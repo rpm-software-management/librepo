@@ -129,39 +129,50 @@ CURLcode lr_last_curl_error(lr_Handle);
 
 /* Yum repo */
 
-struct _lr_RepoMdRecod {
+struct _lr_YumDistroTag {
+    char *cpeid;
+    char *value;
+};
+typedef struct _lr_YumDistroTag *lr_YumDistroTag;
+
+struct _lr_YumRepoMdRecord {
     char *location_href;
     char *checksum;
     char *checksum_type;
     char *checksum_open;
     char *checksum_open_type;
-    unsigned long timestamp;
-    unsigned long size;
-    unsigned long size_open;
+    long timestamp;
+    long size;
+    long size_open;
     int db_version;
 };
-typedef struct _lr_RepoMdRecord *lr_RepoMdRecord;
+typedef struct _lr_YumRepoMdRecord *lr_YumRepoMdRecord;
 
-struct _lr_RepoMd {
+struct _lr_YumRepoMd {
     char *revision;
     char **repo_tags;
-    char **distro_tags;
+    lr_YumDistroTag *distro_tags;
     char **content_tags;
 
-    lr_RepoMdRecord pri_xml;
-    lr_RepoMdRecord fil_xml;
-    lr_RepoMdRecord oth_xml;
-    lr_RepoMdRecord pri_sql;
-    lr_RepoMdRecord fil_sql;
-    lr_RepoMdRecord oth_sql;
-    lr_RepoMdRecord groupfile;
-    lr_RepoMdRecord cgroupfile;
-    lr_RepoMdRecord updateinfo;
+    int nort; /* number of repo tags */
+    int nodt; /* number of distro tags */
+    int noct; /* number of content tags */
+
+    lr_YumRepoMdRecord pri_xml;
+    lr_YumRepoMdRecord fil_xml;
+    lr_YumRepoMdRecord oth_xml;
+    lr_YumRepoMdRecord pri_sql;
+    lr_YumRepoMdRecord fil_sql;
+    lr_YumRepoMdRecord oth_sql;
+    lr_YumRepoMdRecord groupfile;
+    lr_YumRepoMdRecord cgroupfile;
+    lr_YumRepoMdRecord deltainfo;
+    lr_YumRepoMdRecord updateinfo;
 };
-typedef struct _lr_RepoMd *lr_RepoMd;
+typedef struct _lr_YumRepoMd *lr_YumRepoMd;
 
 struct _lr_YumRepo {
-    lr_RepoMd repomd_obj;
+    lr_YumRepoMd repomd_obj;
 
     char *repomd;
     char *pri_xml;
