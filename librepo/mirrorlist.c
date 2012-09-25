@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "librepo.h"
 #include "util.h"
 #include "mirrorlist.h"
 
@@ -28,7 +29,7 @@ lr_mirrorlist_free(lr_Mirrorlist mirrorlist)
 }
 
 void
-append_url(lr_Mirrorlist m, char *url)
+lr_mirrorlist_append_url(lr_Mirrorlist m, char *url)
 {
     if (m->nou+1 > m->lou) {
         m->lou += 5;
@@ -50,7 +51,7 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
 
     f = fdopen(dup(fd), "r");
     if (!f)
-        return LR_MIRRORLIST_RC_IO_ERR;
+        return LRE_IO;
 
     while ((p = fgets(buf, BUF_LEN, f))) {
         int l;
@@ -72,10 +73,10 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
             continue;
 
         /* Append URL */
-        append_url(mirrorlist, lr_strdup(p));
+        lr_mirrorlist_append_url(mirrorlist, lr_strdup(p));
     }
 
     fclose(f);
 
-    return LR_MIRRORLIST_RC_OK;
+    return LRE_OK;
 }

@@ -200,7 +200,7 @@ start_handler(void *pdata, const char *name, const char **atts)
     ParserData *pd = pdata;
     StatesSwitch *sw;
 
-    if (pd->ret != LR_YUM_REPOMD_RC_OK)
+    if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
 
     if (pd->depth != pd->statedepth) {
@@ -316,7 +316,7 @@ char_handler(void *pdata, const XML_Char *s, int len)
     char *c;
     ParserData *pd = pdata;
 
-    if (pd->ret != LR_YUM_REPOMD_RC_OK)
+    if (pd->ret != LRE_OK)
         return;  /* There was an error -> do nothing */
 
     if (!pd->docontent)
@@ -340,7 +340,7 @@ end_handler(void *pdata, const char *name)
 {
     ParserData *pd = pdata;
 
-    if (pd->ret != LR_YUM_REPOMD_RC_OK)
+    if (pd->ret != LRE_OK)
         return;  /* There was an error -> do nothing */
 
     if (pd->depth != pd->statedepth) {
@@ -374,7 +374,7 @@ end_handler(void *pdata, const char *name)
 
     case STATE_DISTRO:
         if (pd->repomd->nodt < 1) {
-            pd->ret = LR_YUM_REPOMD_RC_XML_ERR;
+            pd->ret = LRE_REPOMD_XML;
             break;
         }
         pd->repomd->distro_tags[pd->repomd->nodt-1]->value = lr_strdup(pd->content);
@@ -450,7 +450,7 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
 
     /* Initialization of parser data */
     memset(&pd, 0, sizeof(pd));
-    pd.ret = LR_YUM_REPOMD_RC_OK;
+    pd.ret = LRE_OK;
     pd.depth = 0;
     pd.state = STATE_START;
     pd.statedepth = 0;
@@ -477,15 +477,15 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
 
         len = read(fd, (void *) buf, CHUNK_SIZE);
         if (len < 0)
-            return LR_YUM_REPOMD_RC_IO_ERR;
+            return LRE_IO;
 
         if (!XML_ParseBuffer(parser, len, len == 0))
-            return LR_YUM_REPOMD_RC_XML_ERR;
+            return LRE_REPOMD_XML;
 
         if (len == 0)
             break;
 
-        if (pd.ret != LR_YUM_REPOMD_RC_OK)
+        if (pd.ret != LRE_OK)
             break;
     }
 

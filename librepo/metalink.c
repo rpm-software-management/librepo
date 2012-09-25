@@ -156,7 +156,7 @@ start_handler(void *pdata, const char *name, const char **atts)
     ParserData *pd = pdata;
     StatesSwitch *sw;
 
-    if (pd->ret != LR_METALINK_RC_OK)
+    if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
 
     if (pd->depth != pd->statedepth) {
@@ -192,11 +192,11 @@ start_handler(void *pdata, const char *name, const char **atts)
     case STATE_FILE: {
         const char *name = find_attr("name", atts);
         if (!name) {
-            pd->ret = LR_METALINK_RC_MISSING_ATTR;
+            pd->ret = LRE_ML_XML;
             break;
         }
         if (strcmp(name, "repomd.xml")) {
-            pd->ret = LR_METALINK_RC_BADFILE;
+            pd->ret = LRE_ML_BAD;
             break;
         }
         pd->metalink->filename = lr_strdup(name);
@@ -211,7 +211,7 @@ start_handler(void *pdata, const char *name, const char **atts)
         lr_MetalinkHash mh;
         const char *type = find_attr("type", atts);
         if (!type) {
-            pd->ret = LR_METALINK_RC_MISSING_ATTR;
+            pd->ret = LRE_ML_XML;
             break;
         }
         mh = new_metalinkhash(pd->metalink);
@@ -250,7 +250,7 @@ char_handler(void *pdata, const XML_Char *s, int len)
     char *c;
     ParserData *pd = pdata;
 
-    if (pd->ret != LR_METALINK_RC_OK)
+    if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
 
     if (!pd->docontent)
@@ -274,7 +274,7 @@ end_handler(void *pdata, const char *name)
 {
     ParserData *pd = pdata;
 
-    if (pd->ret != LR_METALINK_RC_OK)
+    if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
 
     if (pd->depth != pd->statedepth) {
@@ -305,7 +305,7 @@ end_handler(void *pdata, const char *name)
 
     case STATE_HASH:
         if (!pd->metalink->noh) {
-            pd->ret = LR_METALINK_RC_XML_ERR;
+            pd->ret = LRE_ML_XML;
             break;
         }
         pd->metalink->hashes[pd->metalink->noh-1]->value = lr_strdup(pd->content);
@@ -313,7 +313,7 @@ end_handler(void *pdata, const char *name)
 
     case STATE_URL:
         if (!pd->metalink->nou) {
-            pd->ret = LR_METALINK_RC_XML_ERR;
+            pd->ret = LRE_ML_XML;
             break;
         }
         pd->metalink->urls[pd->metalink->nou-1]->url = lr_strdup(pd->content);
@@ -346,7 +346,7 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
 
     /* Initialization of parser data */
     memset(&pd, 0, sizeof(pd));
-    pd.ret = LR_METALINK_RC_OK;
+    pd.ret = LRE_OK;
     pd.depth = 0;
     pd.state = STATE_START;
     pd.statedepth = 0;
@@ -373,15 +373,15 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
 
         len = read(fd, (void *) buf, CHUNK_SIZE);
         if (len < 0)
-            return LR_METALINK_RC_IO_ERR;
+            return LRE_IO;
 
         if (!XML_ParseBuffer(parser, len, len == 0))
-            return LR_METALINK_RC_XML_ERR;
+            return LRE_ML_XML;
 
         if (len == 0)
             break;
 
-        if (pd.ret != LR_METALINK_RC_OK)
+        if (pd.ret != LRE_OK)
             break;
     }
 

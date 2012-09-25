@@ -5,13 +5,13 @@
 extern "C" {
 #endif
 
-typedef enum {
-    LR_MIRRORLIST_RC_OK,      /*!< everything ok */
-    LR_MIRRORLIST_RC_IO_ERR,  /*!< input/output error */
-} lr_MirrorlistRc;
+/* Return codes of the module:
+ *  LR_RC_OK    verything ok
+ *  LR_RC_IO    input/output error
+ */
 
 struct _lr_Mirrorlist {
-    char **urls;    /* could be NULL */
+    char **urls;    /*!< could be NULL */
     int nou;        /*!< number of urls */
     int lou;        /*!< lenght of urls list */
 };

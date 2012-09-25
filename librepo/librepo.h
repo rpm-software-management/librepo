@@ -9,24 +9,27 @@ extern "C" {
 #include <curl/curl.h>
 
 typedef enum {
-    LR_OK,                      /*!< everything is ok */
-    LR_BAD_FUNCTION_ARGUMENT,   /*!< bad function argument */
+    LRE_OK,                         /*!< everything is ok */
+    LRE_BAD_FUNCTION_ARGUMENT,      /*!< bad function argument */
 
     /* lr_setopt specific */
-    LR_BAD_OPTION_ARGUMENT,     /*!< bad argument of the option*/
-    LR_UNKNOWN_OPTION,          /*!< library doesn't know the option */
-    LR_CURL_SETOPT_ERROR,       /*!< cURL doesn't know the option.
-                                     Too old curl version? */
-    LR_CURL_ERROR,              /*!< other cURL error. Use the
-                                     lr_last_curl_error to get CURLcode */
+    LRE_BAD_OPTION_ARGUMENT,        /*!< bad argument of the option */
+    LRE_UNKNOWN_OPTION,             /*!< library doesn't know the option */
+    LRE_CURL_SETOPT,                /*!< cURL doesn't know the option.
+                                         Too old curl version? */
+    LRE_CURL_DUP,                   /*!< cannot duplicate curl handle */
+    LRE_CURL,                       /*!< cURL error. Use the
+                                         lr_last_curl_error to get CURLcode */
+    LRE_BAD_STATUS,                 /*!< HTTP or FTP returned status code which
+                                         do not represent success */
 
-    /* lr_perform specific */
-    LR_NOURL_SPECIFIED,         /*!< no base url or mirrorlist url specified */
-    LR_CANNOT_CREATE_TMP,       /*!< cannot create tmp directory */
-
-    /* lr_perform - metalink specific */
-    LR_IO_CANNOT_READ,          /*!< cannot read a file descriptor */
-    LR_METALINK_PARSE_ERROR,
+    LRE_IO,                         /*!< input output error */
+    LRE_ML_BAD,                     /*!< bad metalink file (metalink doesn't
+                                         contain needed file) */
+    LRE_ML_XML,                     /*!< metalink XML parse error */
+    LRE_REPOMD_XML,                 /*!< repomd XML parse error */
+    LRE_NOURL,                      /*!< no usable URL found */
+    LRE_CANNOT_CREATE_TMP,          /*!< cannot create tmp directory */
 } lr_Rc; /*!< Return codes */
 
 typedef enum {
@@ -74,6 +77,7 @@ typedef enum {
                          authentification */
     LR_PROXYUSERPWD,/*!< User and password for proxy */
     LR_PROGRESSCB,  /*!< Progress callback */
+    LR_PROGRESSDATA,/*!< Progress callback user data */
     LR_RETRIES,     /*!< Number of maximum retries for each file */
     LR_MAXSPEED,    /*!< Maximum download speed in bytes per second */
     LR_DESTDIR,     /*!< Where to save downloaded files */
@@ -90,26 +94,28 @@ typedef enum {
 
 } lr_Option; /*!< Handle config options */
 
+typedef int (*lr_progress_cb)(void *clientp,
+                              double total_to_download,
+                              double now_downloaded);
+
 struct _lr_Handle {
     CURL            *curl_handle;   /*!< CURL handle */
     char            *baseurl;       /*!< Base URL of repo */
     char            *mirrorlist;    /*!< Mirrorlist or URL */
+    char            *used_mirror;   /*!< Finally used mirror (if any) */
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
     lr_Repotype     repotype;       /*!< Type of repository */
     _lr_Checks      checks;         /*!< Which check sould be applied */
+    long            status_code;    /*!< Last HTTP or FTP status code */
     CURLcode        last_curl_error;/*!< Last curl error code */
     lr_YumRepoFlags yumflags;       /*!< Flags for downloading of yum repo */
+    lr_progress_cb  user_cb;        /*!< User progress callback */
+    void            *user_data;     /*!< User data for callback */
 };
 typedef struct _lr_Handle *lr_Handle;
 
 typedef curl_off_t lr_off_t;
-
-typedef int (*lr_progress_cb)(void *clientp,
-                              double dltotal,
-                              double dlnow,
-                              double ultotal,
-                              double ulnow);
 
 lr_Handle lr_init_handle();
 
@@ -147,6 +153,9 @@ struct _lr_YumRepoMdRecord {
     int db_version;
 };
 typedef struct _lr_YumRepoMdRecord *lr_YumRepoMdRecord;
+
+#define NUMBER_OF_YUM_REPOMD_RECORDS    10  /*!< number of repomd records
+                                                 in _lr_YumRepoMd structure */
 
 struct _lr_YumRepoMd {
     char *revision;

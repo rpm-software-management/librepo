@@ -5,13 +5,12 @@
 extern "C" {
 #endif
 
-typedef enum {
-    LR_METALINK_RC_OK,      /*!< everything ok */
-    LR_METALINK_RC_IO_ERR,  /*!< input/output error */
-    LR_METALINK_RC_BADFILE, /*!< metalink doesn't contain repomd.xml */
-    LR_METALINK_RC_MISSING_ATTR, /*!< some important attribute(s) is/are missing */
-    LR_METALINK_RC_XML_ERR, /*!< non valid xml */
-} lr_MetalinkRc;
+/* Return codes of the module:
+ *  LRE_OK      everything ok
+ *  LRE_IO      input/output error
+ *  LRE_ML_BAD  metalink doesn't contain repomd.xml
+ *  LRE_ML_XML  xml parse error
+ */
 
 struct _lr_MetalinkHash {
     char *type;     /*!< "md5", "sha1", "sha256", "sha512", ... */

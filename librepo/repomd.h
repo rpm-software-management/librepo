@@ -7,11 +7,11 @@ extern "C" {
 
 #include "librepo.h"
 
-typedef enum {
-    LR_YUM_REPOMD_RC_OK,      /*!< everything ok */
-    LR_YUM_REPOMD_RC_IO_ERR,  /*!< input/output error */
-    LR_YUM_REPOMD_RC_XML_ERR, /*!< non valid xml */
-} lr_RepoMdRc;
+/* Return codes of the module:
+ *  LRE_OK          everything ok
+ *  LRE_IO          input/output error
+ *  LR_REPOMD_XML   xml parse error
+ */
 
 lr_YumRepoMd lr_yum_repomd_create();
 void lr_yum_repomd_free(lr_YumRepoMd repomd);
