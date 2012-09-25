@@ -1,9 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <string.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "util.h"
 
@@ -56,6 +57,37 @@ lr_strdup(const char *str)
     return new;
 }
 
+char *
+lr_strconcat(const char *str, ...)
+{
+    va_list arg;
+    char *chunk, *res;
+    size_t offset, total_len;
+
+    if (!str)
+        return NULL;
+
+    offset = strlen(str);
+    total_len = offset;
+
+    va_start(arg, str);
+    while ((chunk = va_arg(arg, char *)))
+        total_len += strlen(chunk);
+    va_end(arg);
+
+    res = lr_malloc(total_len + 1);
+
+    strcpy(res, str);
+    va_start(arg, str);
+    while ((chunk = va_arg(arg, char *))) {
+        strcpy(res + offset, chunk);
+        offset += strlen(chunk);
+    }
+    va_end(arg);
+
+    return res;
+}
+
 int
 lr_gettmpfile()
 {
@@ -67,4 +99,22 @@ lr_gettmpfile()
     }
     unlink(template);
     return fd;
+}
+
+int
+lr_ends_with(const char *str, const char *suffix)
+{
+    int str_len;
+    int suffix_len;
+
+    assert(str);
+    assert(suffix);
+
+    str_len = strlen(str);
+    suffix_len = strlen(suffix);
+
+    if (str_len < suffix_len)
+        return 0;
+
+    return strcmp(str + str_len - suffix_len, suffix) == 0;
 }

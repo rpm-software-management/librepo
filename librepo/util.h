@@ -11,7 +11,9 @@ void *lr_malloc0(size_t len);
 void *lr_realloc(void *ptr, size_t len);
 void lr_free(void *mem);
 char *lr_strdup(const char *str);
+char *lr_strconcat(const char *str, ...);
 int lr_gettmpfile();
+int lr_ends_with(const char *str, const char *suffix);
 
 #ifdef __cplusplus
 }
