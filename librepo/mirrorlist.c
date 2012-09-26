@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "setup.h"
 #include "librepo.h"
 #include "util.h"
 #include "mirrorlist.h"
@@ -48,6 +49,7 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
     char buf[BUF_LEN], *p;
 
     assert(mirrorlist);
+    DEBUGASSERT(fd >= 0);
 
     f = fdopen(dup(fd), "r");
     if (!f)

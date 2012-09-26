@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <expat.h>
 
+#include "setup.h"
 #include "librepo.h"
 #include "util.h"
 #include "metalink.h"
@@ -337,6 +338,7 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
     StatesSwitch *sw;
 
     assert(metalink);
+    DEBUGASSERT(fd >= 0);
 
     /* Parser configuration */
     parser = XML_ParserCreate(NULL);

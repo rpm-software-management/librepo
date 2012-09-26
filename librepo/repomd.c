@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <expat.h>
 
+#include "setup.h"
 #include "librepo.h"
 #include "util.h"
 #include "repomd.h"
@@ -441,6 +442,7 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
     StatesSwitch *sw;
 
     assert(repomd);
+    DEBUGASSERT(fd >= 0);
 
     /* Parser configuration */
     parser = XML_ParserCreate(NULL);

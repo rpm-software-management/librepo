@@ -20,16 +20,23 @@ typedef enum {
     LRE_CURL_DUP,                   /*!< cannot duplicate curl handle */
     LRE_CURL,                       /*!< cURL error. Use the
                                          lr_last_curl_error to get CURLcode */
+    LRE_CURLM,                      /*!< cULR multi handle error. Use the
+                                         lr_last_mculr_error to get CURLMcode */
     LRE_BAD_STATUS,                 /*!< HTTP or FTP returned status code which
-                                         do not represent success */
-
+                                         do not represent success
+                                         (file doesn't exists, etc.) */
+    LRE_SELECT,                     /*!< error while call select() on set
+                                         of sockets */
     LRE_IO,                         /*!< input output error */
     LRE_ML_BAD,                     /*!< bad metalink file (metalink doesn't
                                          contain needed file) */
     LRE_ML_XML,                     /*!< metalink XML parse error */
+    LRE_BAD_CHECKSUM,               /*!< bad checksum */
     LRE_REPOMD_XML,                 /*!< repomd XML parse error */
     LRE_NOURL,                      /*!< no usable URL found */
     LRE_CANNOT_CREATE_TMP,          /*!< cannot create tmp directory */
+    LRE_UNKNOWN_CHECKSUM,           /*!< unknown type of checksum is need to
+                                         calculate to verify one or more file */
 } lr_Rc; /*!< Return codes */
 
 typedef enum {
@@ -109,6 +116,7 @@ struct _lr_Handle {
     _lr_Checks      checks;         /*!< Which check sould be applied */
     long            status_code;    /*!< Last HTTP or FTP status code */
     CURLcode        last_curl_error;/*!< Last curl error code */
+    CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
     lr_YumRepoFlags yumflags;       /*!< Flags for downloading of yum repo */
     lr_progress_cb  user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
@@ -124,9 +132,10 @@ void lr_free_handle(lr_Handle handle);
 /* look at: url.c - Curl_setopt() */
 lr_Rc lr_setopt(lr_Handle handle, lr_Option option, ...);
 
-lr_Rc lr_perform(lr_Handle handle);
+lr_Rc lr_perform(lr_Handle handle, void **repo_ptr);
 
 CURLcode lr_last_curl_error(lr_Handle);
+CURLMcode lr_last_curlm_error(lr_Handle);
 
 /** TODO:
  * - Pri stahovani se budou kontrolovat checksumy, pri praci s lokalnim repem
@@ -192,12 +201,15 @@ struct _lr_YumRepo {
     char *oth_sql;
     char *groupfile;
     char *cgroupfile;
+    char *deltainfo;
     char *updateinfo;
 
     char *url;          /*!< URL from where repo was downloaded */
     char *destdir;      /*!< Local path to the repo */
 };
 typedef struct _lr_YumRepo *lr_YumRepo;
+
+void lr_yum_repo_free(lr_YumRepo repo);
 
 #ifdef __cplusplus
 }
