@@ -14,6 +14,7 @@ char *lr_strdup(const char *str);
 char *lr_strconcat(const char *str, ...);
 int lr_gettmpfile();
 int lr_ends_with(const char *str, const char *suffix);
+char *lr_pathconcat(const char *str, ...);
 
 #ifdef __cplusplus
 }

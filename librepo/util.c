@@ -6,7 +6,10 @@
 #include <unistd.h>
 #include <stdarg.h>
 
+#include "setup.h"
 #include "util.h"
+
+#define DIR_SEPARATOR   "/"
 
 void
 lr_out_of_memory()
@@ -117,4 +120,108 @@ lr_ends_with(const char *str, const char *suffix)
         return 0;
 
     return strcmp(str + str_len - suffix_len, suffix) == 0;
+}
+
+char *
+lr_pathconcat(const char *first, ...)
+{
+    va_list args;
+    const char *next;
+    char *separator = DIR_SEPARATOR;
+    char *chunk, *res = NULL;
+    size_t separator_len = strlen(DIR_SEPARATOR);
+    size_t total_len;  // Maximal len of result
+    size_t offset = 0;
+    int is_first = 1;
+    int previous_was_empty = 0; // If last chunk was "" then separator will be
+                                // appended to the result
+
+    if (!first)
+        return NULL;
+
+    total_len = strlen(first);
+
+    va_start(args, first);
+    while ((chunk = va_arg(args, char *)))
+        total_len += (strlen(chunk) + separator_len);
+    va_end(args);
+
+    if (total_len == 0)
+        return lr_strdup("");
+
+    res = lr_malloc(total_len + separator_len + 1);
+
+    next = first;
+    va_start(args, first);
+    while (1) {
+        const char *current, *start, *end;
+        size_t current_len;
+
+        if (next) {
+            current = next;
+            next = va_arg(args, char *);
+        } else
+            break;
+
+        current_len = strlen(current);
+
+        if (!current_len) {
+            previous_was_empty = 1;
+            continue;   /* Skip empty element */
+        } else
+            previous_was_empty = 0;
+
+        start = current;
+        end = start + current_len;
+
+        /* Skip leading separators - except first element */
+        if (separator_len && is_first == 0) {
+            while (!strncmp(start, separator, separator_len))
+                start += separator_len;
+        }
+
+        /* Skip trailing separators */
+        if (separator_len) {
+            while (start + separator_len <= end &&
+                   !strncmp(end-separator_len, separator, separator_len))
+                end -= separator_len;
+        }
+
+        if (start >= end) {
+            /* Element is filled only by separators */
+            if (is_first)
+                is_first = 0;
+            continue;
+        }
+
+        /* Prepend separator - except first element */
+        if (is_first == 0) {
+            strncpy(res + offset, separator, separator_len);
+            offset += separator_len;
+        } else
+            is_first = 0;
+
+        strncpy(res + offset, start, end - start);
+        offset += end - start;
+    }
+    va_end(args);
+
+    DEBUGASSERT(offset <= total_len);
+
+    if (offset == 0) {
+        lr_free(res);
+        return lr_strdup(first);
+    }
+
+    /* If last element was emtpy string, append separator to the end */
+    if (previous_was_empty && is_first == 0) {
+        strncpy(res + offset, separator, separator_len);
+        offset += separator_len;
+    }
+
+    DEBUGASSERT(offset <= total_len);
+
+    res[offset] = '\0';
+
+    return res;
 }
