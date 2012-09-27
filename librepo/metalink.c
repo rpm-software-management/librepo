@@ -17,7 +17,7 @@
 /* Metalink object manipulation helpers */
 
 lr_MetalinkHash
-new_metalinkhash(lr_Metalink m)
+lr_new_metalinkhash(lr_Metalink m)
 {
     assert(m);
 
@@ -32,7 +32,7 @@ new_metalinkhash(lr_Metalink m)
 }
 
 lr_MetalinkUrl
-new_metalinkurl(lr_Metalink m)
+lr_new_metalinkurl(lr_Metalink m)
 {
     assert(m);
 
@@ -47,7 +47,7 @@ new_metalinkurl(lr_Metalink m)
 }
 
 void
-free_metalinkhash(lr_MetalinkHash metalinkhash)
+lr_free_metalinkhash(lr_MetalinkHash metalinkhash)
 {
     if (!metalinkhash) return;
     lr_free(metalinkhash->type);
@@ -56,7 +56,7 @@ free_metalinkhash(lr_MetalinkHash metalinkhash)
 }
 
 void
-free_metalinkurl(lr_MetalinkUrl metalinkurl)
+lr_free_metalinkurl(lr_MetalinkUrl metalinkurl)
 {
     if (!metalinkurl) return;
     lr_free(metalinkurl->protocol);
@@ -79,10 +79,10 @@ lr_metalink_free(lr_Metalink metalink)
         return;
     lr_free(metalink->filename);
     for (int x = 0; x < metalink->noh; x++)
-        free_metalinkhash(metalink->hashes[x]);
+        lr_free_metalinkhash(metalink->hashes[x]);
     lr_free(metalink->hashes);
     for (int x = 0; x < metalink->nou; x++)
-        free_metalinkurl(metalink->urls[x]);
+        lr_free_metalinkurl(metalink->urls[x]);
     lr_free(metalink->urls);
     lr_free(metalink);
 }
@@ -101,17 +101,17 @@ typedef enum {
     STATE_RESOURCES,
     STATE_URL,
     NUMSTATES
-} State;
+} lr_State;
 
 typedef struct {
-    State from;     /*!< source state */
+    lr_State from;  /*!< source state */
     char *ename;    /*!< element name */
-    State to;       /*!< target state */
+    lr_State to;    /*!< target state */
     int docontent;  /*!< store the text of the element */
-} StatesSwitch;
+} lr_StatesSwitch;
 
 /* Same states in the first column must be together */
-static StatesSwitch stateswitches[] = {
+static lr_StatesSwitch stateswitches[] = {
     { STATE_START,      "metalink",         STATE_METALINK,     0 },
     { STATE_METALINK,   "files",            STATE_FILES,        0 },
     { STATE_FILES,      "file",             STATE_FILE,         0 },
@@ -125,25 +125,25 @@ static StatesSwitch stateswitches[] = {
 };
 
 typedef struct _ParserData {
-    int ret;        /*!< status of parsing (return code) */
+    int ret;            /*!< status of parsing (return code) */
     int depth;
     int statedepth;
-    State state;    /*!< current state */
+    lr_State state;     /*!< current state */
 
     int docontent;  /*!< tell if store text from the current element */
     char *content;  /*!< text content of element */
     int lcontent;   /*!< content lenght */
     int acontent;   /*!< availbable bytes in the content */
 
-    XML_Parser *parser;             /*!< parser */
-    StatesSwitch *swtab[NUMSTATES]; /*!< pointers to stateswitches table */
-    State sbtab[NUMSTATES];         /*!< stab[to_state] = from_state */
+    XML_Parser *parser;                 /*!< parser */
+    lr_StatesSwitch *swtab[NUMSTATES];  /*!< pointers to stateswitches table */
+    lr_State sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
 
     lr_Metalink metalink;   /*!< metalink object */
 } ParserData;
 
 static inline const char *
-find_attr(const char *txt, const char **atts)
+lr_find_attr(const char *txt, const char **atts)
 {
     for (; *atts; atts += 2)
         if (!strcmp(*atts, txt))
@@ -152,10 +152,10 @@ find_attr(const char *txt, const char **atts)
 }
 
 static void XMLCALL
-start_handler(void *pdata, const char *name, const char **atts)
+lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
 {
     ParserData *pd = pdata;
-    StatesSwitch *sw;
+    lr_StatesSwitch *sw;
 
     if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
@@ -191,7 +191,7 @@ start_handler(void *pdata, const char *name, const char **atts)
         break;
 
     case STATE_FILE: {
-        const char *name = find_attr("name", atts);
+        const char *name = lr_find_attr("name", atts);
         if (!name) {
             pd->ret = LRE_ML_XML;
             break;
@@ -210,12 +210,12 @@ start_handler(void *pdata, const char *name, const char **atts)
 
     case STATE_HASH: {
         lr_MetalinkHash mh;
-        const char *type = find_attr("type", atts);
+        const char *type = lr_find_attr("type", atts);
         if (!type) {
             pd->ret = LRE_ML_XML;
             break;
         }
-        mh = new_metalinkhash(pd->metalink);
+        mh = lr_new_metalinkhash(pd->metalink);
         mh->type = lr_strdup(type);
         break;
     }
@@ -225,14 +225,14 @@ start_handler(void *pdata, const char *name, const char **atts)
 
     case STATE_URL: {
         const char *attr;
-        lr_MetalinkUrl url = new_metalinkurl(pd->metalink);
-        if ((attr = find_attr("protocol", atts)))
+        lr_MetalinkUrl url = lr_new_metalinkurl(pd->metalink);
+        if ((attr = lr_find_attr("protocol", atts)))
             url->protocol = lr_strdup(attr);
-        if ((attr = find_attr("type", atts)))
+        if ((attr = lr_find_attr("type", atts)))
             url->type = lr_strdup(attr);
-        if ((attr = find_attr("location", atts)))
+        if ((attr = lr_find_attr("location", atts)))
             url->location = lr_strdup(attr);
-        if ((attr = find_attr("preference", atts)))
+        if ((attr = lr_find_attr("preference", atts)))
             url->preference = atol(attr);
         break;
     }
@@ -245,7 +245,7 @@ start_handler(void *pdata, const char *name, const char **atts)
 }
 
 static void XMLCALL
-char_handler(void *pdata, const XML_Char *s, int len)
+lr_metalink_char_handler(void *pdata, const XML_Char *s, int len)
 {
     int l;
     char *c;
@@ -271,7 +271,7 @@ char_handler(void *pdata, const XML_Char *s, int len)
 }
 
 static void XMLCALL
-end_handler(void *pdata, const char *name)
+lr_metalink_end_handler(void *pdata, const char *name)
 {
     ParserData *pd = pdata;
 
@@ -335,7 +335,7 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
 {
     XML_Parser parser;
     ParserData pd;
-    StatesSwitch *sw;
+    lr_StatesSwitch *sw;
 
     assert(metalink);
     DEBUGASSERT(fd >= 0);
@@ -343,8 +343,8 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
     /* Parser configuration */
     parser = XML_ParserCreate(NULL);
     XML_SetUserData(parser, (void *) &pd);
-    XML_SetElementHandler(parser, start_handler, end_handler);
-    XML_SetCharacterDataHandler(parser, char_handler);
+    XML_SetElementHandler(parser, lr_metalink_start_handler, lr_metalink_end_handler);
+    XML_SetCharacterDataHandler(parser, lr_metalink_char_handler);
 
     /* Initialization of parser data */
     memset(&pd, 0, sizeof(pd));

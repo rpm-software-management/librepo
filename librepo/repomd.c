@@ -138,17 +138,17 @@ typedef enum {
     STATE_OPENSIZE,
     STATE_DBVERSION,
     NUMSTATES
-} State;
+} lr_State;
 
 typedef struct {
-  State from;
+  lr_State from;
   char *ename;
-  State to;
+  lr_State to;
   int docontent;
-} StatesSwitch;
+} lr_StatesSwitch;
 
 /* Same states in the first column must be together */
-static StatesSwitch stateswitches[] = {
+static lr_StatesSwitch stateswitches[] = {
     { STATE_START,      "repomd",           STATE_REPOMD,       0 },
     { STATE_REPOMD,     "revision",         STATE_REVISION,     1 },
     { STATE_REPOMD,     "tags",             STATE_TAGS,         0 },
@@ -170,16 +170,16 @@ typedef struct _ParserData {
     int ret;        /*!< status of parsing (return code) */
     int depth;
     int statedepth;
-    State state;    /*!< current state */
+    lr_State state; /*!< current state */
 
     int docontent;  /*!< tell if store text from the current element */
     char *content;  /*!< text content of the element */
     int lcontent;   /*!< content lenght */
     int acontent;   /*!< available bytes in the content */
 
-    XML_Parser *parser;             /*!< parser */
-    StatesSwitch *swtab[NUMSTATES]; /*!< pointers to statesswitches table */
-    State sbtab[NUMSTATES];         /*!< stab[to_state] = from_state */
+    XML_Parser *parser;                 /*!< parser */
+    lr_StatesSwitch *swtab[NUMSTATES];  /*!< pointers to statesswitches table */
+    lr_State sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
 
     lr_YumRepoMd repomd;            /*!< repomd object */
     lr_YumRepoMdRecord repomd_rec;  /*!< current repomd record */
@@ -199,7 +199,7 @@ static void XMLCALL
 start_handler(void *pdata, const char *name, const char **atts)
 {
     ParserData *pd = pdata;
-    StatesSwitch *sw;
+    lr_StatesSwitch *sw;
 
     if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
@@ -439,7 +439,7 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
 {
     XML_Parser parser;
     ParserData pd;
-    StatesSwitch *sw;
+    lr_StatesSwitch *sw;
 
     assert(repomd);
     DEBUGASSERT(fd >= 0);
