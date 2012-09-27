@@ -81,7 +81,7 @@ lr_checksum_calculate(lr_ChecksumType type, int fd)
     }
 
     ctx = EVP_MD_CTX_create();
-    rc = EVP_DigestInit(ctx, ctx_type);
+    rc = EVP_DigestInit_ex(ctx, ctx_type, NULL);
     if (!rc) {
         EVP_MD_CTX_destroy(ctx);
         return NULL;
@@ -95,7 +95,8 @@ lr_checksum_calculate(lr_ChecksumType type, int fd)
         return NULL;
     }
 
-    EVP_DigestFinal(ctx, raw_checksum, &len);
+    EVP_DigestFinal_ex(ctx, raw_checksum, &len);
+    EVP_MD_CTX_destroy(ctx);
     checksum = lr_malloc0(sizeof(char) * (len * 2 + 1));
     for (int x = 0; x < len; x++)
         sprintf(checksum+(x*2), "%02x", raw_checksum[x]);

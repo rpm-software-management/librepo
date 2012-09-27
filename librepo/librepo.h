@@ -27,6 +27,8 @@ typedef enum {
                                          (file doesn't exists, etc.) */
     LRE_SELECT,                     /*!< error while call select() on set
                                          of sockets */
+    LRE_CANNOT_CREATE_DIR,          /*!< cannot create a directory in output
+                                         dir (the directory already exists?) */
     LRE_IO,                         /*!< input output error */
     LRE_ML_BAD,                     /*!< bad metalink file (metalink doesn't
                                          contain needed file) */
@@ -85,7 +87,7 @@ typedef enum {
     LR_PROXYUSERPWD,/*!< User and password for proxy */
     LR_PROGRESSCB,  /*!< Progress callback */
     LR_PROGRESSDATA,/*!< Progress callback user data */
-    LR_RETRIES,     /*!< Number of maximum retries for each file */
+    LR_RETRIES,     /*!< Number of maximum retries for each file - TODO */
     LR_MAXSPEED,    /*!< Maximum download speed in bytes per second */
     LR_DESTDIR,     /*!< Where to save downloaded files */
 
@@ -93,7 +95,7 @@ typedef enum {
                          is LR_YUMREPO. */
 
     /* Repo common options */
-    LR_GPGCHECK,    /*!< Check GPG signature if available */
+    LR_GPGCHECK,    /*!< Check GPG signature if available - TODO */
     LR_CHECKSUM,    /*!< Check files checksum if available */
 
     /* LR_YUMREPO specific options */
@@ -136,11 +138,6 @@ lr_Rc lr_perform(lr_Handle handle, void **repo_ptr);
 
 CURLcode lr_last_curl_error(lr_Handle);
 CURLMcode lr_last_curlm_error(lr_Handle);
-
-/** TODO:
- * - Pri stahovani se budou kontrolovat checksumy, pri praci s lokalnim repem
- *   ale taky.
- */
 
 /* Yum repo */
 
