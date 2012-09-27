@@ -67,7 +67,7 @@ lr_progress_func(void* ptr,
     total_size = scd_data->advertise ? scd_data->total_size : 0.0;
 
     /* Call user callback */
-    DEBUGASSERT(scd_data->db);
+    DEBUGASSERT(scd_data->cb);
     return scd_data->cb(scd_data->user_data, total_size, scd_data->downloaded);
 }
 
