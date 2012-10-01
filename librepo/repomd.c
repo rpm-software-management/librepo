@@ -78,14 +78,14 @@ lr_yum_repomd_free(lr_YumRepoMd repomd)
     for (int x = 0; x < repomd->noct; x++)
         lr_free(repomd->content_tags[x]);
     lr_free(repomd->content_tags);
-    lr_yum_repomdrecord_free(repomd->pri_xml);
-    lr_yum_repomdrecord_free(repomd->fil_xml);
-    lr_yum_repomdrecord_free(repomd->oth_xml);
-    lr_yum_repomdrecord_free(repomd->pri_sql);
-    lr_yum_repomdrecord_free(repomd->fil_sql);
-    lr_yum_repomdrecord_free(repomd->oth_sql);
-    lr_yum_repomdrecord_free(repomd->groupfile);
-    lr_yum_repomdrecord_free(repomd->cgroupfile);
+    lr_yum_repomdrecord_free(repomd->primary);
+    lr_yum_repomdrecord_free(repomd->filelists);
+    lr_yum_repomdrecord_free(repomd->other);
+    lr_yum_repomdrecord_free(repomd->primary_db);
+    lr_yum_repomdrecord_free(repomd->filelists_db);
+    lr_yum_repomdrecord_free(repomd->other_db);
+    lr_yum_repomdrecord_free(repomd->group);
+    lr_yum_repomdrecord_free(repomd->group_gz);
     lr_yum_repomdrecord_free(repomd->deltainfo);
     lr_yum_repomdrecord_free(repomd->updateinfo);
     lr_free(repomd);
@@ -251,21 +251,21 @@ start_handler(void *pdata, const char *name, const char **atts)
         if (!type) break;
         pd->repomd_rec = lr_yum_repomdrecord_create();
         if (!strcmp(type, "primary"))
-            pd->repomd->pri_xml = pd->repomd_rec;
+            pd->repomd->primary = pd->repomd_rec;
         else if (!strcmp(type, "filelists"))
-            pd->repomd->fil_xml = pd->repomd_rec;
+            pd->repomd->filelists = pd->repomd_rec;
         else if (!strcmp(type, "other"))
-            pd->repomd->oth_xml = pd->repomd_rec;
+            pd->repomd->other = pd->repomd_rec;
         else if (!strcmp(type, "primary_db"))
-            pd->repomd->pri_sql = pd->repomd_rec;
+            pd->repomd->primary_db = pd->repomd_rec;
         else if (!strcmp(type, "filelists_db"))
-            pd->repomd->fil_sql = pd->repomd_rec;
+            pd->repomd->filelists_db = pd->repomd_rec;
         else if (!strcmp(type, "other_db"))
-            pd->repomd->oth_sql = pd->repomd_rec;
+            pd->repomd->other_db = pd->repomd_rec;
         else if (!strcmp(type, "group"))
-            pd->repomd->groupfile = pd->repomd_rec;
+            pd->repomd->group = pd->repomd_rec;
         else if (!strcmp(type, "group_gz"))
-            pd->repomd->cgroupfile = pd->repomd_rec;
+            pd->repomd->group_gz = pd->repomd_rec;
         else if (!strcmp(type, "deltainfo"))
             pd->repomd->deltainfo = pd->repomd_rec;
         else if (!strcmp(type, "updateinfo"))

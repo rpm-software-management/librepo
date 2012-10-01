@@ -36,14 +36,14 @@ lr_yum_repo_free(lr_YumRepo repo)
         return;
     lr_yum_repomd_free(repo->repomd_obj);
     lr_free(repo->repomd);
-    lr_free(repo->pri_xml);
-    lr_free(repo->fil_xml);
-    lr_free(repo->oth_xml);
-    lr_free(repo->pri_sql);
-    lr_free(repo->fil_sql);
-    lr_free(repo->oth_sql);
-    lr_free(repo->groupfile);
-    lr_free(repo->cgroupfile);
+    lr_free(repo->primary);
+    lr_free(repo->filelists);
+    lr_free(repo->other);
+    lr_free(repo->primary_db);
+    lr_free(repo->filelists_db);
+    lr_free(repo->other_db);
+    lr_free(repo->group);
+    lr_free(repo->group_gz);
     lr_free(repo->deltainfo);
     lr_free(repo->updateinfo);
     lr_free(repo->url);
@@ -289,33 +289,33 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo)
     dir = handle->destdir;
     url = handle->used_mirror ? handle->used_mirror : handle->baseurl;
 
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->pri_xml,
-                          &repo->pri_xml, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_XML_PRI));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->fil_xml,
-                          &repo->fil_xml, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_XML_FIL));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->oth_xml,
-                          &repo->oth_xml, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_XML_OTH));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->pri_sql,
-                          &repo->pri_sql, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_SQL_PRI));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->fil_sql,
-                          &repo->fil_sql, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_SQL_FIL));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->oth_sql,
-                          &repo->oth_sql, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_SQL_OTH));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->groupfile,
-                          &repo->groupfile, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUPFILE));
-    used += lr_add_target(targets, dir, url, repo->repomd_obj->cgroupfile,
-                          &repo->cgroupfile, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_CGROUPFILE));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->primary,
+                          &repo->primary, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->filelists,
+                          &repo->filelists, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->other,
+                          &repo->other, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->primary_db,
+                          &repo->primary_db, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI_DB));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->filelists_db,
+                          &repo->filelists_db, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL_DB));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->other_db,
+                          &repo->other_db, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH_DB));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->group,
+                          &repo->group, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP));
+    used += lr_add_target(targets, dir, url, repo->repomd_obj->group,
+                          &repo->group, used,
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP_GZ));
     used += lr_add_target(targets, dir, url, repo->repomd_obj->deltainfo,
                           &repo->deltainfo, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_PRESTODELTA));
+                          handle->yumflags & (LR_YUM_FULL|LR_YUM_DELTAINFO));
     used += lr_add_target(targets, dir, url, repo->repomd_obj->updateinfo,
                           &repo->updateinfo, used,
                           handle->yumflags & (LR_YUM_FULL|LR_YUM_UPDATEINFO));
@@ -386,36 +386,36 @@ lr_yum_check_repo_checksums(lr_YumRepo repo)
 {
     int ret;
 
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->pri_xml,
-                                             repo->pri_xml);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->primary,
+                                             repo->primary);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (primary)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->fil_xml,
-                                             repo->fil_xml);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->filelists,
+                                             repo->filelists);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (filelists)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->oth_xml,
-                                             repo->oth_xml);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->other,
+                                             repo->other);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (other)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->pri_sql,
-                                             repo->pri_sql);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->primary_db,
+                                             repo->primary_db);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (primary_db)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->fil_sql,
-                                             repo->fil_sql);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->filelists_db,
+                                             repo->filelists_db);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (filelists_db)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->oth_sql,
-                                             repo->oth_sql);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->other_db,
+                                             repo->other_db);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (other_db)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->groupfile,
-                                             repo->groupfile);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->group,
+                                             repo->group);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (group)\n", ret));
     if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->cgroupfile,
-                                             repo->cgroupfile);
+    ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->group_gz,
+                                             repo->group_gz);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (group_gz)\n", ret));
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repo->repomd_obj->deltainfo,
@@ -450,11 +450,17 @@ lr_yum_perform(lr_Handle handle, void **repo_ptr)
     if (rc == -1)
         return LRE_CANNOT_CREATE_DIR;
 
+    repo->destdir = lr_strdup(handle->destdir);
+
     /* Download and parse repomd.xml */
     if ((rc = lr_yum_get_repomd(handle, repo)) != LRE_OK)
         return rc;
 
     repo->repomd = lr_pathconcat(handle->destdir, "/repodata/repomd.xml", NULL);
+    if (handle->used_mirror)
+        repo->url = lr_strdup(handle->used_mirror);
+    else
+        repo->url = lr_strdup(handle->baseurl);
 
     DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repo->repomd_obj->revision));
 
@@ -465,10 +471,11 @@ lr_yum_perform(lr_Handle handle, void **repo_ptr)
     DEBUGF(fprintf(stderr, "Repository was successfully downloaded\n"));
 
     /* Check checksums */
-    if ((rc = lr_yum_check_repo_checksums(repo)) != LRE_OK)
-        return rc;
-
-    DEBUGF(fprintf(stderr, "All checksums in repository seems to be valid\n"));
+    if (handle->checks & LR_CHECK_CHECKSUM) {
+        if ((rc = lr_yum_check_repo_checksums(repo)) != LRE_OK)
+            return rc;
+        DEBUGF(fprintf(stderr, "All checksums in repository seems to be valid\n"));
+    }
 
     return rc;
 }

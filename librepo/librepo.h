@@ -44,7 +44,7 @@ typedef enum {
 typedef enum {
     LR_CHECK_GPG          = (1<<0),
     LR_CHECK_CHECKSUM     = (1<<1),
-} _lr_Checks;
+} lr_Checks;
 
 typedef enum {
     LR_YUMREPO     = (1<<1),
@@ -55,20 +55,20 @@ typedef enum {
 typedef enum {
     LR_YUM_FULL         = (1<<0),
     LR_YUM_REPOMD       = (1<<1),
-    LR_YUM_XML_PRI      = (1<<2),
-    LR_YUM_XML_FIL      = (1<<3),
-    LR_YUM_XML_OTH      = (1<<4),
-    LR_YUM_SQL_PRI      = (1<<5),
-    LR_YUM_SQL_FIL      = (1<<6),
-    LR_YUM_SQL_OTH      = (1<<7),
-    LR_YUM_GROUPFILE    = (1<<8),
-    LR_YUM_CGROUPFILE   = (1<<9),
-    LR_YUM_UPDATEINFO   = (1<<10),
-    LR_YUM_PRESTODELTA  = (1<<11),
+    LR_YUM_PRI          = (1<<2),
+    LR_YUM_FIL          = (1<<3),
+    LR_YUM_OTH          = (1<<4),
+    LR_YUM_PRI_DB       = (1<<5),
+    LR_YUM_FIL_DB       = (1<<6),
+    LR_YUM_OTH_DB       = (1<<7),
+    LR_YUM_GROUP        = (1<<8),
+    LR_YUM_GROUP_GZ     = (1<<9),
+    LR_YUM_DELTAINFO    = (1<<10),
+    LR_YUM_UPDATEINFO   = (1<<11),
 
     // Common combinations
-    LR_YUM_BASE_XML     = LR_YUM_XML_PRI|LR_YUM_XML_FIL|LR_YUM_XML_OTH,
-    LR_YUM_BASE_HAWKEY  = LR_YUM_XML_PRI|LR_YUM_XML_FIL|LR_YUM_PRESTODELTA,
+    LR_YUM_BASE_XML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
+    LR_YUM_BASE_HAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_DELTAINFO,
 } lr_YumRepoFlags;
 
 typedef enum {
@@ -115,7 +115,7 @@ struct _lr_Handle {
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
     lr_Repotype     repotype;       /*!< Type of repository */
-    _lr_Checks      checks;         /*!< Which check sould be applied */
+    lr_Checks       checks;         /*!< Which check sould be applied */
     long            status_code;    /*!< Last HTTP or FTP status code */
     CURLcode        last_curl_error;/*!< Last curl error code */
     CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
@@ -173,14 +173,14 @@ struct _lr_YumRepoMd {
     int nodt; /* number of distro tags */
     int noct; /* number of content tags */
 
-    lr_YumRepoMdRecord pri_xml;
-    lr_YumRepoMdRecord fil_xml;
-    lr_YumRepoMdRecord oth_xml;
-    lr_YumRepoMdRecord pri_sql;
-    lr_YumRepoMdRecord fil_sql;
-    lr_YumRepoMdRecord oth_sql;
-    lr_YumRepoMdRecord groupfile;
-    lr_YumRepoMdRecord cgroupfile;
+    lr_YumRepoMdRecord primary;
+    lr_YumRepoMdRecord filelists;
+    lr_YumRepoMdRecord other;
+    lr_YumRepoMdRecord primary_db;
+    lr_YumRepoMdRecord filelists_db;
+    lr_YumRepoMdRecord other_db;
+    lr_YumRepoMdRecord group;
+    lr_YumRepoMdRecord group_gz;
     lr_YumRepoMdRecord deltainfo;
     lr_YumRepoMdRecord updateinfo;
 };
@@ -190,14 +190,14 @@ struct _lr_YumRepo {
     lr_YumRepoMd repomd_obj;
 
     char *repomd;
-    char *pri_xml;
-    char *fil_xml;
-    char *oth_xml;
-    char *pri_sql;
-    char *fil_sql;
-    char *oth_sql;
-    char *groupfile;
-    char *cgroupfile;
+    char *primary;
+    char *filelists;
+    char *other;
+    char *primary_db;
+    char *filelists_db;
+    char *other_db;
+    char *group;
+    char *group_gz;
     char *deltainfo;
     char *updateinfo;
 
