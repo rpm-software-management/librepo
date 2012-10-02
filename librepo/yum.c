@@ -54,20 +54,9 @@ lr_yum_repo_free(lr_YumRepo repo)
 /* main bussines logic */
 
 int
-lr_yum_get_repomd(lr_Handle handle, lr_YumRepo repo)
+lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
 {
-    lr_YumRepoMd repomd;
     int rc = LRE_OK;
-    char *path;
-    int fd;
-
-    /* Prepare repomd.xml file */
-    path = lr_pathconcat(handle->destdir, "/repodata/repomd.xml", NULL);
-    fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0660);
-    lr_free(path);
-
-    if (fd == -1)
-        return LRE_IO;
 
     if (handle->baseurl) {
         /* Try base url */
@@ -86,13 +75,11 @@ lr_yum_get_repomd(lr_Handle handle, lr_YumRepo repo)
 
         rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd, NULL);
         if (rc != LRE_OK) {
-            close(fd);
             close(mirrors_fd);
             return rc;
         }
 
         if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
-            close(fd);
             close(mirrors_fd);
             return LRE_IO;
         }
@@ -110,7 +97,6 @@ lr_yum_get_repomd(lr_Handle handle, lr_YumRepo repo)
             rc = lr_metalink_parse_file(metalink, mirrors_fd);
             if (rc != LRE_OK) {
                 DEBUGF(fprintf(stderr, "Cannot parse metalink (%d)\n", rc));
-                close(fd);
                 close(mirrors_fd);
                 lr_metalink_free(metalink);
                 return rc;
@@ -183,7 +169,6 @@ lr_yum_get_repomd(lr_Handle handle, lr_YumRepo repo)
             rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
             if (rc != LRE_OK) {
                 DEBUGF(fprintf(stderr, "Cannot parse mirrorlist (%d)\n", rc));
-                close(fd);
                 close(mirrors_fd);
                 lr_mirrorlist_free(mirrorlist);
                 return rc;
@@ -217,25 +202,8 @@ lr_yum_get_repomd(lr_Handle handle, lr_YumRepo repo)
     if (rc != LRE_OK) {
         /* Download of repomd.xml was not successful */
         DEBUGF(fprintf(stderr, "All downloads was unsuccessful"));
-        close(fd);
         return rc;
     }
-
-    lseek(fd, 0, SEEK_SET);
-
-    /* Parse repomd */
-    DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
-    repomd = lr_yum_repomd_create();
-    rc = lr_yum_repomd_parse_file(repomd, fd);
-    if (rc != LRE_OK) {
-        DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
-        lr_yum_repomd_free(repomd);
-        close(fd);
-        return rc;
-    }
-
-    repo->repomd_obj = repomd;
-    close(fd);
 
     return LRE_OK;
 }
@@ -434,8 +402,10 @@ int
 lr_yum_perform(lr_Handle handle, void **repo_ptr)
 {
     int rc = LRE_OK;
-    char *path_to_repodata;
+    int fd;
+    char *path_to_repodata, *path;
     lr_YumRepo repo;
+    lr_YumRepoMd repomd;
 
     repo = lr_yum_repo_create();
     *repo_ptr = repo;
@@ -443,32 +413,144 @@ lr_yum_perform(lr_Handle handle, void **repo_ptr)
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
 
-    /* Prepare repodata/ subdir */
-    path_to_repodata = lr_pathconcat(handle->destdir, "repodata", NULL);
-    rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
-    lr_free(path_to_repodata);
-    if (rc == -1)
-        return LRE_CANNOT_CREATE_DIR;
+    if (handle->dontdup) {
+        /* Do not duplicate repoata, just locate the local one */
+        if (strncmp(handle->baseurl, "file://", 7) &&
+            strstr(handle->baseurl, "://")) {
+            return LRE_MUSTDUP;
+        }
 
-    repo->destdir = lr_strdup(handle->destdir);
+        path = lr_pathconcat(handle->baseurl, "repodata/repomd.xml", NULL);
+        fd = open(path, O_RDONLY);
+        if (fd < 0) {
+            DEBUGF(fprintf(stderr, "%s doesn't exists\n", path));
+            lr_free(path);
+            return LRE_IO;
+        }
 
-    /* Download and parse repomd.xml */
-    if ((rc = lr_yum_get_repomd(handle, repo)) != LRE_OK)
-        return rc;
+        /* Parse repomd */
+        DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
+        repomd = lr_yum_repomd_create();
+        rc = lr_yum_repomd_parse_file(repomd, fd);
+        if (rc != LRE_OK) {
+            DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
+            lr_yum_repomd_free(repomd);
+            lr_free(path);
+            return rc;
+        }
 
-    repo->repomd = lr_pathconcat(handle->destdir, "/repodata/repomd.xml", NULL);
-    if (handle->used_mirror)
-        repo->url = lr_strdup(handle->used_mirror);
-    else
-        repo->url = lr_strdup(handle->baseurl);
+        close(fd);
 
-    DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repo->repomd_obj->revision));
+        /* Fill repo object */
+        if (repo->destdir)
+            lr_free(repo->destdir);
+        repo->repomd_obj = repomd;
+        repo->repomd = path;
+        repo->destdir = lr_strdup(handle->baseurl);
 
-    /* Download rest of metadata files */
-    if ((rc = lr_yum_download_repo(handle, repo)) != LRE_OK)
-        return rc;
+        DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repo->repomd_obj->revision));
 
-    DEBUGF(fprintf(stderr, "Repository was successfully downloaded\n"));
+        /* Locate rest of metadata files */
+        if (repo->repomd_obj->primary)
+            repo->primary = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->primary->location_href,
+                                NULL);
+        if (repo->repomd_obj->filelists)
+            repo->filelists = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->filelists->location_href,
+                                NULL);
+        if (repo->repomd_obj->other)
+            repo->other = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->other->location_href,
+                                NULL);
+        if (repo->repomd_obj->primary_db)
+            repo->primary_db = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->primary_db->location_href,
+                                NULL);
+        if (repo->repomd_obj->filelists_db)
+            repo->filelists_db = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->filelists_db->location_href,
+                                NULL);
+        if (repo->repomd_obj->other_db)
+            repo->other_db = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->other_db->location_href,
+                                NULL);
+        if (repo->repomd_obj->group)
+            repo->group = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->group->location_href,
+                                NULL);
+        if (repo->repomd_obj->group_gz)
+            repo->group_gz = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->group_gz->location_href,
+                                NULL);
+        if (repo->repomd_obj->deltainfo)
+            repo->deltainfo = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->deltainfo->location_href,
+                                NULL);
+        if (repo->repomd_obj->updateinfo)
+            repo->updateinfo = lr_pathconcat(handle->baseurl,
+                                repo->repomd_obj->updateinfo->location_href,
+                                NULL);
+        DEBUGF(fprintf(stderr, "Repository was successfully located\n"));
+    } else {
+        /* Download remote metadata */
+
+        /* Prepare repodata/ subdir */
+        path_to_repodata = lr_pathconcat(handle->destdir, "repodata", NULL);
+        rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
+        lr_free(path_to_repodata);
+        if (rc == -1)
+            return LRE_CANNOT_CREATE_DIR;
+
+        repo->destdir = lr_strdup(handle->destdir);
+
+        /* Prepare repomd.xml file */
+        path = lr_pathconcat(handle->destdir, "/repodata/repomd.xml", NULL);
+        fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0660);
+        if (fd == -1) {
+            lr_free(path);
+            return LRE_IO;
+        }
+
+        /* Download repomd.xml */
+        rc = lr_yum_download_repomd(handle, repo, fd);
+        close(fd);
+        if (rc != LRE_OK) {
+            lr_free(path);
+            return rc;
+        }
+
+        lseek(fd, 0, SEEK_SET);
+
+        /* Parse repomd */
+        DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
+        repomd = lr_yum_repomd_create();
+        rc = lr_yum_repomd_parse_file(repomd, fd);
+        if (rc != LRE_OK) {
+            DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
+            lr_yum_repomd_free(repomd);
+            lr_free(path);
+            return rc;
+        }
+
+        close(fd);
+
+        /* Fill repo object */
+        repo->repomd_obj = repomd;
+        repo->repomd = path;
+        if (handle->used_mirror)
+            repo->url = lr_strdup(handle->used_mirror);
+        else
+            repo->url = lr_strdup(handle->baseurl);
+
+        DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repo->repomd_obj->revision));
+
+        /* Download rest of metadata files */
+        if ((rc = lr_yum_download_repo(handle, repo)) != LRE_OK)
+            return rc;
+
+        DEBUGF(fprintf(stderr, "Repository was successfully downloaded\n"));
+    }
 
     /* Check checksums */
     if (handle->checks & LR_CHECK_CHECKSUM) {

@@ -25,6 +25,8 @@ typedef enum {
     LRE_BAD_STATUS,                 /*!< HTTP or FTP returned status code which
                                          do not represent success
                                          (file doesn't exists, etc.) */
+    LRE_MUSTDUP,                    /*!< DONTDUP option used, but the URL is not
+                                         a local address */
     LRE_SELECT,                     /*!< error while call select() on set
                                          of sockets */
     LRE_CANNOT_CREATE_DIR,          /*!< cannot create a directory in output
@@ -74,6 +76,8 @@ typedef enum {
 typedef enum {
     LR_URL,         /*!< Base repo URL */
     LR_MIRRORLIST,  /*!< Mirrorlist or metalink url */
+    LR_DONTDUP,     /*!< Do not duplicate local metadata, just locate
+                         the old one */
     LR_HTTPAUTH,    /*!< Enable all supported method of HTTP
                          authentification. */
     LR_USERPWD,     /*!< User and password for http authetification in format
@@ -111,6 +115,7 @@ struct _lr_Handle {
     CURL            *curl_handle;   /*!< CURL handle */
     char            *baseurl;       /*!< Base URL of repo */
     char            *mirrorlist;    /*!< Mirrorlist or URL */
+    int             dontdup;        /*!< Do not duplicate local data */
     char            *used_mirror;   /*!< Finally used mirror (if any) */
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */

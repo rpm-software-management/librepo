@@ -69,6 +69,10 @@ lr_setopt(lr_Handle handle, lr_Option option, ...)
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
         break;
 
+    case LR_DONTDUP:
+        handle->dontdup = va_arg(arg, long);
+        break;
+
     case LR_HTTPAUTH:
         c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
         break;
@@ -191,7 +195,7 @@ lr_perform(lr_Handle handle, void **repo_ptr)
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
 
-    if (!handle->destdir) {
+    if (!handle->destdir && !handle->dontdup) {
         handle->destdir = lr_strdup(TMP_DIR_TEMPLATE);
         if (!mkdtemp(handle->destdir))
             return LRE_CANNOT_CREATE_TMP;
