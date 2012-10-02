@@ -8,6 +8,9 @@ extern "C" {
 #include <stdlib.h>
 #include <curl/curl.h>
 
+#include "types.h"
+
+/* Return/Error codes */
 typedef enum {
     LRE_OK,                         /*!< everything is ok */
     LRE_BAD_FUNCTION_ARGUMENT,      /*!< bad function argument */
@@ -41,37 +44,9 @@ typedef enum {
     LRE_CANNOT_CREATE_TMP,          /*!< cannot create tmp directory */
     LRE_UNKNOWN_CHECKSUM,           /*!< unknown type of checksum is need to
                                          calculate to verify one or more file */
+    LRE_UNKNOWN_ERROR,              /*!< unknown error - last element in
+                                         error codes enum */
 } lr_Rc; /*!< Return codes */
-
-typedef enum {
-    LR_CHECK_GPG          = (1<<0),
-    LR_CHECK_CHECKSUM     = (1<<1),
-} lr_Checks;
-
-typedef enum {
-    LR_YUMREPO     = (1<<1),
-    LR_SUSEREPO    = (1<<2),
-    LR_DEBREPO     = (1<<3),
-} lr_Repotype;
-
-typedef enum {
-    LR_YUM_FULL         = (1<<0),
-    LR_YUM_REPOMD       = (1<<1),
-    LR_YUM_PRI          = (1<<2),
-    LR_YUM_FIL          = (1<<3),
-    LR_YUM_OTH          = (1<<4),
-    LR_YUM_PRI_DB       = (1<<5),
-    LR_YUM_FIL_DB       = (1<<6),
-    LR_YUM_OTH_DB       = (1<<7),
-    LR_YUM_GROUP        = (1<<8),
-    LR_YUM_GROUP_GZ     = (1<<9),
-    LR_YUM_DELTAINFO    = (1<<10),
-    LR_YUM_UPDATEINFO   = (1<<11),
-
-    // Common combinations
-    LR_YUM_BASE_XML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
-    LR_YUM_BASE_HAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_DELTAINFO,
-} lr_YumRepoFlags;
 
 typedef enum {
     LR_URL,         /*!< Base repo URL */
@@ -107,110 +82,18 @@ typedef enum {
 
 } lr_Option; /*!< Handle config options */
 
-typedef int (*lr_progress_cb)(void *clientp,
-                              double total_to_download,
-                              double now_downloaded);
-
-struct _lr_Handle {
-    CURL            *curl_handle;   /*!< CURL handle */
-    char            *baseurl;       /*!< Base URL of repo */
-    char            *mirrorlist;    /*!< Mirrorlist or URL */
-    int             dontdup;        /*!< Do not duplicate local data */
-    char            *used_mirror;   /*!< Finally used mirror (if any) */
-    int             retries;        /*!< Number of maximum retries */
-    char            *destdir;       /*!< Destination directory */
-    lr_Repotype     repotype;       /*!< Type of repository */
-    lr_Checks       checks;         /*!< Which check sould be applied */
-    long            status_code;    /*!< Last HTTP or FTP status code */
-    CURLcode        last_curl_error;/*!< Last curl error code */
-    CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
-    lr_YumRepoFlags yumflags;       /*!< Flags for downloading of yum repo */
-    lr_progress_cb  user_cb;        /*!< User progress callback */
-    void            *user_data;     /*!< User data for callback */
-};
-typedef struct _lr_Handle *lr_Handle;
-
-typedef curl_off_t lr_off_t;
-
 lr_Handle lr_init_handle();
-
 void lr_free_handle(lr_Handle handle);
 
 /* look at: url.c - Curl_setopt() */
-lr_Rc lr_setopt(lr_Handle handle, lr_Option option, ...);
-
-lr_Rc lr_perform(lr_Handle handle, void **repo_ptr);
-
-CURLcode lr_last_curl_error(lr_Handle);
-CURLMcode lr_last_curlm_error(lr_Handle);
+int lr_setopt(lr_Handle handle, lr_Option option, ...);
+int lr_perform(lr_Handle handle, void *repo_ptr);
+int lr_last_curl_error(lr_Handle);
+int lr_last_curlm_error(lr_Handle);
 
 /* Yum repo */
 
-struct _lr_YumDistroTag {
-    char *cpeid;
-    char *value;
-};
-typedef struct _lr_YumDistroTag *lr_YumDistroTag;
-
-struct _lr_YumRepoMdRecord {
-    char *location_href;
-    char *checksum;
-    char *checksum_type;
-    char *checksum_open;
-    char *checksum_open_type;
-    long timestamp;
-    long size;
-    long size_open;
-    int db_version;
-};
-typedef struct _lr_YumRepoMdRecord *lr_YumRepoMdRecord;
-
-#define NUMBER_OF_YUM_REPOMD_RECORDS    10  /*!< number of repomd records
-                                                 in _lr_YumRepoMd structure */
-
-struct _lr_YumRepoMd {
-    char *revision;
-    char **repo_tags;
-    lr_YumDistroTag *distro_tags;
-    char **content_tags;
-
-    int nort; /* number of repo tags */
-    int nodt; /* number of distro tags */
-    int noct; /* number of content tags */
-
-    lr_YumRepoMdRecord primary;
-    lr_YumRepoMdRecord filelists;
-    lr_YumRepoMdRecord other;
-    lr_YumRepoMdRecord primary_db;
-    lr_YumRepoMdRecord filelists_db;
-    lr_YumRepoMdRecord other_db;
-    lr_YumRepoMdRecord group;
-    lr_YumRepoMdRecord group_gz;
-    lr_YumRepoMdRecord deltainfo;
-    lr_YumRepoMdRecord updateinfo;
-};
-typedef struct _lr_YumRepoMd *lr_YumRepoMd;
-
-struct _lr_YumRepo {
-    lr_YumRepoMd repomd_obj;
-
-    char *repomd;
-    char *primary;
-    char *filelists;
-    char *other;
-    char *primary_db;
-    char *filelists_db;
-    char *other_db;
-    char *group;
-    char *group_gz;
-    char *deltainfo;
-    char *updateinfo;
-
-    char *url;          /*!< URL from where repo was downloaded */
-    char *destdir;      /*!< Local path to the repo */
-};
-typedef struct _lr_YumRepo *lr_YumRepo;
-
+lr_YumRepo lr_yum_repo_create();
 void lr_yum_repo_free(lr_YumRepo repo);
 
 #ifdef __cplusplus

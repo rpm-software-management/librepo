@@ -16,6 +16,7 @@
 #include "repomd.h"
 #include "curl.h"
 #include "checksum.h"
+#include "handle_internal.h"
 
 /** TODO:
  * - GPG check
@@ -210,7 +211,7 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
 
 /* Returns 1 if target was added and 0 otherwise */
 int
-lr_add_target(lr_Target targets[],
+lr_add_target(lr_CurlTarget targets[],
               const char *destdir,
               const char *url,
               lr_YumRepoMdRecord rec,
@@ -219,7 +220,7 @@ lr_add_target(lr_Target targets[],
               int use_this)
 {
     int fd;
-    lr_Target target;
+    lr_CurlTarget target;
 
     if (!use_this)
         return 0;
@@ -251,7 +252,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo)
     int ret = LRE_OK;
     char *dir;                                        /* Destination dir */
     char *url;                                        /* Base url */
-    lr_Target targets[NUMBER_OF_YUM_REPOMD_RECORDS];  /* Targets to download */
+    lr_CurlTarget targets[LR_NUM_OF_YUM_REPOMD_RECORDS];/* Targets to download */
     int used = 0;                                     /* Number of targets */
 
     dir = handle->destdir;
@@ -399,16 +400,12 @@ lr_yum_check_repo_checksums(lr_YumRepo repo)
 }
 
 int
-lr_yum_perform(lr_Handle handle, void **repo_ptr)
+lr_yum_perform(lr_Handle handle, lr_YumRepo repo)
 {
     int rc = LRE_OK;
     int fd;
     char *path_to_repodata, *path;
-    lr_YumRepo repo;
     lr_YumRepoMd repomd;
-
-    repo = lr_yum_repo_create();
-    *repo_ptr = repo;
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
@@ -451,43 +448,43 @@ lr_yum_perform(lr_Handle handle, void **repo_ptr)
         DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repo->repomd_obj->revision));
 
         /* Locate rest of metadata files */
-        if (repo->repomd_obj->primary)
+        if (repo->repomd_obj->primary && handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI))
             repo->primary = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->primary->location_href,
                                 NULL);
-        if (repo->repomd_obj->filelists)
+        if (repo->repomd_obj->filelists && handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL))
             repo->filelists = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->filelists->location_href,
                                 NULL);
-        if (repo->repomd_obj->other)
+        if (repo->repomd_obj->other && handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH))
             repo->other = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->other->location_href,
                                 NULL);
-        if (repo->repomd_obj->primary_db)
+        if (repo->repomd_obj->primary_db && handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI_DB))
             repo->primary_db = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->primary_db->location_href,
                                 NULL);
-        if (repo->repomd_obj->filelists_db)
+        if (repo->repomd_obj->filelists_db && handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL_DB))
             repo->filelists_db = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->filelists_db->location_href,
                                 NULL);
-        if (repo->repomd_obj->other_db)
+        if (repo->repomd_obj->other_db && handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH_DB))
             repo->other_db = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->other_db->location_href,
                                 NULL);
-        if (repo->repomd_obj->group)
+        if (repo->repomd_obj->group && handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP))
             repo->group = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->group->location_href,
                                 NULL);
-        if (repo->repomd_obj->group_gz)
+        if (repo->repomd_obj->group_gz && handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP_GZ))
             repo->group_gz = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->group_gz->location_href,
                                 NULL);
-        if (repo->repomd_obj->deltainfo)
+        if (repo->repomd_obj->deltainfo && handle->yumflags & (LR_YUM_FULL|LR_YUM_DELTAINFO))
             repo->deltainfo = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->deltainfo->location_href,
                                 NULL);
-        if (repo->repomd_obj->updateinfo)
+        if (repo->repomd_obj->updateinfo && handle->yumflags & (LR_YUM_FULL|LR_YUM_UPDATEINFO))
             repo->updateinfo = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->updateinfo->location_href,
                                 NULL);

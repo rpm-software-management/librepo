@@ -18,21 +18,21 @@ extern "C" {
  *                  do not represent success
  */
 
-struct _lr_Target {
+struct _lr_CurlTarget {
     char *url;
     int fd;
 };
-typedef struct _lr_Target * lr_Target;
+typedef struct _lr_CurlTarget * lr_CurlTarget;
 
-lr_Target lr_target_create();
-void lr_target_free(lr_Target target);
+lr_CurlTarget lr_target_create();
+void lr_target_free(lr_CurlTarget target);
 
 int lr_curl_single_download(lr_Handle handle,
                             const char *url,
                             int fd,
                             char *mandatory_suffix);
 
-int lr_curl_multi_download(lr_Handle handle, lr_Target targets[], int not);
+int lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not);
 
 #ifdef __cplusplus
 }

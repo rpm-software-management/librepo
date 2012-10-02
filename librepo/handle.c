@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <curl/curl.h>
 
+#include "handle_internal.h"
 #include "setup.h"
 #include "librepo.h"
 #include "util.h"
@@ -47,7 +48,7 @@ lr_free_handle(lr_Handle handle)
     lr_free(handle);
 }
 
-lr_Rc
+int
 lr_setopt(lr_Handle handle, lr_Option option, ...)
 {
     lr_Rc ret = LRE_OK;
@@ -170,27 +171,28 @@ lr_setopt(lr_Handle handle, lr_Option option, ...)
     return ret;
 }
 
-CURLcode
+int
 lr_last_curl_error(lr_Handle handle)
 {
     assert(handle);
     return handle->last_curl_error;
 }
 
-CURLMcode
+int
 lr_last_curlm_error(lr_Handle handle)
 {
     assert(handle);
     return handle->last_curlm_error;
 }
 
-lr_Rc
-lr_perform(lr_Handle handle, void **repo_ptr)
+int
+lr_perform(lr_Handle handle, void *repo_ptr)
 {
     int rc;
     assert(handle);
 
-    *repo_ptr = NULL;
+    if (!repo_ptr)
+        return LRE_BAD_FUNCTION_ARGUMENT;
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
@@ -205,7 +207,7 @@ lr_perform(lr_Handle handle, void **repo_ptr)
 
     switch (handle->repotype) {
     case LR_YUMREPO:
-        DEBUGF(fprintf(stderr, "Downloading yum repo\n"));
+        DEBUGF(fprintf(stderr, "Downloading/Locating yum repo\n"));
         rc = lr_yum_perform(handle, repo_ptr);
         break;
     default:

@@ -10,6 +10,7 @@
 #include "curl.h"
 #include "librepo.h"
 #include "util.h"
+#include "handle_internal.h"
 
 /* Callback stuff */
 
@@ -151,14 +152,14 @@ lr_curl_single_download(lr_Handle handle,
     return LRE_OK;
 }
 
-lr_Target
+lr_CurlTarget
 lr_target_create()
 {
-    return lr_malloc0(sizeof(struct _lr_Target));
+    return lr_malloc0(sizeof(struct _lr_CurlTarget));
 }
 
 void
-lr_target_free(lr_Target target)
+lr_target_free(lr_CurlTarget target)
 {
     if (!target)
         return;
@@ -166,7 +167,7 @@ lr_target_free(lr_Target target)
 }
 
 int
-lr_curl_multi_download(lr_Handle handle, lr_Target targets[], int not)
+lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
 {
     int ret = LRE_OK;
     CURL *curl_easy_interfaces[not];
@@ -207,7 +208,7 @@ lr_curl_multi_download(lr_Handle handle, lr_Target targets[], int not)
     for (int x = 0; x < not; x++) {
         FILE *f;
         CURLcode c_rc;
-        lr_Target t = targets[x];
+        lr_CurlTarget t = targets[x];
         CURL *c_h = curl_easy_duphandle(handle->curl_handle);
 
         if (!c_h) {

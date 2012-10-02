@@ -333,6 +333,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 int
 lr_metalink_parse_file(lr_Metalink metalink, int fd)
 {
+    int ret = LRE_OK;
     XML_Parser parser;
     ParserData pd;
     lr_StatesSwitch *sw;
@@ -374,22 +375,28 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
             lr_out_of_memory();
 
         len = read(fd, (void *) buf, CHUNK_SIZE);
-        if (len < 0)
-            return LRE_IO;
+        if (len < 0) {
+            ret = LRE_IO;
+            break;
+        }
 
-        if (!XML_ParseBuffer(parser, len, len == 0))
-            return LRE_ML_XML;
+        if (!XML_ParseBuffer(parser, len, len == 0)) {
+            ret = LRE_ML_XML;
+            break;
+        }
 
         if (len == 0)
             break;
 
-        if (pd.ret != LRE_OK)
+        if (pd.ret != LRE_OK) {
+            ret = pd.ret;
             break;
+        }
     }
 
     /* Parser data cleanup */
     lr_free(pd.content);
     XML_ParserFree(parser);
 
-    return pd.ret;
+    return ret;
 }
