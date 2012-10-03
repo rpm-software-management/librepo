@@ -78,7 +78,7 @@ typedef enum {
     LR_CHECKSUM,    /*!< Check files checksum if available */
 
     /* LR_YUMREPO specific options */
-    LR_YUMDOWNLOADFLAGS, /*!< Download only specified files */
+    LR_YUMREPOFLAGS,/*!< Download only specified files */
 
 } lr_Option; /*!< Handle config options */
 

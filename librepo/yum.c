@@ -260,34 +260,34 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo)
 
     used += lr_add_target(targets, dir, url, repo->repomd_obj->primary,
                           &repo->primary, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI));
+                          handle->yumflags & LR_YUM_PRI);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->filelists,
                           &repo->filelists, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL));
+                          handle->yumflags & LR_YUM_FIL);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->other,
                           &repo->other, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH));
+                          handle->yumflags & LR_YUM_OTH);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->primary_db,
                           &repo->primary_db, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI_DB));
+                          handle->yumflags & LR_YUM_PRI_DB);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->filelists_db,
                           &repo->filelists_db, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL_DB));
+                          handle->yumflags & LR_YUM_FIL_DB);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->other_db,
                           &repo->other_db, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH_DB));
+                          handle->yumflags & LR_YUM_OTH_DB);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->group,
                           &repo->group, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP));
+                          handle->yumflags & LR_YUM_GROUP);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->group,
                           &repo->group, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP_GZ));
+                          handle->yumflags & LR_YUM_GROUP_GZ);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->deltainfo,
                           &repo->deltainfo, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_DELTAINFO));
+                          handle->yumflags & LR_YUM_DELTAINFO);
     used += lr_add_target(targets, dir, url, repo->repomd_obj->updateinfo,
                           &repo->updateinfo, used,
-                          handle->yumflags & (LR_YUM_FULL|LR_YUM_UPDATEINFO));
+                          handle->yumflags & LR_YUM_UPDATEINFO);
 
     if (used == 0)
         return ret;
@@ -448,43 +448,43 @@ lr_yum_perform(lr_Handle handle, lr_YumRepo repo)
         DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repo->repomd_obj->revision));
 
         /* Locate rest of metadata files */
-        if (repo->repomd_obj->primary && handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI))
+        if (repo->repomd_obj->primary && handle->yumflags & LR_YUM_PRI)
             repo->primary = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->primary->location_href,
                                 NULL);
-        if (repo->repomd_obj->filelists && handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL))
+        if (repo->repomd_obj->filelists && handle->yumflags & LR_YUM_FIL)
             repo->filelists = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->filelists->location_href,
                                 NULL);
-        if (repo->repomd_obj->other && handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH))
+        if (repo->repomd_obj->other && handle->yumflags & LR_YUM_OTH)
             repo->other = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->other->location_href,
                                 NULL);
-        if (repo->repomd_obj->primary_db && handle->yumflags & (LR_YUM_FULL|LR_YUM_PRI_DB))
+        if (repo->repomd_obj->primary_db && handle->yumflags & LR_YUM_PRI_DB)
             repo->primary_db = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->primary_db->location_href,
                                 NULL);
-        if (repo->repomd_obj->filelists_db && handle->yumflags & (LR_YUM_FULL|LR_YUM_FIL_DB))
+        if (repo->repomd_obj->filelists_db && handle->yumflags & LR_YUM_FIL_DB)
             repo->filelists_db = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->filelists_db->location_href,
                                 NULL);
-        if (repo->repomd_obj->other_db && handle->yumflags & (LR_YUM_FULL|LR_YUM_OTH_DB))
+        if (repo->repomd_obj->other_db && handle->yumflags & LR_YUM_OTH_DB)
             repo->other_db = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->other_db->location_href,
                                 NULL);
-        if (repo->repomd_obj->group && handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP))
+        if (repo->repomd_obj->group && handle->yumflags & LR_YUM_GROUP)
             repo->group = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->group->location_href,
                                 NULL);
-        if (repo->repomd_obj->group_gz && handle->yumflags & (LR_YUM_FULL|LR_YUM_GROUP_GZ))
+        if (repo->repomd_obj->group_gz && handle->yumflags & LR_YUM_GROUP_GZ)
             repo->group_gz = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->group_gz->location_href,
                                 NULL);
-        if (repo->repomd_obj->deltainfo && handle->yumflags & (LR_YUM_FULL|LR_YUM_DELTAINFO))
+        if (repo->repomd_obj->deltainfo && handle->yumflags & LR_YUM_DELTAINFO)
             repo->deltainfo = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->deltainfo->location_href,
                                 NULL);
-        if (repo->repomd_obj->updateinfo && handle->yumflags & (LR_YUM_FULL|LR_YUM_UPDATEINFO))
+        if (repo->repomd_obj->updateinfo && handle->yumflags & LR_YUM_UPDATEINFO)
             repo->updateinfo = lr_pathconcat(handle->baseurl,
                                 repo->repomd_obj->updateinfo->location_href,
                                 NULL);

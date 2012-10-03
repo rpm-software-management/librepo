@@ -159,7 +159,7 @@ lr_setopt(lr_Handle handle, lr_Option option, ...)
             handle->checks &= ~LR_CHECK_CHECKSUM;
         break;
 
-    case LR_YUMDOWNLOADFLAGS:
+    case LR_YUMREPOFLAGS:
         handle->yumflags = va_arg(arg, lr_YumRepoFlags);
         break;
 

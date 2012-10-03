@@ -22,8 +22,8 @@ typedef enum {
 /* YUM related types */
 
 typedef enum {
-    LR_YUM_FULL         = (1<<0),
-    LR_YUM_REPOMD       = (1<<1),
+/*  LR_YUM_             = (1<<0),  Reserved */
+/*  LR_YUM_             = (1<<1),  Reserved */
     LR_YUM_PRI          = (1<<2),
     LR_YUM_FIL          = (1<<3),
     LR_YUM_OTH          = (1<<4),
@@ -37,7 +37,12 @@ typedef enum {
 
     // Common combinations
     LR_YUM_BASE_XML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
+    LR_YUM_BASE_DB      = LR_YUM_PRI_DB|LR_YUM_FIL_DB|LR_YUM_OTH_DB,
     LR_YUM_BASE_HAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_DELTAINFO,
+    LR_YUM_FULL         = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH|
+                          LR_YUM_PRI_DB|LR_YUM_FIL_DB|LR_YUM_OTH_DB|
+                          LR_YUM_GROUP|LR_YUM_GROUP_GZ|LR_YUM_DELTAINFO|
+                          LR_YUM_UPDATEINFO,
 } lr_YumRepoFlags;
 
 struct _lr_YumDistroTag {
