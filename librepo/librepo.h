@@ -82,8 +82,11 @@ typedef enum {
 
 } lr_Option; /*!< Handle config options */
 
-lr_Handle lr_init_handle();
-void lr_free_handle(lr_Handle handle);
+void lr_global_init();
+void lr_global_cleanup();
+
+lr_Handle lr_handle_init();
+void lr_handle_free(lr_Handle handle);
 
 /* look at: url.c - Curl_setopt() */
 int lr_setopt(lr_Handle handle, lr_Option option, ...);

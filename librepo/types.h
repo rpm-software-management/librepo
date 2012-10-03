@@ -111,6 +111,8 @@ typedef int (*lr_progress_cb)(void *clientp,
                               double total_to_download,
                               double now_downloaded);
 
+typedef int (*lr_update_cb)(lr_YumRepoMd first, lr_YumRepoMd second);
+
 #ifdef __cplusplus
 }
 #endif

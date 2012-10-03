@@ -12,8 +12,20 @@
 
 #define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
 
+void
+lr_global_init()
+{
+    curl_global_init(CURL_GLOBAL_SSL);
+}
+
+void
+lr_global_cleanup()
+{
+    curl_global_cleanup();
+}
+
 lr_Handle
-lr_init_handle()
+lr_handle_init()
 {
     lr_Handle handle;
     CURL *curl = curl_easy_init();
@@ -35,7 +47,7 @@ lr_init_handle()
 }
 
 void
-lr_free_handle(lr_Handle handle)
+lr_handle_free(lr_Handle handle)
 {
     if (!handle)
         return;
@@ -54,10 +66,12 @@ lr_setopt(lr_Handle handle, lr_Option option, ...)
     lr_Rc ret = LRE_OK;
     va_list arg;
     CURLcode c_rc = CURLE_OK;
-    CURL *c_h = handle->curl_handle;
+    CURL *c_h;
 
     if (!handle)
         return LRE_BAD_FUNCTION_ARGUMENT;
+
+    c_h = handle->curl_handle;
 
     va_start(arg, option);
 
