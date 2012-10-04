@@ -13,7 +13,8 @@ extern "C" {
  *  LR_REPOMD_XML   xml parse error
  */
 
-lr_YumRepoMd lr_yum_repomd_create();
+lr_YumRepoMd lr_yum_repomd_init();
+void lr_yum_repomd_clear(lr_YumRepoMd repomd);
 void lr_yum_repomd_free(lr_YumRepoMd repomd);
 int lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd);
 

@@ -24,7 +24,7 @@ struct _lr_CurlTarget {
 };
 typedef struct _lr_CurlTarget * lr_CurlTarget;
 
-lr_CurlTarget lr_target_create();
+lr_CurlTarget lr_target_init();
 void lr_target_free(lr_CurlTarget target);
 
 int lr_curl_single_download(lr_Handle handle,

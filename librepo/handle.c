@@ -1,10 +1,12 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <stdarg.h>
 #include <curl/curl.h>
 
 #include "handle_internal.h"
+#include "repomd.h"
 #include "setup.h"
 #include "librepo.h"
 #include "util.h"
@@ -22,6 +24,66 @@ void
 lr_global_cleanup()
 {
     curl_global_cleanup();
+}
+
+lr_Result
+lr_result_init()
+{
+    return lr_malloc0(sizeof(struct _lr_Result));
+}
+
+void
+lr_result_clear(lr_Result result)
+{
+    if (!result)
+        return;
+    lr_yum_repomd_free(result->yum_repomd);
+    lr_yum_repo_free(result->yum_repo);
+    memset(result, 0, sizeof(struct _lr_Result));
+}
+
+void
+lr_result_free(lr_Result result)
+{
+    if (!result)
+        return;
+    lr_result_clear(result);
+    lr_free(result);
+}
+
+int
+lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...)
+{
+    int rc = LRE_OK;
+    va_list arg;
+
+    if (!result)
+        return LRE_BAD_FUNCTION_ARGUMENT;
+
+    va_start(arg, option);
+
+    switch (option) {
+    case LRR_YUM_REPO: {
+        lr_YumRepo *repo;
+        repo = va_arg(arg, lr_YumRepo *);
+        *repo = result->yum_repo;
+        break;
+    }
+
+    case LRR_YUM_REPOMD: {
+        lr_YumRepoMd repomd;
+        repomd = va_arg(arg, lr_YumRepoMd *);
+        *repomd = result->yum_repomd;
+        break;
+    }
+
+    default:
+        rc = LRE_UNKNOWN_OPTION;
+        break;
+    }
+
+    va_end(arg);
+    return rc;
 }
 
 lr_Handle
@@ -61,7 +123,7 @@ lr_handle_free(lr_Handle handle)
 }
 
 int
-lr_setopt(lr_Handle handle, lr_Option option, ...)
+lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
 {
     lr_Rc ret = LRE_OK;
     va_list arg;
@@ -76,55 +138,59 @@ lr_setopt(lr_Handle handle, lr_Option option, ...)
     va_start(arg, option);
 
     switch (option) {
-    case LR_URL:
+    case LRO_UPDATE:
+        handle->update = va_arg(arg, long) ? 1 : 0;
+        break;
+
+    case LRO_URL:
         handle->baseurl = lr_strdup(va_arg(arg, char *));
         break;
 
-    case LR_MIRRORLIST:
+    case LRO_MIRRORLIST:
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
         break;
 
-    case LR_DONTDUP:
-        handle->dontdup = va_arg(arg, long);
+    case LRO_LOCAL:
+        handle->local = va_arg(arg, long) ? 1 : 0;
         break;
 
-    case LR_HTTPAUTH:
+    case LRO_HTTPAUTH:
         c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
         break;
 
-    case LR_USERPWD:
+    case LRO_USERPWD:
         c_rc = curl_easy_setopt(c_h, CURLOPT_USERPWD, va_arg(arg, char *));
         break;
 
-    case LR_PROXY:
+    case LRO_PROXY:
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY, va_arg(arg, char *));
         break;
 
-    case LR_PROXYPORT:
+    case LRO_PROXYPORT:
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYPORT, va_arg(arg, long));
         break;
 
-    case LR_PROXYSOCK:
+    case LRO_PROXYSOCK:
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
         break;
 
-    case LR_PROXYAUTH:
+    case LRO_PROXYAUTH:
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
         break;
 
-    case LR_PROXYUSERPWD:
+    case LRO_PROXYUSERPWD:
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYUSERPWD, va_arg(arg, char *));
         break;
 
-    case LR_PROGRESSCB:
-        handle->user_cb = va_arg(arg, lr_progress_cb);
+    case LRO_PROGRESSCB:
+        handle->user_cb = va_arg(arg, lr_ProgressCb);
         break;
 
-    case LR_PROGRESSDATA:
+    case LRO_PROGRESSDATA:
         handle->user_data = va_arg(arg, void *);
         break;
 
-    case LR_RETRIES:
+    case LRO_RETRIES:
         handle->retries = va_arg(arg, int);
         if (handle->retries < 1) {
             ret = LRE_BAD_OPTION_ARGUMENT;
@@ -132,34 +198,34 @@ lr_setopt(lr_Handle handle, lr_Option option, ...)
         }
         break;
 
-    case LR_MAXSPEED:
+    case LRO_MAXSPEED:
         c_rc = curl_easy_setopt(c_h, CURLOPT_MAX_RECV_SPEED_LARGE, va_arg(arg, lr_off_t));
         break;
 
-    case LR_DESTDIR:
+    case LRO_DESTDIR:
         handle->destdir = lr_strdup(va_arg(arg, char *));
         break;
 
-    case LR_REPOTYPE:
+    case LRO_REPOTYPE:
         handle->repotype = va_arg(arg, lr_Repotype);
         assert(handle->repotype == LR_YUMREPO);
         break;
 
-    case LR_GPGCHECK:
+    case LRO_GPGCHECK:
         if (va_arg(arg, int))
             handle->checks |= LR_CHECK_GPG;
         else
             handle->checks &= ~LR_CHECK_GPG;
         break;
 
-    case LR_CHECKSUM:
+    case LRO_CHECKSUM:
         if (va_arg(arg, int))
             handle->checks |= LR_CHECK_CHECKSUM;
         else
             handle->checks &= ~LR_CHECK_CHECKSUM;
         break;
 
-    case LR_YUMREPOFLAGS:
+    case LRO_YUMREPOFLAGS:
         handle->yumflags = va_arg(arg, lr_YumRepoFlags);
         break;
 
@@ -200,18 +266,24 @@ lr_last_curlm_error(lr_Handle handle)
 }
 
 int
-lr_perform(lr_Handle handle, void *repo_ptr)
+lr_perform(lr_Handle handle, lr_Result result)
 {
     int rc;
     assert(handle);
 
-    if (!repo_ptr)
+    if (!result)
         return LRE_BAD_FUNCTION_ARGUMENT;
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
 
-    if (!handle->destdir && !handle->dontdup) {
+    /* Setup destination directory */
+    if (handle->update) {
+        if (!result->destdir)
+            return LRE_INCOMPLETERESULT;
+        lr_free(handle->destdir);
+        handle->destdir = lr_strdup(result->destdir);
+    } else if (!handle->destdir && !handle->local) {
         handle->destdir = lr_strdup(TMP_DIR_TEMPLATE);
         if (!mkdtemp(handle->destdir))
             return LRE_CANNOT_CREATE_TMP;
@@ -222,7 +294,7 @@ lr_perform(lr_Handle handle, void *repo_ptr)
     switch (handle->repotype) {
     case LR_YUMREPO:
         DEBUGF(fprintf(stderr, "Downloading/Locating yum repo\n"));
-        rc = lr_yum_perform(handle, repo_ptr);
+        rc = lr_yum_perform(handle, result);
         break;
     default:
         DEBUGF(fprintf(stderr, "Bad repo type\n"));

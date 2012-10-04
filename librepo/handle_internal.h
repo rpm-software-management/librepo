@@ -9,9 +9,10 @@ extern "C" {
 
 struct _lr_Handle {
     CURL            *curl_handle;   /*!< CURL handle */
+    int             update;         /*!< Just update existing repo */
     char            *baseurl;       /*!< Base URL of repo */
     char            *mirrorlist;    /*!< Mirrorlist or URL */
-    int             dontdup;        /*!< Do not duplicate local data */
+    int             local;          /*!< Do not duplicate local data */
     char            *used_mirror;   /*!< Finally used mirror (if any) */
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
@@ -21,8 +22,14 @@ struct _lr_Handle {
     CURLcode        last_curl_error;/*!< Last curl error code */
     CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
     lr_YumRepoFlags yumflags;       /*!< Flags for downloading of yum repo */
-    lr_progress_cb  user_cb;        /*!< User progress callback */
+    lr_ProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
+};
+
+struct _lr_Result {
+    char            *destdir;
+    lr_YumRepoMd    yum_repomd;     /* pointer to struct representingrepomd.xml */
+    lr_YumRepo      yum_repo;       /* pointer to struct with info about yum repo */
 };
 
 #ifdef __cplusplus

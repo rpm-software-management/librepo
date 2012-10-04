@@ -13,7 +13,7 @@
 #define BUF_LEN 4096
 
 lr_Mirrorlist
-lr_mirrorlist_create()
+lr_mirrorlist_init()
 {
     return lr_malloc0(sizeof(struct _lr_Mirrorlist));
 }

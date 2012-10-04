@@ -23,7 +23,7 @@
 /* Repomd object manipulation helpers */
 
 lr_YumDistroTag
-lr_yum_distrotag_create()
+lr_yum_distrotag_init()
 {
     return lr_malloc0(sizeof(struct _lr_YumDistroTag));
 }
@@ -39,7 +39,7 @@ lr_yum_distrotag_free(lr_YumDistroTag dt)
 }
 
 lr_YumRepoMdRecord
-lr_yum_repomdrecord_create()
+lr_yum_repomdrecord_init()
 {
     return lr_malloc0(sizeof(struct _lr_YumRepoMdRecord));
 }
@@ -58,13 +58,13 @@ lr_yum_repomdrecord_free(lr_YumRepoMdRecord rec)
 }
 
 lr_YumRepoMd
-lr_yum_repomd_create()
+lr_yum_repomd_init()
 {
     return lr_malloc0(sizeof(struct _lr_YumRepoMd));
 }
 
 void
-lr_yum_repomd_free(lr_YumRepoMd repomd)
+lr_yum_repomd_clear(lr_YumRepoMd repomd)
 {
     if (!repomd)
         return;
@@ -88,6 +88,15 @@ lr_yum_repomd_free(lr_YumRepoMd repomd)
     lr_yum_repomdrecord_free(repomd->group_gz);
     lr_yum_repomdrecord_free(repomd->deltainfo);
     lr_yum_repomdrecord_free(repomd->updateinfo);
+    memset(repomd, 0, sizeof(struct _lr_YumRepoMd));
+}
+
+void
+lr_yum_repomd_free(lr_YumRepoMd repomd)
+{
+    if (!repomd)
+        return;
+    lr_yum_repomd_clear(repomd);
     lr_free(repomd);
 }
 
@@ -239,7 +248,7 @@ start_handler(void *pdata, const char *name, const char **atts)
 
     case STATE_DISTRO: {
         const char *cpeid = find_attr("cpeid", atts);
-        lr_YumDistroTag tag = lr_yum_distrotag_create();
+        lr_YumDistroTag tag = lr_yum_distrotag_init();
         if (cpeid)
             tag->cpeid = lr_strdup(cpeid);
         lr_yum_repomd_add_distro_tag(pd->repomd, tag);
@@ -249,7 +258,7 @@ start_handler(void *pdata, const char *name, const char **atts)
     case STATE_DATA: {
         const char *type= find_attr("type", atts);
         if (!type) break;
-        pd->repomd_rec = lr_yum_repomdrecord_create();
+        pd->repomd_rec = lr_yum_repomdrecord_init();
         if (!strcmp(type, "primary"))
             pd->repomd->primary = pd->repomd_rec;
         else if (!strcmp(type, "filelists"))

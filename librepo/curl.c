@@ -23,7 +23,7 @@ struct _lr_SharedCallbackData {
     double downloaded;  /*!< yet downloaded  */
     double total_size;  /*!< total size to download */
 
-    lr_progress_cb cb;  /*!< pointer to user callback */
+    lr_ProgressCb cb;   /*!< pointer to user callback */
     void *user_data;    /*!< user callback data */
 };
 typedef struct _lr_SharedCallbackData * lr_SharedCallbackData;
@@ -153,7 +153,7 @@ lr_curl_single_download(lr_Handle handle,
 }
 
 lr_CurlTarget
-lr_target_create()
+lr_target_init()
 {
     return lr_malloc0(sizeof(struct _lr_CurlTarget));
 }

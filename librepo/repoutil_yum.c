@@ -15,29 +15,29 @@ lr_repoutil_yum_check_repo(const char *path)
 {
     int rc;
     lr_Handle h;
-    lr_YumRepo repo;
+    lr_Result result;
 
     h = lr_handle_init();
+    result = lr_result_init();
     if (!h)
         return LRE_UNKNOWN_ERROR;
 
-    if ((rc = lr_setopt(h, LR_REPOTYPE, LR_YUMREPO)) != LRE_OK)
+    if ((rc = lr_setopt(h, LRO_REPOTYPE, LR_YUMREPO)) != LRE_OK)
         return rc;
 
-    if ((rc = lr_setopt(h, LR_URL, path)) != LRE_OK)
+    if ((rc = lr_setopt(h, LRO_URL, path)) != LRE_OK)
         return rc;
 
-    if ((rc = lr_setopt(h, LR_CHECKSUM, 1)) != LRE_OK)
+    if ((rc = lr_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK)
         return rc;
 
-    if ((rc = lr_setopt(h, LR_DONTDUP, 1)) != LRE_OK)
+    if ((rc = lr_setopt(h, LRO_LOCAL, 1)) != LRE_OK)
         return rc;
 
-    repo = lr_yum_repo_create();
-    rc = lr_perform(h, repo);
+    rc = lr_perform(h, result);
 
+    lr_result_free(result);
     lr_handle_free(h);
-    lr_yum_repo_free(repo);
     return rc;
 }
 

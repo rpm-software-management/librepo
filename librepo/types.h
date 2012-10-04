@@ -7,6 +7,7 @@ extern "C" {
 
 typedef curl_off_t lr_off_t;
 typedef struct _lr_Handle *lr_Handle;
+typedef struct _lr_Result *lr_Result;
 
 typedef enum {
     LR_CHECK_GPG        = (1<<0),
@@ -91,8 +92,6 @@ struct _lr_YumRepoMd {
 typedef struct _lr_YumRepoMd *lr_YumRepoMd;
 
 struct _lr_YumRepo {
-    lr_YumRepoMd repomd_obj;
-
     char *repomd;
     char *primary;
     char *filelists;
@@ -112,11 +111,11 @@ typedef struct _lr_YumRepo *lr_YumRepo;
 
 /* Callbacks */
 
-typedef int (*lr_progress_cb)(void *clientp,
+typedef int (*lr_ProgressCb)(void *clientp,
                               double total_to_download,
                               double now_downloaded);
 
-typedef int (*lr_update_cb)(lr_YumRepoMd first, lr_YumRepoMd second);
+typedef int (*lr_UpdateCb)(lr_YumRepoMd first, lr_YumRepoMd second);
 
 #ifdef __cplusplus
 }

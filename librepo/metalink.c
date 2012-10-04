@@ -67,7 +67,7 @@ lr_free_metalinkurl(lr_MetalinkUrl metalinkurl)
 }
 
 lr_Metalink
-lr_metalink_create()
+lr_metalink_init()
 {
     return lr_malloc0(sizeof(struct _lr_Metalink));
 }

@@ -41,7 +41,7 @@ struct _lr_Metalink {
 };
 typedef struct _lr_Metalink * lr_Metalink;
 
-lr_Metalink lr_metalink_create();
+lr_Metalink lr_metalink_init();
 int lr_metalink_parse_file(lr_Metalink metalink, int fd);
 void lr_metalink_free(lr_Metalink metalink);
 

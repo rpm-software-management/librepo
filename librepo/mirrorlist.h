@@ -17,7 +17,7 @@ struct _lr_Mirrorlist {
 };
 typedef struct _lr_Mirrorlist * lr_Mirrorlist;
 
-lr_Mirrorlist lr_mirrorlist_create();
+lr_Mirrorlist lr_mirrorlist_init();
 int lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd);
 void lr_mirrorlist_free(lr_Mirrorlist mirrorlist);
 

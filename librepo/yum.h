@@ -17,7 +17,7 @@ extern "C" {
  *  + Codes from curl.h
  */
 
-int lr_yum_perform(lr_Handle handle, lr_YumRepo repo);
+int lr_yum_perform(lr_Handle handle, lr_Result result);
 
 #ifdef __cplusplus
 }
