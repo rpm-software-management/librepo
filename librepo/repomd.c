@@ -88,6 +88,7 @@ lr_yum_repomd_clear(lr_YumRepoMd repomd)
     lr_yum_repomdrecord_free(repomd->group_gz);
     lr_yum_repomdrecord_free(repomd->deltainfo);
     lr_yum_repomdrecord_free(repomd->updateinfo);
+    lr_yum_repomdrecord_free(repomd->origin);
     memset(repomd, 0, sizeof(struct _lr_YumRepoMd));
 }
 
@@ -279,6 +280,8 @@ start_handler(void *pdata, const char *name, const char **atts)
             pd->repomd->deltainfo = pd->repomd_rec;
         else if (!strcmp(type, "updateinfo"))
             pd->repomd->updateinfo = pd->repomd_rec;
+        else if (!strcmp(type, "origin"))
+            pd->repomd->origin = pd->repomd_rec;
         else {
             /* Unknown type of record */
             lr_yum_repomdrecord_free(pd->repomd_rec);

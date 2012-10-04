@@ -46,6 +46,7 @@ lr_yum_repo_clear(lr_YumRepo repo)
     lr_free(repo->group_gz);
     lr_free(repo->deltainfo);
     lr_free(repo->updateinfo);
+    lr_free(repo->origin);
     lr_free(repo->url);
     lr_free(repo->destdir);
     memset(repo, 0, sizeof(struct _lr_YumRepo));

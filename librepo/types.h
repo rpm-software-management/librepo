@@ -88,6 +88,7 @@ struct _lr_YumRepoMd {
     lr_YumRepoMdRecord group_gz;
     lr_YumRepoMdRecord deltainfo;
     lr_YumRepoMdRecord updateinfo;
+    lr_YumRepoMdRecord origin;
 };
 typedef struct _lr_YumRepoMd *lr_YumRepoMd;
 
@@ -103,6 +104,7 @@ struct _lr_YumRepo {
     char *group_gz;
     char *deltainfo;
     char *updateinfo;
+    char *origin;
 
     char *url;          /*!< URL from where repo was downloaded */
     char *destdir;      /*!< Local path to the repo */
