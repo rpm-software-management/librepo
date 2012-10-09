@@ -14,6 +14,7 @@ FILE(COPY ${librepo_COPIES} DESTINATION ./librepo/)
 
 SET (librepomodule_SRCS
      exception-py.c
+     handle-py.c
      librepomodule.c)
 
 ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
@@ -24,5 +25,5 @@ TARGET_LINK_LIBRARIES(_librepomodule ${EXPAT_LIBRARIES})
 TARGET_LINK_LIBRARIES(_librepomodule ${CURL_LIBRARY})
 TARGET_LINK_LIBRARIES(_librepomodule ${PYTHON_LIBRARY})
 
-#INSTALL(FILES __init__.py DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
-#INSTALL(TARGETS _librepomodule LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
+INSTALL(FILES __init__.py DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
+INSTALL(TARGETS _librepomodule LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)

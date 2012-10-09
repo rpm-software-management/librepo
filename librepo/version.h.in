@@ -1,0 +1,16 @@
+#ifndef LR_VERSION_H
+#define LR_VERSION_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define LR_VERSION_MAJOR @LIBREPO_MAJOR@
+#define LR_VERSION_MINOR @LIBREPO_MINOR@
+#define LR_VERSION_PATCH @LIBREPO_PATCH@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
