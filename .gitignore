@@ -1,0 +1,4 @@
+build/
+TAGS
+librepo.spec
+librepo/version.h
