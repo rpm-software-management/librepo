@@ -1,0 +1,21 @@
+Testing files
+=============
+
+repos
+  Directory with testing repositories
+
+CMakeLists.txt
+  CMake config file
+
+fixtures.c  fixtures.h
+  Tests global data (global test variable, setup and tear down function(s), ...)
+
+testsys.c  testsys.h
+  Test configuration and expected results (constants in testsys.h)
+  and useful functions for testing result (functions in testsys.h)
+
+test_main.c
+  Main file
+
+test_*.c  test_*.h
+  Test suits
