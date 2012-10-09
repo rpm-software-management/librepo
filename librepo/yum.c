@@ -150,7 +150,7 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
                     if (checksum_type != LR_CHECKSUM_UNKNOWN) {
                         DEBUGF(fprintf(stderr, "Checking checksum\n"));
                         lseek(fd, 0, SEEK_SET);
-                        if (lr_checksum_check(checksum_type, fd, checksum)) {
+                        if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
                             DEBUGF(fprintf(stderr, "Bad checksum\n"));
                             rc = LRE_BAD_CHECKSUM;
                             continue; /* Try next mirror */
@@ -347,7 +347,7 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
         return LRE_IO;
     }
 
-    ret = lr_checksum_check(checksum_type, fd, expected_checksum);
+    ret = lr_checksum_fd_cmp(checksum_type, fd, expected_checksum);
 
     close(fd);
 

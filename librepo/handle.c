@@ -71,7 +71,7 @@ lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...)
     }
 
     case LRR_YUM_REPOMD: {
-        lr_YumRepoMd repomd;
+        lr_YumRepoMd *repomd;
         repomd = va_arg(arg, lr_YumRepoMd *);
         *repomd = result->yum_repomd;
         break;

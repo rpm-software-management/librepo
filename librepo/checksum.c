@@ -54,7 +54,7 @@ lr_checksum_type(const char *type)
 }
 
 char *
-lr_checksum_calculate(lr_ChecksumType type, int fd)
+lr_checksum_fd(lr_ChecksumType type, int fd)
 {
     int rc;
     unsigned int len;
@@ -105,7 +105,7 @@ lr_checksum_calculate(lr_ChecksumType type, int fd)
 }
 
 int
-lr_checksum_check(lr_ChecksumType type, int fd, const char *expected)
+lr_checksum_fd_cmp(lr_ChecksumType type, int fd, const char *expected)
 {
     int ret;
     char *checksum;
@@ -115,7 +115,7 @@ lr_checksum_check(lr_ChecksumType type, int fd, const char *expected)
     if (!expected)
         return 1;
 
-    checksum = lr_checksum_calculate(type, fd);
+    checksum = lr_checksum_fd(type, fd);
     if (!checksum) {
         return 1;
     }

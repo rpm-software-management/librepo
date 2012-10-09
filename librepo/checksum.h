@@ -19,10 +19,10 @@ typedef enum {
 } lr_ChecksumType;
 
 lr_ChecksumType lr_checksum_type(const char *type);
-char *lr_checksum_calculate(lr_ChecksumType type, int fd);
+char *lr_checksum_fd(lr_ChecksumType type, int fd);
 
 /* 0 - checksums are same, other - checksums are different */
-int lr_checksum_check(lr_ChecksumType type, int fd, const char *expected);
+int lr_checksum_fd_cmp(lr_ChecksumType type, int fd, const char *expected);
 
 #ifdef __cplusplus
 }
