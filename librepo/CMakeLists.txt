@@ -7,7 +7,9 @@ SET (librepo_SRCS
      repomd.c
      curl.c
      checksum.c
-     repoutil_yum.c)
+     repoutil_yum.c
+     result.c
+     librepo.c)
 
 SET(librepo_HEADERS
     librepo.h
@@ -19,7 +21,9 @@ SET(librepo_HEADERS
     curl.h
     checksum.h
     setup.h
-    repoutil_yum.h)
+    repoutil_yum.h
+    handle.h
+    result.h)
 
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
 TARGET_LINK_LIBRARIES(librepo ${EXPAT_LIBRARIES})

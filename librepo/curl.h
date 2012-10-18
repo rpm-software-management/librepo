@@ -24,7 +24,8 @@
 extern "C" {
 #endif
 
-#include "librepo.h"
+#include "types.h"
+#include "rcodes.h"
 
 /* Return codes of the module:
  *  LRE_OK          everything ok

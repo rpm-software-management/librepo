@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <curl/curl.h>
+
 #include "types.h"
 
 struct _lr_Handle {
@@ -43,12 +45,6 @@ struct _lr_Handle {
     lr_YumRepoFlags yumflags;       /*!< Flags for downloading of yum repo */
     lr_ProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
-};
-
-struct _lr_Result {
-    char            *destdir;
-    lr_YumRepoMd    yum_repomd;     /* pointer to struct representingrepomd.xml */
-    lr_YumRepo      yum_repo;       /* pointer to struct with info about yum repo */
 };
 
 #ifdef __cplusplus

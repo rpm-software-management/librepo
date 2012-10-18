@@ -21,10 +21,17 @@ librepo - A library providing C and Python (libcURL like) API to downloading rep
 
 ## Unittests:
 
+    All unit tests run from librepo checkout dir
+
 ### Build:
     cd build/tests
     make tests
 
-### Run (from your checkout dir):
+### Run (from your checkout dir) - C unittests:
+
     build/tests/test_main tests/repos/
+
+### Run (from your checkout dir) - Python unittests:
+
+    PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/
 

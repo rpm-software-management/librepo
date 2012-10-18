@@ -22,6 +22,8 @@
 #include "librepo/librepo.h"
 
 #include "exception-py.h"
+#include "handle-py.h"
+#include "result-py.h"
 
 static PyObject *
 py_global_init(PyObject *self, PyObject *noarg)
@@ -54,7 +56,107 @@ init_librepo(void)
     if (!m)
         return;
 
+    /* Exceptions */
     if (!init_exceptions())
         return;
     PyModule_AddObject(m, "Exception", LrErr_Exception);
+
+    /* Objects */
+    /* _librepo.Handle */
+    if (PyType_Ready(&Handle_Type) < 0)
+        return;
+    Py_INCREF(&Handle_Type);
+    PyModule_AddObject(m, "Handle", (PyObject *)&Handle_Type);
+    /* _librepo.Result */
+    if (PyType_Ready(&Result_Type) < 0)
+        return;
+    Py_INCREF(&Result_Type);
+    PyModule_AddObject(m, "Result", (PyObject *)&Result_Type);
+
+    /* Module constants */
+
+    /* Version */
+    PyModule_AddIntConstant(m, "VERSION_MAJOR", LR_VERSION_MAJOR);
+    PyModule_AddIntConstant(m, "VERSION_MINOR", LR_VERSION_MINOR);
+    PyModule_AddIntConstant(m, "VERSION_PATCH", LR_VERSION_PATCH);
+
+    /* Handle options */
+    PyModule_AddIntConstant(m, "LRO_UPDATE", LRO_UPDATE);
+    PyModule_AddIntConstant(m, "LRO_URL", LRO_URL);
+    PyModule_AddIntConstant(m, "LRO_MIRRORLIST", LRO_MIRRORLIST);
+    PyModule_AddIntConstant(m, "LRO_LOCAL", LRO_LOCAL);
+    PyModule_AddIntConstant(m, "LRO_HTTPAUTH", LRO_HTTPAUTH);
+    PyModule_AddIntConstant(m, "LRO_USERPWD", LRO_USERPWD);
+    PyModule_AddIntConstant(m, "LRO_PROXY", LRO_PROXY);
+    PyModule_AddIntConstant(m, "LRO_PROXYPORT", LRO_PROXYPORT);
+    PyModule_AddIntConstant(m, "LRO_PROXYSOCK", LRO_PROXYSOCK);
+    PyModule_AddIntConstant(m, "LRO_PROXYAUTH", LRO_PROXYAUTH);
+    PyModule_AddIntConstant(m, "LRO_PROXYUSERPWD", LRO_PROXYUSERPWD);
+    PyModule_AddIntConstant(m, "LRO_PROGRESSCB", LRO_PROGRESSCB);
+    PyModule_AddIntConstant(m, "LRO_PROGRESSDATA", LRO_PROGRESSDATA);
+    PyModule_AddIntConstant(m, "LRO_RETRIES", LRO_RETRIES);
+    PyModule_AddIntConstant(m, "LRO_MAXSPEED", LRO_MAXSPEED);
+    PyModule_AddIntConstant(m, "LRO_DESTDIR", LRO_DESTDIR);
+    PyModule_AddIntConstant(m, "LRO_REPOTYPE", LRO_REPOTYPE);
+    PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
+    PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
+    PyModule_AddIntConstant(m, "LRO_YUMREPOFLAGS", LRO_YUMREPOFLAGS);
+    PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
+
+    /* Check options */
+    PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);
+    PyModule_AddIntConstant(m, "LR_CHECK_CHECKSUM", LR_CHECK_CHECKSUM);
+
+    /* Repo type */
+    PyModule_AddIntConstant(m, "LR_YUMREPO", LR_YUMREPO);
+    PyModule_AddIntConstant(m, "LR_SUSEREPO", LR_SUSEREPO);
+    PyModule_AddIntConstant(m, "LR_DEBREPO", LR_DEBREPO);
+
+    /* Yum repo flags */
+    PyModule_AddIntConstant(m, "LR_YUM_REPOMD_ONLY", LR_YUM_REPOMD_ONLY);
+    PyModule_AddIntConstant(m, "LR_YUM_PRI", LR_YUM_PRI);
+    PyModule_AddIntConstant(m, "LR_YUM_FIL", LR_YUM_FIL);
+    PyModule_AddIntConstant(m, "LR_YUM_OTH", LR_YUM_OTH);
+    PyModule_AddIntConstant(m, "LR_YUM_PRI_DB", LR_YUM_PRI_DB);
+    PyModule_AddIntConstant(m, "LR_YUM_FIL_DB", LR_YUM_FIL_DB);
+    PyModule_AddIntConstant(m, "LR_YUM_OTH_DB", LR_YUM_OTH_DB);
+    PyModule_AddIntConstant(m, "LR_YUM_GROUP", LR_YUM_GROUP);
+    PyModule_AddIntConstant(m, "LR_YUM_GROUP_GZ", LR_YUM_GROUP_GZ);
+    PyModule_AddIntConstant(m, "LR_YUM_PRESTODELTA", LR_YUM_PRESTODELTA);
+    PyModule_AddIntConstant(m, "LR_YUM_DELTAINFO", LR_YUM_DELTAINFO);
+    PyModule_AddIntConstant(m, "LR_YUM_UPDATEINFO", LR_YUM_UPDATEINFO);
+    PyModule_AddIntConstant(m, "LR_YUM_ORIGIN", LR_YUM_ORIGIN);
+    PyModule_AddIntConstant(m, "LR_YUM_BASE_XML", LR_YUM_BASE_XML);
+    PyModule_AddIntConstant(m, "LR_YUM_BASE_DB", LR_YUM_BASE_DB);
+    PyModule_AddIntConstant(m, "LR_YUM_BASE_HAWKEY", LR_YUM_BASE_HAWKEY);
+    PyModule_AddIntConstant(m, "LR_YUM_FULL", LR_YUM_FULL);
+
+    /* Return codes */
+    PyModule_AddIntConstant(m, "LRE_OK", LRE_OK);
+    PyModule_AddIntConstant(m, "LRE_BAD_FUNCTION_ARGUMENT", LRE_BAD_FUNCTION_ARGUMENT);
+    PyModule_AddIntConstant(m, "LRE_BAD_OPTION_ARGUMENT", LRE_BAD_OPTION_ARGUMENT);
+    PyModule_AddIntConstant(m, "LRE_UNKNOWN_OPTION", LRE_UNKNOWN_OPTION);
+    PyModule_AddIntConstant(m, "LRE_CURL_SETOPT", LRE_CURL_SETOPT);
+    PyModule_AddIntConstant(m, "LRE_ALREADYUSEDRESULT", LRE_ALREADYUSEDRESULT);
+    PyModule_AddIntConstant(m, "LRE_INCOMPLETERESULT", LRE_INCOMPLETERESULT);
+    PyModule_AddIntConstant(m, "LRE_CURL_DUP", LRE_CURL_DUP);
+    PyModule_AddIntConstant(m, "LRE_CURL", LRE_CURL);
+    PyModule_AddIntConstant(m, "LRE_CURLM", LRE_CURLM);
+    PyModule_AddIntConstant(m, "LRE_BAD_STATUS", LRE_BAD_STATUS);
+    PyModule_AddIntConstant(m, "LRE_NOTLOCAL", LRE_NOTLOCAL);
+    PyModule_AddIntConstant(m, "LRE_CANNOT_CREATE_DIR", LRE_CANNOT_CREATE_DIR);
+    PyModule_AddIntConstant(m, "LRE_IO", LRE_IO);
+    PyModule_AddIntConstant(m, "LRE_ML_BAD", LRE_ML_BAD);
+    PyModule_AddIntConstant(m, "LRE_ML_XML", LRE_ML_XML);
+    PyModule_AddIntConstant(m, "LRE_BAD_CHECKSUM", LRE_BAD_CHECKSUM);
+    PyModule_AddIntConstant(m, "LRE_REPOMD_XML", LRE_REPOMD_XML);
+    PyModule_AddIntConstant(m, "LRE_NOURL", LRE_NOURL);
+    PyModule_AddIntConstant(m, "LRE_CANNOT_CREATE_TMP", LRE_CANNOT_CREATE_TMP);
+    PyModule_AddIntConstant(m, "LRE_UNKNOWN_CHECKSUM", LRE_UNKNOWN_CHECKSUM);
+    PyModule_AddIntConstant(m, "LRE_UNKNOWN_ERROR", LRE_UNKNOWN_ERROR);
+
+    /* Result option */
+    PyModule_AddIntConstant(m, "LRR_YUM_REPO", LRR_YUM_REPO);
+    PyModule_AddIntConstant(m, "LRR_YUM_REPOMD", LRR_YUM_REPOMD);
+    PyModule_AddIntConstant(m, "LRR_SENTINEL", LRR_SENTINEL);
 }

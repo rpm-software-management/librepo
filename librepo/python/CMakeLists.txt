@@ -15,7 +15,9 @@ FILE(COPY ${librepo_COPIES} DESTINATION ./librepo/)
 SET (librepomodule_SRCS
      exception-py.c
      handle-py.c
-     librepomodule.c)
+     librepomodule.c
+     result-py.c
+     typeconversion.c)
 
 ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
 SET_TARGET_PROPERTIES(_librepomodule PROPERTIES PREFIX "")

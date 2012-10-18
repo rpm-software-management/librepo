@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "librepo.h"
+#include "rcodes.h"
 #include "util.h"
 #include "repomd.h"
 #include "yum.h"

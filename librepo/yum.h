@@ -24,7 +24,9 @@
 extern "C" {
 #endif
 
-#include "librepo.h"
+#include "rcodes.h"
+#include "result.h"
+#include "handle.h"
 
 /* Return codes of the module:
  *  LRE_OK      everything ok
@@ -37,6 +39,12 @@ extern "C" {
  */
 
 int lr_yum_perform(lr_Handle handle, lr_Result result);
+
+/* Yum repo */
+
+lr_YumRepo lr_yum_repo_init();
+void lr_yum_repo_clear(lr_YumRepo repo);
+void lr_yum_repo_free(lr_YumRepo repo);
 
 #ifdef __cplusplus
 }

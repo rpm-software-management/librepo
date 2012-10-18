@@ -17,35 +17,25 @@
  * USA.
  */
 
-#ifndef LR_SETUP_H
-#define LR_SETUP_H
+#define _POSIX_C_SOURCE 200809L
+#include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "types.h"
+#include "setup.h"
+#include "rcodes.h"
+#include "librepo.h"
+#include "handle_internal.h"
+#include "result_internal.h"
+#include "util.h"
 
-#define DEBUG
-
-#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
-
-#ifdef DEBUG
-#define DEBUGF(x) x
-#else
-#define DEBUGF(x) do {} while(0)  /* Just to force write ';' after DEBUGF() */
-#endif
-
-/* DEBUGASSERT is only for debuging.
- * For assertion which shoud be always valid assert() is used directly.
- */
-#ifdef DEBUG
-#include <assert.h>
-#define DEBUGASSERT(x) assert(x)
-#else
-#define DEBUGASSERT(x) do {} while(0)
-#endif
-
-#ifdef __cplusplus
+void
+lr_global_init()
+{
+    curl_global_init(CURL_GLOBAL_SSL);
 }
-#endif
 
-#endif
+void
+lr_global_cleanup()
+{
+    curl_global_cleanup();
+}

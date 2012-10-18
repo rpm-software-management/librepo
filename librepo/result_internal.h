@@ -17,32 +17,20 @@
  * USA.
  */
 
-#ifndef LR_SETUP_H
-#define LR_SETUP_H
+#ifndef LR_RESULT_INTERNAL_H
+#define LR_RESULT_INTERNAL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DEBUG
+#include "types.h"
 
-#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
-
-#ifdef DEBUG
-#define DEBUGF(x) x
-#else
-#define DEBUGF(x) do {} while(0)  /* Just to force write ';' after DEBUGF() */
-#endif
-
-/* DEBUGASSERT is only for debuging.
- * For assertion which shoud be always valid assert() is used directly.
- */
-#ifdef DEBUG
-#include <assert.h>
-#define DEBUGASSERT(x) assert(x)
-#else
-#define DEBUGASSERT(x) do {} while(0)
-#endif
+struct _lr_Result {
+    char            *destdir;
+    lr_YumRepoMd    yum_repomd;     /* pointer to struct representingrepomd.xml */
+    lr_YumRepo      yum_repo;       /* pointer to struct with info about yum repo */
+};
 
 #ifdef __cplusplus
 }

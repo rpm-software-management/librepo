@@ -25,7 +25,7 @@
 #include <unistd.h>
 
 #include "setup.h"
-#include "librepo.h"
+#include "rcodes.h"
 #include "util.h"
 #include "mirrorlist.h"
 
@@ -94,7 +94,8 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
             continue;
 
         /* Append URL */
-        lr_mirrorlist_append_url(mirrorlist, lr_strdup(p));
+        if (p[0] != '\0' && (strstr(p, "://") || p[0] == '/'))
+            lr_mirrorlist_append_url(mirrorlist, lr_strdup(p));
     }
 
     fclose(f);

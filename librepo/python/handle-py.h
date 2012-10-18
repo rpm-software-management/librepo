@@ -20,8 +20,13 @@
 #ifndef LR_HANDLE_PY_H
 #define LR_HANDLE_PY_H
 
-extern PyTypeObject ;
+#include "librepo/librepo.h"
 
-int init_exceptions();
+extern PyTypeObject Handle_Type;
+
+#define HandleObject_Check(o)   PyObject_TypeCheck(o, &Handle_Type)
+
+lr_Handle Handle_FromPyObject(PyObject *o);
+//int handle_converter(PyObject *o, lr_Handle *handle_ptr);
 
 #endif

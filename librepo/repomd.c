@@ -11,9 +11,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <expat.h>
+#include <errno.h>
 
 #include "setup.h"
-#include "librepo.h"
+#include "rcodes.h"
 #include "util.h"
 #include "repomd.h"
 
@@ -86,6 +87,7 @@ lr_yum_repomd_clear(lr_YumRepoMd repomd)
     lr_yum_repomdrecord_free(repomd->other_db);
     lr_yum_repomdrecord_free(repomd->group);
     lr_yum_repomdrecord_free(repomd->group_gz);
+    lr_yum_repomdrecord_free(repomd->prestodelta);
     lr_yum_repomdrecord_free(repomd->deltainfo);
     lr_yum_repomdrecord_free(repomd->updateinfo);
     lr_yum_repomdrecord_free(repomd->origin);
@@ -276,6 +278,8 @@ start_handler(void *pdata, const char *name, const char **atts)
             pd->repomd->group = pd->repomd_rec;
         else if (!strcmp(type, "group_gz"))
             pd->repomd->group_gz = pd->repomd_rec;
+        else if (!strcmp(type, "prestodelta"))
+            pd->repomd->prestodelta = pd->repomd_rec;
         else if (!strcmp(type, "deltainfo"))
             pd->repomd->deltainfo = pd->repomd_rec;
         else if (!strcmp(type, "updateinfo"))
@@ -482,6 +486,7 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
     }
 
     /* Parse */
+
     for (;;) {
         char *buf;
         int len;

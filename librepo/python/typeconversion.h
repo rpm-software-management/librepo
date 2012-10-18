@@ -17,35 +17,12 @@
  * USA.
  */
 
-#ifndef LR_SETUP_H
-#define LR_SETUP_H
+#ifndef LR_TYPECONVERSION_PY_H
+#define LR_TYPECONVERSION_PY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "librepo/types.h"
 
-#define DEBUG
-
-#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
-
-#ifdef DEBUG
-#define DEBUGF(x) x
-#else
-#define DEBUGF(x) do {} while(0)  /* Just to force write ';' after DEBUGF() */
-#endif
-
-/* DEBUGASSERT is only for debuging.
- * For assertion which shoud be always valid assert() is used directly.
- */
-#ifdef DEBUG
-#include <assert.h>
-#define DEBUGASSERT(x) assert(x)
-#else
-#define DEBUGASSERT(x) do {} while(0)
-#endif
-
-#ifdef __cplusplus
-}
-#endif
+PyObject *PyObject_FromYumRepo(lr_YumRepo repo);
+PyObject *PyObject_FromYumRepoMd(lr_YumRepoMd repomd);
 
 #endif

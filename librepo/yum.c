@@ -36,6 +36,7 @@
 #include "curl.h"
 #include "checksum.h"
 #include "handle_internal.h"
+#include "result_internal.h"
 
 /** TODO:
  * - GPG check
@@ -63,6 +64,7 @@ lr_yum_repo_clear(lr_YumRepo repo)
     lr_free(repo->other_db);
     lr_free(repo->group);
     lr_free(repo->group_gz);
+    lr_free(repo->prestodelta);
     lr_free(repo->deltainfo);
     lr_free(repo->updateinfo);
     lr_free(repo->origin);
@@ -129,6 +131,11 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
                 close(mirrors_fd);
                 lr_metalink_free(metalink);
                 return rc;
+            }
+
+            if (metalink->nou <= 0) {
+                DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
+                return LRE_ML_BAD;
             }
 
             /* Select the best checksum type */
@@ -201,6 +208,11 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
                 close(mirrors_fd);
                 lr_mirrorlist_free(mirrorlist);
                 return rc;
+            }
+
+            if (mirrorlist->nou <= 0) {
+                DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
+                return LRE_ML_BAD;
             }
 
             /* Download repomd.xml from any of mirror */
@@ -309,15 +321,21 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
     used += lr_add_target(targets, dir, url, repomd->group,
                           &repo->group, used,
                           handle->yumflags & LR_YUM_GROUP);
-    used += lr_add_target(targets, dir, url, repomd->group,
-                          &repo->group, used,
+    used += lr_add_target(targets, dir, url, repomd->group_gz,
+                          &repo->group_gz, used,
                           handle->yumflags & LR_YUM_GROUP_GZ);
+    used += lr_add_target(targets, dir, url, repomd->prestodelta,
+                          &repo->prestodelta, used,
+                          handle->yumflags & LR_YUM_PRESTODELTA);
     used += lr_add_target(targets, dir, url, repomd->deltainfo,
                           &repo->deltainfo, used,
                           handle->yumflags & LR_YUM_DELTAINFO);
     used += lr_add_target(targets, dir, url, repomd->updateinfo,
                           &repo->updateinfo, used,
                           handle->yumflags & LR_YUM_UPDATEINFO);
+    used += lr_add_target(targets, dir, url, repomd->origin,
+                          &repo->origin, used,
+                          handle->yumflags & LR_YUM_ORIGIN);
 
     if (used == 0)
         return ret;
@@ -417,6 +435,10 @@ lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
                                              repo->group_gz);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (group_gz)\n", ret));
     if (ret != LRE_OK) return ret;
+    ret = lr_yum_check_checksum_of_md_record(repomd->prestodelta,
+                                             repo->prestodelta);
+    DEBUGF(fprintf(stderr, "Checksum rc: %d (prestodelta)\n", ret));
+    if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->deltainfo,
                                              repo->deltainfo);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (deltainfo)\n", ret));
@@ -424,6 +446,10 @@ lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
     ret = lr_yum_check_checksum_of_md_record(repomd->updateinfo,
                                              repo->updateinfo);
     DEBUGF(fprintf(stderr, "Checksum rc: %d (updateinfo)\n", ret));
+    if (ret != LRE_OK) return ret;
+    ret = lr_yum_check_checksum_of_md_record(repomd->origin,
+                                             repo->origin);
+    DEBUGF(fprintf(stderr, "Checksum rc: %d (origin)\n", ret));
     if (ret != LRE_OK) return ret;
 
     return LRE_OK;
@@ -476,7 +502,6 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
             }
 
             DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
-            repomd = lr_yum_repomd_init();
             rc = lr_yum_repomd_parse_file(repomd, fd);
             if (rc != LRE_OK) {
                 DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
@@ -488,6 +513,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
 
             /* Fill result object */
             result->destdir = lr_strdup(handle->baseurl);
+            repo->destdir = lr_strdup(handle->baseurl);
             repo->repomd = path;
 
             DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repomd->revision));
@@ -528,6 +554,10 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
             repo->group_gz = lr_pathconcat(handle->baseurl,
                                 repomd->group_gz->location_href,
                                 NULL);
+        if (!repo->prestodelta && repomd->prestodelta && handle->yumflags & LR_YUM_PRESTODELTA)
+            repo->prestodelta = lr_pathconcat(handle->baseurl,
+                                repomd->prestodelta->location_href,
+                                NULL);
         if (!repo->deltainfo && repomd->deltainfo && handle->yumflags & LR_YUM_DELTAINFO)
             repo->deltainfo = lr_pathconcat(handle->baseurl,
                                 repomd->deltainfo->location_href,
@@ -535,6 +565,10 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
         if (!repo->updateinfo && repomd->updateinfo && handle->yumflags & LR_YUM_UPDATEINFO)
             repo->updateinfo = lr_pathconcat(handle->baseurl,
                                 repomd->updateinfo->location_href,
+                                NULL);
+        if (!repo->origin && repomd->origin && handle->yumflags & LR_YUM_ORIGIN)
+            repo->origin = lr_pathconcat(handle->baseurl,
+                                repomd->origin->location_href,
                                 NULL);
         DEBUGF(fprintf(stderr, "Repository was successfully located\n"));
     } else {
@@ -571,8 +605,8 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
 
             /* Download repomd.xml */
             rc = lr_yum_download_repomd(handle, repo, fd);
-            close(fd);
             if (rc != LRE_OK) {
+                close(fd);
                 lr_free(path);
                 return rc;
             }
@@ -581,18 +615,17 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
 
             /* Parse repomd */
             DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
-            repomd = lr_yum_repomd_init();
             rc = lr_yum_repomd_parse_file(repomd, fd);
+            close(fd);
             if (rc != LRE_OK) {
                 DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
                 lr_free(path);
                 return rc;
             }
 
-            close(fd);
-
             /* Fill result object */
             result->destdir = lr_strdup(handle->destdir);
+            repo->destdir = lr_strdup(handle->destdir);
             repo->repomd = path;
             if (handle->used_mirror)
                 repo->url = lr_strdup(handle->used_mirror);

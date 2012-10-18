@@ -25,85 +25,13 @@
 #include <curl/curl.h>
 
 #include "handle_internal.h"
+#include "handle.h"
+#include "result_internal.h"
 #include "repomd.h"
 #include "setup.h"
-#include "librepo.h"
+#include "rcodes.h"
 #include "util.h"
 #include "yum.h"
-
-#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
-
-void
-lr_global_init()
-{
-    curl_global_init(CURL_GLOBAL_SSL);
-}
-
-void
-lr_global_cleanup()
-{
-    curl_global_cleanup();
-}
-
-lr_Result
-lr_result_init()
-{
-    return lr_malloc0(sizeof(struct _lr_Result));
-}
-
-void
-lr_result_clear(lr_Result result)
-{
-    if (!result)
-        return;
-    lr_yum_repomd_free(result->yum_repomd);
-    lr_yum_repo_free(result->yum_repo);
-    memset(result, 0, sizeof(struct _lr_Result));
-}
-
-void
-lr_result_free(lr_Result result)
-{
-    if (!result)
-        return;
-    lr_result_clear(result);
-    lr_free(result);
-}
-
-int
-lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...)
-{
-    int rc = LRE_OK;
-    va_list arg;
-
-    if (!result)
-        return LRE_BAD_FUNCTION_ARGUMENT;
-
-    va_start(arg, option);
-
-    switch (option) {
-    case LRR_YUM_REPO: {
-        lr_YumRepo *repo;
-        repo = va_arg(arg, lr_YumRepo *);
-        *repo = result->yum_repo;
-        break;
-    }
-
-    case LRR_YUM_REPOMD: {
-        lr_YumRepoMd *repomd;
-        repomd = va_arg(arg, lr_YumRepoMd *);
-        *repomd = result->yum_repomd;
-        break;
-    }
-
-    default:
-        rc = LRE_UNKNOWN_OPTION;
-        break;
-    }
-
-    va_end(arg);
-    return rc;
-}
 
 lr_Handle
 lr_handle_init()
@@ -174,7 +102,10 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_HTTPAUTH:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        if (va_arg(arg, long) ==  1)
+            c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        else
+            c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         break;
 
     case LRO_USERPWD:
@@ -190,11 +121,17 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_PROXYSOCK:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+        if (va_arg(arg, long) == 1)
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+        else
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
         break;
 
     case LRO_PROXYAUTH:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+        if (va_arg(arg, long) == 1)
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+        else
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
         break;
 
     case LRO_PROXYUSERPWD:
@@ -210,7 +147,7 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_RETRIES:
-        handle->retries = va_arg(arg, int);
+        handle->retries = va_arg(arg, long);
         if (handle->retries < 1) {
             ret = LRE_BAD_OPTION_ARGUMENT;
             handle->retries = 1;
@@ -296,6 +233,9 @@ lr_perform(lr_Handle handle, lr_Result result)
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
 
+    if (handle->repotype != LR_YUMREPO)
+        return LRE_BAD_FUNCTION_ARGUMENT;
+
     /* Setup destination directory */
     if (handle->update) {
         if (!result->destdir)
@@ -321,6 +261,7 @@ lr_perform(lr_Handle handle, lr_Result result)
         break;
     };
 
+    printf("result->destdir: %s\n", result->destdir);
+
     return rc;
 }
-

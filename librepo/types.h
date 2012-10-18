@@ -24,9 +24,11 @@
 extern "C" {
 #endif
 
-typedef curl_off_t lr_off_t;
+#include <curl/curl.h>
+
 typedef struct _lr_Handle *lr_Handle;
 typedef struct _lr_Result *lr_Result;
+typedef curl_off_t lr_off_t;
 
 typedef enum {
     LR_CHECK_GPG        = (1<<0),
@@ -52,17 +54,21 @@ typedef enum {
     LR_YUM_OTH_DB       = (1<<7),
     LR_YUM_GROUP        = (1<<8),
     LR_YUM_GROUP_GZ     = (1<<9),
-    LR_YUM_DELTAINFO    = (1<<10),
-    LR_YUM_UPDATEINFO   = (1<<11),
+    LR_YUM_PRESTODELTA  = (1<<10),
+    LR_YUM_DELTAINFO    = (1<<11),
+    LR_YUM_UPDATEINFO   = (1<<12),
+    LR_YUM_ORIGIN       = (1<<13),
 
-    // Common combinations
+    // Common combination
+    LR_YUM_REPOMD_ONLY  = 0,
     LR_YUM_BASE_XML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
     LR_YUM_BASE_DB      = LR_YUM_PRI_DB|LR_YUM_FIL_DB|LR_YUM_OTH_DB,
-    LR_YUM_BASE_HAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_DELTAINFO,
+    LR_YUM_BASE_HAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_PRESTODELTA|
+                          LR_YUM_DELTAINFO,
     LR_YUM_FULL         = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH|
                           LR_YUM_PRI_DB|LR_YUM_FIL_DB|LR_YUM_OTH_DB|
-                          LR_YUM_GROUP|LR_YUM_GROUP_GZ|LR_YUM_DELTAINFO|
-                          LR_YUM_UPDATEINFO,
+                          LR_YUM_GROUP|LR_YUM_GROUP_GZ|LR_YUM_PRESTODELTA|
+                          LR_YUM_DELTAINFO|LR_YUM_UPDATEINFO|LR_YUM_ORIGIN,
 } lr_YumRepoFlags;
 
 struct _lr_YumDistroTag {
@@ -84,7 +90,7 @@ struct _lr_YumRepoMdRecord {
 };
 typedef struct _lr_YumRepoMdRecord *lr_YumRepoMdRecord;
 
-#define LR_NUM_OF_YUM_REPOMD_RECORDS    10  /*!< number of repomd records
+#define LR_NUM_OF_YUM_REPOMD_RECORDS    12  /*!< number of repomd records
                                                  in _lr_YumRepoMd structure */
 
 struct _lr_YumRepoMd {
@@ -105,6 +111,7 @@ struct _lr_YumRepoMd {
     lr_YumRepoMdRecord other_db;
     lr_YumRepoMdRecord group;
     lr_YumRepoMdRecord group_gz;
+    lr_YumRepoMdRecord prestodelta;
     lr_YumRepoMdRecord deltainfo;
     lr_YumRepoMdRecord updateinfo;
     lr_YumRepoMdRecord origin;
@@ -121,6 +128,7 @@ struct _lr_YumRepo {
     char *other_db;
     char *group;
     char *group_gz;
+    char *prestodelta;
     char *deltainfo;
     char *updateinfo;
     char *origin;

@@ -1,4 +1,6 @@
 build/
 TAGS
+tags
 librepo.spec
 librepo/version.h
+*.pyc

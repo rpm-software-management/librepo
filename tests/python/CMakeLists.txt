@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY (module)
+ADD_SUBDIRECTORY (tests)

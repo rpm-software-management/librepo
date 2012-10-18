@@ -17,4 +17,4 @@ TARGET_LINK_LIBRARIES(test_main
     )
 ADD_TEST(test_main test_main "${CMAKE_CURRENT_SOURCE_DIR}/repos/")
 
-#ADD_SUBDIRECTORY (python)
+ADD_SUBDIRECTORY (python)

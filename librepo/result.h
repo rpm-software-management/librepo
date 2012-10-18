@@ -17,32 +17,26 @@
  * USA.
  */
 
-#ifndef LR_SETUP_H
-#define LR_SETUP_H
+#ifndef LR_RESULT_H
+#define LR_RESULT_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DEBUG
+#include "types.h"
 
-#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
+/* Result option */
+typedef enum {
+    LRR_YUM_REPO,
+    LRR_YUM_REPOMD,
+    LRR_SENTINEL,
+} lr_ResultInfoOption;
 
-#ifdef DEBUG
-#define DEBUGF(x) x
-#else
-#define DEBUGF(x) do {} while(0)  /* Just to force write ';' after DEBUGF() */
-#endif
-
-/* DEBUGASSERT is only for debuging.
- * For assertion which shoud be always valid assert() is used directly.
- */
-#ifdef DEBUG
-#include <assert.h>
-#define DEBUGASSERT(x) assert(x)
-#else
-#define DEBUGASSERT(x) do {} while(0)
-#endif
+lr_Result lr_result_init();
+void lr_result_clear(lr_Result);
+void lr_result_free(lr_Result);
+int lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...);
 
 #ifdef __cplusplus
 }

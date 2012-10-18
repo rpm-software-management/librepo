@@ -27,7 +27,7 @@
 
 #include "setup.h"
 #include "curl.h"
-#include "librepo.h"
+#include "rcodes.h"
 #include "util.h"
 #include "handle_internal.h"
 
@@ -224,6 +224,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
     /* --- Since here it shoud be safe to use "goto cleanup" --- */
 
     /* Prepare curl_easy_handlers for every file */
+    DEBUGF(fprintf(stderr, "CURL multi handle targets:\n"));
     for (int x = 0; x < not; x++) {
         FILE *f;
         CURLcode c_rc;
@@ -242,6 +243,8 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
             goto cleanup;
         }
         open_files[x] = f;
+
+        DEBUGF(fprintf(stderr, "  %s\n", t->url));
 
         c_rc = curl_easy_setopt(c_h, CURLOPT_URL, t->url);
         if (c_rc != CURLE_OK) {

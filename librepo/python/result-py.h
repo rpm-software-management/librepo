@@ -17,35 +17,16 @@
  * USA.
  */
 
-#ifndef LR_SETUP_H
-#define LR_SETUP_H
+#ifndef LR_RESULT_PY_H
+#define LR_RESULT_PY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "librepo/librepo.h"
 
-#define DEBUG
+extern PyTypeObject Result_Type;
 
-#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
+#define ResultObject_Check(o)   PyObject_TypeCheck(o, &Result_Type)
 
-#ifdef DEBUG
-#define DEBUGF(x) x
-#else
-#define DEBUGF(x) do {} while(0)  /* Just to force write ';' after DEBUGF() */
-#endif
-
-/* DEBUGASSERT is only for debuging.
- * For assertion which shoud be always valid assert() is used directly.
- */
-#ifdef DEBUG
-#include <assert.h>
-#define DEBUGASSERT(x) assert(x)
-#else
-#define DEBUGASSERT(x) do {} while(0)
-#endif
-
-#ifdef __cplusplus
-}
-#endif
+lr_Result Result_FromPyObject(PyObject *o);
+//int Result_converter(PyObject *o, lr_Result *result_ptr);
 
 #endif
