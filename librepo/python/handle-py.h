@@ -27,6 +27,5 @@ extern PyTypeObject Handle_Type;
 #define HandleObject_Check(o)   PyObject_TypeCheck(o, &Handle_Type)
 
 lr_Handle Handle_FromPyObject(PyObject *o);
-//int handle_converter(PyObject *o, lr_Handle *handle_ptr);
 
 #endif

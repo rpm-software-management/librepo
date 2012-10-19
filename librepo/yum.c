@@ -464,7 +464,8 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
-    assert(result);
+    if (!result)
+        return LRE_BAD_FUNCTION_ARGUMENT;
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;

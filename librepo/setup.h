@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#define DEBUG
-
 #define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
 
 #ifdef DEBUG

@@ -50,18 +50,6 @@ Handle_FromPyObject(PyObject *o)
     return ((_HandleObject *)o)->handle;
 }
 
-/*
-int
-handle_converter(PyObject *o, lr_Handle *handle_ptr)
-{
-    lr_Handle handle = Handle_FromPyObject(o);
-    if (handle == NULL)
-        return 0;
-    *handle_ptr = handle;
-    return 1;
-}
-*/
-
 static int
 check_HandleStatus(const _HandleObject *self)
 {
