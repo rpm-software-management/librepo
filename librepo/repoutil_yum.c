@@ -39,21 +39,21 @@ lr_repoutil_yum_check_repo(const char *path)
     h = lr_handle_init();
     result = lr_result_init();
     if (!h)
-        return LRE_UNKNOWN_ERROR;
+        return LRE_UNKNOWNERROR;
 
-    if ((rc = lr_setopt(h, LRO_REPOTYPE, LR_YUMREPO)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO)) != LRE_OK)
         return rc;
 
-    if ((rc = lr_setopt(h, LRO_URL, path)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_URL, path)) != LRE_OK)
         return rc;
 
-    if ((rc = lr_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK)
         return rc;
 
-    if ((rc = lr_setopt(h, LRO_LOCAL, 1)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_LOCAL, 1)) != LRE_OK)
         return rc;
 
-    rc = lr_perform(h, result);
+    rc = lr_handle_perform(h, result);
 
     lr_result_free(result);
     lr_handle_free(h);

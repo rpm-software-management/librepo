@@ -391,7 +391,7 @@ end_handler(void *pdata, const char *name)
 
     case STATE_DISTRO:
         if (pd->repomd->nodt < 1) {
-            pd->ret = LRE_REPOMD_XML;
+            pd->ret = LRE_REPOMDXML;
             break;
         }
         pd->repomd->distro_tags[pd->repomd->nodt-1]->value = lr_strdup(pd->content);
@@ -502,7 +502,7 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
         }
 
         if (!XML_ParseBuffer(parser, len, len == 0)) {
-            ret = LRE_REPOMD_XML;
+            ret = LRE_REPOMDXML;
             break;
         }
 

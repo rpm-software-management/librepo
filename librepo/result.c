@@ -61,7 +61,7 @@ lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...)
     va_list arg;
 
     if (!result)
-        return LRE_BAD_FUNCTION_ARGUMENT;
+        return LRE_BADFUNCARG;
 
     va_start(arg, option);
 
@@ -81,7 +81,7 @@ lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...)
     }
 
     default:
-        rc = LRE_UNKNOWN_OPTION;
+        rc = LRE_UNKNOWNOPT;
         break;
     }
 

@@ -70,7 +70,7 @@ lr_handle_free(lr_Handle handle)
 }
 
 int
-lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
+lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 {
     lr_Rc ret = LRE_OK;
     va_list arg;
@@ -78,7 +78,7 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
     CURL *c_h;
 
     if (!handle)
-        return LRE_BAD_FUNCTION_ARGUMENT;
+        return LRE_BADFUNCARG;
 
     c_h = handle->curl_handle;
 
@@ -149,7 +149,7 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
     case LRO_RETRIES:
         handle->retries = va_arg(arg, long);
         if (handle->retries < 1) {
-            ret = LRE_BAD_OPTION_ARGUMENT;
+            ret = LRE_BADOPTARG;
             handle->retries = 1;
         }
         break;
@@ -186,7 +186,7 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     default:
-        ret = LRE_UNKNOWN_OPTION;
+        ret = LRE_UNKNOWNOPT;
         break;
     };
 
@@ -195,7 +195,7 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->last_curl_error = c_rc;
         switch (c_rc) {
         case CURLE_FAILED_INIT:
-            ret = LRE_CURL_SETOPT;
+            ret = LRE_CURLSETOPT;
             break;
         default:
             ret = LRE_CURL;
@@ -208,33 +208,33 @@ lr_setopt(lr_Handle handle, lr_HandleOption option, ...)
 }
 
 int
-lr_last_curl_error(lr_Handle handle)
+lr_handle_last_curl_error(lr_Handle handle)
 {
     assert(handle);
     return handle->last_curl_error;
 }
 
 int
-lr_last_curlm_error(lr_Handle handle)
+lr_handle_last_curlm_error(lr_Handle handle)
 {
     assert(handle);
     return handle->last_curlm_error;
 }
 
 int
-lr_perform(lr_Handle handle, lr_Result result)
+lr_handle_perform(lr_Handle handle, lr_Result result)
 {
     int rc;
     assert(handle);
 
     if (!result)
-        return LRE_BAD_FUNCTION_ARGUMENT;
+        return LRE_BADFUNCARG;
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
 
     if (handle->repotype != LR_YUMREPO)
-        return LRE_BAD_FUNCTION_ARGUMENT;
+        return LRE_BADFUNCARG;
 
     /* Setup destination directory */
     if (handle->update) {
@@ -245,7 +245,7 @@ lr_perform(lr_Handle handle, lr_Result result)
     } else if (!handle->destdir && !handle->local) {
         handle->destdir = lr_strdup(TMP_DIR_TEMPLATE);
         if (!mkdtemp(handle->destdir))
-            return LRE_CANNOT_CREATE_TMP;
+            return LRE_CANNOTCREATETMP;
     }
 
     DEBUGF(fprintf(stderr, "Using dir: %s\n", handle->destdir));

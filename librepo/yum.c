@@ -135,7 +135,7 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
 
             if (metalink->nou <= 0) {
                 DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
-                return LRE_ML_BAD;
+                return LRE_MLBAD;
             }
 
             /* Select the best checksum type */
@@ -178,7 +178,7 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
                         lseek(fd, 0, SEEK_SET);
                         if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
                             DEBUGF(fprintf(stderr, "Bad checksum\n"));
-                            rc = LRE_BAD_CHECKSUM;
+                            rc = LRE_BADCHECKSUM;
                             continue; /* Try next mirror */
                         }
                     }
@@ -212,7 +212,7 @@ lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
 
             if (mirrorlist->nou <= 0) {
                 DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
-                return LRE_ML_BAD;
+                return LRE_MLBAD;
             }
 
             /* Download repomd.xml from any of mirror */
@@ -311,19 +311,19 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
                           handle->yumflags & LR_YUM_OTH);
     used += lr_add_target(targets, dir, url, repomd->primary_db,
                           &repo->primary_db, used,
-                          handle->yumflags & LR_YUM_PRI_DB);
+                          handle->yumflags & LR_YUM_PRIDB);
     used += lr_add_target(targets, dir, url, repomd->filelists_db,
                           &repo->filelists_db, used,
-                          handle->yumflags & LR_YUM_FIL_DB);
+                          handle->yumflags & LR_YUM_FILDB);
     used += lr_add_target(targets, dir, url, repomd->other_db,
                           &repo->other_db, used,
-                          handle->yumflags & LR_YUM_OTH_DB);
+                          handle->yumflags & LR_YUM_OTHDB);
     used += lr_add_target(targets, dir, url, repomd->group,
                           &repo->group, used,
                           handle->yumflags & LR_YUM_GROUP);
     used += lr_add_target(targets, dir, url, repomd->group_gz,
                           &repo->group_gz, used,
-                          handle->yumflags & LR_YUM_GROUP_GZ);
+                          handle->yumflags & LR_YUM_GROUPGZ);
     used += lr_add_target(targets, dir, url, repomd->prestodelta,
                           &repo->prestodelta, used,
                           handle->yumflags & LR_YUM_PRESTODELTA);
@@ -375,7 +375,7 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
 
     if (checksum_type == LR_CHECKSUM_UNKNOWN) {
         DEBUGF(fprintf(stderr, "Unknown checksum: %s\n", rec->checksum_type));
-        return LRE_UNKNOWN_CHECKSUM;
+        return LRE_UNKNOWNCHECKSUM;
     }
 
     fd = open(path, O_RDONLY);
@@ -390,7 +390,7 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
 
     if (ret) {
         DEBUGF(fprintf(stderr, "Checksum check - Failed\n"));
-        return LRE_BAD_CHECKSUM;
+        return LRE_BADCHECKSUM;
     }
 
     DEBUGF(fprintf(stderr, "Checksum check - Passed\n"));
@@ -465,7 +465,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     lr_YumRepoMd repomd;
 
     if (!result)
-        return LRE_BAD_FUNCTION_ARGUMENT;
+        return LRE_BADFUNCARG;
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
@@ -535,15 +535,15 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
             repo->other = lr_pathconcat(handle->baseurl,
                                 repomd->other->location_href,
                                 NULL);
-        if (!repo->primary_db && repomd->primary_db && handle->yumflags & LR_YUM_PRI_DB)
+        if (!repo->primary_db && repomd->primary_db && handle->yumflags & LR_YUM_PRIDB)
             repo->primary_db = lr_pathconcat(handle->baseurl,
                                 repomd->primary_db->location_href,
                                 NULL);
-        if (!repo->filelists_db && repomd->filelists_db && handle->yumflags & LR_YUM_FIL_DB)
+        if (!repo->filelists_db && repomd->filelists_db && handle->yumflags & LR_YUM_FILDB)
             repo->filelists_db = lr_pathconcat(handle->baseurl,
                                 repomd->filelists_db->location_href,
                                 NULL);
-        if (!repo->other_db && repomd->other_db && handle->yumflags & LR_YUM_OTH_DB)
+        if (!repo->other_db && repomd->other_db && handle->yumflags & LR_YUM_OTHDB)
             repo->other_db = lr_pathconcat(handle->baseurl,
                                 repomd->other_db->location_href,
                                 NULL);
@@ -551,7 +551,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
             repo->group = lr_pathconcat(handle->baseurl,
                                 repomd->group->location_href,
                                 NULL);
-        if (!repo->group_gz && repomd->group_gz && handle->yumflags & LR_YUM_GROUP_GZ)
+        if (!repo->group_gz && repomd->group_gz && handle->yumflags & LR_YUM_GROUPGZ)
             repo->group_gz = lr_pathconcat(handle->baseurl,
                                 repomd->group_gz->location_href,
                                 NULL);
@@ -590,7 +590,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
             rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
             if (rc == -1) {
                 lr_free(path_to_repodata);
-                return LRE_CANNOT_CREATE_DIR;
+                return LRE_CANNOTCREATEDIR;
             }
         }
         lr_free(path_to_repodata);

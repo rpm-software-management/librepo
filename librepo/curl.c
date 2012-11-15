@@ -110,7 +110,7 @@ lr_curl_single_download(lr_Handle handle,
 
     c_h = curl_easy_duphandle(handle->curl_handle);
     if (!c_h)
-        return LRE_CURL_DUP;
+        return LRE_CURLDUP;
 
     /* Append mandatory_suffix_if_necessary */
     if (mandatory_suffix && !lr_ends_with(url, mandatory_suffix)) {
@@ -163,7 +163,7 @@ lr_curl_single_download(lr_Handle handle,
     if (status_code && (status_code != 200 && status_code != 226)) {
         handle->status_code = status_code;
         curl_easy_cleanup(c_h);
-        return LRE_BAD_STATUS;
+        return LRE_BADSTATUS;
     }
 
     curl_easy_cleanup(c_h);
@@ -199,7 +199,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
     struct _lr_CallbackData cb_data[not];
 
     if (!cm_h)
-        return LRE_CURL_DUP;
+        return LRE_CURLDUP;
 
     if (not == 0) {
         /* Maybe user callback shoud be called here */
@@ -232,7 +232,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
         CURL *c_h = curl_easy_duphandle(handle->curl_handle);
 
         if (!c_h) {
-            ret = LRE_CURL_DUP;
+            ret = LRE_CURLDUP;
             goto cleanup;
         }
         curl_easy_interfaces[x] = c_h;
@@ -248,13 +248,13 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
 
         c_rc = curl_easy_setopt(c_h, CURLOPT_URL, t->url);
         if (c_rc != CURLE_OK) {
-            ret = LRE_CURL_DUP;
+            ret = LRE_CURLDUP;
             goto cleanup;
         }
 
         c_rc = curl_easy_setopt(c_h, CURLOPT_WRITEDATA, f);
         if (c_rc != CURLE_OK) {
-            ret = LRE_CURL_DUP;
+            ret = LRE_CURLDUP;
             goto cleanup;
         }
 

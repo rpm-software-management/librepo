@@ -167,7 +167,7 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_setopt(self->handle, (lr_HandleOption)option, str);
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, str);
         break;
     }
 
@@ -196,7 +196,7 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_setopt(self->handle, (lr_HandleOption)option, d);
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, d);
         break;
     }
 
@@ -219,7 +219,7 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_setopt(self->handle, (lr_HandleOption)option, d);
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, d);
         break;
     }
 
@@ -235,10 +235,10 @@ setopt(_HandleObject *self, PyObject *args)
         Py_XDECREF(self->progress_cb);
         Py_XINCREF(obj);
         self->progress_cb = obj;
-        res = lr_setopt(self->handle, (lr_HandleOption)option, progress_callback);
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, progress_callback);
         if (res != LRE_OK)
             RETURN_ERROR(res);
-        res = lr_setopt(self->handle, LRO_PROGRESSDATA, self);
+        res = lr_handle_setopt(self->handle, LRO_PROGRESSDATA, self);
         break;
     }
 
@@ -278,7 +278,7 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
-    ret = lr_perform(self->handle, result);
+    ret = lr_handle_perform(self->handle, result);
     if (ret != LRE_OK)
         RETURN_ERROR(ret);
 

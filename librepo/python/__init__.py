@@ -84,3 +84,46 @@ LRE_UNKNOWN_ERROR       = _librepo.LRE_UNKNOWN_ERROR
 LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
 LRR_YUM_REPOMD  = _librepo.LRR_YUM_REPOMD
 LRR_SENTINEL    = _librepo.LRR_SENTINEL
+
+class Handle(_librepo.Handle):
+    def update(self, val):
+        self.setopt(LRO_UPDATE, val)
+    def url(self, val):
+        self.setopt(LRO_URL, val)
+    def mirrorlist(self, val):
+        self.setopt(LRO_MIRRORLIST, val)
+    def local(self, val):
+        self.setopt(LRO_LOCAL, val)
+    def httpauth(self, val):
+        self.setopt(LRO_HTTPAUTH, val)
+    def userpwd(self, val):
+        self.setopt(LRO_USERPWD, val)
+    def proxy(self, val):
+        self.setopt(LRO_PROXY, val)
+    def proxyport(self, val):
+        self.setopt(LRO_PROXYPORT, val)
+    def proxysock(self, val):
+        self.setopt(LRO_PROXYSOCK, val)
+    def proxyauth(self, val):
+        self.setopt(LRO_PROXYAUTH, val)
+    def proxyuserpwd(self, val):
+        self.setopt(LRO_PROXYUSERPWD, val)
+    def progresscb(self, val):
+        self.setopt(LRO_PROGRESSCB, val)
+    def progressdata(self, val):
+        self.setopt(LRO_PROGRESSDATA, val)
+    def retries(self, val):
+        self.setopt(LRO_RETRIES, val)
+    def maxspeed(self, val):
+        self.setopt(LRO_MAXSPEED, val)
+    def destdir(self, val):
+        self.setopt(LRO_DESTDIR, val)
+    def repotype(self, val):
+        self.setopt(LRO_REPOTYPE, val)
+    def gpgcheck(self, val):
+        self.setopt(LRO_GPGCHECK, val)
+    def checksum(self, val):
+        self.setopt(LRO_CHECKSUM, val)
+    def yumrepoflags(self, val):
+        self.setopt(LRO_YUMREPOFLAGS, val)
+

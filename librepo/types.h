@@ -49,26 +49,26 @@ typedef enum {
     LR_YUM_PRI          = (1<<2),
     LR_YUM_FIL          = (1<<3),
     LR_YUM_OTH          = (1<<4),
-    LR_YUM_PRI_DB       = (1<<5),
-    LR_YUM_FIL_DB       = (1<<6),
-    LR_YUM_OTH_DB       = (1<<7),
+    LR_YUM_PRIDB        = (1<<5),
+    LR_YUM_FILDB        = (1<<6),
+    LR_YUM_OTHDB        = (1<<7),
     LR_YUM_GROUP        = (1<<8),
-    LR_YUM_GROUP_GZ     = (1<<9),
+    LR_YUM_GROUPGZ      = (1<<9),
     LR_YUM_PRESTODELTA  = (1<<10),
     LR_YUM_DELTAINFO    = (1<<11),
     LR_YUM_UPDATEINFO   = (1<<12),
     LR_YUM_ORIGIN       = (1<<13),
 
     // Common combination
-    LR_YUM_REPOMD_ONLY  = 0,
-    LR_YUM_BASE_XML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
-    LR_YUM_BASE_DB      = LR_YUM_PRI_DB|LR_YUM_FIL_DB|LR_YUM_OTH_DB,
-    LR_YUM_BASE_HAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_PRESTODELTA|
-                          LR_YUM_DELTAINFO,
-    LR_YUM_FULL         = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH|
-                          LR_YUM_PRI_DB|LR_YUM_FIL_DB|LR_YUM_OTH_DB|
-                          LR_YUM_GROUP|LR_YUM_GROUP_GZ|LR_YUM_PRESTODELTA|
-                          LR_YUM_DELTAINFO|LR_YUM_UPDATEINFO|LR_YUM_ORIGIN,
+    LR_YUM_REPOMDONLY  = 0,
+    LR_YUM_BASEXML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
+    LR_YUM_BASEDB      = LR_YUM_PRIDB|LR_YUM_FILDB|LR_YUM_OTHDB,
+    LR_YUM_BASEHAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_PRESTODELTA|
+                         LR_YUM_DELTAINFO,
+    LR_YUM_FULL        = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH|
+                         LR_YUM_PRIDB|LR_YUM_FILDB|LR_YUM_OTHDB|
+                         LR_YUM_GROUP|LR_YUM_GROUPGZ|LR_YUM_PRESTODELTA|
+                         LR_YUM_DELTAINFO|LR_YUM_UPDATEINFO|LR_YUM_ORIGIN,
 } lr_YumRepoFlags;
 
 struct _lr_YumDistroTag {

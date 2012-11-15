@@ -212,11 +212,11 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
     case STATE_FILE: {
         const char *name = lr_find_attr("name", atts);
         if (!name) {
-            pd->ret = LRE_ML_XML;
+            pd->ret = LRE_MLXML;
             break;
         }
         if (strcmp(name, "repomd.xml")) {
-            pd->ret = LRE_ML_BAD;
+            pd->ret = LRE_MLBAD;
             break;
         }
         pd->metalink->filename = lr_strdup(name);
@@ -231,7 +231,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
         lr_MetalinkHash mh;
         const char *type = lr_find_attr("type", atts);
         if (!type) {
-            pd->ret = LRE_ML_XML;
+            pd->ret = LRE_MLXML;
             break;
         }
         mh = lr_new_metalinkhash(pd->metalink);
@@ -325,7 +325,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 
     case STATE_HASH:
         if (!pd->metalink->noh) {
-            pd->ret = LRE_ML_XML;
+            pd->ret = LRE_MLXML;
             break;
         }
         pd->metalink->hashes[pd->metalink->noh-1]->value = lr_strdup(pd->content);
@@ -333,7 +333,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 
     case STATE_URL:
         if (!pd->metalink->nou) {
-            pd->ret = LRE_ML_XML;
+            pd->ret = LRE_MLXML;
             break;
         }
         pd->metalink->urls[pd->metalink->nou-1]->url = lr_strdup(pd->content);
@@ -400,7 +400,7 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
         }
 
         if (!XML_ParseBuffer(parser, len, len == 0)) {
-            ret = LRE_ML_XML;
+            ret = LRE_MLXML;
             break;
         }
 

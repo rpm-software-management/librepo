@@ -27,39 +27,39 @@ extern "C" {
 /* Return/Error codes */
 typedef enum {
     LRE_OK,                         /*!< everything is ok */
-    LRE_BAD_FUNCTION_ARGUMENT,      /*!< bad function argument */
+    LRE_BADFUNCARG,                 /*!< bad function argument */
 
     /* lr_setopt specific */
-    LRE_BAD_OPTION_ARGUMENT,        /*!< bad argument of the option */
-    LRE_UNKNOWN_OPTION,             /*!< library doesn't know the option */
-    LRE_CURL_SETOPT,                /*!< cURL doesn't know the option.
+    LRE_BADOPTARG,                  /*!< bad argument of the option */
+    LRE_UNKNOWNOPT,                 /*!< library doesn't know the option */
+    LRE_CURLSETOPT,                 /*!< cURL doesn't know the option.
                                          Too old curl version? */
     LRE_ALREADYUSEDRESULT,          /*!< lr_Result object is not clean */
     LRE_INCOMPLETERESULT,           /*!< lr_Result doesn't contain all what
                                          is needed */
-    LRE_CURL_DUP,                   /*!< cannot duplicate curl handle */
+    LRE_CURLDUP,                    /*!< cannot duplicate curl handle */
     LRE_CURL,                       /*!< cURL error. Use the
                                          lr_last_curl_error to get CURLcode */
     LRE_CURLM,                      /*!< cULR multi handle error. Use the
                                          lr_last_mculr_error to get CURLMcode */
-    LRE_BAD_STATUS,                 /*!< HTTP or FTP returned status code which
+    LRE_BADSTATUS,                  /*!< HTTP or FTP returned status code which
                                          do not represent success
                                          (file doesn't exists, etc.) */
     LRE_NOTLOCAL,                   /*!< URL is not a local address */
-    LRE_CANNOT_CREATE_DIR,          /*!< cannot create a directory in output
+    LRE_CANNOTCREATEDIR,            /*!< cannot create a directory in output
                                          dir (the directory already exists?) */
     LRE_IO,                         /*!< input output error */
-    LRE_ML_BAD,                     /*!< bad mirrorlist/metalink file
+    LRE_MLBAD,                      /*!< bad mirrorlist/metalink file
                                          (metalink doesn't contain needed file,
                                          mirrorlist doesn't contain urls, ..) */
-    LRE_ML_XML,                     /*!< metalink XML parse error */
-    LRE_BAD_CHECKSUM,               /*!< bad checksum */
-    LRE_REPOMD_XML,                 /*!< repomd XML parse error */
+    LRE_MLXML,                      /*!< metalink XML parse error */
+    LRE_BADCHECKSUM,                /*!< bad checksum */
+    LRE_REPOMDXML,                  /*!< repomd XML parse error */
     LRE_NOURL,                      /*!< no usable URL found */
-    LRE_CANNOT_CREATE_TMP,          /*!< cannot create tmp directory */
-    LRE_UNKNOWN_CHECKSUM,           /*!< unknown type of checksum is need to
+    LRE_CANNOTCREATETMP,            /*!< cannot create tmp directory */
+    LRE_UNKNOWNCHECKSUM,            /*!< unknown type of checksum is need to
                                          calculate to verify one or more file */
-    LRE_UNKNOWN_ERROR,              /*!< unknown error - sentinel of
+    LRE_UNKNOWNERROR,               /*!< unknown error - sentinel of
                                          error codes enum */
 } lr_Rc; /*!< Return codes */
 

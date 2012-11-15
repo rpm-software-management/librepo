@@ -70,10 +70,10 @@ lr_Handle lr_handle_init();
 void lr_handle_free(lr_Handle handle);
 
 /* look at: url.c - Curl_setopt() */
-int lr_setopt(lr_Handle handle, lr_HandleOption option, ...);
-int lr_perform(lr_Handle handle, lr_Result result);
-int lr_last_curl_error(lr_Handle);
-int lr_last_curlm_error(lr_Handle);
+int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
+int lr_handle_perform(lr_Handle handle, lr_Result result);
+int lr_handle_last_curl_error(lr_Handle);
+int lr_handle_last_curlm_error(lr_Handle);
 
 #ifdef __cplusplus
 }
