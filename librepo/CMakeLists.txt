@@ -9,7 +9,8 @@ SET (librepo_SRCS
      checksum.c
      repoutil_yum.c
      result.c
-     librepo.c)
+     librepo.c
+     internal_mirrorlist.c)
 
 SET(librepo_HEADERS
     librepo.h

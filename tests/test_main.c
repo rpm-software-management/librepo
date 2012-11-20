@@ -11,6 +11,7 @@
 #include "fixtures.h"
 #include "testsys.h"
 #include "test_checksum.h"
+#include "test_internal_mirrorlist.h"
 
 
 static int
@@ -51,7 +52,7 @@ main(int argc, const char **argv)
     printf("Tests using directory: %s\n", test_globals.tmpdir);
 
     SRunner *sr = srunner_create(checksum_suite());
-//    srunner_add_suite(sr, checksum_suite());
+    srunner_add_suite(sr, internal_mirrorlist_suite());
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
