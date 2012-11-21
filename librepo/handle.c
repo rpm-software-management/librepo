@@ -66,6 +66,7 @@ lr_handle_free(lr_Handle handle)
     lr_free(handle->mirrorlist);
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
+    lr_internalmirrorlist_free(handle->internal_mirrorlist);
     lr_free(handle);
 }
 
@@ -260,8 +261,6 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
         assert(0);
         break;
     };
-
-    printf("result->destdir: %s\n", result->destdir);
 
     return rc;
 }
