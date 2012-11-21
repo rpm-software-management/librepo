@@ -1,6 +1,7 @@
 # librepo
 
-librepo - A library providing C and Python (libcURL like) API to downloading repository
+librepo - A library providing C and Python (libcURL like) API for downloading
+linux repository metadata and packages
 
 ## Building
 
@@ -11,6 +12,7 @@ librepo - A library providing C and Python (libcURL like) API to downloading rep
 * check (http://check.sourceforge.net/) - in Fedora: check-devel
 * expat (http://expat.sourceforge.net/) - in Fedora: expat-devel
 * python (http://python.org/) - in Fedora: python2-devel
+* openssl (http://www.openssl.org/) - in Fedora: openssl-devel
 
 ### Build from your checkout dir:
 
