@@ -37,6 +37,7 @@
 #include "checksum.h"
 #include "handle_internal.h"
 #include "result_internal.h"
+#include "internal_mirrorlist.h"
 
 /** TODO:
  * - GPG check
@@ -85,164 +86,44 @@ lr_yum_repo_free(lr_YumRepo repo)
 /* main bussines logic */
 
 int
-lr_yum_download_repomd(lr_Handle handle, lr_YumRepo repo, int fd)
+lr_yum_download_repomd(lr_Handle handle,
+                       lr_Metalink metalink,
+                       lr_YumRepo repo,
+                       int fd)
 {
     int rc = LRE_OK;
+    lr_ChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
+    char *checksum = NULL;
 
-    if (handle->baseurl) {
-        /* Try base url */
-        DEBUGF(fprintf(stderr, "Downloading repomd.xml via baseurl: %s\n", handle->baseurl));
-        rc = lr_curl_single_download(handle,
-                                     handle->baseurl,
-                                     fd,
-                                     "/repodata/repomd.xml");
+
+   DEBUGF(fprintf(stderr, "Downloading repomd.xml via mirrorlist\n"));
+
+    if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
+        /* Select the best checksum type */
+        for (int x = 0; x < metalink->noh; x++) {
+            lr_ChecksumType mtype;
+            lr_MetalinkHash mhash = metalink->hashes[x];
+
+            if (!mhash->type || !mhash->value)
+                continue;
+
+            mtype = lr_checksum_type(mhash->type);
+            if (mtype != LR_CHECKSUM_UNKNOWN && mtype > checksum_type) {
+                checksum_type = mtype;
+                checksum = mhash->value;
+            }
+        }
     }
 
-    if (handle->mirrorlist && (!handle->baseurl || rc != LRE_OK)) {
-        /* Use mirrorlist */
-        int mirrors_fd = lr_gettmpfile();
-
-        DEBUGF(fprintf(stderr, "Downloading repomd.xml via mirrorlist\n"));
-
-        rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd, NULL);
-        if (rc != LRE_OK) {
-            close(mirrors_fd);
-            return rc;
-        }
-
-        if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
-            close(mirrors_fd);
-            return LRE_IO;
-        }
-
-        if (strstr(handle->mirrorlist, "metalink")) {
-            /* Metalink */
-            lr_Metalink metalink;
-            lr_ChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
-            char *checksum;
-
-            DEBUGF(fprintf(stderr, "Got metalink\n"));
-
-            /* Parse metalink */
-            metalink = lr_metalink_init();
-            rc = lr_metalink_parse_file(metalink, mirrors_fd);
-            if (rc != LRE_OK) {
-                DEBUGF(fprintf(stderr, "Cannot parse metalink (%d)\n", rc));
-                close(mirrors_fd);
-                lr_metalink_free(metalink);
-                return rc;
-            }
-
-            if (metalink->nou <= 0) {
-                DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
-                return LRE_MLBAD;
-            }
-
-            /* Select the best checksum type */
-            for (int x = 0; x < metalink->noh; x++) {
-                if (!(handle->checks & LR_CHECK_CHECKSUM))
-                    break;  /* Do not want to check checksum */
-
-                lr_ChecksumType mtype;
-                lr_MetalinkHash mhash = metalink->hashes[x];
-
-                if (!mhash->type || !mhash->value)
-                    continue;
-
-                mtype = lr_checksum_type(mhash->type);
-                if (mtype != LR_CHECKSUM_UNKNOWN && mtype > checksum_type) {
-                    checksum_type = mtype;
-                    checksum = mhash->value;
-                }
-            }
-
-            /* Download repomd.xml from any of mirror */
-            for (int x = 0; x < metalink->nou; x++) {
-                char *used_mirror = metalink->urls[x]->url;
-
-                DEBUGF(fprintf(stderr, "Downloading from mirror: %s\n", used_mirror));
-
-                lseek(fd, 0, SEEK_SET);
-                rc = lr_curl_single_download(handle,
-                                             used_mirror,
-                                             fd,
-                                             "/repodata/repomd.xml");
-                DEBUGF(fprintf(stderr, "Download rc: %d\n", rc));
-                if (rc == LRE_OK) {
-                    /* Download successful */
-                    DEBUGF(fprintf(stderr, "Download successful\n"));
-
-                    /* Check checksum if possible and wanted */
-                    if (checksum_type != LR_CHECKSUM_UNKNOWN) {
-                        DEBUGF(fprintf(stderr, "Checking checksum\n"));
-                        lseek(fd, 0, SEEK_SET);
-                        if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
-                            DEBUGF(fprintf(stderr, "Bad checksum\n"));
-                            rc = LRE_BADCHECKSUM;
-                            continue; /* Try next mirror */
-                        }
-                    }
-
-                    /* Store used mirror into the handler */
-                    handle->used_mirror = lr_strdup(used_mirror);
-                    if (lr_ends_with(used_mirror, "/repodata/repomd.xml")) {
-                        /* Strip "/repodata/repomd.xml" from mirror url */
-                        size_t len = strlen(handle->used_mirror);
-                        handle->used_mirror[len-20] = '\0';
-                    }
-                    break;
-                }
-            }
-
-            lr_metalink_free(metalink);
-        } else {
-            /* Mirrorlist */
-            lr_Mirrorlist mirrorlist;
-
-            DEBUGF(fprintf(stderr, "Got mirrorlist\n"));
-
-            mirrorlist = lr_mirrorlist_init();
-            rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
-            if (rc != LRE_OK) {
-                DEBUGF(fprintf(stderr, "Cannot parse mirrorlist (%d)\n", rc));
-                close(mirrors_fd);
-                lr_mirrorlist_free(mirrorlist);
-                return rc;
-            }
-
-            if (mirrorlist->nou <= 0) {
-                DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
-                return LRE_MLBAD;
-            }
-
-            /* Download repomd.xml from any of mirror */
-            for (int x = 0; x < mirrorlist->nou; x++) {
-                char *used_mirror = mirrorlist->urls[x];
-
-                DEBUGF(fprintf(stderr, "Downloading from mirror: %s\n", used_mirror));
-
-                lseek(fd, 0, SEEK_SET);
-                rc = lr_curl_single_download(handle,
-                                          used_mirror,
+    rc = lr_curl_single_mirrored_download(handle,
+                                          "repodata/repomd.xml",
                                           fd,
-                                          "/repodata/repomd.xml");
-                DEBUGF(fprintf(stderr, "Download rc: %d\n", rc));
-                if (rc == LRE_OK) {
-                    DEBUGF(fprintf(stderr, "Download successful\n"));
-                    handle->used_mirror = lr_strdup(used_mirror);
-                    break;
-                }
-            }
-
-            lr_mirrorlist_free(mirrorlist);
-        }
-
-        close(mirrors_fd);
-    }
+                                          checksum_type,
+                                          checksum);
 
     if (rc != LRE_OK) {
         /* Download of repomd.xml was not successful */
-        DEBUGF(fprintf(stderr, "All downloads was unsuccessful"));
+        DEBUGF(fprintf(stderr, "repomd.xml download was unsuccessful"));
         return rc;
     }
 
@@ -464,6 +345,8 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
+    DEBUGF(fprintf(stderr, "Locating repo..\n"));
+
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
 
@@ -564,11 +447,91 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     int fd;
     int create_repodata_dir = 1;
     char *path_to_repodata;
+    lr_Metalink metalink = NULL;
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
+    int do_mirrorlist = (handle->internal_mirrorlist) ? 0 : 1;
+    // ^^^ Do internal mirrorlist only if it doesn't already exist
+
+    DEBUGF(fprintf(stderr, "Downloading/Copying repo..\n"));
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
+
+    if (do_mirrorlist) {
+        handle->internal_mirrorlist = lr_internalmirrorlist_new();
+        /* Repository URL specified by user should the first element */
+        if (handle->baseurl)
+            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                             handle->baseurl);
+    }
+
+    if (do_mirrorlist && handle->mirrorlist) {
+        /* Download and parse metalink or mirrorlist to internal mirrorlist */
+        lr_Mirrorlist mirrorlist = NULL;
+        int mirrors_fd = lr_gettmpfile();
+
+        rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd);
+        if (rc != LRE_OK)
+            goto mirrorlist_error;
+
+        if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
+            rc = LRE_IO;
+            goto mirrorlist_error;
+        }
+
+        if (strstr(handle->mirrorlist, "metalink")) {
+            /* Metalink */
+            DEBUGF(fprintf(stderr, "Got metalink\n"));
+
+            /* Parse metalink */
+            metalink = lr_metalink_init();
+            rc = lr_metalink_parse_file(metalink, mirrors_fd);
+            if (rc != LRE_OK) {
+                DEBUGF(fprintf(stderr, "Cannot parse metalink (%d)\n", rc));
+                goto mirrorlist_error;
+            }
+
+            if (metalink->nou <= 0) {
+                DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
+                rc = LRE_MLBAD;
+                goto mirrorlist_error;
+            }
+        } else {
+            /* Mirrorlist */
+            DEBUGF(fprintf(stderr, "Got mirrorlist\n"));
+
+            mirrorlist = lr_mirrorlist_init();
+            rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
+            if (rc != LRE_OK) {
+                DEBUGF(fprintf(stderr, "Cannot parse mirrorlist (%d)\n", rc));
+                goto mirrorlist_error;
+            }
+
+            if (mirrorlist->nou <= 0) {
+                DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
+                rc = LRE_MLBAD;
+                goto mirrorlist_error;
+            }
+        }
+
+        /* Set internal_mirrorlist into the handle  */
+        if (metalink)
+            lr_internalmirrorlist_append_metalink(handle->internal_mirrorlist,
+                                                  metalink,
+                                                  "repodata/repomd.xml");
+        if (mirrorlist)
+            lr_internalmirrorlist_append_mirrorlist(handle->internal_mirrorlist,
+                                                    mirrorlist);
+
+mirrorlist_error:
+        lr_mirrorlist_free(mirrorlist);
+        close(mirrors_fd);
+        if (rc != LRE_OK) {
+            lr_metalink_free(metalink);
+            return rc;
+        }
+    }
 
     path_to_repodata = lr_pathconcat(handle->destdir, "repodata", NULL);
 
@@ -582,12 +545,12 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     if (create_repodata_dir) {
         /* Prepare repodata/ subdir */
         rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
+        lr_free(path_to_repodata);
         if (rc == -1) {
-            lr_free(path_to_repodata);
+            lr_metalink_free(metalink);
             return LRE_CANNOTCREATEDIR;
         }
     }
-    lr_free(path_to_repodata);
 
     if (!handle->update) {
         /* Prepare repomd.xml file */
@@ -596,17 +559,20 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0660);
         if (fd == -1) {
             lr_free(path);
+            lr_metalink_free(metalink);
             return LRE_IO;
         }
 
         /* Download repomd.xml */
-        rc = lr_yum_download_repomd(handle, repo, fd);
+        rc = lr_yum_download_repomd(handle, metalink, repo, fd);
+        lr_metalink_free(metalink);
         if (rc != LRE_OK) {
             close(fd);
             lr_free(path);
             return rc;
         }
 
+        metalink = NULL;
         lseek(fd, 0, SEEK_SET);
 
         /* Parse repomd */

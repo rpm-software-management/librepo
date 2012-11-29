@@ -96,13 +96,11 @@ lr_progress_func(void* ptr,
 int
 lr_curl_single_download(lr_Handle handle,
                         const char *url,
-                        int fd,
-                        char *mandatory_suffix)
+                        int fd)
 {
     CURLcode c_rc = CURLE_OK;
     CURL *c_h = NULL;
     FILE *f = NULL;
-    char *full_url = NULL;
     long status_code = 0;
 
     if (!url)
@@ -112,27 +110,12 @@ lr_curl_single_download(lr_Handle handle,
     if (!c_h)
         return LRE_CURLDUP;
 
-    /* Append mandatory_suffix_if_necessary */
-    if (mandatory_suffix && !lr_ends_with(url, mandatory_suffix)) {
-        size_t url_len = strlen(url);
-        size_t len = url_len + strlen(mandatory_suffix) + 2;
-
-        full_url = lr_malloc(sizeof(char) * len);
-        strcpy(full_url, url);
-        full_url[url_len] = '/';
-        strcpy(full_url + url_len + 1, mandatory_suffix);
-    } else
-        full_url = (char *) url;
-
-    c_rc = curl_easy_setopt(c_h, CURLOPT_URL, full_url);
+    c_rc = curl_easy_setopt(c_h, CURLOPT_URL, url);
     if (c_rc != CURLE_OK) {
         curl_easy_cleanup(c_h);
         handle->last_curl_error = c_rc;
         return LRE_CURL;
     }
-
-    if (full_url != url)
-        lr_free(full_url);
 
     f = fdopen(dup(fd), "w+");
     if (!f) {
@@ -169,6 +152,63 @@ lr_curl_single_download(lr_Handle handle,
     curl_easy_cleanup(c_h);
 
     return LRE_OK;
+}
+
+int
+lr_curl_single_mirrored_download(lr_Handle handle,
+                                 const char *filename,
+                                 int fd,
+                                 lr_ChecksumType checksum_type,
+                                 const char *checksum)
+{
+    int rc;
+    int mirrors;
+    lr_InternalMirrorlist iml = handle->internal_mirrorlist;
+
+    if (!iml)
+        return LRE_NOURL;
+
+    mirrors = lr_internalmirrorlist_len(handle->internal_mirrorlist);
+    if (mirrors < 1)
+        return LRE_NOURL;
+
+    DEBUGF(fprintf(stderr, "Downloading %s\n", filename));
+
+    for (int x=0; x < mirrors; x++) {
+        char *full_url;
+        char *url = lr_internalmirrorlist_get_url(iml, x);
+        DEBUGF(fprintf(stderr, "Trying mirror: %s\n", url));
+
+        lseek(fd, 0, SEEK_SET);
+
+        full_url = lr_pathconcat(url, filename, NULL);
+        rc = lr_curl_single_download(handle, full_url, fd);
+        lr_free(full_url);
+
+        if (rc == LRE_OK) {
+            /* Download successful */
+            DEBUGF(fprintf(stderr, "Download successful\n"));
+
+            /* Check checksum */
+            if (checksum && checksum_type != LR_CHECKSUM_UNKNOWN) {
+                DEBUGF(fprintf(stderr, "Checking checksum\n"));
+                lseek(fd, 0, SEEK_SET);
+                if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
+                    DEBUGF(fprintf(stderr, "Bad checksum\n"));
+                    rc = LRE_BADCHECKSUM;
+                    continue; /* Try next mirror */
+                }
+            }
+
+            /* Store used mirror into the handler */
+            handle->used_mirror = lr_strdup(url);
+            break;
+        } else {
+            DEBUGF(fprintf(stderr, "Download rc: %d\n", rc));
+        }
+    }
+
+    return rc;
 }
 
 lr_CurlTarget
@@ -328,6 +368,11 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
             break;
         }
     } while (still_running);
+
+    /* TODO:
+     * - Check status codes of curl easy interfaces
+     * - Try to re-download failed downloads
+     **/
 
 cleanup:
     lr_free(shared_cb_data.counted);
