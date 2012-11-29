@@ -10,7 +10,8 @@ SET (librepo_SRCS
      repoutil_yum.c
      result.c
      librepo.c
-     internal_mirrorlist.c)
+     internal_mirrorlist.c
+     curltargetlist.c)
 
 SET(librepo_HEADERS
     librepo.h
