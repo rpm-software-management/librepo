@@ -28,6 +28,7 @@ extern "C" {
 #include "checksum.h"
 #include "rcodes.h"
 #include "internal_mirrorlist.h"
+#include "curltargetlist.h"
 
 /* Return codes of the module:
  *  LRE_OK          everything ok
@@ -40,15 +41,6 @@ extern "C" {
  *                  do not represent success
  */
 
-struct _lr_CurlTarget {
-    char *url;
-    int fd;
-};
-typedef struct _lr_CurlTarget * lr_CurlTarget;
-
-lr_CurlTarget lr_target_init();
-void lr_target_free(lr_CurlTarget target);
-
 int lr_curl_single_download(lr_Handle handle, const char *url, int fd);
 
 int lr_curl_single_mirrored_download(lr_Handle handle,
@@ -57,7 +49,7 @@ int lr_curl_single_mirrored_download(lr_Handle handle,
                                      lr_ChecksumType checksum_type,
                                      const char *checksum);
 
-int lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not);
+int lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets);
 
 #ifdef __cplusplus
 }

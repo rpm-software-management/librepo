@@ -30,6 +30,7 @@
 #include "rcodes.h"
 #include "util.h"
 #include "handle_internal.h"
+#include "curltargetlist.h"
 
 /* Callback stuff */
 
@@ -117,7 +118,7 @@ lr_curl_single_download(lr_Handle handle,
         return LRE_CURL;
     }
 
-    f = fdopen(dup(fd), "w+");
+    f = fdopen(dup(fd), "w");
     if (!f) {
         curl_easy_cleanup(c_h);
         return LRE_IO;
@@ -180,10 +181,13 @@ lr_curl_single_mirrored_download(lr_Handle handle,
         DEBUGF(fprintf(stderr, "Trying mirror: %s\n", url));
 
         lseek(fd, 0, SEEK_SET);
+        ftruncate(fd, 0);
 
         full_url = lr_pathconcat(url, filename, NULL);
         rc = lr_curl_single_download(handle, full_url, fd);
         lr_free(full_url);
+
+printf("%s\n", curl_easy_strerror(rc));
 
         if (rc == LRE_OK) {
             /* Download successful */
@@ -211,45 +215,34 @@ lr_curl_single_mirrored_download(lr_Handle handle,
     return rc;
 }
 
-lr_CurlTarget
-lr_target_init()
-{
-    return lr_malloc0(sizeof(struct _lr_CurlTarget));
-}
-
-void
-lr_target_free(lr_CurlTarget target)
-{
-    if (!target)
-        return;
-    lr_free(target);
-}
-
 int
-lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
+lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 {
+    int not = lr_curltargetlist_len(targets);  /* Number Of Targets */
+    int nom;            /* Number Of Mirrors */
     int ret = LRE_OK;
     CURL *curl_easy_interfaces[not];
     FILE *open_files[not];
     CURLMcode cm_rc;
-    CURLM *cm_h = curl_multi_init();    /* Curl Multi Handle */
-    int still_running;                  /* Number of still running downloads */
+    CURLM *cm_h = NULL; /* Curl Multi Handle */
+    lr_InternalMirrorlist iml;
 
     struct _lr_SharedCallbackData shared_cb_data;
     struct _lr_CallbackData cb_data[not];
 
-    if (!cm_h)
-        return LRE_CURLDUP;
+    assert(handle);
+
+    iml = handle->internal_mirrorlist;
+    if (!iml)
+        return LRE_NOURL;
+
+    nom = lr_internalmirrorlist_len(iml);
+    if (nom < 1)
+        return LRE_NOURL;
 
     if (not == 0) {
         /* Maybe user callback shoud be called here */
         return LRE_OK;
-    }
-
-    /* Init variables */
-    for (int x = 0; x < not; x++) {
-        curl_easy_interfaces[x] = NULL;
-        open_files[x] = NULL;
     }
 
     /* Initialize shared callback data */
@@ -263,120 +256,219 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTarget targets[], int not)
 
     /* --- Since here it shoud be safe to use "goto cleanup" --- */
 
-    /* Prepare curl_easy_handlers for every file */
-    DEBUGF(fprintf(stderr, "CURL multi handle targets:\n"));
-    for (int x = 0; x < not; x++) {
-        FILE *f;
-        CURLcode c_rc;
-        lr_CurlTarget t = targets[x];
-        CURL *c_h = curl_easy_duphandle(handle->curl_handle);
+    for (int i = 0; i < nom; i++) {
+        int used = 0;
+        char *mirror = lr_internalmirrorlist_get_url(iml, i);
+        int still_running;  /* Number of still running downloads */
+        int failed_downloads = 0;
+        CURLMsg *msg;  /* for picking up messages with the transfer status */
+        int msgs_left; /* how many messages are left */
 
-        if (!c_h) {
-            ret = LRE_CURLDUP;
-            goto cleanup;
-        }
-        curl_easy_interfaces[x] = c_h;
+        DEBUGF(fprintf(stderr, "Using mirror %s\n", mirror));
 
-        f = fdopen(dup(t->fd), "w+");
-        if (!f) {
-            ret = LRE_IO;
-            goto cleanup;
-        }
-        open_files[x] = f;
-
-        DEBUGF(fprintf(stderr, "  %s\n", t->url));
-
-        c_rc = curl_easy_setopt(c_h, CURLOPT_URL, t->url);
-        if (c_rc != CURLE_OK) {
+        cm_h = curl_multi_init();
+        if (!cm_h) {
             ret = LRE_CURLDUP;
             goto cleanup;
         }
 
-        c_rc = curl_easy_setopt(c_h, CURLOPT_WRITEDATA, f);
-        if (c_rc != CURLE_OK) {
-            ret = LRE_CURLDUP;
-            goto cleanup;
+        /*  Prepare curl_easy_handlers for every file */
+        DEBUGF(fprintf(stderr, "CURL multi handle targets:\n"));
+        for (int x = 0; x < not; x++) {
+            FILE *f;
+            char *url;
+            CURL *c_h;
+            CURLcode c_rc;
+            lr_CurlTarget t = lr_curltargetlist_get(targets, x);
+
+            curl_easy_interfaces[x] = NULL;
+            open_files[x] = NULL;
+
+            if (t->downloaded)
+                /* Already downloaded */
+                continue;
+
+            c_h = curl_easy_duphandle(handle->curl_handle);
+            if (!c_h) {
+                ret = LRE_CURLDUP;
+                DEBUGF(fprintf(stderr, "Cannot dup CURL handle\n"));
+                goto cleanup;
+            }
+            curl_easy_interfaces[x] = c_h;
+
+            lseek(t->fd, 0, SEEK_SET);
+            ftruncate(t->fd, 0);
+            f = fdopen(dup(t->fd), "w");
+            if (!f) {
+                ret = LRE_IO;
+                DEBUGF(fprintf(stderr, "Cannot dup fd %d\n", t->fd));
+                goto cleanup;
+            }
+            open_files[x] = f;
+
+            url = lr_pathconcat(mirror, t->path, NULL);
+            DEBUGF(fprintf(stderr, "  %s\n", url));
+
+            c_rc = curl_easy_setopt(c_h, CURLOPT_URL, url);
+            lr_free(url);
+            if (c_rc != CURLE_OK) {
+                ret = LRE_CURLDUP;
+                DEBUGF(fprintf(stderr, "Cannot set CURLOPT_URL\n"));
+                goto cleanup;
+            }
+
+            c_rc = curl_easy_setopt(c_h, CURLOPT_WRITEDATA, f);
+            if (c_rc != CURLE_OK) {
+                ret = LRE_CURLDUP;
+                DEBUGF(fprintf(stderr, "Cannot set CURLOPT_WRITEDATA\n"));
+                goto cleanup;
+            }
+
+            /* Prepare callback and its data */
+            if (handle->user_cb) {
+                lr_CallbackData data = &cb_data[x];
+                data->id = x;
+                data->downloaded = 0.0;
+                data->scb_data = &shared_cb_data;
+                c_rc = curl_easy_setopt(c_h, CURLOPT_PROGRESSFUNCTION, lr_progress_func);
+                c_rc = curl_easy_setopt(c_h, CURLOPT_NOPROGRESS, 0);
+                c_rc = curl_easy_setopt(c_h, CURLOPT_PROGRESSDATA, data);
+            }
+
+            cm_rc = curl_multi_add_handle(cm_h, c_h);
+            if (cm_rc != CURLM_OK) {
+                handle->last_curlm_error = cm_rc;
+                ret = LRE_CURLM;
+                DEBUGF(fprintf(stderr, "Cannot add curl_easy hadle to multi handle\n"));
+                goto cleanup;
+            }
+            used++;
         }
 
-        /* Prepare callback and its data */
-        if (handle->user_cb) {
-            lr_CallbackData data = &cb_data[x];
-            data->id = x;
-            data->downloaded = 0.0;
-            data->scb_data = &shared_cb_data;
-            c_rc = curl_easy_setopt(c_h, CURLOPT_PROGRESSFUNCTION, lr_progress_func);
-            c_rc = curl_easy_setopt(c_h, CURLOPT_NOPROGRESS, 0);
-            c_rc = curl_easy_setopt(c_h, CURLOPT_PROGRESSDATA, data);
+        if (used == 0) {
+            DEBUGF(fprintf(stderr, "All files were downloaded\n"));
+            break;  /* Nothing to download */
         }
 
-        cm_rc = curl_multi_add_handle(cm_h, c_h);
-        if (cm_rc != CURLM_OK) {
-            handle->last_curlm_error = cm_rc;
-            ret = LRE_CURLM;
-            goto cleanup;
+        /* Perform */
+        DEBUGF(fprintf(stderr, "curl_multi_perform\n"));
+        curl_multi_perform(cm_h, &still_running);
+
+        do {
+            int rc;
+            int maxfd = -1;
+            long curl_timeo = -1;
+            fd_set fdread;
+            fd_set fdwrite;
+            fd_set fdexcep;
+            struct timeval timeout;
+
+            FD_ZERO(&fdread);
+            FD_ZERO(&fdwrite);
+            FD_ZERO(&fdexcep);
+
+            /* Set timeout */
+            timeout.tv_sec = 1;
+            timeout.tv_usec = 0;
+
+            curl_multi_timeout(cm_h, &curl_timeo);
+            if (curl_timeo >= 0) {
+                timeout.tv_sec = curl_timeo / 1000;
+                if (timeout.tv_sec > 1)
+                    timeout.tv_sec = 1;
+                else
+                    timeout.tv_usec = (curl_timeo % 1000) * 1000;
+            }
+
+            /* Get filedescriptors from the transfers */
+            cm_rc = curl_multi_fdset(cm_h, &fdread, &fdwrite, &fdexcep, &maxfd);
+            if (cm_rc != CURLM_OK) {
+                DEBUGF(fprintf(stderr, "curl_multi_fdset() error: %d\n", cm_rc));
+                handle->last_curlm_error = cm_rc;
+                ret = LRE_CURLM;
+                goto cleanup;
+            }
+
+            rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+            switch (rc) {
+            case -1:
+                break; /* select() error */
+
+            case 0:
+            default:
+                /* Timeout or readable/writeable sockets */
+                curl_multi_perform(cm_h, &still_running);
+                break;
+            }
+        } while (still_running);
+
+        /* Check download statuses */
+        while ((msg = curl_multi_info_read(cm_h, &msgs_left))) {
+            if (msg->msg == CURLMSG_DONE) {
+                int failed = 0;
+                int idx, found = 0;
+                lr_CurlTarget t = NULL;
+
+                /* Find out which handle this message is about */
+                for (idx=0; idx < not; idx++) {
+                    found = (msg->easy_handle == curl_easy_interfaces[idx]);
+                    t = lr_curltargetlist_get(targets, idx);
+                    if(found)
+                        break;
+                }
+
+                DEBUGF(fprintf(stderr, "Download status: %d (%s)\n",
+                               msg->data.result,
+                               t->path));
+
+                if (msg->data.result == CURLE_OK) {
+                    long code = 0; // HTTP or FTP code
+                    curl_easy_getinfo (msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
+                    //if (code == 200 && msg->data.result != CURLE_ABORTED_BY_CALLBACK) {
+                    if (code == 200) {
+                        // Succeeded
+                        t->downloaded = 1;
+                    } else {
+                        DEBUGF(fprintf(stderr, "Bad HTTP/FTP code: %d\n", code));
+                        failed = 1;
+                    }
+                } else
+                    failed = 1;
+
+                if (failed) {
+                    failed_downloads++;
+                    /* Update total_to_download in  callback data */
+                    shared_cb_data.counted[idx] = 0;
+                }
+            }
         }
-    }
 
-    /* Perform */
-    curl_multi_perform(cm_h, &still_running);
-
-    do {
-        int rc;
-        int maxfd = -1;
-        long curl_timeo = -1;
-        fd_set fdread;
-        fd_set fdwrite;
-        fd_set fdexcep;
-        struct timeval timeout;
-
-        FD_ZERO(&fdread);
-        FD_ZERO(&fdwrite);
-        FD_ZERO(&fdexcep);
-
-        /* Set timeout */
-        timeout.tv_sec = 1;
-        timeout.tv_usec = 0;
-
-        curl_multi_timeout(cm_h, &curl_timeo);
-        if (curl_timeo >= 0) {
-            timeout.tv_sec = curl_timeo / 1000;
-            if (timeout.tv_sec > 1)
-                timeout.tv_sec = 1;
-            else
-                timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        /* Cleanup */
+        curl_multi_cleanup(cm_h);
+        cm_h = NULL;
+        for (int x = 0; x < not; x++) {
+            if (curl_easy_interfaces[x]) {
+                curl_easy_cleanup(curl_easy_interfaces[x]);
+                curl_easy_interfaces[x] = NULL;
+            }
+            if (open_files[x]) {
+                fclose(open_files[x]);
+                open_files[x] = NULL;
+            }
         }
 
-        /* Get filedescriptors from the transfers */
-        cm_rc = curl_multi_fdset(cm_h, &fdread, &fdwrite, &fdexcep, &maxfd);
-        if (cm_rc != CURLM_OK) {
-            DEBUGF(fprintf(stderr, "curl_multi_fdset() error: %d\n", cm_rc));
-            handle->last_curlm_error = cm_rc;
-            ret = LRE_CURLM;
-            goto cleanup;
-        }
-
-        rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-
-        switch (rc) {
-        case -1:
-            break; /* select() error */
-
-        case 0:
-        default:
-            /* Timeout or readable/writeable sockets */
-            curl_multi_perform(cm_h, &still_running);
+        if (failed_downloads == 0)
             break;
-        }
-    } while (still_running);
 
-    /* TODO:
-     * - Check status codes of curl easy interfaces
-     * - Try to re-download failed downloads
-     **/
+    } /* End of iteration over mirrors */
 
 cleanup:
+    DEBUGF(fprintf(stderr, "Cleanup\n"));
+
     lr_free(shared_cb_data.counted);
-    curl_multi_cleanup(cm_h);
+    if (cm_h)
+        curl_multi_cleanup(cm_h);
     for (int x = 0; x < not; x++) {
         if (curl_easy_interfaces[x])
             curl_easy_cleanup(curl_easy_interfaces[x]);

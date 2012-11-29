@@ -38,6 +38,7 @@
 #include "handle_internal.h"
 #include "result_internal.h"
 #include "internal_mirrorlist.h"
+#include "curltargetlist.h"
 
 /** TODO:
  * - GPG check
@@ -88,7 +89,6 @@ lr_yum_repo_free(lr_YumRepo repo)
 int
 lr_yum_download_repomd(lr_Handle handle,
                        lr_Metalink metalink,
-                       lr_YumRepo repo,
                        int fd)
 {
     int rc = LRE_OK;
@@ -130,27 +130,24 @@ lr_yum_download_repomd(lr_Handle handle,
     return LRE_OK;
 }
 
-/* Returns 1 if target was added and 0 otherwise */
-int
-lr_add_target(lr_CurlTarget targets[],
+void
+lr_add_target(lr_CurlTargetList targets,
               const char *destdir,
-              const char *url,
               lr_YumRepoMdRecord rec,
               char **local_path,
-              int used,
               int use_this)
 {
     int fd;
     lr_CurlTarget target;
 
     if (!use_this)
-        return 0;
+        return;
 
     DEBUGASSERT(destdir);
     DEBUGASSERT(strlen(destdir));
 
     if (!rec || !rec->location_href)
-        return 0;
+        return;
 
     if (*local_path)  /* During update local_path may be already existing */
         lr_free(*local_path);
@@ -158,78 +155,54 @@ lr_add_target(lr_CurlTarget targets[],
     fd = open(*local_path, O_CREAT|O_TRUNC|O_RDWR, 0660);
     if (fd < 0) {
         lr_free(*local_path);
-        return 0;
+        return;
     }
 
-    target = lr_target_init();
-    target->url = lr_pathconcat(url, rec->location_href, NULL);
+    target = lr_curltarget_new();
+    target->path = lr_strdup(rec->location_href);
     target->fd = fd;
-    targets[used] = target;
-
-    return 1;
+    lr_curltargetlist_append(targets, target);
 }
 
 int
 lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
 {
     int ret = LRE_OK;
-    char *dir;                                        /* Destination dir */
-    char *url;                                        /* Base url */
-    lr_CurlTarget targets[LR_NUM_OF_YUM_REPOMD_RECORDS];/* Targets to download */
-    int used = 0;                                     /* Number of targets */
+    char *dir;  /* Destination dir */
+    lr_CurlTargetList targets = lr_curltargetlist_new();
 
     dir = handle->destdir;
-    url = handle->used_mirror ? handle->used_mirror : handle->baseurl;
 
-    used += lr_add_target(targets, dir, url, repomd->primary,
-                          &repo->primary, used,
+    lr_add_target(targets, dir, repomd->primary, &repo->primary,
                           handle->yumflags & LR_YUM_PRI);
-    used += lr_add_target(targets, dir, url, repomd->filelists,
-                          &repo->filelists, used,
+    lr_add_target(targets, dir, repomd->filelists, &repo->filelists,
                           handle->yumflags & LR_YUM_FIL);
-    used += lr_add_target(targets, dir, url, repomd->other,
-                          &repo->other, used,
+    lr_add_target(targets, dir, repomd->other, &repo->other,
                           handle->yumflags & LR_YUM_OTH);
-    used += lr_add_target(targets, dir, url, repomd->primary_db,
-                          &repo->primary_db, used,
+    lr_add_target(targets, dir, repomd->primary_db, &repo->primary_db,
                           handle->yumflags & LR_YUM_PRIDB);
-    used += lr_add_target(targets, dir, url, repomd->filelists_db,
-                          &repo->filelists_db, used,
+    lr_add_target(targets, dir, repomd->filelists_db, &repo->filelists_db,
                           handle->yumflags & LR_YUM_FILDB);
-    used += lr_add_target(targets, dir, url, repomd->other_db,
-                          &repo->other_db, used,
+    lr_add_target(targets, dir, repomd->other_db, &repo->other_db,
                           handle->yumflags & LR_YUM_OTHDB);
-    used += lr_add_target(targets, dir, url, repomd->group,
-                          &repo->group, used,
+    lr_add_target(targets, dir, repomd->group, &repo->group,
                           handle->yumflags & LR_YUM_GROUP);
-    used += lr_add_target(targets, dir, url, repomd->group_gz,
-                          &repo->group_gz, used,
+    lr_add_target(targets, dir, repomd->group_gz, &repo->group_gz,
                           handle->yumflags & LR_YUM_GROUPGZ);
-    used += lr_add_target(targets, dir, url, repomd->prestodelta,
-                          &repo->prestodelta, used,
+    lr_add_target(targets, dir, repomd->prestodelta, &repo->prestodelta,
                           handle->yumflags & LR_YUM_PRESTODELTA);
-    used += lr_add_target(targets, dir, url, repomd->deltainfo,
-                          &repo->deltainfo, used,
+    lr_add_target(targets, dir, repomd->deltainfo, &repo->deltainfo,
                           handle->yumflags & LR_YUM_DELTAINFO);
-    used += lr_add_target(targets, dir, url, repomd->updateinfo,
-                          &repo->updateinfo, used,
+    lr_add_target(targets, dir, repomd->updateinfo, &repo->updateinfo,
                           handle->yumflags & LR_YUM_UPDATEINFO);
-    used += lr_add_target(targets, dir, url, repomd->origin,
-                          &repo->origin, used,
+    lr_add_target(targets, dir, repomd->origin, &repo->origin,
                           handle->yumflags & LR_YUM_ORIGIN);
 
-    if (used == 0)
-        return ret;
-
-    ret = lr_curl_multi_download(handle, targets, used);
-
-    /* Clean up */
-    for (int x = 0; x < used; x++) {
-        close(targets[x]->fd);
-        lr_free(targets[x]->url);
-        lr_target_free(targets[x]);
+    if (lr_curltargetlist_len(targets) > 0) {
+        ret = lr_curl_multi_download(handle, targets);
     }
 
+    lr_curltargetlist_free(targets);
     return ret;
 }
 
@@ -564,7 +537,7 @@ mirrorlist_error:
         }
 
         /* Download repomd.xml */
-        rc = lr_yum_download_repomd(handle, metalink, repo, fd);
+        rc = lr_yum_download_repomd(handle, metalink, fd);
         lr_metalink_free(metalink);
         if (rc != LRE_OK) {
             close(fd);
