@@ -40,12 +40,17 @@ struct _lr_InternalMirrorlist {
 };
 typedef struct _lr_InternalMirrorlist * lr_InternalMirrorlist;
 
-lr_InternalMirrorlist lr_internalmirrorlist_from_mirrorlist(lr_Mirrorlist);
-lr_InternalMirrorlist lr_internalmirrorlist_from_metalink(lr_Metalink);
+lr_InternalMirrorlist lr_internalmirrorlist_new();
+void lr_internalmirrorlist_free(lr_InternalMirrorlist);
+void lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml, const char *url);
+void lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml,
+                                             lr_Mirrorlist mirrorlist);
+void lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
+                                           lr_Metalink metalink,
+                                           const char *suffix);
 lr_InternalMirror lr_internalmirrorlist_get(lr_InternalMirrorlist, int);
 char *lr_internalmirrorlist_get_url(lr_InternalMirrorlist, int);
 int lr_internalmirrorlist_len(lr_InternalMirrorlist);
-void lr_internalmirrorlist_free(lr_InternalMirrorlist);
 
 #ifdef __cplusplus
 }

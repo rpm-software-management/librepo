@@ -1,55 +1,14 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "util.h"
 #include "internal_mirrorlist.h"
 
 lr_InternalMirrorlist
-lr_internalmirrorlist_from_mirrorlist(lr_Mirrorlist ml)
+lr_internalmirrorlist_new()
 {
-    lr_InternalMirrorlist iml;
-
-    if (!ml || ml->nou == 0)
-        return NULL;
-
-    iml = lr_malloc0(sizeof(struct _lr_InternalMirrorlist));
-    iml->nom = ml->nou;
-    iml->mirrors = lr_malloc(sizeof(lr_InternalMirror *) * iml->nom);
-
-    for (int x=0; x < iml->nom; x++) {
-        lr_InternalMirror im;
-        im = lr_malloc(sizeof(struct _lr_InternalMirror));
-        im->url = lr_strdup(ml->urls[x]);
-        im->preference = 100;
-        im->fails = 0;
-        iml->mirrors[x] = im;
-    }
-
-    return iml;
-}
-
-lr_InternalMirrorlist
-lr_internalmirrorlist_from_metalink(lr_Metalink ml)
-{
-    lr_InternalMirrorlist iml;
-
-    if (!ml || ml->nou == 0)
-        return NULL;
-
-    iml = lr_malloc0(sizeof(struct _lr_InternalMirrorlist));
-    iml->nom = ml->nou;
-    iml->mirrors = lr_malloc(sizeof(lr_InternalMirror *) * iml->nom);
-
-    for (int x=0; x < iml->nom; x++) {
-        lr_InternalMirror im;
-        im = lr_malloc(sizeof(struct _lr_InternalMirror));
-        im->url = lr_strdup(ml->urls[x]->url);
-        im->preference = ml->urls[x]->preference;
-        im->fails = 0;
-        iml->mirrors[x] = im;
-    }
-
-    return iml;
+    return lr_malloc0(sizeof(struct _lr_InternalMirrorlist));
 }
 
 void
@@ -64,6 +23,82 @@ lr_internalmirrorlist_free(lr_InternalMirrorlist ml)
     }
     lr_free(ml->mirrors);
     lr_free(ml);
+}
+
+void
+lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml, const char *url)
+{
+    lr_InternalMirror im;
+
+    if (!iml || !url)
+        return;
+
+    im = lr_malloc(sizeof(struct _lr_InternalMirror));
+    im->url = lr_strdup(url);
+    im->preference = 100;
+    im->fails = 0;
+
+    iml->nom++;
+    iml->mirrors = lr_realloc(iml->mirrors, sizeof(lr_InternalMirror *) * iml->nom);
+    iml->mirrors[iml->nom-1] = im;
+}
+
+void
+lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml, lr_Mirrorlist ml)
+{
+    int nom_old;
+    if (!iml || !ml || ml->nou == 0)
+        return;
+
+    nom_old = iml->nom;
+    iml->nom += ml->nou;
+    iml->mirrors = lr_realloc(iml->mirrors, sizeof(lr_InternalMirror *) * iml->nom);
+
+    for (int x=nom_old; x < iml->nom; x++) {
+        int im_id = x - nom_old;
+        lr_InternalMirror im;
+        im = lr_malloc(sizeof(struct _lr_InternalMirror));
+        im->url = lr_strdup(ml->urls[im_id]);
+        im->preference = 100;
+        im->fails = 0;
+        iml->mirrors[x] = im;
+    }
+}
+
+void
+lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
+                                      lr_Metalink ml,
+                                      const char *suffix)
+{
+    int nom_old;
+    size_t suffix_len = 0;
+
+    if (!iml || !ml || ml->nou == 0)
+        return;
+
+    if (suffix)
+        suffix_len = strlen(suffix);
+
+    nom_old = iml->nom;
+    iml->nom += ml->nou;
+    iml->mirrors = lr_realloc(iml->mirrors, sizeof(lr_InternalMirror *) * iml->nom);
+
+    for (int x=nom_old; x < iml->nom; x++) {
+        int im_id = x - nom_old;
+        char *url = ml->urls[im_id]->url;
+        lr_InternalMirror im;
+        im = lr_malloc(sizeof(struct _lr_InternalMirror));
+        im->url = lr_strdup(url);
+        if (suffix_len) {
+            /* Remove suffix if necessary */
+            size_t url_len = strlen(url);
+            if (url_len >= suffix_len && !strcmp(url+(url_len-suffix_len), suffix))
+                im->url[url_len-suffix_len] = '\0';
+        }
+        im->preference = ml->urls[im_id]->preference;
+        im->fails = 0;
+        iml->mirrors[x] = im;
+    }
 }
 
 lr_InternalMirror

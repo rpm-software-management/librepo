@@ -2,7 +2,7 @@
 #include "test_internal_mirrorlist.h"
 #include "librepo/internal_mirrorlist.h"
 
-START_TEST(test_internalimirrorlist_from_mirrorlist)
+START_TEST(test_internalimirrorlist_append_mirrorlist)
 {
     lr_InternalMirrorlist iml = NULL;
     lr_InternalMirror mirror = NULL;
@@ -13,11 +13,12 @@ START_TEST(test_internalimirrorlist_from_mirrorlist)
         .lou = 2,
     };
 
-    iml = lr_internalmirrorlist_from_mirrorlist(NULL);
-    fail_if(iml != NULL);
+    iml = lr_internalmirrorlist_new();
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
+    lr_internalmirrorlist_append_mirrorlist(iml, NULL);
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
 
-    iml = lr_internalmirrorlist_from_mirrorlist(&ml);
-    fail_if(iml == NULL);
+    lr_internalmirrorlist_append_mirrorlist(iml, &ml);
     fail_if(iml->nom != 2);
     fail_if(strcmp(iml->mirrors[0]->url, "http://foo"));
     fail_if(iml->mirrors[0]->preference != 100);
@@ -44,7 +45,7 @@ START_TEST(test_internalimirrorlist_from_mirrorlist)
 }
 END_TEST
 
-START_TEST(test_internalimirrorlist_from_metalink)
+START_TEST(test_internalimirrorlist_append_metalink)
 {
     lr_InternalMirrorlist iml = NULL;
     lr_InternalMirror mirror = NULL;
@@ -54,14 +55,14 @@ START_TEST(test_internalimirrorlist_from_metalink)
             .type = "http",
             .location = "CZ",
             .preference = 100,
-            .url = "http://foo",
+            .url = "http://foo/repodata/repomd.xml",
         };
     struct _lr_MetalinkUrl url2 = {
             .protocol = "ftp",
             .type = "ftp",
             .location = "US",
             .preference = 95,
-            .url = "ftp://bar",
+            .url = "ftp://bar/repodata/repomd.xml",
         };
     struct _lr_Metalink ml = {
         .filename = NULL,
@@ -78,11 +79,12 @@ START_TEST(test_internalimirrorlist_from_metalink)
         .lou = 2,
     };
 
-    iml = lr_internalmirrorlist_from_mirrorlist(NULL);
-    fail_if(iml != NULL);
+    iml = lr_internalmirrorlist_new();
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
+    lr_internalmirrorlist_append_metalink(iml, NULL, NULL);
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
 
-    iml = lr_internalmirrorlist_from_metalink(&ml);
-    fail_if(iml == NULL);
+    lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml");
     fail_if(iml->nom != 2);
     fail_if(strcmp(iml->mirrors[0]->url, "http://foo"));
     fail_if(iml->mirrors[0]->preference != 100);
@@ -106,6 +108,21 @@ START_TEST(test_internalimirrorlist_from_metalink)
     fail_if(strcmp(url, "ftp://bar"));
 
     lr_internalmirrorlist_free(iml);
+
+    // Try append on list with existing element
+    iml = lr_internalmirrorlist_new();
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
+    lr_internalmirrorlist_append_url(iml, "http://abc");
+    fail_if(lr_internalmirrorlist_len(iml) != 1);
+    lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml");
+    fail_if(lr_internalmirrorlist_len(iml) != 3);
+    url = lr_internalmirrorlist_get_url(iml, 0);
+    fail_if(strcmp(url, "http://abc"));
+    url = lr_internalmirrorlist_get_url(iml, 1);
+    fail_if(strcmp(url, "http://foo"));
+    url = lr_internalmirrorlist_get_url(iml, 2);
+    fail_if(strcmp(url, "ftp://bar"));
+    lr_internalmirrorlist_free(iml);
 }
 END_TEST
 
@@ -114,8 +131,8 @@ internal_mirrorlist_suite(void)
 {
     Suite *s = suite_create("internal_mirrorlist");
     TCase *tc = tcase_create("Main");
-    tcase_add_test(tc, test_internalimirrorlist_from_mirrorlist);
-    tcase_add_test(tc, test_internalimirrorlist_from_metalink);
+    tcase_add_test(tc, test_internalimirrorlist_append_mirrorlist);
+    tcase_add_test(tc, test_internalimirrorlist_append_metalink);
     suite_add_tcase(s, tc);
     return s;
 }
