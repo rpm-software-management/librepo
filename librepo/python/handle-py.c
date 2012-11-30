@@ -96,6 +96,7 @@ static PyObject *
 handle_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     _HandleObject *self = (_HandleObject *)type->tp_alloc(type, 0);
+
     if (self) {
         self->handle = NULL;
         self->progress_cb = NULL;

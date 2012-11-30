@@ -175,7 +175,7 @@ static lr_StatesSwitch stateswitches[] = {
     { STATE_DATA,       "size",             STATE_SIZE,         1 },
     { STATE_DATA,       "open-size",        STATE_OPENSIZE,     1 },
     { STATE_DATA,       "database_version", STATE_DBVERSION,    1 },
-    { NUMSTATES }
+    { NUMSTATES,        NULL,               NUMSTATES,          0 }
 };
 
 typedef struct _ParserData {
@@ -356,6 +356,8 @@ static void XMLCALL
 end_handler(void *pdata, const char *name)
 {
     ParserData *pd = pdata;
+
+    LR_UNUSED(name);
 
     if (pd->ret != LRE_OK)
         return;  /* There was an error -> do nothing */

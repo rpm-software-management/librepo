@@ -140,7 +140,7 @@ static lr_StatesSwitch stateswitches[] = {
     { STATE_FILE,       "resources",        STATE_RESOURCES,    0 },
     { STATE_VERIFICATION, "hash",           STATE_HASH,         1 },
     { STATE_RESOURCES,  "url",              STATE_URL,          1 },
-    { NUMSTATES }
+    { NUMSTATES,        NULL,               NUMSTATES,          0 }
 };
 
 typedef struct _ParserData {
@@ -293,6 +293,8 @@ static void XMLCALL
 lr_metalink_end_handler(void *pdata, const char *name)
 {
     ParserData *pd = pdata;
+
+    LR_UNUSED(name);
 
     if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */

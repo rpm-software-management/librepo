@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#define LR_UNUSED(x) (void)(x)
+
 void lr_out_of_memory();
 void *lr_malloc(size_t len);
 void *lr_malloc0(size_t len);

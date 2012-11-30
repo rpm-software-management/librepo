@@ -43,7 +43,7 @@ lr_checksum_type(const char *type)
     if (len > MAX_CHECKSUM_NAME_LEN)
         return LR_CHECKSUM_UNKNOWN;
 
-    for (int x = 0; x <= len; x++)
+    for (size_t x = 0; x <= len; x++)
         type_lower[x] = tolower(type[x]);
 
     if (!strncmp(type_lower, "md", 2)) {
@@ -117,7 +117,7 @@ lr_checksum_fd(lr_ChecksumType type, int fd)
     EVP_DigestFinal_ex(ctx, raw_checksum, &len);
     EVP_MD_CTX_destroy(ctx);
     checksum = lr_malloc0(sizeof(char) * (len * 2 + 1));
-    for (int x = 0; x < len; x++)
+    for (size_t x = 0; x < len; x++)
         sprintf(checksum+(x*2), "%02x", raw_checksum[x]);
 
     return checksum;

@@ -17,7 +17,8 @@
  * USA.
  */
 
-#define _POSIX_SOURCE
+#define _POSIX_SOURCE   200112L
+#define _BSD_SOURCE
 
 #include <assert.h>
 #include <string.h>
@@ -66,6 +67,9 @@ lr_progress_func(void* ptr,
     double total_size = 0.0;
     lr_CallbackData cb_data = ptr;
     lr_SharedCallbackData scd_data = cb_data->scb_data;
+
+    LR_UNUSED(total_to_upload);
+    LR_UNUSED(now_uploaded);
 
     if (total_to_download) {
         if (!scd_data->counted[cb_data->id]) {
@@ -186,8 +190,6 @@ lr_curl_single_mirrored_download(lr_Handle handle,
         full_url = lr_pathconcat(url, filename, NULL);
         rc = lr_curl_single_download(handle, full_url, fd);
         lr_free(full_url);
-
-printf("%s\n", curl_easy_strerror(rc));
 
         if (rc == LRE_OK) {
             /* Download successful */
@@ -430,7 +432,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                         // Succeeded
                         t->downloaded = 1;
                     } else {
-                        DEBUGF(fprintf(stderr, "Bad HTTP/FTP code: %d\n", code));
+                        DEBUGF(fprintf(stderr, "Bad HTTP/FTP code: %ld\n", code));
                         failed = 1;
                     }
                 } else
