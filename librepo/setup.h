@@ -28,8 +28,10 @@ extern "C" {
 
 #ifdef DEBUG
 #define DEBUGF(x) x
+#define DPRINTF(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define DEBUGF(x) do {} while(0)  /* Just to force write ';' after DEBUGF() */
+#define DPRINTF(...) do {} while (0)
 #endif
 
 /* DEBUGASSERT is only for debuging.
