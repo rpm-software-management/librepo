@@ -318,6 +318,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     char *path;
     int rc = LRE_OK;
     int fd;
+    char *baseurl;
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
@@ -325,19 +326,23 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
+    baseurl = handle->baseurl;
 
     /* Do not duplicate repoata, just locate the local one */
-    if (strncmp(handle->baseurl, "file://", 7) &&
-        strstr(handle->baseurl, "://")) {
-        return LRE_NOTLOCAL;
+    if (strncmp(baseurl, "file://", 7)) {
+        if (strstr(baseurl, "://"))
+            return LRE_NOTLOCAL;
+    } else {
+        /* Skip file:// in baseurl */
+        baseurl = baseurl+7;
     }
 
     if (!handle->update) {
         /* Open and parse repomd */
-        path = lr_pathconcat(handle->baseurl, "repodata/repomd.xml", NULL);
+        path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
         fd = open(path, O_RDONLY);
         if (fd < 0) {
-            DEBUGF(fprintf(stderr, "%s doesn't exists\n", path));
+            DEBUGF(fprintf(stderr, "%s: open(%s): %s\n", __func__, path, strerror(errno)));
             lr_free(path);
             return LRE_IO;
         }
@@ -353,8 +358,8 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         close(fd);
 
         /* Fill result object */
-        result->destdir = lr_strdup(handle->baseurl);
-        repo->destdir = lr_strdup(handle->baseurl);
+        result->destdir = lr_strdup(baseurl);
+        repo->destdir = lr_strdup(baseurl);
         repo->repomd = path;
 
         DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repomd->revision));
@@ -364,51 +369,51 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     /* First condition !repo->* is for cases when handle->update is true,
      * then we don't need to generate paths we already have */
     if (!repo->primary && repomd->primary && handle->yumflags & LR_YUM_PRI)
-        repo->primary = lr_pathconcat(handle->baseurl,
+        repo->primary = lr_pathconcat(baseurl,
                             repomd->primary->location_href,
                             NULL);
     if (!repo->filelists && repomd->filelists && handle->yumflags & LR_YUM_FIL)
-        repo->filelists = lr_pathconcat(handle->baseurl,
+        repo->filelists = lr_pathconcat(baseurl,
                             repomd->filelists->location_href,
                             NULL);
     if (!repo->other && repomd->other && handle->yumflags & LR_YUM_OTH)
-        repo->other = lr_pathconcat(handle->baseurl,
+        repo->other = lr_pathconcat(baseurl,
                             repomd->other->location_href,
                             NULL);
     if (!repo->primary_db && repomd->primary_db && handle->yumflags & LR_YUM_PRIDB)
-        repo->primary_db = lr_pathconcat(handle->baseurl,
+        repo->primary_db = lr_pathconcat(baseurl,
                             repomd->primary_db->location_href,
                             NULL);
     if (!repo->filelists_db && repomd->filelists_db && handle->yumflags & LR_YUM_FILDB)
-        repo->filelists_db = lr_pathconcat(handle->baseurl,
+        repo->filelists_db = lr_pathconcat(baseurl,
                             repomd->filelists_db->location_href,
                             NULL);
     if (!repo->other_db && repomd->other_db && handle->yumflags & LR_YUM_OTHDB)
-        repo->other_db = lr_pathconcat(handle->baseurl,
+        repo->other_db = lr_pathconcat(baseurl,
                             repomd->other_db->location_href,
                             NULL);
     if (!repo->group && repomd->group && handle->yumflags & LR_YUM_GROUP)
-        repo->group = lr_pathconcat(handle->baseurl,
+        repo->group = lr_pathconcat(baseurl,
                             repomd->group->location_href,
                             NULL);
     if (!repo->group_gz && repomd->group_gz && handle->yumflags & LR_YUM_GROUPGZ)
-        repo->group_gz = lr_pathconcat(handle->baseurl,
+        repo->group_gz = lr_pathconcat(baseurl,
                             repomd->group_gz->location_href,
                             NULL);
     if (!repo->prestodelta && repomd->prestodelta && handle->yumflags & LR_YUM_PRESTODELTA)
-        repo->prestodelta = lr_pathconcat(handle->baseurl,
+        repo->prestodelta = lr_pathconcat(baseurl,
                             repomd->prestodelta->location_href,
                             NULL);
     if (!repo->deltainfo && repomd->deltainfo && handle->yumflags & LR_YUM_DELTAINFO)
-        repo->deltainfo = lr_pathconcat(handle->baseurl,
+        repo->deltainfo = lr_pathconcat(baseurl,
                             repomd->deltainfo->location_href,
                             NULL);
     if (!repo->updateinfo && repomd->updateinfo && handle->yumflags & LR_YUM_UPDATEINFO)
-        repo->updateinfo = lr_pathconcat(handle->baseurl,
+        repo->updateinfo = lr_pathconcat(baseurl,
                             repomd->updateinfo->location_href,
                             NULL);
     if (!repo->origin && repomd->origin && handle->yumflags & LR_YUM_ORIGIN)
-        repo->origin = lr_pathconcat(handle->baseurl,
+        repo->origin = lr_pathconcat(baseurl,
                             repomd->origin->location_href,
                             NULL);
 

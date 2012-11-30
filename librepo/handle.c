@@ -32,6 +32,7 @@
 #include "rcodes.h"
 #include "util.h"
 #include "yum.h"
+#include "version.h"
 
 lr_Handle
 lr_handle_init()
@@ -227,6 +228,10 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
 {
     int rc;
     assert(handle);
+
+    DPRINTF("Librepo version: %d.%d.%d\n", LR_VERSION_MAJOR,
+                                           LR_VERSION_MINOR,
+                                           LR_VERSION_PATCH);
 
     if (!result)
         return LRE_BADFUNCARG;
