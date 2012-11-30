@@ -21,6 +21,7 @@
 #define _BSD_SOURCE
 
 #include <assert.h>
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -108,23 +109,29 @@ lr_curl_single_download(lr_Handle handle,
     FILE *f = NULL;
     long status_code = 0;
 
-    if (!url)
+    if (!url) {
+        DPRINTF("%s: No url specified", __func__);
         return LRE_NOURL;
+    }
 
     c_h = curl_easy_duphandle(handle->curl_handle);
-    if (!c_h)
+    if (!c_h) {
+        DPRINTF("%s: Cannot dup CURL handle\n", __func__);
         return LRE_CURLDUP;
+    }
 
     c_rc = curl_easy_setopt(c_h, CURLOPT_URL, url);
     if (c_rc != CURLE_OK) {
         curl_easy_cleanup(c_h);
         handle->last_curl_error = c_rc;
+        DPRINTF("%s: curl_easy_setopt: %s\n", __func__, curl_easy_strerror(c_rc));
         return LRE_CURL;
     }
 
     f = fdopen(dup(fd), "w");
     if (!f) {
         curl_easy_cleanup(c_h);
+        DPRINTF("%s: fdopen: %s\n", __func__, strerror(errno));
         return LRE_IO;
     }
 
@@ -133,6 +140,7 @@ lr_curl_single_download(lr_Handle handle,
         curl_easy_cleanup(c_h);
         handle->last_curl_error = c_rc;
         fclose(f);
+        DPRINTF("%s: curl_easy_setopt: %s\n", __func__, curl_easy_strerror(c_rc));
         return LRE_CURL;
     }
 
@@ -141,6 +149,7 @@ lr_curl_single_download(lr_Handle handle,
         curl_easy_cleanup(c_h);
         handle->last_curl_error = c_rc;
         fclose(f);
+        DPRINTF("%s: curl_easy_perform: %s\n", __func__, curl_easy_strerror(c_rc));
         return LRE_CURL;
     }
 
@@ -151,6 +160,7 @@ lr_curl_single_download(lr_Handle handle,
     if (status_code && (status_code != 200 && status_code != 226)) {
         handle->status_code = status_code;
         curl_easy_cleanup(c_h);
+        DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
         return LRE_BADSTATUS;
     }
 
@@ -428,7 +438,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     long code = 0; // HTTP or FTP code
                     curl_easy_getinfo (msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
                     //if (code == 200 && msg->data.result != CURLE_ABORTED_BY_CALLBACK) {
-                    if (code == 200) {
+                    if (code && (code == 200 || code == 226)) {
                         // Succeeded
                         t->downloaded = 1;
                     } else {

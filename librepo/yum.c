@@ -18,8 +18,11 @@
  */
 
 #define _POSIX_SOURCE
+#define _BSD_SOURCE
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <unistd.h>
 #include <curl/curl.h>
@@ -434,9 +437,41 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     if (do_mirrorlist) {
         handle->internal_mirrorlist = lr_internalmirrorlist_new();
         /* Repository URL specified by user should the first element */
-        if (handle->baseurl)
-            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                             handle->baseurl);
+        if (handle->baseurl) {
+            if (strstr(handle->baseurl, "://")) {
+                /* Base URL has specified protocol */
+                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                                 handle->baseurl);
+            } else {
+                /* No protocol specified - if local path => prepend file:// */
+                if (handle->baseurl[0] == '/') {
+                    /* Base URL is absolute path */
+                    char *path_with_protocol;
+                    path_with_protocol = lr_strconcat("file://",
+                                                      handle->baseurl,
+                                                      NULL);
+                    lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                                     path_with_protocol);
+                    lr_free(path_with_protocol);
+                } else {
+                    /* Base URL is relative path */
+                    char *path_with_protocol;
+                    char *resolved_path = NULL;
+                    resolved_path = realpath(handle->baseurl, NULL);
+                    if (!resolved_path) {
+                        DPRINTF("%s: realpath: %s\n", __func__, strerror(errno));
+                        return LRE_BADURL;
+                    }
+                    path_with_protocol = lr_strconcat("file://",
+                                                      resolved_path,
+                                                      NULL);
+                    lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                                     path_with_protocol);
+                    free(resolved_path);
+                    lr_free(path_with_protocol);
+                }
+            }
+        }
     }
 
     if (do_mirrorlist && handle->mirrorlist) {
@@ -607,8 +642,10 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     repomd = result->yum_repomd;
 
     if (handle->local)
+        /* Do not duplicate repository, just use the existing local one */
         rc = lr_yum_use_local(handle, result);
     else
+        /* Download remote/Duplicate local repository */
         rc = lr_yum_download_remote(handle, result);
 
     if (rc != LRE_OK)

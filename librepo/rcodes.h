@@ -59,6 +59,7 @@ typedef enum {
     LRE_CANNOTCREATETMP,            /*!< cannot create tmp directory */
     LRE_UNKNOWNCHECKSUM,            /*!< unknown type of checksum is need to
                                          calculate to verify one or more file */
+    LRE_BADURL,                     /*!< bad URL specified */
     LRE_UNKNOWNERROR,               /*!< unknown error - sentinel of
                                          error codes enum */
 } lr_Rc; /*!< Return codes */
