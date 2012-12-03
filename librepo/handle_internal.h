@@ -35,6 +35,7 @@ struct _lr_Handle {
     char            *baseurl;       /*!< Base URL of repo */
     char            *mirrorlist;    /*!< Mirrorlist or metalink URL */
     lr_InternalMirrorlist internal_mirrorlist; /*!< List of mirrors */
+    lr_Metalink     metalink;       /*!< Parsed metalink for repomd.xml */
     int             local;          /*!< Do not duplicate local data */
     char            *used_mirror;   /*!< Finally used mirror (if any) */
     int             retries;        /*!< Number of maximum retries */

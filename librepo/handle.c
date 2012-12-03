@@ -68,6 +68,7 @@ lr_handle_free(lr_Handle handle)
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
     lr_internalmirrorlist_free(handle->internal_mirrorlist);
+    lr_metalink_free(handle->metalink);
     lr_free(handle);
 }
 
