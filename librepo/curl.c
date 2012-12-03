@@ -232,7 +232,8 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 {
     int not = lr_curltargetlist_len(targets);  /* Number Of Targets */
     int nom;            /* Number Of Mirrors */
-    int ret = LRE_OK;
+    int ret = LRE_OK, last_ret = LRE_OK;
+    int failed_downloads;
     CURL *curl_easy_interfaces[not];
     FILE *open_files[not];
     CURLMcode cm_rc;
@@ -272,11 +273,12 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         int used = 0;
         char *mirror = lr_internalmirrorlist_get_url(iml, i);
         int still_running;  /* Number of still running downloads */
-        int failed_downloads = 0;
         CURLMsg *msg;  /* for picking up messages with the transfer status */
         int msgs_left; /* how many messages are left */
 
         DEBUGF(fprintf(stderr, "Using mirror %s\n", mirror));
+
+        failed_downloads = 0;
 
         cm_h = curl_multi_init();
         if (!cm_h) {
@@ -438,15 +440,18 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     long code = 0; // HTTP or FTP code
                     curl_easy_getinfo (msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
                     //if (code == 200 && msg->data.result != CURLE_ABORTED_BY_CALLBACK) {
-                    if (code && (code == 200 || code == 226)) {
+                    if (!code || (code == 200 || code == 226)) {
                         // Succeeded
                         t->downloaded = 1;
                     } else {
                         DEBUGF(fprintf(stderr, "Bad HTTP/FTP code: %ld\n", code));
                         failed = 1;
+                        last_ret = LRE_BADSTATUS;
                     }
-                } else
+                } else {
                     failed = 1;
+                    last_ret = LRE_CURL;
+                }
 
                 if (failed) {
                     failed_downloads++;
@@ -477,6 +482,10 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 
 cleanup:
     DEBUGF(fprintf(stderr, "Cleanup\n"));
+
+    if (failed_downloads != 0)
+        /* At least one file cannot be downloaded from any mirror */
+        ret = last_ret;
 
     lr_free(shared_cb_data.counted);
     if (cm_h)
