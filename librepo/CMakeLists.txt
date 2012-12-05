@@ -11,21 +11,21 @@ SET (librepo_SRCS
      result.c
      librepo.c
      internal_mirrorlist.c
-     curltargetlist.c)
+     curltargetlist.c
+     package_downloader.c
+     rcodes.c)
 
 SET(librepo_HEADERS
     librepo.h
-    metalink.h
-    util.h
-    mirrorlist.h
-    yum.h
-    repomd.h
-    curl.h
-    checksum.h
-    setup.h
-    repoutil_yum.h
+    rcodes.h
+    types.h
     handle.h
-    result.h)
+    result.h
+    yum.h
+    util.h
+    checksum.h
+    repoutil_yum.h
+    package_downloader.h)
 
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
 TARGET_LINK_LIBRARIES(librepo ${EXPAT_LIBRARIES})
