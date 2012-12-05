@@ -499,11 +499,15 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
 
         len = read(fd, (void *) buf, CHUNK_SIZE);
         if (len < 0) {
+            DPRINTF("%s: Cannot read repomd for parsing : %s\n",
+                    __func__, strerror(errno));
             ret = LRE_IO;
             break;
         }
 
         if (!XML_ParseBuffer(parser, len, len == 0)) {
+            DPRINTF("%s: repomd parsing error: %s\n",
+                    __func__, XML_ErrorString(XML_GetErrorCode(parser)));
             ret = LRE_REPOMDXML;
             break;
         }

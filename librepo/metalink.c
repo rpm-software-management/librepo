@@ -18,6 +18,8 @@
  */
 
 #include <assert.h>
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -212,10 +214,12 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
     case STATE_FILE: {
         const char *name = lr_find_attr("name", atts);
         if (!name) {
+            DPRINTF("%s: file element doesn't have name attribute\n", __func__);
             pd->ret = LRE_MLXML;
             break;
         }
         if (strcmp(name, "repomd.xml")) {
+            DPRINTF("%s: file element name attribute is not \"repomd.xml\"\n", __func__);
             pd->ret = LRE_MLBAD;
             break;
         }
@@ -231,6 +235,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
         lr_MetalinkHash mh;
         const char *type = lr_find_attr("type", atts);
         if (!type) {
+            DPRINTF("%s: hash element doesn't have type attribute\n", __func__);
             pd->ret = LRE_MLXML;
             break;
         }
@@ -327,6 +332,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 
     case STATE_HASH:
         if (!pd->metalink->noh) {
+            DPRINTF("%s: there are no checksums", __func__);
             pd->ret = LRE_MLXML;
             break;
         }
@@ -335,6 +341,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 
     case STATE_URL:
         if (!pd->metalink->nou) {
+            DPRINTF("%s: there are no urls", __func__);
             pd->ret = LRE_MLXML;
             break;
         }
@@ -397,11 +404,15 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
 
         len = read(fd, (void *) buf, CHUNK_SIZE);
         if (len < 0) {
+            DPRINTF("%s: Cannot read for parsing : %s\n",
+                    __func__, strerror(errno));
             ret = LRE_IO;
             break;
         }
 
         if (!XML_ParseBuffer(parser, len, len == 0)) {
+            DPRINTF("%s: parsing error: %s\n",
+                    __func__, XML_ErrorString(XML_GetErrorCode(parser)));
             ret = LRE_MLXML;
             break;
         }

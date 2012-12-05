@@ -19,6 +19,7 @@
 
 #define _POSIX_SOURCE
 
+#include <errno.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -71,8 +72,10 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
     DEBUGASSERT(fd >= 0);
 
     f = fdopen(dup(fd), "r");
-    if (!f)
+    if (!f) {
+        DPRINTF("%s: Cannot fdopen(mirrorlist_fd): %s\n", __func__, strerror(errno));
         return LRE_IO;
+    }
 
     while ((p = fgets(buf, BUF_LEN, f))) {
         int l;
