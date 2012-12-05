@@ -30,6 +30,10 @@ extern "C" {
 #include "handle.h"
 #include "result.h"
 #include "yum.h"
+#include "util.h"
+#include "checksum.h"
+#include "repoutil_yum.h"
+#include "package_downloader.h"
 
 void lr_global_init();
 void lr_global_cleanup();
