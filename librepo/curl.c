@@ -221,12 +221,12 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
     if (mirrors < 1)
         return LRE_NOURL;
 
-    DEBUGF(fprintf(stderr, "Downloading %s\n", filename));
+    DPRINTF("%s: Downloading %s\n", __func__, filename);
 
     for (int x=0; x < mirrors; x++) {
         char *full_url;
         char *url = lr_internalmirrorlist_get_url(iml, x);
-        DEBUGF(fprintf(stderr, "Trying mirror: %s\n", url));
+        DPRINTF("%s: Trying mirror: %s\n", __func__, url);
 
         lseek(fd, 0, SEEK_SET);
         if (offset == 0)
@@ -238,14 +238,14 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
 
         if (rc == LRE_OK) {
             /* Download successful */
-            DEBUGF(fprintf(stderr, "Download successful\n"));
+            DPRINTF("%s: Download successful\n", __func__);
 
             /* Check checksum */
             if (checksum && checksum_type != LR_CHECKSUM_UNKNOWN) {
-                DEBUGF(fprintf(stderr, "Checking checksum\n"));
+                DPRINTF("%s: Checking checksum\n", __func__);
                 lseek(fd, 0, SEEK_SET);
                 if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
-                    DEBUGF(fprintf(stderr, "Bad checksum\n"));
+                    DPRINTF("%s: Bad checksum\n", __func__);
                     rc = LRE_BADCHECKSUM;
                     if (offset) {
                         /* If download was successfull but checksum doesn't match
@@ -264,7 +264,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             handle->used_mirror = lr_strdup(url);
             break;
         } else {
-            DEBUGF(fprintf(stderr, "Download rc: %d\n", rc));
+            DPRINTF("%s: Download rc: %d\n", __func__, rc);
         }
     }
 
@@ -321,7 +321,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         CURLMsg *msg;  /* for picking up messages with the transfer status */
         int msgs_left; /* how many messages are left */
 
-        DEBUGF(fprintf(stderr, "Using mirror %s\n", mirror));
+        DPRINTF("%s: Using mirror %s\n", __func__, mirror);
 
         failed_downloads = 0;
 
@@ -331,7 +331,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             goto cleanup;
         }
 
-        DEBUGF(fprintf(stderr, "CURL multi handle targets:\n"));
+        DPRINTF("%s: CURL multi handle targets:\n", __func__);
         for (int x = 0; x < not; x++) {
             /*  Prepare curl_easy_handlers for every target (file) which
              *  haven't been already downloaded */
@@ -351,7 +351,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             c_h = curl_easy_duphandle(handle->curl_handle);
             if (!c_h) {
                 ret = LRE_CURLDUP;
-                DEBUGF(fprintf(stderr, "Cannot dup CURL handle\n"));
+                DPRINTF("%s: Cannot dup CURL handle\n", __func__);
                 goto cleanup;
             }
             curl_easy_interfaces[x] = c_h;
@@ -361,20 +361,20 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             f = fdopen(dup(t->fd), "w");
             if (!f) {
                 ret = LRE_IO;
-                DEBUGF(fprintf(stderr, "Cannot dup fd %d\n", t->fd));
+                DPRINTF("%s: Cannot dup fd %d\n", __func__, t->fd);
                 goto cleanup;
             }
             open_files[x] = f;
 
             url = lr_pathconcat(mirror, t->path, NULL);
-            DEBUGF(fprintf(stderr, "  %s\n", url));
+            DPRINTF("%s:  %s\n", __func__, url);
 
             c_rc = curl_easy_setopt(c_h, CURLOPT_URL, url);
             lr_free(url);
             if (c_rc != CURLE_OK) {
                 handle->last_curl_error = c_rc;
                 ret = LRE_CURLDUP;
-                DEBUGF(fprintf(stderr, "Cannot set CURLOPT_URL\n"));
+                DPRINTF("%s: Cannot set CURLOPT_URL\n", __func__);
                 goto cleanup;
             }
 
@@ -382,7 +382,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             if (c_rc != CURLE_OK) {
                 handle->last_curl_error = c_rc;
                 ret = LRE_CURLDUP;
-                DEBUGF(fprintf(stderr, "Cannot set CURLOPT_WRITEDATA\n"));
+                DPRINTF("%s: Cannot set CURLOPT_WRITEDATA\n", __func__);
                 goto cleanup;
             }
 
@@ -401,19 +401,19 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             if (cm_rc != CURLM_OK) {
                 handle->last_curlm_error = cm_rc;
                 ret = LRE_CURLM;
-                DEBUGF(fprintf(stderr, "Cannot add curl_easy hadle to multi handle\n"));
+                DPRINTF("%s: Cannot add curl_easy hadle to multi handle\n", __func__);
                 goto cleanup;
             }
             used++;
         }
 
         if (used == 0) {
-            DEBUGF(fprintf(stderr, "All files were downloaded\n"));
+            DPRINTF("%s: All files were downloaded\n", __func__);
             break;  /* Nothing to download */
         }
 
         /* Perform */
-        DEBUGF(fprintf(stderr, "curl_multi_perform\n"));
+        DPRINTF("%s: curl_multi_perform\n", __func__);
         curl_multi_perform(cm_h, &still_running);
 
         do {
@@ -445,7 +445,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             /* Get filedescriptors from the transfers */
             cm_rc = curl_multi_fdset(cm_h, &fdread, &fdwrite, &fdexcep, &maxfd);
             if (cm_rc != CURLM_OK) {
-                DEBUGF(fprintf(stderr, "curl_multi_fdset() error: %d\n", cm_rc));
+                DPRINTF("%s: curl_multi_fdset() error: %d\n", __func__, cm_rc);
                 handle->last_curlm_error = cm_rc;
                 ret = LRE_CURLM;
                 goto cleanup;
@@ -480,9 +480,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                         break;
                 }
 
-                DEBUGF(fprintf(stderr, "Download status: %d (%s)\n",
-                               msg->data.result,
-                               t->path));
+                DPRINTF("%s: Download status: %d (%s)\n", __func__, msg->data.result, t->path);
 
                 if (msg->data.result == CURLE_OK) {
                     long code = 0; // HTTP or FTP code
@@ -492,7 +490,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                         // Succeeded
                         t->downloaded = 1;
                     } else {
-                        DEBUGF(fprintf(stderr, "Bad HTTP/FTP code: %ld\n", code));
+                        DPRINTF("%s: Bad HTTP/FTP code: %ld\n", __func__, code);
                         failed = 1;
                         last_ret = LRE_BADSTATUS;
                         last_code = code;
@@ -530,7 +528,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
     } /* End of iteration over mirrors */
 
 cleanup:
-    DEBUGF(fprintf(stderr, "Cleanup\n"));
+    DPRINTF("%s: Cleanup\n", __func__);
 
     if (failed_downloads != 0) {
         /* At least one file cannot be downloaded from any mirror */

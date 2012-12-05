@@ -99,7 +99,7 @@ lr_yum_download_repomd(lr_Handle handle,
     char *checksum = NULL;
 
 
-   DEBUGF(fprintf(stderr, "Downloading repomd.xml via mirrorlist\n"));
+    DPRINTF("%s: Downloading repomd.xml via mirrorlist\n", __func__);
 
     if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
         /* Select the best checksum type */
@@ -126,7 +126,7 @@ lr_yum_download_repomd(lr_Handle handle,
 
     if (rc != LRE_OK) {
         /* Download of repomd.xml was not successful */
-        DEBUGF(fprintf(stderr, "repomd.xml download was unsuccessful"));
+        DPRINTF("%s: repomd.xml download was unsuccessful", __func__);
         return rc;
     }
 
@@ -222,22 +222,22 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
     expected_checksum = rec->checksum;
     checksum_type = lr_checksum_type(rec->checksum_type);
 
-    DEBUGF(fprintf(stderr, "Checking checksum of %s (expected: %s [%s])\n",
-                           path, expected_checksum, rec->checksum_type));
+    DPRINTF("%s: Checking checksum of %s (expected: %s [%s])\n",
+                       __func__, path, expected_checksum, rec->checksum_type);
 
     if (!expected_checksum) {
-        DEBUGF(fprintf(stderr, "No checksum in repomd\n"));
+        DPRINTF("%s: No checksum in repomd\n", __func__);
         return LRE_OK;  /* Empty checksum - suppose it's ok */
     }
 
     if (checksum_type == LR_CHECKSUM_UNKNOWN) {
-        DEBUGF(fprintf(stderr, "Unknown checksum: %s\n", rec->checksum_type));
+        DPRINTF("%s: Unknown checksum: %s\n", __func__, rec->checksum_type);
         return LRE_UNKNOWNCHECKSUM;
     }
 
     fd = open(path, O_RDONLY);
     if (fd < 0) {
-        DEBUGF(fprintf(stderr, "Cannot open %s\n", path));
+        DPRINTF("%s: Cannot open %s\n", __func__, path);
         return LRE_IO;
     }
 
@@ -246,11 +246,11 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
     close(fd);
 
     if (ret) {
-        DEBUGF(fprintf(stderr, "Checksum check - Failed\n"));
+        DPRINTF("%s: Checksum check - Failed\n", __func__);
         return LRE_BADCHECKSUM;
     }
 
-    DEBUGF(fprintf(stderr, "Checksum check - Passed\n"));
+    DPRINTF("%s: Checksum check - Passed\n", __func__);
 
     return LRE_OK;
 }
@@ -262,51 +262,51 @@ lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
 
     ret = lr_yum_check_checksum_of_md_record(repomd->primary,
                                              repo->primary);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (primary)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (primary)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->filelists,
                                              repo->filelists);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (filelists)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (filelists)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->other,
                                              repo->other);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (other)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (other)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->primary_db,
                                              repo->primary_db);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (primary_db)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (primary_db)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->filelists_db,
                                              repo->filelists_db);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (filelists_db)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (filelists_db)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->other_db,
                                              repo->other_db);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (other_db)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (other_db)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->group,
                                              repo->group);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (group)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (group)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->group_gz,
                                              repo->group_gz);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (group_gz)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (group_gz)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->prestodelta,
                                              repo->prestodelta);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (prestodelta)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (prestodelta)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->deltainfo,
                                              repo->deltainfo);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (deltainfo)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (deltainfo)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->updateinfo,
                                              repo->updateinfo);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (updateinfo)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (updateinfo)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
     ret = lr_yum_check_checksum_of_md_record(repomd->origin,
                                              repo->origin);
-    DEBUGF(fprintf(stderr, "Checksum rc: %d (origin)\n", ret));
+    DPRINTF("%s: Checksum rc: %d (origin)\n", __func__, ret);
     if (ret != LRE_OK) return ret;
 
     return LRE_OK;
@@ -322,7 +322,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
-    DEBUGF(fprintf(stderr, "Locating repo..\n"));
+    DPRINTF("%s: Locating repo..\n", __func__);
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
@@ -342,15 +342,15 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
         fd = open(path, O_RDONLY);
         if (fd < 0) {
-            DEBUGF(fprintf(stderr, "%s: open(%s): %s\n", __func__, path, strerror(errno)));
+            DPRINTF("%s: open(%s): %s\n", __func__, path, strerror(errno));
             lr_free(path);
             return LRE_IO;
         }
 
-        DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
+        DPRINTF("%s: Parsing repomd.xml\n", __func__);
         rc = lr_yum_repomd_parse_file(repomd, fd);
         if (rc != LRE_OK) {
-            DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
+            DPRINTF("%s: Parsing unsuccessful (%d)\n", __func__, rc);
             lr_free(path);
             return rc;
         }
@@ -362,7 +362,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         repo->destdir = lr_strdup(baseurl);
         repo->repomd = path;
 
-        DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repomd->revision));
+        DPRINTF("%s: Repomd revision: %s\n", __func__, repomd->revision);
     }
 
     /* Locate rest of metadata files */
@@ -417,7 +417,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
                             repomd->origin->location_href,
                             NULL);
 
-    DEBUGF(fprintf(stderr, "Repository was successfully located\n"));
+    DPRINTF("%s: Repository was successfully located\n", __func__);
     return LRE_OK;
 }
 
@@ -431,7 +431,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
-    DEBUGF(fprintf(stderr, "Downloading/Copying repo..\n"));
+    DPRINTF("%s: Downloading/Copying repo..\n", __func__);
 
     rc = lr_handle_prepare_internal_mirrorlist(handle, "repodata/repomd.xml");
     if (rc != LRE_OK)
@@ -478,11 +478,11 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         lseek(fd, 0, SEEK_SET);
 
         /* Parse repomd */
-        DEBUGF(fprintf(stderr, "Parsing repomd.xml\n"));
+        DPRINTF("%s: Parsing repomd.xml\n", __func__);
         rc = lr_yum_repomd_parse_file(repomd, fd);
         close(fd);
         if (rc != LRE_OK) {
-            DEBUGF(fprintf(stderr, "Parsing unsuccessful (%d)\n", rc));
+            DPRINTF("%s: Parsing unsuccessful (%d)\n", __func__, rc);
             lr_free(path);
             return rc;
         }
@@ -496,14 +496,14 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         else
             repo->url = lr_strdup(handle->baseurl);
 
-        DEBUGF(fprintf(stderr, "Repomd revision: %s\n", repomd->revision));
+        DPRINTF("%s: Repomd revision: %s\n", repomd->revision, __func__);
     }
 
     /* Download rest of metadata files */
     if ((rc = lr_yum_download_repo(handle, repo, repomd)) != LRE_OK)
         return rc;
 
-    DEBUGF(fprintf(stderr, "Repository was successfully downloaded\n"));
+    DPRINTF("%s: Repository was successfully downloaded\n", __func__);
     return LRE_OK;
 }
 
@@ -554,7 +554,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     if (handle->checks & LR_CHECK_CHECKSUM) {
         if ((rc = lr_yum_check_repo_checksums(repo, repomd)) != LRE_OK)
             return rc;
-        DEBUGF(fprintf(stderr, "All checksums in repository seems to be valid\n"));
+        DPRINTF("%s: All checksums in repository seems to be valid\n", __func__);
     }
 
     return rc;

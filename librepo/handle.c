@@ -322,34 +322,34 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
 
         if (strstr(handle->mirrorlist, "metalink")) {
             /* Metalink */
-            DEBUGF(fprintf(stderr, "Got metalink\n"));
+            DPRINTF("%s: Got metalink\n", __func__);
 
             /* Parse metalink */
             metalink = lr_metalink_init();
             rc = lr_metalink_parse_file(metalink, mirrors_fd);
             if (rc != LRE_OK) {
-                DEBUGF(fprintf(stderr, "Cannot parse metalink (%d)\n", rc));
+                DPRINTF("%s: Cannot parse metalink (%d)\n", __func__, rc);
                 goto mirrorlist_error;
             }
 
             if (metalink->nou <= 0) {
-                DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
+                DPRINTF("%s: No URLs in metalink (%d)\n", __func__, rc);
                 rc = LRE_MLBAD;
                 goto mirrorlist_error;
             }
         } else {
             /* Mirrorlist */
-            DEBUGF(fprintf(stderr, "Got mirrorlist\n"));
+            DPRINTF("%s: Got mirrorlist\n", __func__);
 
             mirrorlist = lr_mirrorlist_init();
             rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
             if (rc != LRE_OK) {
-                DEBUGF(fprintf(stderr, "Cannot parse mirrorlist (%d)\n", rc));
+                DPRINTF("%s: Cannot parse mirrorlist (%d)\n", __func__, rc);
                 goto mirrorlist_error;
             }
 
             if (mirrorlist->nou <= 0) {
-                DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
+                DPRINTF("%s: No URLs in mirrorlist (%d)\n", __func__, rc);
                 rc = LRE_MLBAD;
                 goto mirrorlist_error;
             }
@@ -411,15 +411,15 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
             return LRE_CANNOTCREATETMP;
     }
 
-    DEBUGF(fprintf(stderr, "Using dir: %s\n", handle->destdir));
+    DPRINTF("%s: Using dir: %s\n", __func__, handle->destdir);
 
     switch (handle->repotype) {
     case LR_YUMREPO:
-        DEBUGF(fprintf(stderr, "Downloading/Locating yum repo\n"));
+        DPRINTF("%s: Downloading/Locating yum repo\n", __func__);
         rc = lr_yum_perform(handle, result);
         break;
     default:
-        DEBUGF(fprintf(stderr, "Bad repo type\n"));
+        DPRINTF("%s: Bad repo type\n", __func__);
         assert(0);
         break;
     };
