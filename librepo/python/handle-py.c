@@ -28,11 +28,14 @@
 #include "result-py.h"
 
 #define RETURN_ERROR(res, h) do { \
-    const char *curlerr = NULL, *curlmerr = NULL;  \
-    if ((h) && (res) == LRE_CURL) curlerr = lr_handle_last_curl_strerror((h)); \
-    if ((h) && (res) == LRE_CURLM) curlmerr = lr_handle_last_curlm_strerror((h)); \
-    if (curlerr || curlmerr) \
-        PyErr_Format(LrErr_Exception, "%d: %s: %s", (res), lr_strerror((res)), (curlerr ? curlerr : curlmerr)); \
+    const char *nexterr = NULL;  \
+    if ((h) && (res) == LRE_CURL) nexterr = lr_handle_last_curl_strerror((h)); \
+    if ((h) && (res) == LRE_CURLM) nexterr = lr_handle_last_curlm_strerror((h)); \
+    \
+    if ((h) && (res) == LRE_BADSTATUS) \
+        PyErr_Format(LrErr_Exception, "%d: %s: %ld", (res), lr_strerror((res)), lr_handle_last_bad_status_code((h))); \
+    else if (nexterr) \
+        PyErr_Format(LrErr_Exception, "%d: %s: %s", (res), lr_strerror((res)), nexterr); \
     else \
         PyErr_Format(LrErr_Exception, "%d: %s", (res), lr_strerror((res))); \
     return NULL; \

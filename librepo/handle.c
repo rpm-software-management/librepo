@@ -238,6 +238,12 @@ lr_handle_last_curlm_error(lr_Handle handle)
     return handle->last_curlm_error;
 }
 
+long
+lr_handle_last_bad_status_code(lr_Handle handle)
+{
+    return handle->status_code;
+}
+
 const char *
 lr_handle_last_curl_strerror(lr_Handle handle)
 {
