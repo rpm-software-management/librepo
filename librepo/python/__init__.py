@@ -85,6 +85,16 @@ LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
 LRR_YUM_REPOMD  = _librepo.LRR_YUM_REPOMD
 LRR_SENTINEL    = _librepo.LRR_SENTINEL
 
+CHECKSUM_UNKNOWN    = _librepo.CHECKSUM_UNKNOWN
+CHECKSUM_MD2        = _librepo.CHECKSUM_MD2
+CHECKSUM_MD5        = _librepo.CHECKSUM_MD5
+CHECKSUM_SHA        = _librepo.CHECKSUM_SHA
+CHECKSUM_SHA1       = _librepo.CHECKSUM_SHA1
+CHECKSUM_SHA224     = _librepo.CHECKSUM_SHA224
+CHECKSUM_SHA256     = _librepo.CHECKSUM_SHA256
+CHECKSUM_SHA384     = _librepo.CHECKSUM_SHA384
+CHECKSUM_SHA512     = _librepo.CHECKSUM_SHA512
+
 class Handle(_librepo.Handle):
     def update(self, val):
         self.setopt(LRO_UPDATE, val)
@@ -126,4 +136,6 @@ class Handle(_librepo.Handle):
         self.setopt(LRO_CHECKSUM, val)
     def yumrepoflags(self, val):
         self.setopt(LRO_YUMREPOFLAGS, val)
+    def download(self, url, checksum_type=0, checksum=None, dest=None, resume=0):
+        self.download_package(url, checksum_type, checksum, dest, resume)
 

@@ -33,6 +33,9 @@ PyObject_FromYumRepo(lr_YumRepo repo)
 {
     PyObject *dict;
 
+    if (!repo)
+        Py_RETURN_NONE;
+
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
@@ -83,6 +86,9 @@ PyObject *
 PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
 {
     PyObject *dict, *list;
+
+    if (!repomd)
+        Py_RETURN_NONE;
 
     if ((dict = PyDict_New()) == NULL)
         return NULL;

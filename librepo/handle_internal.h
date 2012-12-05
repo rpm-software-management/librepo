@@ -50,6 +50,10 @@ struct _lr_Handle {
     void            *user_data;     /*!< User data for callback */
 };
 
+int lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
+                                          const char *metalink_suffix);
+
+
 #ifdef __cplusplus
 }
 #endif

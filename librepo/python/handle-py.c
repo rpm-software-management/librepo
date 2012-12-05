@@ -27,8 +27,14 @@
 #include "handle-py.h"
 #include "result-py.h"
 
-#define RETURN_ERROR(res) do { \
-    PyErr_Format(LrErr_Exception, "%d %s", (res), "Error"); \
+#define RETURN_ERROR(res, h) do { \
+    const char *curlerr = NULL, *curlmerr = NULL;  \
+    if ((h) && (res) == LRE_CURL) curlerr = lr_handle_last_curl_strerror((h)); \
+    if ((h) && (res) == LRE_CURLM) curlmerr = lr_handle_last_curlm_strerror((h)); \
+    if (curlerr || curlmerr) \
+        PyErr_Format(LrErr_Exception, "%d: %s: %s", (res), lr_strerror((res)), (curlerr ? curlerr : curlmerr)); \
+    else \
+        PyErr_Format(LrErr_Exception, "%d: %s", (res), lr_strerror((res))); \
     return NULL; \
 } while (0)
 
@@ -238,7 +244,7 @@ setopt(_HandleObject *self, PyObject *args)
         self->progress_cb = obj;
         res = lr_handle_setopt(self->handle, (lr_HandleOption)option, progress_callback);
         if (res != LRE_OK)
-            RETURN_ERROR(res);
+            RETURN_ERROR(res, self->handle);
         res = lr_handle_setopt(self->handle, LRO_PROGRESSDATA, self);
         break;
     }
@@ -261,7 +267,7 @@ setopt(_HandleObject *self, PyObject *args)
     }
 
     if (res != LRE_OK)
-        RETURN_ERROR(res);
+        RETURN_ERROR(res, self->handle);
     Py_RETURN_NONE;
 }
 
@@ -281,7 +287,32 @@ perform(_HandleObject *self, PyObject *args)
 
     ret = lr_handle_perform(self->handle, result);
     if (ret != LRE_OK)
-        RETURN_ERROR(ret);
+        RETURN_ERROR(ret, self->handle);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+download_package(_HandleObject *self, PyObject *args)
+{
+    PyObject *result_obj;
+    int ret;
+    char *relative_url, *checksum, *dest;
+    int resume, checksum_type;
+
+    if (!PyArg_ParseTuple(args, "sizzi:download_package", &relative_url,
+                                                          &checksum_type,
+                                                          &checksum,
+                                                          &dest,
+                                                          &resume))
+        return NULL;
+    if (check_HandleStatus(self))
+        return NULL;
+
+    ret = lr_download_package(self->handle, relative_url, checksum_type,
+                              checksum, dest, resume);
+    if (ret != LRE_OK)
+        RETURN_ERROR(ret, self->handle);
 
     Py_RETURN_NONE;
 }
@@ -290,6 +321,7 @@ static struct
 PyMethodDef handle_methods[] = {
     { "setopt", (PyCFunction)setopt, METH_VARARGS, NULL },
     { "perform", (PyCFunction)perform, METH_VARARGS, NULL },
+    { "download_package", (PyCFunction)download_package, METH_VARARGS, NULL },
     { NULL }
 };
 

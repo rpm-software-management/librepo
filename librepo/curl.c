@@ -100,9 +100,10 @@ lr_progress_func(void* ptr,
 /* End of callback stuff */
 
 int
-lr_curl_single_download(lr_Handle handle,
-                        const char *url,
-                        int fd)
+lr_curl_single_download_resume(lr_Handle handle,
+                               const char *url,
+                               int fd,
+                               long offset)
 {
     CURLcode c_rc = CURLE_OK;
     CURL *c_h = NULL;
@@ -144,8 +145,33 @@ lr_curl_single_download(lr_Handle handle,
         return LRE_CURL;
     }
 
+    /* Set offset for resume download if offset param is passed */
+    if (offset != 0) {
+        DPRINTF("%s: download resume offset: %ld\n", __func__, offset);
+        if (offset == -1) {
+            /* determine offset */
+            fseek(f, 0L, SEEK_END);
+            offset = ftell(f);
+            DPRINTF("%s: determined offset for download resume: %ld\n",
+                    __func__, offset);
+        }
+
+        c_rc = curl_easy_setopt(c_h, CURLOPT_RESUME_FROM, offset);
+        if (c_rc != CURLE_OK) {
+            curl_easy_cleanup(c_h);
+            handle->last_curl_error = c_rc;
+            fclose(f);
+            DPRINTF("%s: curl_easy_setopt: %s\n", __func__, curl_easy_strerror(c_rc));
+            return LRE_CURL;
+        }
+    }
+
     c_rc = curl_easy_perform(c_h);
     if (c_rc != CURLE_OK) {
+        /* Discart all downloaded data which were downloaded now (truncate) */
+        /* The downloaded data are problably only server error message! */
+        lseek(fd, offset, SEEK_SET);
+        ftruncate(fd, offset);
         curl_easy_cleanup(c_h);
         handle->last_curl_error = c_rc;
         fclose(f);
@@ -157,10 +183,17 @@ lr_curl_single_download(lr_Handle handle,
 
     /* Check status code */
     curl_easy_getinfo(c_h, CURLINFO_RESPONSE_CODE, &status_code);
-    if (status_code && (status_code != 200 && status_code != 226)) {
+    if (status_code && offset && status_code == 206) {
+        /* 206 (Partial Content) */
+        ;
+    } else if (status_code && (status_code != 200 && status_code != 226)) {
         handle->status_code = status_code;
-        curl_easy_cleanup(c_h);
         DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
+        /* Discart all downloaded data which were downloaded now (truncate) */
+        /* The downloaded data are problably only server error message! */
+        lseek(fd, offset, SEEK_SET);
+        ftruncate(fd, offset);
+        curl_easy_cleanup(c_h);
         return LRE_BADSTATUS;
     }
 
@@ -170,11 +203,12 @@ lr_curl_single_download(lr_Handle handle,
 }
 
 int
-lr_curl_single_mirrored_download(lr_Handle handle,
-                                 const char *filename,
-                                 int fd,
-                                 lr_ChecksumType checksum_type,
-                                 const char *checksum)
+lr_curl_single_mirrored_download_resume(lr_Handle handle,
+                                        const char *filename,
+                                        int fd,
+                                        lr_ChecksumType checksum_type,
+                                        const char *checksum,
+                                        long offset)
 {
     int rc;
     int mirrors;
@@ -195,10 +229,11 @@ lr_curl_single_mirrored_download(lr_Handle handle,
         DEBUGF(fprintf(stderr, "Trying mirror: %s\n", url));
 
         lseek(fd, 0, SEEK_SET);
-        ftruncate(fd, 0);
+        if (offset == 0)
+            ftruncate(fd, 0);
 
         full_url = lr_pathconcat(url, filename, NULL);
-        rc = lr_curl_single_download(handle, full_url, fd);
+        rc = lr_curl_single_download_resume(handle, full_url, fd, offset);
         lr_free(full_url);
 
         if (rc == LRE_OK) {
@@ -212,6 +247,15 @@ lr_curl_single_mirrored_download(lr_Handle handle,
                 if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
                     DEBUGF(fprintf(stderr, "Bad checksum\n"));
                     rc = LRE_BADCHECKSUM;
+                    if (offset) {
+                        /* If download was successfull but checksum doesn't match
+                         * In next run, do not try to resume download and download
+                         * whole file instead*/
+                        offset = 0;
+                        /* Try againt this mirror, but this time download
+                         * whole file (no resume) */
+                        x--;
+                    }
                     continue; /* Try next mirror */
                 }
             }
@@ -233,7 +277,8 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
     int not = lr_curltargetlist_len(targets);  /* Number Of Targets */
     int nom;            /* Number Of Mirrors */
     int ret = LRE_OK, last_ret = LRE_OK;
-    int failed_downloads;
+    long last_code = 0; // last error HTTP of FTP return code
+    int failed_downloads = 0;
     CURL *curl_easy_interfaces[not];
     FILE *open_files[not];
     CURLMcode cm_rc;
@@ -286,9 +331,10 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             goto cleanup;
         }
 
-        /*  Prepare curl_easy_handlers for every file */
         DEBUGF(fprintf(stderr, "CURL multi handle targets:\n"));
         for (int x = 0; x < not; x++) {
+            /*  Prepare curl_easy_handlers for every target (file) which
+             *  haven't been already downloaded */
             FILE *f;
             char *url;
             CURL *c_h;
@@ -326,6 +372,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             c_rc = curl_easy_setopt(c_h, CURLOPT_URL, url);
             lr_free(url);
             if (c_rc != CURLE_OK) {
+                handle->last_curl_error = c_rc;
                 ret = LRE_CURLDUP;
                 DEBUGF(fprintf(stderr, "Cannot set CURLOPT_URL\n"));
                 goto cleanup;
@@ -333,6 +380,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 
             c_rc = curl_easy_setopt(c_h, CURLOPT_WRITEDATA, f);
             if (c_rc != CURLE_OK) {
+                handle->last_curl_error = c_rc;
                 ret = LRE_CURLDUP;
                 DEBUGF(fprintf(stderr, "Cannot set CURLOPT_WRITEDATA\n"));
                 goto cleanup;
@@ -447,6 +495,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                         DEBUGF(fprintf(stderr, "Bad HTTP/FTP code: %ld\n", code));
                         failed = 1;
                         last_ret = LRE_BADSTATUS;
+                        last_code = code;
                     }
                 } else {
                     failed = 1;
@@ -483,9 +532,13 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 cleanup:
     DEBUGF(fprintf(stderr, "Cleanup\n"));
 
-    if (failed_downloads != 0)
+    if (failed_downloads != 0) {
         /* At least one file cannot be downloaded from any mirror */
-        ret = last_ret;
+        if (last_ret != LRE_OK)
+            ret = last_ret;
+        if (last_code != 0)
+            handle->status_code = last_code;
+    }
 
     lr_free(shared_cb_data.counted);
     if (cm_h)

@@ -422,129 +422,6 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
 }
 
 int
-lr_yum_prepare_internal_mirrorlist(lr_Handle handle)
-{
-    int rc = LRE_OK;
-    lr_Metalink metalink = NULL;
-
-    if (handle->internal_mirrorlist)
-        return LRE_OK;
-
-    /* Create internal mirrorlist */
-    handle->internal_mirrorlist = lr_internalmirrorlist_new();
-
-    if (handle->baseurl) {
-        /* Repository URL specified by user insert it as the first element */
-
-        if (strstr(handle->baseurl, "://")) {
-            /* Base URL has specified protocol */
-            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                             handle->baseurl);
-        } else {
-            /* No protocol specified - if local path => prepend file:// */
-            if (handle->baseurl[0] == '/') {
-                /* Base URL is absolute path */
-                char *path_with_protocol;
-                path_with_protocol = lr_strconcat("file://",
-                                                  handle->baseurl,
-                                                  NULL);
-                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                                 path_with_protocol);
-                lr_free(path_with_protocol);
-            } else {
-                /* Base URL is relative path */
-                char *path_with_protocol;
-                char *resolved_path = NULL;
-                resolved_path = realpath(handle->baseurl, NULL);
-                if (!resolved_path) {
-                    DPRINTF("%s: realpath: %s\n", __func__, strerror(errno));
-                    return LRE_BADURL;
-                }
-                path_with_protocol = lr_strconcat("file://",
-                                                  resolved_path,
-                                                  NULL);
-                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                                 path_with_protocol);
-                free(resolved_path);
-                lr_free(path_with_protocol);
-            }
-        }
-    }
-
-    if (handle->mirrorlist) {
-        /* Download and parse metalink or mirrorlist to internal mirrorlist */
-        lr_Mirrorlist mirrorlist = NULL;
-        int mirrors_fd = lr_gettmpfile();
-
-        rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd);
-        if (rc != LRE_OK)
-            goto mirrorlist_error;
-
-        if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
-            rc = LRE_IO;
-            goto mirrorlist_error;
-        }
-
-        if (strstr(handle->mirrorlist, "metalink")) {
-            /* Metalink */
-            DEBUGF(fprintf(stderr, "Got metalink\n"));
-
-            /* Parse metalink */
-            metalink = lr_metalink_init();
-            rc = lr_metalink_parse_file(metalink, mirrors_fd);
-            if (rc != LRE_OK) {
-                DEBUGF(fprintf(stderr, "Cannot parse metalink (%d)\n", rc));
-                goto mirrorlist_error;
-            }
-
-            if (metalink->nou <= 0) {
-                DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
-                rc = LRE_MLBAD;
-                goto mirrorlist_error;
-            }
-        } else {
-            /* Mirrorlist */
-            DEBUGF(fprintf(stderr, "Got mirrorlist\n"));
-
-            mirrorlist = lr_mirrorlist_init();
-            rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
-            if (rc != LRE_OK) {
-                DEBUGF(fprintf(stderr, "Cannot parse mirrorlist (%d)\n", rc));
-                goto mirrorlist_error;
-            }
-
-            if (mirrorlist->nou <= 0) {
-                DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
-                rc = LRE_MLBAD;
-                goto mirrorlist_error;
-            }
-        }
-
-        /* Set internal_mirrorlist into the handle  */
-        if (rc == LRE_OK && metalink) {
-            lr_internalmirrorlist_append_metalink(handle->internal_mirrorlist,
-                                                  metalink,
-                                                  "repodata/repomd.xml");
-            handle->metalink = metalink;
-        }
-
-        if (rc == LRE_OK && mirrorlist)
-            lr_internalmirrorlist_append_mirrorlist(handle->internal_mirrorlist,
-                                                    mirrorlist);
-
-mirrorlist_error:
-        lr_mirrorlist_free(mirrorlist);
-        close(mirrors_fd);
-        if (rc != LRE_OK) {
-            lr_metalink_free(metalink);
-            return rc;
-        }
-    }
-
-    return rc;
-}
-
-int
 lr_yum_download_remote(lr_Handle handle, lr_Result result)
 {
     int rc = LRE_OK;
@@ -556,7 +433,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
 
     DEBUGF(fprintf(stderr, "Downloading/Copying repo..\n"));
 
-    rc = lr_yum_prepare_internal_mirrorlist(handle);
+    rc = lr_handle_prepare_internal_mirrorlist(handle, "repodata/repomd.xml");
     if (rc != LRE_OK)
         return rc;
 
@@ -636,6 +513,8 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     int rc = LRE_OK;
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
+
+    assert(handle);
 
     if (!result)
         return LRE_BADFUNCARG;

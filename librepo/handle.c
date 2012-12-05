@@ -18,11 +18,16 @@
  */
 
 #define _POSIX_C_SOURCE 200809L
+#define _BSD_SOURCE
+
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <stdarg.h>
 #include <curl/curl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "handle_internal.h"
 #include "handle.h"
@@ -33,6 +38,7 @@
 #include "util.h"
 #include "yum.h"
 #include "version.h"
+#include "curl.h"
 
 lr_Handle
 lr_handle_init()
@@ -94,10 +100,18 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRO_URL:
         handle->baseurl = lr_strdup(va_arg(arg, char *));
+        if (handle->internal_mirrorlist) {
+            lr_internalmirrorlist_free(handle->internal_mirrorlist);
+            handle->internal_mirrorlist = NULL;
+        }
         break;
 
     case LRO_MIRRORLIST:
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
+        if (handle->internal_mirrorlist) {
+            lr_internalmirrorlist_free(handle->internal_mirrorlist);
+            handle->internal_mirrorlist = NULL;
+        }
         break;
 
     case LRO_LOCAL:
@@ -223,6 +237,148 @@ lr_handle_last_curlm_error(lr_Handle handle)
     assert(handle);
     return handle->last_curlm_error;
 }
+
+const char *
+lr_handle_last_curl_strerror(lr_Handle handle)
+{
+    assert(handle);
+    return curl_easy_strerror(handle->last_curl_error);
+}
+
+const char *
+lr_handle_last_curlm_strerror(lr_Handle handle)
+{
+    assert(handle);
+    return curl_multi_strerror(handle->last_curlm_error);
+}
+
+int
+lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
+                                      const char *metalink_suffix)
+{
+    int rc = LRE_OK;
+    lr_Metalink metalink = NULL;
+
+    if (handle->internal_mirrorlist)
+        return LRE_OK;  /* Internal mirrorlist already exists */
+
+    if (!handle->baseurl && !handle->mirrorlist)
+        return LRE_NOURL;
+
+    /* Create internal mirrorlist */
+    handle->internal_mirrorlist = lr_internalmirrorlist_new();
+
+    if (handle->baseurl) {
+        /* Repository URL specified by user insert it as the first element */
+
+        if (strstr(handle->baseurl, "://")) {
+            /* Base URL has specified protocol */
+            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                             handle->baseurl);
+        } else {
+            /* No protocol specified - if local path => prepend file:// */
+            if (handle->baseurl[0] == '/') {
+                /* Base URL is absolute path */
+                char *path_with_protocol;
+                path_with_protocol = lr_strconcat("file://",
+                                                  handle->baseurl,
+                                                  NULL);
+                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                                 path_with_protocol);
+                lr_free(path_with_protocol);
+            } else {
+                /* Base URL is relative path */
+                char *path_with_protocol;
+                char *resolved_path = NULL;
+                resolved_path = realpath(handle->baseurl, NULL);
+                if (!resolved_path) {
+                    DPRINTF("%s: realpath: %s\n", __func__, strerror(errno));
+                    return LRE_BADURL;
+                }
+                path_with_protocol = lr_strconcat("file://",
+                                                  resolved_path,
+                                                  NULL);
+                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                                 path_with_protocol);
+                free(resolved_path);
+                lr_free(path_with_protocol);
+            }
+        }
+    }
+
+    if (handle->mirrorlist) {
+        /* Download and parse metalink or mirrorlist to internal mirrorlist */
+        lr_Mirrorlist mirrorlist = NULL;
+        int mirrors_fd = lr_gettmpfile();
+
+        rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd);
+        if (rc != LRE_OK)
+            goto mirrorlist_error;
+
+        if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
+            rc = LRE_IO;
+            goto mirrorlist_error;
+        }
+
+        if (strstr(handle->mirrorlist, "metalink")) {
+            /* Metalink */
+            DEBUGF(fprintf(stderr, "Got metalink\n"));
+
+            /* Parse metalink */
+            metalink = lr_metalink_init();
+            rc = lr_metalink_parse_file(metalink, mirrors_fd);
+            if (rc != LRE_OK) {
+                DEBUGF(fprintf(stderr, "Cannot parse metalink (%d)\n", rc));
+                goto mirrorlist_error;
+            }
+
+            if (metalink->nou <= 0) {
+                DEBUGF(fprintf(stderr, "No URLs in metalink (%d)\n", rc));
+                rc = LRE_MLBAD;
+                goto mirrorlist_error;
+            }
+        } else {
+            /* Mirrorlist */
+            DEBUGF(fprintf(stderr, "Got mirrorlist\n"));
+
+            mirrorlist = lr_mirrorlist_init();
+            rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
+            if (rc != LRE_OK) {
+                DEBUGF(fprintf(stderr, "Cannot parse mirrorlist (%d)\n", rc));
+                goto mirrorlist_error;
+            }
+
+            if (mirrorlist->nou <= 0) {
+                DEBUGF(fprintf(stderr, "No URLs in mirrorlist (%d)\n", rc));
+                rc = LRE_MLBAD;
+                goto mirrorlist_error;
+            }
+        }
+
+        /* Set internal_mirrorlist into the handle  */
+        if (rc == LRE_OK && metalink) {
+            lr_internalmirrorlist_append_metalink(handle->internal_mirrorlist,
+                                                  metalink,
+                                                  metalink_suffix);
+            handle->metalink = metalink;
+        }
+
+        if (rc == LRE_OK && mirrorlist)
+            lr_internalmirrorlist_append_mirrorlist(handle->internal_mirrorlist,
+                                                    mirrorlist);
+
+mirrorlist_error:
+        lr_mirrorlist_free(mirrorlist);
+        close(mirrors_fd);
+        if (rc != LRE_OK) {
+            lr_metalink_free(metalink);
+            return rc;
+        }
+    }
+
+    return rc;
+}
+
 
 int
 lr_handle_perform(lr_Handle handle, lr_Result result)

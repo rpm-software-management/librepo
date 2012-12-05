@@ -74,6 +74,8 @@ int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
 int lr_handle_perform(lr_Handle handle, lr_Result result);
 int lr_handle_last_curl_error(lr_Handle);
 int lr_handle_last_curlm_error(lr_Handle);
+const char *lr_handle_last_curl_strerror(lr_Handle handle);
+const char *lr_handle_last_curlm_strerror(lr_Handle handle);
 
 #ifdef __cplusplus
 }

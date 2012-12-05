@@ -159,4 +159,15 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRR_YUM_REPO", LRR_YUM_REPO);
     PyModule_AddIntConstant(m, "LRR_YUM_REPOMD", LRR_YUM_REPOMD);
     PyModule_AddIntConstant(m, "LRR_SENTINEL", LRR_SENTINEL);
+
+    /* Checksums */
+    PyModule_AddIntConstant(m, "CHECKSUM_UNKNOWN", LR_CHECKSUM_UNKNOWN);
+    PyModule_AddIntConstant(m, "CHECKSUM_MD2", LR_CHECKSUM_MD2);
+    PyModule_AddIntConstant(m, "CHECKSUM_MD5", LR_CHECKSUM_MD5);
+    PyModule_AddIntConstant(m, "CHECKSUM_SHA", LR_CHECKSUM_SHA);
+    PyModule_AddIntConstant(m, "CHECKSUM_SHA1", LR_CHECKSUM_SHA1);
+    PyModule_AddIntConstant(m, "CHECKSUM_SHA224", LR_CHECKSUM_SHA224);
+    PyModule_AddIntConstant(m, "CHECKSUM_SHA256", LR_CHECKSUM_SHA256);
+    PyModule_AddIntConstant(m, "CHECKSUM_SHA384", LR_CHECKSUM_SHA384);
+    PyModule_AddIntConstant(m, "CHECKSUM_SHA512", LR_CHECKSUM_SHA512);
 }
