@@ -113,47 +113,48 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LR_DEBREPO", LR_DEBREPO);
 
     /* Yum repo flags */
-    PyModule_AddIntConstant(m, "LR_YUM_REPOMD_ONLY", LR_YUM_REPOMDONLY);
+    PyModule_AddIntConstant(m, "LR_YUM_REPOMDONLY", LR_YUM_REPOMDONLY);
     PyModule_AddIntConstant(m, "LR_YUM_PRI", LR_YUM_PRI);
     PyModule_AddIntConstant(m, "LR_YUM_FIL", LR_YUM_FIL);
     PyModule_AddIntConstant(m, "LR_YUM_OTH", LR_YUM_OTH);
-    PyModule_AddIntConstant(m, "LR_YUM_PRI_DB", LR_YUM_PRIDB);
-    PyModule_AddIntConstant(m, "LR_YUM_FIL_DB", LR_YUM_FILDB);
-    PyModule_AddIntConstant(m, "LR_YUM_OTH_DB", LR_YUM_OTHDB);
+    PyModule_AddIntConstant(m, "LR_YUM_PRIDB", LR_YUM_PRIDB);
+    PyModule_AddIntConstant(m, "LR_YUM_FILDB", LR_YUM_FILDB);
+    PyModule_AddIntConstant(m, "LR_YUM_OTHDB", LR_YUM_OTHDB);
     PyModule_AddIntConstant(m, "LR_YUM_GROUP", LR_YUM_GROUP);
-    PyModule_AddIntConstant(m, "LR_YUM_GROUP_GZ", LR_YUM_GROUPGZ);
+    PyModule_AddIntConstant(m, "LR_YUM_GROUPGZ", LR_YUM_GROUPGZ);
     PyModule_AddIntConstant(m, "LR_YUM_PRESTODELTA", LR_YUM_PRESTODELTA);
     PyModule_AddIntConstant(m, "LR_YUM_DELTAINFO", LR_YUM_DELTAINFO);
     PyModule_AddIntConstant(m, "LR_YUM_UPDATEINFO", LR_YUM_UPDATEINFO);
     PyModule_AddIntConstant(m, "LR_YUM_ORIGIN", LR_YUM_ORIGIN);
-    PyModule_AddIntConstant(m, "LR_YUM_BASE_XML", LR_YUM_BASEXML);
-    PyModule_AddIntConstant(m, "LR_YUM_BASE_DB", LR_YUM_BASEDB);
-    PyModule_AddIntConstant(m, "LR_YUM_BASE_HAWKEY", LR_YUM_BASEHAWKEY);
+    PyModule_AddIntConstant(m, "LR_YUM_BASEXML", LR_YUM_BASEXML);
+    PyModule_AddIntConstant(m, "LR_YUM_BASEDB", LR_YUM_BASEDB);
+    PyModule_AddIntConstant(m, "LR_YUM_BASEHAWKEY", LR_YUM_BASEHAWKEY);
     PyModule_AddIntConstant(m, "LR_YUM_FULL", LR_YUM_FULL);
 
     /* Return codes */
     PyModule_AddIntConstant(m, "LRE_OK", LRE_OK);
-    PyModule_AddIntConstant(m, "LRE_BAD_FUNCTION_ARGUMENT", LRE_BADFUNCARG);
-    PyModule_AddIntConstant(m, "LRE_BAD_OPTION_ARGUMENT", LRE_BADOPTARG);
-    PyModule_AddIntConstant(m, "LRE_UNKNOWN_OPTION", LRE_UNKNOWNOPT);
-    PyModule_AddIntConstant(m, "LRE_CURL_SETOPT", LRE_CURLSETOPT);
+    PyModule_AddIntConstant(m, "LRE_BADFUNCARG", LRE_BADFUNCARG);
+    PyModule_AddIntConstant(m, "LRE_BADOPTARG", LRE_BADOPTARG);
+    PyModule_AddIntConstant(m, "LRE_UNKNOWNOPT", LRE_UNKNOWNOPT);
+    PyModule_AddIntConstant(m, "LRE_CURLSETOPT", LRE_CURLSETOPT);
     PyModule_AddIntConstant(m, "LRE_ALREADYUSEDRESULT", LRE_ALREADYUSEDRESULT);
     PyModule_AddIntConstant(m, "LRE_INCOMPLETERESULT", LRE_INCOMPLETERESULT);
-    PyModule_AddIntConstant(m, "LRE_CURL_DUP", LRE_CURLDUP);
+    PyModule_AddIntConstant(m, "LRE_CURLDUP", LRE_CURLDUP);
     PyModule_AddIntConstant(m, "LRE_CURL", LRE_CURL);
     PyModule_AddIntConstant(m, "LRE_CURLM", LRE_CURLM);
-    PyModule_AddIntConstant(m, "LRE_BAD_STATUS", LRE_BADSTATUS);
+    PyModule_AddIntConstant(m, "LRE_BADSTATUS", LRE_BADSTATUS);
     PyModule_AddIntConstant(m, "LRE_NOTLOCAL", LRE_NOTLOCAL);
-    PyModule_AddIntConstant(m, "LRE_CANNOT_CREATE_DIR", LRE_CANNOTCREATEDIR);
+    PyModule_AddIntConstant(m, "LRE_CANNOTCREATEDIR", LRE_CANNOTCREATEDIR);
     PyModule_AddIntConstant(m, "LRE_IO", LRE_IO);
-    PyModule_AddIntConstant(m, "LRE_ML_BAD", LRE_MLBAD);
-    PyModule_AddIntConstant(m, "LRE_ML_XML", LRE_MLXML);
-    PyModule_AddIntConstant(m, "LRE_BAD_CHECKSUM", LRE_BADCHECKSUM);
-    PyModule_AddIntConstant(m, "LRE_REPOMD_XML", LRE_REPOMDXML);
+    PyModule_AddIntConstant(m, "LRE_MLBAD", LRE_MLBAD);
+    PyModule_AddIntConstant(m, "LRE_MLXML", LRE_MLXML);
+    PyModule_AddIntConstant(m, "LRE_BADCHECKSUM", LRE_BADCHECKSUM);
+    PyModule_AddIntConstant(m, "LRE_REPOMDXML", LRE_REPOMDXML);
     PyModule_AddIntConstant(m, "LRE_NOURL", LRE_NOURL);
-    PyModule_AddIntConstant(m, "LRE_CANNOT_CREATE_TMP", LRE_CANNOTCREATETMP);
-    PyModule_AddIntConstant(m, "LRE_UNKNOWN_CHECKSUM", LRE_UNKNOWNCHECKSUM);
-    PyModule_AddIntConstant(m, "LRE_UNKNOWN_ERROR", LRE_UNKNOWNERROR);
+    PyModule_AddIntConstant(m, "LRE_CANNOTCREATETMP", LRE_CANNOTCREATETMP);
+    PyModule_AddIntConstant(m, "LRE_UNKNOWNCHECKSUM", LRE_UNKNOWNCHECKSUM);
+    PyModule_AddIntConstant(m, "LRE_BADURL", LRE_BADURL);
+    PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
 
     /* Result option */
     PyModule_AddIntConstant(m, "LRR_YUM_REPO", LRR_YUM_REPO);
