@@ -55,7 +55,7 @@ typedef enum {
     LRE_MLXML,                      /*!< metalink XML parse error */
     LRE_BADCHECKSUM,                /*!< bad checksum */
     LRE_REPOMDXML,                  /*!< repomd XML parse error */
-    LRE_NOURL,                      /*!< no usable URL found */
+    LRE_NOURL,                      /*!< usable URL not found */
     LRE_CANNOTCREATETMP,            /*!< cannot create tmp directory */
     LRE_UNKNOWNCHECKSUM,            /*!< unknown type of checksum is need to
                                          calculate to verify one or more file */
@@ -63,6 +63,8 @@ typedef enum {
     LRE_UNKNOWNERROR,               /*!< unknown error - sentinel of
                                          error codes enum */
 } lr_Rc; /*!< Return codes */
+
+const char *lr_strerror(int rc);
 
 #ifdef __cplusplus
 }
