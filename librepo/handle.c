@@ -172,7 +172,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_MAXSPEED:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_MAX_RECV_SPEED_LARGE, va_arg(arg, lr_off_t));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t) va_arg(arg, unsigned long long));
         break;
 
     case LRO_DESTDIR:

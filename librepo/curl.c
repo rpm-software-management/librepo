@@ -103,7 +103,7 @@ int
 lr_curl_single_download_resume(lr_Handle handle,
                                const char *url,
                                int fd,
-                               long offset)
+                               long long offset)
 {
     CURLcode c_rc = CURLE_OK;
     CURL *c_h = NULL;
@@ -147,16 +147,16 @@ lr_curl_single_download_resume(lr_Handle handle,
 
     /* Set offset for resume download if offset param is passed */
     if (offset != 0) {
-        DPRINTF("%s: download resume offset: %ld\n", __func__, offset);
+        DPRINTF("%s: download resume offset: %lld\n", __func__, offset);
         if (offset == -1) {
             /* determine offset */
             fseek(f, 0L, SEEK_END);
-            offset = ftell(f);
-            DPRINTF("%s: determined offset for download resume: %ld\n",
+            offset = (long long) ftell(f);
+            DPRINTF("%s: determined offset for download resume: %lld\n",
                     __func__, offset);
         }
 
-        c_rc = curl_easy_setopt(c_h, CURLOPT_RESUME_FROM, offset);
+        c_rc = curl_easy_setopt(c_h, CURLOPT_RESUME_FROM_LARGE, (curl_off_t) offset);
         if (c_rc != CURLE_OK) {
             curl_easy_cleanup(c_h);
             handle->last_curl_error = c_rc;
@@ -170,8 +170,8 @@ lr_curl_single_download_resume(lr_Handle handle,
     if (c_rc != CURLE_OK) {
         /* Discart all downloaded data which were downloaded now (truncate) */
         /* The downloaded data are problably only server error message! */
-        lseek(fd, offset, SEEK_SET);
-        ftruncate(fd, offset);
+        lseek(fd, (off_t) offset, SEEK_SET);
+        ftruncate(fd, (off_t) offset);
         curl_easy_cleanup(c_h);
         handle->last_curl_error = c_rc;
         fclose(f);
@@ -191,8 +191,8 @@ lr_curl_single_download_resume(lr_Handle handle,
         DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
         /* Discart all downloaded data which were downloaded now (truncate) */
         /* The downloaded data are problably only server error message! */
-        lseek(fd, offset, SEEK_SET);
-        ftruncate(fd, offset);
+        lseek(fd, (off_t) offset, SEEK_SET);
+        ftruncate(fd, (off_t) offset);
         curl_easy_cleanup(c_h);
         return LRE_BADSTATUS;
     }
@@ -208,7 +208,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
                                         int fd,
                                         lr_ChecksumType checksum_type,
                                         const char *checksum,
-                                        long offset)
+                                        long long offset)
 {
     int rc;
     int mirrors;

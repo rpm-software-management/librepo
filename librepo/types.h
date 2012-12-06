@@ -24,11 +24,8 @@
 extern "C" {
 #endif
 
-#include <curl/curl.h>
-
 typedef struct _lr_Handle *lr_Handle;
 typedef struct _lr_Result *lr_Result;
-typedef curl_off_t lr_off_t;
 
 typedef enum {
     LR_CHECK_GPG        = (1<<0),
