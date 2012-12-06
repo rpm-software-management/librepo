@@ -23,6 +23,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 #include "setup.h"
@@ -37,9 +38,10 @@
 int
 lr_download_package(lr_Handle handle,
                     const char *relative_url,
+                    const char *dest,
                     lr_ChecksumType checksum_type,
                     const char *checksum,
-                    const char *dest,
+                    const char *base_url,
                     int resume)
 {
     int rc = LRE_OK;
@@ -49,8 +51,6 @@ lr_download_package(lr_Handle handle,
     char *file_basename;
     char *dest_basename;
     int open_flags = O_CREAT|O_TRUNC|O_RDWR;
-
-    // TODO: download resume
 
     assert(handle);
 
@@ -88,15 +88,39 @@ lr_download_package(lr_Handle handle,
         return LRE_IO;
     }
 
-    DPRINTF("%s: Trying to download package: [mirror]/%s to: %s (resume: %d)\n",
+    if (!base_url) {
+        /* Use internal mirrorlist to download */
+        DPRINTF("%s: Trying to download package: [mirror]/%s to: %s (resume: %d)\n",
                 __func__, relative_url, dest_path, resume);
 
-    rc = lr_curl_single_mirrored_download_resume(handle,
-                                                relative_url,
-                                                fd,
-                                                checksum_type,
-                                                checksum,
-                                                offset);
+        rc = lr_curl_single_mirrored_download_resume(handle,
+                                                     relative_url,
+                                                     fd,
+                                                     checksum_type,
+                                                     checksum,
+                                                     offset,
+                                                     1);
+    } else {
+        /* Use base url instead of mirrorlist */
+        char *full_url;
+
+        full_url = lr_pathconcat(base_url, relative_url, NULL);
+        DPRINTF("%s: Trying to download package: %s to: %s (resume: %d)\n",
+                __func__, full_url, dest_path, resume);
+
+        rc = lr_curl_single_download_resume(handle, full_url, fd, offset, 1);
+        lr_free(full_url);
+
+        /* Check checksum */
+        if (rc == LRE_OK && checksum && checksum_type != LR_CHECKSUM_UNKNOWN) {
+            DPRINTF("%s: Checking checksum\n", __func__);
+            lseek(fd, 0, SEEK_SET);
+            if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
+                DPRINTF("%s: Bad checksum\n", __func__);
+                rc = LRE_BADCHECKSUM;
+            }
+        }
+    }
 
     lr_free(dest_path);
     return rc;

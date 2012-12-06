@@ -42,9 +42,13 @@ extern "C" {
  */
 
 #define lr_curl_single_download(HANDLE, URL, FD) \
-            lr_curl_single_download_resume((HANDLE), (URL), (FD), 0)
+            lr_curl_single_download_resume((HANDLE), (URL), (FD), 0, 0)
 
-int lr_curl_single_download_resume(lr_Handle handle, const char *url, int fd, long long offset);
+int lr_curl_single_download_resume(lr_Handle handle,
+                                   const char *url,
+                                   int fd,
+                                   long long offset,
+                                   int use_cb);
 
 #define lr_curl_single_mirrored_download(HANDLE, FILENAME, FD, CHKSUM_T, CHKSUM)\
             lr_curl_single_mirrored_download_resume((HANDLE), \
@@ -52,6 +56,7 @@ int lr_curl_single_download_resume(lr_Handle handle, const char *url, int fd, lo
                                                      (FD), \
                                                      (CHKSUM_T), \
                                                      (CHKSUM), \
+                                                     0, \
                                                      0)
 
 int lr_curl_single_mirrored_download_resume(lr_Handle handle,
@@ -59,7 +64,8 @@ int lr_curl_single_mirrored_download_resume(lr_Handle handle,
                                             int fd,
                                             lr_ChecksumType checksum_type,
                                             const char *checksum,
-                                            long long offset);
+                                            long long offset,
+                                            int use_cb);
 
 int lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets);
 

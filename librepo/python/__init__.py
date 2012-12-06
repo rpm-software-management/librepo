@@ -137,6 +137,6 @@ class Handle(_librepo.Handle):
         self.setopt(LRO_CHECKSUM, val)
     def yumrepoflags(self, val):
         self.setopt(LRO_YUMREPOFLAGS, val)
-    def download(self, url, checksum_type=0, checksum=None, dest=None, resume=0):
-        self.download_package(url, checksum_type, checksum, dest, resume)
+    def download(self, url, dest=None, checksum_type=0, checksum=None, base_url=None, resume=0):
+        self.download_package(url, dest, checksum_type, checksum, base_url, resume)
 

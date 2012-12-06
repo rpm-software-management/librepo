@@ -28,14 +28,20 @@
 #include "result-py.h"
 
 #define RETURN_ERROR(res, h) do { \
+    int nexterr_num = 0; \
     const char *nexterr = NULL;  \
-    if ((h) && (res) == LRE_CURL) nexterr = lr_handle_last_curl_strerror((h)); \
-    if ((h) && (res) == LRE_CURLM) nexterr = lr_handle_last_curlm_strerror((h)); \
-    \
+    if ((h) && (res) == LRE_CURL) { \
+        nexterr_num = lr_handle_last_curl_error((h)); \
+        nexterr = lr_handle_last_curl_strerror((h)); \
+    } \
+    if ((h) && (res) == LRE_CURLM) { \
+        nexterr_num = lr_handle_last_curlm_error((h)); \
+        nexterr = lr_handle_last_curlm_strerror((h)); \
+    } \
     if ((h) && (res) == LRE_BADSTATUS) \
         PyErr_Format(LrErr_Exception, "%d: %s: %ld", (res), lr_strerror((res)), lr_handle_last_bad_status_code((h))); \
     else if (nexterr) \
-        PyErr_Format(LrErr_Exception, "%d: %s: %s", (res), lr_strerror((res)), nexterr); \
+        PyErr_Format(LrErr_Exception, "%d: %s: (%d) %s", (res), lr_strerror((res)), nexterr_num, nexterr); \
     else \
         PyErr_Format(LrErr_Exception, "%d: %s", (res), lr_strerror((res))); \
     return NULL; \
@@ -300,20 +306,21 @@ download_package(_HandleObject *self, PyObject *args)
 {
     PyObject *result_obj;
     int ret;
-    char *relative_url, *checksum, *dest;
+    char *relative_url, *checksum, *dest, *base_url;
     int resume, checksum_type;
 
-    if (!PyArg_ParseTuple(args, "sizzi:download_package", &relative_url,
-                                                          &checksum_type,
-                                                          &checksum,
-                                                          &dest,
-                                                          &resume))
+    if (!PyArg_ParseTuple(args, "szizzi:download_package", &relative_url,
+                                                           &dest,
+                                                           &checksum_type,
+                                                           &checksum,
+                                                           &base_url,
+                                                           &resume))
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
 
-    ret = lr_download_package(self->handle, relative_url, checksum_type,
-                              checksum, dest, resume);
+    ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
+                              checksum, base_url, resume);
     if (ret != LRE_OK)
         RETURN_ERROR(ret, self->handle);
 

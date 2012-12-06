@@ -29,13 +29,14 @@ extern "C" {
 #include "checksum.h"
 
 #define lr_download_simple(HANDLE, URL) \
-                        lr_download_package((HANDLE), (URL), 0, NULL, NULL, 0)
+                        lr_download_package((HANDLE), (URL), NULL, 0, NULL, NULL, 0)
 
 int lr_download_package(lr_Handle handle,
                         const char *relative_url,
+                        const char *dest,
                         lr_ChecksumType checksum_type,
                         const char *checksum,
-                        const char *dest,
+                        const char *base_url,
                         int resume);
 
 #ifdef __cplusplus

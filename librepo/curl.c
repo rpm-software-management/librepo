@@ -57,6 +57,12 @@ struct _lr_CallbackData {
 };
 typedef struct _lr_CallbackData * lr_CallbackData;
 
+struct _lr_SingleCallbackData {
+    lr_ProgressCb cb;   /*!< pointer to user callback */
+    void *user_data;    /*!< user callback data */
+};
+typedef struct _lr_SingleCallbackData * lr_SingleCallbackData;
+
 int
 lr_progress_func(void* ptr,
                  double total_to_download,
@@ -97,18 +103,47 @@ lr_progress_func(void* ptr,
     return scd_data->cb(scd_data->user_data, total_size, scd_data->downloaded);
 }
 
+int
+lr_single_progress_func(void* ptr,
+                        double total_to_download,
+                        double now_downloaded,
+                        double total_to_upload,
+                        double now_uploaded)
+{
+    lr_SingleCallbackData cb_data = ptr;
+
+    LR_UNUSED(total_to_upload);
+    LR_UNUSED(now_uploaded);
+    return cb_data->cb(cb_data->user_data, total_to_download, now_downloaded);
+}
+
 /* End of callback stuff */
+
+/*
+size_t
+header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    size_t len = size * nmemb;
+    printf("HEADER: ");
+    for (size_t x = 0; x < len; x++)
+        putchar(((char *)ptr)[x]);
+    printf("\n");
+    return len;
+}
+*/
 
 int
 lr_curl_single_download_resume(lr_Handle handle,
                                const char *url,
                                int fd,
-                               long long offset)
+                               long long offset,
+                               int use_cb)
 {
     CURLcode c_rc = CURLE_OK;
     CURL *c_h = NULL;
     FILE *f = NULL;
     long status_code = 0;
+    lr_SingleCallbackData cb_data = NULL;
 
     if (!url) {
         DPRINTF("%s: No url specified", __func__);
@@ -166,7 +201,26 @@ lr_curl_single_download_resume(lr_Handle handle,
         }
     }
 
+    /* Header cb */
+//    curl_easy_setopt(c_h, CURLOPT_HEADERFUNCTION, header_cb);
+
+    /* Use callback if desired */
+    if (use_cb && handle->user_cb) {
+        DPRINTF("%s: callback used\n", __func__);
+
+        cb_data = lr_malloc0(sizeof(struct _lr_SingleCallbackData));
+        cb_data->cb = handle->user_cb;
+        cb_data->user_data = handle->user_data;
+
+        curl_easy_setopt(c_h, CURLOPT_PROGRESSFUNCTION, lr_single_progress_func);
+        curl_easy_setopt(c_h, CURLOPT_NOPROGRESS, 0);
+        curl_easy_setopt(c_h, CURLOPT_PROGRESSDATA, cb_data);
+     }
+
     c_rc = curl_easy_perform(c_h);
+
+    lr_free(cb_data);
+
     if (c_rc != CURLE_OK) {
         /* Discart all downloaded data which were downloaded now (truncate) */
         /* The downloaded data are problably only server error message! */
@@ -208,7 +262,8 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
                                         int fd,
                                         lr_ChecksumType checksum_type,
                                         const char *checksum,
-                                        long long offset)
+                                        long long offset,
+                                        int use_cb)
 {
     int rc;
     int mirrors;
@@ -233,7 +288,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             ftruncate(fd, 0);
 
         full_url = lr_pathconcat(url, filename, NULL);
-        rc = lr_curl_single_download_resume(handle, full_url, fd, offset);
+        rc = lr_curl_single_download_resume(handle, full_url, fd, offset, use_cb);
         lr_free(full_url);
 
         if (rc == LRE_OK) {
@@ -264,7 +319,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             handle->used_mirror = lr_strdup(url);
             break;
         } else {
-            DPRINTF("%s: Download rc: %d\n", __func__, rc);
+            DPRINTF("%s: Download rc: %d (%s)\n", __func__, rc, lr_strerror(rc));
         }
     }
 
