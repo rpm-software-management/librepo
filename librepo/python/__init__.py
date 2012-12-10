@@ -69,6 +69,7 @@ LRE_CURLDUP             = _librepo.LRE_CURLDUP
 LRE_CURL                = _librepo.LRE_CURL
 LRE_CURLM               = _librepo.LRE_CURLM
 LRE_BADSTATUS           = _librepo.LRE_BADSTATUS
+LRE_TEMPORARYERR        = _librepo.LRE_TEMPORARYERR
 LRE_NOTLOCAL            = _librepo.LRE_NOTLOCAL
 LRE_CANNOTCREATEDIR     = _librepo.LRE_CANNOTCREATEDIR
 LRE_IO                  = _librepo.LRE_IO

@@ -45,6 +45,10 @@ typedef enum {
     LRE_BADSTATUS,                  /*!< HTTP or FTP returned status code which
                                          do not represent success
                                          (file doesn't exists, etc.) */
+    LRE_TEMPORARYERR,               /*!< some error that should be temporary
+                                         and next try could work
+                                         (HTTP status codes 500, 502-504,
+                                          operation timeout, ...) */
     LRE_NOTLOCAL,                   /*!< URL is not a local address */
     LRE_CANNOTCREATEDIR,            /*!< cannot create a directory in output
                                          dir (the directory already exists?) */

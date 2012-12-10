@@ -143,6 +143,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_CURL", LRE_CURL);
     PyModule_AddIntConstant(m, "LRE_CURLM", LRE_CURLM);
     PyModule_AddIntConstant(m, "LRE_BADSTATUS", LRE_BADSTATUS);
+    PyModule_AddIntConstant(m, "LRE_TEMPORARYERR", LRE_TEMPORARYERR);
     PyModule_AddIntConstant(m, "LRE_NOTLOCAL", LRE_NOTLOCAL);
     PyModule_AddIntConstant(m, "LRE_CANNOTCREATEDIR", LRE_CANNOTCREATEDIR);
     PyModule_AddIntConstant(m, "LRE_IO", LRE_IO);

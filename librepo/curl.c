@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <time.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -143,6 +144,8 @@ lr_curl_single_download_resume(lr_Handle handle,
     CURL *c_h = NULL;
     FILE *f = NULL;
     long status_code = 0;
+    int ret = LRE_OK;
+    int retries = 0;
     lr_SingleCallbackData cb_data = NULL;
 
     if (!url) {
@@ -217,43 +220,108 @@ lr_curl_single_download_resume(lr_Handle handle,
         curl_easy_setopt(c_h, CURLOPT_PROGRESSDATA, cb_data);
      }
 
-    c_rc = curl_easy_perform(c_h);
 
-    lr_free(cb_data);
+    /* Main downloading loop - loop because of retries */
 
-    if (c_rc != CURLE_OK) {
+    for (;;) {
+        ret = LRE_OK;
+        status_code = 0;
+
+        c_rc = curl_easy_perform(c_h);
+
+        if (c_rc != CURLE_OK && c_rc != CURLE_HTTP_RETURNED_ERROR) {
+            ret = LRE_CURL;
+            if ((c_rc == CURLE_OPERATION_TIMEDOUT) ||
+                (c_rc == CURLE_COULDNT_RESOLVE_HOST) ||
+                (c_rc == CURLE_COULDNT_RESOLVE_PROXY) ||
+                (c_rc == CURLE_FTP_ACCEPT_TIMEOUT)) {
+                /* Temporary error => retry */
+                ret = LRE_TEMPORARYERR;
+            }
+            goto retry;
+        }
+
+        /* Even if CULRE_OK is returned we have to check status code */
+        curl_easy_getinfo(c_h, CURLINFO_RESPONSE_CODE, &status_code);
+        if (status_code) {
+            char *effective_url = NULL;
+            curl_easy_getinfo(c_h, CURLINFO_EFFECTIVE_URL, &effective_url);
+
+            if (effective_url && !strncmp(effective_url, "http", 4)) {
+                /* HTTP(S) */
+                if (status_code == 200)
+                    break; /* No error */
+                if (offset && status_code == 206)
+                    break; /* No error */
+
+                ret = LRE_BADSTATUS;
+                if ((status_code == 500) || /* Internal Server Error */
+                    (status_code == 502) || /* Bad Gateway */
+                    (status_code == 503) || /* Service Unavailable */
+                    (status_code == 504)) { /* Gateway Timeout */
+                    ret = LRE_TEMPORARYERR;
+                }
+            } else if (effective_url) {
+                /* FTP */
+                if (status_code/100 == 2)
+                    break; /* No error */
+
+                ret = LRE_BADSTATUS;
+                if (status_code/100 == 4) {
+                    /* This is typically when the FTP server only allows a certain
+                     * amount of users and we are not one of them.  All 4xx codes
+                     * are transient. */
+                    ret = LRE_TEMPORARYERR;
+                }
+            } else {
+                ret = LRE_BADSTATUS;
+            }
+
+            goto retry;
+        }
+
+       if (ret == LRE_OK && c_rc == CURLE_OK)
+            /* Downloading was successfull */
+            break;
+
+retry:
+        if (status_code) {
+            handle->status_code = status_code;
+            DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
+        }
+
+        if (c_rc != CURLE_OK) {
+            handle->last_curl_error = c_rc;
+            DPRINTF("%s: curl_easy_perform: %s\n", __func__, curl_easy_strerror(c_rc));
+        }
+
         /* Discart all downloaded data which were downloaded now (truncate) */
         /* The downloaded data are problably only server error message! */
         lseek(fd, (off_t) offset, SEEK_SET);
         ftruncate(fd, (off_t) offset);
-        curl_easy_cleanup(c_h);
-        handle->last_curl_error = c_rc;
-        fclose(f);
-        DPRINTF("%s: curl_easy_perform: %s\n", __func__, curl_easy_strerror(c_rc));
-        return LRE_CURL;
+        fseek(f, offset, SEEK_SET);
+
+        if (ret != LRE_TEMPORARYERR)
+            /* No temporary error - end */
+            break;
+
+        retries++;
+        if (retries >= handle->retries)
+            /* No more retries */
+            break;
+
+        /* Try download again */
+        DPRINTF("%s: Temporary download error - trying again (%d)\n",
+                __func__, retries);
+
+        /* Sleep for 500ms before next try */
+        usleep(500000);
     }
 
     fclose(f);
-
-    /* Check status code */
-    curl_easy_getinfo(c_h, CURLINFO_RESPONSE_CODE, &status_code);
-    if (status_code && offset && status_code == 206) {
-        /* 206 (Partial Content) */
-        ;
-    } else if (status_code && (status_code != 200 && status_code != 226)) {
-        handle->status_code = status_code;
-        DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
-        /* Discart all downloaded data which were downloaded now (truncate) */
-        /* The downloaded data are problably only server error message! */
-        lseek(fd, (off_t) offset, SEEK_SET);
-        ftruncate(fd, (off_t) offset);
-        curl_easy_cleanup(c_h);
-        return LRE_BADSTATUS;
-    }
-
     curl_easy_cleanup(c_h);
-
-    return LRE_OK;
+    lr_free(cb_data);
+    return ret;
 }
 
 int
@@ -291,6 +359,8 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
         rc = lr_curl_single_download_resume(handle, full_url, fd, offset, use_cb);
         lr_free(full_url);
 
+        DPRINTF("%s: Download rc: %d (%s)\n", __func__, rc, lr_strerror(rc));
+
         if (rc == LRE_OK) {
             /* Download successful */
             DPRINTF("%s: Download successful\n", __func__);
@@ -318,8 +388,6 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             /* Store used mirror into the handler */
             handle->used_mirror = lr_strdup(url);
             break;
-        } else {
-            DPRINTF("%s: Download rc: %d (%s)\n", __func__, rc, lr_strerror(rc));
         }
     }
 
@@ -593,7 +661,6 @@ cleanup:
             handle->status_code = last_code;
     }
 
-    lr_free(shared_cb_data.counted);
     if (cm_h)
         curl_multi_cleanup(cm_h);
     for (int x = 0; x < not; x++) {
@@ -602,6 +669,7 @@ cleanup:
         if (open_files[x])
             fclose(open_files[x]);
     }
+    lr_free(shared_cb_data.counted);
 
     return ret;
 }

@@ -45,6 +45,8 @@ lr_strerror(int rc)
         return "An Curl multi handle error";
     case LRE_BADSTATUS:
         return "Error HTTP/FTP status code";
+    case LRE_TEMPORARYERR:
+        return "Temporary error (operation timeout, ...), next try could work";
     case LRE_NOTLOCAL:
         return "Repository URL is not a local path";
     case LRE_CANNOTCREATEDIR:
