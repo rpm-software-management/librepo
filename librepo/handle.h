@@ -50,6 +50,7 @@ typedef enum {
 
     LRO_REPOTYPE,    /*!< Type of downloaded repo, currently only supported
                           is LR_YUMREPO. */
+    LRO_CONNECTTIMEOUT,/*!< Max time in sec for connection phase */
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< Check GPG signature if available - TODO */

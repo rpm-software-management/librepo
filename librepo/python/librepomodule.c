@@ -98,6 +98,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_MAXSPEED", LRO_MAXSPEED);
     PyModule_AddIntConstant(m, "LRO_DESTDIR", LRO_DESTDIR);
     PyModule_AddIntConstant(m, "LRO_REPOTYPE", LRO_REPOTYPE);
+    PyModule_AddIntConstant(m, "LRO_CONNECTTIMEOUT", LRO_CONNECTTIMEOUT);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
     PyModule_AddIntConstant(m, "LRO_YUMREPOFLAGS", LRO_YUMREPOFLAGS);
