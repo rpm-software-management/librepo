@@ -38,6 +38,7 @@ typedef enum {
 } lr_ChecksumType;
 
 lr_ChecksumType lr_checksum_type(const char *type);
+const char *lr_checksum_type_to_str(lr_ChecksumType type);
 char *lr_checksum_fd(lr_ChecksumType type, int fd);
 
 /* 0 - checksums are same, other - checksums are different */

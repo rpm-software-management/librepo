@@ -72,6 +72,32 @@ lr_checksum_type(const char *type)
     return LR_CHECKSUM_UNKNOWN;
 }
 
+const char *
+lr_checksum_type_to_str(lr_ChecksumType type)
+{
+    switch (type) {
+    case LR_CHECKSUM_UNKNOWN:
+        return "Unknown checksum";
+    case LR_CHECKSUM_MD2:
+        return "md2";
+    case LR_CHECKSUM_MD5:
+        return "md5";
+    case LR_CHECKSUM_SHA:
+        return "sha";
+    case LR_CHECKSUM_SHA1:
+        return "sha1";
+    case LR_CHECKSUM_SHA224:
+        return "sha224";
+    case LR_CHECKSUM_SHA256:
+        return "sha256";
+    case LR_CHECKSUM_SHA384:
+        return "sha384";
+    case LR_CHECKSUM_SHA512:
+        return "sha512";
+    }
+    return NULL;
+}
+
 char *
 lr_checksum_fd(lr_ChecksumType type, int fd)
 {
