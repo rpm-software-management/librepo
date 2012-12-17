@@ -588,6 +588,19 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             }
         } while (still_running);
 
+        /* Close opened files */
+        /* Closing must be here! In the next code, if download failed
+         * we truncate the download file descriptor. Truncation doesn't take
+         * the effect if we truncate the file descriptor first and after that
+         * we close the FILE* stream (opened from that file descriptor).
+         * In short: FILE* stream must be closed first. */
+        for (int x = 0; x < not; x++) {
+            if (open_files[x]) {
+                fclose(open_files[x]);
+                open_files[x] = NULL;
+            }
+        }
+
         /* Check download statuses */
         while ((msg = curl_multi_info_read(cm_h, &msgs_left))) {
             if (msg->msg == CURLMSG_DONE) {
@@ -627,6 +640,9 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     failed_downloads++;
                     /* Update total_to_download in  callback data */
                     shared_cb_data.counted[idx] = 0;
+                    /* Seek and truncate the file */
+                    lseek(t->fd, 0, SEEK_SET);
+                    ftruncate(t->fd, 0);
                 }
             }
         }
@@ -639,11 +655,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                 curl_easy_cleanup(curl_easy_interfaces[x]);
                 curl_easy_interfaces[x] = NULL;
             }
-            if (open_files[x]) {
-                fclose(open_files[x]);
-                open_files[x] = NULL;
-            }
-        }
+       }
 
         if (failed_downloads == 0)
             break;
