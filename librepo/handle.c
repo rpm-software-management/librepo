@@ -341,8 +341,14 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
                 goto mirrorlist_error;
             }
 
+            if (strcmp("repomd.xml", metalink->filename)) {
+                DPRINTF("%s: No repomd.xml file in metalink\n", __func__);
+                rc = LRE_MLBAD;
+                goto mirrorlist_error;
+            }
+
             if (metalink->nou <= 0) {
-                DPRINTF("%s: No URLs in metalink (%d)\n", __func__, rc);
+                DPRINTF("%s: No URLs in metalink\n", __func__);
                 rc = LRE_MLBAD;
                 goto mirrorlist_error;
             }
