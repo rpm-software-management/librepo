@@ -53,7 +53,9 @@ lr_handle_init()
     handle->curl_handle = curl;
     handle->retries = 1;
     handle->last_curl_error = CURLE_OK;
+    handle->last_curlm_error = CURLM_OK;
     handle->yumflags = LR_YUM_FULL;
+    handle->checks |= LR_CHECK_CHECKSUM;
 
     /* Default options */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
