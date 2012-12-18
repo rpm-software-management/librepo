@@ -366,7 +366,9 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             DPRINTF("%s: Download successful\n", __func__);
 
             /* Check checksum */
-            if (checksum && checksum_type != LR_CHECKSUM_UNKNOWN) {
+            if (checksum && handle->checks & LR_CHECK_CHECKSUM
+                &&  checksum_type != LR_CHECKSUM_UNKNOWN)
+            {
                 DPRINTF("%s: Checking checksum\n", __func__);
                 lseek(fd, 0, SEEK_SET);
                 if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
@@ -622,10 +624,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     long code = 0; // HTTP or FTP code
                     curl_easy_getinfo (msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
                     //if (code == 200 && msg->data.result != CURLE_ABORTED_BY_CALLBACK) {
-                    if (!code || (code == 200 || code == 226)) {
-                        // Succeeded
-                        t->downloaded = 1;
-                    } else {
+                    if (code && (code != 200 && code != 226)) {
                         DPRINTF("%s: Bad HTTP/FTP code: %ld\n", __func__, code);
                         failed = 1;
                         last_ret = LRE_BADSTATUS;
@@ -636,6 +635,19 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     last_ret = LRE_CURL;
                 }
 
+                /* Check checksum */
+                if (!failed && handle->checks & LR_CHECK_CHECKSUM
+                    && t->checksum && t->checksum_type != LR_CHECKSUM_UNKNOWN)
+                {
+                    DPRINTF("%s: Checking checksum\n", __func__);
+                    lseek(t->fd, 0, SEEK_SET);
+                    if (lr_checksum_fd_cmp(t->checksum_type, t->fd, t->checksum)) {
+                        DPRINTF("%s: Bad checksum\n", __func__);
+                        last_ret = LRE_BADCHECKSUM;
+                        failed = 1;
+                    }
+                }
+
                 if (failed) {
                     failed_downloads++;
                     /* Update total_to_download in  callback data */
@@ -643,6 +655,9 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     /* Seek and truncate the file */
                     lseek(t->fd, 0, SEEK_SET);
                     ftruncate(t->fd, 0);
+                } else {
+                    /* Succeeded */
+                    t->downloaded = 1;
                 }
             }
         }

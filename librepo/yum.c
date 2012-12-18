@@ -116,6 +116,9 @@ lr_yum_download_repomd(lr_Handle handle,
                 checksum = mhash->value;
             }
         }
+
+        DPRINTF("%s: selected repomd.xml checksum to check: (%s) %s\n",
+                __func__, lr_checksum_type_to_str(checksum_type), checksum);
     }
 
     rc = lr_curl_single_mirrored_download(handle,
@@ -126,7 +129,7 @@ lr_yum_download_repomd(lr_Handle handle,
 
     if (rc != LRE_OK) {
         /* Download of repomd.xml was not successful */
-        DPRINTF("%s: repomd.xml download was unsuccessful", __func__);
+        DPRINTF("%s: repomd.xml download was unsuccessful\n", __func__);
         return rc;
     }
 
@@ -164,6 +167,8 @@ lr_add_target(lr_CurlTargetList targets,
     target = lr_curltarget_new();
     target->path = lr_strdup(rec->location_href);
     target->fd = fd;
+    target->checksum_type = lr_checksum_type(rec->checksum_type);
+    target->checksum = lr_strdup(rec->checksum);
     lr_curltargetlist_append(targets, target);
 }
 
@@ -453,8 +458,11 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         /* Prepare repodata/ subdir */
         rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
         lr_free(path_to_repodata);
-        if (rc == -1)
+        if (rc == -1) {
+            DPRINTF("%s: Cannot create dir: %s (%s)\n",
+                    __func__, path_to_repodata, strerror(errno));
             return LRE_CANNOTCREATEDIR;
+        }
     }
 
     if (!handle->update) {
@@ -540,21 +548,15 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
 
-    if (handle->local)
+    if (handle->local) {
         /* Do not duplicate repository, just use the existing local one */
         rc = lr_yum_use_local(handle, result);
-    else
+        if (handle->checks & LR_CHECK_CHECKSUM)
+            rc = lr_yum_check_repo_checksums(repo, repomd);
+    } else {
         /* Download remote/Duplicate local repository */
         rc = lr_yum_download_remote(handle, result);
-
-    if (rc != LRE_OK)
-        return rc;
-
-    /* Check checksums */
-    if (handle->checks & LR_CHECK_CHECKSUM) {
-        if ((rc = lr_yum_check_repo_checksums(repo, repomd)) != LRE_OK)
-            return rc;
-        DPRINTF("%s: All checksums in repository seems to be valid\n", __func__);
+        /* All checksums are checked while downloading */
     }
 
     return rc;
