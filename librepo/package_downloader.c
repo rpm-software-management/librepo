@@ -67,13 +67,26 @@ lr_download_package(lr_Handle handle,
     file_basename = basename(relative_url);
     dest_basename = (dest) ? basename(dest) : "";
 
+    /* Get/Build path for destination file */
     if (dest) {
-        if (!dest_basename || dest_basename[0] == '\0')
-            dest_path = lr_pathconcat(dest, file_basename);
-        else
+        /* Use path specified during function call */
+        if (!dest_basename || dest_basename[0] == '\0') {
+            /* Only directory is specified */
+            dest_path = lr_pathconcat(dest, file_basename, NULL);
+        } else {
+            /* Whole path including filename is specified */
             dest_path = lr_strdup(dest);
-    } else
-        dest_path = lr_strdup(file_basename);
+        }
+    } else {
+        /* No path specified */
+        if (!handle->destdir) {
+            /* No destdir in handle - use current working dir */
+            dest_path = lr_strdup(file_basename);
+        } else {
+            /* Use dir specified in handle */
+            dest_path = lr_pathconcat(handle->destdir, file_basename, NULL);
+        }
+    }
 
     if (resume) {
         /* Enable autodetection for resume download */
