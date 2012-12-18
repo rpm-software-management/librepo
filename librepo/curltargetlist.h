@@ -24,9 +24,13 @@
 extern "C" {
 #endif
 
+#include "checksum.h"
+
 struct _lr_CurlTarget {
     char *path;      // Path for URL (URL: "http://foo.bar/stuff", path: "somestuff.rar")
     int fd;          // File descriptor
+    lr_ChecksumType checksum_type;  // Checksum type
+    char *checksum;  // Checksum value or NULL
     int downloaded;  // Was target downloaded successfully? 0 - no, 1 - yes
 };
 

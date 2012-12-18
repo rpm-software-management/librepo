@@ -18,6 +18,7 @@ lr_curltarget_free(lr_CurlTarget target)
 {
     if (!target) return;
     lr_free(target->path);
+    lr_free(target->checksum);
     lr_free(target);
 }
 
