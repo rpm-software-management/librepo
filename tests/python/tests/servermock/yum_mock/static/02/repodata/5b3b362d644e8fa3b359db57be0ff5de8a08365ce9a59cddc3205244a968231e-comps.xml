@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE comps PUBLIC "-//Red Hat, Inc.//DTD Comps info//EN" "comps.dtd">
+<comps>
+  <group>
+   <id>testgroup</id>
+   <default>false</default>
+   <uservisible>true</uservisible>
+   <display_order>1024</display_order>
+   <name>Test group</name>
+   <description>Description of test group</description>
+   <packagelist>
+      <packagereq type="default">foobar</packagereq>
+   </packagelist>
+  </group>
+  
+  <category>
+   <id>testcategory</id>
+   <display_order>99</display_order>
+   <name>Test Category</name>
+   <description>Test category</description>
+   <grouplist>
+     <groupid>testgroup</groupid>
+    </grouplist>
+  </category>
+</comps>

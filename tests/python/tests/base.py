@@ -1,9 +1,27 @@
 import librepo
 import os.path
-import unittest
+import time
+from multiprocessing import Process
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
+MOCKURL="http://127.0.0.1:5000/"
 
 class TestCase(unittest.TestCase):
     repo_dir = os.path.normpath(os.path.join(__file__, "../../../repos"))
 
-#def by_name(sack, name):
-#    return librepo.Query(sack).filter(name=name)[0]
+class TestCaseWithFlask(TestCase):
+    application = NotImplemented
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server = Process(target=cls.application.run)
+        cls.server.start()
+        time.sleep(0.5)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.terminate()
+        cls.server.join()
