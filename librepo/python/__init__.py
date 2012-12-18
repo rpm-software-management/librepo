@@ -8,6 +8,8 @@ VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 Handle = _librepo.Handle
 Result = _librepo.Result
 
+LibrepoException = _librepo.LibrepoException
+
 global_init    = _librepo.global_init
 global_cleanup = _librepo.global_cleanup
 

@@ -59,7 +59,7 @@ init_librepo(void)
     /* Exceptions */
     if (!init_exceptions())
         return;
-    PyModule_AddObject(m, "Exception", LrErr_Exception);
+    PyModule_AddObject(m, "LibrepoException", LrErr_Exception);
 
     /* Objects */
     /* _librepo.Handle */
