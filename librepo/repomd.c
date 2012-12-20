@@ -52,6 +52,7 @@ lr_yum_repomdrecord_free(lr_YumRepoMdRecord rec)
     if (!rec)
         return;
     lr_free(rec->location_href);
+    lr_free(rec->location_base);
     lr_free(rec->checksum);
     lr_free(rec->checksum_type);
     lr_free(rec->checksum_open);
@@ -297,8 +298,11 @@ start_handler(void *pdata, const char *name, const char **atts)
 
     case STATE_LOCATION: {
         const char *href = find_attr("href", atts);
+        const char *base = find_attr("base", atts);
 	if (pd->repomd_rec && href)
             pd->repomd_rec->location_href = lr_strdup(href);
+        if (pd->repomd_rec && base)
+            pd->repomd_rec->location_base = lr_strdup(base);
         break;
     }
 

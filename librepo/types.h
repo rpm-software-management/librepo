@@ -76,6 +76,7 @@ typedef struct _lr_YumDistroTag *lr_YumDistroTag;
 
 struct _lr_YumRepoMdRecord {
     char *location_href;
+    char *location_base;
     char *checksum;
     char *checksum_type;
     char *checksum_open;
