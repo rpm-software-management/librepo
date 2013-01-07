@@ -222,7 +222,6 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXYPORT:
     case LRO_RETRIES:
     case LRO_REPOTYPE:
-    case LRO_YUMREPOFLAGS:
     case LRO_MAXSPEED: {
         PY_LONG_LONG d;
 
@@ -236,6 +235,45 @@ setopt(_HandleObject *self, PyObject *args)
         }
 
         res = lr_handle_setopt(self->handle, (lr_HandleOption)option, d);
+        break;
+    }
+
+    /*
+     * Options with array argument
+     */
+    case LRO_YUMDLIST: {
+        Py_ssize_t len = 0;
+
+        if (!PyList_Check(obj) && obj != Py_None) {
+            PyErr_SetString(PyExc_TypeError, "Only List or None type is supported with this option");
+            return NULL;
+        }
+
+        if (obj == Py_None) {
+            res = lr_handle_setopt(self->handle, (lr_HandleOption)option, NULL);
+            break;
+        }
+
+        len = PyList_Size(obj);
+        for (Py_ssize_t x = 0; x < len; x++) {
+            PyObject *item = PyList_GetItem(obj, x);
+            if (!PyString_Check(item) && item != Py_None) {
+                PyErr_SetString(PyExc_TypeError, "Only strings or None is supported in list");
+                return NULL;
+            }
+        }
+
+        char **array[len+1];
+        for (Py_ssize_t x = 0; x < len; x++) {
+            PyObject *item = PyList_GetItem(obj, x);
+            if (PyString_Check(item))
+                array[x] = PyString_AsString(item);
+            else
+                array[x] = NULL;
+        }
+        array[len] = NULL;
+
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, array);
         break;
     }
 

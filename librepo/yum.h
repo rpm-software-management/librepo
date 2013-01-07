@@ -45,6 +45,8 @@ int lr_yum_perform(lr_Handle handle, lr_Result result);
 lr_YumRepo lr_yum_repo_init();
 void lr_yum_repo_clear(lr_YumRepo repo);
 void lr_yum_repo_free(lr_YumRepo repo);
+char *lr_yum_repo_path(lr_YumRepo repo, const char *type);
+void lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path);
 
 #ifdef __cplusplus
 }

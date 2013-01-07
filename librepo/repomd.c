@@ -51,6 +51,7 @@ lr_yum_repomdrecord_free(lr_YumRepoMdRecord rec)
 {
     if (!rec)
         return;
+    lr_free(rec->type);
     lr_free(rec->location_href);
     lr_free(rec->location_base);
     lr_free(rec->checksum);
@@ -81,18 +82,9 @@ lr_yum_repomd_clear(lr_YumRepoMd repomd)
     for (int x = 0; x < repomd->noct; x++)
         lr_free(repomd->content_tags[x]);
     lr_free(repomd->content_tags);
-    lr_yum_repomdrecord_free(repomd->primary);
-    lr_yum_repomdrecord_free(repomd->filelists);
-    lr_yum_repomdrecord_free(repomd->other);
-    lr_yum_repomdrecord_free(repomd->primary_db);
-    lr_yum_repomdrecord_free(repomd->filelists_db);
-    lr_yum_repomdrecord_free(repomd->other_db);
-    lr_yum_repomdrecord_free(repomd->group);
-    lr_yum_repomdrecord_free(repomd->group_gz);
-    lr_yum_repomdrecord_free(repomd->prestodelta);
-    lr_yum_repomdrecord_free(repomd->deltainfo);
-    lr_yum_repomdrecord_free(repomd->updateinfo);
-    lr_yum_repomdrecord_free(repomd->origin);
+    for (int x = 0; x < repomd->nor; x++)
+        lr_yum_repomdrecord_free(repomd->records[x]);
+    lr_free(repomd->records);
     memset(repomd, 0, sizeof(struct _lr_YumRepoMd));
 }
 
@@ -264,35 +256,12 @@ start_handler(void *pdata, const char *name, const char **atts)
         const char *type= find_attr("type", atts);
         if (!type) break;
         pd->repomd_rec = lr_yum_repomdrecord_init();
-        if (!strcmp(type, "primary"))
-            pd->repomd->primary = pd->repomd_rec;
-        else if (!strcmp(type, "filelists"))
-            pd->repomd->filelists = pd->repomd_rec;
-        else if (!strcmp(type, "other"))
-            pd->repomd->other = pd->repomd_rec;
-        else if (!strcmp(type, "primary_db"))
-            pd->repomd->primary_db = pd->repomd_rec;
-        else if (!strcmp(type, "filelists_db"))
-            pd->repomd->filelists_db = pd->repomd_rec;
-        else if (!strcmp(type, "other_db"))
-            pd->repomd->other_db = pd->repomd_rec;
-        else if (!strcmp(type, "group"))
-            pd->repomd->group = pd->repomd_rec;
-        else if (!strcmp(type, "group_gz"))
-            pd->repomd->group_gz = pd->repomd_rec;
-        else if (!strcmp(type, "prestodelta"))
-            pd->repomd->prestodelta = pd->repomd_rec;
-        else if (!strcmp(type, "deltainfo"))
-            pd->repomd->deltainfo = pd->repomd_rec;
-        else if (!strcmp(type, "updateinfo"))
-            pd->repomd->updateinfo = pd->repomd_rec;
-        else if (!strcmp(type, "origin"))
-            pd->repomd->origin = pd->repomd_rec;
-        else {
-            /* Unknown type of record */
-            lr_yum_repomdrecord_free(pd->repomd_rec);
-            pd->repomd_rec = NULL;
-        }
+        pd->repomd_rec->type = lr_strdup(type);
+        /* Append record to lr_YumRepoMd->records */
+        pd->repomd->nor += 1;
+        pd->repomd->records = lr_realloc(pd->repomd->records,
+                        sizeof(struct _lr_YumRepoMdRecord)*pd->repomd->nor);
+        pd->repomd->records[pd->repomd->nor-1] = pd->repomd_rec;
         break;
     }
 
@@ -531,4 +500,15 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
     XML_ParserFree(parser);
 
     return ret;
+}
+
+lr_YumRepoMdRecord
+lr_yum_repomd_get_record(lr_YumRepoMd repomd, const char *type)
+{
+    assert(repomd);
+    assert(type);
+    for (int x=0; x < repomd->nor; x++)
+        if (!strcmp(repomd->records[x]->type, type))
+            return repomd->records[x];
+    return NULL;
 }

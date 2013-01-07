@@ -40,20 +40,14 @@ PyObject_FromYumRepo(lr_YumRepo repo)
         return NULL;
 
     PyDict_SetItemString(dict, "repomd", PyStringOrNone_FromString(repo->repomd));
-    PyDict_SetItemString(dict, "primary", PyStringOrNone_FromString(repo->primary));
-    PyDict_SetItemString(dict, "filelists", PyStringOrNone_FromString(repo->filelists));
-    PyDict_SetItemString(dict, "other", PyStringOrNone_FromString(repo->other));
-    PyDict_SetItemString(dict, "primary_db", PyStringOrNone_FromString(repo->primary_db));
-    PyDict_SetItemString(dict, "filelists_db", PyStringOrNone_FromString(repo->filelists_db));
-    PyDict_SetItemString(dict, "other_db", PyStringOrNone_FromString(repo->other_db));
-    PyDict_SetItemString(dict, "group", PyStringOrNone_FromString(repo->group));
-    PyDict_SetItemString(dict, "group_gz", PyStringOrNone_FromString(repo->group_gz));
-    PyDict_SetItemString(dict, "prestodelta", PyStringOrNone_FromString(repo->prestodelta));
-    PyDict_SetItemString(dict, "deltainfo", PyStringOrNone_FromString(repo->deltainfo));
-    PyDict_SetItemString(dict, "updateinfo", PyStringOrNone_FromString(repo->updateinfo));
-    PyDict_SetItemString(dict, "origin", PyStringOrNone_FromString(repo->origin));
     PyDict_SetItemString(dict, "url", PyStringOrNone_FromString(repo->url));
     PyDict_SetItemString(dict, "destdir", PyStringOrNone_FromString(repo->destdir));
+
+    for (int x = 0; x < repo->nop; x++) {
+        PyDict_SetItemString(dict,
+                             repo->paths[x]->type,
+                             PyStringOrNone_FromString(repo->paths[x]->path));
+    }
 
     return dict;
 }
@@ -123,18 +117,10 @@ PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
     }
     PyDict_SetItemString(dict, "content_tags", list);
 
-    PyDict_SetItemString(dict, "primary", PyObject_FromRepoMdRecord(repomd->primary));
-    PyDict_SetItemString(dict, "filelists", PyObject_FromRepoMdRecord(repomd->filelists));
-    PyDict_SetItemString(dict, "other", PyObject_FromRepoMdRecord(repomd->other));
-    PyDict_SetItemString(dict, "primary_db", PyObject_FromRepoMdRecord(repomd->primary_db));
-    PyDict_SetItemString(dict, "filelists_db", PyObject_FromRepoMdRecord(repomd->filelists_db));
-    PyDict_SetItemString(dict, "other_db", PyObject_FromRepoMdRecord(repomd->other_db));
-    PyDict_SetItemString(dict, "group", PyObject_FromRepoMdRecord(repomd->group));
-    PyDict_SetItemString(dict, "group_gz", PyObject_FromRepoMdRecord(repomd->group_gz));
-    PyDict_SetItemString(dict, "prestodelta", PyObject_FromRepoMdRecord(repomd->prestodelta));
-    PyDict_SetItemString(dict, "deltainfo", PyObject_FromRepoMdRecord(repomd->deltainfo));
-    PyDict_SetItemString(dict, "updateinfo", PyObject_FromRepoMdRecord(repomd->updateinfo));
-    PyDict_SetItemString(dict, "origin", PyObject_FromRepoMdRecord(repomd->origin));
+    for (int x=0; x < repomd->nor; x++)
+        PyDict_SetItemString(dict,
+                repomd->records[x]->type,
+                PyObject_FromRepoMdRecord(repomd->records[x]));
 
     return dict;
 }

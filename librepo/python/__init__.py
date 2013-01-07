@@ -33,7 +33,7 @@ LRO_REPOTYPE        = _librepo.LRO_REPOTYPE
 LRO_CONNECTTIMEOUT  = _librepo.LRO_CONNECTTIMEOUT
 LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
-LRO_YUMREPOFLAGS    = _librepo.LRO_YUMREPOFLAGS
+LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -43,23 +43,11 @@ LR_YUMREPO  = _librepo.LR_YUMREPO
 LR_SUSEREPO = _librepo.LR_SUSEREPO
 LR_DEBREPO  = _librepo.LR_DEBREPO
 
-LR_YUM_REPOMDONLY   = _librepo.LR_YUM_REPOMDONLY
-LR_YUM_PRI          = _librepo.LR_YUM_PRI
-LR_YUM_FIL          = _librepo.LR_YUM_FIL
-LR_YUM_OTH          = _librepo.LR_YUM_OTH
-LR_YUM_PRIDB        = _librepo.LR_YUM_PRIDB
-LR_YUM_FILDB        = _librepo.LR_YUM_FILDB
-LR_YUM_OTHDB        = _librepo.LR_YUM_OTHDB
-LR_YUM_GROUP        = _librepo.LR_YUM_GROUP
-LR_YUM_GROUPGZ      = _librepo.LR_YUM_GROUPGZ
-LR_YUM_PRESTODELTA  = _librepo.LR_YUM_PRESTODELTA
-LR_YUM_DELTAINFO    = _librepo.LR_YUM_DELTAINFO
-LR_YUM_UPDATEINFO   = _librepo.LR_YUM_UPDATEINFO
-LR_YUM_ORIGIN       = _librepo.LR_YUM_ORIGIN
-LR_YUM_BASEXML      = _librepo.LR_YUM_BASEXML
-LR_YUM_BASEDB       = _librepo.LR_YUM_BASEDB
-LR_YUM_BASEHAWKEY   = _librepo.LR_YUM_BASEHAWKEY
-LR_YUM_FULL         = _librepo.LR_YUM_FULL
+LR_YUM_FULL         = None
+LR_YUM_REPOMDONLY   = [None]
+LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
+LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
+LR_YUM_BASEHAWKEY   = ["primary", "filelists", "prestodelta", None]
 
 LRE_OK                  = _librepo.LRE_OK
 LRE_BADFUNCARG          = _librepo.LRE_BADFUNCARG
@@ -139,8 +127,8 @@ class Handle(_librepo.Handle):
         self.setopt(LRO_GPGCHECK, val)
     def checksum(self, val):
         self.setopt(LRO_CHECKSUM, val)
-    def yumrepoflags(self, val):
-        self.setopt(LRO_YUMREPOFLAGS, val)
+    def yumdlist(self, val):
+        self.setopt(LRO_YUMDLIST, val)
     def download(self, url, dest=None, checksum_type=0, checksum=None, base_url=None, resume=0):
         self.download_package(url, dest, checksum_type, checksum, base_url, resume)
 

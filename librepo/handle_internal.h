@@ -45,9 +45,11 @@ struct _lr_Handle {
     long            status_code;    /*!< Last HTTP or FTP status code */
     CURLcode        last_curl_error;/*!< Last curl error code */
     CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
-    lr_YumRepoFlags yumflags;       /*!< Flags for downloading of yum repo */
     lr_ProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
+    char            **yumdlist;     /*!< Repomd data typenames to download
+                                        NULL - Download all
+                                        yumdlist[0] = NULL - Only repomd.xml */
 };
 
 int lr_handle_prepare_internal_mirrorlist(lr_Handle handle,

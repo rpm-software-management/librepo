@@ -58,12 +58,10 @@ if __name__ == "__main__":
     # Set user data for the callback
     h.setopt(librepo.LRO_PROGRESSDATA, {'test': 'dict', 'foo': 'bar'})
 
-    # Download only filelists.xml, deltainfo.xml, prestodelta.xml
+    # Download only filelists.xml, prestodelta.xml
     # Note: repomd.xml is downloaded implicitly!
-    # Note: If LRO_YUMREPOFLAGS is not specified, all files are downloaded
-    h.setopt(librepo.LRO_YUMREPOFLAGS, librepo.LR_YUM_FIL|
-                                       librepo.LR_YUM_DELTAINFO|
-                                       librepo.LR_YUM_PRESTODELTA)
+    # Note: If LRO_YUMDLIST is None -> all files are downloaded
+    h.setopt(librepo.LRO_YUMDLIST, ["filelists", "prestodelta"])
 
     h.perform(r)
 
@@ -74,7 +72,7 @@ if __name__ == "__main__":
     # Whoops... I forget to download primary.xml.. Lets fix it!
     # Set LRO_UPDATE - only update existing Result
     h.setopt(librepo.LRO_UPDATE, True)
-    h.setopt(librepo.LRO_YUMREPOFLAGS, librepo.LR_YUM_PRI)
+    h.setopt(librepo.LRO_YUMDLIST, ["primary"])
     h.perform(r)
 
     # Get and show final results

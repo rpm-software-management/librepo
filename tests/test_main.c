@@ -12,6 +12,7 @@
 #include "testsys.h"
 #include "test_checksum.h"
 #include "test_internal_mirrorlist.h"
+#include "test_repomd.h"
 
 
 static int
@@ -53,6 +54,7 @@ main(int argc, const char **argv)
 
     SRunner *sr = srunner_create(checksum_suite());
     srunner_add_suite(sr, internal_mirrorlist_suite());
+    srunner_add_suite(sr, repomd_suite());
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);

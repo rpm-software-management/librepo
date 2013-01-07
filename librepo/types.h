@@ -40,33 +40,12 @@ typedef enum {
 
 /* YUM related types */
 
-typedef enum {
-/*  LR_YUM_             = (1<<0),  Reserved */
-/*  LR_YUM_             = (1<<1),  Reserved */
-    LR_YUM_PRI          = (1<<2),
-    LR_YUM_FIL          = (1<<3),
-    LR_YUM_OTH          = (1<<4),
-    LR_YUM_PRIDB        = (1<<5),
-    LR_YUM_FILDB        = (1<<6),
-    LR_YUM_OTHDB        = (1<<7),
-    LR_YUM_GROUP        = (1<<8),
-    LR_YUM_GROUPGZ      = (1<<9),
-    LR_YUM_PRESTODELTA  = (1<<10),
-    LR_YUM_DELTAINFO    = (1<<11),
-    LR_YUM_UPDATEINFO   = (1<<12),
-    LR_YUM_ORIGIN       = (1<<13),
-
-    // Common combination
-    LR_YUM_REPOMDONLY  = 0,
-    LR_YUM_BASEXML     = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH,
-    LR_YUM_BASEDB      = LR_YUM_PRIDB|LR_YUM_FILDB|LR_YUM_OTHDB,
-    LR_YUM_BASEHAWKEY  = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_PRESTODELTA|
-                         LR_YUM_DELTAINFO,
-    LR_YUM_FULL        = LR_YUM_PRI|LR_YUM_FIL|LR_YUM_OTH|
-                         LR_YUM_PRIDB|LR_YUM_FILDB|LR_YUM_OTHDB|
-                         LR_YUM_GROUP|LR_YUM_GROUPGZ|LR_YUM_PRESTODELTA|
-                         LR_YUM_DELTAINFO|LR_YUM_UPDATEINFO|LR_YUM_ORIGIN,
-} lr_YumRepoFlags;
+/* Some common used arrays for LRO_YUMDLIST */
+#define LR_YUM_FULL         NULL
+#define LR_YUM_REPOMDONLY   [NULL]
+#define LR_YUM_BASEXML      ["primary", "filelists", "other", NULL]
+#define LR_YUM_BASEDB       ["primary_db", "filelists_db", "other_db", NULL]
+#define LR_YUM_HAWKEY       ["primary", "filelists", "prestodelta", NULL]
 
 struct _lr_YumDistroTag {
     char *cpeid;
@@ -75,6 +54,7 @@ struct _lr_YumDistroTag {
 typedef struct _lr_YumDistroTag *lr_YumDistroTag;
 
 struct _lr_YumRepoMdRecord {
+    char *type;
     char *location_href;
     char *location_base;
     char *checksum;
@@ -96,41 +76,26 @@ struct _lr_YumRepoMd {
     char **repo_tags;
     lr_YumDistroTag *distro_tags;
     char **content_tags;
+    lr_YumRepoMdRecord *records;
 
     int nort; /* number of repo tags */
     int nodt; /* number of distro tags */
     int noct; /* number of content tags */
-
-    lr_YumRepoMdRecord primary;
-    lr_YumRepoMdRecord filelists;
-    lr_YumRepoMdRecord other;
-    lr_YumRepoMdRecord primary_db;
-    lr_YumRepoMdRecord filelists_db;
-    lr_YumRepoMdRecord other_db;
-    lr_YumRepoMdRecord group;
-    lr_YumRepoMdRecord group_gz;
-    lr_YumRepoMdRecord prestodelta;
-    lr_YumRepoMdRecord deltainfo;
-    lr_YumRepoMdRecord updateinfo;
-    lr_YumRepoMdRecord origin;
+    int nor;  /* number of records */
 };
 typedef struct _lr_YumRepoMd *lr_YumRepoMd;
 
-struct _lr_YumRepo {
-    char *repomd;
-    char *primary;
-    char *filelists;
-    char *other;
-    char *primary_db;
-    char *filelists_db;
-    char *other_db;
-    char *group;
-    char *group_gz;
-    char *prestodelta;
-    char *deltainfo;
-    char *updateinfo;
-    char *origin;
+struct _lr_YumRepoPath {
+    char *type;  /* e.g. primary */
+    char *path;  /* e.g. foo/bar/repodata/primary.xml */
+};
+typedef struct _lr_YumRepoPath *lr_YumRepoPath;
 
+struct _lr_YumRepo {
+    int nop; /* Number of paths */
+    lr_YumRepoPath *paths;
+
+    char *repomd;
     char *url;          /*!< URL from where repo was downloaded */
     char *destdir;      /*!< Local path to the repo */
 };

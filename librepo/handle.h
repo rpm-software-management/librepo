@@ -57,7 +57,7 @@ typedef enum {
     LRO_CHECKSUM,    /*!< Check files checksum if available */
 
     /* LR_YUMREPO specific options */
-    LRO_YUMREPOFLAGS,/*!< Download only specified files */
+    LRO_YUMDLIST,   /*!< Download only specified records from repomd. */
     LRO_SENTINEL,    /*!<  */
 } lr_HandleOption; /*!< Handle config options */
 

@@ -101,7 +101,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_CONNECTTIMEOUT", LRO_CONNECTTIMEOUT);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
-    PyModule_AddIntConstant(m, "LRO_YUMREPOFLAGS", LRO_YUMREPOFLAGS);
+    PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
     /* Check options */
@@ -112,25 +112,6 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LR_YUMREPO", LR_YUMREPO);
     PyModule_AddIntConstant(m, "LR_SUSEREPO", LR_SUSEREPO);
     PyModule_AddIntConstant(m, "LR_DEBREPO", LR_DEBREPO);
-
-    /* Yum repo flags */
-    PyModule_AddIntConstant(m, "LR_YUM_REPOMDONLY", LR_YUM_REPOMDONLY);
-    PyModule_AddIntConstant(m, "LR_YUM_PRI", LR_YUM_PRI);
-    PyModule_AddIntConstant(m, "LR_YUM_FIL", LR_YUM_FIL);
-    PyModule_AddIntConstant(m, "LR_YUM_OTH", LR_YUM_OTH);
-    PyModule_AddIntConstant(m, "LR_YUM_PRIDB", LR_YUM_PRIDB);
-    PyModule_AddIntConstant(m, "LR_YUM_FILDB", LR_YUM_FILDB);
-    PyModule_AddIntConstant(m, "LR_YUM_OTHDB", LR_YUM_OTHDB);
-    PyModule_AddIntConstant(m, "LR_YUM_GROUP", LR_YUM_GROUP);
-    PyModule_AddIntConstant(m, "LR_YUM_GROUPGZ", LR_YUM_GROUPGZ);
-    PyModule_AddIntConstant(m, "LR_YUM_PRESTODELTA", LR_YUM_PRESTODELTA);
-    PyModule_AddIntConstant(m, "LR_YUM_DELTAINFO", LR_YUM_DELTAINFO);
-    PyModule_AddIntConstant(m, "LR_YUM_UPDATEINFO", LR_YUM_UPDATEINFO);
-    PyModule_AddIntConstant(m, "LR_YUM_ORIGIN", LR_YUM_ORIGIN);
-    PyModule_AddIntConstant(m, "LR_YUM_BASEXML", LR_YUM_BASEXML);
-    PyModule_AddIntConstant(m, "LR_YUM_BASEDB", LR_YUM_BASEDB);
-    PyModule_AddIntConstant(m, "LR_YUM_BASEHAWKEY", LR_YUM_BASEHAWKEY);
-    PyModule_AddIntConstant(m, "LR_YUM_FULL", LR_YUM_FULL);
 
     /* Return codes */
     PyModule_AddIntConstant(m, "LRE_OK", LRE_OK);

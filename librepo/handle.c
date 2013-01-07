@@ -40,6 +40,23 @@
 #include "version.h"
 #include "curl.h"
 
+void
+lr_handle_free_yumdlist(lr_Handle handle)
+{
+    int x;
+    assert(handle);
+    if (!handle->yumdlist)
+        return;
+
+    x = 0;
+    while (handle->yumdlist[x]) {
+        lr_free(handle->yumdlist[x]);
+        x++;
+    }
+    lr_free(handle->yumdlist);
+    handle->yumdlist = NULL;
+}
+
 lr_Handle
 lr_handle_init()
 {
@@ -54,7 +71,6 @@ lr_handle_init()
     handle->retries = 1;
     handle->last_curl_error = CURLE_OK;
     handle->last_curlm_error = CURLM_OK;
-    handle->yumflags = LR_YUM_FULL;
     handle->checks |= LR_CHECK_CHECKSUM;
 
     /* Default options */
@@ -77,6 +93,7 @@ lr_handle_free(lr_Handle handle)
     lr_free(handle->destdir);
     lr_internalmirrorlist_free(handle->internal_mirrorlist);
     lr_metalink_free(handle->metalink);
+    lr_handle_free_yumdlist(handle);
     lr_free(handle);
 }
 
@@ -203,9 +220,22 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
             handle->checks &= ~LR_CHECK_CHECKSUM;
         break;
 
-    case LRO_YUMREPOFLAGS:
-        handle->yumflags = va_arg(arg, lr_YumRepoFlags);
+    case LRO_YUMDLIST: {
+        int size = 0;
+        char **list = va_arg(arg, char **);
+        lr_handle_free_yumdlist(handle);
+        if (!list)
+            break;
+
+        /* Copy list */
+        while (list[size])
+            size++;
+        size++;
+        handle->yumdlist = lr_malloc0(size * sizeof(char *));
+        for (int x = 0; x < size; x++)
+            handle->yumdlist[x] = lr_strdup(list[x]);
         break;
+    }
 
     default:
         ret = LRE_UNKNOWNOPT;

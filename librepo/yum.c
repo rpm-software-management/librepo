@@ -60,23 +60,17 @@ lr_yum_repo_clear(lr_YumRepo repo)
 {
     if (!repo)
         return;
+    for (int x = 0; x < repo->nop; x++) {
+        lr_free(repo->paths[x]->type);
+        lr_free(repo->paths[x]->path);
+        lr_free(repo->paths[x]);
+    }
+    lr_free(repo->paths);
     lr_free(repo->repomd);
-    lr_free(repo->primary);
-    lr_free(repo->filelists);
-    lr_free(repo->other);
-    lr_free(repo->primary_db);
-    lr_free(repo->filelists_db);
-    lr_free(repo->other_db);
-    lr_free(repo->group);
-    lr_free(repo->group_gz);
-    lr_free(repo->prestodelta);
-    lr_free(repo->deltainfo);
-    lr_free(repo->updateinfo);
-    lr_free(repo->origin);
     lr_free(repo->url);
     lr_free(repo->destdir);
     memset(repo, 0, sizeof(struct _lr_YumRepo));
- }
+}
 
 void
 lr_yum_repo_free(lr_YumRepo repo)
@@ -87,7 +81,60 @@ lr_yum_repo_free(lr_YumRepo repo)
     lr_free(repo);
 }
 
+char *
+lr_yum_repo_path(lr_YumRepo repo, const char *type)
+{
+    assert(repo);
+    for (int x = 0; x < repo->nop; x++)
+        if (!strcmp(repo->paths[x]->type, type))
+            return repo->paths[x]->path;
+    return NULL;
+}
+
+void
+lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path)
+{
+    assert(repo);
+    assert(type);
+    assert(path);
+    repo->paths = lr_realloc(repo->paths, (repo->nop+1) * sizeof(lr_YumRepoMd));
+    repo->paths[repo->nop] = lr_malloc(sizeof(struct _lr_YumRepoPath));
+    repo->paths[repo->nop]->type = lr_strdup(type);
+    repo->paths[repo->nop]->path = lr_strdup(path);
+    repo->nop++;
+}
+
+void
+lr_yum_repo_update(lr_YumRepo repo, const char *type, const char *path)
+{
+    assert(repo);
+    assert(type);
+    assert(path);
+    for (int x = 0; x < repo->nop; x++)
+        if (!strcmp(repo->paths[x]->type, type)) {
+            lr_free(repo->paths[x]->path);
+            repo->paths[x]->path = lr_strdup(path);
+            return;
+        }
+    lr_yum_repo_append(repo, type, path);
+}
+
 /* main bussines logic */
+
+int
+lr_yum_repomd_record_enabled(lr_Handle handle, const char *type)
+{
+    if (handle->yumdlist) {
+        int x = 0, found = 0;
+        while (handle->yumdlist[x]) {
+            if (!strcmp(handle->yumdlist[x], type))
+                return 1;;
+            x++;
+        }
+        return 0;
+    }
+    return 1;
+}
 
 int
 lr_yum_download_repomd(lr_Handle handle,
@@ -136,79 +183,49 @@ lr_yum_download_repomd(lr_Handle handle,
     return LRE_OK;
 }
 
-void
-lr_add_target(lr_CurlTargetList targets,
-              const char *destdir,
-              lr_YumRepoMdRecord rec,
-              char **local_path,
-              int use_this)
-{
-    int fd;
-    lr_CurlTarget target;
-
-    if (!use_this)
-        return;
-
-    DEBUGASSERT(destdir);
-    DEBUGASSERT(strlen(destdir));
-
-    if (!rec || !rec->location_href)
-        return;
-
-    if (*local_path)  /* During update local_path may be already existing */
-        lr_free(*local_path);
-    *local_path = lr_pathconcat(destdir, rec->location_href, NULL);
-    fd = open(*local_path, O_CREAT|O_TRUNC|O_RDWR, 0660);
-    if (fd < 0) {
-        lr_free(*local_path);
-        return;
-    }
-
-    target = lr_curltarget_new();
-    target->path = lr_strdup(rec->location_href);
-    target->fd = fd;
-    target->checksum_type = lr_checksum_type(rec->checksum_type);
-    target->checksum = lr_strdup(rec->checksum);
-    lr_curltargetlist_append(targets, target);
-}
-
 int
 lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
 {
     int ret = LRE_OK;
-    char *dir;  /* Destination dir */
+    char *destdir;  /* Destination dir */
     lr_CurlTargetList targets = lr_curltargetlist_new();
 
-    dir = handle->destdir;
+    destdir = handle->destdir;
+    DEBUGASSERT(destdir);
+    DEBUGASSERT(strlen(destdir));
 
-    lr_add_target(targets, dir, repomd->primary, &repo->primary,
-                          handle->yumflags & LR_YUM_PRI);
-    lr_add_target(targets, dir, repomd->filelists, &repo->filelists,
-                          handle->yumflags & LR_YUM_FIL);
-    lr_add_target(targets, dir, repomd->other, &repo->other,
-                          handle->yumflags & LR_YUM_OTH);
-    lr_add_target(targets, dir, repomd->primary_db, &repo->primary_db,
-                          handle->yumflags & LR_YUM_PRIDB);
-    lr_add_target(targets, dir, repomd->filelists_db, &repo->filelists_db,
-                          handle->yumflags & LR_YUM_FILDB);
-    lr_add_target(targets, dir, repomd->other_db, &repo->other_db,
-                          handle->yumflags & LR_YUM_OTHDB);
-    lr_add_target(targets, dir, repomd->group, &repo->group,
-                          handle->yumflags & LR_YUM_GROUP);
-    lr_add_target(targets, dir, repomd->group_gz, &repo->group_gz,
-                          handle->yumflags & LR_YUM_GROUPGZ);
-    lr_add_target(targets, dir, repomd->prestodelta, &repo->prestodelta,
-                          handle->yumflags & LR_YUM_PRESTODELTA);
-    lr_add_target(targets, dir, repomd->deltainfo, &repo->deltainfo,
-                          handle->yumflags & LR_YUM_DELTAINFO);
-    lr_add_target(targets, dir, repomd->updateinfo, &repo->updateinfo,
-                          handle->yumflags & LR_YUM_UPDATEINFO);
-    lr_add_target(targets, dir, repomd->origin, &repo->origin,
-                          handle->yumflags & LR_YUM_ORIGIN);
+    for (int x = 0; x < repomd->nor; x++) {
+        int fd;
+        char *path;
+        lr_CurlTarget target;
+        lr_YumRepoMdRecord record = repomd->records[x];
 
-    if (lr_curltargetlist_len(targets) > 0) {
-        ret = lr_curl_multi_download(handle, targets);
+        if (!lr_yum_repomd_record_enabled(handle, record->type))
+            continue;
+
+        path = lr_pathconcat(destdir, record->location_href, NULL);
+        fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0660);
+        if (fd < 0) {
+            DPRINTF("%s: Cannot create/open %s (%s)\n",
+                    __func__, path, strerror(errno));
+            lr_free(path);
+            return LRE_IO;
+        }
+
+        target = lr_curltarget_new();
+        target->path = lr_strdup(record->location_href);
+        target->fd = fd;
+        target->checksum_type = lr_checksum_type(record->checksum_type);
+        target->checksum = lr_strdup(record->checksum);
+        lr_curltargetlist_append(targets, target);
+
+        /* Becouse path may already exists in repo (while update) */
+        lr_yum_repo_update(repo, record->type, path);
+        lr_free(path);
     }
+
+    if (lr_curltargetlist_len(targets) > 0)
+        ret = lr_curl_multi_download(handle, targets);
 
     lr_curltargetlist_free(targets);
     return ret;
@@ -263,56 +280,15 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
 int
 lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
 {
-    int ret;
-
-    ret = lr_yum_check_checksum_of_md_record(repomd->primary,
-                                             repo->primary);
-    DPRINTF("%s: Checksum rc: %d (primary)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->filelists,
-                                             repo->filelists);
-    DPRINTF("%s: Checksum rc: %d (filelists)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->other,
-                                             repo->other);
-    DPRINTF("%s: Checksum rc: %d (other)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->primary_db,
-                                             repo->primary_db);
-    DPRINTF("%s: Checksum rc: %d (primary_db)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->filelists_db,
-                                             repo->filelists_db);
-    DPRINTF("%s: Checksum rc: %d (filelists_db)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->other_db,
-                                             repo->other_db);
-    DPRINTF("%s: Checksum rc: %d (other_db)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->group,
-                                             repo->group);
-    DPRINTF("%s: Checksum rc: %d (group)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->group_gz,
-                                             repo->group_gz);
-    DPRINTF("%s: Checksum rc: %d (group_gz)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->prestodelta,
-                                             repo->prestodelta);
-    DPRINTF("%s: Checksum rc: %d (prestodelta)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->deltainfo,
-                                             repo->deltainfo);
-    DPRINTF("%s: Checksum rc: %d (deltainfo)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->updateinfo,
-                                             repo->updateinfo);
-    DPRINTF("%s: Checksum rc: %d (updateinfo)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
-    ret = lr_yum_check_checksum_of_md_record(repomd->origin,
-                                             repo->origin);
-    DPRINTF("%s: Checksum rc: %d (origin)\n", __func__, ret);
-    if (ret != LRE_OK) return ret;
+    for (int x=0; x < repomd->nor; x++) {
+        int ret;
+        lr_YumRepoMdRecord record  = repomd->records[x];
+        char *path = lr_yum_repo_path(repo, record->type);
+        ret = lr_yum_check_checksum_of_md_record(record, path);
+        DPRINTF("%s: Checksum rc: %d (%s)\n", __func__, ret, record->type);
+        if (ret != LRE_OK)
+            return ret;
+    }
 
     return LRE_OK;
 }
@@ -371,56 +347,19 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     }
 
     /* Locate rest of metadata files */
-    /* First condition !repo->* is for cases when handle->update is true,
-     * then we don't need to generate paths we already have */
-    if (!repo->primary && repomd->primary && handle->yumflags & LR_YUM_PRI)
-        repo->primary = lr_pathconcat(baseurl,
-                            repomd->primary->location_href,
-                            NULL);
-    if (!repo->filelists && repomd->filelists && handle->yumflags & LR_YUM_FIL)
-        repo->filelists = lr_pathconcat(baseurl,
-                            repomd->filelists->location_href,
-                            NULL);
-    if (!repo->other && repomd->other && handle->yumflags & LR_YUM_OTH)
-        repo->other = lr_pathconcat(baseurl,
-                            repomd->other->location_href,
-                            NULL);
-    if (!repo->primary_db && repomd->primary_db && handle->yumflags & LR_YUM_PRIDB)
-        repo->primary_db = lr_pathconcat(baseurl,
-                            repomd->primary_db->location_href,
-                            NULL);
-    if (!repo->filelists_db && repomd->filelists_db && handle->yumflags & LR_YUM_FILDB)
-        repo->filelists_db = lr_pathconcat(baseurl,
-                            repomd->filelists_db->location_href,
-                            NULL);
-    if (!repo->other_db && repomd->other_db && handle->yumflags & LR_YUM_OTHDB)
-        repo->other_db = lr_pathconcat(baseurl,
-                            repomd->other_db->location_href,
-                            NULL);
-    if (!repo->group && repomd->group && handle->yumflags & LR_YUM_GROUP)
-        repo->group = lr_pathconcat(baseurl,
-                            repomd->group->location_href,
-                            NULL);
-    if (!repo->group_gz && repomd->group_gz && handle->yumflags & LR_YUM_GROUPGZ)
-        repo->group_gz = lr_pathconcat(baseurl,
-                            repomd->group_gz->location_href,
-                            NULL);
-    if (!repo->prestodelta && repomd->prestodelta && handle->yumflags & LR_YUM_PRESTODELTA)
-        repo->prestodelta = lr_pathconcat(baseurl,
-                            repomd->prestodelta->location_href,
-                            NULL);
-    if (!repo->deltainfo && repomd->deltainfo && handle->yumflags & LR_YUM_DELTAINFO)
-        repo->deltainfo = lr_pathconcat(baseurl,
-                            repomd->deltainfo->location_href,
-                            NULL);
-    if (!repo->updateinfo && repomd->updateinfo && handle->yumflags & LR_YUM_UPDATEINFO)
-        repo->updateinfo = lr_pathconcat(baseurl,
-                            repomd->updateinfo->location_href,
-                            NULL);
-    if (!repo->origin && repomd->origin && handle->yumflags & LR_YUM_ORIGIN)
-        repo->origin = lr_pathconcat(baseurl,
-                            repomd->origin->location_href,
-                            NULL);
+    for (int x = 0; x < repomd->nor; x++) {
+        char *path;
+        lr_YumRepoMdRecord record = repomd->records[x];
+
+        if (!lr_yum_repomd_record_enabled(handle, record->type))
+            continue;
+        if (lr_yum_repo_path(repo, record->type))
+            continue; /* This path already exists in repo */
+
+        path = lr_pathconcat(baseurl, record->location_href, NULL);
+        if (path)
+            lr_yum_repo_append(repo, record->type, path);
+    }
 
     DPRINTF("%s: Repository was successfully located\n", __func__);
     return LRE_OK;
