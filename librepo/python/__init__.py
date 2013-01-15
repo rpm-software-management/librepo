@@ -400,7 +400,7 @@ class Handle(_librepo.Handle):
             # is equivalent to:
             h.url("http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
         """
-        _librepo.Handle.setopt(self, opt, val)
+        _librepo.Handle.setopt(self, option, val)
 
     def update(self, val):
         """Set *val* to ``True`` if only want update localised or downloaded
@@ -552,6 +552,7 @@ class Handle(_librepo.Handle):
         """
         self.download_package(url, dest, checksum_type, checksum, base_url, resume)
 
+
 class Result(_librepo.Result):
     """Librepo result class
 
@@ -563,14 +564,14 @@ class Result(_librepo.Result):
 
         *option* could be one of: :ref:`result-options-label`
         """
-        _librepo.Result.getinfo(self, option)
+        return _librepo.Result.getinfo(self, option)
 
     def yum_repo(self):
         """Return a dict with local paths to downloaded/localised
         yum repository."""
-        self.getinfo(LRR_YUM_REPO)
+        return self.getinfo(LRR_YUM_REPO)
 
     def yum_repomd(self):
         """Return a dict representing a repomd.xml file of
         downloaded yum repository."""
-        self.getinfo(LRR_YUM_REPOMD)
+        return self.getinfo(LRR_YUM_REPOMD)
