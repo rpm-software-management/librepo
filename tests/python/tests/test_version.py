@@ -1,7 +1,7 @@
 import unittest
 import librepo
 
-class Version(unittest.TestCase):
+class TestCaseVersion(unittest.TestCase):
     def test_version(self):
         self.assertIsInstance(librepo.VERSION, unicode)
         self.assertGreaterEqual(len(librepo.VERSION), 5)
