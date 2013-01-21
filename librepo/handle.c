@@ -39,6 +39,7 @@
 #include "yum.h"
 #include "version.h"
 #include "curl.h"
+#include "yum_internal.h"
 
 void
 lr_handle_free_yumdlist(lr_Handle handle)

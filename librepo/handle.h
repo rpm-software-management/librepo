@@ -24,59 +24,116 @@
 extern "C" {
 #endif
 
-/* Handle options */
-typedef enum {
-    LRO_UPDATE,      /*!< Update existing repo in lr_Result */
-    LRO_URL,         /*!< Base repo URL */
-    LRO_MIRRORLIST,  /*!< Mirrorlist or metalink url */
-    LRO_LOCAL,       /*!< Do not duplicate local metadata, just locate
-                          the old one */
-    LRO_HTTPAUTH,    /*!< Enable all supported method of HTTP
-                          authentification. */
-    LRO_USERPWD,     /*!< User and password for http authetification in format
-                          "user:password" */
-    LRO_PROXY,       /*!< Address of proxy server eg. "proxy-host.com:8080" */
-    LRO_PROXYPORT,   /*!< Set port number for proxy separately */
-    LRO_PROXYSOCK,   /*!< Set type of proxy to SOCK (default is assumed
-                          HTTP proxy) */
-    LRO_PROXYAUTH,   /*!< Enable all supported method for proxy
-                          authentification */
-    LRO_PROXYUSERPWD,/*!< User and password for proxy */
-    LRO_PROGRESSCB,  /*!< Progress callback */
-    LRO_PROGRESSDATA,/*!< Progress callback user data */
-    LRO_RETRIES,     /*!< Number of maximum retries for each file - TODO */
-    LRO_MAXSPEED,    /*!< Maximum download speed in bytes per second */
-    LRO_DESTDIR,     /*!< Where to save downloaded files */
+/** \defgroup   handle    Handle for downloading data
+ */
 
-    LRO_REPOTYPE,    /*!< Type of downloaded repo, currently only supported
-                          is LR_YUMREPO. */
-    LRO_CONNECTTIMEOUT,/*!< Max time in sec for connection phase */
+/** \ingroup handle
+ * Handle options for the ::lr_handle_setopt function.
+ */
+typedef enum {
+    LRO_UPDATE,      /*!< (long 1 or 0) Update existing repo in ::lr_Result.
+                          Update means download missing (previously omitted)
+                          metadata file(s). TODO: rename to reuse */
+    LRO_URL,         /*!< (char *) Base repo URL */
+    LRO_MIRRORLIST,  /*!< (char *) Mirrorlist or metalink url */
+    LRO_LOCAL,       /*!< (long 1 or 0) Do not duplicate local metadata, just
+                          locate the old one */
+    LRO_HTTPAUTH,    /*!< (long 1 or 0) Enable all supported method of HTTP
+                          authentification. */
+    LRO_USERPWD,     /*!< (char *) User and password for http authetification
+                          in format user:password */
+    LRO_PROXY,       /*!< (char *) Address of proxy server eg.
+                          "proxy-host.com:8080" */
+    LRO_PROXYPORT,   /*!< (long) Set port number for proxy separately */
+    LRO_PROXYSOCK,   /*!< (long 1 or 0) Set type of proxy to SOCK (default is
+                          assumed HTTP proxy) - TODO: more options */
+    LRO_PROXYAUTH,   /*!< (long 1 or 0) Enable all supported method for proxy
+                          authentification */
+    LRO_PROXYUSERPWD,/*!< (char *) User and password for proxy in format
+                          user:password */
+    LRO_PROGRESSCB,  /*!< (::lr_ProgressCb) Progress callback */
+    LRO_PROGRESSDATA,/*!< (void *) Progress callback user data */
+    LRO_RETRIES,     /*!< (long) Number of maximum retries for each file - TODO */
+    LRO_MAXSPEED,    /*!< (unsigned long long) Maximum download speed
+                          in bytes per second */
+    LRO_DESTDIR,     /*!< (char *) Where to save downloaded files */
+
+    LRO_REPOTYPE,    /*!< (::lr_Repotype) Type of downloaded repo, currently
+                          only supported is LR_YUMREPO. */
+    LRO_CONNECTTIMEOUT,/*!< (long) Max time in sec for connection phase */
 
     /* Repo common options */
-    LRO_GPGCHECK,    /*!< Check GPG signature if available - TODO */
-    LRO_CHECKSUM,    /*!< Check files checksum if available */
+    LRO_GPGCHECK,    /*!< (int) Check GPG signature if available - TODO */
+    LRO_CHECKSUM,    /*!< (int) Check files checksum if available */
 
     /* LR_YUMREPO specific options */
-    LRO_YUMDLIST,   /*!< Download only specified records from repomd. */
+    LRO_YUMDLIST,    /*!< (char **) Download only specified records
+                          from repomd (e.g. ["primary", "filelists"]). */
     LRO_SENTINEL,    /*!<  */
 } lr_HandleOption; /*!< Handle config options */
 
-/* Handle info options */
-typedef enum {
-    LRI_URL,
-} lr_HandleInfoOption;
-
-
+/** \ingroup handle
+ * Return new handle.
+ * @return              New allocated handle.
+ */
 lr_Handle lr_handle_init();
+
+/** \ingroup handle
+ * Frees handle and its content.
+ * @param handle        Handle.
+ */
 void lr_handle_free(lr_Handle handle);
 
-/* look at: url.c - Curl_setopt() */
+/** \ingroup handle
+ * Set option (::lr_HandleOption) of the handle.
+ * @param handle         Handle.
+ * @param option        Option from ::lr_HandleOption enum.
+ * @param ...           Value for the option.
+ * @return              Librepo return code from ::lr_Rc enum.
+ */
 int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
+
+/** \ingroup handle
+ * Perform repodata download or location.
+ * @param handle        Librepo handle.
+ * @param result        Librepo result.
+ * @return              Librepo return code from ::lr_Rc enum.
+ */
 int lr_handle_perform(lr_Handle handle, lr_Result result);
-int lr_handle_last_curl_error(lr_Handle);
-int lr_handle_last_curlm_error(lr_Handle);
-long lr_handle_last_bad_status_code(lr_Handle);
+
+/** \ingroup handle
+ * Return last encountered cURL error code from cURL.
+ * @param handle        Librepo handle.
+ * @return              cURL (CURLcode) return code.
+ */
+int lr_handle_last_curl_error(lr_Handle handle);
+
+/** \ingroup handle
+ * Return last encoutered cURL error code from cURL multi handle.
+ * @param handle        Librepo handle.
+ * @return              cURL multi (CURLMcode) return code.
+ */
+int lr_handle_last_curlm_error(lr_Handle handle);
+
+/** \ingroup handle
+ * Return last encountered HTTP/FTP status code (e.g. 404).
+ * @param handle        Librepo handle.
+ * @return              Last encountered HTTP/FTP status code.
+ */
+long lr_handle_last_bad_status_code(lr_Handle handle);
+
+/** \ingroup handle
+ * Return string representation of last encountered cURL error.
+ * @param handle        Librepo handle.
+ * @return              String with text description of error.
+ */
 const char *lr_handle_last_curl_strerror(lr_Handle handle);
+
+/** \ingroup handle
+ * Return string representation of last encountered cURL multi error.
+ * @param handle        Librepo handle.
+ * @return              String with text description of error.
+ */
 const char *lr_handle_last_curlm_strerror(lr_Handle handle);
 
 #ifdef __cplusplus

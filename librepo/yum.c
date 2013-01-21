@@ -40,6 +40,7 @@
 #include "checksum.h"
 #include "handle_internal.h"
 #include "result_internal.h"
+#include "yum_internal.h"
 #include "internal_mirrorlist.h"
 #include "curltargetlist.h"
 
@@ -125,7 +126,7 @@ int
 lr_yum_repomd_record_enabled(lr_Handle handle, const char *type)
 {
     if (handle->yumdlist) {
-        int x = 0, found = 0;
+        int x = 0;
         while (handle->yumdlist[x]) {
             if (!strcmp(handle->yumdlist[x], type))
                 return 1;;

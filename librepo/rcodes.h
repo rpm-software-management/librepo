@@ -24,7 +24,12 @@
 extern "C" {
 #endif
 
-/* Return/Error codes */
+/** \defgroup   rcodes      Librepo return codes
+ */
+
+/** \ingroup rcodes
+ * Return/Error codes
+ */
 typedef enum {
     LRE_OK,                         /*!< everything is ok */
     LRE_BADFUNCARG,                 /*!< bad function argument */
@@ -61,8 +66,8 @@ typedef enum {
     LRE_REPOMDXML,                  /*!< repomd XML parse error */
     LRE_NOURL,                      /*!< usable URL not found */
     LRE_CANNOTCREATETMP,            /*!< cannot create tmp directory */
-    LRE_UNKNOWNCHECKSUM,            /*!< unknown type of checksum is need to
-                                         calculate to verify one or more file */
+    LRE_UNKNOWNCHECKSUM,            /*!< unknown type of checksum is needed
+                                         for verification one or more files */
     LRE_BADURL,                     /*!< bad URL specified */
     LRE_UNKNOWNERROR,               /*!< unknown error - sentinel of
                                          error codes enum */

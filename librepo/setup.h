@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 /* DEBUGASSERT is only for debuging.
- * For assertion which shoud be always valid assert() is used directly.
+ * For assertion which shoud be always valid, assert() is used directly.
  */
 #ifdef DEBUG
 #include <assert.h>

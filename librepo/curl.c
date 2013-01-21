@@ -120,19 +120,6 @@ lr_single_progress_func(void* ptr,
 
 /* End of callback stuff */
 
-/*
-size_t
-header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
-{
-    size_t len = size * nmemb;
-    printf("HEADER: ");
-    for (size_t x = 0; x < len; x++)
-        putchar(((char *)ptr)[x]);
-    printf("\n");
-    return len;
-}
-*/
-
 int
 lr_curl_single_download_resume(lr_Handle handle,
                                const char *url,
@@ -326,7 +313,7 @@ retry:
 
 int
 lr_curl_single_mirrored_download_resume(lr_Handle handle,
-                                        const char *filename,
+                                        const char *path,
                                         int fd,
                                         lr_ChecksumType checksum_type,
                                         const char *checksum,
@@ -344,7 +331,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
     if (mirrors < 1)
         return LRE_NOURL;
 
-    DPRINTF("%s: Downloading %s\n", __func__, filename);
+    DPRINTF("%s: Downloading %s\n", __func__, path);
 
     for (int x=0; x < mirrors; x++) {
         char *full_url;
@@ -355,7 +342,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
         if (offset == 0)
             ftruncate(fd, 0);
 
-        full_url = lr_pathconcat(url, filename, NULL);
+        full_url = lr_pathconcat(url, path, NULL);
         rc = lr_curl_single_download_resume(handle, full_url, fd, offset, use_cb);
         lr_free(full_url);
 

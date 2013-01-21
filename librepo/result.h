@@ -26,16 +26,42 @@ extern "C" {
 
 #include "types.h"
 
-/* Result option */
+/** \defgroup   result      Result object
+ */
+
+/** \ingroup result
+ * Result options for ::lr_result_getinfo.
+ */
 typedef enum {
-    LRR_YUM_REPO,
-    LRR_YUM_REPOMD,
+    LRR_YUM_REPO,       /*!< (lr_YumRepo *) Reference to ::lr_YumRepo in result */
+    LRR_YUM_REPOMD,     /*!< (lr_YumRepoMd *) Reference to ::lr_YumRepoMd in result */
     LRR_SENTINEL,
 } lr_ResultInfoOption;
 
+/** \ingroup result
+ * Return new allocated ::lr_Result object
+ * @return          New allocated ::lr_Result object
+ */
 lr_Result lr_result_init();
-void lr_result_clear(lr_Result);
-void lr_result_free(lr_Result);
+
+/** \ingroup result
+ * Clean result object.
+ * @param result    Result object.
+ */
+void lr_result_clear(lr_Result result);
+
+/** \ingroup result
+ * Free result object.
+ * @param result    Result object.
+ */
+void lr_result_free(lr_Result result);
+
+/** \ingroup result
+ * Get information about downloaded/localised repository from result object.
+ * @param result    Result object.
+ * @param option    Option from ::lr_ResultInfoOption enum.
+ * @param ...       Apropriate variable for the selected option.
+ */
 int lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...);
 
 #ifdef __cplusplus

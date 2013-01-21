@@ -26,32 +26,78 @@ extern "C" {
 
 #include "checksum.h"
 
+/**
+ * Target for download via ::lr_curl_multi_download
+ */
 struct _lr_CurlTarget {
-    char *path;      // Path for URL (URL: "http://foo.bar/stuff", path: "somestuff.rar")
-    int fd;          // File descriptor
-    lr_ChecksumType checksum_type;  // Checksum type
-    char *checksum;  // Checksum value or NULL
-    int downloaded;  // Was target downloaded successfully? 0 - no, 1 - yes
+    char *path;      /*!< Relative path for URL
+                        (URL: "http://foo.bar/stuff", path: "somestuff.xml") */
+    int fd;          /*!< Opened file descriptor where data will be written */
+    lr_ChecksumType checksum_type;  /*!< Checksum type */
+    char *checksum;  /*!< Expected checksum value or NULL */
+    int downloaded;  /*!< 1 target was downloaded successfully, 0 otherwise */
 };
 
 typedef struct _lr_CurlTarget * lr_CurlTarget;
 
+/**
+ * List of targets to download used in ::lr_curl_multi_download
+ */
 struct _lr_CurlTargetList {
-    int size;   // Number of allocated elements
-    int used;   // Number of used elements
-    struct _lr_CurlTarget **targets;
+    int size;                           /*!< Number of allocated elements */
+    int used;                           /*!< Number of used elements */
+    struct _lr_CurlTarget **targets;    /*!< List of targets */
 };
 
 typedef struct _lr_CurlTargetList * lr_CurlTargetList;
 
+/**
+ * Create new empty ::lr_CurlTarget.
+ * @return              New allocated target.
+ */
 lr_CurlTarget lr_curltarget_new();
-void lr_curltarget_free(lr_CurlTarget);
 
+/**
+ * Free a ::lr_CurlTarget element and ist content.
+ * @param target        Target to free.
+ */
+void lr_curltarget_free(lr_CurlTarget target);
+
+/**
+ * Create new empty curl list of targets.
+ * @return              New empty list of targets.
+ */
 lr_CurlTargetList lr_curltargetlist_new();
-void lr_curltargetlist_free(lr_CurlTargetList);
-void lr_curltargetlist_append(lr_CurlTargetList, lr_CurlTarget);
-int lr_curltargetlist_len(lr_CurlTargetList);
-lr_CurlTarget lr_curltargetlist_get(lr_CurlTargetList, int);
+
+/**
+ * Free a ::lr_CurlTargetList and all its content.
+ * @param list          List.
+ */
+void lr_curltargetlist_free(lr_CurlTargetList list);
+
+/**
+ * Append curl target to list of curl targets.
+ * @param list          List of curl targets.
+ * @param target        Curl target.
+ */
+void lr_curltargetlist_append(lr_CurlTargetList list, lr_CurlTarget target);
+
+/**
+ * Return number of elements of the list.
+ * @param list          List of curl targets.
+ * @return              Number of targets in the list.
+ */
+int lr_curltargetlist_len(lr_CurlTargetList list);
+
+/**
+ * Return target on the position selected by index. Items in the list
+ * are indexed from 0. If index < 0 or index >= lr_curltargetlist_len(list)
+ * then NULL is returned.
+ * @param list          List of curl targets.
+ * @param index         Index of desired curl target.
+ * @return              Curl target or NULL.
+ */
+lr_CurlTarget lr_curltargetlist_get(lr_CurlTargetList list, int index);
 
 #ifdef __cplusplus
 }

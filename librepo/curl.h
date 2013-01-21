@@ -30,43 +30,94 @@ extern "C" {
 #include "internal_mirrorlist.h"
 #include "curltargetlist.h"
 
-/* Return codes of the module:
- *  LRE_OK          everything ok
- *  LRE_IO          input/output error
- *  LRE_NOURL       no usable URL
- *  LRE_CURL_DUP    cannot duplicate curl handle
- *  LRE_CURL        curl err
- *  LRE_MCURL       curl multi handle error
- *  LRE_BAD_STATUS  HTTP or FTP returned status code which
- *                  do not represent success
+/** \defgroup   curl    Set of function for downloading via curl
  */
 
-#define lr_curl_single_download(HANDLE, URL, FD) \
-            lr_curl_single_download_resume((HANDLE), (URL), (FD), 0, 0)
+/** \ingroup curl
+ * Simplified version lr_curl_single_download_resume. Whole file is
+ * downloaded without try to resume and user callback in handle is not used.
+ * For more information look at lr_curl_single_download_resume.
+ * @param handle        Librepo handle
+ * @param url           Full URL
+ * @param fd            Opened file descriptor.
+ * @return              ::lr_Rc value.
+ */
+#define lr_curl_single_download(handle, url, fd) \
+            lr_curl_single_download_resume((handle), (url), (fd), 0, 0)
 
+/** \ingroup curl
+ * Download one single file.
+ * @param handle        Librepo handle
+ * @param url           Full URL
+ * @param fd            Opened file descriptor where downloaded data
+ *                      will be written. Data writing starts on current
+ *                      descriptor position, no seek or truncation
+ *                      is performed (except situation when offset is -1).
+ * @param offset        Offset where to start downloading. If 0, do not
+ *                      resume and download whole file. If offset > 0, try
+ *                      start download from this offset (no seek performed!).
+ *                      If offset == -1 offset autodetection is used
+ *                      (seek to the SEEK_END, obtain offset by ftell())
+ *                      and start writing from the current (SEEK_END)
+ *                      position..
+ * @param use_cb        Use user callback from librepo handle? 0 == No
+ * @return              ::lr_Rc value.
+ */
 int lr_curl_single_download_resume(lr_Handle handle,
                                    const char *url,
                                    int fd,
                                    long long offset,
                                    int use_cb);
 
-#define lr_curl_single_mirrored_download(HANDLE, FILENAME, FD, CHKSUM_T, CHKSUM)\
-            lr_curl_single_mirrored_download_resume((HANDLE), \
-                                                     (FILENAME), \
-                                                     (FD), \
-                                                     (CHKSUM_T), \
-                                                     (CHKSUM), \
+/** \ingroup curl
+ * Simplified version of lr_curl_single_mirrored_download_resume.
+ * Whole file is downloaded without try to resume and user callback in handle
+ * is not used.
+ * @param handle        Librepo handle
+ * @param path          Relative part of URL. Mirror URL will be prepended
+ *                      to this path.
+ * @param fd            Openede file descriptor.
+ * @param chksum_t      CHecksum type.
+ * @param chksum        Expected checksum value or NULL. If NULL, checksum
+ *                      will not be checked.
+ * @return              ::lr_Rc value.
+ */
+#define lr_curl_single_mirrored_download(handle, path, fd, chksum_t, chksum)\
+            lr_curl_single_mirrored_download_resume((handle), \
+                                                     (path), \
+                                                     (fd), \
+                                                     (chksum_t), \
+                                                     (chksum), \
                                                      0, \
                                                      0)
 
+/** \ingroup curl
+ * Download single file from a first working mirror.
+ * @param handle        Librepo handle.
+ * @param path          Relative part of URL. Mirror URL will be prepended
+ *                      to this path.
+ * @param fd            Opened file descriptor.
+ * @param checksum_type Checksum type.
+ * @param checksum      Expected checksum of file or NULL. If NULL, checksum
+ *                      will not be checked.
+ * @param offset        Offset (same as ::lr_curl_single_download_resume).
+ * @param use_cb        Use user callback from librepo handle? 0 == No.
+ * @return              ::lr_Rc value.
+ */
 int lr_curl_single_mirrored_download_resume(lr_Handle handle,
-                                            const char *filename,
+                                            const char *path,
                                             int fd,
                                             lr_ChecksumType checksum_type,
                                             const char *checksum,
                                             long long offset,
                                             int use_cb);
 
+/** \ingroup curl
+ * Download several files at once.
+ * @param handle        Librepo handle.
+ * @param targets       List of targets to download.
+ * @return              ::lr_Rc value.
+ */
 int lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets);
 
 #ifdef __cplusplus

@@ -104,7 +104,7 @@ lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
 lr_InternalMirror
 lr_internalmirrorlist_get(lr_InternalMirrorlist iml, int i)
 {
-    if (!iml || i >= iml->nom)
+    if (!iml || i >= iml->nom || i < 0)
         return NULL;
     return iml->mirrors[i];
 }
@@ -112,7 +112,7 @@ lr_internalmirrorlist_get(lr_InternalMirrorlist iml, int i)
 char *
 lr_internalmirrorlist_get_url(lr_InternalMirrorlist iml, int i)
 {
-    if (!iml || i >= iml->nom)
+    if (!iml || i >= iml->nom || i < 0)
         return NULL;
     return iml->mirrors[i]->url;
 }

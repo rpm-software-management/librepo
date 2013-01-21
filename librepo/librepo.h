@@ -34,8 +34,19 @@ extern "C" {
 #include "checksum.h"
 #include "repoutil_yum.h"
 #include "package_downloader.h"
+#include "repomd.h"
 
+/** \defgroup librepo       Librepo library init function
+ */
+
+/** \ingroup librepo
+ * Initialize librepo library.
+ */
 void lr_global_init();
+
+/** \ingroup librepo
+ * Clean up librepo library.
+ */
 void lr_global_cleanup();
 
 #ifdef __cplusplus

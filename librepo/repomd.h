@@ -26,16 +26,41 @@ extern "C" {
 
 #include "types.h"
 
-/* Return codes of the module:
- *  LRE_OK          everything ok
- *  LRE_IO          input/output error
- *  LR_REPOMD_XML   xml parse error
+/** \defgroup repomd        Repomd parser
  */
 
+/** \ingroup repomd
+ * Create new empty repomd object.
+ * @return              New repomd object.
+ */
 lr_YumRepoMd lr_yum_repomd_init();
+
+/** \ingroup repomd
+ * Free all repomd content.
+ * @param repomd        Repomd object.
+ */
 void lr_yum_repomd_clear(lr_YumRepoMd repomd);
+
+/** \ingroup repomd
+ * Free repomd content and repomd object itself.
+ * @param repomd        Repomd object.
+ */
 void lr_yum_repomd_free(lr_YumRepoMd repomd);
+
+/** \ingroup repomd
+ * Parse repomd.xml file.
+ * @param repomd        Empty repomd object.
+ * @param fd            File descriptor.
+ * @return              Librepo return code ::lr_Rc.
+ */
 int lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd);
+
+/** \ingroup repomd
+ * Get repomd record from the repomd object.
+ * @param repomd        Repomd record.
+ * @param type          Type of record e.g. "primary", "filelists", ...
+ * @return              Record of desired type or NULL.
+ */
 lr_YumRepoMdRecord lr_yum_repomd_get_record(lr_YumRepoMd repomd,
                                             const char *type);
 

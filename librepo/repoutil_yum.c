@@ -28,6 +28,8 @@
 #include "util.h"
 #include "repomd.h"
 #include "yum.h"
+#include "handle.h"
+#include "result.h"
 
 int
 lr_repoutil_yum_check_repo(const char *path)

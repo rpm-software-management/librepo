@@ -24,44 +24,62 @@
 extern "C" {
 #endif
 
-/* Return codes of the module:
- *  LRE_OK      everything ok
- *  LRE_IO      input/output error
- *  LRE_ML_BAD  metalink doesn't contain repomd.xml
- *  LRE_ML_XML  xml parse error
- */
-
+/** Single checksum for the metalink target file. */
 struct _lr_MetalinkHash {
-    char *type;     /*!< "md5", "sha1", "sha256", "sha512", ... */
-    char *value;    /*!< file hash */
+    char *type;     /*!< Type of checksum (e.g. "md5", "sha1", "sha256", ... */
+    char *value;    /*!< Value of the checksum */
 };
+
+/** Pointer to ::_lr_MetalinkHash */
 typedef struct _lr_MetalinkHash * lr_MetalinkHash;
 
+/** Single metalink URL */
 struct _lr_MetalinkUrl {
-    char *protocol;     /*!< "http", "ftp", "rsync", ... */
-    char *type;         /*!< "http", "ftp", "rsync", ... */
+    char *protocol;     /*!< Mirror protocol "http", "ftp", "rsync", ... */
+    char *type;         /*!< Mirror type "http", "ftp", "rsync", ... */
     char *location;     /*!< ISO 3166-1 alpha-2 code ("US", "CZ", ..) */
-    int preference;     /*!< integer number 1-100, higher is better */
+    int preference;     /*!< Integer number 1-100, higher is better */
     char *url;          /*!< URL to the target file */
 };
+
+/** Pointer to ::_lr_MetalinkUrl */
 typedef struct _lr_MetalinkUrl * lr_MetalinkUrl;
 
+/** Metalink */
 struct _lr_Metalink {
-    char *filename;
-    long timestamp;
-    long size;
-    lr_MetalinkHash *hashes;    /* could be NULL */
-    lr_MetalinkUrl *urls;       /* could be NULL */
+    char *filename;             /*!< Filename */
+    long timestamp;             /*!< File timestamp */
+    long size;                  /*!< File size */
+    lr_MetalinkHash *hashes;    /*!< File checksum list (could be NULL) */
+    lr_MetalinkUrl *urls;       /*!< Mirrors url list (could be NULL) */
 
-    int noh;    /*!< number of hashes */
-    int nou;    /*!< number of urls */
-    int loh;    /*!< lenght of hashes list */
-    int lou;    /*!< lenght of urls list */
+    int noh;                    /*!< Number of hashes */
+    int nou;                    /*!< Number of urls */
+    int loh;                    /*!< Length of hashes list (allocated len) */
+    int lou;                    /*!< Length urls list (allocated len) */
 };
+
+/** Pointer to ::_lr_Metalink */
 typedef struct _lr_Metalink * lr_Metalink;
 
+/**
+ * Create new empty metalink object.
+ * @return              New metalink object.
+ */
 lr_Metalink lr_metalink_init();
+
+/**
+ * Parse metalink file.
+ * @param metalink      Metalink object.
+ * @param fd            File descriptor.
+ * @return              Librepo return code ::lr_Rc.
+ */
 int lr_metalink_parse_file(lr_Metalink metalink, int fd);
+
+/**
+ * Free metalink object and all its content.
+ * @param metalink      Metalink object.
+ */
 void lr_metalink_free(lr_Metalink metalink);
 
 #ifdef __cplusplus

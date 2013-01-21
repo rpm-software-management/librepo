@@ -25,6 +25,7 @@
 #include "librepo.h"
 #include "util.h"
 #include "result.h"
+#include "handle_internal.h"
 #include "result_internal.h"
 #include "yum.h"
 #include "repomd.h"

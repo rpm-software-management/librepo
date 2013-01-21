@@ -17,42 +17,18 @@
  * USA.
  */
 
-#ifndef LR_MIRRORLIST_H
-#define LR_MIRRORLIST_H
+#ifndef LR_YUM_INTERNAL_H
+#define LR_YUM_INTERNAL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Mirrorlist */
-struct _lr_Mirrorlist {
-    char **urls;    /*!< List of URLs, could be NULL */
-    int nou;        /*!< Number of urls */
-    int lou;        /*!< Lenght of urls list (items allocated) */
-};
+#include "rcodes.h"
+#include "result.h"
+#include "handle.h"
 
-/** Pointer to ::_lr_Mirrorlist */
-typedef struct _lr_Mirrorlist * lr_Mirrorlist;
-
-/**
- * Create new empty mirrorlist.
- * @return              New empty mirrorlist.
- */
-lr_Mirrorlist lr_mirrorlist_init();
-
-/**
- * Parse mirrorlist file.
- * @param mirrorlist    Mirrorlist object.
- * @param fd            Opened file descriptor of mirrorlist file.
- * @return              Librepo return code ::lr_Rc.
- */
-int lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd);
-
-/**
- * Free mirrorlist and all its content.
- * @param mirrorlist    Mirrorlist object.
- */
-void lr_mirrorlist_free(lr_Mirrorlist mirrorlist);
+int lr_yum_perform(lr_Handle handle, lr_Result result);
 
 #ifdef __cplusplus
 }

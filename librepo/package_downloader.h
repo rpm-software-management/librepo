@@ -28,9 +28,32 @@ extern "C" {
 #include "handle.h"
 #include "checksum.h"
 
-#define lr_download_simple(HANDLE, URL) \
-                        lr_download_package((HANDLE), (URL), NULL, 0, NULL, NULL, 0)
+/** \defgroup package_downloader    Package downloading
+ */
 
+/** \ingroup package_downloader
+ * Download package from repository.
+ * @param handle            Librepo handle.
+ * @param relative_url      Relative part of url.
+ * @return                  Librepo return code ::lr_Rc.
+ */
+#define lr_download_simple(handle, relative_url) \
+                    lr_download_package((handle), (relative_url), NULL, 0, \
+                                        NULL, NULL, 0)
+
+/** \ingroup package_downloader
+ * Download package from repository or base_url.
+ * @param handle            Librepo handle.
+ * @param relative_url      Relative part of url.
+ * @param dest              Destination file, directory
+ *                          or NULL (current working dir is used).
+ * @param checksum_type     Type of checksum.
+ * @param checksum          Checksum value or NULL.
+ * @param base_url          If specified, mirrors from handle are ignored
+ *                          and this base_url is used for downloading.
+ * @param resume            If != 0 try to resume downloading if dest file
+ *                          already exists.
+ */
 int lr_download_package(lr_Handle handle,
                         const char *relative_url,
                         const char *dest,

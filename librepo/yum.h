@@ -25,27 +25,43 @@ extern "C" {
 #endif
 
 #include "rcodes.h"
-#include "result.h"
-#include "handle.h"
+#include "types.h"
 
-/* Return codes of the module:
- *  LRE_OK      everything ok
- *  LRE_IO      input/output error
- *  LRE_URL     no usable URL (no base URL or mirrorlist URL specified)
- *  + Codes from metalink.h
- *  + Codes from mirrorlist.h
- *  + Codes from repomd.h
- *  + Codes from curl.h
+/** \defgroup yum       Yum repo manipulation
  */
 
-int lr_yum_perform(lr_Handle handle, lr_Result result);
-
-/* Yum repo */
-
+/** \ingroup yum
+ * Allocate new yum repo object.
+ * @return              New yum repo object.
+ */
 lr_YumRepo lr_yum_repo_init();
+
+/** \ingroup yum
+ * Clear yum repo - free its item.
+ * @param repo          Yum repo object.
+ */
 void lr_yum_repo_clear(lr_YumRepo repo);
+
+/** \ingroup yum
+ * Free yum repo - free its item and the repo itself.
+ * @param repo          Yum repo object.
+ */
 void lr_yum_repo_free(lr_YumRepo repo);
+
+/** \ingroup yum
+ * Retruns path for the file from repository.
+ * @param repo          Yum repo object.
+ * @param type          Type of path. E.g. "primary", "filelists", ...
+ * @return              Path or NULL.
+ */
 char *lr_yum_repo_path(lr_YumRepo repo, const char *type);
+
+/** \ingroup yum
+ * Append path to the repository object.
+ * @param repo          Yum repo object.
+ * @param type          Type of file. E.g. "primary", "filelists", ...
+ * @param path          Path to the file.
+ */
 void lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path);
 
 #ifdef __cplusplus

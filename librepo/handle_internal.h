@@ -52,6 +52,14 @@ struct _lr_Handle {
                                         yumdlist[0] = NULL - Only repomd.xml */
 };
 
+/**
+ * Create (if do not exists) internal mirrorlist. Insert baseurl (if
+ * specified) and download, parse and insert mirrors from mirrorlist url.
+ * @param handle            Librepo handle.
+ * @param metalink_suffix   Suffix of metalink mirror urls that will be removed
+ *                          (e.g. "repodata/repomd.xml").
+ *  @return                 Librepo return code.
+ */
 int lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
                                           const char *metalink_suffix);
 

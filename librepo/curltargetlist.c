@@ -66,7 +66,7 @@ lr_CurlTarget
 lr_curltargetlist_get(lr_CurlTargetList list, int index)
 {
     assert(list);
-    if (index >= list->used)
+    if (index >= list->used || index < 0)
         return NULL;
     return list->targets[index];
 }

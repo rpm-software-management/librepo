@@ -44,9 +44,9 @@ typedef enum {
 } lr_ChecksumType;
 
 /** \ingroup checksum
- * Convert checksum name (string) to lr_ChecksumType.
+ * Convert checksum name (string) to ::lr_ChecksumType.
  * @param type      String with a checksum name (e.g. "sha1", "SHA256", ...)
- * @return          lr_ChecksumType value representing the checksum
+ * @return          ::lr_ChecksumType value representing the checksum
  *                  or LR_CHECKSUM_UNKNOWN
  */
 lr_ChecksumType lr_checksum_type(const char *type);

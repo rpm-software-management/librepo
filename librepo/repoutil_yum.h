@@ -24,11 +24,23 @@
 extern "C" {
 #endif
 
-/* Functions for repo manipulation */
+/** \defgroup   repoutil_yum      High level Functions for yum repos
+ */
 
-/* 0 - Ok */
+
+/** \ingroup repoutil_yum
+ * Check checksum of selected repository.
+ * @param path          Path to directory containing "repodata" subdir.
+ * @return              Librepo return code ::lr_Rc.
+ */
 int lr_repoutil_yum_check_repo(const char *path);
 
+/** \ingroup repoutil_yum
+ * Parse repomd.xml file.
+ * @param path          Path to repository or to the repomd file.
+ * @param repomd        Empty repomd object.
+ * @return              Librepo return code ::lr_Rc.
+ */
 int lr_repoutil_yum_parse_repomd(const char *path, lr_YumRepoMd repomd);
 
 /*
