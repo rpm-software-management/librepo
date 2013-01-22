@@ -104,6 +104,15 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
+    /* Handle info options */
+    PyModule_AddIntConstant(m, "LRI_UPDATE", LRI_UPDATE);
+    PyModule_AddIntConstant(m, "LRI_URL", LRI_URL);
+    PyModule_AddIntConstant(m, "LRI_MIRRORLIST", LRI_MIRRORLIST);
+    PyModule_AddIntConstant(m, "LRI_LOCAL", LRI_LOCAL);
+    PyModule_AddIntConstant(m, "LRI_DESTDIR", LRI_DESTDIR);
+    PyModule_AddIntConstant(m, "LRI_REPOTYPE", LRI_REPOTYPE);
+    PyModule_AddIntConstant(m, "LRI_YUMDLIST", LRI_YUMDLIST);
+
     /* Check options */
     PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);
     PyModule_AddIntConstant(m, "LR_CHECK_CHECKSUM", LR_CHECK_CHECKSUM);

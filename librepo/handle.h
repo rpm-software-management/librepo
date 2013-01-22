@@ -25,11 +25,11 @@ extern "C" {
 #endif
 
 /** \defgroup   handle    Handle for downloading data
+ *  \addtogroup handle
+ *  @{
  */
 
-/** \ingroup handle
- * Handle options for the ::lr_handle_setopt function.
- */
+/** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
     LRO_UPDATE,      /*!< (long 1 or 0) Update existing repo in ::lr_Result.
                           Update means download missing (previously omitted)
@@ -72,20 +72,35 @@ typedef enum {
     LRO_SENTINEL,    /*!<  */
 } lr_HandleOption; /*!< Handle config options */
 
-/** \ingroup handle
- * Return new handle.
+/** Handle options for the ::lr_handle_getinfo function. */
+typedef enum {
+    LRI_UPDATE,
+    LRI_URL,
+    LRI_MIRRORLIST,
+    LRI_LOCAL,
+    LRI_DESTDIR,
+    LRI_REPOTYPE,
+    LRI_YUMDLIST,
+    // -------- TODO:
+    LRI_LASTCURLERROR,
+    LRI_LASTCURLMERROR,
+    LRI_LASTBADSTATUSCODE,
+    LRI_LASTCURLSTRERROR,
+    LRI_LASTCURLMSTRERROR,
+    LRI_SENTINEL,
+} lr_HandleInfoOption; /*!< Handle info options */
+
+/** Return new handle.
  * @return              New allocated handle.
  */
 lr_Handle lr_handle_init();
 
-/** \ingroup handle
- * Frees handle and its content.
+/** Frees handle and its content.
  * @param handle        Handle.
  */
 void lr_handle_free(lr_Handle handle);
 
-/** \ingroup handle
- * Set option (::lr_HandleOption) of the handle.
+/** Set option (::lr_HandleOption) of the handle.
  * @param handle         Handle.
  * @param option        Option from ::lr_HandleOption enum.
  * @param ...           Value for the option.
@@ -93,48 +108,52 @@ void lr_handle_free(lr_Handle handle);
  */
 int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
 
-/** \ingroup handle
- * Perform repodata download or location.
+/** Get information from handle.
+ * @param handle        Librepo handle.
+ * @param option        Option from ::lr_HandleInfoOption enum.
+ * @param ...           Apropriate variable fro the selected option.
+ * @return              Librepo return code ::lr_Rc.
+ */
+int lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...);
+
+/** Perform repodata download or location.
  * @param handle        Librepo handle.
  * @param result        Librepo result.
  * @return              Librepo return code from ::lr_Rc enum.
  */
 int lr_handle_perform(lr_Handle handle, lr_Result result);
 
-/** \ingroup handle
- * Return last encountered cURL error code from cURL.
+/** Return last encountered cURL error code from cURL.
  * @param handle        Librepo handle.
  * @return              cURL (CURLcode) return code.
  */
 int lr_handle_last_curl_error(lr_Handle handle);
 
-/** \ingroup handle
- * Return last encoutered cURL error code from cURL multi handle.
+/** Return last encoutered cURL error code from cURL multi handle.
  * @param handle        Librepo handle.
  * @return              cURL multi (CURLMcode) return code.
  */
 int lr_handle_last_curlm_error(lr_Handle handle);
 
-/** \ingroup handle
- * Return last encountered HTTP/FTP status code (e.g. 404).
+/** Return last encountered HTTP/FTP status code (e.g. 404).
  * @param handle        Librepo handle.
  * @return              Last encountered HTTP/FTP status code.
  */
 long lr_handle_last_bad_status_code(lr_Handle handle);
 
-/** \ingroup handle
- * Return string representation of last encountered cURL error.
+/** Return string representation of last encountered cURL error.
  * @param handle        Librepo handle.
  * @return              String with text description of error.
  */
 const char *lr_handle_last_curl_strerror(lr_Handle handle);
 
-/** \ingroup handle
- * Return string representation of last encountered cURL multi error.
+/** Return string representation of last encountered cURL multi error.
  * @param handle        Librepo handle.
  * @return              String with text description of error.
  */
 const char *lr_handle_last_curlm_strerror(lr_Handle handle);
+
+/** @} */
 
 #ifdef __cplusplus
 }

@@ -24,9 +24,10 @@
 extern "C" {
 #endif
 
+#include "repomd.h"
+
 /** \defgroup   repoutil_yum      High level Functions for yum repos
  */
-
 
 /** \ingroup repoutil_yum
  * Check checksum of selected repository.

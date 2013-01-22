@@ -25,44 +25,64 @@ extern "C" {
 #endif
 
 #include "rcodes.h"
-#include "types.h"
 
 /** \defgroup yum       Yum repo manipulation
+ *  \addtogroup yum
+ *  @{
  */
 
-/** \ingroup yum
- * Allocate new yum repo object.
+/** Path to single metadata file from repomd.xml. */
+struct _lr_YumRepoPath {
+    char *type;  /*!< Type of record (e.g. "primary") */
+    char *path;  /*!< Path to the file (e.g. foo/bar/repodata/primary.xml) */
+};
+
+/** Pointer to ::_lr_YumRepoPath */
+typedef struct _lr_YumRepoPath *lr_YumRepoPath;
+
+/** Yum repository */
+struct _lr_YumRepo {
+    int nop;                /*!< Number of paths */
+    lr_YumRepoPath *paths;  /*!< Paths to repo files */
+
+    char *repomd;           /*!< Path to repomd.xml */
+    char *url;              /*!< URL from where repo was downloaded */
+    char *destdir;          /*!< Local path to the repo */
+};
+
+/** Pointer to ::_lr_YumRepo */
+typedef struct _lr_YumRepo *lr_YumRepo;
+
+/** Allocate new yum repo object.
  * @return              New yum repo object.
  */
 lr_YumRepo lr_yum_repo_init();
 
-/** \ingroup yum
- * Clear yum repo - free its item.
+/** Clear yum repo - free its item.
  * @param repo          Yum repo object.
  */
 void lr_yum_repo_clear(lr_YumRepo repo);
 
-/** \ingroup yum
- * Free yum repo - free its item and the repo itself.
+/** Free yum repo - free its item and the repo itself.
  * @param repo          Yum repo object.
  */
 void lr_yum_repo_free(lr_YumRepo repo);
 
-/** \ingroup yum
- * Retruns path for the file from repository.
+/** Retruns path for the file from repository.
  * @param repo          Yum repo object.
  * @param type          Type of path. E.g. "primary", "filelists", ...
  * @return              Path or NULL.
  */
 char *lr_yum_repo_path(lr_YumRepo repo, const char *type);
 
-/** \ingroup yum
- * Append path to the repository object.
+/** Append path to the repository object.
  * @param repo          Yum repo object.
  * @param type          Type of file. E.g. "primary", "filelists", ...
  * @param path          Path to the file.
  */
 void lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path);
+
+/** @} */
 
 #ifdef __cplusplus
 }

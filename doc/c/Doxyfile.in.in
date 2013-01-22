@@ -667,7 +667,7 @@ WARN_LOGFILE           =
 
 INPUT                  = @CMAKE_SOURCE_DIR@/librepo/librepo.h \
                          @CMAKE_SOURCE_DIR@/librepo/rcodes.h \
-                         @CMAKE_SOURCE_DIR@/librepo/version. \
+                         @CMAKE_SOURCE_DIR@/librepo/version.h \
                          @CMAKE_SOURCE_DIR@/librepo/types.h \
                          @CMAKE_SOURCE_DIR@/librepo/handle.h \
                          @CMAKE_SOURCE_DIR@/librepo/result.h \

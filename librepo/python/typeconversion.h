@@ -20,7 +20,8 @@
 #ifndef LR_TYPECONVERSION_PY_H
 #define LR_TYPECONVERSION_PY_H
 
-#include "librepo/types.h"
+#include "librepo/repomd.h"
+#include "librepo/yum.h"
 
 PyObject *PyObject_FromYumRepo(lr_YumRepo repo);
 PyObject *PyObject_FromYumRepoMd(lr_YumRepoMd repomd);

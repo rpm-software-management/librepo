@@ -126,6 +126,23 @@ Constants
     List of strings. See more: :meth:`~.Handle.yumdlist`
     Some predefined list :ref:`predefined-yumdlists-label`.
 
+
+.. _handle-info-options-label:
+
+:class:`~.Handle` info options
+------------------------------
+
+    LRI (aka LibRepo Information) constants are used to get information
+    from :class:`.Handle` via :meth:`~.Handle.getinfo` method.
+
+.. data:: LRI_UPDATE
+.. data:: LRI_URL
+.. data:: LRI_MIRRORLIST
+.. data:: LRI_LOCAL
+.. data:: LRI_DESTDIR
+.. data:: LRI_REPOTYPE
+.. data:: LRI_YUMDLIST
+
 .. _repotype-constants-label:
 
 Repotype constants
@@ -331,6 +348,14 @@ LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
+LRI_UPDATE          = _librepo.LRI_UPDATE
+LRI_URL             = _librepo.LRI_URL
+LRI_MIRRORLIST      = _librepo.LRI_MIRRORLIST
+LRI_LOCAL           = _librepo.LRI_LOCAL
+LRI_DESTDIR         = _librepo.LRI_DESTDIR
+LRI_REPOTYPE        = _librepo.LRI_REPOTYPE
+LRI_YUMDLIST        = _librepo.LRI_YUMDLIST
+
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
 LR_CHECK_CHECKSUM   = _librepo.LR_CHECK_CHECKSUM
 
@@ -402,10 +427,17 @@ class Handle(_librepo.Handle):
         """
         _librepo.Handle.setopt(self, option, val)
 
+    def getinfo(self, option):
+        """Get information from :class:`.Handle`.
+
+        *option* could be one of :ref:`handle-info-options-label`
+        """
+        return _librepo.Handle.getinfo(self, option)
+
     def update(self, val):
         """Set *val* to ``True`` if only want update localised or downloaded
         repository represented by :class:`.Result` object. Update mode is
-        meant to download previously omited repository file(s)."""
+        meant to download previously omitted repository file(s)."""
         self.setopt(LRO_UPDATE, val)
 
     def url(self, url):

@@ -112,7 +112,7 @@ getinfo(_ResultObject *self, PyObject *args)
     int option;
     int res = LRE_OK;
 
-    if (!PyArg_ParseTuple(args, "i:setopt", &option))
+    if (!PyArg_ParseTuple(args, "i:getinfo", &option))
         return NULL;
     if (check_ResultStatus(self))
         return NULL;

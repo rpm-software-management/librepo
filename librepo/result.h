@@ -61,6 +61,7 @@ void lr_result_free(lr_Result result);
  * @param result    Result object.
  * @param option    Option from ::lr_ResultInfoOption enum.
  * @param ...       Apropriate variable for the selected option.
+ * @return          Librepo return code ::lr_Rc.
  */
 int lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...);
 

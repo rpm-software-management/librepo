@@ -397,13 +397,14 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     if (create_repodata_dir) {
         /* Prepare repodata/ subdir */
         rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
-        lr_free(path_to_repodata);
         if (rc == -1) {
             DPRINTF("%s: Cannot create dir: %s (%s)\n",
                     __func__, path_to_repodata, strerror(errno));
+            lr_free(path_to_repodata);
             return LRE_CANNOTCREATEDIR;
         }
     }
+    lr_free(path_to_repodata);
 
     if (!handle->update) {
         /* Prepare repomd.xml file */

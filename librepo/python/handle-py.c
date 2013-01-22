@@ -319,6 +319,68 @@ setopt(_HandleObject *self, PyObject *args)
 }
 
 static PyObject *
+getinfo(_HandleObject *self, PyObject *args)
+{
+    int option;
+    int res = LRE_OK;
+    char *str;
+    long lval;
+
+    if (!PyArg_ParseTuple(args, "i:getinfo", &option))
+        return NULL;
+    if (check_HandleStatus(self))
+        return NULL;
+
+    if (option < 0 || option >= LRI_SENTINEL) {
+        PyErr_SetString(PyExc_TypeError, "Unknown option");
+        return NULL;
+    }
+
+    switch (option) {
+
+    case LRI_URL:
+    case LRI_MIRRORLIST:
+    case LRI_DESTDIR:
+        res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &str);
+        if (res != LRE_OK)
+            RETURN_ERROR(res, self->handle);
+        if (str == NULL)
+            Py_RETURN_NONE;
+        return PyString_FromString(str);
+
+    case LRI_UPDATE:
+    case LRI_LOCAL:
+        res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &lval);
+        if (res != LRE_OK)
+            RETURN_ERROR(res, self->handle);
+        return PyLong_FromLong(lval);
+
+    case LRI_YUMDLIST: {
+        PyObject *yumdlist;
+        char **strlist;
+        res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &strlist);
+        if (res != LRE_OK)
+            RETURN_ERROR(res, self->handle);
+        if (strlist == NULL)
+            Py_RETURN_NONE;
+        yumdlist = PyList_New(0);
+        for (int x=0; strlist[x] != NULL; x++)
+            PyList_Append(yumdlist, PyString_FromString(strlist[x]));
+        return yumdlist;
+    }
+
+    default:
+        PyErr_SetString(PyExc_TypeError, "Unknown option");
+        return NULL;
+    }
+
+    printf("+++++++++++++++++++++++++++++++++++++++\n");
+    if (res != LRE_OK)
+        RETURN_ERROR(res, self->handle);
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 perform(_HandleObject *self, PyObject *args)
 {
     PyObject *result_obj;
@@ -342,7 +404,6 @@ perform(_HandleObject *self, PyObject *args)
 static PyObject *
 download_package(_HandleObject *self, PyObject *args)
 {
-    PyObject *result_obj;
     int ret;
     char *relative_url, *checksum, *dest, *base_url;
     int resume, checksum_type;
@@ -368,6 +429,7 @@ download_package(_HandleObject *self, PyObject *args)
 static struct
 PyMethodDef handle_methods[] = {
     { "setopt", (PyCFunction)setopt, METH_VARARGS, NULL },
+    { "getinfo", (PyCFunction)getinfo, METH_VARARGS, NULL },
     { "perform", (PyCFunction)perform, METH_VARARGS, NULL },
     { "download_package", (PyCFunction)download_package, METH_VARARGS, NULL },
     { NULL }

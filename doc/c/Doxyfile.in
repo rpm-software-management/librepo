@@ -667,7 +667,7 @@ WARN_LOGFILE           =
 
 INPUT                  = /home/tmlcoch/git/librepo/librepo/librepo.h \
                          /home/tmlcoch/git/librepo/librepo/rcodes.h \
-                         /home/tmlcoch/git/librepo/librepo/version. \
+                         /home/tmlcoch/git/librepo/librepo/version.h \
                          /home/tmlcoch/git/librepo/librepo/types.h \
                          /home/tmlcoch/git/librepo/librepo/handle.h \
                          /home/tmlcoch/git/librepo/librepo/result.h \

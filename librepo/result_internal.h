@@ -24,7 +24,8 @@
 extern "C" {
 #endif
 
-#include "types.h"
+#include "repomd.h"
+#include "yum.h"
 
 struct _lr_Result {
     char            *destdir;

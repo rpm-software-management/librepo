@@ -470,3 +470,58 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
 
     return rc;
 }
+
+int
+lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
+{
+    int rc = LRE_OK;
+    va_list arg;
+    char **str;
+    long *lnum;
+
+    if (!handle)
+        return LRE_BADFUNCARG;
+
+    va_start(arg, option);
+
+    switch (option) {
+
+    case LRI_UPDATE:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->update;
+        break;
+
+    case LRI_URL:
+        str = va_arg(arg, char **);
+        *str = handle->baseurl;
+        break;
+
+    case LRI_MIRRORLIST:
+        str = va_arg(arg, char **);
+        *str = handle->mirrorlist;
+        break;
+
+    case LRI_LOCAL:
+        lnum = va_arg(arg, long *);
+        *lnum = handle->local;
+        break;
+
+    case LRI_DESTDIR:
+        str = va_arg(arg, char **);
+        *str = handle->destdir;
+        break;
+
+    case LRI_YUMDLIST: {
+        char ***strlist = va_arg(arg, char ***);
+        *strlist = handle->yumdlist;
+        break;
+    }
+
+    default:
+        rc = LRE_UNKNOWNOPT;
+        break;
+    }
+
+    va_end(arg);
+    return rc;
+}
