@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Handle (librepo.Handle) &mdash; librepo 0.0.1-1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.1-1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="librepo 0.0.1-1 documentation" href="index.html" />
+    <link rel="up" title="The Librepo Library" href="lib.html" />
+    <link rel="next" title="Result (librepo.Result)" href="result.html" />
+    <link rel="prev" title="The Librepo Library" href="lib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="result.html" title="Result (librepo.Result)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lib.html" title="The Librepo Library"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">librepo 0.0.1-1 documentation</a> &raquo;</li>
+          <li><a href="lib.html" accesskey="U">The Librepo Library</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="handle-librepo-handle">
+<span id="handle"></span><h1>Handle (librepo.Handle)<a class="headerlink" href="#handle-librepo-handle" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="librepo.Handle">
+<em class="property">class </em><tt class="descclassname">librepo.</tt><tt class="descname">Handle</tt><a class="headerlink" href="#librepo.Handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Librepo handle class.
+Handle hold information about a repository and configuration for
+downloading from the repository.</p>
+<dl class="method">
+<dt id="librepo.Handle.checksum">
+<tt class="descname">checksum</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.checksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set False/True to disable/enable checksum check.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Checksum check is enabled by default.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If checksum check is disabled, then even explicitly specified
+checksum related params e.g. in <a class="reference internal" href="#librepo.Handle.download" title="librepo.Handle.download"><tt class="xref py py-meth docutils literal"><span class="pre">download()</span></tt></a>
+method are ignored and checksum is not checked!</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.connecttimeout">
+<tt class="descname">connecttimeout</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.connecttimeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximal timeout in sec for connection phase.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.destdir">
+<tt class="descname">destdir</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.destdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set destination directory for downloaded data
+(metadata or packages).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.download">
+<tt class="descname">download</tt><big>(</big><em>url</em>, <em>dest=None</em>, <em>checksum_type=0</em>, <em>checksum=None</em>, <em>base_url=None</em>, <em>resume=0</em><big>)</big><a class="headerlink" href="#librepo.Handle.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download package from repository specified by
+<a class="reference internal" href="#librepo.Handle.url" title="librepo.Handle.url"><tt class="xref py py-meth docutils literal"><span class="pre">url()</span></tt></a> or <a class="reference internal" href="#librepo.Handle.mirrorlist" title="librepo.Handle.mirrorlist"><tt class="xref py py-meth docutils literal"><span class="pre">mirrorlist()</span></tt></a>
+method. If <em>base_url</em> is specified, url and mirrorlist in handle
+are ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> &#8211; Relative path to the package in the repository.</li>
+<li><strong>dest</strong> &#8211; Destination for package. Could be absolute/relative
+path to directory or filename.</li>
+<li><strong>checksum_type</strong> &#8211; Type of used checksum.</li>
+<li><strong>checksum</strong> &#8211; Checksum value.</li>
+<li><strong>base_url</strong> &#8211; Instead of repositories specified in <tt class="docutils literal"><span class="pre">Handle</span></tt>
+use repository on this url.</li>
+<li><strong>resume</strong> &#8211; <tt class="docutils literal"><span class="pre">True</span></tt> enables resume. Resume means that if local
+destination file exists, just try to
+resume download, if not or resume download failed
+than download whole file again.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
+<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s">&quot;Packages/s/sl-3.03-12.fc17.i686.rpm&quot;</span><span class="p">,</span>
+    <span class="n">checksum</span><span class="o">=</span><span class="s">&quot;0ec8535d0fc00b497d8aef491c3f8b3955f2d84846325ee44851d9de8a36d12c&quot;</span><span class="p">,</span>
+    <span class="n">checksum_type</span><span class="o">=</span><span class="n">librepo</span><span class="o">.</span><span class="n">CHECKSUM_SHA256</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If checksum check is disabled in the current <tt class="docutils literal"><span class="pre">Handle</span></tt>, then
+checksum is NOT checked even if <em>checksum</em> and <em>checksum_type</em>
+params are specified!</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.gpgcheck">
+<tt class="descname">gpgcheck</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.gpgcheck" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set True to enable gpg check (if available) of downloaded repo.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.httpauth">
+<tt class="descname">httpauth</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.httpauth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, all supported methods of HTTP authentication
+are enabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.local">
+<tt class="descname">local</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.local" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set to True, no local copy of repository is created
+and repository is just localised in its current location.
+When True, url of repository MUST be a local address
+(e.g. &#8216;/home/user/repo&#8217; or &#8216;<a class="reference external" href="file:///home/user/repo">file:///home/user/repo</a>&#8216;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.maxspeed">
+<tt class="descname">maxspeed</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.maxspeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximal allowed speed per download in bytes per second.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.mirrorlist">
+<tt class="descname">mirrorlist</tt><big>(</big><em>url</em><big>)</big><a class="headerlink" href="#librepo.Handle.mirrorlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set mirrorlist <em>url</em> (url could point to a metalink mirrorlist or
+to simple mirrorlist where each line wihtout <tt class="docutils literal"><span class="pre">'#'</span></tt> is considered
+as mirror url).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.progresscb">
+<tt class="descname">progresscb</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.progresscb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set progress callback. Callback must be in format:
+<tt class="docutils literal"><span class="pre">callback(userdata,</span> <span class="pre">total_to_download,</span> <span class="pre">downloaded)</span></tt>. If
+total_to_download is 0, then total size is not known.
+Total size (total_to_download) could change (grow) among two calls,
+if download failed and another mirror is tried.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.progressdata">
+<tt class="descname">progressdata</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.progressdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set user data for the progress callback.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.proxy">
+<tt class="descname">proxy</tt><big>(</big><em>address</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set proxy server address. Port could be specified by different
+option or by the :[port] suffix of this address.
+Any protocol prefix (<a class="reference external" href="http://">http://</a>) will be ignored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.proxyauth">
+<tt class="descname">proxyauth</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxyauth" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, all supported proxy authentication methods are enabled.
+If False, only basic authentication method is enabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.proxyport">
+<tt class="descname">proxyport</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxyport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set proxy port number to connect unsless it is specified in
+the proxy address string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.proxysock">
+<tt class="descname">proxysock</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxysock" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True proxy type is set to SOCK4.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.proxyuserpwd">
+<tt class="descname">proxyuserpwd</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxyuserpwd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set username and password for proxy authentication in format
+&#8216;username:password&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.repotype">
+<tt class="descname">repotype</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.repotype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set type of repository.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.retries">
+<tt class="descname">retries</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.retries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximal number of retries for one mirror.
+One try per mirror is default value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.setopt">
+<tt class="descname">setopt</tt><big>(</big><em>option</em>, <em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.setopt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set option to <a class="reference internal" href="#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> directly.</p>
+<p><em>option</em> could be one of: <a class="reference internal" href="lib.html#handle-options-label"><em>Handle options</em></a></p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># The command:</span>
+<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="c"># is equivalent to:</span>
+<span class="n">h</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.update">
+<tt class="descname">update</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <em>val</em> to <tt class="docutils literal"><span class="pre">True</span></tt> if only want update localised or downloaded
+repository represented by <a class="reference internal" href="result.html#librepo.Result" title="librepo.Result"><tt class="xref py py-class docutils literal"><span class="pre">Result</span></tt></a> object. Update mode is
+meant to download previously omitted repository file(s).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.url">
+<tt class="descname">url</tt><big>(</big><em>url</em><big>)</big><a class="headerlink" href="#librepo.Handle.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set repository <em>url</em> (repository url and baseurl
+are the same things).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.userpwd">
+<tt class="descname">userpwd</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.userpwd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set username and password for HTTP authentication. <em>val</em> must
+be in format &#8216;username:password&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.yumdlist">
+<tt class="descname">yumdlist</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.yumdlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set list of yum metadata files to download. e.g. <tt class="docutils literal"><span class="pre">[&quot;primary&quot;,</span>
+<span class="pre">&quot;filelists&quot;,</span> <span class="pre">&quot;other&quot;,</span> <span class="pre">&quot;primary_db&quot;,</span> <span class="pre">&quot;prestodelta&quot;]</span></tt> If <em>val</em> is None,
+all metadata files will be downloaded. If <em>val</em> is <tt class="docutils literal"><span class="pre">[]</span></tt> or <tt class="docutils literal"><span class="pre">[None]</span></tt>
+only <tt class="docutils literal"><span class="pre">repomd.xml</span></tt> will be downloaded.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lib.html"
+                        title="previous chapter">The Librepo Library</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="result.html"
+                        title="next chapter">Result (librepo.Result)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/handle.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="result.html" title="Result (librepo.Result)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lib.html" title="The Librepo Library"
+             >previous</a> |</li>
+        <li><a href="index.html">librepo 0.0.1-1 documentation</a> &raquo;</li>
+          <li><a href="lib.html" >The Librepo Library</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Red Hat.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

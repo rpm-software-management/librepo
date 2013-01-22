@@ -1,0 +1,550 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Librepo Library &mdash; librepo 0.0.1-1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.1-1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="librepo 0.0.1-1 documentation" href="index.html" />
+    <link rel="next" title="Handle (librepo.Handle)" href="handle.html" />
+    <link rel="prev" title="librepo" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="handle.html" title="Handle (librepo.Handle)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="librepo"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">librepo 0.0.1-1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-librepo-library">
+<span id="lib"></span><h1>The Librepo Library<a class="headerlink" href="#the-librepo-library" title="Permalink to this headline">¶</a></h1>
+<p>Librepo includes several classes.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="handle.html">Handle (librepo.Handle)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="result.html">Result (librepo.Result)</a></li>
+</ul>
+</div>
+<span class="target" id="module-librepo"></span><div class="section" id="module-init-and-cleanup">
+<h2>Module init and cleanup<a class="headerlink" href="#module-init-and-cleanup" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="librepo.global_init">
+<tt class="descclassname">librepo.</tt><tt class="descname">global_init</tt><big>(</big><big>)</big><a class="headerlink" href="#librepo.global_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes curl library wich is internaly used.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="librepo.global_cleanup">
+<tt class="descclassname">librepo.</tt><tt class="descname">global_cleanup</tt><big>(</big><big>)</big><a class="headerlink" href="#librepo.global_cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reclaims memory that has been obtained through a libcurl call.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="librepo.VERSION_MAJOR">
+<tt class="descclassname">librepo.</tt><tt class="descname">VERSION_MAJOR</tt><a class="headerlink" href="#librepo.VERSION_MAJOR" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.VERSION_MINOR">
+<tt class="descclassname">librepo.</tt><tt class="descname">VERSION_MINOR</tt><a class="headerlink" href="#librepo.VERSION_MINOR" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.VERSION_PATCH">
+<tt class="descclassname">librepo.</tt><tt class="descname">VERSION_PATCH</tt><a class="headerlink" href="#librepo.VERSION_PATCH" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.VERSION">
+<tt class="descclassname">librepo.</tt><tt class="descname">VERSION</tt><a class="headerlink" href="#librepo.VERSION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constants with version numbers and whole version string.</p>
+</dd></dl>
+
+<div class="section" id="handle-options">
+<span id="handle-options-label"></span><h3><a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> options<a class="headerlink" href="#handle-options" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>LRO (aka LibRepo Option) constants are used to set <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a>
+options via <a class="reference internal" href="handle.html#librepo.Handle.setopt" title="librepo.Handle.setopt"><tt class="xref py py-meth docutils literal"><span class="pre">setopt()</span></tt></a> method.</p>
+<p>This options could be also set by <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> class methods
+with same names in lowercase and without <tt class="docutils literal"><span class="pre">LRO_</span></tt> prefix.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># The command:</span>
+<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="c"># is equivalent to:</span>
+<span class="n">h</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For detailed description of this options consult <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> page.</p>
+</div>
+</div></blockquote>
+<dl class="data">
+<dt id="librepo.LRO_UPDATE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_UPDATE</tt><a class="headerlink" href="#librepo.LRO_UPDATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.update" title="librepo.Handle.update"><tt class="xref py py-meth docutils literal"><span class="pre">update()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_URL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_URL</tt><a class="headerlink" href="#librepo.LRO_URL" title="Permalink to this definition">¶</a></dt>
+<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.url" title="librepo.Handle.url"><tt class="xref py py-meth docutils literal"><span class="pre">url()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_MIRRORLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_MIRRORLIST</tt><a class="headerlink" href="#librepo.LRO_MIRRORLIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.mirrorlist" title="librepo.Handle.mirrorlist"><tt class="xref py py-meth docutils literal"><span class="pre">mirrorlist()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_LOCAL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_LOCAL</tt><a class="headerlink" href="#librepo.LRO_LOCAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.local" title="librepo.Handle.local"><tt class="xref py py-meth docutils literal"><span class="pre">local()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_HTTPAUTH">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_HTTPAUTH</tt><a class="headerlink" href="#librepo.LRO_HTTPAUTH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.httpauth" title="librepo.Handle.httpauth"><tt class="xref py py-meth docutils literal"><span class="pre">httpauth()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_USERPWD">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_USERPWD</tt><a class="headerlink" href="#librepo.LRO_USERPWD" title="Permalink to this definition">¶</a></dt>
+<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.userpwd" title="librepo.Handle.userpwd"><tt class="xref py py-meth docutils literal"><span class="pre">userpwd()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROXY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXY</tt><a class="headerlink" href="#librepo.LRO_PROXY" title="Permalink to this definition">¶</a></dt>
+<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxy" title="librepo.Handle.proxy"><tt class="xref py py-meth docutils literal"><span class="pre">proxy()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROXYPORT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYPORT</tt><a class="headerlink" href="#librepo.LRO_PROXYPORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyport" title="librepo.Handle.proxyport"><tt class="xref py py-meth docutils literal"><span class="pre">proxyport()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROXYSOCK">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYSOCK</tt><a class="headerlink" href="#librepo.LRO_PROXYSOCK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxysock" title="librepo.Handle.proxysock"><tt class="xref py py-meth docutils literal"><span class="pre">proxysock()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROXYAUTH">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYAUTH</tt><a class="headerlink" href="#librepo.LRO_PROXYAUTH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyauth" title="librepo.Handle.proxyauth"><tt class="xref py py-meth docutils literal"><span class="pre">proxyauth()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROXYUSERPWD">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYUSERPWD</tt><a class="headerlink" href="#librepo.LRO_PROXYUSERPWD" title="Permalink to this definition">¶</a></dt>
+<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyuserpwd" title="librepo.Handle.proxyuserpwd"><tt class="xref py py-meth docutils literal"><span class="pre">proxyuserpwd()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROGRESSCB">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROGRESSCB</tt><a class="headerlink" href="#librepo.LRO_PROGRESSCB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function. See more: <a class="reference internal" href="handle.html#librepo.Handle.progresscb" title="librepo.Handle.progresscb"><tt class="xref py py-meth docutils literal"><span class="pre">progresscb()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROGRESSDATA">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROGRESSDATA</tt><a class="headerlink" href="#librepo.LRO_PROGRESSDATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Any object. See more: <a class="reference internal" href="handle.html#librepo.Handle.progressdata" title="librepo.Handle.progressdata"><tt class="xref py py-meth docutils literal"><span class="pre">progressdata()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_RETRIES">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_RETRIES</tt><a class="headerlink" href="#librepo.LRO_RETRIES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. See more: <a class="reference internal" href="handle.html#librepo.Handle.retries" title="librepo.Handle.retries"><tt class="xref py py-meth docutils literal"><span class="pre">retries()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_MAXSPEED">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_MAXSPEED</tt><a class="headerlink" href="#librepo.LRO_MAXSPEED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Long. See more: <a class="reference internal" href="handle.html#librepo.Handle.maxspeed" title="librepo.Handle.maxspeed"><tt class="xref py py-meth docutils literal"><span class="pre">maxspeed()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_DESTDIR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_DESTDIR</tt><a class="headerlink" href="#librepo.LRO_DESTDIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.destdir" title="librepo.Handle.destdir"><tt class="xref py py-meth docutils literal"><span class="pre">destdir()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_REPOTYPE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_REPOTYPE</tt><a class="headerlink" href="#librepo.LRO_REPOTYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>One of <a class="reference internal" href="#repotype-constants-label"><em>Repotype constants</em></a>. See more <a class="reference internal" href="handle.html#librepo.Handle.repotype" title="librepo.Handle.repotype"><tt class="xref py py-meth docutils literal"><span class="pre">repotype()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_CONNECTTIMEOUT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_CONNECTTIMEOUT</tt><a class="headerlink" href="#librepo.LRO_CONNECTTIMEOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer. See more: <a class="reference internal" href="handle.html#librepo.Handle.connecttimeout" title="librepo.Handle.connecttimeout"><tt class="xref py py-meth docutils literal"><span class="pre">connecttimeout()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_GPGCHECK">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_GPGCHECK</tt><a class="headerlink" href="#librepo.LRO_GPGCHECK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.gpgcheck" title="librepo.Handle.gpgcheck"><tt class="xref py py-meth docutils literal"><span class="pre">gpgcheck()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_CHECKSUM">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_CHECKSUM</tt><a class="headerlink" href="#librepo.LRO_CHECKSUM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.checksum" title="librepo.Handle.checksum"><tt class="xref py py-meth docutils literal"><span class="pre">checksum()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_YUMDLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_YUMDLIST</tt><a class="headerlink" href="#librepo.LRO_YUMDLIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of strings. See more: <a class="reference internal" href="handle.html#librepo.Handle.yumdlist" title="librepo.Handle.yumdlist"><tt class="xref py py-meth docutils literal"><span class="pre">yumdlist()</span></tt></a>
+Some predefined list <a class="reference internal" href="#predefined-yumdlists-label"><em>Predefined yumdlist lists</em></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="repotype-constants">
+<span id="repotype-constants-label"></span><h3>Repotype constants<a class="headerlink" href="#repotype-constants" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="librepo.LR_YUMREPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_YUMREPO</tt><a class="headerlink" href="#librepo.LR_YUMREPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classical yum repository with <tt class="docutils literal"><span class="pre">repodata/</span></tt> directory.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_SUSEREPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_SUSEREPO</tt><a class="headerlink" href="#librepo.LR_SUSEREPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>YaST2 repository (<a class="reference external" href="http://en.opensuse.org/openSUSE:Standards_YaST2_Repository_Metadata_content">http://en.opensuse.org/openSUSE:Standards_YaST2_Repository_Metadata_content</a>).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This option is not supported yet!</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_DEBREPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_DEBREPO</tt><a class="headerlink" href="#librepo.LR_DEBREPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Debian repository</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This option is not supported yet!</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="predefined-yumdlist-lists">
+<span id="predefined-yumdlists-label"></span><h3>Predefined yumdlist lists<a class="headerlink" href="#predefined-yumdlist-lists" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="librepo.LR_YUM_FULL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_YUM_FULL</tt><a class="headerlink" href="#librepo.LR_YUM_FULL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download all repodata files</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_REPOMDONLY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_REPOMDONLY</tt><a class="headerlink" href="#librepo.LR_REPOMDONLY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download only repomd.xml file</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_BASEXML">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_BASEXML</tt><a class="headerlink" href="#librepo.LR_BASEXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download only primary.xml, filelists.xml and other.xml</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_BASEDB">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_BASEDB</tt><a class="headerlink" href="#librepo.LR_BASEDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download only primary, filelists and other databases.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_BASEHAWKEY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_BASEHAWKEY</tt><a class="headerlink" href="#librepo.LR_BASEHAWKEY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download only files used by Hawkey (<a class="reference external" href="https://github.com/akozumpl/hawkey/">https://github.com/akozumpl/hawkey/</a>).
+(primary, filelists, prestodelta)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="error-codes">
+<h3>Error codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h3>
+<p>LibRepo Error codes.</p>
+<dl class="data">
+<dt id="librepo.LRE_OK">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_OK</tt><a class="headerlink" href="#librepo.LRE_OK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Everything is ok.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_BADFUNCARG">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_BADFUNCARG</tt><a class="headerlink" href="#librepo.LRE_BADFUNCARG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad function argument(s).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_BADOPTARG">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_BADOPTARG</tt><a class="headerlink" href="#librepo.LRE_BADOPTARG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad argument for the option in <a class="reference internal" href="handle.html#librepo.Handle.setopt" title="librepo.Handle.setopt"><tt class="xref py py-meth docutils literal"><span class="pre">setopt()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_UNKNOWNOPT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_UNKNOWNOPT</tt><a class="headerlink" href="#librepo.LRE_UNKNOWNOPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unknown option.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_CURLSETOPT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_CURLSETOPT</tt><a class="headerlink" href="#librepo.LRE_CURLSETOPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>cURL doesn&#8217;t know an option used by librepo. Probably
+too old cURL version is used.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_ALREDYUSEDRESULT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_ALREDYUSEDRESULT</tt><a class="headerlink" href="#librepo.LRE_ALREDYUSEDRESULT" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="result.html#librepo.Result" title="librepo.Result"><tt class="xref py py-class docutils literal"><span class="pre">Result</span></tt></a> object is not &#8220;clean&#8221; (it has been already
+used and filled).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_INCOMPLETERESULT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_INCOMPLETERESULT</tt><a class="headerlink" href="#librepo.LRE_INCOMPLETERESULT" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="result.html#librepo.Result" title="librepo.Result"><tt class="xref py py-class docutils literal"><span class="pre">Result</span></tt></a> object doesn&#8217;t contain all what is needed.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_CURLDUP">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_CURLDUP</tt><a class="headerlink" href="#librepo.LRE_CURLDUP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cannot duplicate cURL handle. No free memory?</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_CURL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_CURL</tt><a class="headerlink" href="#librepo.LRE_CURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>A cURL error.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_CURLM">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_CURLM</tt><a class="headerlink" href="#librepo.LRE_CURLM" title="Permalink to this definition">¶</a></dt>
+<dd><p>A multi cURL handle error.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_BADSTATUS">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_BADSTATUS</tt><a class="headerlink" href="#librepo.LRE_BADSTATUS" title="Permalink to this definition">¶</a></dt>
+<dd><p>An error HTTP or FTP status code.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_TEMPORARYERR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_TEMPORARYERR</tt><a class="headerlink" href="#librepo.LRE_TEMPORARYERR" title="Permalink to this definition">¶</a></dt>
+<dd><p>An error that should be temporary (e.g. HTTP status codes 500, 502-504, ..)</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_NOTLOCAL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_NOTLOCAL</tt><a class="headerlink" href="#librepo.LRE_NOTLOCAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <a class="reference internal" href="#librepo.LRO_UPDATE" title="librepo.LRO_UPDATE"><tt class="xref py py-data docutils literal"><span class="pre">LRO_UPDATE</span></tt></a> option is <tt class="docutils literal"><span class="pre">True</span></tt> and URL is not a local path (address).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_CANNOTCREATEDIR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_CANNOTCREATEDIR</tt><a class="headerlink" href="#librepo.LRE_CANNOTCREATEDIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cannot create directory for downloaded data. Bad permission?</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_IO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_IO</tt><a class="headerlink" href="#librepo.LRE_IO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input/Output error. Bad permission?</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_MLBAD">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_MLBAD</tt><a class="headerlink" href="#librepo.LRE_MLBAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad mirrorlist or metalink file. E.g. metalink doesn&#8217;t contain
+reference to target file (repomd.xml), mirrorlist is empty, ..</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_MLXML">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_MLXML</tt><a class="headerlink" href="#librepo.LRE_MLXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cannot parse metalink xml. Non-valid metalink file?</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_BADCHECKSUM">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_BADCHECKSUM</tt><a class="headerlink" href="#librepo.LRE_BADCHECKSUM" title="Permalink to this definition">¶</a></dt>
+<dd><p>A downloaded file has bad checksum.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_REPOMDXML">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_REPOMDXML</tt><a class="headerlink" href="#librepo.LRE_REPOMDXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cannot parse repomd.xml file. Non-valid repomd.xml file?</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_NOURL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_NOURL</tt><a class="headerlink" href="#librepo.LRE_NOURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>No usable URL found. E.g. bad links or no links in metalink.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_CANNOTCREATETMP">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_CANNOTCREATETMP</tt><a class="headerlink" href="#librepo.LRE_CANNOTCREATETMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cannot create temporary directory.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_UNKNOWNCHECKSUM">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_UNKNOWNCHECKSUM</tt><a class="headerlink" href="#librepo.LRE_UNKNOWNCHECKSUM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unknown type of checksum is needed for verification one or more files.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_BADURL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_BADURL</tt><a class="headerlink" href="#librepo.LRE_BADURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad URL specified.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_UNKNOWNERROR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_UNKNOWNERROR</tt><a class="headerlink" href="#librepo.LRE_UNKNOWNERROR" title="Permalink to this definition">¶</a></dt>
+<dd><p>An unknown error.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="result-options">
+<span id="result-options-label"></span><h3><a class="reference internal" href="result.html#librepo.Result" title="librepo.Result"><tt class="xref py py-class docutils literal"><span class="pre">Result</span></tt></a> options<a class="headerlink" href="#result-options" title="Permalink to this headline">¶</a></h3>
+<p>LibRepo Result options for use in <a class="reference internal" href="result.html#librepo.Result.getinfo" title="librepo.Result.getinfo"><tt class="xref py py-meth docutils literal"><span class="pre">getinfo()</span></tt></a> method.</p>
+<dl class="data">
+<dt id="librepo.LRR_YUM_REPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_REPO</tt><a class="headerlink" href="#librepo.LRR_YUM_REPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dict with local paths to downloaded/localised
+yum repository.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRR_YUM_REPOMD">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_REPOMD</tt><a class="headerlink" href="#librepo.LRR_YUM_REPOMD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dict representing a repomd.xml file of downloaded
+yum repository.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Librepo Library</a><ul>
+<li><a class="reference internal" href="#module-init-and-cleanup">Module init and cleanup</a></li>
+<li><a class="reference internal" href="#constants">Constants</a><ul>
+<li><a class="reference internal" href="#handle-options"><tt class="docutils literal"><span class="pre">Handle</span></tt> options</a></li>
+<li><a class="reference internal" href="#repotype-constants">Repotype constants</a></li>
+<li><a class="reference internal" href="#predefined-yumdlist-lists">Predefined yumdlist lists</a></li>
+<li><a class="reference internal" href="#error-codes">Error codes</a></li>
+<li><a class="reference internal" href="#result-options"><tt class="docutils literal"><span class="pre">Result</span></tt> options</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">librepo</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="handle.html"
+                        title="next chapter">Handle (librepo.Handle)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/lib.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="handle.html" title="Handle (librepo.Handle)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="librepo"
+             >previous</a> |</li>
+        <li><a href="index.html">librepo 0.0.1-1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Red Hat.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
