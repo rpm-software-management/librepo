@@ -374,7 +374,6 @@ getinfo(_HandleObject *self, PyObject *args)
         return NULL;
     }
 
-    printf("+++++++++++++++++++++++++++++++++++++++\n");
     if (res != LRE_OK)
         RETURN_ERROR(res, self->handle);
     Py_RETURN_NONE;

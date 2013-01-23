@@ -21,9 +21,23 @@ linux repository metadata and packages
     cmake ..
     make
 
-## Unittests:
+## Documentation
 
-    All unit tests run from librepo checkout dir
+### Build:
+
+    cd build/
+    make doc
+
+* C documentation: `build/doc/c/html/index.html`
+* Python documentation: `build/doc/python/index.html`
+
+### Online python bindings documentation:
+
+http://tojaj.github.com/librepo/
+
+## Testing
+
+All unit tests run from librepo checkout dir
 
 ### Build:
     cd build/tests
