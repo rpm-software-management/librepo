@@ -263,7 +263,7 @@ setopt(_HandleObject *self, PyObject *args)
             }
         }
 
-        char **array[len+1];
+        char *array[len+1];
         for (Py_ssize_t x = 0; x < len; x++) {
             PyObject *item = PyList_GetItem(obj, x);
             if (PyString_Check(item))
@@ -281,18 +281,27 @@ setopt(_HandleObject *self, PyObject *args)
      * Options with callable arguments
      */
     case LRO_PROGRESSCB: {
-        if (!PyCallable_Check(obj)) {
-            PyErr_SetString(PyExc_TypeError, "Only callable arguments are supported with this option");
+        if (!PyCallable_Check(obj) && obj != Py_None) {
+            PyErr_SetString(PyExc_TypeError, "Only callable argument or None is supported with this option");
             return NULL;
         }
 
         Py_XDECREF(self->progress_cb);
-        Py_XINCREF(obj);
-        self->progress_cb = obj;
-        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, progress_callback);
-        if (res != LRE_OK)
-            RETURN_ERROR(res, self->handle);
-        res = lr_handle_setopt(self->handle, LRO_PROGRESSDATA, self);
+        if (obj == Py_None) {
+            // None object
+            self->progress_cb = NULL;
+            res = lr_handle_setopt(self->handle, (lr_HandleOption)option, NULL);
+            if (res != LRE_OK)
+                RETURN_ERROR(res, self->handle);
+        } else {
+            // New callback object
+            Py_XINCREF(obj);
+            self->progress_cb = obj;
+            res = lr_handle_setopt(self->handle, (lr_HandleOption)option, progress_callback);
+            if (res != LRE_OK)
+                RETURN_ERROR(res, self->handle);
+            res = lr_handle_setopt(self->handle, LRO_PROGRESSDATA, self);
+        }
         break;
     }
 
