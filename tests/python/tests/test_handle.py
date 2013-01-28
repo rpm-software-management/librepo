@@ -54,6 +54,25 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_YUMDLIST,  [None])
         self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), [])
 
+    def test_handle_setopt_none_value(self):
+        """Using None in setopt."""
+        h = librepo.Handle()
+
+        h.setopt(librepo.LRO_LOCAL, None)
+        h.setopt(librepo.LRO_HTTPAUTH, None)
+        h.setopt(librepo.LRO_USERPWD, None)
+        h.setopt(librepo.LRO_PROXY, None)
+        h.setopt(librepo.LRO_PROXYPORT, None)       # None sets default value
+        h.setopt(librepo.LRO_PROXYSOCK, None)
+        h.setopt(librepo.LRO_PROXYAUTH, None)
+        h.setopt(librepo.LRO_PROXYUSERPWD, None)
+        h.setopt(librepo.LRO_PROGRESSDATA, None)
+        h.setopt(librepo.LRO_RETRIES, None)         # None sets default value
+        h.setopt(librepo.LRO_MAXSPEED, None)        # None sets default value
+        h.setopt(librepo.LRO_CONNECTTIMEOUT, None)  # None sets default value
+        h.setopt(librepo.LRO_GPGCHECK, None)
+        h.setopt(librepo.LRO_CHECKSUM, None)
+
         def callback(data, total_to_download, downloaded):
             pass
         h.setopt(librepo.LRO_PROGRESSCB, None)

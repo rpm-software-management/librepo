@@ -44,7 +44,8 @@ typedef enum {
                           in format user:password */
     LRO_PROXY,       /*!< (char *) Address of proxy server eg.
                           "proxy-host.com:8080" */
-    LRO_PROXYPORT,   /*!< (long) Set port number for proxy separately */
+    LRO_PROXYPORT,   /*!< (long) Set port number for proxy separately. Default
+                          port is 1080. */
     LRO_PROXYSOCK,   /*!< (long 1 or 0) Set type of proxy to SOCK (default is
                           assumed HTTP proxy) - TODO: more options */
     LRO_PROXYAUTH,   /*!< (long 1 or 0) Enable all supported method for proxy
@@ -55,12 +56,14 @@ typedef enum {
     LRO_PROGRESSDATA,/*!< (void *) Progress callback user data */
     LRO_RETRIES,     /*!< (long) Number of maximum retries for each file - TODO */
     LRO_MAXSPEED,    /*!< (unsigned long long) Maximum download speed
-                          in bytes per second */
+                          in bytes per second. Default is 0 = unlimited
+                          download speed. */
     LRO_DESTDIR,     /*!< (char *) Where to save downloaded files */
 
     LRO_REPOTYPE,    /*!< (::lr_Repotype) Type of downloaded repo, currently
                           only supported is LR_YUMREPO. */
-    LRO_CONNECTTIMEOUT,/*!< (long) Max time in sec for connection phase */
+    LRO_CONNECTTIMEOUT,/*!< (long) Max time in sec for connection phase.
+                            default timeout is 300 seconds. */
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< (int) Check GPG signature if available - TODO */

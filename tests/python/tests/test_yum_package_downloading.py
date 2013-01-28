@@ -38,7 +38,8 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
     def test_download_package_02(self):
         """Download with checksum check.
         Destination file is specified by full path
-        in dest option of download() method"""
+        in dest option of download() method and
+        checksum type is specified by string"""
         h = librepo.Handle()
 
         destination = os.path.join(self.tmpdir, "pkg.rpm")
@@ -50,7 +51,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         h.download(config.PACKAGE_01_01,
                    dest=destination,
                    checksum=config.PACKAGE_01_01_SHA256,
-                   checksum_type=librepo.CHECKSUM_SHA256)
+                   checksum_type="sha256")
 
         self.assertTrue(os.path.isfile(destination))
 
@@ -77,7 +78,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
 
     def test_download_package_04(self):
         """Download with checksum check.
-        Destination dir is not specified in dest option
+        Destination dir is specified in dest option
         of download() method"""
 
         h = librepo.Handle()

@@ -71,7 +71,7 @@ Constants
 
 .. data:: LRO_PROXYPORT
 
-    Integer. See more: :meth:`~.Handle.proxyport`
+    Integer or None. See more: :meth:`~.Handle.proxyport`
 
 .. data:: LRO_PROXYSOCK
 
@@ -95,11 +95,11 @@ Constants
 
 .. data:: LRO_RETRIES
 
-    Integer. See more: :meth:`~.Handle.retries`
+    Integer or None. See more: :meth:`~.Handle.retries`
 
 .. data:: LRO_MAXSPEED
 
-    Long. See more: :meth:`~.Handle.maxspeed`
+    Long or None. See more: :meth:`~.Handle.maxspeed`
 
 .. data:: LRO_DESTDIR
 
@@ -111,7 +111,7 @@ Constants
 
 .. data:: LRO_CONNECTTIMEOUT
 
-    Integer. See more: :meth:`~.Handle.connecttimeout`
+    Integer or None. See more: :meth:`~.Handle.connecttimeout`
 
 .. data:: LRO_GPGCHECK
 
@@ -408,6 +408,21 @@ CHECKSUM_SHA256     = _librepo.CHECKSUM_SHA256
 CHECKSUM_SHA384     = _librepo.CHECKSUM_SHA384
 CHECKSUM_SHA512     = _librepo.CHECKSUM_SHA512
 
+_CHECKSUM_STR_TO_VAL_MAP = {
+    'md2':      CHECKSUM_MD2,
+    'md5':      CHECKSUM_MD5,
+    'sha':      CHECKSUM_SHA,
+    'sha1':     CHECKSUM_SHA1,
+    'sha224':   CHECKSUM_SHA224,
+    'sha256':   CHECKSUM_SHA256,
+    'sha384':   CHECKSUM_SHA384,
+    'sha512':   CHECKSUM_SHA512,
+}
+
+def checksum_str_to_type(name):
+    name = name.lower()
+    return _CHECKSUM_STR_TO_VAL_MAP.get(name, CHECKSUM_UNKNOWN)
+
 class Handle(_librepo.Handle):
     """Librepo handle class.
     Handle hold information about a repository and configuration for
@@ -476,7 +491,7 @@ class Handle(_librepo.Handle):
 
     def proxyport(self, val):
         """Set proxy port number to connect unsless it is specified in
-        the proxy address string."""
+        the proxy address string. None sets default value 1080."""
         self.setopt(LRO_PROXYPORT, val)
 
     def proxysock(self, val):
@@ -507,11 +522,13 @@ class Handle(_librepo.Handle):
 
     def retries(self, val):
         """Set maximal number of retries for one mirror.
-        One try per mirror is default value."""
+        One try per mirror is default value. None as *va* sets the
+        default value."""
         self.setopt(LRO_RETRIES, val)
 
     def maxspeed(self, val):
-        """Set maximal allowed speed per download in bytes per second."""
+        """Set maximal allowed speed per download in bytes per second.
+        0 = unlimited speed - the default value."""
         self.setopt(LRO_MAXSPEED, val)
 
     def destdir(self, val):
@@ -524,7 +541,8 @@ class Handle(_librepo.Handle):
         self.setopt(LRO_REPOTYPE, val)
 
     def connecttimeout(self, val):
-        """Set maximal timeout in sec for connection phase."""
+        """Set maximal timeout in sec for connection phase.
+        Default value is 300. None as *val* sets the default value."""
         self.setopt(LRO_CONNECTTIMEOUT, val)
 
     def gpgcheck(self, val):
@@ -549,7 +567,8 @@ class Handle(_librepo.Handle):
         """
         self.setopt(LRO_YUMDLIST, val)
 
-    def download(self, url, dest=None, checksum_type=0, checksum=None, base_url=None, resume=0):
+    def download(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
+                 checksum=None, base_url=None, resume=0):
         """Download package from repository specified by
         :meth:`~librepo.Handle.url()` or :meth:`~librepo.Handle.mirrorlist()`
         method. If *base_url* is specified, url and mirrorlist in handle
@@ -582,6 +601,8 @@ class Handle(_librepo.Handle):
             params are specified!
 
         """
+        if isinstance(checksum_type, basestring):
+            checksum_type = checksum_str_to_type(checksum_type)
         self.download_package(url, dest, checksum_type, checksum, base_url, resume)
 
 

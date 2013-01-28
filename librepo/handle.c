@@ -153,9 +153,10 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY, va_arg(arg, char *));
         break;
 
-    case LRO_PROXYPORT:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYPORT, va_arg(arg, long));
+    case LRO_PROXYPORT: {
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYPORT,va_arg(arg, long));
         break;
+    }
 
     case LRO_PROXYSOCK:
         if (va_arg(arg, long) == 1)
@@ -201,7 +202,8 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRO_REPOTYPE:
         handle->repotype = va_arg(arg, lr_Repotype);
-        assert(handle->repotype == LR_YUMREPO);
+        if (handle->repotype != LR_YUMREPO)
+            ret = LRE_BADOPTARG;
         break;
 
     case LRO_CONNECTTIMEOUT:
@@ -431,7 +433,7 @@ mirrorlist_error:
 int
 lr_handle_perform(lr_Handle handle, lr_Result result)
 {
-    int rc;
+    int rc = LRE_OK;
     assert(handle);
 
     if (!result)

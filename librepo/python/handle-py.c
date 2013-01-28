@@ -219,10 +219,7 @@ setopt(_HandleObject *self, PyObject *args)
     /*
      * Options with long/int arguments
      */
-    case LRO_PROXYPORT:
-    case LRO_RETRIES:
-    case LRO_REPOTYPE:
-    case LRO_MAXSPEED: {
+    case LRO_REPOTYPE: {
         PY_LONG_LONG d;
 
         if (PyInt_Check(obj))
@@ -230,7 +227,41 @@ setopt(_HandleObject *self, PyObject *args)
         else if (PyLong_Check(obj))
             d = PyLong_AsLongLong(obj);
         else {
-            PyErr_SetString(PyExc_TypeError, "Only Int or Long are supported with this option");
+            PyErr_SetString(PyExc_TypeError, "Only Int/Long is supported with this option");
+            return NULL;
+        }
+
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, d);
+        break;
+    }
+
+    /*
+     * Options with long/int/None arguments
+     */
+    case LRO_PROXYPORT:
+    case LRO_RETRIES:
+    case LRO_MAXSPEED:
+    case LRO_CONNECTTIMEOUT: {
+        PY_LONG_LONG d;
+
+        if (PyInt_Check(obj))
+            d = (PY_LONG_LONG) PyInt_AS_LONG(obj);
+        else if (PyLong_Check(obj))
+            d = PyLong_AsLongLong(obj);
+        else if (obj == Py_None) {
+            /* Default options */
+            if (option == LRO_PROXYPORT)
+                d = 1080;
+            else if (option == LRO_RETRIES)
+                d = 1;
+            else if (option == LRO_MAXSPEED)
+                d = 0;
+            else if (option == LRO_CONNECTTIMEOUT)
+                d = 300;
+            else
+                assert(0);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Only Int/Long/None is supported with this option");
             return NULL;
         }
 
