@@ -290,6 +290,18 @@ LibRepo Error codes.
 
     Bad URL specified.
 
+.. data:: LRE_GPGNOTSUPPORTED
+
+    OpenPGP protocol is not supported.
+
+.. data:: LRE_GPGERROR
+
+    GPG error.
+
+.. data:: LRE_BADGPG
+
+    Bad GPG signature.
+
 .. data:: LRE_UNKNOWNERROR
 
     An unknown error.
@@ -392,6 +404,9 @@ LRE_NOURL               = _librepo.LRE_NOURL
 LRE_CANNOTCREATETMP     = _librepo.LRE_CANNOTCREATETMP
 LRE_UNKNOWNCHECKSUM     = _librepo.LRE_UNKNOWNCHECKSUM
 LRE_BADURL              = _librepo.LRE_BADURL
+LRE_GPGNOTSUPPORTED     = _librepo.LRE_GPGNOTSUPPORTED
+LRE_GPGERROR            = _librepo.LRE_GPGERROR
+LRE_BADGPG              = _librepo.LRE_BADGPG
 LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
 
 LRR_YUM_REPO    = _librepo.LRR_YUM_REPO

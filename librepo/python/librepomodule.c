@@ -146,6 +146,9 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_CANNOTCREATETMP", LRE_CANNOTCREATETMP);
     PyModule_AddIntConstant(m, "LRE_UNKNOWNCHECKSUM", LRE_UNKNOWNCHECKSUM);
     PyModule_AddIntConstant(m, "LRE_BADURL", LRE_BADURL);
+    PyModule_AddIntConstant(m, "LRE_GPGNOTSUPPORTED", LRE_GPGNOTSUPPORTED);
+    PyModule_AddIntConstant(m, "LRE_GPGERROR", LRE_GPGERROR);
+    PyModule_AddIntConstant(m, "LRE_BADGPG", LRE_BADGPG);
     PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
 
     /* Result option */

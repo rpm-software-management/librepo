@@ -13,7 +13,8 @@ SET (librepo_SRCS
      internal_mirrorlist.c
      curltargetlist.c
      package_downloader.c
-     rcodes.c)
+     rcodes.c
+     gpg.c)
 
 SET(librepo_HEADERS
     librepo.h
@@ -30,6 +31,7 @@ SET(librepo_HEADERS
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
 TARGET_LINK_LIBRARIES(librepo ${EXPAT_LIBRARIES})
 TARGET_LINK_LIBRARIES(librepo ${CURL_LIBRARY})
+TARGET_LINK_LIBRARIES(librepo ${GPGME_VANILLA_LIBRARIES})
 SET_TARGET_PROPERTIES(librepo PROPERTIES OUTPUT_NAME "repo")
 SET_TARGET_PROPERTIES(librepo PROPERTIES SOVERSION 0)
 #SET_TARGET_PROPERTIES(librepo PROPERTIES VERSION "0")

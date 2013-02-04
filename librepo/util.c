@@ -18,12 +18,15 @@
  */
 
 #define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 500
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <ftw.h>
 
 #include "setup.h"
 #include "util.h"
@@ -121,6 +124,16 @@ lr_gettmpfile()
     }
     unlink(template);
     return fd;
+}
+
+char *
+lr_gettmpdir()
+{
+    char *template = lr_strdup("/tmp/librepo-tmpdir-XXXXXX");
+    char *dir = mkdtemp(template);
+    if (!dir)
+        lr_free(template);
+    return dir;
 }
 
 int
@@ -243,4 +256,25 @@ lr_pathconcat(const char *first, ...)
     res[offset] = '\0';
 
     return res;
+}
+
+int
+lr_remove_dir_cb(const char *fpath,
+                 const struct stat *sb,
+                 int typeflag,
+                 struct FTW *ftwbuf)
+{
+    LR_UNUSED(sb);
+    LR_UNUSED(typeflag);
+    LR_UNUSED(ftwbuf);
+    int rv = remove(fpath);
+    if (rv)
+        DPRINTF("%s: Cannot remove: %s: %s", __func__, fpath, strerror(errno));
+    return rv;
+}
+
+int
+lr_remove_dir(const char *path)
+{
+    return nftw(path, lr_remove_dir_cb, 64, FTW_DEPTH | FTW_PHYS);
 }

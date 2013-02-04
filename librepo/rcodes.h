@@ -69,6 +69,9 @@ typedef enum {
     LRE_UNKNOWNCHECKSUM,            /*!< unknown type of checksum is needed
                                          for verification one or more files */
     LRE_BADURL,                     /*!< bad URL specified */
+    LRE_GPGNOTSUPPORTED,            /*!< OpenPGP protocol is not supported */
+    LRE_GPGERROR,                   /*!< GPG error */
+    LRE_BADGPG,                     /*!< Bad GPG signature */
     LRE_UNKNOWNERROR,               /*!< unknown error - sentinel of
                                          error codes enum */
 } lr_Rc; /*!< Return codes */

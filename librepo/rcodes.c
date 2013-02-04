@@ -69,6 +69,12 @@ lr_strerror(int rc)
         return "Unknown type of checksum is needed to verify one or more file(s)";
     case LRE_BADURL:
         return "Bad URL specified";
+    case LRE_GPGNOTSUPPORTED:
+        return "GPGME protocol is not supported";
+    case LRE_GPGERROR:
+        return "Error while GPG check";
+    case LRE_BADGPG:
+        return "Bad GPG signature";
     }
 
     return "Unknown error";

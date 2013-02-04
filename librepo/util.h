@@ -90,6 +90,12 @@ char *lr_strconcat(const char *str, ...);
 int lr_gettmpfile();
 
 /** \ingroup util
+ * Create temporary directory in /tmp directory.
+ * @return              Path to directory.
+ */
+char *lr_gettmpdir();
+
+/** \ingroup util
  * Looks whether string ends with suffix.
  * @param str           String.
  * @param suffix        Suffix.
@@ -104,6 +110,13 @@ int lr_ends_with(const char *str, const char *suffix);
  * @return              Concatenated path.
  */
 char *lr_pathconcat(const char *str, ...);
+
+/** \ingroup util
+ * Recursively remove directory.
+ * @param path          Path to the directory.
+ * @return              0 on succes, -1 on error.
+ */
+int lr_remove_dir(const char *path);
 
 #ifdef __cplusplus
 }

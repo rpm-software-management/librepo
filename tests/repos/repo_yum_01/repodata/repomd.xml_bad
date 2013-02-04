@@ -1,0 +1,36 @@
+<?xml version="1.0" ?><repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm" xmlns:suse="http://novell.com/package/metadata/suse/common">
+  <revision>1359079470</revision>
+  <tags>
+    <repo>obsrepository://messiah.leuenberger.net/SuSE/11.1</repo>
+  </tags>
+  <data type="other">
+    <checksum type="sha">d1e49565a4e4c3ca0ace622b9931e112a2a07567</checksum>
+    <timestamp>1359079470</timestamp>
+    <size>50472</size>
+    <open-size>880506</open-size>
+    <open-checksum type="sha">f8b2a1f13ef2cfe325d76bfe89c12a5290c53e96</open-checksum>
+    <location href="repodata/other.xml.gz"/>
+  </data>
+  <data type="filelists">
+    <checksum type="sha">29cef9e9007a55b7c56a823ffd364cafd758fb9a</checksum>
+    <timestamp>1359079470</timestamp>
+    <size>140479</size>
+    <open-size>1625075</open-size>
+    <open-checksum type="sha">bebd7a8b6b85e9c31275a43c92302c6410a20270</open-checksum>
+    <location href="repodata/filelists.xml.gz"/>
+  </data>
+  <data type="primary">
+    <checksum type="sha">3fb1d331ec069e6eab9461d00910f4c87131c930</checksum>
+    <timestamp>1359079470</timestamp>
+    <size>51264</size>
+    <open-size>639419</open-size>
+    <open-checksum type="sha">0077943317eead251836ccbe561041f2dabe43e9</open-checksum>
+    <location href="repodata/primary.xml.gz"/>
+  </data>
+  <data type="patterns">
+    <location href="repodata/3f5f2513b1a6ade726f1c6369130b6bf54ff904b8061589e32adb11dbdbaa635-patterns.xml.gz"/>
+    <checksum type="sha256">3f5f2513b1a6ade726f1c6369130b6bf54ff904b8061589e32adb11dbdbaa635</checksum>
+    <timestamp>1359079470.42</timestamp>
+    <open-checksum type="sha256">11db26be9ac4eacdc93a63d8676f9923c4b5f9f388d166456cb88269793f719a</open-checksum>
+  </data>
+</repomd>
