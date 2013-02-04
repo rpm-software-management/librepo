@@ -48,6 +48,9 @@ struct _lr_YumRepo {
     char *repomd;           /*!< Path to repomd.xml */
     char *url;              /*!< URL from where repo was downloaded */
     char *destdir;          /*!< Local path to the repo */
+    char *signature;        /*!< Path to signature if available and
+                                 signature was downloaded (GPG check
+                                 was enabled during repo downloading) */
 };
 
 /** Pointer to ::_lr_YumRepo */

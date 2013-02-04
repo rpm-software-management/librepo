@@ -72,6 +72,7 @@ lr_yum_repo_clear(lr_YumRepo repo)
     lr_free(repo->repomd);
     lr_free(repo->url);
     lr_free(repo->destdir);
+    lr_free(repo->signature);
     memset(repo, 0, sizeof(struct _lr_YumRepo));
 }
 
@@ -460,6 +461,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
                 lr_free(signature);
             } else {
                 // Signature downloaded
+                repo->signature = lr_strdup(signature);
                 rc = lr_gpg_check_signature(signature, path, NULL);
                 if (rc != LRE_OK) {
                     DPRINTF("%s: GPG signature verification failed\n", __func__);

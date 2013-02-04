@@ -48,7 +48,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               'primary_db': self.tmpdir+'/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
               'repomd': self.tmpdir+'/repodata/repomd.xml',
               #'updateinfo': None,
-              'url': url}
+              'url': url,
+              'signature': None}
         )
 
         self.assertEqual(yum_repomd,
@@ -159,7 +160,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              'primary_db': self.tmpdir+'/repodata/a09c42730c03b0d5defa3fd9213794c49e9bafbc67acdd8d4e87a2adf30b8752-primary.sqlite.bz2',
              'repomd': self.tmpdir+'/repodata/repomd.xml',
              'updateinfo': self.tmpdir+'/repodata/65c4f66e2808d328890505c3c2f13bb35a96f457d1c21a6346191c4dc07e6080-updateinfo.xml.gz',
-             'url': url}
+             'url': url,
+             'signature': None}
         )
 
         self.assertEqual(yum_repomd,
@@ -321,7 +323,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              #'primary_db': None,
              'repomd': self.tmpdir+'/repodata/repomd.xml',
              #'updateinfo': None,
-             'url': url}
+             'url': url,
+             'signature': None}
         )
 
         # Test if all mentioned files really exist
@@ -359,7 +362,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              #'primary_db': None,
              'repomd': self.tmpdir+'/repodata/repomd.xml',
              #'updateinfo': None,
-             'url': url}
+             'url': url,
+             'signature': None}
         )
 
         # Test if all mentioned files really exist
@@ -418,6 +422,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
+        self.assertTrue("signature" in yum_repo and yum_repo["signature"])
+        self.assertTrue(self.tmpdir+'/repodata/repomd.xml.asc' == yum_repo["signature"] )
 
     def test_download_repo_with_gpg_check_bad_signature(self):
         h = librepo.Handle()
@@ -435,6 +441,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
+        self.assertTrue("signature" not in yum_repo or yum_repo["signature"])
 
     def test_download_repo_01_with_missing_file(self):
         h = librepo.Handle()

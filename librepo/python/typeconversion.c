@@ -42,6 +42,7 @@ PyObject_FromYumRepo(lr_YumRepo repo)
     PyDict_SetItemString(dict, "repomd", PyStringOrNone_FromString(repo->repomd));
     PyDict_SetItemString(dict, "url", PyStringOrNone_FromString(repo->url));
     PyDict_SetItemString(dict, "destdir", PyStringOrNone_FromString(repo->destdir));
+    PyDict_SetItemString(dict, "signature", PyStringOrNone_FromString(repo->signature));
 
     for (int x = 0; x < repo->nop; x++) {
         PyDict_SetItemString(dict,
