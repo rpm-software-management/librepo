@@ -53,6 +53,23 @@ def badurl(path):
     """Just return 404 for each url with this prefix"""
     abort(404)
 
+@yum_mock.route("/badgpg/<path:path>")
+def badgpg(path):
+    """Instead of <path>/repomd.xml.asc returns
+    content of <path>/repomd.xml.asc.bad"""
+    if "static/" not in path:
+        abort(400)
+    path = path[path.find("static/"):]
+    if path.endswith("repomd.xml.asc"):
+        path = path + ".bad"
+
+    try:
+        with yum_mock.open_resource(path) as f:
+            return f.read()
+    except IOError:
+        # File probably doesn't exist or we can't read it
+        abort(404)
+
 # Basic Auth
 
 def check_auth(username, password):

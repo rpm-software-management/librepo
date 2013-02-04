@@ -2,6 +2,7 @@ REPOS_YUM = "yum/static/"
 HARMCHECKSUM = "yum/harm_checksum/%s/"
 MISSINGFILE = "yum/not_found/%s/"
 BADURL = "yum/badurl/"
+BADGPG = "yum/badgpg/"
 AUTHBASIC = "yum/auth_basic/"
 PARTIAL = "yum/partial/"
 

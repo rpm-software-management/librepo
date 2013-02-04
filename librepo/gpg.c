@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <string.h>
 #include <gpgme.h>
+#include <unistd.h>
 
 #include "rcodes.h"
 #include "setup.h"
@@ -30,11 +31,10 @@
 #include "gpg.h"
 
 int
-lr_gpg_check_signature(const char *signature_fn,
-                       const char *data_fn,
-                       const char *home_dir)
+lr_gpg_check_signature_fd(int signature_fd,
+                          int data_fd,
+                          const char *home_dir)
 {
-    int signature_fd, data_fd;
     gpgme_error_t err;
     gpgme_ctx_t context;
     gpgme_data_t signature_data;
@@ -73,18 +73,6 @@ lr_gpg_check_signature(const char *signature_fn,
     }
 
     gpgme_set_armor(context, 1);
-
-    signature_fd = open(signature_fn, O_RDONLY);
-    if (signature_fd == -1) {
-        DPRINTF("%s: Opening signature: %s\n", __func__, strerror(errno));
-        return LRE_IO;
-    }
-
-    data_fd = open(data_fn, O_RDONLY);
-    if (signature_fd == -1) {
-        DPRINTF("%s: Opening data: %s\n", __func__, strerror(errno));
-        return LRE_IO;
-    }
 
     err = gpgme_data_new_from_fd(&signature_data, signature_fd);
     if (err != GPG_ERR_NO_ERROR) {
@@ -132,6 +120,37 @@ lr_gpg_check_signature(const char *signature_fn,
     }
 
     return LRE_BADGPG;
+
+}
+
+int
+lr_gpg_check_signature(const char *signature_fn,
+                       const char *data_fn,
+                       const char *home_dir)
+{
+    int rc, signature_fd, data_fd;
+
+    signature_fd = open(signature_fn, O_RDONLY);
+    if (signature_fd == -1) {
+        DPRINTF("%s: Opening signature %s: %s\n",
+                __func__, signature_fn, strerror(errno));
+        return LRE_IO;
+    }
+
+    data_fd = open(data_fn, O_RDONLY);
+    if (signature_fd == -1) {
+        DPRINTF("%s: Opening data %s: %s\n",
+                __func__, data_fn, strerror(errno));
+        close(signature_fd);
+        return LRE_IO;
+    }
+
+     rc = lr_gpg_check_signature_fd(signature_fd, data_fd, home_dir);
+
+     close(signature_fd);
+     close(data_fd);
+
+     return rc;
 }
 
 int

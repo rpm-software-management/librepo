@@ -44,6 +44,7 @@
 #include "yum_internal.h"
 #include "internal_mirrorlist.h"
 #include "curltargetlist.h"
+#include "gpg.h"
 
 /** TODO:
  * - GPG check
@@ -423,6 +424,52 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
             close(fd);
             lr_free(path);
             return rc;
+        }
+
+        /* Check repomd.xml.asc if available.
+         * Try to download and verify GPG signature (repomd.xml.asc).
+         * Try to download only from the mirror where repomd.xml iself was
+         * downloaded. It is because most of yum repositories are not signed
+         * and try every mirror for signature is non effective.
+         * Every mirror would be tried because mirrorded_download function have
+         * no clue if 404 for repomd.xml.asc means that no signature exists or
+         * it is just error on the mirror and should try the next one.
+         **/
+        if (handle->checks & LR_CHECK_GPG) {
+            int fd_sig;
+            char *url, *signature;
+
+            signature = lr_pathconcat(handle->destdir, "repodata/repomd.xml.asc", NULL);
+            fd_sig = open(signature, O_CREAT|O_TRUNC|O_RDWR, 0660);
+            if (fd_sig == -1) {
+                DPRINTF("%s: Cannot open: %s\n", __func__, signature);
+                close(fd);
+                lr_free(path);
+                lr_free(signature);
+                return LRE_IO;
+            }
+
+            url = lr_pathconcat(handle->used_mirror, "repodata/repomd.xml.asc", NULL);
+            rc = lr_curl_single_download(handle, url, fd_sig);
+            lr_free(url);
+            close(fd_sig);
+            if (rc != LRE_OK) {
+                // Signature doesn't exist
+                DPRINTF("%s: GPG signature doesn't exists\n", __func__);
+                unlink(signature);
+                lr_free(signature);
+            } else {
+                // Signature downloaded
+                rc = lr_gpg_check_signature(signature, path, NULL);
+                if (rc != LRE_OK) {
+                    DPRINTF("%s: GPG signature verification failed\n", __func__);
+                    close(fd);
+                    lr_free(path);
+                    lr_free(signature);
+                    return rc;
+                }
+                DPRINTF("%s: GPG signature successfully verified\n", __func__);
+            }
         }
 
         lseek(fd, 0, SEEK_SET);

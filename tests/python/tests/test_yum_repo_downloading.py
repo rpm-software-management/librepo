@@ -402,6 +402,40 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
 
+    def test_download_repo_with_gpg_check(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.perform(r)
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+
+    def test_download_repo_with_gpg_check_bad_signature(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s%s" % (MOCKURL, config.BADGPG, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_GPGCHECK, True)
+        self.assertRaises(librepo.LibrepoException, h.perform, (r))
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+
     def test_download_repo_01_with_missing_file(self):
         h = librepo.Handle()
         r = librepo.Result()

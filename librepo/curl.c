@@ -375,6 +375,8 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             }
 
             /* Store used mirror into the handler */
+            if (handle->used_mirror)
+                lr_free(handle->used_mirror);
             handle->used_mirror = lr_strdup(url);
             break;
         }

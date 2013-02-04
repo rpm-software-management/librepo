@@ -30,6 +30,17 @@ extern "C" {
  */
 
 /** Check detached signature of data.
+ * @param signature_fd      File descriptor of signature file.
+ * @param data_fd           File descriptor of data to verify.
+ * @param home_dir          Configuration directory of OpenPGP engine
+ *                          (e.g. "/home/user/.gnupg/"), if NULL default
+ *                          config directory is used.
+ */
+int lr_gpg_check_signature_fd(int signature_fd,
+                              int data_fd,
+                              const char *home_dir);
+
+/** Check detached signature of data.
  * @param signature_fn      Filename (path) of signature file.
  * @param data_fn           Filename (path) of data to verify.
  * @param home_dir          Configuration directory of OpenPGP engine

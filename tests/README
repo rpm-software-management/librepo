@@ -19,3 +19,21 @@ test_main.c
 
 test_*.c  test_*.h
   Test suits
+
+Python tests
+============
+Some python tests use Flask python framework (http://flask.pocoo.org/)
+to simulate web server. The server is started automatically during tests.
+
+If you want to try your modification of server:
+$ python python/tests/servermock/server.py
+
+Then you could test your server modification e.g.:
+http://127.0.0.1:5000/yum/auth_basic/static/01/repodata/repomd.xml
+ - This url provides basic authentification
+
+http://127.0.0.1:5000/yum/badgpg/static/01/repodata/repomd.xml.asc
+ - This url in fact returns .../repodata/repomd.xml.asc.bad file
+
+etc..
+
