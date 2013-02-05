@@ -324,6 +324,8 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
 
     if (!handle->update) {
         /* Open and parse repomd */
+        char *sig;
+
         path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
         fd = open(path, O_RDONLY);
         if (fd < 0) {
@@ -346,6 +348,23 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         result->destdir = lr_strdup(baseurl);
         repo->destdir = lr_strdup(baseurl);
         repo->repomd = path;
+
+        /* Check if signature file exists */
+        sig = lr_pathconcat(baseurl, "repodata/repomd.xml.asc", NULL);
+        if (access(sig, F_OK) == 0)
+            repo->signature = sig;  // File with key exists
+        else
+            lr_free(sig);
+
+        /* Signature checking */
+        if (handle->checks & LR_CHECK_GPG && repo->signature) {
+            rc = lr_gpg_check_signature(repo->signature, repo->repomd, NULL);
+            if (rc != LRE_OK) {
+                DPRINTF("%s: GPG signature verification failed\n", __func__);
+                return rc;
+            }
+        }
+
 
         DPRINTF("%s: Repomd revision: %s\n", __func__, repomd->revision);
     }
@@ -542,6 +561,8 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     if (handle->local) {
         /* Do not duplicate repository, just use the existing local one */
         rc = lr_yum_use_local(handle, result);
+        if (rc != LRE_OK)
+            return rc;
         if (handle->checks & LR_CHECK_CHECKSUM)
             rc = lr_yum_check_repo_checksums(repo, repomd);
     } else {

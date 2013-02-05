@@ -424,6 +424,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(yum_repomd)
         self.assertTrue("signature" in yum_repo and yum_repo["signature"])
         self.assertTrue(self.tmpdir+'/repodata/repomd.xml.asc' == yum_repo["signature"] )
+        self.assertTrue(os.path.isfile(yum_repo["signature"]))
 
     def test_download_repo_with_gpg_check_bad_signature(self):
         h = librepo.Handle()
