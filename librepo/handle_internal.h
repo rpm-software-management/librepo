@@ -47,6 +47,7 @@ struct _lr_Handle {
     CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
     lr_ProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
+    int             ignoremissing;  /*!< Ignore missing metadata files */
     char            **yumdlist;     /*!< Repomd data typenames to download
                                         NULL - Download all
                                         yumdlist[0] = NULL - Only repomd.xml */

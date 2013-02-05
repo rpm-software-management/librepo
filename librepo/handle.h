@@ -64,9 +64,14 @@ typedef enum {
                           only supported is LR_YUMREPO. */
     LRO_CONNECTTIMEOUT,/*!< (long) Max time in sec for connection phase.
                             default timeout is 300 seconds. */
+    LRO_IGNOREMISSING, /*!< (long) If you want to localise (LRO_LOCAL is enabled)
+                            a incomplete local repository (eg. only primary
+                            and filelists are present) you could use
+                            LRO_YUMDLIST and specify only file that are
+                            present, or use this option. */
 
     /* Repo common options */
-    LRO_GPGCHECK,    /*!< (int) Check GPG signature if available - TODO */
+    LRO_GPGCHECK,    /*!< (int) Check GPG signature if available */
     LRO_CHECKSUM,    /*!< (int) Check files checksum if available */
 
     /* LR_YUMREPO specific options */

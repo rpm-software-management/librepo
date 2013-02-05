@@ -113,6 +113,13 @@ Constants
 
     Integer or None. See more: :meth:`~.Handle.connecttimeout`
 
+.. data:: LRO_IGNOREMISSING
+
+    Boolean. If you want to localise (LRO_LOCAL is True) a incomplete local
+    repository (eg. only primary and filelists are present but repomd.xml
+    contains more files), you could use LRO_YUMDLIST and specify only file
+    that are present of use this option.
+
 .. data:: LRO_GPGCHECK
 
     Boolean. See more: :meth:`~.Handle.gpgcheck`
@@ -302,6 +309,10 @@ LibRepo Error codes.
 
     Bad GPG signature.
 
+.. data:: LRE_INCOMPLETEREPO
+
+    Repository metadata are not complete.
+
 .. data:: LRE_UNKNOWNERROR
 
     An unknown error.
@@ -355,6 +366,7 @@ LRO_MAXSPEED        = _librepo.LRO_MAXSPEED
 LRO_DESTDIR         = _librepo.LRO_DESTDIR
 LRO_REPOTYPE        = _librepo.LRO_REPOTYPE
 LRO_CONNECTTIMEOUT  = _librepo.LRO_CONNECTTIMEOUT
+LRO_IGNOREMISSING   = _librepo.LRO_IGNOREMISSING
 LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
@@ -407,6 +419,7 @@ LRE_BADURL              = _librepo.LRE_BADURL
 LRE_GPGNOTSUPPORTED     = _librepo.LRE_GPGNOTSUPPORTED
 LRE_GPGERROR            = _librepo.LRE_GPGERROR
 LRE_BADGPG              = _librepo.LRE_BADGPG
+LRE_INCOMPLETEREPO      = _librepo.LRE_INCOMPLETEREPO
 LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
 
 LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
@@ -559,6 +572,13 @@ class Handle(_librepo.Handle):
         """Set maximal timeout in sec for connection phase.
         Default value is 300. None as *val* sets the default value."""
         self.setopt(LRO_CONNECTTIMEOUT, val)
+
+    def ignoremissing(self, val):
+        """If you want to localise (LRO_LOCAL is True) a incomplete
+        local repository (eg. only primary and filelists are present but
+        repomd.xml contains more files), you could use LRO_YUMDLIST and
+        specify only file that are present of use this option."""
+        self.setopt(LRO_IGNOREMISSING, val)
 
     def gpgcheck(self, val):
         """Set True to enable gpg check (if available) of downloaded repo."""

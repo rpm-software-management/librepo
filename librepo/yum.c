@@ -380,8 +380,18 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
             continue; /* This path already exists in repo */
 
         path = lr_pathconcat(baseurl, record->location_href, NULL);
-        if (path)
-            lr_yum_repo_append(repo, record->type, path);
+        if (path) {
+            if (access(path, F_OK) == -1) {
+                /* A repo file is missing */
+                if (!handle->ignoremissing) {
+                    DPRINTF("%s: Incomplete repository\n", __func__);
+                    lr_free(path);
+                    return LRE_INCOMPLETEREPO;
+                }
+            } else
+                lr_yum_repo_append(repo, record->type, path);
+            lr_free(path);
+        }
     }
 
     DPRINTF("%s: Repository was successfully located\n", __func__);

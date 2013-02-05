@@ -73,6 +73,8 @@ lr_strerror(int rc)
         return "GPGME protocol is not supported";
     case LRE_GPGERROR:
         return "Error while GPG check";
+    case LRE_INCOMPLETEREPO:
+        return "Repository metadata are not complete";
     case LRE_BADGPG:
         return "Bad GPG signature";
     }

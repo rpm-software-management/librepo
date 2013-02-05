@@ -196,6 +196,7 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXYSOCK:
     case LRO_PROXYAUTH:
     case LRO_GPGCHECK:
+    case LRO_IGNOREMISSING:
     case LRO_CHECKSUM: {
         PY_LONG_LONG d;
 

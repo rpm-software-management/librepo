@@ -208,6 +208,11 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRO_CONNECTTIMEOUT:
         c_rc = curl_easy_setopt(c_h, CURLOPT_CONNECTTIMEOUT, va_arg(arg, long));
+        break;
+
+    case LRO_IGNOREMISSING:
+        handle->ignoremissing = va_arg(arg, long) ? 1 : 0;
+        break;
 
     case LRO_GPGCHECK:
         if (va_arg(arg, int))

@@ -72,6 +72,7 @@ typedef enum {
     LRE_GPGNOTSUPPORTED,            /*!< OpenPGP protocol is not supported */
     LRE_GPGERROR,                   /*!< GPG error */
     LRE_BADGPG,                     /*!< Bad GPG signature */
+    LRE_INCOMPLETEREPO,             /*!< Repository metadata are not complete */
     LRE_UNKNOWNERROR,               /*!< unknown error - sentinel of
                                          error codes enum */
 } lr_Rc; /*!< Return codes */

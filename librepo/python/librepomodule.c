@@ -99,6 +99,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_DESTDIR", LRO_DESTDIR);
     PyModule_AddIntConstant(m, "LRO_REPOTYPE", LRO_REPOTYPE);
     PyModule_AddIntConstant(m, "LRO_CONNECTTIMEOUT", LRO_CONNECTTIMEOUT);
+    PyModule_AddIntConstant(m, "LRO_IGNOREMISSING", LRO_IGNOREMISSING);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);
@@ -149,6 +150,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_GPGNOTSUPPORTED", LRE_GPGNOTSUPPORTED);
     PyModule_AddIntConstant(m, "LRE_GPGERROR", LRE_GPGERROR);
     PyModule_AddIntConstant(m, "LRE_BADGPG", LRE_BADGPG);
+    PyModule_AddIntConstant(m, "LRE_INCOMPLETEREPO", LRE_INCOMPLETEREPO);
     PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
 
     /* Result option */
