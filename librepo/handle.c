@@ -215,14 +215,14 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_GPGCHECK:
-        if (va_arg(arg, int))
+        if (va_arg(arg, long))
             handle->checks |= LR_CHECK_GPG;
         else
             handle->checks &= ~LR_CHECK_GPG;
         break;
 
     case LRO_CHECKSUM:
-        if (va_arg(arg, int))
+        if (va_arg(arg, long))
             handle->checks |= LR_CHECK_CHECKSUM;
         else
             handle->checks &= ~LR_CHECK_CHECKSUM;

@@ -71,8 +71,8 @@ typedef enum {
                             present, or use this option. */
 
     /* Repo common options */
-    LRO_GPGCHECK,    /*!< (int) Check GPG signature if available */
-    LRO_CHECKSUM,    /*!< (int) Check files checksum if available */
+    LRO_GPGCHECK,    /*!< (long 1 or 0) Check GPG signature if available */
+    LRO_CHECKSUM,    /*!< (long 1 or 0) Check files checksum if available */
 
     /* LR_YUMREPO specific options */
     LRO_YUMDLIST,    /*!< (char **) Download only specified records
