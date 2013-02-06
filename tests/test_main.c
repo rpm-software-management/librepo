@@ -41,16 +41,16 @@ main(int argc, const char **argv)
     struct stat s;
 
     if (argc != 2) {
-	fprintf(stderr, "usage: %s <repos_directory>\n", argv[0]);
-	exit(1);
+        fprintf(stderr, "usage: %s <repos_directory>\n", argv[0]);
+        exit(1);
     }
     if (stat(argv[1], &s) || !S_ISDIR(s.st_mode)) {
-	fprintf(stderr, "can not read repos at '%s'.\n", argv[1]);
-	exit(1);
+        fprintf(stderr, "can not read repos at '%s'.\n", argv[1]);
+        exit(1);
     }
     if (init_test_globals(&test_globals, argv[1])) {
-	fprintf(stderr, "failed initializing test engine.\n");
-	exit(1);
+        fprintf(stderr, "failed initializing test engine.\n");
+        exit(1);
     }
     printf("Tests using directory: %s\n", test_globals.tmpdir);
 
