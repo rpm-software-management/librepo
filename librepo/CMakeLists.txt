@@ -1,37 +1,42 @@
 SET (librepo_SRCS
-     handle.c
-     metalink.c
-     util.c
-     mirrorlist.c
-     yum.c
-     repomd.c
-     curl.c
      checksum.c
-     repoutil_yum.c
-     result.c
-     librepo.c
-     internal_mirrorlist.c
+     curl.c
      curltargetlist.c
+     gpg.c
+     handle.c
+     internal_mirrorlist.c
+     librepo.c
+     metalink.c
+     mirrorlist.c
      package_downloader.c
      rcodes.c
-     gpg.c)
+     repomd.c
+     repoutil_yum.c
+     result.c
+     util.c
+     yum.c)
 
 SET(librepo_HEADERS
-    librepo.h
-    rcodes.h
-    types.h
-    handle.h
-    result.h
-    yum.h
-    util.h
     checksum.h
+    gpg.h
+    handle.h
+    librepo.h
+    package_downloader.h
+    rcodes.h
+    repomd.h
     repoutil_yum.h
-    package_downloader.h)
+    result.h
+    types.h
+    util.h
+    version.h
+    yum.h)
 
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
-TARGET_LINK_LIBRARIES(librepo ${EXPAT_LIBRARIES})
-TARGET_LINK_LIBRARIES(librepo ${CURL_LIBRARY})
-TARGET_LINK_LIBRARIES(librepo ${GPGME_VANILLA_LIBRARIES})
+TARGET_LINK_LIBRARIES(librepo
+                        ${EXPAT_LIBRARY}
+                        ${CURL_LIBRARY}
+                        ${GPGME_VANILLA_LIBRARIES}
+                     )
 SET_TARGET_PROPERTIES(librepo PROPERTIES OUTPUT_NAME "repo")
 SET_TARGET_PROPERTIES(librepo PROPERTIES SOVERSION 0)
 #SET_TARGET_PROPERTIES(librepo PROPERTIES VERSION "0")

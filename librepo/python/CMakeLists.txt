@@ -23,9 +23,11 @@ ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
 SET_TARGET_PROPERTIES(_librepomodule PROPERTIES PREFIX "")
 SET_TARGET_PROPERTIES(_librepomodule PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
 TARGET_LINK_LIBRARIES(_librepomodule librepo)
-TARGET_LINK_LIBRARIES(_librepomodule ${EXPAT_LIBRARIES})
-TARGET_LINK_LIBRARIES(_librepomodule ${CURL_LIBRARY})
-TARGET_LINK_LIBRARIES(_librepomodule ${PYTHON_LIBRARY})
+TARGET_LINK_LIBRARIES(_librepomodule
+                        ${EXPAT_LIBRARIES}
+                        ${CURL_LIBRARY}
+                        ${PYTHON_LIBRARY}
+                     )
 
 INSTALL(FILES __init__.py DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
 INSTALL(TARGETS _librepomodule LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
