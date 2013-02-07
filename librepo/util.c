@@ -142,8 +142,8 @@ lr_ends_with(const char *str, const char *suffix)
     int str_len;
     int suffix_len;
 
-    assert(str);
-    assert(suffix);
+    if (!str || !suffix)
+        return 0;
 
     str_len = strlen(str);
     suffix_len = strlen(suffix);

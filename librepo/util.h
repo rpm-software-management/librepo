@@ -105,6 +105,7 @@ int lr_ends_with(const char *str, const char *suffix);
 
 /** \ingroup util
  * Concatenate all of given part of path.
+ * If last chunk is "" then separator will be appended to the result.
  * @param str           First part of the path.
  * @param ...           NULL terminated list of strings.
  * @return              Concatenated path.
