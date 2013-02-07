@@ -1,6 +1,7 @@
 SET (librepotest_SRCS
      fixtures.c
      test_checksum.c
+     test_curltargetlist.c
      test_gpg.c
      test_internal_mirrorlist.c
      test_main.c

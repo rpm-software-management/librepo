@@ -58,7 +58,9 @@ typedef struct _lr_CurlTargetList * lr_CurlTargetList;
 lr_CurlTarget lr_curltarget_new();
 
 /**
- * Free a ::lr_CurlTarget element and ist content.
+ * Free a ::lr_CurlTarget element and its content.
+ * Note: Each char* element of ::lr_CurlTarget structure will be freed!
+ * So each such element have to be a malloced (not static) string or NULL!
  * @param target        Target to free.
  */
 void lr_curltarget_free(lr_CurlTarget target);
@@ -71,6 +73,9 @@ lr_CurlTargetList lr_curltargetlist_new();
 
 /**
  * Free a ::lr_CurlTargetList and all its content.
+ * Note: Keep in mind that each char* element in all ::lr_CurlTarget items
+ * will be freed! So each that element have to be NULL or points to malloced
+ * string.
  * @param list          List.
  */
 void lr_curltargetlist_free(lr_CurlTargetList list);
