@@ -60,6 +60,7 @@ lr_gpg_check_signature_fd(int signature_fd,
     err = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_set_protocol: %s\n", __func__, gpgme_strerror(err));
+        gpgme_release(context);
         return LRE_GPGERROR;
     }
 
@@ -68,6 +69,7 @@ lr_gpg_check_signature_fd(int signature_fd,
                                         NULL, home_dir);
         if (err != GPG_ERR_NO_ERROR) {
             DPRINTF("%s: gpgme_ctx_set_engine_info: %s\n", __func__, gpgme_strerror(err));
+            gpgme_release(context);
             return LRE_GPGERROR;
         }
     }
@@ -78,6 +80,7 @@ lr_gpg_check_signature_fd(int signature_fd,
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_data_new_from_fd: %s\n",
                  __func__, gpgme_strerror(err));
+        gpgme_release(context);
         return LRE_GPGERROR;
     }
 
@@ -85,19 +88,25 @@ lr_gpg_check_signature_fd(int signature_fd,
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_data_new_from_fd: %s\n",
                  __func__, gpgme_strerror(err));
+        gpgme_data_release(signature_data);
+        gpgme_release(context);
         return LRE_GPGERROR;
     }
 
     // Verify
     err = gpgme_op_verify(context, signature_data, data_data, NULL);
+    gpgme_data_release(signature_data);
+    gpgme_data_release(data_data);
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_op_verify: %s\n", __func__, gpgme_strerror(err));
+        gpgme_release(context);
         return LRE_GPGERROR;
     }
 
     result = gpgme_op_verify_result(context);
     if (!result) {
         DPRINTF("%s: gpgme_op_verify_result: error\n", __func__);
+        gpgme_release(context);
         return LRE_GPGERROR;
     }
 
@@ -105,6 +114,7 @@ lr_gpg_check_signature_fd(int signature_fd,
     sig = result->signatures;
     if(!sig) {
         DPRINTF("%s: signature verify error (no signatures)\n", __func__);
+        gpgme_release(context);
         return LRE_BADGPG;
     }
 
@@ -115,12 +125,13 @@ lr_gpg_check_signature_fd(int signature_fd,
             (sig->summary & GPGME_SIGSUM_GREEN) ||  // Valid
             (sig->summary == 0 && sig->status == GPG_ERR_NO_ERROR)) // Valid but key is not certified with a trusted signature
         {
+            gpgme_release(context);
             return LRE_OK;
         }
     }
 
+    gpgme_release(context);
     return LRE_BADGPG;
-
 }
 
 int
@@ -179,6 +190,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
     err = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_set_protocol: %s\n", __func__, gpgme_strerror(err));
+        gpgme_release(context);
         return LRE_GPGERROR;
     }
 
@@ -187,6 +199,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
                                         NULL, home_dir);
         if (err != GPG_ERR_NO_ERROR) {
             DPRINTF("%s: gpgme_ctx_set_engine_info: %s\n", __func__, gpgme_strerror(err));
+            gpgme_release(context);
             return LRE_GPGERROR;
         }
     }
@@ -198,6 +211,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
     key_fd = open(key_fn, O_RDONLY);
     if (key_fd == -1) {
         DPRINTF("%s: Opening key: %s\n", __func__, strerror(errno));
+        gpgme_release(context);
         return LRE_IO;
     }
 
@@ -205,14 +219,22 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_data_new_from_fd: %s\n",
                  __func__, gpgme_strerror(err));
+        gpgme_release(context);
+        close(key_fd);
         return LRE_GPGERROR;
     }
 
     err = gpgme_op_import(context, key_data);
+    gpgme_data_release(key_data);
     if (err != GPG_ERR_NO_ERROR) {
         DPRINTF("%s: gpgme_op_import: %s\n", __func__, gpgme_strerror(err));
+        gpgme_release(context);
+        close(key_fd);
         return LRE_GPGERROR;
     }
+
+    close(key_fd);
+    gpgme_release(context);
 
     return LRE_OK;
 }
