@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #include "types.h"
+#include "handle.h"
 #include "checksum.h"
 #include "rcodes.h"
 #include "internal_mirrorlist.h"

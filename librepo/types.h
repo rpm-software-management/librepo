@@ -32,7 +32,7 @@ extern "C" {
 /** Handle object containing configration for repository metadata and
  * package downloading.
  */
-typedef struct _lr_Handle *lr_Handle;
+//typedef struct _lr_Handle *lr_Handle;
 
 /** Result object containing information about downloaded/located repository. */
 typedef struct _lr_Result *lr_Result;

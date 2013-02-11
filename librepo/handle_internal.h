@@ -27,6 +27,7 @@ extern "C" {
 #include <curl/curl.h>
 
 #include "types.h"
+#include "handle.h"
 #include "internal_mirrorlist.h"
 
 struct _lr_Handle {

@@ -518,11 +518,41 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         *str = handle->destdir;
         break;
 
+    case LRI_REPOTYPE:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->repotype;
+        break;
+
     case LRI_YUMDLIST: {
         char ***strlist = va_arg(arg, char ***);
         *strlist = handle->yumdlist;
         break;
     }
+
+    case LRI_LASTCURLERR:
+        lnum = va_arg(arg, long *);
+        *lnum = handle->last_curl_error;
+        break;
+
+    case LRI_LASTCURLMERR:
+        lnum = va_arg(arg, long *);
+        *lnum = handle->last_curlm_error;
+        break;
+
+    case LRI_LASTCURLSTRERR:
+        str = va_arg(arg, char **);
+        *str = (char *) curl_easy_strerror(handle->last_curl_error);
+        break;
+
+    case LRI_LASTCURLMSTRERR:
+        str = va_arg(arg, char **);
+        *str = (char *) curl_multi_strerror(handle->last_curlm_error);
+        break;
+
+    case LRI_LASTBADSTATUSCODE:
+        lnum = va_arg(arg, long *);
+        *lnum = handle->status_code;
+        break;
 
     default:
         rc = LRE_UNKNOWNOPT;

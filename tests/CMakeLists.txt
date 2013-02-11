@@ -3,6 +3,7 @@ SET (librepotest_SRCS
      test_checksum.c
      test_curltargetlist.c
      test_gpg.c
+     test_handle.c
      test_internal_mirrorlist.c
      test_main.c
      test_repomd.c

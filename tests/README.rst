@@ -1,3 +1,15 @@
+C tests
+=======
+C tests uses the Check unit testing framework (http://check.sourceforge.net/).
+
+Run (from your checkout dir)::
+
+build/tests/test_main tests/repos/
+
+*Tip:* Use Valgrind (http://valgrind.org/) with C tests::
+
+valgrind build/tests/test_main tests/repos/
+
 Files of C tests
 ================
 

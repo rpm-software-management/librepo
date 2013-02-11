@@ -24,10 +24,17 @@
 extern "C" {
 #endif
 
+#include "result.h"
+
 /** \defgroup   handle    Handle for downloading data
  *  \addtogroup handle
  *  @{
  */
+
+/** Handle object containing configration for repository metadata and
+ * package downloading.
+ */
+typedef struct _lr_Handle *lr_Handle;
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
@@ -76,25 +83,25 @@ typedef enum {
 
     /* LR_YUMREPO specific options */
     LRO_YUMDLIST,    /*!< (char **) Download only specified records
-                          from repomd (e.g. ["primary", "filelists"]). */
+                          from repomd (e.g. ["primary", "filelists", NULL]).
+                          Note: Last element of the list must be NULL! */
     LRO_SENTINEL,    /*!<  */
 } lr_HandleOption; /*!< Handle config options */
 
 /** Handle options for the ::lr_handle_getinfo function. */
 typedef enum {
-    LRI_UPDATE,
-    LRI_URL,
-    LRI_MIRRORLIST,
-    LRI_LOCAL,
-    LRI_DESTDIR,
-    LRI_REPOTYPE,
-    LRI_YUMDLIST,
-    // -------- TODO:
-    LRI_LASTCURLERROR,
-    LRI_LASTCURLMERROR,
-    LRI_LASTBADSTATUSCODE,
-    LRI_LASTCURLSTRERROR,
-    LRI_LASTCURLMSTRERROR,
+    LRI_UPDATE,                 /* (long *) */
+    LRI_URL,                    /* (char **) */
+    LRI_MIRRORLIST,             /* (char **) */
+    LRI_LOCAL,                  /* (long *) */
+    LRI_DESTDIR,                /* (char **) */
+    LRI_REPOTYPE,               /* (long *) */
+    LRI_YUMDLIST,               /* (char **) */
+    LRI_LASTCURLERR,            /* (long *) */
+    LRI_LASTCURLMERR,           /* (long *) */
+    LRI_LASTCURLSTRERR,         /* (char **) */
+    LRI_LASTCURLMSTRERR,        /* (char **) */
+    LRI_LASTBADSTATUSCODE,      /* (long *) */
     LRI_SENTINEL,
 } lr_HandleInfoOption; /*!< Handle info options */
 
@@ -117,6 +124,12 @@ void lr_handle_free(lr_Handle handle);
 int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
 
 /** Get information from handle.
+ * Most of returned pointers point directly to the handle internal
+ * values and therefore you should assume that they are only valid until
+ * any manipulation (lr_handle_setopt, lr_handle_perform, ...)
+ * with handle occurs.
+ * NOTE: You should not free or modify the memory returned by this
+ * function unless it is explicitly mentioned!
  * @param handle        Librepo handle.
  * @param option        Option from ::lr_HandleInfoOption enum.
  * @param ...           Apropriate variable fro the selected option.
