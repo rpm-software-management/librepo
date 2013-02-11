@@ -24,17 +24,17 @@ START_TEST(test_gpg_check_signature)
     char *tmp_home_path;
 
     tmp_home_path = lr_gettmpdir();
-    key_path = lr_pathconcat(test_globals.repo_dir,
+    key_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml.key", NULL);
-    _key_path = lr_pathconcat(test_globals.repo_dir,
+    _key_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml_bad.key", NULL);
-    data_path = lr_pathconcat(test_globals.repo_dir,
+    data_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml", NULL);
-    _data_path = lr_pathconcat(test_globals.repo_dir,
+    _data_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml_bad", NULL);
-    signature_path = lr_pathconcat(test_globals.repo_dir,
+    signature_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml.asc", NULL);
-    _signature_path = lr_pathconcat(test_globals.repo_dir,
+    _signature_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml_bad.asc", NULL);
 
     rc = lr_gpg_import_key(key_path, tmp_home_path);

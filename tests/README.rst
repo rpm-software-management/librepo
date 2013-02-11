@@ -8,7 +8,7 @@ build/tests/test_main tests/repos/
 
 *Tip:* Use Valgrind (http://valgrind.org/) with C tests::
 
-valgrind build/tests/test_main tests/repos/
+valgrind build/tests/test_main tests/test_data/
 
 Files of C tests
 ================

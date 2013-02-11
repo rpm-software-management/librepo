@@ -22,25 +22,25 @@ import _librepo_test
 #                                prefix='pyhawkey')
 
 #class TestSackMixin(object):
-#    def __init__(self, repo_dir):
-#        self.repo_dir = repo_dir
+#    def __init__(self, testdata_dir):
+#        self.testdata_dir = testdata_dir
 #
 #    def load_test_repo(self, name, fn):
-#        path = os.path.join(self.repo_dir, fn)
+#        path = os.path.join(self.testdata_dir, fn)
 #        _hawkey_test.load_repo(self, name, path, False)
 #
 #    def load_system_repo(self, *args, **kwargs):
-#        path = os.path.join(self.repo_dir, "@System.repo")
+#        path = os.path.join(self.testdata_dir, "@System.repo")
 #        _hawkey_test.load_repo(self, hawkey.SYSTEM_REPO_NAME, path, True)
 #
 #    def load_yum_repo(self, **args):
-#        d = os.path.join(self.repo_dir, YUM_DIR_SUFFIX)
+#        d = os.path.join(self.testdata_dir, YUM_DIR_SUFFIX)
 #        repo = glob_for_repofiles(self, "messerk", d)
 #        super(TestSackMixin, self).load_yum_repo(repo, **args)
 #
 #class TestSack(TestSackMixin, hawkey.Sack):
-#    def __init__(self, repo_dir, PackageClass=None, package_userdata=None):
-#        TestSackMixin.__init__(self, repo_dir)
+#    def __init__(self, testdata_dir, PackageClass=None, package_userdata=None):
+#        TestSackMixin.__init__(self, testdata_dir)
 #        hawkey.Sack.__init__(self,
 #                             cachedir=cachedir,
 #                             arch=FIXED_ARCH,

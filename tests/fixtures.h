@@ -2,7 +2,7 @@
 #define LR_FIXTURES_H
 
 struct TestGlobals_s {
-    char *repo_dir;
+    char *testdata_dir;
     char *tmpdir;
 };
 

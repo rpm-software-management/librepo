@@ -7,7 +7,7 @@ import librepo
 # Repositories used in download tests
 #REPOS_YUM = "tests/python/tests/servermock/yum_mock/static/"
 
-REPOS_YUM = "tests/repos/"
+REPOS_YUM = "tests/test_data/"
 
 REPO_YUM_01_PATH = REPOS_YUM+"repo_yum_01/"
 REPO_YUM_02_PATH = REPOS_YUM+"repo_yum_02/"

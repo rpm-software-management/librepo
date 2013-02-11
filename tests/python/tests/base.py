@@ -10,7 +10,7 @@ except ImportError:
 MOCKURL="http://127.0.0.1:5000/"
 
 class TestCase(unittest.TestCase):
-    repo_dir = os.path.normpath(os.path.join(__file__, "../../../repos"))
+    testdata_dir = os.path.normpath(os.path.join(__file__, "../../../test_data"))
 
 class TestCaseWithFlask(TestCase):
     application = NotImplemented

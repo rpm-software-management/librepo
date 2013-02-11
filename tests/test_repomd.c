@@ -16,7 +16,7 @@ START_TEST(test_repomd_parsing)
     lr_YumRepoMd repomd;
     char *repomd_path;
 
-    repomd_path = lr_pathconcat(test_globals.repo_dir,
+    repomd_path = lr_pathconcat(test_globals.testdata_dir,
                                 "repo_yum_02/repodata/repomd.xml",
                                 NULL);
     repomd = lr_yum_repomd_init();

@@ -45,7 +45,7 @@ All unit tests run from librepo checkout dir
 
 ### Run (from your checkout dir) - C unittests:
 
-    build/tests/test_main tests/repos/
+    build/tests/test_main tests/test_data/
 
 ### Run (from your checkout dir) - Python unittests:
 

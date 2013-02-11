@@ -20,9 +20,9 @@
 
 
 static int
-init_test_globals(struct TestGlobals_s *tg, const char *repo_dir)
+init_test_globals(struct TestGlobals_s *tg, const char *testdata_dir)
 {
-    tg->repo_dir = lr_pathconcat(repo_dir, "/", NULL);
+    tg->testdata_dir = lr_pathconcat(testdata_dir, "/", NULL);
     tg->tmpdir = lr_strdup(UNITTEST_DIR);
     if (mkdtemp(tg->tmpdir) == NULL)
         return 1;
@@ -33,7 +33,7 @@ static void
 free_test_globals(struct TestGlobals_s *tg)
 {
     lr_free(tg->tmpdir);
-    lr_free(tg->repo_dir);
+    lr_free(tg->testdata_dir);
 }
 
 int
