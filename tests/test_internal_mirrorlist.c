@@ -8,9 +8,9 @@ START_TEST(test_internalimirrorlist_append_mirrorlist)
     lr_InternalMirror mirror = NULL;
     char *url = NULL;
     struct _lr_Mirrorlist ml = {
-        .urls = (char*[2]) {"http://foo", "ftp://bar"},
-        .nou = 2,
-        .lou = 2,
+        .urls = (char*[4]) {"http://foo", "", NULL, "ftp://bar"},
+        .nou = 4,
+        .lou = 4,
     };
 
     iml = lr_internalmirrorlist_new();
@@ -58,6 +58,20 @@ START_TEST(test_internalimirrorlist_append_metalink)
             .url = "http://foo/repodata/repomd.xml",
         };
     struct _lr_MetalinkUrl url2 = {
+            .protocol = "rsync",
+            .type = "rsync",
+            .location = "US",
+            .preference = 50,
+            .url = "",
+        };
+    struct _lr_MetalinkUrl url3 = {
+            .protocol = "ftp",
+            .type = "ftp",
+            .location = "CZ",
+            .preference = 1,
+            .url = NULL,
+        };
+    struct _lr_MetalinkUrl url4 = {
             .protocol = "ftp",
             .type = "ftp",
             .location = "US",
@@ -69,14 +83,16 @@ START_TEST(test_internalimirrorlist_append_metalink)
         .timestamp = 1,
         .size = 1,
         .hashes = NULL,
-        .urls = (lr_MetalinkUrl[2]) {
+        .urls = (lr_MetalinkUrl[4]) {
             (lr_MetalinkUrl) &url1,
-            (lr_MetalinkUrl) &url2
+            (lr_MetalinkUrl) &url2,
+            (lr_MetalinkUrl) &url3,
+            (lr_MetalinkUrl) &url4
         },
         .noh = 0,
-        .nou = 2,
+        .nou = 4,
         .loh = 0,
-        .lou = 2,
+        .lou = 4,
     };
 
     iml = lr_internalmirrorlist_new();
@@ -85,7 +101,7 @@ START_TEST(test_internalimirrorlist_append_metalink)
     fail_if(lr_internalmirrorlist_len(iml) != 0);
 
     lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml");
-    fail_if(iml->nom != 2);
+    fail_if(iml->nom != 2);  // 2 because element with empty url shoud be skipped
     fail_if(strcmp(iml->mirrors[0]->url, "http://foo"));
     fail_if(iml->mirrors[0]->preference != 100);
     fail_if(iml->mirrors[0]->fails != 0);
