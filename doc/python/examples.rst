@@ -5,7 +5,149 @@ Examples
 
 Librepo usage examples.
 
-Example::
+
+Simple download of metadata
+---------------------------
+
+::
+
+    """
+    Example: Simple download whole yum repository
+
+    Use case:
+    We have a metalink url of a repository and we
+    want do download complete repository metadata.
+    """
+
+    import sys
+    import librepo
+
+    METADATA_PATH = "downloaded_metadata"
+    URL = "https://mirrors.fedoraproject.org/metalink?repo=fedora-18&arch=x86_64"
+    DESTDIR = "downloaded_metadata"
+
+    if __name__ == "__main__":
+        h = librepo.Handle()
+        r = librepo.Result()
+        # Yum metadata
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        # Metalink url
+        h.setopt(librepo.LRO_MIRRORLIST, URL)
+        # Destination directory for metadata
+        h.setopt(librepo.LRO_DESTDIR, DESTDIR)
+
+        try:
+            h.perform(r)
+        except librepo.LibrepoException as e:
+            rc, msg, ext = e
+            print "Error: %s" % msg
+            sys.exit(1)
+        sys.exit(0)
+
+Metadata localisation
+---------------------
+
+::
+
+    """
+    Example: Localise metadata files of local yum repository
+
+    Use case:
+    We have a local yum repositository and want to
+    paths to all its metadata files.
+    """
+
+    import sys
+    import librepo
+    import pprint
+
+    METADATA_PATH = "downloaded_metadata"
+
+    if __name__ == "__main__":
+        h = librepo.Handle()
+        r = librepo.Result()
+        # Yum metadata
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        # Path to metadata
+        h.setopt(librepo.LRO_URL, METADATA_PATH)
+        # Do not duplicate (copy) metadata, just localise them
+        h.setopt(librepo.LRO_LOCAL, True)
+
+        try:
+            h.perform(r)
+        except librepo.LibrepoException as e:
+            rc, msg, ext = e
+            print "Error: %s" % msg
+            sys.exit(1)
+
+        print "Repomd content:"
+        pprint.pprint(r.getinfo(librepo.LRR_YUM_REPOMD))
+
+        print "\nPath to metadata files:"
+        for data_type, path in r.getinfo(librepo.LRR_YUM_REPO).iteritems():
+            print "%15s: %s" % (data_type, path)
+
+        sys.exit(0)
+
+
+Checksum verification
+---------------------
+
+.. note::
+    Checksum verification is enabled by default. So command
+    ``h.setopt(librepo.LRO_CHECKSUM, True)`` is unnecessary, but
+    for illustration it is better to write the command anyway.
+
+::
+
+    """
+    Example: Verify checksum of local yum metadata
+
+    Use case:
+    We have some incomplete yum metadata localy.
+    They are incomplete because they doesn't
+    contain all files specified in repomd.xml.
+    They contains only primary.xml and filelists.xml.
+    We want to check checksum of this metadata.
+    """
+
+    import sys
+    import librepo
+
+    METADATA_PATH = "downloaded_metadata"
+
+    if __name__ == "__main__":
+        h = librepo.Handle()
+        r = librepo.Result()
+        # Yum metadata
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        # Path to the metadata
+        h.setopt(librepo.LRO_URL, METADATA_PATH)
+        # Do not duplicate (copy) the metadata
+        h.setopt(librepo.LRO_LOCAL, True)
+        # Check checksum of metadata
+        h.setopt(librepo.LRO_CHECKSUM, True)
+        # Ignore missing metadata files
+        h.setopt(librepo.LRO_IGNOREMISSING, True)
+
+        try:
+            h.perform(r)
+        except librepo.LibrepoException as e:
+            rc, msg, ext = e
+            if rc == librepo.LRE_BADCHECKSUM:
+                print "Corrupted metadata!"
+            else:
+                print "Other error: %s" % msg
+            sys.exit(1)
+
+        print "Metadata are fine!"
+        sys.exit(0)
+
+
+More complex download
+---------------------
+
+::
 
     import os
     import sys
@@ -81,4 +223,5 @@ Example::
         # Get and show final results
         pprint (r.getinfo(librepo.LRR_YUM_REPO))
         pprint (r.getinfo(librepo.LRR_YUM_REPOMD))
+
 
