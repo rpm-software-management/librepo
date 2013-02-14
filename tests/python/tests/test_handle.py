@@ -63,7 +63,7 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_USERPWD, None)
         h.setopt(librepo.LRO_PROXY, None)
         h.setopt(librepo.LRO_PROXYPORT, None)       # None sets default value
-        h.setopt(librepo.LRO_PROXYSOCK, None)
+        h.setopt(librepo.LRO_PROXYTYPE, None)
         h.setopt(librepo.LRO_PROXYAUTH, None)
         h.setopt(librepo.LRO_PROXYUSERPWD, None)
         h.setopt(librepo.LRO_PROGRESSDATA, None)

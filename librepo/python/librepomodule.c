@@ -89,7 +89,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_USERPWD", LRO_USERPWD);
     PyModule_AddIntConstant(m, "LRO_PROXY", LRO_PROXY);
     PyModule_AddIntConstant(m, "LRO_PROXYPORT", LRO_PROXYPORT);
-    PyModule_AddIntConstant(m, "LRO_PROXYSOCK", LRO_PROXYSOCK);
+    PyModule_AddIntConstant(m, "LRO_PROXYTYPE", LRO_PROXYTYPE);
     PyModule_AddIntConstant(m, "LRO_PROXYAUTH", LRO_PROXYAUTH);
     PyModule_AddIntConstant(m, "LRO_PROXYUSERPWD", LRO_PROXYUSERPWD);
     PyModule_AddIntConstant(m, "LRO_PROGRESSCB", LRO_PROGRESSCB);
@@ -127,6 +127,14 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LR_YUMREPO", LR_YUMREPO);
     PyModule_AddIntConstant(m, "LR_SUSEREPO", LR_SUSEREPO);
     PyModule_AddIntConstant(m, "LR_DEBREPO", LR_DEBREPO);
+
+    /* Proxy type */
+    PyModule_AddIntConstant(m, "LR_PROXY_HTTP", LR_PROXY_HTTP);
+    PyModule_AddIntConstant(m, "LR_PROXY_HTTP_1_0", LR_PROXY_HTTP_1_0);
+    PyModule_AddIntConstant(m, "LR_PROXY_SOCKS4", LR_PROXY_SOCKS4);
+    PyModule_AddIntConstant(m, "LR_PROXY_SOCKS5", LR_PROXY_SOCKS5);
+    PyModule_AddIntConstant(m, "LR_PROXY_SOCKS4A", LR_PROXY_SOCKS4A);
+    PyModule_AddIntConstant(m, "LR_PROXY_SOCKS5_HOSTNAME", LR_PROXY_SOCKS5_HOSTNAME);
 
     /* Return codes */
     PyModule_AddIntConstant(m, "LRE_OK", LRE_OK);

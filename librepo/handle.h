@@ -40,7 +40,7 @@ typedef struct _lr_Handle *lr_Handle;
 typedef enum {
     LRO_UPDATE,      /*!< (long 1 or 0) Update existing repo in ::lr_Result.
                           Update means download missing (previously omitted)
-                          metadata file(s). TODO: rename to reuse */
+                          metadata file(s). */
     LRO_URL,         /*!< (char *) Base repo URL */
     LRO_MIRRORLIST,  /*!< (char *) Mirrorlist or metalink url */
     LRO_LOCAL,       /*!< (long 1 or 0) Do not duplicate local metadata, just
@@ -53,8 +53,7 @@ typedef enum {
                           "proxy-host.com:8080" */
     LRO_PROXYPORT,   /*!< (long) Set port number for proxy separately. Default
                           port is 1080. */
-    LRO_PROXYSOCK,   /*!< (long 1 or 0) Set type of proxy to SOCK (default is
-                          assumed HTTP proxy) - TODO: more options */
+    LRO_PROXYTYPE,   /*!< (::lr_ProxyType) Type of the proxy used. */
     LRO_PROXYAUTH,   /*!< (long 1 or 0) Enable all supported method for proxy
                           authentification */
     LRO_PROXYUSERPWD,/*!< (char *) User and password for proxy in format

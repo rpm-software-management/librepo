@@ -73,9 +73,9 @@ Constants
 
     Integer or None. See more: :meth:`~.Handle.proxyport`
 
-.. data:: LRO_PROXYSOCK
+.. data:: LRO_PROXYTYPE
 
-    Boolean. See more: :meth:`~.Handle.proxysock`
+    Boolean. See more: :meth:`~.Handle.proxytype`
 
 .. data:: LRO_PROXYAUTH
 
@@ -155,10 +155,22 @@ Constants
 .. data:: LRI_LASTCURLMSTRERR
 .. data:: LRI_LASTBADSTATUSCODE
 
+.. _proxy-type-label:
+
+Proxy type constants
+--------------------
+
+.. data:: LR_PROXY_HTTP
+.. data:: LR_PROXY_HTTP_1_0
+.. data:: LR_PROXY_SOCKS4
+.. data:: LR_PROXY_SOCKS5
+.. data:: LR_PROXY_SOCKS4A
+.. data:: LR_PROXY_SOCKS5_HOSTNAME
+
 .. _repotype-constants-label:
 
-Repotype constants
-------------------
+Repo type constants
+-------------------
 
 .. data:: LR_YUMREPO
 
@@ -361,7 +373,7 @@ LRO_HTTPAUTH        = _librepo.LRO_HTTPAUTH
 LRO_USERPWD         = _librepo.LRO_USERPWD
 LRO_PROXY           = _librepo.LRO_PROXY
 LRO_PROXYPORT       = _librepo.LRO_PROXYPORT
-LRO_PROXYSOCK       = _librepo.LRO_PROXYSOCK
+LRO_PROXYTYPE       = _librepo.LRO_PROXYTYPE
 LRO_PROXYAUTH       = _librepo.LRO_PROXYAUTH
 LRO_PROXYUSERPWD    = _librepo.LRO_PROXYUSERPWD
 LRO_PROGRESSCB      = _librepo.LRO_PROGRESSCB
@@ -396,6 +408,13 @@ LR_CHECK_CHECKSUM   = _librepo.LR_CHECK_CHECKSUM
 LR_YUMREPO  = _librepo.LR_YUMREPO
 LR_SUSEREPO = _librepo.LR_SUSEREPO
 LR_DEBREPO  = _librepo.LR_DEBREPO
+
+LR_PROXY_HTTP               = _librepo.LR_PROXY_HTTP
+LR_PROXY_HTTP_1_0           = _librepo.LR_PROXY_HTTP_1_0
+LR_PROXY_SOCKS4             = _librepo.LR_PROXY_SOCKS4
+LR_PROXY_SOCKS5             = _librepo.LR_PROXY_SOCKS5
+LR_PROXY_SOCKS4A            = _librepo.LR_PROXY_SOCKS4A
+LR_PROXY_SOCKS5_HOSTNAME    = _librepo.LR_PROXY_SOCKS5_HOSTNAME
 
 LR_YUM_FULL         = None
 LR_YUM_REPOMDONLY   = [None]
@@ -532,9 +551,11 @@ class Handle(_librepo.Handle):
         the proxy address string. None sets default value 1080."""
         self.setopt(LRO_PROXYPORT, val)
 
-    def proxysock(self, val):
-        """If True proxy type is set to SOCK4."""
-        self.setopt(LRO_PROXYSOCK, val)
+    def proxytype(self, option):
+        """Set type of proxy.
+
+        *option* could be one of :ref:`proxy-type-label`"""
+        self.setopt(LRO_PROXYTYPE, option)
 
     def proxyauth(self, val):
         """If True, all supported proxy authentication methods are enabled.

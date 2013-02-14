@@ -193,7 +193,6 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_UPDATE:
     case LRO_LOCAL:
     case LRO_HTTPAUTH:
-    case LRO_PROXYSOCK:
     case LRO_PROXYAUTH:
     case LRO_GPGCHECK:
     case LRO_IGNOREMISSING:
@@ -220,14 +219,25 @@ setopt(_HandleObject *self, PyObject *args)
     /*
      * Options with long/int arguments
      */
+    case LRO_PROXYTYPE:
     case LRO_REPOTYPE: {
+        int badarg = 0;
         PY_LONG_LONG d;
 
         if (PyInt_Check(obj))
             d = (PY_LONG_LONG) PyInt_AS_LONG(obj);
         else if (PyLong_Check(obj))
             d = PyLong_AsLongLong(obj);
-        else {
+        else if (obj == Py_None) {
+            // None stands for default value
+            if (option == LRO_PROXYTYPE)
+                d = LR_PROXY_HTTP;
+            else
+                badarg = 1;
+        } else
+            badarg = 1;
+
+        if (badarg) {
             PyErr_SetString(PyExc_TypeError, "Only Int/Long is supported with this option");
             return NULL;
         }

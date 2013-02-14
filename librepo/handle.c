@@ -158,12 +158,23 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
     }
 
-    case LRO_PROXYSOCK:
-        if (va_arg(arg, long) == 1)
-            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+    case LRO_PROXYTYPE: {
+        long curl_proxy = -1;
+        switch (va_arg(arg, long)) {
+            case LR_PROXY_HTTP:     curl_proxy = CURLPROXY_HTTP;    break;
+            case LR_PROXY_HTTP_1_0: curl_proxy = CURLPROXY_HTTP_1_0;break;
+            case LR_PROXY_SOCKS4:   curl_proxy = CURLPROXY_SOCKS4;  break;
+            case LR_PROXY_SOCKS5:   curl_proxy = CURLPROXY_SOCKS5;  break;
+            case LR_PROXY_SOCKS4A:  curl_proxy = CURLPROXY_SOCKS4A; break;
+            case LR_PROXY_SOCKS5_HOSTNAME: curl_proxy = CURLPROXY_SOCKS5_HOSTNAME; break;
+            default: break;
+        }
+        if (curl_proxy == -1)
+            c_rc = LRE_BADOPTARG;
         else
-            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, curl_proxy);
         break;
+    }
 
     case LRO_PROXYAUTH:
         if (va_arg(arg, long) == 1)

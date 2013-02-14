@@ -50,6 +50,16 @@ typedef enum {
     LR_DEBREPO          = (1<<3),   /*!< Debian repository - Not implemented yet */
 } lr_Repotype;
 
+/** Proxy types. */
+typedef enum {
+    LR_PROXY_HTTP,              /*!< HTTP proxy (Default) */
+    LR_PROXY_HTTP_1_0,          /*!< HTTP 1.0 proxy */
+    LR_PROXY_SOCKS4,            /*!< SOCKS4 proxy */
+    LR_PROXY_SOCKS5,            /*!< SOCKS5 proxy */
+    LR_PROXY_SOCKS4A,           /*!< SOCKS4A proxy */
+    LR_PROXY_SOCKS5_HOSTNAME,   /*!< SOCKS5 proxy */
+} lr_ProxyType;
+
 /* Some common used arrays for LRO_YUMDLIST */
 
 /** Predefined value for LRO_YUMDLIST option - Download whole repo. */
