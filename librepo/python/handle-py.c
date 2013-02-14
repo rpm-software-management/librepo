@@ -379,9 +379,12 @@ getinfo(_HandleObject *self, PyObject *args)
 
     switch (option) {
 
+    /** char** options*/
     case LRI_URL:
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
+    case LRI_LASTCURLSTRERR:
+    case LRI_LASTCURLMSTRERR:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &str);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);
@@ -389,13 +392,19 @@ getinfo(_HandleObject *self, PyObject *args)
             Py_RETURN_NONE;
         return PyString_FromString(str);
 
+    /* long* options */
     case LRI_UPDATE:
     case LRI_LOCAL:
+    case LRI_REPOTYPE:
+    case LRI_LASTCURLERR:
+    case LRI_LASTCURLMERR:
+    case LRI_LASTBADSTATUSCODE:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &lval);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);
         return PyLong_FromLong(lval);
 
+    /* char*** */
     case LRI_YUMDLIST: {
         PyObject *yumdlist;
         char **strlist;

@@ -96,7 +96,7 @@ typedef enum {
     LRI_LOCAL,                  /* (long *) */
     LRI_DESTDIR,                /* (char **) */
     LRI_REPOTYPE,               /* (long *) */
-    LRI_YUMDLIST,               /* (char **) */
+    LRI_YUMDLIST,               /* (char ***) */
     LRI_LASTCURLERR,            /* (long *) */
     LRI_LASTCURLMERR,           /* (long *) */
     LRI_LASTCURLSTRERR,         /* (char **) */

@@ -149,6 +149,11 @@ Constants
 .. data:: LRI_DESTDIR
 .. data:: LRI_REPOTYPE
 .. data:: LRI_YUMDLIST
+.. data:: LRI_LASTCURLERR
+.. data:: LRI_LASTCURLMERR
+.. data:: LRI_LASTCURLSTRERR
+.. data:: LRI_LASTCURLMSTRERR
+.. data:: LRI_LASTBADSTATUSCODE
 
 .. _repotype-constants-label:
 
@@ -372,13 +377,18 @@ LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
-LRI_UPDATE          = _librepo.LRI_UPDATE
-LRI_URL             = _librepo.LRI_URL
-LRI_MIRRORLIST      = _librepo.LRI_MIRRORLIST
-LRI_LOCAL           = _librepo.LRI_LOCAL
-LRI_DESTDIR         = _librepo.LRI_DESTDIR
-LRI_REPOTYPE        = _librepo.LRI_REPOTYPE
-LRI_YUMDLIST        = _librepo.LRI_YUMDLIST
+LRI_UPDATE              = _librepo.LRI_UPDATE
+LRI_URL                 = _librepo.LRI_URL
+LRI_MIRRORLIST          = _librepo.LRI_MIRRORLIST
+LRI_LOCAL               = _librepo.LRI_LOCAL
+LRI_DESTDIR             = _librepo.LRI_DESTDIR
+LRI_REPOTYPE            = _librepo.LRI_REPOTYPE
+LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
+LRI_LASTCURLERR         = _librepo.LRI_LASTCURLERR
+LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
+LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
+LRI_LASTCURLMSTRERR     = _librepo.LRI_LASTCURLMSTRERR
+LRI_LASTBADSTATUSCODE   = _librepo.LRI_LASTBADSTATUSCODE
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
 LR_CHECK_CHECKSUM   = _librepo.LR_CHECK_CHECKSUM
