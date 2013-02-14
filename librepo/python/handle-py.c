@@ -27,26 +27,6 @@
 #include "handle-py.h"
 #include "result-py.h"
 
-#define RETURN_ERROR(res, h) do { \
-    int nexterr_num = 0; \
-    const char *nexterr = NULL;  \
-    if ((h) && (res) == LRE_CURL) { \
-        nexterr_num = lr_handle_last_curl_error((h)); \
-        nexterr = lr_handle_last_curl_strerror((h)); \
-    } \
-    if ((h) && (res) == LRE_CURLM) { \
-        nexterr_num = lr_handle_last_curlm_error((h)); \
-        nexterr = lr_handle_last_curlm_strerror((h)); \
-    } \
-    if ((h) && (res) == LRE_BADSTATUS) \
-        PyErr_Format(LrErr_Exception, "%d: %s: %ld", (res), lr_strerror((res)), lr_handle_last_bad_status_code((h))); \
-    else if (nexterr) \
-        PyErr_Format(LrErr_Exception, "%d: %s: (%d) %s", (res), lr_strerror((res)), nexterr_num, nexterr); \
-    else \
-        PyErr_Format(LrErr_Exception, "%d: %s", (res), lr_strerror((res))); \
-    return NULL; \
-} while (0)
-
 typedef struct {
     PyObject_HEAD
     lr_Handle handle;
@@ -92,7 +72,6 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     if (self->progress_cb_data)
         user_data = self->progress_cb_data;
     else
-        // XXX: Ref count for Py_None here??
         user_data = Py_None;
 
     arglist = Py_BuildValue("(Odd)", user_data, total_to_download, now_downloaded);

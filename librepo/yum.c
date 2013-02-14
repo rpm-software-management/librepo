@@ -46,11 +46,7 @@
 #include "curltargetlist.h"
 #include "gpg.h"
 
-/** TODO:
- * - GPG check
- */
-
-/* helper function for YumRepo manipulation */
+/* helper functions for YumRepo manipulation */
 
 lr_YumRepo
 lr_yum_repo_init()

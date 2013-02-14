@@ -27,11 +27,6 @@
 #include "exception-py.h"
 #include "result-py.h"
 
-#define RETURN_ERROR(res) do { \
-    PyErr_Format(LrErr_Exception, "%d %s", (res), "Error"); \
-    return NULL; \
-} while (0)
-
 typedef struct {
     PyObject_HEAD
     lr_Result result;
@@ -131,7 +126,7 @@ getinfo(_ResultObject *self, PyObject *args)
         lr_YumRepo repo;
         res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repo);
         if (res != LRE_OK)
-            RETURN_ERROR(res);
+            RETURN_ERROR(res, NULL);
         return PyObject_FromYumRepo(repo);
     }
 
@@ -139,7 +134,7 @@ getinfo(_ResultObject *self, PyObject *args)
         lr_YumRepoMd repomd;
         res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repomd);
         if (res != LRE_OK)
-            RETURN_ERROR(res);
+            RETURN_ERROR(res, NULL);
         return PyObject_FromYumRepoMd(repomd);
     }
 
@@ -152,7 +147,7 @@ getinfo(_ResultObject *self, PyObject *args)
     }
 
     if (res != LRE_OK)
-        RETURN_ERROR(res);
+        RETURN_ERROR(res, NULL);
     Py_RETURN_NONE;
 }
 

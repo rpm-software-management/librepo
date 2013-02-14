@@ -11,6 +11,26 @@ Module init and cleanup
 
     Reclaims memory that has been obtained through a libcurl call.
 
+Exceptions
+==========
+
+Librepo module has only one own exception.
+
+.. class:: LibrepoException
+
+Value of this exception is tuple with three elements:
+``(return code, error message, extra information)``
+
+* Return code is a value from: :ref:`error-codes-label`.
+* Error message is a string with a description of the error.
+* Extra information is `None` for most of errors, but for specific
+  errors it contain additional info about the error.
+
+    Error codes with extra information and its format:
+        * **LRE_CURL** - ``(Curl easy handle error code, Curl error string)``
+        * **LRE_CURLM** - ``(Curl multi handle error code, Curl error string)``
+        * **LRE_BADSTATUS** - ``Status code number`` (e.g.: 403, 404, 500, ...)
+
 Constants
 =========
 
@@ -213,6 +233,8 @@ Predefined yumdlist lists
 
     Download only files used by Hawkey (https://github.com/akozumpl/hawkey/).
     (primary, filelists, prestodelta)
+
+.. _error-codes-label:
 
 Error codes
 -----------

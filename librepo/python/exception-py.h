@@ -20,8 +20,14 @@
 #ifndef LR_EXCEPTION_PY_H
 #define LR_EXCEPTION_PY_H
 
+#include "librepo/librepo.h"
+
 extern PyObject *LrErr_Exception;
 
 int init_exceptions();
+
+#define RETURN_ERROR(rc, h) do { return return_error((rc), (h)); } while(0)
+
+void *return_error(int rc, lr_Handle h);
 
 #endif
