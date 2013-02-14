@@ -53,7 +53,142 @@
   <div class="section" id="examples">
 <span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
 <p>Librepo usage examples.</p>
-<p>Example:</p>
+<div class="section" id="simple-download-of-metadata">
+<h2>Simple download of metadata<a class="headerlink" href="#simple-download-of-metadata" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Example: Simple download whole yum repository</span>
+
+<span class="sd">Use case:</span>
+<span class="sd">We have a metalink url of a repository and we</span>
+<span class="sd">want do download complete repository metadata.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">librepo</span>
+
+<span class="n">METADATA_PATH</span> <span class="o">=</span> <span class="s">&quot;downloaded_metadata&quot;</span>
+<span class="n">URL</span> <span class="o">=</span> <span class="s">&quot;https://mirrors.fedoraproject.org/metalink?repo=fedora-18&amp;arch=x86_64&quot;</span>
+<span class="n">DESTDIR</span> <span class="o">=</span> <span class="s">&quot;downloaded_metadata&quot;</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
+    <span class="c"># Yum metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
+    <span class="c"># Metalink url</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_MIRRORLIST</span><span class="p">,</span> <span class="n">URL</span><span class="p">)</span>
+    <span class="c"># Destination directory for metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_DESTDIR</span><span class="p">,</span> <span class="n">DESTDIR</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LibrepoException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">rc</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="k">print</span> <span class="s">&quot;Error: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="metadata-localisation">
+<h2>Metadata localisation<a class="headerlink" href="#metadata-localisation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Example: Localise metadata files of local yum repository</span>
+
+<span class="sd">Use case:</span>
+<span class="sd">We have a local yum repositository and want to</span>
+<span class="sd">paths to all its metadata files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">librepo</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+
+<span class="n">METADATA_PATH</span> <span class="o">=</span> <span class="s">&quot;downloaded_metadata&quot;</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
+    <span class="c"># Yum metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
+    <span class="c"># Path to metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="n">METADATA_PATH</span><span class="p">)</span>
+    <span class="c"># Do not duplicate (copy) metadata, just localise them</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_LOCAL</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LibrepoException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">rc</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="k">print</span> <span class="s">&quot;Error: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;Repomd content:&quot;</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">getinfo</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRR_YUM_REPOMD</span><span class="p">))</span>
+
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Path to metadata files:&quot;</span>
+    <span class="k">for</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">getinfo</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRR_YUM_REPO</span><span class="p">)</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%15s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="checksum-verification">
+<h2>Checksum verification<a class="headerlink" href="#checksum-verification" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Checksum verification is enabled by default. So command
+<tt class="docutils literal"><span class="pre">h.setopt(librepo.LRO_CHECKSUM,</span> <span class="pre">True)</span></tt> is unnecessary, but
+for illustration it is better to write the command anyway.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Example: Verify checksum of local yum metadata</span>
+
+<span class="sd">Use case:</span>
+<span class="sd">We have some incomplete yum metadata localy.</span>
+<span class="sd">They are incomplete because they doesn&#39;t</span>
+<span class="sd">contain all files specified in repomd.xml.</span>
+<span class="sd">They contains only primary.xml and filelists.xml.</span>
+<span class="sd">We want to check checksum of this metadata.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">librepo</span>
+
+<span class="n">METADATA_PATH</span> <span class="o">=</span> <span class="s">&quot;downloaded_metadata&quot;</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
+    <span class="c"># Yum metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
+    <span class="c"># Path to the metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="n">METADATA_PATH</span><span class="p">)</span>
+    <span class="c"># Do not duplicate (copy) the metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_LOCAL</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="c"># Check checksum of metadata</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_CHECKSUM</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="c"># Ignore missing metadata files</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_IGNOREMISSING</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LibrepoException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">rc</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LRE_BADCHECKSUM</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Corrupted metadata!&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Other error: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">msg</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;Metadata are fine!&quot;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-complex-download">
+<h2>More complex download<a class="headerlink" href="#more-complex-download" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -131,6 +266,7 @@
 </pre></div>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -138,6 +274,17 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#simple-download-of-metadata">Simple download of metadata</a></li>
+<li><a class="reference internal" href="#metadata-localisation">Metadata localisation</a></li>
+<li><a class="reference internal" href="#checksum-verification">Checksum verification</a></li>
+<li><a class="reference internal" href="#more-complex-download">More complex download</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="result.html"
                         title="previous chapter">Result (librepo.Result)</a></p>

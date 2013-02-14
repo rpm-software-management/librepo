@@ -83,7 +83,8 @@ method are ignored and checksum is not checked!</p>
 <dl class="method">
 <dt id="librepo.Handle.connecttimeout">
 <tt class="descname">connecttimeout</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.connecttimeout" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set maximal timeout in sec for connection phase.</p>
+<dd><p>Set maximal timeout in sec for connection phase.
+Default value is 300. None as <em>val</em> sets the default value.</p>
 </dd></dl>
 
 <dl class="method">
@@ -139,6 +140,13 @@ params are specified!</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="librepo.Handle.getinfo">
+<tt class="descname">getinfo</tt><big>(</big><em>option</em><big>)</big><a class="headerlink" href="#librepo.Handle.getinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get information from <a class="reference internal" href="#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a>.</p>
+<p><em>option</em> could be one of <a class="reference internal" href="lib.html#handle-info-options-label"><em>Handle info options</em></a></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="librepo.Handle.gpgcheck">
 <tt class="descname">gpgcheck</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.gpgcheck" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set True to enable gpg check (if available) of downloaded repo.</p>
@@ -149,6 +157,15 @@ params are specified!</p>
 <tt class="descname">httpauth</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.httpauth" title="Permalink to this definition">¶</a></dt>
 <dd><p>If True, all supported methods of HTTP authentication
 are enabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.ignoremissing">
+<tt class="descname">ignoremissing</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.ignoremissing" title="Permalink to this definition">¶</a></dt>
+<dd><p>If you want to localise (LRO_LOCAL is True) a incomplete
+local repository (eg. only primary and filelists are present but
+repomd.xml contains more files), you could use LRO_YUMDLIST and
+specify only file that are present of use this option.</p>
 </dd></dl>
 
 <dl class="method">
@@ -163,7 +180,8 @@ When True, url of repository MUST be a local address
 <dl class="method">
 <dt id="librepo.Handle.maxspeed">
 <tt class="descname">maxspeed</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.maxspeed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set maximal allowed speed per download in bytes per second.</p>
+<dd><p>Set maximal allowed speed per download in bytes per second.
+0 = unlimited speed - the default value.</p>
 </dd></dl>
 
 <dl class="method">
@@ -209,13 +227,14 @@ If False, only basic authentication method is enabled.</p>
 <dt id="librepo.Handle.proxyport">
 <tt class="descname">proxyport</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxyport" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set proxy port number to connect unsless it is specified in
-the proxy address string.</p>
+the proxy address string. None sets default value 1080.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="librepo.Handle.proxysock">
-<tt class="descname">proxysock</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxysock" title="Permalink to this definition">¶</a></dt>
-<dd><p>If True proxy type is set to SOCK4.</p>
+<dt id="librepo.Handle.proxytype">
+<tt class="descname">proxytype</tt><big>(</big><em>option</em><big>)</big><a class="headerlink" href="#librepo.Handle.proxytype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set type of proxy.</p>
+<p><em>option</em> could be one of <a class="reference internal" href="lib.html#proxy-type-label"><em>Proxy type constants</em></a></p>
 </dd></dl>
 
 <dl class="method">
@@ -235,7 +254,8 @@ the proxy address string.</p>
 <dt id="librepo.Handle.retries">
 <tt class="descname">retries</tt><big>(</big><em>val</em><big>)</big><a class="headerlink" href="#librepo.Handle.retries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set maximal number of retries for one mirror.
-One try per mirror is default value.</p>
+One try per mirror is default value. None as <em>va</em> sets the
+default value.</p>
 </dd></dl>
 
 <dl class="method">

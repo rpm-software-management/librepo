@@ -78,6 +78,37 @@
 </dd></dl>
 
 </div>
+<div class="section" id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<p>Librepo module has only one own exception.</p>
+<dl class="class">
+<dt id="librepo.LibrepoException">
+<em class="property">class </em><tt class="descclassname">librepo.</tt><tt class="descname">LibrepoException</tt><a class="headerlink" href="#librepo.LibrepoException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Value of this exception is tuple with three elements:
+<tt class="docutils literal"><span class="pre">(return</span> <span class="pre">code,</span> <span class="pre">error</span> <span class="pre">message,</span> <span class="pre">extra</span> <span class="pre">information)</span></tt></p>
+<ul>
+<li><p class="first">Return code is a value from: <a class="reference internal" href="#error-codes-label"><em>Error codes</em></a>.</p>
+</li>
+<li><p class="first">Error message is a string with a description of the error.</p>
+</li>
+<li><p class="first">Extra information is <cite>None</cite> for most of errors, but for specific
+errors it contain additional info about the error.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Error codes with extra information and its format:</dt>
+<dd><ul class="first last simple">
+<li><strong>LRE_CURL</strong> - <tt class="docutils literal"><span class="pre">(Curl</span> <span class="pre">easy</span> <span class="pre">handle</span> <span class="pre">error</span> <span class="pre">code,</span> <span class="pre">Curl</span> <span class="pre">error</span> <span class="pre">string)</span></tt></li>
+<li><strong>LRE_CURLM</strong> - <tt class="docutils literal"><span class="pre">(Curl</span> <span class="pre">multi</span> <span class="pre">handle</span> <span class="pre">error</span> <span class="pre">code,</span> <span class="pre">Curl</span> <span class="pre">error</span> <span class="pre">string)</span></tt></li>
+<li><strong>LRE_BADSTATUS</strong> - <tt class="docutils literal"><span class="pre">Status</span> <span class="pre">code</span> <span class="pre">number</span></tt> (e.g.: 403, 404, 500, ...)</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ul>
+</div>
 <div class="section" id="constants">
 <h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
@@ -156,13 +187,13 @@ with same names in lowercase and without <tt class="docutils literal"><span clas
 <dl class="data">
 <dt id="librepo.LRO_PROXYPORT">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYPORT</tt><a class="headerlink" href="#librepo.LRO_PROXYPORT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integer. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyport" title="librepo.Handle.proxyport"><tt class="xref py py-meth docutils literal"><span class="pre">proxyport()</span></tt></a></p>
+<dd><p>Integer or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyport" title="librepo.Handle.proxyport"><tt class="xref py py-meth docutils literal"><span class="pre">proxyport()</span></tt></a></p>
 </dd></dl>
 
 <dl class="data">
-<dt id="librepo.LRO_PROXYSOCK">
-<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYSOCK</tt><a class="headerlink" href="#librepo.LRO_PROXYSOCK" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxysock" title="librepo.Handle.proxysock"><tt class="xref py py-meth docutils literal"><span class="pre">proxysock()</span></tt></a></p>
+<dt id="librepo.LRO_PROXYTYPE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYTYPE</tt><a class="headerlink" href="#librepo.LRO_PROXYTYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxytype" title="librepo.Handle.proxytype"><tt class="xref py py-meth docutils literal"><span class="pre">proxytype()</span></tt></a></p>
 </dd></dl>
 
 <dl class="data">
@@ -192,13 +223,13 @@ with same names in lowercase and without <tt class="docutils literal"><span clas
 <dl class="data">
 <dt id="librepo.LRO_RETRIES">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_RETRIES</tt><a class="headerlink" href="#librepo.LRO_RETRIES" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integer. See more: <a class="reference internal" href="handle.html#librepo.Handle.retries" title="librepo.Handle.retries"><tt class="xref py py-meth docutils literal"><span class="pre">retries()</span></tt></a></p>
+<dd><p>Integer or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.retries" title="librepo.Handle.retries"><tt class="xref py py-meth docutils literal"><span class="pre">retries()</span></tt></a></p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_MAXSPEED">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_MAXSPEED</tt><a class="headerlink" href="#librepo.LRO_MAXSPEED" title="Permalink to this definition">¶</a></dt>
-<dd><p>Long. See more: <a class="reference internal" href="handle.html#librepo.Handle.maxspeed" title="librepo.Handle.maxspeed"><tt class="xref py py-meth docutils literal"><span class="pre">maxspeed()</span></tt></a></p>
+<dd><p>Long or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.maxspeed" title="librepo.Handle.maxspeed"><tt class="xref py py-meth docutils literal"><span class="pre">maxspeed()</span></tt></a></p>
 </dd></dl>
 
 <dl class="data">
@@ -210,13 +241,22 @@ with same names in lowercase and without <tt class="docutils literal"><span clas
 <dl class="data">
 <dt id="librepo.LRO_REPOTYPE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_REPOTYPE</tt><a class="headerlink" href="#librepo.LRO_REPOTYPE" title="Permalink to this definition">¶</a></dt>
-<dd><p>One of <a class="reference internal" href="#repotype-constants-label"><em>Repotype constants</em></a>. See more <a class="reference internal" href="handle.html#librepo.Handle.repotype" title="librepo.Handle.repotype"><tt class="xref py py-meth docutils literal"><span class="pre">repotype()</span></tt></a></p>
+<dd><p>One of <a class="reference internal" href="#repotype-constants-label"><em>Repo type constants</em></a>. See more <a class="reference internal" href="handle.html#librepo.Handle.repotype" title="librepo.Handle.repotype"><tt class="xref py py-meth docutils literal"><span class="pre">repotype()</span></tt></a></p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_CONNECTTIMEOUT">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_CONNECTTIMEOUT</tt><a class="headerlink" href="#librepo.LRO_CONNECTTIMEOUT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integer. See more: <a class="reference internal" href="handle.html#librepo.Handle.connecttimeout" title="librepo.Handle.connecttimeout"><tt class="xref py py-meth docutils literal"><span class="pre">connecttimeout()</span></tt></a></p>
+<dd><p>Integer or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.connecttimeout" title="librepo.Handle.connecttimeout"><tt class="xref py py-meth docutils literal"><span class="pre">connecttimeout()</span></tt></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_IGNOREMISSING">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_IGNOREMISSING</tt><a class="headerlink" href="#librepo.LRO_IGNOREMISSING" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean. If you want to localise (LRO_LOCAL is True) a incomplete local
+repository (eg. only primary and filelists are present but repomd.xml
+contains more files), you could use LRO_YUMDLIST and specify only file
+that are present of use this option.</p>
 </dd></dl>
 
 <dl class="data">
@@ -239,8 +279,107 @@ Some predefined list <a class="reference internal" href="#predefined-yumdlists-l
 </dd></dl>
 
 </div>
-<div class="section" id="repotype-constants">
-<span id="repotype-constants-label"></span><h3>Repotype constants<a class="headerlink" href="#repotype-constants" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="handle-info-options">
+<span id="handle-info-options-label"></span><h3><a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> info options<a class="headerlink" href="#handle-info-options" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>LRI (aka LibRepo Information) constants are used to get information
+from <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> via <a class="reference internal" href="handle.html#librepo.Handle.getinfo" title="librepo.Handle.getinfo"><tt class="xref py py-meth docutils literal"><span class="pre">getinfo()</span></tt></a> method.</div></blockquote>
+<dl class="data">
+<dt id="librepo.LRI_UPDATE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_UPDATE</tt><a class="headerlink" href="#librepo.LRI_UPDATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_URL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_URL</tt><a class="headerlink" href="#librepo.LRI_URL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_MIRRORLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_MIRRORLIST</tt><a class="headerlink" href="#librepo.LRI_MIRRORLIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_LOCAL">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_LOCAL</tt><a class="headerlink" href="#librepo.LRI_LOCAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_DESTDIR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_DESTDIR</tt><a class="headerlink" href="#librepo.LRI_DESTDIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_REPOTYPE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_REPOTYPE</tt><a class="headerlink" href="#librepo.LRI_REPOTYPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_YUMDLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_YUMDLIST</tt><a class="headerlink" href="#librepo.LRI_YUMDLIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_LASTCURLERR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_LASTCURLERR</tt><a class="headerlink" href="#librepo.LRI_LASTCURLERR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_LASTCURLMERR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_LASTCURLMERR</tt><a class="headerlink" href="#librepo.LRI_LASTCURLMERR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_LASTCURLSTRERR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_LASTCURLSTRERR</tt><a class="headerlink" href="#librepo.LRI_LASTCURLSTRERR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_LASTCURLMSTRERR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_LASTCURLMSTRERR</tt><a class="headerlink" href="#librepo.LRI_LASTCURLMSTRERR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_LASTBADSTATUSCODE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_LASTBADSTATUSCODE</tt><a class="headerlink" href="#librepo.LRI_LASTBADSTATUSCODE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="proxy-type-constants">
+<span id="proxy-type-label"></span><h3>Proxy type constants<a class="headerlink" href="#proxy-type-constants" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="librepo.LR_PROXY_HTTP">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_PROXY_HTTP</tt><a class="headerlink" href="#librepo.LR_PROXY_HTTP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_PROXY_HTTP_1_0">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_PROXY_HTTP_1_0</tt><a class="headerlink" href="#librepo.LR_PROXY_HTTP_1_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_PROXY_SOCKS4">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_PROXY_SOCKS4</tt><a class="headerlink" href="#librepo.LR_PROXY_SOCKS4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_PROXY_SOCKS5">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_PROXY_SOCKS5</tt><a class="headerlink" href="#librepo.LR_PROXY_SOCKS5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_PROXY_SOCKS4A">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_PROXY_SOCKS4A</tt><a class="headerlink" href="#librepo.LR_PROXY_SOCKS4A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_PROXY_SOCKS5_HOSTNAME">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_PROXY_SOCKS5_HOSTNAME</tt><a class="headerlink" href="#librepo.LR_PROXY_SOCKS5_HOSTNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="repo-type-constants">
+<span id="repotype-constants-label"></span><h3>Repo type constants<a class="headerlink" href="#repo-type-constants" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="librepo.LR_YUMREPO">
 <tt class="descclassname">librepo.</tt><tt class="descname">LR_YUMREPO</tt><a class="headerlink" href="#librepo.LR_YUMREPO" title="Permalink to this definition">¶</a></dt>
@@ -303,7 +442,7 @@ Some predefined list <a class="reference internal" href="#predefined-yumdlists-l
 
 </div>
 <div class="section" id="error-codes">
-<h3>Error codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h3>
+<span id="error-codes-label"></span><h3>Error codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h3>
 <p>LibRepo Error codes.</p>
 <dl class="data">
 <dt id="librepo.LRE_OK">
@@ -447,6 +586,30 @@ reference to target file (repomd.xml), mirrorlist is empty, ..</p>
 </dd></dl>
 
 <dl class="data">
+<dt id="librepo.LRE_GPGNOTSUPPORTED">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_GPGNOTSUPPORTED</tt><a class="headerlink" href="#librepo.LRE_GPGNOTSUPPORTED" title="Permalink to this definition">¶</a></dt>
+<dd><p>OpenPGP protocol is not supported.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_GPGERROR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_GPGERROR</tt><a class="headerlink" href="#librepo.LRE_GPGERROR" title="Permalink to this definition">¶</a></dt>
+<dd><p>GPG error.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_BADGPG">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_BADGPG</tt><a class="headerlink" href="#librepo.LRE_BADGPG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad GPG signature.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRE_INCOMPLETEREPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRE_INCOMPLETEREPO</tt><a class="headerlink" href="#librepo.LRE_INCOMPLETEREPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Repository metadata are not complete.</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="librepo.LRE_UNKNOWNERROR">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRE_UNKNOWNERROR</tt><a class="headerlink" href="#librepo.LRE_UNKNOWNERROR" title="Permalink to this definition">¶</a></dt>
 <dd><p>An unknown error.</p>
@@ -484,9 +647,12 @@ yum repository.</p>
   <ul>
 <li><a class="reference internal" href="#">The Librepo Library</a><ul>
 <li><a class="reference internal" href="#module-init-and-cleanup">Module init and cleanup</a></li>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#constants">Constants</a><ul>
 <li><a class="reference internal" href="#handle-options"><tt class="docutils literal"><span class="pre">Handle</span></tt> options</a></li>
-<li><a class="reference internal" href="#repotype-constants">Repotype constants</a></li>
+<li><a class="reference internal" href="#handle-info-options"><tt class="docutils literal"><span class="pre">Handle</span></tt> info options</a></li>
+<li><a class="reference internal" href="#proxy-type-constants">Proxy type constants</a></li>
+<li><a class="reference internal" href="#repo-type-constants">Repo type constants</a></li>
 <li><a class="reference internal" href="#predefined-yumdlist-lists">Predefined yumdlist lists</a></li>
 <li><a class="reference internal" href="#error-codes">Error codes</a></li>
 <li><a class="reference internal" href="#result-options"><tt class="docutils literal"><span class="pre">Result</span></tt> options</a></li>
