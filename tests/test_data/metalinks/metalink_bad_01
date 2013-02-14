@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/" type="dynamic" pubdate="Tue, 11 Sep 2012 07:36:51 GMT" generator="mirrormanager" xmlns:mm0="http://fedorahosted.org/mirrormanager">
+  <files>
+    <file name="repomd.xml">
+      <!-- Bad timestamp -->
+      <mm0:timestamp>foo</mm0:timestamp>
+      <!-- Bad size -->
+      <size>bar</size>
+      <verification>
+        <hash type="md5">20b6d77930574ae541108e8e7987ad3f</hash>
+        <!--  Bad hash type and empty value:-->
+        <hash type="foo"></hash>
+        <hash type="sha256">0076c44aabd352da878d5c4d794901ac87f66afac869488f6a4ef166de018cdf</hash>
+        <hash type="sha512">884dc465da67fee8fe3f11dab321a99d9a13b22ce97f84ceff210e82b6b1a8c635ccd196add1dd738807686714c3a0a048897e2d0650bc05302b3ee26de521fd</hash>
+      </verification>
+      <resources maxconnections="1">
+        <!-- Bad preference attr -->
+        <url protocol="http" type="http" location="US" preference="foobar" >http://mirror.pnl.gov/fedora/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
+        <!-- Bad preference -->
+        <url preference="-5" >ftp://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
+        <url>rsync://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
+        <url />
+      </resources>
+    </file>
+  </files>
+</metalink>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" >
+  <files>
+    <file name="repomd.xml">
+      <verification>
+        <hash type="md5">20b6d77930574ae541108e8e7987ad3f</hash>
+      </verification>
+      <resources maxconnections="1">
+        <url protocol="http" type="http" location="US" preference="97" >http://mirror.pnl.gov/fedora/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>

@@ -6,6 +6,7 @@ SET (librepotest_SRCS
      test_handle.c
      test_internal_mirrorlist.c
      test_main.c
+     test_metalink.c
      test_repomd.c
      test_util.c
      testsys.c

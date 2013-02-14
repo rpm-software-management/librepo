@@ -15,6 +15,7 @@
 #include "test_gpg.h"
 #include "test_handle.h"
 #include "test_internal_mirrorlist.h"
+#include "test_metalink.h"
 #include "test_repomd.h"
 #include "test_util.h"
 
@@ -61,6 +62,7 @@ main(int argc, const char **argv)
     srunner_add_suite(sr, gpg_suite());
     srunner_add_suite(sr, handle_suite());
     srunner_add_suite(sr, internal_mirrorlist_suite());
+    srunner_add_suite(sr, metalink_suite());
     srunner_add_suite(sr, repomd_suite());
     srunner_add_suite(sr, util_suite());
     srunner_run_all(sr, CK_NORMAL);

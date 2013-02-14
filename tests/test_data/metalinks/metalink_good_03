@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/">
+  <files>
+    <file name="repomd.xml">
+    </file>
+  </files>
+</metalink>

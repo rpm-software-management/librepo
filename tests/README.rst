@@ -4,7 +4,7 @@ C tests uses the Check unit testing framework (http://check.sourceforge.net/).
 
 Run (from your checkout dir)::
 
-build/tests/test_main tests/repos/
+build/tests/test_main tests/test_data/
 
 *Tip:* Use Valgrind (http://valgrind.org/) with C tests::
 
@@ -13,8 +13,8 @@ valgrind build/tests/test_main tests/test_data/
 Files of C tests
 ================
 
-**repos/**
- * Directory with testing repositories
+**test_data/**
+ * Directory with testing repositories, metalink files, etc.
 
 **CMakeLists.txt**
  * CMake config file
