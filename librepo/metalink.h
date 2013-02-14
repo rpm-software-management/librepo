@@ -72,9 +72,10 @@ lr_Metalink lr_metalink_init();
  * Parse metalink file.
  * @param metalink      Metalink object.
  * @param fd            File descriptor.
+ * @param filename      File to look for in metalink file.
  * @return              Librepo return code ::lr_Rc.
  */
-int lr_metalink_parse_file(lr_Metalink metalink, int fd);
+int lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename);
 
 /**
  * Free metalink object and all its content.

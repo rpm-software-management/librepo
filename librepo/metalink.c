@@ -160,6 +160,10 @@ typedef struct _ParserData {
     lr_StatesSwitch *swtab[NUMSTATES];  /*!< pointers to stateswitches table */
     lr_State sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
 
+    char *filename;         /*!< filename we are looking for in metalink */
+    int ignore;             /*!< ignore all subelements of the current file element */
+    int found;              /*!< wanted file was already parsed */
+
     lr_Metalink metalink;   /*!< metalink object */
 } ParserData;
 
@@ -205,6 +209,9 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
     pd->lcontent = 0;
     pd->content[0] = '\0';
 
+    if (pd->ignore && pd->state != STATE_FILE)
+        return; /* Ignore all subelements of the current file element */
+
     switch (pd->state) {
     case STATE_START:
     case STATE_METALINK:
@@ -218,10 +225,12 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
             pd->ret = LRE_MLXML;
             break;
         }
-        if (strcmp(name, "repomd.xml")) {
-            DPRINTF("%s: file element name attribute is not \"repomd.xml\"\n", __func__);
-            pd->ret = LRE_MLBAD;
+        if (pd->found || strcmp(name, pd->filename)) {
+            pd->ignore = 1;
             break;
+        } else {
+            pd->ignore = 0;
+            pd->found = 1;
         }
         pd->metalink->filename = lr_strdup(name);
         break;
@@ -281,6 +290,9 @@ lr_metalink_char_handler(void *pdata, const XML_Char *s, int len)
     if (!pd->docontent)
         return; /* Do not store the content */
 
+    if (pd->ignore)
+        return; /* Ignore all content */
+
     l = pd->lcontent + len + 1;
     if (l > pd->acontent) {
         pd->acontent = l + CONTENT_REALLOC_STEP;
@@ -312,6 +324,12 @@ lr_metalink_end_handler(void *pdata, const char *name)
 
     pd->depth--;
     pd->statedepth--;
+
+    if (pd->ignore && pd->state != STATE_FILE) {
+        pd->state = pd->sbtab[pd->state];
+        pd->docontent = 0;
+        return; /* Ignore all subelements of the current file element */
+    }
 
     switch (pd->state) {
     case STATE_START:
@@ -359,7 +377,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 }
 
 int
-lr_metalink_parse_file(lr_Metalink metalink, int fd)
+lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
 {
     int ret = LRE_OK;
     XML_Parser parser;
@@ -387,6 +405,9 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
     pd.acontent = CONTENT_REALLOC_STEP;
     pd.parser = &parser;
     pd.metalink = metalink;
+    pd.filename = (char *) filename;
+    pd.ignore = 1;
+    pd.found = 0;
     for (sw = stateswitches; sw->from != NUMSTATES; sw++) {
         if (!pd.swtab[sw->from])
             pd.swtab[sw->from] = sw;
@@ -429,6 +450,9 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd)
     /* Parser data cleanup */
     lr_free(pd.content);
     XML_ParserFree(parser);
+
+    if (!pd.found)
+        return LRE_MLBAD; /* The wanted file was not found in metalink */
 
     return ret;
 }

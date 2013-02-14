@@ -12,5 +12,16 @@
         <url protocol="ftp" type="ftp" location="US" preference="98" >ftp://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
       </resources>
     </file>
+    <!-- Bad name (we want repomd.xml) -->
+    <file name="bar.xml">
+      <verification>
+        <hash type="md5">20b6d77930574ae541108e8e7987ad3f</hash>
+      </verification>
+      <resources maxconnections="1">
+        <url protocol="http" type="http" location="US" preference="97" >http://mirror.pnl.gov/fedora/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="US" preference="98" >http://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="US" preference="98" >ftp://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml</url>
+      </resources>
+    </file>
   </files>
 </metalink>

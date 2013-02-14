@@ -11,6 +11,7 @@
 #include "librepo/metalink.h"
 #include "librepo/util.h"
 
+#define REPOMD              "repomd.xml"
 #define METALINK_DIR        "metalinks"
 
 /* metalink_good_*
@@ -47,7 +48,7 @@ START_TEST(test_metalink_good_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
     fail_if(ret != LRE_OK);
     close(fd);
 
@@ -133,7 +134,7 @@ START_TEST(test_metalink_good_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
     fail_if(ret != LRE_OK);
     close(fd);
 
@@ -173,7 +174,7 @@ START_TEST(test_metalink_good_03)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
     fail_if(ret != LRE_OK);
     close(fd);
 
@@ -202,7 +203,7 @@ START_TEST(test_metalink_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
     fail_if(ret != LRE_OK);
     close(fd);
 
@@ -288,10 +289,9 @@ START_TEST(test_metalink_really_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
     fail_if(ret == LRE_OK);
     close(fd);
-
     lr_metalink_free(ml);
 }
 END_TEST
@@ -310,10 +310,30 @@ START_TEST(test_metalink_really_bad_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
     fail_if(ret == LRE_OK);
     close(fd);
+    lr_metalink_free(ml);
+}
+END_TEST
 
+START_TEST(test_metalink_really_bad_03)
+{
+    int fd;
+    int ret;
+    char *path;
+    lr_Metalink ml = NULL;
+
+    path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
+                         "metalink_really_bad_03", NULL);
+    fd = open(path, O_RDONLY);
+    lr_free(path);
+    fail_if(fd < 0);
+    ml = lr_metalink_init();
+    fail_if(ml == NULL);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    fail_if(ret == LRE_OK);
+    close(fd);
     lr_metalink_free(ml);
 }
 END_TEST
@@ -330,6 +350,7 @@ metalink_suite(void)
     tcase_add_test(tc, test_metalink_bad_01);
     tcase_add_test(tc, test_metalink_really_bad_01);
     tcase_add_test(tc, test_metalink_really_bad_02);
+    tcase_add_test(tc, test_metalink_really_bad_03);
     suite_add_tcase(s, tc);
     return s;
 }

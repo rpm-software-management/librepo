@@ -375,7 +375,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
 
             /* Parse metalink */
             metalink = lr_metalink_init();
-            rc = lr_metalink_parse_file(metalink, mirrors_fd);
+            rc = lr_metalink_parse_file(metalink, mirrors_fd, "repomd.xml");
             if (rc != LRE_OK) {
                 DPRINTF("%s: Cannot parse metalink (%d)\n", __func__, rc);
                 goto mirrorlist_error;
