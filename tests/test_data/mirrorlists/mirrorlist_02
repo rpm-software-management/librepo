@@ -1,0 +1,3 @@
+# repo = fedora-17 arch = i386 Using preferred netblock country = GB country = BE country = BG country = BY country = RU country = RO country = GR country = HU country = PT country = PL country = FR country = FI country = NL country = NO country = CH country = CZ country = SE country = DE country = TR country = IS country = IE country = UA 
+#http://foo.bar/fedora/linux/
+#ftp://ftp.bar.foo/Fedora/17/
