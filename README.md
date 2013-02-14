@@ -7,12 +7,13 @@ linux repository metadata and packages
 
 ### Build requires:
 
-* gcc (http://gcc.gnu.org/)
-* libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
 * check (http://check.sourceforge.net/) - in Fedora: check-devel
 * expat (http://expat.sourceforge.net/) - in Fedora: expat-devel
-* python (http://python.org/) - in Fedora: python2-devel
+* gcc (http://gcc.gnu.org/)
+* gpgme (http://www.gnupg.org/) - in Fedora: gpgme-devel
+* libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
 * openssl (http://www.openssl.org/) - in Fedora: openssl-devel
+* python (http://python.org/) - in Fedora: python2-devel
 
 ### Build from your checkout dir:
 
