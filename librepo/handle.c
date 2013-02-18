@@ -42,20 +42,20 @@
 #include "yum_internal.h"
 
 void
-lr_handle_free_yumdlist(lr_Handle handle)
+lr_handle_free_list(char ***list)
 {
     int x;
-    assert(handle);
-    if (!handle->yumdlist)
+    if (!list || *list == NULL)
         return;
 
     x = 0;
-    while (handle->yumdlist[x]) {
-        lr_free(handle->yumdlist[x]);
+    while ((*list)[x]) {
+        lr_free((*list)[x]);
         x++;
     }
-    lr_free(handle->yumdlist);
-    handle->yumdlist = NULL;
+
+    lr_free(*list);
+    *list = NULL;
 }
 
 lr_Handle
@@ -94,7 +94,8 @@ lr_handle_free(lr_Handle handle)
     lr_free(handle->destdir);
     lr_internalmirrorlist_free(handle->internal_mirrorlist);
     lr_metalink_free(handle->metalink);
-    lr_handle_free_yumdlist(handle);
+    lr_handle_free_list(&handle->yumdlist);
+    lr_handle_free_list(&handle->yumblist);
     lr_free(handle);
 }
 
@@ -239,10 +240,18 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
             handle->checks &= ~LR_CHECK_CHECKSUM;
         break;
 
-    case LRO_YUMDLIST: {
+    case LRO_YUMDLIST:
+    case LRO_YUMBLIST: {
         int size = 0;
         char **list = va_arg(arg, char **);
-        lr_handle_free_yumdlist(handle);
+        char ***handle_list = NULL;
+
+        if (option == LRO_YUMDLIST)
+            handle_list = &handle->yumdlist;
+        else
+            handle_list = &handle->yumblist;
+
+        lr_handle_free_list(handle_list);
         if (!list)
             break;
 
@@ -250,9 +259,9 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         while (list[size])
             size++;
         size++;
-        handle->yumdlist = lr_malloc0(size * sizeof(char *));
+        *handle_list = lr_malloc0(size * sizeof(char *));
         for (int x = 0; x < size; x++)
-            handle->yumdlist[x] = lr_strdup(list[x]);
+            (*handle_list)[x] = lr_strdup(list[x]);
         break;
     }
 
@@ -537,6 +546,12 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
     case LRI_YUMDLIST: {
         char ***strlist = va_arg(arg, char ***);
         *strlist = handle->yumdlist;
+        break;
+    }
+
+    case LRI_YUMBLIST: {
+        char ***strlist = va_arg(arg, char ***);
+        *strlist = handle->yumblist;
         break;
     }
 

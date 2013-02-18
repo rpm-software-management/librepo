@@ -52,6 +52,9 @@ struct _lr_Handle {
     char            **yumdlist;     /*!< Repomd data typenames to download
                                         NULL - Download all
                                         yumdlist[0] = NULL - Only repomd.xml */
+    char            **yumblist;     /*!< Repomd data typenames to skip
+                                      (blacklist). NULL as argument will
+                                      disable blacklist. */
 };
 
 /**

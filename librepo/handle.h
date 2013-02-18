@@ -84,6 +84,9 @@ typedef enum {
     LRO_YUMDLIST,    /*!< (char **) Download only specified records
                           from repomd (e.g. ["primary", "filelists", NULL]).
                           Note: Last element of the list must be NULL! */
+    LRO_YUMBLIST,    /*!< (char **) Do not download this specified records
+                          from repomd (blacklist).
+                          Note: Last element of the list must be NULL! */
     LRO_SENTINEL,    /*!<  */
 } lr_HandleOption; /*!< Handle config options */
 
@@ -96,6 +99,7 @@ typedef enum {
     LRI_DESTDIR,                /* (char **) */
     LRI_REPOTYPE,               /* (long *) */
     LRI_YUMDLIST,               /* (char ***) */
+    LRI_YUMBLIST,               /* (char ***) */
     LRI_LASTCURLERR,            /* (long *) */
     LRI_LASTCURLMERR,           /* (long *) */
     LRI_LASTCURLSTRERR,         /* (char **) */

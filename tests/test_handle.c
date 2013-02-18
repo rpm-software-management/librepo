@@ -33,6 +33,7 @@ START_TEST(test_handle)
     lr_handle_setopt(h, LRO_DESTDIR, "foodir");
     char *dlist[] = {"primary", "filelists", NULL};
     lr_handle_setopt(h, LRO_YUMDLIST, dlist);
+    lr_handle_setopt(h, LRO_YUMBLIST, dlist);
     lr_handle_free(h);
     h = NULL;
 }
@@ -73,6 +74,10 @@ START_TEST(test_handle_getinfo)
 
     strlist = NULL;
     lr_handle_getinfo(h, LRI_YUMDLIST, &strlist);
+    fail_if(strlist != NULL);
+
+    strlist = NULL;
+    lr_handle_getinfo(h, LRI_YUMBLIST, &strlist);
     fail_if(strlist != NULL);
 
     num = -1;

@@ -262,7 +262,8 @@ setopt(_HandleObject *self, PyObject *args)
     /*
      * Options with array argument
      */
-    case LRO_YUMDLIST: {
+    case LRO_YUMDLIST:
+    case LRO_YUMBLIST: {
         Py_ssize_t len = 0;
 
         if (!PyList_Check(obj) && obj != Py_None) {
@@ -394,18 +395,19 @@ getinfo(_HandleObject *self, PyObject *args)
         return PyLong_FromLong(lval);
 
     /* char*** */
-    case LRI_YUMDLIST: {
-        PyObject *yumdlist;
+    case LRI_YUMDLIST:
+    case LRI_YUMBLIST: {
+        PyObject *list;
         char **strlist;
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &strlist);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);
         if (strlist == NULL)
             Py_RETURN_NONE;
-        yumdlist = PyList_New(0);
+        list = PyList_New(0);
         for (int x=0; strlist[x] != NULL; x++)
-            PyList_Append(yumdlist, PyString_FromString(strlist[x]));
-        return yumdlist;
+            PyList_Append(list, PyString_FromString(strlist[x]));
+        return list;
     }
 
     default:

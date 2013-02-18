@@ -54,6 +54,15 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_YUMDLIST,  [None])
         self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), [])
 
+        self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), None)
+        h.setopt(librepo.LRO_YUMBLIST,  ["primary", "other"])
+        self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), ["primary", "other"])
+        h.setopt(librepo.LRO_YUMBLIST,  [])
+        self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), [])
+        h.setopt(librepo.LRO_YUMBLIST,  [None])
+        self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), [])
+
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()

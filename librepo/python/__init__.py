@@ -138,7 +138,8 @@ Constants
     Boolean. If you want to localise (LRO_LOCAL is True) a incomplete local
     repository (eg. only primary and filelists are present but repomd.xml
     contains more files), you could use LRO_YUMDLIST and specify only file
-    that are present of use this option.
+    that are present, or use LRO_YUMBLIST and specify files that are not
+    present or use this option.
 
 .. data:: LRO_GPGCHECK
 
@@ -153,6 +154,9 @@ Constants
     List of strings. See more: :meth:`~.Handle.yumdlist`
     Some predefined list :ref:`predefined-yumdlists-label`.
 
+.. data:: LRO_YUMBLIST
+
+    List of string. See more: :meth:`~.Handle.yumblist`
 
 .. _handle-info-options-label:
 
@@ -169,6 +173,7 @@ Constants
 .. data:: LRI_DESTDIR
 .. data:: LRI_REPOTYPE
 .. data:: LRI_YUMDLIST
+.. data:: LRI_YUMBLIST
 .. data:: LRI_LASTCURLERR
 .. data:: LRI_LASTCURLMERR
 .. data:: LRI_LASTCURLSTRERR
@@ -409,6 +414,7 @@ LRO_IGNOREMISSING   = _librepo.LRO_IGNOREMISSING
 LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
+LRO_YUMBLIST        = _librepo.LRO_YUMBLIST
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -418,6 +424,7 @@ LRI_LOCAL               = _librepo.LRI_LOCAL
 LRI_DESTDIR             = _librepo.LRI_DESTDIR
 LRI_REPOTYPE            = _librepo.LRI_REPOTYPE
 LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
+LRI_YUMBLIST            = _librepo.LRI_YUMBLIST
 LRI_LASTCURLERR         = _librepo.LRI_LASTCURLERR
 LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
 LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
@@ -630,7 +637,8 @@ class Handle(_librepo.Handle):
         """If you want to localise (LRO_LOCAL is True) a incomplete
         local repository (eg. only primary and filelists are present but
         repomd.xml contains more files), you could use LRO_YUMDLIST and
-        specify only file that are present of use this option."""
+        specify only file that are present of use this option. Or
+        use LRO_YUMBLIST and specify which files are not present."""
         self.setopt(LRO_IGNOREMISSING, val)
 
     def gpgcheck(self, val):
@@ -654,6 +662,12 @@ class Handle(_librepo.Handle):
         only ``repomd.xml`` will be downloaded.
         """
         self.setopt(LRO_YUMDLIST, val)
+
+    def yumblist(self, val):
+        """Set blacklist of yum metadata files. This files will not be
+        downloaded.
+        """
+        self.setopt(LRO_YUMBLIST, val)
 
     def download(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, base_url=None, resume=0):

@@ -372,6 +372,46 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+    def test_partial_download_repo_03(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        print url
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_YUMBLIST, ["other", "filelists"])
+        h.perform(r)
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+
+        self.assertEqual(yum_repo,
+            { #'deltainfo': None,
+              'destdir': self.tmpdir,
+              #'filelists': self.tmpdir+'/repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+              'filelists_db': self.tmpdir+'/repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+              #'group': None,
+              #'group_gz': None,
+              #'origin': None,
+              #'other': self.tmpdir+'/repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+              'other_db': self.tmpdir+'/repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2',
+              #'prestodelta': None,
+              'primary': self.tmpdir+'/repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+              'primary_db': self.tmpdir+'/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+              'repomd': self.tmpdir+'/repodata/repomd.xml',
+              #'updateinfo': None,
+              'url': url,
+              'signature': None}
+        )
+
+        # Test if all mentioned files really exist
+        self.assertTrue(os.path.isdir(yum_repo["destdir"]))
+        for key in yum_repo.iterkeys():
+            if yum_repo[key] and (key not in ("url", "destdir")):
+                self.assertTrue(os.path.isfile(yum_repo[key]))
+
+
     def test_download_repo_01_with_checksum_check(self):
         h = librepo.Handle()
         r = librepo.Result()

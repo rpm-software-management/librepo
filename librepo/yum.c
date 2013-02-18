@@ -124,11 +124,22 @@ lr_yum_repo_update(lr_YumRepo repo, const char *type, const char *path)
 int
 lr_yum_repomd_record_enabled(lr_Handle handle, const char *type)
 {
+    // Blacklist check
+    if (handle->yumblist) {
+        int x = 0;
+        while (handle->yumblist[x]) {
+            if (!strcmp(handle->yumblist[x], type))
+                return 0;
+            x++;
+        }
+    }
+
+    // Whitelist check
     if (handle->yumdlist) {
         int x = 0;
         while (handle->yumdlist[x]) {
             if (!strcmp(handle->yumdlist[x], type))
-                return 1;;
+                return 1;
             x++;
         }
         return 0;
