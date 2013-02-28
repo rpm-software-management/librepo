@@ -71,6 +71,8 @@ check_ResultStatus(const _ResultObject *self)
 static PyObject *
 result_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+    LR_UNUSED(args);
+    LR_UNUSED(kwds);
     _ResultObject *self = (_ResultObject *)type->tp_alloc(type, 0);
     if (self)
         self->result = NULL;
@@ -154,6 +156,7 @@ getinfo(_ResultObject *self, PyObject *args)
 static PyObject *
 clear(_ResultObject *self, PyObject *noarg)
 {
+    LR_UNUSED(noarg);
     if (check_ResultStatus(self))
         return NULL;
     lr_result_clear(self->result);

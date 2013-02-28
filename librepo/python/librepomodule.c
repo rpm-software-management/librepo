@@ -28,6 +28,8 @@
 static PyObject *
 py_global_init(PyObject *self, PyObject *noarg)
 {
+    LR_UNUSED(self);
+    LR_UNUSED(noarg);
     lr_global_init();
     Py_INCREF(Py_None);
     return Py_None;
@@ -36,6 +38,8 @@ py_global_init(PyObject *self, PyObject *noarg)
 static PyObject *
 py_global_cleanup(PyObject *self, PyObject *noarg)
 {
+    LR_UNUSED(self);
+    LR_UNUSED(noarg);
     lr_global_cleanup();
     Py_INCREF(Py_None);
     return Py_None;

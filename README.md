@@ -14,6 +14,7 @@ linux repository metadata and packages
 * libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
 * openssl (http://www.openssl.org/) - in Fedora: openssl-devel
 * python (http://python.org/) - in Fedora: python2-devel
+* **Test requires:** python-flask (http://flask.pocoo.org/) - in Fedora: python-flask
 
 ### Build from your checkout dir:
 
@@ -28,6 +29,13 @@ linux repository metadata and packages
 
     cd build/
     make doc
+
+### Build with debug messages:
+
+    mkdir build
+    cd build/
+    cmake -DCMAKE_BUILD_TYPE="DEBUG" ..
+    make
 
 * C documentation: `build/doc/c/html/index.html`
 * Python documentation: `build/doc/python/index.html`
