@@ -21,6 +21,6 @@ TARGET_LINK_LIBRARIES(test_main
     librepo
     ${CHECK_LIBRARY}
     )
-ADD_TEST(test_main test_main "${CMAKE_CURRENT_SOURCE_DIR}/repos/")
+ADD_TEST(test_main test_main "${CMAKE_CURRENT_SOURCE_DIR}/test_data/")
 
 ADD_SUBDIRECTORY (python)

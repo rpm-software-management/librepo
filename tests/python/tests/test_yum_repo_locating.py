@@ -5,16 +5,16 @@ import unittest
 import gpgme
 import librepo
 
+from base import TestCase, TEST_DATA
+
 # Repositories used in download tests
 #REPOS_YUM = "tests/python/tests/servermock/yum_mock/static/"
 
-TEST_DATA = "tests/test_data/"
+REPO_YUM_01_PATH = TEST_DATA+"/repo_yum_01/"
+REPO_YUM_02_PATH = TEST_DATA+"/repo_yum_02/"
+PUB_KEY = TEST_DATA+"/key.pub"
 
-REPO_YUM_01_PATH = TEST_DATA+"repo_yum_01/"
-REPO_YUM_02_PATH = TEST_DATA+"repo_yum_02/"
-PUB_KEY = TEST_DATA+"key.pub"
-
-class TestCaseYumRepoDownloading(unittest.TestCase):
+class TestCaseYumRepoLocating(TestCase):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")

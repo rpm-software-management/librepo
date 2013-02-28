@@ -1,4 +1,4 @@
-from base import TestCaseWithFlask, MOCKURL
+from base import TestCaseWithFlask, MOCKURL, TEST_DATA
 from servermock.server import app
 import servermock.yum_mock.config as config
 import os.path
@@ -8,8 +8,7 @@ import shutil
 import gpgme
 import librepo
 
-TEST_DATA = "tests/test_data/"
-PUB_KEY = TEST_DATA+"key.pub"
+PUB_KEY = TEST_DATA+"/key.pub"
 
 class TestCaseYumRepoDownloading(TestCaseWithFlask):
     application = app

@@ -8,9 +8,10 @@ except ImportError:
     import unittest
 
 MOCKURL="http://127.0.0.1:5000/"
+TEST_DATA = os.path.normpath(os.path.join(__file__, "../../../test_data"))
 
 class TestCase(unittest.TestCase):
-    testdata_dir = os.path.normpath(os.path.join(__file__, "../../../test_data"))
+    pass
 
 class TestCaseWithFlask(TestCase):
     application = NotImplemented
