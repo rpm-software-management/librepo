@@ -26,13 +26,9 @@ FIND_LIBRARY(CHECK_LIBRARY NAMES check)
 FIND_PACKAGE(Gpgme REQUIRED)
 
 
-# Check to see if we have large file support
+# Enable large file support
 
-include(CheckFileOffsetBits)
-check_file_offset_bits()
-if (_FILE_OFFSET_BITS)
-    add_definitions(-D_FILE_OFFSET_BITS=${_FILE_OFFSET_BITS})
-endif (_FILE_OFFSET_BITS)
+ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE)
 
 # Check libraries
 
