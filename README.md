@@ -14,6 +14,7 @@ linux repository metadata and packages
 * libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
 * openssl (http://www.openssl.org/) - in Fedora: openssl-devel
 * python (http://python.org/) - in Fedora: python2-devel
+* **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - in Fedora: pygpgme
 * **Test requires:** python-flask (http://flask.pocoo.org/) - in Fedora: python-flask
 
 ### Build from your checkout dir:

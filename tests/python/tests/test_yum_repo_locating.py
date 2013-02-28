@@ -2,22 +2,36 @@ import os.path
 import tempfile
 import shutil
 import unittest
+import gpgme
 import librepo
 
 # Repositories used in download tests
 #REPOS_YUM = "tests/python/tests/servermock/yum_mock/static/"
 
-REPOS_YUM = "tests/test_data/"
+TEST_DATA = "tests/test_data/"
 
-REPO_YUM_01_PATH = REPOS_YUM+"repo_yum_01/"
-REPO_YUM_02_PATH = REPOS_YUM+"repo_yum_02/"
+REPO_YUM_01_PATH = TEST_DATA+"repo_yum_01/"
+REPO_YUM_02_PATH = TEST_DATA+"repo_yum_02/"
+PUB_KEY = TEST_DATA+"key.pub"
 
 class TestCaseYumRepoDownloading(unittest.TestCase):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
+        # Import public key into the temporary gpg keyring
+        self._gnupghome = os.environ.get('GNUPGHOME')
+        gpghome = os.path.join(self.tmpdir, "keyring")
+        os.mkdir(gpghome, 0700)
+        os.environ['GNUPGHOME'] = gpghome
+        self.ctx = gpgme.Context()
+        self.ctx.import_(open(PUB_KEY))
 
     def tearDown(self):
+        self.ctx.delete(self.ctx.get_key('22F2C4E9'))
+        if self._gnupghome is None:
+            os.environ.pop('GNUPGHOME')
+        else:
+            os.environ['GNUPGHOME'] = self._gnupghome
         shutil.rmtree(self.tmpdir)
 
     def test_locate_repo_01(self):

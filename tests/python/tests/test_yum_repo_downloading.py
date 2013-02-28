@@ -5,7 +5,11 @@ import os.path
 import unittest
 import tempfile
 import shutil
+import gpgme
 import librepo
+
+TEST_DATA = "tests/test_data/"
+PUB_KEY = TEST_DATA+"key.pub"
 
 class TestCaseYumRepoDownloading(TestCaseWithFlask):
     application = app
@@ -16,8 +20,20 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
+        # Import public key into the temporary gpg keyring
+        self._gnupghome = os.environ.get('GNUPGHOME')
+        gpghome = os.path.join(self.tmpdir, "keyring")
+        os.mkdir(gpghome, 0700)
+        os.environ['GNUPGHOME'] = gpghome
+        self.ctx = gpgme.Context()
+        self.ctx.import_(open(PUB_KEY))
 
     def tearDown(self):
+        self.ctx.delete(self.ctx.get_key('22F2C4E9'))
+        if self._gnupghome is None:
+            os.environ.pop('GNUPGHOME')
+        else:
+            os.environ['GNUPGHOME'] = self._gnupghome
         shutil.rmtree(self.tmpdir)
 
     def test_download_repo_01(self):
