@@ -1,9 +1,20 @@
-/*
- * Copyright (c) 2012, Tomas Mlcoch
- * Copyright (c) 2007, Novell Inc.
+/* librepo - A library providing (libcURL like) API to downloading repository
+ * Copyright (C) 2012  Tomas Mlcoch
  *
- * This file is licensed under the BSD license, read LICENSE.BSD
- * for further information
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
  */
 
 #include <assert.h>
@@ -192,17 +203,20 @@ typedef struct _ParserData {
 } ParserData;
 
 static inline const char *
-find_attr(const char *txt, const char **atts)
+lr_find_attr(const char *name, const char **attr)
 {
-    for (; *atts; atts += 2)
-        if (!strcmp(*atts, txt))
-            return atts[1];
-    return 0;
+    while (*attr) {
+        if (!strcmp(name, *attr))
+            return attr[1];
+        attr += 2;
+    }
+
+    return NULL;
 }
 
 
 static void XMLCALL
-start_handler(void *pdata, const char *name, const char **atts)
+lr_start_handler(void *pdata, const char *element, const char **attr)
 {
     ParserData *pd = pdata;
     lr_StatesSwitch *sw;
@@ -222,7 +236,7 @@ start_handler(void *pdata, const char *name, const char **atts)
 
     /* Find current state by its name */
     for (sw = pd->swtab[pd->state]; sw->from == pd->state; sw++)
-        if (!strcmp(name, sw->ename))
+        if (!strcmp(element, sw->ename))
             break;
     if (sw->from != pd->state)
       return; /* There is no state for the name -> skip */
@@ -244,7 +258,7 @@ start_handler(void *pdata, const char *name, const char **atts)
         break;
 
     case STATE_DISTRO: {
-        const char *cpeid = find_attr("cpeid", atts);
+        const char *cpeid = lr_find_attr("cpeid", attr);
         lr_YumDistroTag tag = lr_yum_distrotag_init();
         if (cpeid)
             tag->cpeid = lr_strdup(cpeid);
@@ -253,7 +267,7 @@ start_handler(void *pdata, const char *name, const char **atts)
     }
 
     case STATE_DATA: {
-        const char *type= find_attr("type", atts);
+        const char *type= lr_find_attr("type", attr);
         if (!type) break;
         pd->repomd_rec = lr_yum_repomdrecord_init();
         pd->repomd_rec->type = lr_strdup(type);
@@ -266,8 +280,8 @@ start_handler(void *pdata, const char *name, const char **atts)
     }
 
     case STATE_LOCATION: {
-        const char *href = find_attr("href", atts);
-        const char *base = find_attr("base", atts);
+        const char *href = lr_find_attr("href", attr);
+        const char *base = lr_find_attr("base", attr);
 	if (pd->repomd_rec && href)
             pd->repomd_rec->location_href = lr_strdup(href);
         if (pd->repomd_rec && base)
@@ -276,14 +290,14 @@ start_handler(void *pdata, const char *name, const char **atts)
     }
 
     case STATE_CHECKSUM: {
-        const char *type = find_attr("type", atts);
+        const char *type = lr_find_attr("type", attr);
         if (pd->repomd_rec && type)
             pd->repomd_rec->checksum_type = lr_strdup(type);
         break;
     }
 
     case STATE_OPENCHECKSUM: {
-        const char *type= find_attr("type", atts);
+        const char *type= lr_find_attr("type", attr);
 	if (pd->repomd_rec && type)
             pd->repomd_rec->checksum_open_type = lr_strdup(type);
         break;
@@ -301,7 +315,7 @@ start_handler(void *pdata, const char *name, const char **atts)
 }
 
 static void XMLCALL
-char_handler(void *pdata, const XML_Char *s, int len)
+lr_char_handler(void *pdata, const XML_Char *s, int len)
 {
     int l;
     char *c;
@@ -327,11 +341,11 @@ char_handler(void *pdata, const XML_Char *s, int len)
 }
 
 static void XMLCALL
-end_handler(void *pdata, const char *name)
+lr_end_handler(void *pdata, const char *element)
 {
     ParserData *pd = pdata;
 
-    LR_UNUSED(name);
+    LR_UNUSED(element);
 
     if (pd->ret != LRE_OK)
         return;  /* There was an error -> do nothing */
@@ -440,8 +454,8 @@ lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
     /* Parser configuration */
     parser = XML_ParserCreate(NULL);
     XML_SetUserData(parser, (void *) &pd);
-    XML_SetElementHandler(parser, start_handler, end_handler);
-    XML_SetCharacterDataHandler(parser, char_handler);
+    XML_SetElementHandler(parser, lr_start_handler, lr_end_handler);
+    XML_SetCharacterDataHandler(parser, lr_char_handler);
 
     /* Initialization of parser data */
     memset(&pd, 0, sizeof(pd));

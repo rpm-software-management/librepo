@@ -168,16 +168,19 @@ typedef struct _ParserData {
 } ParserData;
 
 static inline const char *
-lr_find_attr(const char *txt, const char **atts)
+lr_find_attr(const char *name, const char **attr)
 {
-    for (; *atts; atts += 2)
-        if (!strcmp(*atts, txt))
-            return atts[1];
-    return 0;
+    while (*attr) {
+        if (!strcmp(name, *attr))
+            return attr[1];
+        attr += 2;
+    }
+
+    return NULL;
 }
 
 static void XMLCALL
-lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
+lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
 {
     ParserData *pd = pdata;
     lr_StatesSwitch *sw;
@@ -219,7 +222,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
         break;
 
     case STATE_FILE: {
-        const char *name = lr_find_attr("name", atts);
+        const char *name = lr_find_attr("name", attr);
         if (!name) {
             DPRINTF("%s: file element doesn't have name attribute\n", __func__);
             pd->ret = LRE_MLXML;
@@ -242,7 +245,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
 
     case STATE_HASH: {
         lr_MetalinkHash mh;
-        const char *type = lr_find_attr("type", atts);
+        const char *type = lr_find_attr("type", attr);
         if (!type) {
             DPRINTF("%s: hash element doesn't have type attribute\n", __func__);
             pd->ret = LRE_MLXML;
@@ -257,16 +260,16 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **atts)
         break;
 
     case STATE_URL: {
-        const char *attr;
+        const char *val;
         lr_MetalinkUrl url = lr_new_metalinkurl(pd->metalink);
-        if ((attr = lr_find_attr("protocol", atts)))
-            url->protocol = lr_strdup(attr);
-        if ((attr = lr_find_attr("type", atts)))
-            url->type = lr_strdup(attr);
-        if ((attr = lr_find_attr("location", atts)))
-            url->location = lr_strdup(attr);
-        if ((attr = lr_find_attr("preference", atts)))
-            url->preference = atol(attr);
+        if ((val = lr_find_attr("protocol", attr)))
+            url->protocol = lr_strdup(val);
+        if ((val = lr_find_attr("type", attr)))
+            url->type = lr_strdup(val);
+        if ((val = lr_find_attr("location", attr)))
+            url->location = lr_strdup(val);
+        if ((val = lr_find_attr("preference", attr)))
+            url->preference = atol(val);
         break;
     }
 
