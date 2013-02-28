@@ -16,6 +16,7 @@ linux repository metadata and packages
 * python (http://python.org/) - in Fedora: python2-devel
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - in Fedora: pygpgme
 * **Test requires:** python-flask (http://flask.pocoo.org/) - in Fedora: python-flask
+* **Test requires:** python-nose (https://nose.readthedocs.org/) - in Fedora: python-nose
 
 ### Build from your checkout dir:
 
