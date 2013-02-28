@@ -338,7 +338,6 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        print url
         h.setopt(librepo.LRO_URL, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -377,7 +376,6 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        print url
         h.setopt(librepo.LRO_URL, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
