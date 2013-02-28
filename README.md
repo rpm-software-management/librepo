@@ -49,9 +49,8 @@ http://tojaj.github.com/librepo/
 
 All unit tests run from librepo checkout dir
 
-### Build:
-    cd build/tests
-    make tests
+### Run both (C & Python) tests via makefile:
+    make test
 
 ### Run (from your checkout dir) - C unittests:
 
