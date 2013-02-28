@@ -24,19 +24,19 @@ linux repository metadata and packages
     cmake ..
     make
 
-## Documentation
-
-### Build:
-
-    cd build/
-    make doc
-
 ### Build with debug messages:
 
     mkdir build
     cd build/
     cmake -DCMAKE_BUILD_TYPE="DEBUG" ..
     make
+
+## Documentation
+
+### Build:
+
+    cd build/
+    make doc
 
 * C documentation: `build/doc/c/html/index.html`
 * Python documentation: `build/doc/python/index.html`
