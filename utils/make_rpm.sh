@@ -3,6 +3,7 @@
 RPMBUILD_DIR="${HOME}/rpmbuild/"
 BUILD_DIR="$RPMBUILD_DIR/BUILD"
 GITREV=`git rev-parse --short HEAD`
+TIMESTAMP=`date +%Y%m%d`
 PREFIX=""   # Root project dir
 MY_DIR=`dirname $0`
 MY_DIR="$MY_DIR/"
@@ -49,6 +50,8 @@ if [ ! $? == "0" ]; then
     echo "Error while: cp $PREFIX/librepo.spec $RPMBUILD_DIR/SPECS/"
     exit 1
 fi
+sed --in-place "s/%global timestamp .*/%global timestamp $TIMESTAMP/g" $RPMBUILD_DIR/SPECS/librepo.spec
+
 echo "Copying done"
 
 echo "> Starting rpmbuild librepo.."
