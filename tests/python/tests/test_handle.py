@@ -62,29 +62,105 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_YUMBLIST,  [None])
         self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), [])
 
+    def test_handle_setget_attr(self):
+        """No exception shoud be raised."""
+        h = librepo.Handle()
+
+        self.assertFalse(h.update)
+        h.update = True
+        self.assertTrue(h.update)
+        h.update = False
+        self.assertFalse(h.update)
+        h.update = 1
+        self.assertTrue(h.update)
+        h.update = 0
+        self.assertFalse(h.update)
+
+        self.assertEqual(h.url, None)
+        h.url = "http://foo"
+        self.assertEqual(h.url, "http://foo")
+        h.url = ""
+        self.assertEqual(h.url, "")
+        h.url = None
+        self.assertEqual(h.url, None)
+
+        self.assertEqual(h.mirrorlist, None)
+        h.mirrorlist = "http://ml"
+        self.assertEqual(h.mirrorlist, "http://ml")
+        h.mirrorlist = ""
+        self.assertEqual(h.mirrorlist, "")
+        h.mirrorlist = None
+        self.assertEqual(h.mirrorlist, None)
+
+        self.assertFalse(h.local)
+        h.local =  1
+        self.assertTrue(h.local)
+        h.local =  0
+        self.assertFalse(h.local)
+
+        self.assertEqual(h.destdir, None)
+        h.destdir =  "foodir"
+        self.assertEqual(h.destdir, "foodir")
+        h.destdir =  None
+        self.assertEqual(h.destdir, None)
+        h.destdir =  ""
+        self.assertEqual(h.destdir, "")
+
+        self.assertEqual(h.yumdlist, None)
+        h.yumdlist =  ["primary", "other"]
+        self.assertEqual(h.yumdlist, ["primary", "other"])
+        h.yumdlist =  []
+        self.assertEqual(h.yumdlist, [])
+        h.yumdlist =  [None]
+        self.assertEqual(h.yumdlist, [])
+
+        self.assertEqual(h.yumblist, None)
+        h.yumblist =  ["primary", "other"]
+        self.assertEqual(h.yumblist, ["primary", "other"])
+        h.yumblist =  []
+        self.assertEqual(h.yumblist, [])
+        h.yumblist =  [None]
+        self.assertEqual(h.yumblist, [])
 
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
 
         h.setopt(librepo.LRO_LOCAL, None)
+        h.local = None
         h.setopt(librepo.LRO_HTTPAUTH, None)
+        h.httpauth = None
         h.setopt(librepo.LRO_USERPWD, None)
+        h.userpwd = None
         h.setopt(librepo.LRO_PROXY, None)
+        h.proxy = None
         h.setopt(librepo.LRO_PROXYPORT, None)       # None sets default value
+        h.proxyport = None
         h.setopt(librepo.LRO_PROXYTYPE, None)
+        h.proxytype = None
         h.setopt(librepo.LRO_PROXYAUTH, None)
+        h.proxyauth = None
         h.setopt(librepo.LRO_PROXYUSERPWD, None)
+        h.proxyuserpwd = None
         h.setopt(librepo.LRO_PROGRESSDATA, None)
+        h.progressdata = None
         h.setopt(librepo.LRO_RETRIES, None)         # None sets default value
+        h.retries = None
         h.setopt(librepo.LRO_MAXSPEED, None)        # None sets default value
+        h.maxspeed = None
         h.setopt(librepo.LRO_CONNECTTIMEOUT, None)  # None sets default value
+        h.connecttimeout = None
         h.setopt(librepo.LRO_GPGCHECK, None)
+        h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)
+        h.checksum = None
 
         def callback(data, total_to_download, downloaded):
             pass
         h.setopt(librepo.LRO_PROGRESSCB, None)
+        h.progresscb = None
         h.setopt(librepo.LRO_PROGRESSCB, callback)
+        h.progresscb = callback
         h.setopt(librepo.LRO_PROGRESSCB, None)
+        h.progresscb = None
 

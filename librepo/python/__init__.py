@@ -49,7 +49,7 @@ Constants
     LRO (aka LibRepo Option) constants are used to set :class:`.Handle`
     options via :meth:`~.Handle.setopt` method.
 
-    This options could be also set by :class:`.Handle` class methods
+    This options could be also set by :class:`.Handle` attributes
     with same names in lowercase and without ``LRO_`` prefix.
 
     Example::
@@ -57,85 +57,111 @@ Constants
             # The command:
             h.setopt(librepo.LRO_URL, "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
             # is equivalent to:
-            h.url("http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
+            h.url = "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"
 
     .. note:: For detailed description of this options consult :class:`.Handle` page.
 
 .. data:: LRO_UPDATE
 
-    Boolean. See more: :meth:`~.Handle.update`
+    *Boolean*. Set to ``True`` if only want update localised or downloaded
+    repository represented by :class:`.Result` object. Update mode is
+    meant to download previously omitted repository file(s).
 
 .. data:: LRO_URL
 
-    String or None. See more: :meth:`~.Handle.url`
+    *String or None*. Set repository url (repository url and baseurl
+    are interchangeable terms in this context).
 
 .. data:: LRO_MIRRORLIST
 
-    String or None. See more: :meth:`~.Handle.mirrorlist`
+    *String or None*. Set mirrorlist url (url could point to a metalink
+    mirrorlist or to a simple mirrorlist where each line wihtout ``'#'``
+    is considered as mirror url).
 
 .. data:: LRO_LOCAL
 
-    Boolean. See more: :meth:`~.Handle.local`
+    *Boolean*. If set to True, no local copy of repository is created
+    and repository is just localised in its current location.
+    When True, url of repository MUST be a local address
+    (e.g. '/home/user/repo' or 'file:///home/user/repo').
 
 .. data:: LRO_HTTPAUTH
 
-    Boolean. See more: :meth:`~.Handle.httpauth`
+    *Boolean*. If True, all supported methods of HTTP authentication
+    are enabled.
 
 .. data:: LRO_USERPWD
 
-    String or None. See more: :meth:`~.Handle.userpwd`
+    *String or None*. Set username and password for HTTP authentication.
+    Param must be in format 'username:password'.
 
 .. data:: LRO_PROXY
 
-    String or None. See more: :meth:`~.Handle.proxy`
+    *String or None*. Set proxy server address. Port could be
+    specified by different option or by the :[port] suffix of
+    this address. Any protocol prefix (``http://``, ...) will be ignored.
 
 .. data:: LRO_PROXYPORT
 
-    Integer or None. See more: :meth:`~.Handle.proxyport`
+    *Integer or None*. Set proxy port number to connect unsless
+    it is specified in the proxy address string. None sets default
+    value 1080.
 
 .. data:: LRO_PROXYTYPE
 
-    Boolean. See more: :meth:`~.Handle.proxytype`
+    *Boolean*. Set type of proxy - could be one of :ref:`proxy-type-label`
 
 .. data:: LRO_PROXYAUTH
 
-    Boolean. See more: :meth:`~.Handle.proxyauth`
+    *Boolean*. If True, all supported proxy authentication methods are enabled.
+    If False, only basic authentication method is enabled.
 
 .. data:: LRO_PROXYUSERPWD
 
-    String or None. See more: :meth:`~.Handle.proxyuserpwd`
+    *String or None*. Set username and password for proxy
+    authentication in format 'username:password'.
 
 .. data:: LRO_PROGRESSCB
 
-    Function. See more: :meth:`~.Handle.progresscb`
+    *Function*. Set progress callback. Callback must be in format:
+    ``callback(userdata, total_to_download, downloaded)``. If
+    total_to_download is 0, then total size is not known.
+    Total size (total_to_download) could change (grow) among two callback
+    calls (if some download failed and another mirror is tried).
 
 .. data:: LRO_PROGRESSDATA
 
-    Any object. See more: :meth:`~.Handle.progressdata`
+    *Any object*. Set user data for the progress callback.
 
 .. data:: LRO_RETRIES
 
-    Integer or None. See more: :meth:`~.Handle.retries`
+    *Integer or None*. Set maximal number of retries for one mirror.
+    One try per mirror is default value. None as *va* sets the
+    default value.
 
 .. data:: LRO_MAXSPEED
 
-    Long or None. See more: :meth:`~.Handle.maxspeed`
+    *Long or None*. Set maximal allowed speed per download in bytes per second.
+    0 = unlimited speed - the default value.
 
 .. data:: LRO_DESTDIR
 
-    String or None. See more: :meth:`~.Handle.destdir`
+    *String or None*. Set destination directory for downloaded data
+    (metadata or packages).
 
 .. data:: LRO_REPOTYPE
 
-    One of :ref:`repotype-constants-label`. See more :meth:`~.Handle.repotype`
+    *Integer*. One of :ref:`repotype-constants-label`. See more
+    :meth:`~.Handle.repotype` Set type of repository.
 
 .. data:: LRO_CONNECTTIMEOUT
 
-    Integer or None. See more: :meth:`~.Handle.connecttimeout`
+    *Integer or None. Set maximal timeout in sec for connection phase.
+    Default value is 300. None as *val* sets the default value.
 
 .. data:: LRO_IGNOREMISSING
 
-    Boolean. If you want to localise (LRO_LOCAL is True) a incomplete local
+    *Boolean*. If you want to localise (LRO_LOCAL is True) a incomplete local
     repository (eg. only primary and filelists are present but repomd.xml
     contains more files), you could use LRO_YUMDLIST and specify only file
     that are present, or use LRO_YUMBLIST and specify files that are not
@@ -143,20 +169,30 @@ Constants
 
 .. data:: LRO_GPGCHECK
 
-    Boolean. See more: :meth:`~.Handle.gpgcheck`
+    *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
 
 .. data:: LRO_CHECKSUM
 
-    Boolean. See more: :meth:`~.Handle.checksum`
+    *Boolean*. Set False/True to disable/enable checksum check.
+
+    .. note:: Checksum check is enabled by default.
+    .. note::
+        If checksum check is disabled, then even explicitly specified
+        checksum related params e.g. in :meth:`~librepo.Handle.download`
+        method are ignored and checksum is not checked!
 
 .. data:: LRO_YUMDLIST
 
-    List of strings. See more: :meth:`~.Handle.yumdlist`
-    Some predefined list :ref:`predefined-yumdlists-label`.
+    *List of strings*. Some predefined list :ref:`predefined-yumdlists-label`.
+    Set list of yum metadata files to download. e.g. ``["primary",
+    "filelists", "other", "primary_db", "prestodelta"]`` If *val* is None,
+    all metadata files will be downloaded. If *val* is ``[]`` or ``[None]``
+    only ``repomd.xml`` will be downloaded.
 
 .. data:: LRO_YUMBLIST
 
-    List of string. See more: :meth:`~.Handle.yumblist`
+    *List of strings*. Set blacklist of yum metadata files.
+    This files will not be downloaded.
 
 .. _handle-info-options-label:
 
@@ -417,6 +453,32 @@ LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_YUMBLIST        = _librepo.LRO_YUMBLIST
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
+ATTR_TO_LRO = {
+    "update":           LRO_UPDATE,
+    "url":              LRO_URL,
+    "mirrorlist":       LRO_MIRRORLIST,
+    "local" :           LRO_LOCAL,
+    "httpauth":         LRO_HTTPAUTH,
+    "userpwd":          LRO_USERPWD,
+    "proxy":            LRO_PROXY,
+    "proxyport":        LRO_PROXYPORT,
+    "proxytype":        LRO_PROXYTYPE,
+    "proxyauth":        LRO_PROXYAUTH,
+    "proxyuserpwd":     LRO_PROXYUSERPWD,
+    "progresscb":       LRO_PROGRESSCB,
+    "progressdata":     LRO_PROGRESSDATA,
+    "retries":          LRO_RETRIES,
+    "maxspeed":         LRO_MAXSPEED,
+    "destdir":          LRO_DESTDIR,
+    "repotype":         LRO_REPOTYPE,
+    "connecttimeout":   LRO_CONNECTTIMEOUT,
+    "ignoremissing":    LRO_IGNOREMISSING,
+    "gpgcheck":         LRO_GPGCHECK,
+    "checksum":         LRO_CHECKSUM,
+    "yumdlist":         LRO_YUMDLIST,
+    "yumblist":         LRO_YUMBLIST,
+}
+
 LRI_UPDATE              = _librepo.LRI_UPDATE
 LRI_URL                 = _librepo.LRI_URL
 LRI_MIRRORLIST          = _librepo.LRI_MIRRORLIST
@@ -430,6 +492,22 @@ LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
 LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
 LRI_LASTCURLMSTRERR     = _librepo.LRI_LASTCURLMSTRERR
 LRI_LASTBADSTATUSCODE   = _librepo.LRI_LASTBADSTATUSCODE
+
+ATTR_TO_LRI = {
+    "update":               LRI_UPDATE,
+    "url":                  LRI_URL,
+    "mirrorlist":           LRI_MIRRORLIST,
+    "local":                LRI_LOCAL,
+    "destdir":              LRI_DESTDIR,
+    "repotype":             LRI_REPOTYPE,
+    "yumdlist":             LRI_YUMDLIST,
+    "yumblist":             LRI_YUMBLIST,
+    "lastcurlerr":          LRI_LASTCURLERR,
+    "lastcurlmerr":         LRI_LASTCURLMERR,
+    "lastcurlstrerr":       LRI_LASTCURLSTRERR,
+    "lastcurlmstrerr":      LRI_LASTCURLMSTRERR,
+    "lastbadstatuscode":    LRI_LASTBADSTATUSCODE,
+}
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
 LR_CHECK_CHECKSUM   = _librepo.LR_CHECK_CHECKSUM
@@ -484,6 +562,11 @@ LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
 LRR_YUM_REPOMD  = _librepo.LRR_YUM_REPOMD
 LRR_SENTINEL    = _librepo.LRR_SENTINEL
 
+ATTR_TO_LRR = {
+    "yum_repo":     LRR_YUM_REPO,
+    "yum_repomd":   LRR_YUM_REPOMD,
+}
+
 CHECKSUM_UNKNOWN    = _librepo.CHECKSUM_UNKNOWN
 CHECKSUM_MD2        = _librepo.CHECKSUM_MD2
 CHECKSUM_MD5        = _librepo.CHECKSUM_MD5
@@ -512,7 +595,102 @@ def checksum_str_to_type(name):
 class Handle(_librepo.Handle):
     """Librepo handle class.
     Handle hold information about a repository and configuration for
-    downloading from the repository."""
+    downloading from the repository.
+
+    **Attributes:**
+
+    .. attribute:: update:
+
+        See: :data:`.LRO_UPDATE`
+
+    .. attribute:: url:
+
+        See: :data:`.LRO_URL`
+
+    .. attribute:: mirrorlist:
+
+        See: :data:`.LRO_MIRRORLIST`
+
+    .. attribute:: local:
+
+        See: :data:`.LRO_LOCAL`
+
+    .. attribute:: httpauth:
+
+        See: :data:`.LRO_HTTPAUTH`
+
+    .. attribute:: userpwd:
+
+        See: :data:`.LRO_USERPWD`
+
+    .. attribute:: proxy:
+
+        See: :data:`.LRO_PROXY`
+
+    .. attribute:: proxyport:
+
+        See: :data:`.LRO_PROXYPORT`
+
+    .. attribute:: proxytype:
+
+        See: :data:`.LRO_PROXYTYPE`
+
+    .. attribute:: proxyauth:
+
+        See: :data:`.LRO_PROXYAUTH`
+
+    .. attribute:: proxyuserpwd:
+
+        See: :data:`.LRO_PROXYUSERPWD`
+
+    .. attribute:: progresscb:
+
+        See: :data:`.LRO_PROGRESSCB`
+
+    .. attribute:: progressdata:
+
+        See: :data:`.LRO_PROGRESSDATA`
+
+    .. attribute:: retries:
+
+        See: :data:`.LRO_RETRIES`
+
+    .. attribute:: maxspeed:
+
+        See: :data:`.LRO_MAXSPEED`
+
+    .. attribute:: destdir:
+
+        See: :data:`.LRO_DESTDIR`
+
+    .. attribute:: repotype:
+
+        See: :data:`.LRO_REPOTYPE`
+
+    .. attribute:: connecttimeout:
+
+        See: :data:`.LRO_CONNECTTIMEOUT`
+
+    .. attribute:: ignoremissing:
+
+        See: :data:`.LRO_IGNOREMISSING`
+
+    .. attribute:: gpgcheck:
+
+        See: :data:`.LRO_GPGCHECK`
+
+    .. attribute:: checksum:
+
+        See: :data:`.LRO_CHECKSUM`
+
+    .. attribute:: yumdlist:
+
+        See: :data:`.LRO_YUMDLIST`
+
+    .. attribute:: yumblist:
+
+        See: :data:`.LRO_YUMBLIST`
+    """
 
     def setopt(self, option, val):
         """Set option to :class:`.Handle` directly.
@@ -528,146 +706,24 @@ class Handle(_librepo.Handle):
         """
         _librepo.Handle.setopt(self, option, val)
 
+    def __setattr__(self, attr, val):
+        if attr not in ATTR_TO_LRO:
+            raise LibrepoException("Unknown attribute: %s" % attr)
+        self.setopt(ATTR_TO_LRO[attr], val)
+
+    def __getattr__(self, attr):
+        if attr not in ATTR_TO_LRI and attr in ATTR_TO_LRO:
+            raise LibrepoException("Reading of %s attribute is not supported" % attr)
+        elif attr not in ATTR_TO_LRI:
+            raise LibrepoException("Unknown attribute: %s" % attr)
+        return _librepo.Handle.getinfo(self, ATTR_TO_LRI[attr])
+
     def getinfo(self, option):
         """Get information from :class:`.Handle`.
 
         *option* could be one of :ref:`handle-info-options-label`
         """
         return _librepo.Handle.getinfo(self, option)
-
-    def update(self, val):
-        """Set *val* to ``True`` if only want update localised or downloaded
-        repository represented by :class:`.Result` object. Update mode is
-        meant to download previously omitted repository file(s)."""
-        self.setopt(LRO_UPDATE, val)
-
-    def url(self, url):
-        """Set repository *url* (repository url and baseurl
-        are the same things)."""
-        self.setopt(LRO_URL, url)
-
-    def mirrorlist(self, url):
-        """Set mirrorlist *url* (url could point to a metalink mirrorlist or
-        to simple mirrorlist where each line wihtout ``'#'`` is considered
-        as mirror url)."""
-        self.setopt(LRO_MIRRORLIST, url)
-
-    def local(self, val):
-        """If set to True, no local copy of repository is created
-        and repository is just localised in its current location.
-        When True, url of repository MUST be a local address
-        (e.g. '/home/user/repo' or 'file:///home/user/repo')."""
-        self.setopt(LRO_LOCAL, val)
-
-    def httpauth(self, val):
-        """If True, all supported methods of HTTP authentication
-        are enabled."""
-        self.setopt(LRO_HTTPAUTH, val)
-
-    def userpwd(self, val):
-        """Set username and password for HTTP authentication. *val* must
-        be in format 'username:password'."""
-        self.setopt(LRO_USERPWD, val)
-
-    def proxy(self, address):
-        """Set proxy server address. Port could be specified by different
-        option or by the :[port] suffix of this address.
-        Any protocol prefix (http://) will be ignored."""
-        self.setopt(LRO_PROXY, address)
-
-    def proxyport(self, val):
-        """Set proxy port number to connect unsless it is specified in
-        the proxy address string. None sets default value 1080."""
-        self.setopt(LRO_PROXYPORT, val)
-
-    def proxytype(self, option):
-        """Set type of proxy.
-
-        *option* could be one of :ref:`proxy-type-label`"""
-        self.setopt(LRO_PROXYTYPE, option)
-
-    def proxyauth(self, val):
-        """If True, all supported proxy authentication methods are enabled.
-        If False, only basic authentication method is enabled."""
-        self.setopt(LRO_PROXYAUTH, val)
-
-    def proxyuserpwd(self, val):
-        """Set username and password for proxy authentication in format
-        'username:password'."""
-        self.setopt(LRO_PROXYUSERPWD, val)
-
-    def progresscb(self, val):
-        """Set progress callback. Callback must be in format:
-        ``callback(userdata, total_to_download, downloaded)``. If
-        total_to_download is 0, then total size is not known.
-        Total size (total_to_download) could change (grow) among two calls,
-        if download failed and another mirror is tried."""
-        self.setopt(LRO_PROGRESSCB, val)
-
-    def progressdata(self, val):
-        """Set user data for the progress callback."""
-        self.setopt(LRO_PROGRESSDATA, val)
-
-    def retries(self, val):
-        """Set maximal number of retries for one mirror.
-        One try per mirror is default value. None as *va* sets the
-        default value."""
-        self.setopt(LRO_RETRIES, val)
-
-    def maxspeed(self, val):
-        """Set maximal allowed speed per download in bytes per second.
-        0 = unlimited speed - the default value."""
-        self.setopt(LRO_MAXSPEED, val)
-
-    def destdir(self, val):
-        """Set destination directory for downloaded data
-        (metadata or packages)."""
-        self.setopt(LRO_DESTDIR, val)
-
-    def repotype(self, val):
-        """Set type of repository."""
-        self.setopt(LRO_REPOTYPE, val)
-
-    def connecttimeout(self, val):
-        """Set maximal timeout in sec for connection phase.
-        Default value is 300. None as *val* sets the default value."""
-        self.setopt(LRO_CONNECTTIMEOUT, val)
-
-    def ignoremissing(self, val):
-        """If you want to localise (LRO_LOCAL is True) a incomplete
-        local repository (eg. only primary and filelists are present but
-        repomd.xml contains more files), you could use LRO_YUMDLIST and
-        specify only file that are present of use this option. Or
-        use LRO_YUMBLIST and specify which files are not present."""
-        self.setopt(LRO_IGNOREMISSING, val)
-
-    def gpgcheck(self, val):
-        """Set True to enable gpg check (if available) of downloaded repo."""
-        self.setopt(LRO_GPGCHECK, val)
-
-    def checksum(self, val):
-        """Set False/True to disable/enable checksum check.
-
-        .. note:: Checksum check is enabled by default.
-        .. note::
-            If checksum check is disabled, then even explicitly specified
-            checksum related params e.g. in :meth:`~librepo.Handle.download`
-            method are ignored and checksum is not checked!"""
-        self.setopt(LRO_CHECKSUM, val)
-
-    def yumdlist(self, val):
-        """Set list of yum metadata files to download. e.g. ``["primary",
-        "filelists", "other", "primary_db", "prestodelta"]`` If *val* is None,
-        all metadata files will be downloaded. If *val* is ``[]`` or ``[None]``
-        only ``repomd.xml`` will be downloaded.
-        """
-        self.setopt(LRO_YUMDLIST, val)
-
-    def yumblist(self, val):
-        """Set blacklist of yum metadata files. This files will not be
-        downloaded.
-        """
-        self.setopt(LRO_YUMBLIST, val)
 
     def download(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, base_url=None, resume=0):
@@ -712,6 +768,16 @@ class Result(_librepo.Result):
     """Librepo result class
 
     This class holds information about a downloaded/localised repository.
+
+    **Attributes:**
+
+    .. attribute:: yum_repo
+
+        See: :data:`.LRR_YUM_REPO`
+
+    .. attribute:: yum_repomd
+
+        See: :data:`.LRR_YUM_REPOMD`
     """
 
     def getinfo(self, option):
@@ -721,12 +787,7 @@ class Result(_librepo.Result):
         """
         return _librepo.Result.getinfo(self, option)
 
-    def yum_repo(self):
-        """Return a dict with local paths to downloaded/localised
-        yum repository."""
-        return self.getinfo(LRR_YUM_REPO)
-
-    def yum_repomd(self):
-        """Return a dict representing a repomd.xml file of
-        downloaded yum repository."""
-        return self.getinfo(LRR_YUM_REPOMD)
+    def __getattr__(self, attr):
+        if attr not in ATTR_TO_LRR:
+            raise LibrepoException("Unknown attribute: %s" % attr)
+        return self.getinfo(ATTR_TO_LRR[attr])
