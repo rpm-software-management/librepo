@@ -14,6 +14,9 @@ Simple download of metadata
     """
     Example: Simple download whole yum repository
 
+    This example uses more "pythonic" way of usage.
+    Instead of use setopt() method it uses class properties.
+
     Use case:
     We have a metalink url of a repository and we
     want do download complete repository metadata.
@@ -30,11 +33,11 @@ Simple download of metadata
         h = librepo.Handle()
         r = librepo.Result()
         # Yum metadata
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.repotype = librepo.LR_YUMREPO
         # Metalink url
-        h.setopt(librepo.LRO_MIRRORLIST, URL)
+        h.mirrorlist = URL
         # Destination directory for metadata
-        h.setopt(librepo.LRO_DESTDIR, DESTDIR)
+        h.destdir = DESTDIR
 
         try:
             h.perform(r)
