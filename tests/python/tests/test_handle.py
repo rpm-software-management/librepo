@@ -38,6 +38,22 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_LOCAL,  0)
         self.assertFalse(h.getinfo(librepo.LRI_LOCAL))
 
+        def foo_cb(data, total_to_download, downloaded): pass
+
+        self.assertFalse(h.getinfo(librepo.LRI_PROGRESSCB))
+        h.setopt(librepo.LRO_PROGRESSCB, foo_cb)
+        self.assertEqual(h.getinfo(librepo.LRI_PROGRESSCB), foo_cb)
+        h.setopt(librepo.LRO_PROGRESSCB, None)
+        self.assertFalse(h.getinfo(librepo.LRI_PROGRESSCB))
+
+        data = {'a':'foo'}
+
+        self.assertFalse(h.getinfo(librepo.LRI_PROGRESSDATA))
+        h.setopt(librepo.LRO_PROGRESSDATA, data)
+        self.assertEqual(h.getinfo(librepo.LRI_PROGRESSDATA), data)
+        h.setopt(librepo.LRO_PROGRESSDATA, None)
+        self.assertFalse(h.getinfo(librepo.LRI_PROGRESSDATA))
+
         self.assertEqual(h.getinfo(librepo.LRI_DESTDIR), None)
         h.setopt(librepo.LRO_DESTDIR,  "foodir")
         self.assertEqual(h.getinfo(librepo.LRI_DESTDIR), "foodir")
@@ -97,6 +113,22 @@ class TestCaseHandle(unittest.TestCase):
         self.assertTrue(h.local)
         h.local =  0
         self.assertFalse(h.local)
+
+        def foo_cb(data, total_to_download, downloaded): pass
+
+        self.assertFalse(h.progresscb)
+        h.progresscb = foo_cb
+        self.assertEqual(h.progresscb, foo_cb)
+        h.progresscb = None
+        self.assertFalse(h.progresscb)
+
+        data = {'a':'foo'}
+
+        self.assertFalse(h.progressdata)
+        h.progressdata = data
+        self.assertEqual(h.progressdata, data)
+        h.progressdata = None
+        self.assertFalse(h.progressdata)
 
         self.assertEqual(h.destdir, None)
         h.destdir =  "foodir"

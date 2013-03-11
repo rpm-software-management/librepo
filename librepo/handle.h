@@ -96,6 +96,8 @@ typedef enum {
     LRI_URL,                    /* (char **) */
     LRI_MIRRORLIST,             /* (char **) */
     LRI_LOCAL,                  /* (long *) */
+    LRI_PROGRESSCB,             /* (void *) */
+    LRI_PROGRESSDATA,           /* (lr_ProgressCb) */
     LRI_DESTDIR,                /* (char **) */
     LRI_REPOTYPE,               /* (long *) */
     LRI_YUMDLIST,               /* (char ***) */

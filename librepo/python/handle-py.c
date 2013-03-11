@@ -334,8 +334,12 @@ setopt(_HandleObject *self, PyObject *args)
      * Options with callback data
      */
     case LRO_PROGRESSDATA: {
-        Py_XINCREF(obj);
-        self->progress_cb_data = obj;
+        if (obj == Py_None) {
+            self->progress_cb_data = NULL;
+        } else {
+            Py_XINCREF(obj);
+            self->progress_cb_data = obj;
+        }
         break;
     }
 
@@ -372,7 +376,7 @@ getinfo(_HandleObject *self, PyObject *args)
 
     switch (option) {
 
-    /** char** options*/
+    /* char** options */
     case LRI_URL:
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
@@ -397,7 +401,7 @@ getinfo(_HandleObject *self, PyObject *args)
             RETURN_ERROR(res, self->handle);
         return PyLong_FromLong(lval);
 
-    /* char*** */
+    /* char*** options */
     case LRI_YUMDLIST:
     case LRI_YUMBLIST: {
         PyObject *list;
@@ -412,6 +416,18 @@ getinfo(_HandleObject *self, PyObject *args)
             PyList_Append(list, PyString_FromString(strlist[x]));
         return list;
     }
+
+    /* callback option */
+    case LRI_PROGRESSCB:
+        if (self->progress_cb == NULL)
+            Py_RETURN_NONE;
+        return self->progress_cb;
+
+    /* callback data options */
+    case LRI_PROGRESSDATA:
+        if (self->progress_cb_data == NULL)
+            Py_RETURN_NONE;
+        return self->progress_cb_data;
 
     default:
         PyErr_SetString(PyExc_TypeError, "Unknown option");

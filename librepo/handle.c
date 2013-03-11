@@ -533,6 +533,18 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         *lnum = handle->local;
         break;
 
+    case LRI_PROGRESSCB: {
+        lr_ProgressCb *cb= va_arg(arg, lr_ProgressCb *);
+        *cb = handle->user_cb;
+        break;
+    }
+
+    case LRI_PROGRESSDATA: {
+        void **data = va_arg(arg, void **);
+        *data = handle->user_data;
+        break;
+    }
+
     case LRI_DESTDIR:
         str = va_arg(arg, char **);
         *str = handle->destdir;

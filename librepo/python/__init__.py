@@ -206,6 +206,8 @@ Constants
 .. data:: LRI_URL
 .. data:: LRI_MIRRORLIST
 .. data:: LRI_LOCAL
+.. data:: LRI_PROGRESSCB
+.. data:: LRI_PROGRESSDATA
 .. data:: LRI_DESTDIR
 .. data:: LRI_REPOTYPE
 .. data:: LRI_YUMDLIST
@@ -483,6 +485,8 @@ LRI_UPDATE              = _librepo.LRI_UPDATE
 LRI_URL                 = _librepo.LRI_URL
 LRI_MIRRORLIST          = _librepo.LRI_MIRRORLIST
 LRI_LOCAL               = _librepo.LRI_LOCAL
+LRI_PROGRESSCB          = _librepo.LRI_PROGRESSCB
+LRI_PROGRESSDATA        = _librepo.LRI_PROGRESSDATA
 LRI_DESTDIR             = _librepo.LRI_DESTDIR
 LRI_REPOTYPE            = _librepo.LRI_REPOTYPE
 LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
@@ -498,6 +502,8 @@ ATTR_TO_LRI = {
     "url":                  LRI_URL,
     "mirrorlist":           LRI_MIRRORLIST,
     "local":                LRI_LOCAL,
+    "progresscb":           LRI_PROGRESSCB,
+    "progressdata":         LRI_PROGRESSDATA,
     "destdir":              LRI_DESTDIR,
     "repotype":             LRI_REPOTYPE,
     "yumdlist":             LRI_YUMDLIST,
