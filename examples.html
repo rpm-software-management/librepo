@@ -58,6 +58,9 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Example: Simple download whole yum repository</span>
 
+<span class="sd">This example uses more &quot;pythonic&quot; way of usage.</span>
+<span class="sd">Instead of use setopt() method it uses class properties.</span>
+
 <span class="sd">Use case:</span>
 <span class="sd">We have a metalink url of a repository and we</span>
 <span class="sd">want do download complete repository metadata.</span>
@@ -74,11 +77,11 @@
     <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
     <span class="c"># Yum metadata</span>
-    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">repotype</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span>
     <span class="c"># Metalink url</span>
-    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_MIRRORLIST</span><span class="p">,</span> <span class="n">URL</span><span class="p">)</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">mirrorlist</span> <span class="o">=</span> <span class="n">URL</span>
     <span class="c"># Destination directory for metadata</span>
-    <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_DESTDIR</span><span class="p">,</span> <span class="n">DESTDIR</span><span class="p">)</span>
+    <span class="n">h</span><span class="o">.</span><span class="n">destdir</span> <span class="o">=</span> <span class="n">DESTDIR</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">h</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>

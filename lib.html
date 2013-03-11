@@ -128,13 +128,13 @@ errors it contain additional info about the error.</p>
 <blockquote>
 <div><p>LRO (aka LibRepo Option) constants are used to set <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a>
 options via <a class="reference internal" href="handle.html#librepo.Handle.setopt" title="librepo.Handle.setopt"><tt class="xref py py-meth docutils literal"><span class="pre">setopt()</span></tt></a> method.</p>
-<p>This options could be also set by <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> class methods
+<p>This options could be also set by <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> attributes
 with same names in lowercase and without <tt class="docutils literal"><span class="pre">LRO_</span></tt> prefix.</p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># The command:</span>
 <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
 <span class="c"># is equivalent to:</span>
-<span class="n">h</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -145,137 +145,184 @@ with same names in lowercase and without <tt class="docutils literal"><span clas
 <dl class="data">
 <dt id="librepo.LRO_UPDATE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_UPDATE</tt><a class="headerlink" href="#librepo.LRO_UPDATE" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.update" title="librepo.Handle.update"><tt class="xref py py-meth docutils literal"><span class="pre">update()</span></tt></a></p>
+<dd><p><em>Boolean</em>. Set to <tt class="docutils literal"><span class="pre">True</span></tt> if only want update localised or downloaded
+repository represented by <a class="reference internal" href="result.html#librepo.Result" title="librepo.Result"><tt class="xref py py-class docutils literal"><span class="pre">Result</span></tt></a> object. Update mode is
+meant to download previously omitted repository file(s).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_URL">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_URL</tt><a class="headerlink" href="#librepo.LRO_URL" title="Permalink to this definition">¶</a></dt>
-<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.url" title="librepo.Handle.url"><tt class="xref py py-meth docutils literal"><span class="pre">url()</span></tt></a></p>
+<dd><p><em>String or None</em>. Set repository url (repository url and baseurl
+are interchangeable terms in this context).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_MIRRORLIST">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_MIRRORLIST</tt><a class="headerlink" href="#librepo.LRO_MIRRORLIST" title="Permalink to this definition">¶</a></dt>
-<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.mirrorlist" title="librepo.Handle.mirrorlist"><tt class="xref py py-meth docutils literal"><span class="pre">mirrorlist()</span></tt></a></p>
+<dd><p><em>String or None</em>. Set mirrorlist url (url could point to a metalink
+mirrorlist or to a simple mirrorlist where each line wihtout <tt class="docutils literal"><span class="pre">'#'</span></tt>
+is considered as mirror url).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_LOCAL">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_LOCAL</tt><a class="headerlink" href="#librepo.LRO_LOCAL" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.local" title="librepo.Handle.local"><tt class="xref py py-meth docutils literal"><span class="pre">local()</span></tt></a></p>
+<dd><p><em>Boolean</em>. If set to True, no local copy of repository is created
+and repository is just localised in its current location.
+When True, url of repository MUST be a local address
+(e.g. &#8216;/home/user/repo&#8217; or &#8216;<a class="reference external" href="file:///home/user/repo">file:///home/user/repo</a>&#8216;).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_HTTPAUTH">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_HTTPAUTH</tt><a class="headerlink" href="#librepo.LRO_HTTPAUTH" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.httpauth" title="librepo.Handle.httpauth"><tt class="xref py py-meth docutils literal"><span class="pre">httpauth()</span></tt></a></p>
+<dd><p><em>Boolean</em>. If True, all supported methods of HTTP authentication
+are enabled.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_USERPWD">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_USERPWD</tt><a class="headerlink" href="#librepo.LRO_USERPWD" title="Permalink to this definition">¶</a></dt>
-<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.userpwd" title="librepo.Handle.userpwd"><tt class="xref py py-meth docutils literal"><span class="pre">userpwd()</span></tt></a></p>
+<dd><p><em>String or None</em>. Set username and password for HTTP authentication.
+Param must be in format &#8216;username:password&#8217;.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROXY">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXY</tt><a class="headerlink" href="#librepo.LRO_PROXY" title="Permalink to this definition">¶</a></dt>
-<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxy" title="librepo.Handle.proxy"><tt class="xref py py-meth docutils literal"><span class="pre">proxy()</span></tt></a></p>
+<dd><p><em>String or None</em>. Set proxy server address. Port could be
+specified by different option or by the :[port] suffix of
+this address. Any protocol prefix (<tt class="docutils literal"><span class="pre">http://</span></tt>, ...) will be ignored.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROXYPORT">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYPORT</tt><a class="headerlink" href="#librepo.LRO_PROXYPORT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integer or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyport" title="librepo.Handle.proxyport"><tt class="xref py py-meth docutils literal"><span class="pre">proxyport()</span></tt></a></p>
+<dd><p><em>Integer or None</em>. Set proxy port number to connect unsless
+it is specified in the proxy address string. None sets default
+value 1080.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROXYTYPE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYTYPE</tt><a class="headerlink" href="#librepo.LRO_PROXYTYPE" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxytype" title="librepo.Handle.proxytype"><tt class="xref py py-meth docutils literal"><span class="pre">proxytype()</span></tt></a></p>
+<dd><p><em>Boolean</em>. Set type of proxy - could be one of <a class="reference internal" href="#proxy-type-label"><em>Proxy type constants</em></a></p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROXYAUTH">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYAUTH</tt><a class="headerlink" href="#librepo.LRO_PROXYAUTH" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyauth" title="librepo.Handle.proxyauth"><tt class="xref py py-meth docutils literal"><span class="pre">proxyauth()</span></tt></a></p>
+<dd><p><em>Boolean</em>. If True, all supported proxy authentication methods are enabled.
+If False, only basic authentication method is enabled.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROXYUSERPWD">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYUSERPWD</tt><a class="headerlink" href="#librepo.LRO_PROXYUSERPWD" title="Permalink to this definition">¶</a></dt>
-<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.proxyuserpwd" title="librepo.Handle.proxyuserpwd"><tt class="xref py py-meth docutils literal"><span class="pre">proxyuserpwd()</span></tt></a></p>
+<dd><p><em>String or None</em>. Set username and password for proxy
+authentication in format &#8216;username:password&#8217;.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROGRESSCB">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROGRESSCB</tt><a class="headerlink" href="#librepo.LRO_PROGRESSCB" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function. See more: <a class="reference internal" href="handle.html#librepo.Handle.progresscb" title="librepo.Handle.progresscb"><tt class="xref py py-meth docutils literal"><span class="pre">progresscb()</span></tt></a></p>
+<dd><p><em>Function</em>. Set progress callback. Callback must be in format:
+<tt class="docutils literal"><span class="pre">callback(userdata,</span> <span class="pre">total_to_download,</span> <span class="pre">downloaded)</span></tt>. If
+total_to_download is 0, then total size is not known.
+Total size (total_to_download) could change (grow) among two callback
+calls (if some download failed and another mirror is tried).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_PROGRESSDATA">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROGRESSDATA</tt><a class="headerlink" href="#librepo.LRO_PROGRESSDATA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Any object. See more: <a class="reference internal" href="handle.html#librepo.Handle.progressdata" title="librepo.Handle.progressdata"><tt class="xref py py-meth docutils literal"><span class="pre">progressdata()</span></tt></a></p>
+<dd><p><em>Any object</em>. Set user data for the progress callback.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_RETRIES">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_RETRIES</tt><a class="headerlink" href="#librepo.LRO_RETRIES" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integer or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.retries" title="librepo.Handle.retries"><tt class="xref py py-meth docutils literal"><span class="pre">retries()</span></tt></a></p>
+<dd><p><em>Integer or None</em>. Set maximal number of retries for one mirror.
+One try per mirror is default value. None as <em>va</em> sets the
+default value.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_MAXSPEED">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_MAXSPEED</tt><a class="headerlink" href="#librepo.LRO_MAXSPEED" title="Permalink to this definition">¶</a></dt>
-<dd><p>Long or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.maxspeed" title="librepo.Handle.maxspeed"><tt class="xref py py-meth docutils literal"><span class="pre">maxspeed()</span></tt></a></p>
+<dd><p><em>Long or None</em>. Set maximal allowed speed per download in bytes per second.
+0 = unlimited speed - the default value.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_DESTDIR">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_DESTDIR</tt><a class="headerlink" href="#librepo.LRO_DESTDIR" title="Permalink to this definition">¶</a></dt>
-<dd><p>String or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.destdir" title="librepo.Handle.destdir"><tt class="xref py py-meth docutils literal"><span class="pre">destdir()</span></tt></a></p>
+<dd><p><em>String or None</em>. Set destination directory for downloaded data
+(metadata or packages).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_REPOTYPE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_REPOTYPE</tt><a class="headerlink" href="#librepo.LRO_REPOTYPE" title="Permalink to this definition">¶</a></dt>
-<dd><p>One of <a class="reference internal" href="#repotype-constants-label"><em>Repo type constants</em></a>. See more <a class="reference internal" href="handle.html#librepo.Handle.repotype" title="librepo.Handle.repotype"><tt class="xref py py-meth docutils literal"><span class="pre">repotype()</span></tt></a></p>
+<dd><p><em>Integer</em>. One of <a class="reference internal" href="#repotype-constants-label"><em>Repo type constants</em></a>. See more
+<tt class="xref py py-meth docutils literal"><span class="pre">repotype()</span></tt> Set type of repository.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_CONNECTTIMEOUT">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_CONNECTTIMEOUT</tt><a class="headerlink" href="#librepo.LRO_CONNECTTIMEOUT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Integer or None. See more: <a class="reference internal" href="handle.html#librepo.Handle.connecttimeout" title="librepo.Handle.connecttimeout"><tt class="xref py py-meth docutils literal"><span class="pre">connecttimeout()</span></tt></a></p>
+<dd><p><em>Integer or None. Set maximal timeout in sec for connection phase.
+Default value is 300. None as *val</em> sets the default value.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_IGNOREMISSING">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_IGNOREMISSING</tt><a class="headerlink" href="#librepo.LRO_IGNOREMISSING" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. If you want to localise (LRO_LOCAL is True) a incomplete local
+<dd><p><em>Boolean</em>. If you want to localise (LRO_LOCAL is True) a incomplete local
 repository (eg. only primary and filelists are present but repomd.xml
 contains more files), you could use LRO_YUMDLIST and specify only file
-that are present of use this option.</p>
+that are present, or use LRO_YUMBLIST and specify files that are not
+present or use this option.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_GPGCHECK">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_GPGCHECK</tt><a class="headerlink" href="#librepo.LRO_GPGCHECK" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.gpgcheck" title="librepo.Handle.gpgcheck"><tt class="xref py py-meth docutils literal"><span class="pre">gpgcheck()</span></tt></a></p>
+<dd><p><em>Boolean</em>. Set True to enable gpg check (if available) of downloaded repo.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_CHECKSUM">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_CHECKSUM</tt><a class="headerlink" href="#librepo.LRO_CHECKSUM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boolean. See more: <a class="reference internal" href="handle.html#librepo.Handle.checksum" title="librepo.Handle.checksum"><tt class="xref py py-meth docutils literal"><span class="pre">checksum()</span></tt></a></p>
+<dd><p><em>Boolean</em>. Set False/True to disable/enable checksum check.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Checksum check is enabled by default.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If checksum check is disabled, then even explicitly specified
+checksum related params e.g. in <a class="reference internal" href="handle.html#librepo.Handle.download" title="librepo.Handle.download"><tt class="xref py py-meth docutils literal"><span class="pre">download()</span></tt></a>
+method are ignored and checksum is not checked!</p>
+</div>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRO_YUMDLIST">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_YUMDLIST</tt><a class="headerlink" href="#librepo.LRO_YUMDLIST" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of strings. See more: <a class="reference internal" href="handle.html#librepo.Handle.yumdlist" title="librepo.Handle.yumdlist"><tt class="xref py py-meth docutils literal"><span class="pre">yumdlist()</span></tt></a>
-Some predefined list <a class="reference internal" href="#predefined-yumdlists-label"><em>Predefined yumdlist lists</em></a>.</p>
+<dd><p><em>List of strings</em>. Some predefined list <a class="reference internal" href="#predefined-yumdlists-label"><em>Predefined yumdlist lists</em></a>.
+Set list of yum metadata files to download. e.g. <tt class="docutils literal"><span class="pre">[&quot;primary&quot;,</span>
+<span class="pre">&quot;filelists&quot;,</span> <span class="pre">&quot;other&quot;,</span> <span class="pre">&quot;primary_db&quot;,</span> <span class="pre">&quot;prestodelta&quot;]</span></tt> If <em>val</em> is None,
+all metadata files will be downloaded. If <em>val</em> is <tt class="docutils literal"><span class="pre">[]</span></tt> or <tt class="docutils literal"><span class="pre">[None]</span></tt>
+only <tt class="docutils literal"><span class="pre">repomd.xml</span></tt> will be downloaded.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_YUMBLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_YUMBLIST</tt><a class="headerlink" href="#librepo.LRO_YUMBLIST" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>List of strings</em>. Set blacklist of yum metadata files.
+This files will not be downloaded.</p>
 </dd></dl>
 
 </div>
@@ -305,6 +352,16 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dd></dd></dl>
 
 <dl class="data">
+<dt id="librepo.LRI_PROGRESSCB">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_PROGRESSCB</tt><a class="headerlink" href="#librepo.LRI_PROGRESSCB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_PROGRESSDATA">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_PROGRESSDATA</tt><a class="headerlink" href="#librepo.LRI_PROGRESSDATA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
 <dt id="librepo.LRI_DESTDIR">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_DESTDIR</tt><a class="headerlink" href="#librepo.LRI_DESTDIR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -317,6 +374,11 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dl class="data">
 <dt id="librepo.LRI_YUMDLIST">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_YUMDLIST</tt><a class="headerlink" href="#librepo.LRI_YUMDLIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_YUMBLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_YUMBLIST</tt><a class="headerlink" href="#librepo.LRI_YUMBLIST" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="data">
