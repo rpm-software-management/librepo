@@ -421,12 +421,14 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_PROGRESSCB:
         if (self->progress_cb == NULL)
             Py_RETURN_NONE;
+        Py_INCREF(self->progress_cb);
         return self->progress_cb;
 
     /* callback data options */
     case LRI_PROGRESSDATA:
         if (self->progress_cb_data == NULL)
             Py_RETURN_NONE;
+        Py_INCREF(self->progress_cb_data);
         return self->progress_cb_data;
 
     default:

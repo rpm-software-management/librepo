@@ -1,9 +1,12 @@
 import unittest
 import librepo
 
+def foo_cb(data, total_to_download, downloaded):
+    pass
+
 class TestCaseHandle(unittest.TestCase):
     def test_handle_setopt_getinfo(self):
-        """No exception shoud be raised."""
+        """No exception should be raised."""
         h = librepo.Handle()
 
         self.assertFalse(h.getinfo(librepo.LRI_UPDATE))
@@ -37,8 +40,6 @@ class TestCaseHandle(unittest.TestCase):
         self.assertTrue(h.getinfo(librepo.LRI_LOCAL))
         h.setopt(librepo.LRO_LOCAL,  0)
         self.assertFalse(h.getinfo(librepo.LRI_LOCAL))
-
-        def foo_cb(data, total_to_download, downloaded): pass
 
         self.assertFalse(h.getinfo(librepo.LRI_PROGRESSCB))
         h.setopt(librepo.LRO_PROGRESSCB, foo_cb)
@@ -79,7 +80,7 @@ class TestCaseHandle(unittest.TestCase):
         self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), [])
 
     def test_handle_setget_attr(self):
-        """No exception shoud be raised."""
+        """No exception should be raised."""
         h = librepo.Handle()
 
         self.assertFalse(h.update)
@@ -113,8 +114,6 @@ class TestCaseHandle(unittest.TestCase):
         self.assertTrue(h.local)
         h.local =  0
         self.assertFalse(h.local)
-
-        def foo_cb(data, total_to_download, downloaded): pass
 
         self.assertFalse(h.progresscb)
         h.progresscb = foo_cb
