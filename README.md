@@ -61,3 +61,6 @@ All unit tests run from librepo checkout dir
 
     PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/
 
+## Links
+
+* [Red Hat Bugzilla](https://bugzilla.redhat.com/buglist.cgi?query_format=advanced&bug_status=NEW&bug_status=ASSIGNED&bug_status=MODIFIED&bug_status=VERIFIED&component=librepo)
