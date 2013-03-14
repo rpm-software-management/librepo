@@ -1,0 +1,87 @@
+%global timestamp xxxxxxxx
+%global gitrev xxxxxxx
+%global checkout %{timestamp}git%{gitrev}
+
+Name:		librepo
+Version:	@VERSION@
+Release:	1.%{checkout}%{?dist}
+Summary:	Repodata downloading library
+
+Group:		System Environment/Libraries
+License:	GPLv2+
+URL:		https://github.com/Tojaj/librepo
+# Use the following commands to generate the tarball:
+#  git clone https://github.com/Tojaj/librepo.git
+#  cd librepo
+#  utils/make_tarball.sh %{gitrev}
+Source0:	librepo-%{gitrev}.tar.xz
+
+BuildRequires:	check-devel
+BuildRequires:	cmake
+BuildRequires:	doxygen
+BuildRequires:	expat-devel
+BuildRequires:	gpgme-devel
+BuildRequires:	libcurl-devel
+BuildRequires:	openssl-devel
+BuildRequires:	pygpgme
+BuildRequires:	python2-devel
+BuildRequires:	python-flask
+BuildRequires:	python-nose
+BuildRequires:	python-sphinx
+
+%description
+A library providing C and Python (libcURL like) API to downloading repository
+metadata.
+
+%package devel
+Summary:	Repodata downloading library
+Group:		Development/Libraries
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+
+%description devel
+Development files for librepo.
+
+%package -n python-librepo
+Summary:	Python bindings for the librepo library
+Group:		Development/Languages
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+
+%description -n python-librepo
+Python bindings for the librepo library.
+
+%prep
+%setup -q -n librepo
+
+%build
+%cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .
+make %{?_smp_mflags}
+
+%check
+make ARGS="-V" test
+
+%install
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%doc COPYING README.md
+%{_libdir}/librepo.so.*
+
+%files devel
+%{_libdir}/librepo.so
+%{_libdir}/pkgconfig/librepo.pc
+%{_includedir}/librepo/
+
+%files -n python-librepo
+%{python_sitearch}/librepo/
+
+%changelog
+* Thu Mar 14 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-1.git%{gitrev}
+- Add LRI_PROGRESSCB and LRI_PROGRESSDATA options (RhBug: 919123)
+- Bindings: More pythonic operations with handle's attributes (RhBug: 919124)
+
+* Thu Oct  9 2012 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.1-1.gitc69642e
+- Initial package
