@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <stdarg.h>
+
 /** \defgroup   util    Utility functions and macros
  */
 
@@ -118,6 +120,15 @@ char *lr_pathconcat(const char *str, ...);
  * @return              0 on succes, -1 on error.
  */
 int lr_remove_dir(const char *path);
+
+/** \ingroup util
+ * Print to allocated string.
+ * @param strp          Location for the newly allocated string.
+ * @param format        A standard printf() format string.
+ * @param ap            The list of arguments to insert in the output.
+ * @return              The number of bytes printed
+ */
+int lr_vasprintf(char **strp, const char *format, va_list ap);
 
 #ifdef __cplusplus
 }

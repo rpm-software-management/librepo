@@ -26,7 +26,7 @@ extern "C" {
 
 // HAVE_VSNPRINTF
 // Define if vsnprintf is available.
-/* #undef HAVE_VSNPRINTF */
+#cmakedefine HAVE_VSNPRINTF 1
 
 #define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
 

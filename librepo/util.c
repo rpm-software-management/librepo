@@ -278,3 +278,25 @@ lr_remove_dir(const char *path)
 {
     return nftw(path, lr_remove_dir_cb, 64, FTW_DEPTH | FTW_PHYS);
 }
+
+int
+lr_vasprintf(char **strp, const char *format, va_list va)
+{
+    int size;
+#ifdef HAVE_VASPRINTF
+    size = vasprintf(strp, format, va);
+    if (size == -1)
+        lr_out_of_memory();
+    return size;
+#else
+    va_list va2;
+
+    va_copy(va2, va);
+    size = vsnprintf(NULL, 0, format, va2);
+    va_end(va2);
+    *strp = lr_malloc(size + 1);
+    vsnprintf(*strp, size + 1, format, va);
+    (*strp)[size] = 0;
+    return size;
+#endif
+}
