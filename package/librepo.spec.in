@@ -79,7 +79,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{python_sitearch}/librepo/
 
 %changelog
-* Thu Mar 14 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-1.git%{gitrev}
+* Thu Mar 14 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-1.git714e828
 - Add LRI_PROGRESSCB and LRI_PROGRESSDATA options (RhBug: 919123)
 - Bindings: More pythonic operations with handle's attributes (RhBug: 919124)
 
