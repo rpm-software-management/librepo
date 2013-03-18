@@ -215,7 +215,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
             continue;
 
         path = lr_pathconcat(destdir, record->location_href, NULL);
-        fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0660);
+        fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0666);
         if (fd < 0) {
             DPRINTF("%s: Cannot create/open %s (%s)\n",
                     __func__, path, strerror(errno));
@@ -449,7 +449,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         /* Prepare repomd.xml file */
         char *path;
         path = lr_pathconcat(handle->destdir, "/repodata/repomd.xml", NULL);
-        fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0660);
+        fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0666);
         if (fd == -1) {
             lr_free(path);
             return LRE_IO;
@@ -477,7 +477,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
             char *url, *signature;
 
             signature = lr_pathconcat(handle->destdir, "repodata/repomd.xml.asc", NULL);
-            fd_sig = open(signature, O_CREAT|O_TRUNC|O_RDWR, 0660);
+            fd_sig = open(signature, O_CREAT|O_TRUNC|O_RDWR, 0666);
             if (fd_sig == -1) {
                 DPRINTF("%s: Cannot open: %s\n", __func__, signature);
                 close(fd);

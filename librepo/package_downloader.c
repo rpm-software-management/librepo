@@ -94,7 +94,7 @@ lr_download_package(lr_Handle handle,
         open_flags &= ~O_TRUNC;     /* Do NOT truncate the dest file */
     }
 
-    fd = open(dest_path, open_flags, 0660);
+    fd = open(dest_path, open_flags, 0666);
     if (fd < 0) {
         DPRINTF("%s: open(\"%s\"): %s\n", __func__, dest_path, strerror(errno));
         lr_free(dest_path);
