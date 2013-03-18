@@ -713,15 +713,19 @@ class Handle(_librepo.Handle):
         _librepo.Handle.setopt(self, option, val)
 
     def __setattr__(self, attr, val):
-        if attr not in ATTR_TO_LRO:
-            raise LibrepoException("Unknown attribute: %s" % attr)
+        if attr not in ATTR_TO_LRO and attr in ATTR_TO_LRI:
+            raise AttributeError("Set of attribute '%s' is not supported" % attr)
+        elif attr not in ATTR_TO_LRO:
+            raise AttributeError("'%s' object has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
         self.setopt(ATTR_TO_LRO[attr], val)
 
     def __getattr__(self, attr):
         if attr not in ATTR_TO_LRI and attr in ATTR_TO_LRO:
-            raise LibrepoException("Reading of %s attribute is not supported" % attr)
+            raise AttributeError("Read of attribute '%s' is not supported" % attr)
         elif attr not in ATTR_TO_LRI:
-            raise LibrepoException("Unknown attribute: %s" % attr)
+            raise AttributeError("'%s' object has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
         return _librepo.Handle.getinfo(self, ATTR_TO_LRI[attr])
 
     def getinfo(self, option):
@@ -795,5 +799,6 @@ class Result(_librepo.Result):
 
     def __getattr__(self, attr):
         if attr not in ATTR_TO_LRR:
-            raise LibrepoException("Unknown attribute: %s" % attr)
+            raise AttributeError("'%s' object has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
         return self.getinfo(ATTR_TO_LRR[attr])
