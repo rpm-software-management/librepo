@@ -5,6 +5,7 @@ SET (librepotest_SRCS
      test_gpg.c
      test_handle.c
      test_internal_mirrorlist.c
+     test_list.c
      test_main.c
      test_metalink.c
      test_mirrorlist.c
