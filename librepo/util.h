@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
 #include <stdarg.h>
 
 /** \defgroup   util    Utility functions and macros
