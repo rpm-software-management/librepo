@@ -458,8 +458,13 @@ perform(_HandleObject *self, PyObject *args)
     result = Result_FromPyObject(result_obj);
 
     ret = lr_handle_perform(self->handle, result);
-//    if (ret == LRE_INTERRUPTED)
-//        PyErr_SetInterrupt();
+
+    if (ret == LRE_INTERRUPTED) {
+        PyErr_SetInterrupt();
+        PyErr_CheckSignals();
+        return NULL;
+    }
+
     if (ret != LRE_OK)
         RETURN_ERROR(ret, self->handle);
 
@@ -485,8 +490,13 @@ download_package(_HandleObject *self, PyObject *args)
 
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, base_url, resume);
-//    if (ret == LRE_INTERRUPTED)
-//        PyErr_SetInterrupt();
+
+    if (ret == LRE_INTERRUPTED) {
+        PyErr_SetInterrupt();
+        PyErr_CheckSignals();
+        return NULL;
+    }
+
     if (ret != LRE_OK)
         RETURN_ERROR(ret, self->handle);
 
