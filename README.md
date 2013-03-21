@@ -57,6 +57,17 @@ All unit tests run from librepo checkout dir
 
     build/tests/test_main tests/test_data/
 
+To check memoryleaks:
+
+    CK_FORK=no valgrind --leak-check=full build/tests/test_main tests/test_data/
+
+Supress known still_reachable memory:
+
+    CK_FORK=no valgrind --leak-check=full --suppressions=still_reachable.supp build/tests/test_main tests/test_data/
+
+Note: .valgrindrc file is present in checkoutdir, this file contains the settings:
+`--memcheck:leak-check=full --suppressions=./valgrind.supp`
+
 ### Run (from your checkout dir) - Python unittests:
 
     PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/

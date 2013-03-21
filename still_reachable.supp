@@ -1,0 +1,1535 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:checksum_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:checksum_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:gpg_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:gpg_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:handle_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:handle_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:internal_mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:internal_mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:metalink_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:metalink_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:repomd_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:repomd_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_create
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   fun:set_selinuxmnt
+   fun:verify_selinuxmnt
+   fun:init_lib
+   fun:call_init.part.0
+   fun:_dl_init
+   obj:/usr/lib64/ld-2.15.so
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:checksum_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:gpg_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:handle_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:handle_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:internal_mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:internal_mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:metalink_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:repomd_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:suite_create
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   fun:lr_strdup
+   fun:init_test_globals
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:lr_malloc
+   fun:lr_pathconcat
+   fun:init_test_globals
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_create
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   fun:lr_strdup
+   fun:lr_gettmpdir
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:checksum_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:gpg_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:handle_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:internal_mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:metalink_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:repomd_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:lr_malloc
+   fun:lr_pathconcat
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:checksum_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:gpg_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:handle_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:internal_mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:metalink_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:mirrorlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:repomd_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:metalink_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:fdopen@@GLIBC_2.2.5
+   fun:tmpfile@@GLIBC_2.2.5
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_create
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:_tcase_add_test
+   fun:util_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:tcase_create
+   fun:curltargetlist_suite
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_new
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_ctx_set_engine_info
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_new
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:gpgme_new
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_ctx_set_engine_info
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_import
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_data_new_from_fd
+   fun:lr_gpg_import_key
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_new
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_ctx_set_engine_info
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_new
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:gpgme_new
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_ctx_set_engine_info
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_op_verify
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/usr/lib64/libgpgme.so.11.7.0
+   fun:gpgme_data_new_from_fd
+   fun:lr_gpg_check_signature_fd
+   fun:lr_gpg_check_signature
+   fun:test_gpg_check_signature
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   fun:PR_NewLogModule
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:PR_CreateStack
+   fun:_PR_InitFdCache
+   fun:_PR_InitIO
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:_PR_InitLinker
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLogModule
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_PR_InitMW
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:PR_ErrorInstallTable
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_PR_InitZones
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:_PR_Getfd
+   fun:pt_SetMethods.isra.11
+   fun:_PR_InitIO
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_PR_InitLinker
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:PR_NewCondVar
+   fun:_PR_InitThreads
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:ExpandMonitorCache
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:PR_NewCondVar
+   fun:_PR_InitIO
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewMonitor
+   fun:PR_NewNamedMonitor
+   fun:_PR_InitLinker
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:PR_NewCondVar
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewMonitor
+   fun:_PR_UnixInit
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitEnv
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitLayerCache
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitThreads
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitCMon
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitIO
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitFdCache
+   fun:_PR_InitIO
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:PR_CreateStack
+   fun:_PR_InitFdCache
+   fun:_PR_InitIO
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitNet
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitTime
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitLog
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitDtoa
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_InitMW
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewLock
+   fun:_PR_UnixInit
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:PR_NewMonitor
+   fun:ExpandMonitorCache
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_PR_InitTPD
+   fun:_PR_InitStuff
+   fun:Curl_nss_init
+   fun:curl_global_init
+   fun:lr_global_init
+   fun:test_handle
+   obj:/usr/lib64/libcheck.so.0.0.0
+   fun:srunner_run_all
+   fun:main
+}

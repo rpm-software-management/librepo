@@ -34,7 +34,7 @@ lr_global_init()
     DPRINTF("Librepo version: %d.%d.%d\n", LR_VERSION_MAJOR,
                                            LR_VERSION_MINOR,
                                            LR_VERSION_PATCH);
-    curl_global_init(CURL_GLOBAL_SSL);
+    curl_global_init(CURL_GLOBAL_ALL);
 }
 
 void

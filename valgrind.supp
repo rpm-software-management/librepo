@@ -1,0 +1,72 @@
+# librepo suppressions for valgrind
+#
+# http://wiki.wxwidgets.org/Valgrind_Suppression_File_Howto
+#
+# To have valgrind use this file use --suppressions=/path/to/valgrind.supp
+#
+# Format of this file is:
+# {
+#     name_of_suppression
+#     tool_name:supp_kind
+#     (optional extra info for some suppression types)
+#     caller0 name, or /name/of/so/file.so
+#     caller1 name, or ditto
+#     (optionally: caller2 name)
+#     (optionally: caller3 name)
+# }
+#
+# tool_name:
+#   Memcheck, Addrcheck, Callgrind, ... (and other valgrind tools)
+# supp_kinds for Memcheck are:
+#   Leak Free Cond Param
+#   Value1 Value2 Value4 Value8 Value16
+#   Addr1 Addr2 Addr4 Addr8 Addr16
+# optional extra info is:
+#   if Param: name of system call param
+#   if Free: name of free-ing fn
+# caller line starts with:
+#
+#   'fun' for function calls
+#   'obj' for shared object
+# '...' is the frame-level wildcard -  matches zero or more fun: or obj: lines
+#
+# Example:
+# {
+#     gdk_set_locale
+#     Memcheck:Leak
+#     ...
+#     fun:gdk_set_locale
+# }
+
+{
+   openssl-supp-load-compressions
+   Memcheck:Leak
+   fun:malloc
+   fun:CRYPTO_malloc
+   ...
+   fun:load_builtin_compressions
+   fun:SSL_COMP_get_compression_methods
+   fun:SSL_library_init
+}
+{
+   gpgme-static-get-engine-info
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:gpgme_get_engine_info
+}
+{
+   gpgme-static-set-engine-info
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:_gpgme_set_engine_info
+   fun:gpgme_set_engine_info
+}
+{
+   gpgme-static-set-locale
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   fun:gpgme_set_locale
+}

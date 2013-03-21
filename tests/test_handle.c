@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "librepo/librepo.h"
 #include "librepo/rcodes.h"
 #include "librepo/handle.h"
 
@@ -18,6 +19,7 @@ START_TEST(test_handle)
 {
     lr_Handle h = NULL;
 
+    lr_global_init();
     h = lr_handle_init();
     fail_if(h == NULL);
     lr_handle_free(h);
@@ -35,7 +37,7 @@ START_TEST(test_handle)
     lr_handle_setopt(h, LRO_YUMDLIST, dlist);
     lr_handle_setopt(h, LRO_YUMBLIST, dlist);
     lr_handle_free(h);
-    h = NULL;
+    lr_global_cleanup();
 }
 END_TEST
 
@@ -46,6 +48,7 @@ START_TEST(test_handle_getinfo)
     char **strlist;
     lr_Handle h = NULL;
 
+    lr_global_init();
     h = lr_handle_init();
 
     num = -1;
@@ -99,6 +102,7 @@ START_TEST(test_handle_getinfo)
     fail_if(num != 0);
 
     lr_handle_free(h);
+    lr_global_cleanup();
 }
 END_TEST
 
