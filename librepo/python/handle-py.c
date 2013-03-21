@@ -155,7 +155,8 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_USERPWD:
     case LRO_PROXY:
     case LRO_PROXYUSERPWD:
-    case LRO_DESTDIR: {
+    case LRO_DESTDIR:
+    case LRO_USERAGENT: {
         char *str = NULL;
 
         if (PyString_Check(obj)) {

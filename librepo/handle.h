@@ -78,6 +78,8 @@ typedef enum {
     LRO_INTERRUPTIBLE, /*!< (long 1 or 0) If true, Librepo setups
                             its own signal handler for SIGTERM and
                             stops downloading if SIGTERM is catched. */
+    LRO_USERAGENT,     /*!< (char *) String for  User-Agent: header in the
+                            http request sent to the remote server */
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< (long 1 or 0) Check GPG signature if available */

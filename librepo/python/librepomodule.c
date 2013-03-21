@@ -105,6 +105,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_CONNECTTIMEOUT", LRO_CONNECTTIMEOUT);
     PyModule_AddIntConstant(m, "LRO_IGNOREMISSING", LRO_IGNOREMISSING);
     PyModule_AddIntConstant(m, "LRO_INTERRUPTIBLE", LRO_INTERRUPTIBLE);
+    PyModule_AddIntConstant(m, "LRO_USERAGENT", LRO_USERAGENT);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);

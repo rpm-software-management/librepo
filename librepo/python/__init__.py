@@ -172,6 +172,11 @@ Constants
     *Boolean*. Librepo sets up its own SIGTERM handler. If the SIGTERM signal
     is catched, the current download is interrupted.
 
+.. data:: LRO_USERAGENT
+
+    *String*. String for  User-Agent: header in the http request sent
+    to the remote server.
+
 .. data:: LRO_GPGCHECK
 
     *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
@@ -463,6 +468,7 @@ LRO_REPOTYPE        = _librepo.LRO_REPOTYPE
 LRO_CONNECTTIMEOUT  = _librepo.LRO_CONNECTTIMEOUT
 LRO_IGNOREMISSING   = _librepo.LRO_IGNOREMISSING
 LRO_INTERRUPTIBLE   = _librepo.LRO_INTERRUPTIBLE
+LRO_USERAGENT       = _librepo.LRO_USERAGENT
 LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
@@ -490,6 +496,7 @@ ATTR_TO_LRO = {
     "connecttimeout":   LRO_CONNECTTIMEOUT,
     "ignoremissing":    LRO_IGNOREMISSING,
     "interruptible":    LRO_INTERRUPTIBLE,
+    "useragent":        LRO_USERAGENT,
     "gpgcheck":         LRO_GPGCHECK,
     "checksum":         LRO_CHECKSUM,
     "yumdlist":         LRO_YUMDLIST,
@@ -701,6 +708,10 @@ class Handle(_librepo.Handle):
     .. attribute:: interruptible:
 
         See: :data:`.LRO_INTERRUPTIBLE`
+
+    .. attribute:: useragent:
+
+        See: :data:`.LRO_USERAGENT`
 
     .. attribute:: gpgcheck:
 

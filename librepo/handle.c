@@ -230,6 +230,10 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->interruptible = va_arg(arg, long) ? 1 : 0;
         break;
 
+    case LRO_USERAGENT:
+        c_rc = curl_easy_setopt(c_h, CURLOPT_USERAGENT, va_arg(arg, char *));
+        break;
+
     case LRO_GPGCHECK:
         if (va_arg(arg, long))
             handle->checks |= LR_CHECK_GPG;

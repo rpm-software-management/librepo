@@ -185,6 +185,8 @@ class TestCaseHandle(unittest.TestCase):
         h.ignoremissing = None
         h.setopt(librepo.LRO_INTERRUPTIBLE, None)
         h.interruptible = None
+        h.setopt(librepo.LRO_USERAGENT, None)
+        h.useragent = None
         h.setopt(librepo.LRO_GPGCHECK, None)
         h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)
