@@ -181,6 +181,10 @@ class TestCaseHandle(unittest.TestCase):
         h.maxspeed = None
         h.setopt(librepo.LRO_CONNECTTIMEOUT, None)  # None sets default value
         h.connecttimeout = None
+        h.setopt(librepo.LRO_IGNOREMISSING, None)
+        h.ignoremissing = None
+        h.setopt(librepo.LRO_INTERRUPTIBLE, None)
+        h.interruptible = None
         h.setopt(librepo.LRO_GPGCHECK, None)
         h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)

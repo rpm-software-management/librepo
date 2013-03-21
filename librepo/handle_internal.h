@@ -49,6 +49,7 @@ struct _lr_Handle {
     lr_ProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
     int             ignoremissing;  /*!< Ignore missing metadata files */
+    int             interruptible;  /*!< Setup own SIGTERM handler*/
     char            **yumdlist;     /*!< Repomd data typenames to download
                                         NULL - Download all
                                         yumdlist[0] = NULL - Only repomd.xml */

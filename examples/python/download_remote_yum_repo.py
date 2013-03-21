@@ -46,6 +46,9 @@ if __name__ == "__main__":
 
     # --- Optional arguments --------------------------------------------
 
+    # Make download interruptible
+    h.setopt(librepo.LRO_INTERRUPTIBLE, True)
+
     # Destination directory for metadata
     h.setopt(librepo.LRO_DESTDIR, DESTDIR)
 

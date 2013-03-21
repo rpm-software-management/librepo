@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <signal.h>
+
 #include "types.h"
 #include "handle.h"
 #include "checksum.h"
@@ -33,6 +35,9 @@ extern "C" {
 
 /** \defgroup   curl    Set of function for downloading via curl
  */
+
+extern volatile sig_atomic_t lr_interrupt;
+void lr_sigint_handler(int sig);
 
 /** \ingroup curl
  * Simplified version lr_curl_single_download_resume. Whole file is

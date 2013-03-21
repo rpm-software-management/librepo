@@ -51,8 +51,20 @@ lr_download_package(lr_Handle handle,
     char *file_basename;
     char *dest_basename;
     int open_flags = O_CREAT|O_TRUNC|O_RDWR;
+    struct sigaction old_sigact;
 
     assert(handle);
+
+    if (handle->interruptible) {
+        /* Setup sighandler */
+        struct sigaction sigact;
+        sigact.sa_handler = lr_sigint_handler;
+        sigaddset(&sigact.sa_mask, SIGINT);
+        sigact.sa_flags = SA_RESTART;
+        if (sigaction(SIGINT, &sigact, &old_sigact) == -1)
+            return LRE_SIGACTION;
+    }
+
 
     if (handle->repotype == LR_YUMREPO)
         rc = lr_handle_prepare_internal_mirrorlist(handle, "repodata/repomd.xml");
@@ -133,6 +145,12 @@ lr_download_package(lr_Handle handle,
                 rc = LRE_BADCHECKSUM;
             }
         }
+    }
+
+    if (handle->interruptible) {
+        /* Restore signal handler */
+        if (sigaction(SIGINT, &old_sigact, NULL) == -1)
+            return LRE_SIGACTION;
     }
 
     lr_free(dest_path);

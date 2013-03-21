@@ -167,6 +167,11 @@ Constants
     that are present, or use LRO_YUMBLIST and specify files that are not
     present or use this option.
 
+.. data:: LRO_INTERRUPTIBLE
+
+    *Boolean*. Librepo sets up its own SIGTERM handler. If the SIGTERM signal
+    is catched, the current download is interrupted.
+
 .. data:: LRO_GPGCHECK
 
     *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
@@ -395,6 +400,14 @@ LibRepo Error codes.
 
     Repository metadata are not complete.
 
+.. data:: LRE_INTERRUPTED
+
+    Download was interrupted by SIGTERM signal.
+
+.. data:: LRE_SIGACTION
+
+    Cannot set own signal handler. Sigaction system call failed.
+
 .. data:: LRE_UNKNOWNERROR
 
     An unknown error.
@@ -449,6 +462,7 @@ LRO_DESTDIR         = _librepo.LRO_DESTDIR
 LRO_REPOTYPE        = _librepo.LRO_REPOTYPE
 LRO_CONNECTTIMEOUT  = _librepo.LRO_CONNECTTIMEOUT
 LRO_IGNOREMISSING   = _librepo.LRO_IGNOREMISSING
+LRO_INTERRUPTIBLE   = _librepo.LRO_INTERRUPTIBLE
 LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
@@ -475,6 +489,7 @@ ATTR_TO_LRO = {
     "repotype":         LRO_REPOTYPE,
     "connecttimeout":   LRO_CONNECTTIMEOUT,
     "ignoremissing":    LRO_IGNOREMISSING,
+    "interruptible":    LRO_INTERRUPTIBLE,
     "gpgcheck":         LRO_GPGCHECK,
     "checksum":         LRO_CHECKSUM,
     "yumdlist":         LRO_YUMDLIST,
@@ -562,6 +577,8 @@ LRE_GPGNOTSUPPORTED     = _librepo.LRE_GPGNOTSUPPORTED
 LRE_GPGERROR            = _librepo.LRE_GPGERROR
 LRE_BADGPG              = _librepo.LRE_BADGPG
 LRE_INCOMPLETEREPO      = _librepo.LRE_INCOMPLETEREPO
+LRE_INTERRUPTED         = _librepo.LRE_INTERRUPTED
+LRE_SIGACTION           = _librepo.LRE_SIGACTION
 LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
 
 LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
@@ -680,6 +697,10 @@ class Handle(_librepo.Handle):
     .. attribute:: ignoremissing:
 
         See: :data:`.LRO_IGNOREMISSING`
+
+    .. attribute:: interruptible:
+
+        See: :data:`.LRO_INTERRUPTIBLE`
 
     .. attribute:: gpgcheck:
 

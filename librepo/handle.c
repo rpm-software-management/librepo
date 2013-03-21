@@ -226,6 +226,10 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->ignoremissing = va_arg(arg, long) ? 1 : 0;
         break;
 
+    case LRO_INTERRUPTIBLE:
+        handle->interruptible = va_arg(arg, long) ? 1 : 0;
+        break;
+
     case LRO_GPGCHECK:
         if (va_arg(arg, long))
             handle->checks |= LR_CHECK_GPG;
@@ -454,7 +458,6 @@ mirrorlist_error:
     return rc;
 }
 
-
 int
 lr_handle_perform(lr_Handle handle, lr_Result result)
 {
@@ -484,6 +487,17 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
 
     DPRINTF("%s: Using dir: %s\n", __func__, handle->destdir);
 
+    struct sigaction old_sigact;
+    if (handle->interruptible) {
+        /* Setup sighandler */
+        struct sigaction sigact;
+        sigact.sa_handler = lr_sigint_handler;
+        sigaddset(&sigact.sa_mask, SIGINT);
+        sigact.sa_flags = 0;
+        if (sigaction(SIGINT, &sigact, &old_sigact) == -1)
+            return LRE_SIGACTION;
+    }
+
     switch (handle->repotype) {
     case LR_YUMREPO:
         DPRINTF("%s: Downloading/Locating yum repo\n", __func__);
@@ -494,6 +508,12 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
         assert(0);
         break;
     };
+
+    if (handle->interruptible) {
+        /* Restore signal handler */
+        if (sigaction(SIGINT, &old_sigact, NULL) == -1)
+            return LRE_SIGACTION;
+    }
 
     return rc;
 }

@@ -75,6 +75,10 @@ lr_strerror(int rc)
         return "Error while GPG check";
     case LRE_INCOMPLETEREPO:
         return "Repository metadata are not complete";
+    case LRE_INTERRUPTED:
+        return "Interrupted by SIGINT";
+    case LRE_SIGACTION:
+        return "Cannot set own signal handler - sigaction system call failed";
     case LRE_BADGPG:
         return "Bad GPG signature";
     }

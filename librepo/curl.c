@@ -37,6 +37,15 @@
 
 /* Callback stuff */
 
+volatile sig_atomic_t lr_interrupt = 0;
+
+void
+lr_sigint_handler(int sig)
+{
+    LR_UNUSED(sig);
+    lr_interrupt = 1;
+}
+
 struct _lr_SharedCallbackData {
     short *counted;     /*!< wich downloads have already been included into
                              the total_size*/
@@ -127,6 +136,7 @@ lr_curl_single_download_resume(lr_Handle handle,
                                long long offset,
                                int use_cb)
 {
+    CURLM *cm;
     CURLcode c_rc = CURLE_OK;
     CURL *c_h = NULL;
     FILE *f = NULL;
@@ -192,7 +202,6 @@ lr_curl_single_download_resume(lr_Handle handle,
     }
 
     /* Header cb */
-//    curl_easy_setopt(c_h, CURLOPT_HEADERFUNCTION, header_cb);
 
     /* Use callback if desired */
     if (use_cb && handle->user_cb) {
@@ -207,14 +216,93 @@ lr_curl_single_download_resume(lr_Handle handle,
         curl_easy_setopt(c_h, CURLOPT_PROGRESSDATA, cb_data);
      }
 
+    if (lr_interrupt) {
+        curl_easy_cleanup(c_h);
+        fclose(f);
+        DPRINTF("%s: Download interupted\n", __func__);
+        return LRE_INTERRUPTED;
+    }
 
     /* Main downloading loop - loop because of retries */
+    cm = curl_multi_init();
+    curl_multi_add_handle(cm,  c_h);
 
     for (;;) {
+        CURLMsg *msg;
         ret = LRE_OK;
         status_code = 0;
 
-        c_rc = curl_easy_perform(c_h);
+        /* Non-blocking download via multi handle */
+
+        int msgs_left, still_running;
+
+        curl_multi_perform(cm, &still_running);
+
+        while (still_running) {
+            int maxfd = -1;
+            long curl_timeout = -1;
+            fd_set R, W, E;
+            struct timeval timeout;
+            timeout.tv_sec  = 1;
+            timeout.tv_usec = 0;
+
+            if (lr_interrupt) {
+                c_rc = LRE_INTERRUPTED;
+                DPRINTF("%s: Download interupted\n", __func__);
+                break;
+            }
+
+            FD_ZERO(&R);
+            FD_ZERO(&W);
+            FD_ZERO(&E);
+
+            /* Get file descriptors for from the transfer */
+            if (curl_multi_fdset(cm, &R, &W, &E, &maxfd)) {
+                DPRINTF("%s: curl_multi_fdset error\n", __func__);
+                ret = LRE_CURLM;
+                goto retry;
+            }
+
+            /* Get maximal curl timeout */
+            if (curl_multi_timeout(cm, &curl_timeout)) {
+                DPRINTF("%s: curl_multi_timeout error\n", __func__);
+                ret = LRE_CURLM;
+                goto retry;
+            }
+
+            if (curl_timeout >= 0) {
+                timeout.tv_sec = curl_timeout / 1000;
+                if (timeout.tv_sec > 1)
+                    timeout.tv_sec = 1;
+                else
+                    timeout.tv_usec = (curl_timeout % 1000) * 1000;
+            }
+
+            if (0 > select(maxfd+1, &R, &W, &E, &timeout)) {
+                if (errno == EINTR) {
+                    ret = LRE_INTERRUPTED;
+                    DPRINTF("%s: select() was interrupted\n", __func__);
+                    goto retry;
+                } else {
+                    DPRINTF("%s: select(%i,,,,%li): %i: %s\n",
+                        __func__, maxfd+1, curl_timeout, errno, strerror(errno));
+                    ret = LRE_CURLM;
+                    goto retry;
+                }
+            }
+
+            curl_multi_perform(cm, &still_running);
+        }
+
+        /* See how the transfer went */
+        while ((msg = curl_multi_info_read(cm, &msgs_left))) {
+            if (msg->msg == CURLMSG_DONE)
+                c_rc = msg->data.result;
+            else
+                continue;
+        }
+
+        /* End of non-blocking download via multi hande */
 
         if (c_rc != CURLE_OK && c_rc != CURLE_HTTP_RETURNED_ERROR) {
             ret = LRE_CURL;
@@ -265,9 +353,9 @@ lr_curl_single_download_resume(lr_Handle handle,
             }
 
             goto retry;
-        }
+        } /* end if (status_code) */
 
-       if (ret == LRE_OK && c_rc == CURLE_OK)
+        if (ret == LRE_OK && c_rc == CURLE_OK)
             /* Downloading was successfull */
             break;
 
@@ -303,10 +391,12 @@ retry:
 
         /* Sleep for 500ms before next try */
         usleep(500000);
-    }
+
+    } /* End of for loop */
 
     fclose(f);
     curl_easy_cleanup(c_h);
+    curl_multi_cleanup(cm);
     lr_free(cb_data);
     return ret;
 }
@@ -380,6 +470,9 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             handle->used_mirror = lr_strdup(url);
             break;
         }
+
+        if (rc == LRE_INTERRUPTED)
+            break;
     }
 
     return rc;
@@ -434,6 +527,11 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         int still_running;  /* Number of still running downloads */
         CURLMsg *msg;  /* for picking up messages with the transfer status */
         int msgs_left; /* how many messages are left */
+
+        if (lr_interrupt) {
+            ret = LRE_INTERRUPTED;
+            goto cleanup;
+        }
 
         DPRINTF("%s: Using mirror %s\n", __func__, mirror);
 
@@ -566,6 +664,11 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             }
 
             rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+            if (lr_interrupt) {
+                ret = LRE_INTERRUPTED;
+                goto cleanup;
+            }
 
             switch (rc) {
             case -1:

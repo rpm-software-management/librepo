@@ -75,6 +75,9 @@ typedef enum {
                             and filelists are present) you could use
                             LRO_YUMDLIST and specify only file that are
                             present, or use this option. */
+    LRO_INTERRUPTIBLE, /*!< (long 1 or 0) If true, Librepo setups
+                            its own signal handler for SIGTERM and
+                            stops downloading if SIGTERM is catched. */
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< (long 1 or 0) Check GPG signature if available */

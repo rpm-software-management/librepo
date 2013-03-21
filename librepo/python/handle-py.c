@@ -178,7 +178,8 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXYAUTH:
     case LRO_GPGCHECK:
     case LRO_IGNOREMISSING:
-    case LRO_CHECKSUM: {
+    case LRO_CHECKSUM:
+    case LRO_INTERRUPTIBLE: {
         PY_LONG_LONG d;
 
         if (PyInt_Check(obj))
@@ -456,6 +457,8 @@ perform(_HandleObject *self, PyObject *args)
     result = Result_FromPyObject(result_obj);
 
     ret = lr_handle_perform(self->handle, result);
+//    if (ret == LRE_INTERRUPTED)
+//        PyErr_SetInterrupt();
     if (ret != LRE_OK)
         RETURN_ERROR(ret, self->handle);
 
@@ -481,6 +484,8 @@ download_package(_HandleObject *self, PyObject *args)
 
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, base_url, resume);
+//    if (ret == LRE_INTERRUPTED)
+//        PyErr_SetInterrupt();
     if (ret != LRE_OK)
         RETURN_ERROR(ret, self->handle);
 
