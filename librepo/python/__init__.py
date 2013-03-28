@@ -227,6 +227,7 @@ Constants
 .. data:: LRI_LASTCURLSTRERR
 .. data:: LRI_LASTCURLMSTRERR
 .. data:: LRI_LASTBADSTATUSCODE
+.. data:: LRI_MIRRORS
 
 .. _proxy-type-label:
 
@@ -518,6 +519,7 @@ LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
 LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
 LRI_LASTCURLMSTRERR     = _librepo.LRI_LASTCURLMSTRERR
 LRI_LASTBADSTATUSCODE   = _librepo.LRI_LASTBADSTATUSCODE
+LRI_MIRRORS             = _librepo.LRI_MIRRORS
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
@@ -535,6 +537,7 @@ ATTR_TO_LRI = {
     "lastcurlstrerr":       LRI_LASTCURLSTRERR,
     "lastcurlmstrerr":      LRI_LASTCURLMSTRERR,
     "lastbadstatuscode":    LRI_LASTBADSTATUSCODE,
+    "mirrors":              LRI_MIRRORS,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG

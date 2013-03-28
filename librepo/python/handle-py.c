@@ -405,7 +405,8 @@ getinfo(_HandleObject *self, PyObject *args)
 
     /* char*** options */
     case LRI_YUMDLIST:
-    case LRI_YUMBLIST: {
+    case LRI_YUMBLIST:
+    case LRI_MIRRORS: {
         PyObject *list;
         char **strlist;
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &strlist);
@@ -414,8 +415,13 @@ getinfo(_HandleObject *self, PyObject *args)
         if (strlist == NULL)
             Py_RETURN_NONE;
         list = PyList_New(0);
-        for (int x=0; strlist[x] != NULL; x++)
+        for (int x=0; strlist[x] != NULL; x++) {
             PyList_Append(list, PyString_FromString(strlist[x]));
+        }
+
+        if (option == LRI_MIRRORS)
+            lr_free(strlist);
+
         return list;
     }
 

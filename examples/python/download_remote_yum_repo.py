@@ -78,6 +78,11 @@ if __name__ == "__main__":
     h.setopt(librepo.LRO_YUMDLIST, ["primary"])
     h.perform(r)
 
+    # List of mirrors
+    # (In this case no mirrorlist is used -> list will contain only one url)
+    # Example of access info via attr insted of .getinfo() method
+    pprint (h.mirrors)
+
     # Get and show final results
     pprint (r.getinfo(librepo.LRR_YUM_REPO))
     pprint (r.getinfo(librepo.LRR_YUM_REPOMD))

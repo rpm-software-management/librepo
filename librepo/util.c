@@ -296,6 +296,28 @@ lr_copy_content(int source, int dest)
     return (size < 0) ? -1 : 0;
 }
 
+char *
+lr_prepend_url_protocol(const char *path)
+{
+    if (!path)
+        return NULL;
+
+    if (strstr(path, "://"))  // Protocol was specified
+        return lr_strdup(path);
+
+    if (path[0] == '/')  // Path is absolute path
+        return lr_strconcat("file://", path, NULL);
+
+    char *path_with_protocol, *resolved_path = realpath(path, NULL);
+    if (!resolved_path) {
+        DPRINTF("%s: %s - realpath: %s ", __func__, path, strerror(errno));
+        return NULL;
+    }
+    path_with_protocol = lr_strconcat("file://", resolved_path, NULL);
+    free(resolved_path);
+    return path_with_protocol;
+}
+
 int
 lr_vasprintf(char **strp, const char *format, va_list va)
 {

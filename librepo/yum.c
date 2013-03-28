@@ -434,7 +434,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
 
     DPRINTF("%s: Downloading/Copying repo..\n", __func__);
 
-    rc = lr_handle_prepare_internal_mirrorlist(handle, "repodata/repomd.xml");
+    rc = lr_handle_prepare_internal_mirrorlist(handle);
     if (rc != LRE_OK)
         return rc;
 

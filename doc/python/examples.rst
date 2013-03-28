@@ -228,3 +228,32 @@ More complex download
         pprint (r.getinfo(librepo.LRR_YUM_REPOMD))
 
 
+How to get urls in a local mirrorlist
+-------------------------------------
+
+::
+
+    import os
+    import sys
+    import librepo
+
+    DESTDIR = "downloaded_metadata"
+
+    if __name__ == "__main__":
+        h = librepo.Handle()
+
+        # Correct repotype is important. Without repotype
+        # metalink parser doesn't know suffix which should
+        # be stripped off from the mirrors urls.
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        # Set local mirrorlist file as mirrorlist
+        if os.path.isfile(os.path.join(DESTDIR, "mirrorlist")):
+            h.mirrorlist = os.path.join(DESTDIR, "mirrorlist")
+        elif os.path.isfile(os.path.join(DESTDIR, "metalink.xml")):
+            h.mirrorlist = os.path.join(DESTDIR, "metalink.xml")
+        else:
+            print "Mirrorlist of downloaded repodata isn't available"
+            sys.exit(0)
+
+        print h.mirrors

@@ -339,11 +339,14 @@ lr_handle_last_curlm_strerror(lr_Handle handle)
 }
 
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
-                                      const char *metalink_suffix)
+lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
 {
     int rc = LRE_OK;
     lr_Metalink metalink = NULL;
+    char *metalink_suffix = NULL;
+
+    if (handle->repotype == LR_YUMREPO)
+        metalink_suffix = "repodata/repomd.xml";
 
     if (handle->internal_mirrorlist)
         return LRE_OK;  /* Internal mirrorlist already exists */
@@ -395,7 +398,10 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
     if (handle->mirrorlist) {
         /* Download and parse metalink or mirrorlist to internal mirrorlist */
         lr_Mirrorlist mirrorlist = NULL;
-        int mirrors_fd = lr_gettmpfile();
+        char *mirrorlist_url;
+        int mirrors_fd;
+
+        mirrors_fd = lr_gettmpfile();
         if (mirrors_fd < 1) {
             rc = LRE_IO;
             DPRINTF("%s: Cannot create a temporary file\n", __func__);
@@ -404,7 +410,10 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
 
         handle->mirrorlist_fd = mirrors_fd;
 
-        rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd);
+        mirrorlist_url = lr_prepend_url_protocol(handle->mirrorlist);
+        rc = lr_curl_single_download(handle, mirrorlist_url, mirrors_fd);
+        lr_free(mirrorlist_url);
+
         if (rc != LRE_OK)
             goto mirrorlist_error;
 
@@ -630,6 +639,23 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         lnum = va_arg(arg, long *);
         *lnum = handle->status_code;
         break;
+
+    case LRI_MIRRORS: {
+        int x;
+        char ***list = va_arg(arg, char ***);
+        *list = NULL;
+        rc = lr_handle_prepare_internal_mirrorlist(handle);
+        if (rc != LRE_OK)
+            break;
+        /* Make list of urls from internal mirrorlist */
+        lr_InternalMirrorlist ml = handle->internal_mirrorlist;
+        *list = lr_malloc((ml->nom + 1) * sizeof(char *));
+        for (x = 0; x < ml->nom; x++)
+            (*list)[x] = ml->mirrors[x]->url;
+        (*list)[x] = NULL;
+        break;
+    }
+
 
     default:
         rc = LRE_UNKNOWNOPT;

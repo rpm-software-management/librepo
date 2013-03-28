@@ -112,6 +112,8 @@ typedef enum {
     LRI_LASTCURLSTRERR,         /* (char **) */
     LRI_LASTCURLMSTRERR,        /* (char **) */
     LRI_LASTBADSTATUSCODE,      /* (long *) */
+    LRI_MIRRORS,                /* (char **) Returned list must be freed
+                                   but its elements doesn't! */
     LRI_SENTINEL,
 } lr_HandleInfoOption; /*!< Handle info options */
 

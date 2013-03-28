@@ -67,7 +67,7 @@ lr_download_package(lr_Handle handle,
 
 
     if (handle->repotype == LR_YUMREPO)
-        rc = lr_handle_prepare_internal_mirrorlist(handle, "repodata/repomd.xml");
+        rc = lr_handle_prepare_internal_mirrorlist(handle);
     else {
         DPRINTF("%s: Bad repo type\n", __func__);
         assert(0);

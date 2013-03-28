@@ -131,6 +131,15 @@ int lr_remove_dir(const char *path);
 int lr_copy_content(int source, int dest);
 
 /** \ingroup util
+ * If protocol is specified ("http://foo") return copy of path.
+ * If path is absolute ("/foo/bar/") return path with "file://" prefix.
+ * If path is relative ("bar/") return absolute path with "file://" prefix.
+ * @param               path
+ * @return              url with protocol
+ */
+char *lr_prepend_url_protocol(const char *path);
+
+/** \ingroup util
  * Print to allocated string.
  * @param strp          Location for the newly allocated string.
  * @param format        A standard printf() format string.
