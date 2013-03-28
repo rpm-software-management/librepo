@@ -69,6 +69,7 @@ lr_yum_repo_clear(lr_YumRepo repo)
     lr_free(repo->url);
     lr_free(repo->destdir);
     lr_free(repo->signature);
+    lr_free(repo->mirrorlist);
     memset(repo, 0, sizeof(struct _lr_YumRepo));
 }
 
@@ -330,6 +331,19 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     }
 
     if (!handle->update) {
+        /* Locate mirrorlist if available */
+        path = lr_pathconcat(baseurl, "metalink.xml", NULL);
+        if (access(path, F_OK) == 0) {
+            repo->mirrorlist = path;
+        } else {
+            lr_free(path);
+            path = lr_pathconcat(baseurl, "mirrorlist", NULL);
+            if (access(path, F_OK) == 0)
+                repo->mirrorlist = path;
+            else
+                lr_free(path);
+        }
+
         /* Open and parse repomd */
         char *sig;
 
@@ -415,14 +429,14 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
+    repo   = result->yum_repo;
+    repomd = result->yum_repomd;
+
     DPRINTF("%s: Downloading/Copying repo..\n", __func__);
 
     rc = lr_handle_prepare_internal_mirrorlist(handle, "repodata/repomd.xml");
     if (rc != LRE_OK)
         return rc;
-
-    repo   = result->yum_repo;
-    repomd = result->yum_repomd;
 
     path_to_repodata = lr_pathconcat(handle->destdir, "repodata", NULL);
 
@@ -446,8 +460,33 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     lr_free(path_to_repodata);
 
     if (!handle->update) {
-        /* Prepare repomd.xml file */
+        int ret;
         char *path;
+
+        /* Store mirrorlist file */
+        if (handle->mirrorlist_fd != -1) {
+            char *ml_file_path;
+            if (handle->metalink)
+                ml_file_path = lr_pathconcat(handle->destdir, "metalink.xml", NULL);
+            else
+                ml_file_path = lr_pathconcat(handle->destdir, "mirrorlist", NULL);
+            fd = open(ml_file_path, O_CREAT|O_TRUNC|O_RDWR, 0666);
+            if (fd < 0) {
+                DPRINTF("%s: Cannot create: %s\n", __func__, ml_file_path);
+                lr_free(ml_file_path);
+                return LRE_IO;
+            }
+            ret = lr_copy_content(handle->mirrorlist_fd, fd);
+            close(fd);
+            if (ret != 0) {
+                DPRINTF("%s: Cannot copy content of mirrorlist file\n", __func__);
+                lr_free(ml_file_path);
+                return LRE_IO;
+            }
+            repo->mirrorlist = ml_file_path;
+        }
+
+        /* Prepare repomd.xml file */
         path = lr_pathconcat(handle->destdir, "/repodata/repomd.xml", NULL);
         fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0666);
         if (fd == -1) {

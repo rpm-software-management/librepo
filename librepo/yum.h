@@ -51,6 +51,7 @@ struct _lr_YumRepo {
     char *signature;        /*!< Path to signature if available and
                                  signature was downloaded (GPG check
                                  was enabled during repo downloading) */
+    char *mirrorlist;       /*!< Mirrolist file */
 };
 
 /** Pointer to ::_lr_YumRepo */

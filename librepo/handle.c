@@ -70,6 +70,7 @@ lr_handle_init()
     handle = lr_malloc0(sizeof(struct _lr_Handle));
     handle->curl_handle = curl;
     handle->retries = 1;
+    handle->mirrorlist_fd = -1;
     handle->last_curl_error = CURLE_OK;
     handle->last_curlm_error = CURLM_OK;
     handle->checks |= LR_CHECK_CHECKSUM;
@@ -88,6 +89,8 @@ lr_handle_free(lr_Handle handle)
         return;
     if (handle->curl_handle)
         curl_easy_cleanup(handle->curl_handle);
+    if (handle->mirrorlist_fd != -1)
+        close(handle->mirrorlist_fd);
     lr_free(handle->baseurl);
     lr_free(handle->mirrorlist);
     lr_free(handle->used_mirror);
@@ -130,8 +133,14 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
     case LRO_MIRRORLIST:
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
+            // Clean previous mirrorlist stuff
             lr_internalmirrorlist_free(handle->internal_mirrorlist);
             handle->internal_mirrorlist = NULL;
+            lr_metalink_free(handle->metalink);
+            handle->metalink = NULL;
+            if (handle->mirrorlist_fd != -1)
+                close(handle->mirrorlist_fd);
+            handle->mirrorlist_fd = -1;
         }
         break;
 
@@ -387,6 +396,13 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
         /* Download and parse metalink or mirrorlist to internal mirrorlist */
         lr_Mirrorlist mirrorlist = NULL;
         int mirrors_fd = lr_gettmpfile();
+        if (mirrors_fd < 1) {
+            rc = LRE_IO;
+            DPRINTF("%s: Cannot create a temporary file\n", __func__);
+            goto mirrorlist_error;
+        }
+
+        handle->mirrorlist_fd = mirrors_fd;
 
         rc = lr_curl_single_download(handle, handle->mirrorlist, mirrors_fd);
         if (rc != LRE_OK)
@@ -452,7 +468,6 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle,
 
 mirrorlist_error:
         lr_mirrorlist_free(mirrorlist);
-        close(mirrors_fd);
         if (rc != LRE_OK) {
             lr_metalink_free(metalink);
             return rc;

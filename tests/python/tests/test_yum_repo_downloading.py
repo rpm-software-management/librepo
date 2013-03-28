@@ -64,7 +64,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               'repomd': self.tmpdir+'/repodata/repomd.xml',
               #'updateinfo': None,
               'url': url,
-              'signature': None}
+              'signature': None,
+              'mirrorlist': None}
         )
 
         self.assertEqual(yum_repomd,
@@ -176,7 +177,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              'repomd': self.tmpdir+'/repodata/repomd.xml',
              'updateinfo': self.tmpdir+'/repodata/65c4f66e2808d328890505c3c2f13bb35a96f457d1c21a6346191c4dc07e6080-updateinfo.xml.gz',
              'url': url,
-             'signature': None}
+             'signature': None,
+             'mirrorlist': None}
         )
 
         self.assertEqual(yum_repomd,
@@ -339,7 +341,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              'repomd': self.tmpdir+'/repodata/repomd.xml',
              #'updateinfo': None,
              'url': url,
-             'signature': None}
+             'signature': None,
+             'mirrorlist': None}
         )
 
         # Test if all mentioned files really exist
@@ -377,7 +380,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              'repomd': self.tmpdir+'/repodata/repomd.xml',
              #'updateinfo': None,
              'url': url,
-             'signature': None}
+             'signature': None,
+             'mirrorlist': None}
         )
 
         # Test if all mentioned files really exist
@@ -415,7 +419,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               'repomd': self.tmpdir+'/repodata/repomd.xml',
               #'updateinfo': None,
               'url': url,
-              'signature': None}
+              'signature': None,
+              'mirrorlist': None}
         )
 
         # Test if all mentioned files really exist
@@ -610,8 +615,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
-        # All values shoud be None, [], {} or equivalent
+        self.assertTrue(yum_repo["mirrorlist"])
+        # All other values shoud be None, [], {} or equivalent
         for key in yum_repo.iterkeys():
+            if key == "mirrorlist":
+                continue
             self.assertFalse(yum_repo[key])
         for key in yum_repomd.iterkeys():
             self.assertFalse(yum_repomd[key])
@@ -814,7 +822,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
         self.assertTrue(os.path.exists(yum_repo["repomd"]))
         for key in yum_repo.iterkeys():
-            if yum_repo[key] and (key not in ("repomd", "url", "destdir")):
+            if yum_repo[key] and (key not in ("repomd", "url", "destdir", "mirrorlist")):
                 self.assertTrue(yum_repo[key] == None)
 
         # Update repo
@@ -830,7 +838,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(os.path.exists(yum_repo["repomd"]))
         self.assertTrue(os.path.exists(yum_repo["primary"]))
         for key in yum_repo.iterkeys():
-            if yum_repo[key] and (key not in ("repomd", "primary", "url", "destdir")):
+            if yum_repo[key] and (key not in ("repomd", "primary", "url", "destdir", "mirrorlist")):
                 self.assertTrue(yum_repo[key] == None)
 
 # Base Auth test

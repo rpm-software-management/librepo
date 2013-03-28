@@ -34,9 +34,13 @@ struct _lr_Handle {
     CURL            *curl_handle;   /*!< CURL handle */
     int             update;         /*!< Just update existing repo */
     char            *baseurl;       /*!< Base URL of repo */
+
+    // Mirrorlist related stuff
     char            *mirrorlist;    /*!< Mirrorlist or metalink URL */
     lr_InternalMirrorlist internal_mirrorlist; /*!< List of mirrors */
     lr_Metalink     metalink;       /*!< Parsed metalink for repomd.xml */
+    int             mirrorlist_fd;  /*!< Raw downloaded file */
+
     int             local;          /*!< Do not duplicate local data */
     char            *used_mirror;   /*!< Finally used mirror (if any) */
     int             retries;        /*!< Number of maximum retries */
