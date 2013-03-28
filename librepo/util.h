@@ -123,6 +123,14 @@ char *lr_pathconcat(const char *str, ...);
 int lr_remove_dir(const char *path);
 
 /** \ingroup util
+ * Copy content from source file descriptor to the dest file descriptor.
+ * @param source        Source opened file descriptor
+ * @param dest          Destination openede file descriptor
+ * @return              0 on succes, -1 on error
+ */
+int lr_copy_content(int source, int dest);
+
+/** \ingroup util
  * Print to allocated string.
  * @param strp          Location for the newly allocated string.
  * @param format        A standard printf() format string.

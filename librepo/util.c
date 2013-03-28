@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <stdarg.h>
 #include <ftw.h>
 
@@ -277,6 +278,22 @@ int
 lr_remove_dir(const char *path)
 {
     return nftw(path, lr_remove_dir_cb, 64, FTW_DEPTH | FTW_PHYS);
+}
+
+int
+lr_copy_content(int source, int dest)
+{
+    const int bufsize = 2048;
+    char buf[bufsize];
+    ssize_t size;
+
+    lseek(source, 0, SEEK_SET);
+    lseek(dest, 0, SEEK_SET);
+
+    while ((size = read(source, buf, bufsize)) > 0)
+        write(dest, buf, size);
+
+    return (size < 0) ? -1 : 0;
 }
 
 int
