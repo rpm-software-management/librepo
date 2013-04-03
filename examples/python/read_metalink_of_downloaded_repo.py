@@ -7,6 +7,7 @@ librepo - example of usage
 import os
 import sys
 import librepo
+import pprint
 
 DESTDIR = "downloaded_metadata"
 
@@ -24,7 +25,11 @@ if __name__ == "__main__":
     elif os.path.isfile(os.path.join(DESTDIR, "metalink.xml")):
         h.mirrorlist = os.path.join(DESTDIR, "metalink.xml")
     else:
-        print "Mirrorlist of downloaded repodata isn't available"
+        print "No mirrorlist of downloaded repodata available"
         sys.exit(0)
 
+
+    print "Urls in mirrorlist:"
     print h.mirrors
+    print "Metalink file content:"
+    pprint.pprint(h.metalink)

@@ -24,17 +24,19 @@
 extern "C" {
 #endif
 
-#include "rcodes.h"
-#include "version.h"
-#include "types.h"
-#include "handle.h"
-#include "result.h"
-#include "yum.h"
-#include "util.h"
 #include "checksum.h"
-#include "repoutil_yum.h"
+#include "gpg.h"
+#include "handle.h"
+#include "metalink.h"
 #include "package_downloader.h"
+#include "rcodes.h"
 #include "repomd.h"
+#include "repoutil_yum.h"
+#include "result.h"
+#include "types.h"
+#include "util.h"
+#include "version.h"
+#include "yum.h"
 
 /** \defgroup librepo       Librepo library init function
  */

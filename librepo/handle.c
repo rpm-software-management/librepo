@@ -356,14 +356,14 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
     lr_Metalink metalink = NULL;
     char *metalink_suffix = NULL;
 
-    if (handle->repotype == LR_YUMREPO)
-        metalink_suffix = "repodata/repomd.xml";
-
     if (handle->internal_mirrorlist)
         return LRE_OK;  /* Internal mirrorlist already exists */
 
     if (!handle->baseurl && !handle->mirrorlist)
         return LRE_NOURL;
+
+    if (handle->repotype == LR_YUMREPO)
+        metalink_suffix = "repodata/repomd.xml";
 
     /* Create internal mirrorlist */
     handle->internal_mirrorlist = lr_internalmirrorlist_new();
@@ -669,6 +669,17 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         for (x = 0; x < ml->nom; x++)
             (*list)[x] = ml->mirrors[x]->url;
         (*list)[x] = NULL;
+        break;
+    }
+
+    case LRI_METALINK: {
+        lr_Metalink *metalink = va_arg(arg, lr_Metalink *);
+        *metalink = NULL;
+        rc = lr_handle_prepare_internal_mirrorlist(handle);
+        if (rc != LRE_OK)
+            break;
+        /* Return pointer to internal metalink */
+        *metalink = handle->metalink;
         break;
     }
 

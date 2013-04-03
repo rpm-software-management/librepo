@@ -26,6 +26,7 @@
 #include "exception-py.h"
 #include "handle-py.h"
 #include "result-py.h"
+#include "typeconversion.h"
 
 typedef struct {
     PyObject_HEAD
@@ -439,6 +440,19 @@ getinfo(_HandleObject *self, PyObject *args)
             Py_RETURN_NONE;
         Py_INCREF(self->progress_cb_data);
         return self->progress_cb_data;
+
+    /* metalink */
+    case LRI_METALINK: {
+        PyObject *py_metalink;
+        lr_Metalink metalink;
+        res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &metalink);
+        if (res != LRE_OK)
+            RETURN_ERROR(res, self->handle);
+        if (metalink == NULL)
+            Py_RETURN_NONE;
+        py_metalink = PyObject_FromMetalink(metalink);
+        return py_metalink;
+    }
 
     default:
         PyErr_SetString(PyExc_TypeError, "Unknown option");

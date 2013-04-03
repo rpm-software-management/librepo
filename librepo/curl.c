@@ -367,7 +367,7 @@ retry:
 
         if (c_rc != CURLE_OK) {
             handle->last_curl_error = c_rc;
-            DPRINTF("%s: curl_easy_perform: %s\n", __func__, curl_easy_strerror(c_rc));
+            DPRINTF("%s: handle_msg: %s\n", __func__, curl_easy_strerror(c_rc));
         }
 
         /* Discart all downloaded data which were downloaded now (truncate) */

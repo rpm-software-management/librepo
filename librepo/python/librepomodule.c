@@ -130,6 +130,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_LASTCURLMSTRERR", LRI_LASTCURLMSTRERR);
     PyModule_AddIntConstant(m, "LRI_LASTBADSTATUSCODE", LRI_LASTBADSTATUSCODE);
     PyModule_AddIntConstant(m, "LRI_MIRRORS", LRI_MIRRORS);
+    PyModule_AddIntConstant(m, "LRI_METALINK", LRI_METALINK);
 
     /* Check options */
     PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);

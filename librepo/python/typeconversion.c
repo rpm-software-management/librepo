@@ -126,3 +126,65 @@ PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
 
     return dict;
 }
+
+PyObject *
+PyObject_FromMetalink(lr_Metalink metalink)
+{
+    PyObject *dict, *sub_list;
+
+    if (!metalink)
+        Py_RETURN_NONE;
+
+    if ((dict = PyDict_New()) == NULL)
+        return NULL;
+
+    PyDict_SetItemString(dict, "filename", PyStringOrNone_FromString(metalink->filename));
+    PyDict_SetItemString(dict, "timestamp", PyLong_FromLong(metalink->timestamp));
+    PyDict_SetItemString(dict, "size", PyLong_FromLong(metalink->size));
+
+    // Hashes
+    if ((sub_list = PyList_New(0)) == NULL) {
+        PyDict_Clear(dict);
+        return NULL;
+    }
+    PyDict_SetItemString(dict, "hashes", sub_list);
+
+    for (int x = 0; x < metalink->noh; x++) {
+        PyObject *tuple;
+        if ((tuple = PyTuple_New(2)) == NULL) {
+            PyDict_Clear(dict);
+            return NULL;
+        }
+        PyTuple_SetItem(tuple, 0, PyStringOrNone_FromString(metalink->hashes[x]->type));
+        PyTuple_SetItem(tuple, 1, PyStringOrNone_FromString(metalink->hashes[x]->value));
+        PyList_Append(sub_list, tuple);
+    }
+
+    // Urls
+    if ((sub_list = PyList_New(0)) == NULL) {
+        PyDict_Clear(dict);
+        return NULL;
+    }
+    PyDict_SetItemString(dict, "urls", sub_list);
+
+    for (int x = 0; x < metalink->nou; x++) {
+        PyObject *udict;
+        if ((udict = PyDict_New()) == NULL) {
+            PyDict_Clear(dict);
+            return NULL;
+        }
+        PyDict_SetItemString(udict, "protocol",
+                PyStringOrNone_FromString(metalink->urls[x]->protocol));
+        PyDict_SetItemString(udict, "type",
+                PyStringOrNone_FromString(metalink->urls[x]->type));
+        PyDict_SetItemString(udict, "location",
+                PyStringOrNone_FromString(metalink->urls[x]->location));
+        PyDict_SetItemString(udict, "preference",
+                PyLong_FromLong((long) metalink->urls[x]->preference));
+        PyDict_SetItemString(udict, "url",
+                PyStringOrNone_FromString(metalink->urls[x]->url));
+        PyList_Append(sub_list, udict);
+    }
+
+    return dict;
+}
