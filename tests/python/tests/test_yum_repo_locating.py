@@ -13,6 +13,8 @@ from base import TestCase, TEST_DATA
 REPO_YUM_01_PATH = TEST_DATA+"/repo_yum_01/"
 REPO_YUM_02_PATH = TEST_DATA+"/repo_yum_02/"
 PUB_KEY = TEST_DATA+"/key.pub"
+MIRRORLIST = TEST_DATA+"/mirrorlist"
+METALINK = TEST_DATA+"/metalink.xml"
 
 class TestCaseYumRepoLocating(TestCase):
 
@@ -33,6 +35,36 @@ class TestCaseYumRepoLocating(TestCase):
         else:
             os.environ['GNUPGHOME'] = self._gnupghome
         shutil.rmtree(self.tmpdir)
+
+    def test_read_mirrorlist(self):
+        h = librepo.Handle()
+        h.setopt(librepo.LRO_MIRRORLIST, MIRRORLIST)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink, None)
+
+    def test_read_metalink(self):
+        h = librepo.Handle()
+        h.setopt(librepo.LRO_MIRRORLIST, METALINK)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink,
+            {'timestamp': 1347459931L,
+             'hashes': [
+                 ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
+                 ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
+                 ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
+                 ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
+             'size': 2621L,
+             'urls': [{
+                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'type': 'http',
+                 'protocol': 'http',
+                 'location': 'CZ',
+                 'preference': 100L}],
+             'filename': 'repomd.xml'})
 
     def test_locate_repo_01(self):
         # At first, download whole repository

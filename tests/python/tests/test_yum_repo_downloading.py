@@ -548,6 +548,32 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
 # Metalink tests
 
+    def test_download_only_metalink(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink,
+            {'timestamp': 1347459931L,
+             'hashes': [
+                 ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
+                 ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
+                 ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
+                 ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
+             'size': 2621L,
+             'urls': [{
+                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'type': 'http',
+                 'protocol': 'http',
+                 'location': 'CZ',
+                 'preference': 100L}],
+             'filename': 'repomd.xml'}
+            )
+
     def test_download_repo_01_via_metalink_01(self):
         h = librepo.Handle()
         r = librepo.Result()
@@ -692,6 +718,17 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
 # Mirrorlist tests
+
+    def test_download_only_mirrorlist(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink, None)
 
     def test_download_repo_01_via_mirrorlist_01(self):
         h = librepo.Handle()
