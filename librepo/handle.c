@@ -126,15 +126,21 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
     case LRO_URL:
         handle->baseurl = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
+            // Clear previous mirrorlist stuff
             lr_internalmirrorlist_free(handle->internal_mirrorlist);
             handle->internal_mirrorlist = NULL;
+            lr_metalink_free(handle->metalink);
+            handle->metalink = NULL;
+            if (handle->mirrorlist_fd != -1)
+                close(handle->mirrorlist_fd);
+            handle->mirrorlist_fd = -1;
         }
         break;
 
     case LRO_MIRRORLIST:
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
-            // Clean previous mirrorlist stuff
+            // Clear previous mirrorlist stuff
             lr_internalmirrorlist_free(handle->internal_mirrorlist);
             handle->internal_mirrorlist = NULL;
             lr_metalink_free(handle->metalink);
