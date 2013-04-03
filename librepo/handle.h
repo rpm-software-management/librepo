@@ -77,7 +77,11 @@ typedef enum {
                             present, or use this option. */
     LRO_INTERRUPTIBLE, /*!< (long 1 or 0) If true, Librepo setups
                             its own signal handler for SIGTERM and
-                            stops downloading if SIGTERM is catched. */
+                            stops downloading if SIGTERM is catched.
+                            In this case current operation could return any
+                            kind of error code.
+                            Handle which operation was interrupted
+                            shoud never be used again! */
     LRO_USERAGENT,     /*!< (char *) String for  User-Agent: header in the
                             http request sent to the remote server */
 

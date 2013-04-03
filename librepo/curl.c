@@ -145,8 +145,13 @@ lr_curl_single_download_resume(lr_Handle handle,
     int retries = 0;
     lr_SingleCallbackData cb_data = NULL;
 
+    if (lr_interrupt) {
+        DPRINTF("%s: Download interrupted\n", __func__);
+        return LRE_INTERRUPTED;
+    }
+
     if (!url) {
-        DPRINTF("%s: No url specified", __func__);
+        DPRINTF("%s: No url specified\n", __func__);
         return LRE_NOURL;
     }
 
@@ -247,7 +252,7 @@ lr_curl_single_download_resume(lr_Handle handle,
             timeout.tv_usec = 0;
 
             if (lr_interrupt) {
-                c_rc = LRE_INTERRUPTED;
+                ret = LRE_INTERRUPTED;
                 DPRINTF("%s: Download interupted\n", __func__);
                 break;
             }
@@ -278,7 +283,7 @@ lr_curl_single_download_resume(lr_Handle handle,
                     timeout.tv_usec = (curl_timeout % 1000) * 1000;
             }
 
-            if (0 > select(maxfd+1, &R, &W, &E, &timeout)) {
+            if (select(maxfd+1, &R, &W, &E, &timeout) < 0) {
                 if (errno == EINTR) {
                     ret = LRE_INTERRUPTED;
                     DPRINTF("%s: select() was interrupted\n", __func__);
@@ -497,16 +502,26 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 
     assert(handle);
 
+    if (lr_interrupt) {
+        DPRINTF("%s: Download interrupted\n", __func__);
+        return LRE_INTERRUPTED;
+    }
+
     iml = handle->internal_mirrorlist;
-    if (!iml)
+    if (!iml) {
+        DPRINTF("%s: No internal mirrorlist\n", __func__);
         return LRE_NOURL;
+    }
 
     nom = lr_internalmirrorlist_len(iml);
-    if (nom < 1)
+    if (nom < 1) {
+        DPRINTF("%s: No urls in internal mirrorlist\n", __func__);
         return LRE_NOURL;
+    }
 
     if (not == 0) {
         /* Maybe user callback shoud be called here */
+        DPRINTF("%s: No targets specified\n", __func__);
         return LRE_OK;
     }
 
@@ -629,9 +644,8 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         curl_multi_perform(cm_h, &still_running);
 
         do {
-            int rc;
             int maxfd = -1;
-            long curl_timeo = -1;
+            long curl_timeout = -1;
             fd_set fdread;
             fd_set fdwrite;
             fd_set fdexcep;
@@ -645,13 +659,13 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
             timeout.tv_sec = 1;
             timeout.tv_usec = 0;
 
-            curl_multi_timeout(cm_h, &curl_timeo);
-            if (curl_timeo >= 0) {
-                timeout.tv_sec = curl_timeo / 1000;
+            curl_multi_timeout(cm_h, &curl_timeout);
+            if (curl_timeout >= 0) {
+                timeout.tv_sec = curl_timeout / 1000;
                 if (timeout.tv_sec > 1)
                     timeout.tv_sec = 1;
                 else
-                    timeout.tv_usec = (curl_timeo % 1000) * 1000;
+                    timeout.tv_usec = (curl_timeout % 1000) * 1000;
             }
 
             /* Get filedescriptors from the transfers */
@@ -663,23 +677,24 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                 goto cleanup;
             }
 
-            rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-
             if (lr_interrupt) {
                 ret = LRE_INTERRUPTED;
                 goto cleanup;
             }
 
-            switch (rc) {
-            case -1:
-                break; /* select() error */
-
-            case 0:
-            default:
-                /* Timeout or readable/writeable sockets */
-                curl_multi_perform(cm_h, &still_running);
-                break;
+            if (select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout) < 0) {
+                if (errno == EINTR) {
+                    ret = LRE_INTERRUPTED;
+                    DPRINTF("%s: select() was interrupted\n", __func__);
+                } else {
+                    ret = LRE_CURLM;
+                    DPRINTF("%s: select(%i,,,,%li): %i: %s\n",
+                            __func__, maxfd+1, curl_timeout, errno, strerror(errno));
+                }
+                goto cleanup;
             }
+
+            curl_multi_perform(cm_h, &still_running);
         } while (still_running);
 
         /* Close opened files */
