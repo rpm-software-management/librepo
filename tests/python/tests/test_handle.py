@@ -63,6 +63,14 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_DESTDIR,  "")
         self.assertEqual(h.getinfo(librepo.LRI_DESTDIR), "")
 
+        self.assertEqual(h.getinfo(librepo.LRI_USERAGENT), None)
+        h.setopt(librepo.LRO_USERAGENT,  "librepo/0.0")
+        self.assertEqual(h.getinfo(librepo.LRI_USERAGENT), "librepo/0.0")
+        h.setopt(librepo.LRO_USERAGENT,  None)
+        self.assertEqual(h.getinfo(librepo.LRI_USERAGENT), None)
+        h.setopt(librepo.LRO_USERAGENT,  "")
+        self.assertEqual(h.getinfo(librepo.LRI_USERAGENT), "")
+
         self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), None)
         h.setopt(librepo.LRO_YUMDLIST,  ["primary", "other"])
         self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), ["primary", "other"])
@@ -136,6 +144,14 @@ class TestCaseHandle(unittest.TestCase):
         self.assertEqual(h.destdir, None)
         h.destdir =  ""
         self.assertEqual(h.destdir, "")
+
+        self.assertEqual(h.useragent, None)
+        h.useragent =  "librepo/0.0"
+        self.assertEqual(h.useragent, "librepo/0.0")
+        h.useragent =  None
+        self.assertEqual(h.useragent, None)
+        h.useragent =  ""
+        self.assertEqual(h.useragent, "")
 
         self.assertEqual(h.yumdlist, None)
         h.yumdlist =  ["primary", "other"]

@@ -382,6 +382,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_URL:
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
+    case LRI_USERAGENT:
     case LRI_LASTCURLSTRERR:
     case LRI_LASTCURLMSTRERR:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &str);

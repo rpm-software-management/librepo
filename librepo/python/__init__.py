@@ -220,6 +220,7 @@ Constants
 .. data:: LRI_PROGRESSDATA
 .. data:: LRI_DESTDIR
 .. data:: LRI_REPOTYPE
+.. data:: LRI_USERAGENT
 .. data:: LRI_YUMDLIST
 .. data:: LRI_YUMBLIST
 .. data:: LRI_LASTCURLERR
@@ -512,6 +513,7 @@ LRI_PROGRESSCB          = _librepo.LRI_PROGRESSCB
 LRI_PROGRESSDATA        = _librepo.LRI_PROGRESSDATA
 LRI_DESTDIR             = _librepo.LRI_DESTDIR
 LRI_REPOTYPE            = _librepo.LRI_REPOTYPE
+LRI_USERAGENT           = _librepo.LRI_USERAGENT
 LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
 LRI_YUMBLIST            = _librepo.LRI_YUMBLIST
 LRI_LASTCURLERR         = _librepo.LRI_LASTCURLERR
@@ -530,6 +532,7 @@ ATTR_TO_LRI = {
     "progressdata":         LRI_PROGRESSDATA,
     "destdir":              LRI_DESTDIR,
     "repotype":             LRI_REPOTYPE,
+    "useragent":            LRI_USERAGENT,
     "yumdlist":             LRI_YUMDLIST,
     "yumblist":             LRI_YUMBLIST,
     "lastcurlerr":          LRI_LASTCURLERR,

@@ -33,6 +33,7 @@ START_TEST(test_handle)
     lr_handle_setopt(h, LRO_PROXY, "proxy");
     lr_handle_setopt(h, LRO_PROXYUSERPWD, "proxyuser:pwd");
     lr_handle_setopt(h, LRO_DESTDIR, "foodir");
+    lr_handle_setopt(h, LRO_USERAGENT, "librepo/0.0");
     char *dlist[] = {"primary", "filelists", NULL};
     lr_handle_setopt(h, LRO_YUMDLIST, dlist);
     lr_handle_setopt(h, LRO_YUMBLIST, dlist);
@@ -73,6 +74,10 @@ START_TEST(test_handle_getinfo)
 
     num = -1;
     lr_handle_getinfo(h, LRI_REPOTYPE, &num);
+    fail_if(num != 0);
+
+    str = NULL;
+    lr_handle_getinfo(h, LRI_USERAGENT, &str);
     fail_if(num != 0);
 
     strlist = NULL;

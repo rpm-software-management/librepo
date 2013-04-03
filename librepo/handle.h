@@ -105,6 +105,7 @@ typedef enum {
     LRI_PROGRESSDATA,           /* (lr_ProgressCb) */
     LRI_DESTDIR,                /* (char **) */
     LRI_REPOTYPE,               /* (long *) */
+    LRI_USERAGENT,              /* (char **) */
     LRI_YUMDLIST,               /* (char ***) */
     LRI_YUMBLIST,               /* (char ***) */
     LRI_LASTCURLERR,            /* (long *) */

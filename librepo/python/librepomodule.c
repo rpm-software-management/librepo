@@ -121,6 +121,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_PROGRESSDATA", LRI_PROGRESSDATA);
     PyModule_AddIntConstant(m, "LRI_DESTDIR", LRI_DESTDIR);
     PyModule_AddIntConstant(m, "LRI_REPOTYPE", LRI_REPOTYPE);
+    PyModule_AddIntConstant(m, "LRI_USERAGENT", LRI_USERAGENT);
     PyModule_AddIntConstant(m, "LRI_YUMDLIST", LRI_YUMDLIST);
     PyModule_AddIntConstant(m, "LRI_YUMBLIST", LRI_YUMBLIST);
     PyModule_AddIntConstant(m, "LRI_LASTCURLERR", LRI_LASTCURLERR);

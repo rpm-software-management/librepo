@@ -45,6 +45,7 @@ struct _lr_Handle {
     char            *used_mirror;   /*!< Finally used mirror (if any) */
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
+    char            *useragent;     /*!< User agent */
     lr_Repotype     repotype;       /*!< Type of repository */
     lr_Checks       checks;         /*!< Which check sould be applied */
     long            status_code;    /*!< Last HTTP or FTP status code */

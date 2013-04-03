@@ -95,6 +95,7 @@ lr_handle_free(lr_Handle handle)
     lr_free(handle->mirrorlist);
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
+    lr_free(handle->useragent);
     lr_internalmirrorlist_free(handle->internal_mirrorlist);
     lr_metalink_free(handle->metalink);
     lr_handle_free_list(&handle->yumdlist);
@@ -239,9 +240,13 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->interruptible = va_arg(arg, long) ? 1 : 0;
         break;
 
-    case LRO_USERAGENT:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_USERAGENT, va_arg(arg, char *));
+    case LRO_USERAGENT: {
+        char *useragent = va_arg(arg, char *);
+        if (handle->useragent) lr_free(handle->useragent);
+        handle->useragent = lr_strdup(useragent);
+        c_rc = curl_easy_setopt(c_h, CURLOPT_USERAGENT, useragent);
         break;
+    }
 
     case LRO_GPGCHECK:
         if (va_arg(arg, long))
@@ -603,6 +608,11 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         *lnum = (long) handle->repotype;
         break;
 
+    case LRI_USERAGENT:
+        str = va_arg(arg, char **);
+        *str = handle->useragent;
+        break;
+
     case LRI_YUMDLIST: {
         char ***strlist = va_arg(arg, char ***);
         *strlist = handle->yumdlist;
@@ -655,7 +665,6 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         (*list)[x] = NULL;
         break;
     }
-
 
     default:
         rc = LRE_UNKNOWNOPT;
