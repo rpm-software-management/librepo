@@ -31,10 +31,19 @@
 void
 lr_global_init()
 {
-    DPRINTF("Librepo version: %d.%d.%d\n", LR_VERSION_MAJOR,
-                                           LR_VERSION_MINOR,
-                                           LR_VERSION_PATCH);
+#ifdef CURL_GLOBAL_ACK_EINTR
+#define EINTR_SUPPORT " with CURL_GLOBAL_ACK_EINTR support"
+    curl_global_init(CURL_GLOBAL_ALL|CURL_GLOBAL_ACK_EINTR);
+#else
+#define EINTR_SUPPORT ""
     curl_global_init(CURL_GLOBAL_ALL);
+#endif
+
+    DPRINTF("Librepo version: %d.%d.%d%s (%s)\n", LR_VERSION_MAJOR,
+                                                   LR_VERSION_MINOR,
+                                                   LR_VERSION_PATCH,
+                                                   EINTR_SUPPORT,
+                                                   curl_version());
 }
 
 void
