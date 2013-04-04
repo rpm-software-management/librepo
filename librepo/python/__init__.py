@@ -1,20 +1,5 @@
 """
 
-Module init and cleanup
-=======================
-
-.. function:: global_init()
-
-    Initializes curl library wich is internaly used.
-    This function must be called at least once within a program
-    (a program is all the code that shares a memory space)
-    before the program calls any other function in librepo.
-
-.. function:: global_cleanup()
-
-    Reclaims memory that has been obtained through a libcurl call.
-    This function is not thread safe.
-
 Exceptions
 ==========
 
@@ -451,9 +436,6 @@ VERSION_PATCH = _librepo.VERSION_PATCH
 VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 
 LibrepoException = _librepo.LibrepoException
-
-global_init    = _librepo.global_init
-global_cleanup = _librepo.global_cleanup
 
 LRO_UPDATE          = _librepo.LRO_UPDATE
 LRO_URL             = _librepo.LRO_URL

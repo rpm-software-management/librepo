@@ -17,7 +17,6 @@ import librepo
 METADATA_PATH = "downloaded_metadata"
 
 if __name__ == "__main__":
-    librepo.global_init()
     h = librepo.Handle()
     r = librepo.Result()
     # Yum metadata
@@ -39,10 +38,8 @@ if __name__ == "__main__":
             print "Corrupted metadata!"
         else:
             print "Other error: %s" % msg
-        librepo.global_cleanup()
         sys.exit(1)
 
     print "Metadata are fine!"
-    librepo.global_cleanup()
     sys.exit(0)
 

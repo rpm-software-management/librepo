@@ -25,31 +25,7 @@
 #include "handle-py.h"
 #include "result-py.h"
 
-static PyObject *
-py_global_init(PyObject *self, PyObject *noarg)
-{
-    LR_UNUSED(self);
-    LR_UNUSED(noarg);
-    lr_global_init();
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-py_global_cleanup(PyObject *self, PyObject *noarg)
-{
-    LR_UNUSED(self);
-    LR_UNUSED(noarg);
-    lr_global_cleanup();
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 static struct PyMethodDef librepo_methods[] = {
-    { "global_init",    (PyCFunction) py_global_init,
-      METH_NOARGS, NULL },
-    { "global_cleanup", (PyCFunction)py_global_cleanup,
-      METH_NOARGS, NULL },
     { NULL }
 };
 
@@ -76,6 +52,9 @@ init_librepo(void)
         return;
     Py_INCREF(&Result_Type);
     PyModule_AddObject(m, "Result", (PyObject *)&Result_Type);
+
+    /* Init module */
+    lr_global_init();
 
     /* Module constants */
 

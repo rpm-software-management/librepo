@@ -19,7 +19,6 @@ URL = "https://mirrors.fedoraproject.org/metalink?repo=fedora-18&arch=x86_64"
 DESTDIR = "downloaded_metadata"
 
 if __name__ == "__main__":
-    librepo.global_init()
     h = librepo.Handle()
     r = librepo.Result()
     # Yum metadata
@@ -34,4 +33,3 @@ if __name__ == "__main__":
     except librepo.LibrepoException as e:
         rc, msg, ext = e
         print "Error: %s" % msg
-    librepo.global_cleanup()
