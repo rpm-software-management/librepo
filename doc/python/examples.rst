@@ -30,6 +30,7 @@ Simple download of metadata
     DESTDIR = "downloaded_metadata"
 
     if __name__ == "__main__":
+        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
         # Yum metadata
@@ -44,8 +45,7 @@ Simple download of metadata
         except librepo.LibrepoException as e:
             rc, msg, ext = e
             print "Error: %s" % msg
-            sys.exit(1)
-        sys.exit(0)
+        librepo.global_cleanup()
 
 Metadata localisation
 ---------------------
@@ -67,6 +67,7 @@ Metadata localisation
     METADATA_PATH = "downloaded_metadata"
 
     if __name__ == "__main__":
+        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
         # Yum metadata
@@ -81,6 +82,7 @@ Metadata localisation
         except librepo.LibrepoException as e:
             rc, msg, ext = e
             print "Error: %s" % msg
+            librepo.global_cleanup()
             sys.exit(1)
 
         print "Repomd content:"
@@ -89,9 +91,7 @@ Metadata localisation
         print "\nPath to metadata files:"
         for data_type, path in r.getinfo(librepo.LRR_YUM_REPO).iteritems():
             print "%15s: %s" % (data_type, path)
-
-        sys.exit(0)
-
+        librepo.global_cleanup()
 
 Checksum verification
 ---------------------
@@ -120,6 +120,7 @@ Checksum verification
     METADATA_PATH = "downloaded_metadata"
 
     if __name__ == "__main__":
+        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
         # Yum metadata
@@ -141,11 +142,11 @@ Checksum verification
                 print "Corrupted metadata!"
             else:
                 print "Other error: %s" % msg
+            librepo.global_cleanup()
             sys.exit(1)
 
         print "Metadata are fine!"
-        sys.exit(0)
-
+        librepo.global_cleanup()
 
 More complex download
 ---------------------
@@ -177,6 +178,8 @@ More complex download
                 raise IOError("%s is not a directory" % DESTDIR)
             shutil.rmtree(DESTDIR)
         os.mkdir(DESTDIR)
+
+        librepo.global_init()
 
         h = librepo.Handle() # Handle represents a download configuration
         r = librepo.Result() # Result represents an existing/downloaded repository
@@ -227,6 +230,8 @@ More complex download
         pprint (r.getinfo(librepo.LRR_YUM_REPO))
         pprint (r.getinfo(librepo.LRR_YUM_REPOMD))
 
+        librepo.global_cleanup()
+
 
 How to get urls in a local mirrorlist
 -------------------------------------
@@ -240,6 +245,7 @@ How to get urls in a local mirrorlist
     DESTDIR = "downloaded_metadata"
 
     if __name__ == "__main__":
+        librepo.global_init()
         h = librepo.Handle()
 
         # Correct repotype is important. Without repotype
@@ -254,6 +260,11 @@ How to get urls in a local mirrorlist
             h.mirrorlist = os.path.join(DESTDIR, "metalink.xml")
         else:
             print "Mirrorlist of downloaded repodata isn't available"
+            librepo.global_cleanup()
             sys.exit(0)
 
+        print "Urls in mirrorlist:"
         print h.mirrors
+        print "Metalink file content:"
+        pprint.pprint(h.metalink)
+        librepo.global_cleanup()

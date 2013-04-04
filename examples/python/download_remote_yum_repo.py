@@ -30,6 +30,8 @@ if __name__ == "__main__":
         shutil.rmtree(DESTDIR)
     os.mkdir(DESTDIR)
 
+    librepo.global_init()
+
     h = librepo.Handle() # Handle represents a download configuration
     r = librepo.Result() # Result represents an existing/downloaded repository
 
@@ -87,3 +89,4 @@ if __name__ == "__main__":
     pprint (r.getinfo(librepo.LRR_YUM_REPO))
     pprint (r.getinfo(librepo.LRR_YUM_REPOMD))
 
+    librepo.global_cleanup()

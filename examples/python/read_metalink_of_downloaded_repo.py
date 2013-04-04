@@ -12,6 +12,7 @@ import pprint
 DESTDIR = "downloaded_metadata"
 
 if __name__ == "__main__":
+    librepo.global_init()
     h = librepo.Handle()
 
     # Correct repotype is important. Without repotype
@@ -26,10 +27,11 @@ if __name__ == "__main__":
         h.mirrorlist = os.path.join(DESTDIR, "metalink.xml")
     else:
         print "No mirrorlist of downloaded repodata available"
+        librepo.global_cleanup()
         sys.exit(0)
-
 
     print "Urls in mirrorlist:"
     print h.mirrors
     print "Metalink file content:"
     pprint.pprint(h.metalink)
+    librepo.global_cleanup()

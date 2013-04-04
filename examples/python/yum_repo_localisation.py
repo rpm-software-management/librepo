@@ -16,6 +16,7 @@ import pprint
 METADATA_PATH = "downloaded_metadata"
 
 if __name__ == "__main__":
+    librepo.global_init()
     h = librepo.Handle()
     r = librepo.Result()
     # Yum metadata
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     except librepo.LibrepoException as e:
         rc, msg, ext = e
         print "Error: %s" % msg
+        librepo.global_cleanup()
         sys.exit(1)
 
     print "Repomd content:"
@@ -39,5 +41,5 @@ if __name__ == "__main__":
     for data_type, path in r.getinfo(librepo.LRR_YUM_REPO).iteritems():
         print "%15s: %s" % (data_type, path)
 
+    librepo.global_cleanup()
     sys.exit(0)
-
