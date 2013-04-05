@@ -800,6 +800,14 @@ cleanup:
     }
 
     for (int x = 0; x < not; x++) {
+#ifdef DEBUG
+        char *effective_url = NULL;
+        if (curl_easy_getinfo(curl_easy_interfaces[x],
+                              CURLINFO_EFFECTIVE_URL,
+                              &effective_url) != CURLE_OK)
+            effective_url = "Cannot determine URL";
+        DPRINTF("%s: Freeing curl easy handle (%s)\n", __func__, effective_url);
+#endif
         if (curl_easy_interfaces[x]) {
             curl_multi_remove_handle(cm_h, curl_easy_interfaces[x]);
             curl_easy_cleanup(curl_easy_interfaces[x]);
@@ -807,8 +815,11 @@ cleanup:
         if (open_files[x])
             fclose(open_files[x]);
     }
-    if (cm_h)
+
+    if (cm_h) {
+        DPRINTF("%s: Freeing culr multi handle\n", __func__);
         curl_multi_cleanup(cm_h);
+    }
     lr_free(shared_cb_data.counted);
 
     return ret;
