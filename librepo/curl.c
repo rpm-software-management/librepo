@@ -254,7 +254,7 @@ lr_curl_single_download_resume(lr_Handle handle,
             if (lr_interrupt) {
                 ret = LRE_INTERRUPTED;
                 DPRINTF("%s: Download interupted\n", __func__);
-                break;
+                goto retry;
             }
 
             FD_ZERO(&R);
@@ -365,14 +365,16 @@ lr_curl_single_download_resume(lr_Handle handle,
             break;
 
 retry:
-        if (status_code) {
-            handle->status_code = status_code;
-            DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
-        }
+        if (ret != LRE_INTERRUPTED) {
+            if (status_code) {
+                handle->status_code = status_code;
+                DPRINTF("%s: bad status code: %ld\n", __func__, status_code);
+            }
 
-        if (c_rc != CURLE_OK) {
-            handle->last_curl_error = c_rc;
-            DPRINTF("%s: handle_msg: %s\n", __func__, curl_easy_strerror(c_rc));
+            if (c_rc != CURLE_OK) {
+                handle->last_curl_error = c_rc;
+                DPRINTF("%s: handle_msg: %s\n", __func__, curl_easy_strerror(c_rc));
+            }
         }
 
         /* Discart all downloaded data which were downloaded now (truncate) */
@@ -400,6 +402,7 @@ retry:
     } /* End of for loop */
 
     fclose(f);
+    curl_multi_remove_handle(cm, c_h);
     curl_easy_cleanup(c_h);
     curl_multi_cleanup(cm);
     lr_free(cb_data);
@@ -770,14 +773,15 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         }
 
         /* Cleanup */
-        curl_multi_cleanup(cm_h);
-        cm_h = NULL;
         for (int x = 0; x < not; x++) {
             if (curl_easy_interfaces[x]) {
+                curl_multi_remove_handle(cm_h, curl_easy_interfaces[x]);
                 curl_easy_cleanup(curl_easy_interfaces[x]);
                 curl_easy_interfaces[x] = NULL;
             }
-       }
+        }
+        curl_multi_cleanup(cm_h);
+        cm_h = NULL;
 
         if (failed_downloads == 0)
             break;
@@ -787,7 +791,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 cleanup:
     DPRINTF("%s: Cleanup\n", __func__);
 
-    if (failed_downloads != 0) {
+    if (ret != LRE_INTERRUPTED && failed_downloads != 0) {
         /* At least one file cannot be downloaded from any mirror */
         if (last_ret != LRE_OK)
             ret = last_ret;
@@ -795,14 +799,16 @@ cleanup:
             handle->status_code = last_code;
     }
 
-    if (cm_h)
-        curl_multi_cleanup(cm_h);
     for (int x = 0; x < not; x++) {
-        if (curl_easy_interfaces[x])
+        if (curl_easy_interfaces[x]) {
+            curl_multi_remove_handle(cm_h, curl_easy_interfaces[x]);
             curl_easy_cleanup(curl_easy_interfaces[x]);
+        }
         if (open_files[x])
             fclose(open_files[x]);
     }
+    if (cm_h)
+        curl_multi_cleanup(cm_h);
     lr_free(shared_cb_data.counted);
 
     return ret;
