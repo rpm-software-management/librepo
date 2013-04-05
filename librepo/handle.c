@@ -529,6 +529,7 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
     struct sigaction old_sigact;
     if (handle->interruptible) {
         /* Setup sighandler */
+        DPRINTF("%s: Using own SIGINT handler\n", __func__);
         struct sigaction sigact;
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
@@ -550,6 +551,7 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
 
     if (handle->interruptible) {
         /* Restore signal handler */
+        DPRINTF("%s: Restoring an old SIGINT handler\n", __func__);
         if (sigaction(SIGINT, &old_sigact, NULL) == -1)
             return LRE_SIGACTION;
     }
