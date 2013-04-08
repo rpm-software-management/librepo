@@ -293,6 +293,10 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
     }
 
+    case LRO_FETCHMIRRORS:
+        handle->fetchmirrors = va_arg(arg, long) ? 1 : 0;
+        break;
+
     default:
         ret = LRE_UNKNOWNOPT;
         break;
@@ -538,16 +542,23 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
             return LRE_SIGACTION;
     }
 
-    switch (handle->repotype) {
-    case LR_YUMREPO:
-        DPRINTF("%s: Downloading/Locating yum repo\n", __func__);
-        rc = lr_yum_perform(handle, result);
-        break;
-    default:
-        DPRINTF("%s: Bad repo type\n", __func__);
-        assert(0);
-        break;
-    };
+    if (handle->fetchmirrors) {
+        /* Only download and parse mirrorlist */
+        DPRINTF("%s: Only fetching mirrorlist/metalink\n", __func__);
+        rc = lr_handle_prepare_internal_mirrorlist(handle);
+    } else {
+        /* Do the other thing */
+        switch (handle->repotype) {
+        case LR_YUMREPO:
+            DPRINTF("%s: Downloading/Locating yum repo\n", __func__);
+            rc = lr_yum_perform(handle, result);
+            break;
+        default:
+            DPRINTF("%s: Bad repo type\n", __func__);
+            assert(0);
+            break;
+        };
+    }
 
     if (handle->interruptible) {
         /* Restore signal handler */
@@ -633,6 +644,11 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         break;
     }
 
+    case LRI_FETCHMIRRORS:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->fetchmirrors;
+        break;
+
     case LRI_LASTCURLERR:
         lnum = va_arg(arg, long *);
         *lnum = handle->last_curl_error;
@@ -662,11 +678,10 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         int x;
         char ***list = va_arg(arg, char ***);
         *list = NULL;
-        rc = lr_handle_prepare_internal_mirrorlist(handle);
-        if (rc != LRE_OK)
-            break;
-        /* Make list of urls from internal mirrorlist */
         lr_InternalMirrorlist ml = handle->internal_mirrorlist;
+        if (!ml)
+            break;  // lr_handle_perform() or lr_download_package() was not called yet
+        /* Make list of urls from internal mirrorlist */
         *list = lr_malloc((ml->nom + 1) * sizeof(char *));
         for (x = 0; x < ml->nom; x++)
             (*list)[x] = ml->mirrors[x]->url;
@@ -676,11 +691,6 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRI_METALINK: {
         lr_Metalink *metalink = va_arg(arg, lr_Metalink *);
-        *metalink = NULL;
-        rc = lr_handle_prepare_internal_mirrorlist(handle);
-        if (rc != LRE_OK)
-            break;
-        /* Return pointer to internal metalink */
         *metalink = handle->metalink;
         break;
     }

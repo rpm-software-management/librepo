@@ -13,6 +13,7 @@ DESTDIR = "downloaded_metadata"
 
 if __name__ == "__main__":
     h = librepo.Handle()
+    r = librepo.Result()
 
     # Correct repotype is important. Without repotype
     # metalink parser doesn't know suffix which should
@@ -27,6 +28,11 @@ if __name__ == "__main__":
     else:
         print "No mirrorlist of downloaded repodata available"
         sys.exit(0)
+
+    # Download only the mirrorlist during perform() call.
+    h.setopt(LRO_FETCHMIRRORS, True)
+
+    h.perform(r)
 
     print "Urls in mirrorlist:"
     print h.mirrors

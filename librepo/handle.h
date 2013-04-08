@@ -84,6 +84,9 @@ typedef enum {
                             shoud never be used again! */
     LRO_USERAGENT,     /*!< (char *) String for  User-Agent: header in the
                             http request sent to the remote server */
+    LRO_FETCHMIRRORS,  /*!< (long 1 or 0) If true - do not download anything,
+                            except mirrorlist or metalink
+                            (during lr_handle_perform()).*/
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< (long 1 or 0) Check GPG signature if available */
@@ -112,6 +115,7 @@ typedef enum {
     LRI_USERAGENT,              /* (char **) */
     LRI_YUMDLIST,               /* (char ***) */
     LRI_YUMBLIST,               /* (char ***) */
+    LRI_FETCHMIRRORS,           /* (long *) */
     LRI_LASTCURLERR,            /* (long *) */
     LRI_LASTCURLMERR,           /* (long *) */
     LRI_LASTCURLSTRERR,         /* (char **) */

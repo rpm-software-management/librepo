@@ -556,6 +556,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.perform(r)
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink,
             {'timestamp': 1347459931L,
@@ -727,6 +729,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.perform(r)
+
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink, None)
 

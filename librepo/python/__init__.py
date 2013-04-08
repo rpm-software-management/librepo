@@ -193,6 +193,11 @@ Constants
     *List of strings*. Set blacklist of yum metadata files.
     This files will not be downloaded.
 
+.. data:: LRO_FETCHMIRRORS
+
+    *Boolean*. With this option enable. Only mirrorlist download and parsing
+    will be performed during :meth:`librepo.Handle.perform`.
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -212,6 +217,7 @@ Constants
 .. data:: LRI_USERAGENT
 .. data:: LRI_YUMDLIST
 .. data:: LRI_YUMBLIST
+.. data:: LRI_FETCHMIRRORS
 .. data:: LRI_LASTCURLERR
 .. data:: LRI_LASTCURLMERR
 .. data:: LRI_LASTCURLSTRERR
@@ -462,6 +468,7 @@ LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_YUMBLIST        = _librepo.LRO_YUMBLIST
+LRO_FETCHMIRRORS    = _librepo.LRO_FETCHMIRRORS
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -490,6 +497,7 @@ ATTR_TO_LRO = {
     "checksum":         LRO_CHECKSUM,
     "yumdlist":         LRO_YUMDLIST,
     "yumblist":         LRO_YUMBLIST,
+    "fetchmirrors":     LRO_FETCHMIRRORS,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -503,6 +511,7 @@ LRI_REPOTYPE            = _librepo.LRI_REPOTYPE
 LRI_USERAGENT           = _librepo.LRI_USERAGENT
 LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
 LRI_YUMBLIST            = _librepo.LRI_YUMBLIST
+LRI_FETCHMIRRORS        = _librepo.LRI_FETCHMIRRORS
 LRI_LASTCURLERR         = _librepo.LRI_LASTCURLERR
 LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
 LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
@@ -523,6 +532,7 @@ ATTR_TO_LRI = {
     "useragent":            LRI_USERAGENT,
     "yumdlist":             LRI_YUMDLIST,
     "yumblist":             LRI_YUMBLIST,
+    "fetchmirrors":         LRI_FETCHMIRRORS,
     "lastcurlerr":          LRI_LASTCURLERR,
     "lastcurlmerr":         LRI_LASTCURLMERR,
     "lastcurlstrerr":       LRI_LASTCURLSTRERR,

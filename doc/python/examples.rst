@@ -247,6 +247,7 @@ How to get urls in a local mirrorlist
     if __name__ == "__main__":
         librepo.global_init()
         h = librepo.Handle()
+        r = librepo.Result()
 
         # Correct repotype is important. Without repotype
         # metalink parser doesn't know suffix which should
@@ -262,6 +263,11 @@ How to get urls in a local mirrorlist
             print "Mirrorlist of downloaded repodata isn't available"
             librepo.global_cleanup()
             sys.exit(0)
+
+        # Download only the mirrorlist during perform() call.
+        h.setopt(LRO_FETCHMIRRORS, True)
+
+        h.perform(r)
 
         print "Urls in mirrorlist:"
         print h.mirrors

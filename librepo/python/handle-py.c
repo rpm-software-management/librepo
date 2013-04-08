@@ -181,7 +181,8 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_GPGCHECK:
     case LRO_IGNOREMISSING:
     case LRO_CHECKSUM:
-    case LRO_INTERRUPTIBLE: {
+    case LRO_INTERRUPTIBLE:
+    case LRO_FETCHMIRRORS: {
         PY_LONG_LONG d;
 
         if (PyInt_Check(obj))
@@ -400,6 +401,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_LASTCURLERR:
     case LRI_LASTCURLMERR:
     case LRI_LASTBADSTATUSCODE:
+    case LRO_FETCHMIRRORS:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &lval);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);

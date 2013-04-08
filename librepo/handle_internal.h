@@ -61,6 +61,7 @@ struct _lr_Handle {
     char            **yumblist;     /*!< Repomd data typenames to skip
                                       (blacklist). NULL as argument will
                                       disable blacklist. */
+    int             fetchmirrors;   /*!< Only fetch and parse mirrorlist. */
 };
 
 /**
