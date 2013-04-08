@@ -4,7 +4,7 @@
 
 Name:		librepo
 Version:	@VERSION@
-Release:	1.%{checkout}%{?dist}
+Release:	3.%{checkout}%{?dist}
 Summary:	Repodata downloading library
 
 Group:		System Environment/Libraries
@@ -79,7 +79,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{python_sitearch}/librepo/
 
 %changelog
-* Mon Apr  8 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.3-1
+* Mon Apr  8 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-3.git720d68d
 - Add CURL_GLOBAL_ACK_EINTR flag to curl init.
 - Proper multi handle cleanup. (RhBug: 947388)
 - Support for read 'useragent' attr. (RhBug: 947346)
@@ -87,6 +87,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 - Make python bindings interruptible (LRO_INTERRUPTIBLE) (RhBug: 919125)
 - Add LRI_MIRRORS option (RhBug: 923198)
 - Add LRI_METALINK option. (BzBug: 947767)
+
+* Mon Mar 18 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-2.gitb3c3323
+- py: Use standard python exception while accessing bad attrs. (RhBug: 920673)
+- Default mask for newly created files is 0666. (RhBug: 922557)
 
 * Thu Mar 14 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-1.git714e828
 - Add LRI_PROGRESSCB and LRI_PROGRESSDATA options (RhBug: 919123)
