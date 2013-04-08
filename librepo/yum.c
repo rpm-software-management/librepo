@@ -576,7 +576,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     /* Download rest of metadata files */
     rc = lr_yum_download_repo(handle, repo, repomd);
     DPRINTF("%s: Repository download rc: %d (%s)\n", __func__, rc, lr_strerror(rc));
-    return LRE_OK;
+    return rc;
 }
 
 int
