@@ -298,6 +298,10 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->fetchmirrors = va_arg(arg, long) ? 1 : 0;
         break;
 
+    case LRO_QUICKDOWNLOADFAIL:
+        handle->quickdownloadfail = va_arg(arg, long) ? 1 : 0;
+        break;
+
     default:
         ret = LRE_UNKNOWNOPT;
         break;

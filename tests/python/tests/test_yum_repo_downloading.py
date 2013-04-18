@@ -933,6 +933,21 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+    def test_download_repo_01_via_mirrorlist_firsturlhascorruptedfiles_quickdownloadfail_enabled(self):
+        """Download should fails on the first mirror (one file has a bad checksum).
+        Other mirrors have the file with a good checksum, but option
+        LRO_QUICKDOWNLOADFAIL should prevent trying of other mirrors."""
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.setopt(librepo.LRO_QUICKDOWNLOADFAIL, True)
+        self.assertRaises(librepo.LibrepoException, h.perform, (r))
+
     def test_download_repo_01_with_baseurl_and_mirrorlist_specified_only_fetchmirrors(self):
         h = librepo.Handle()
         r = librepo.Result()

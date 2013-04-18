@@ -182,7 +182,9 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_IGNOREMISSING:
     case LRO_CHECKSUM:
     case LRO_INTERRUPTIBLE:
-    case LRO_FETCHMIRRORS: {
+    case LRO_FETCHMIRRORS:
+    case LRO_QUICKDOWNLOADFAIL:
+    {
         PY_LONG_LONG d;
 
         if (PyInt_Check(obj))

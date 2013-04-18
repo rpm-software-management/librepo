@@ -90,6 +90,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);
     PyModule_AddIntConstant(m, "LRO_YUMBLIST", LRO_YUMBLIST);
     PyModule_AddIntConstant(m, "LRO_FETCHMIRRORS", LRO_FETCHMIRRORS);
+    PyModule_AddIntConstant(m, "LRO_QUICKDOWNLOADFAIL", LRO_QUICKDOWNLOADFAIL);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
     /* Handle info options */

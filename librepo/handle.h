@@ -87,6 +87,9 @@ typedef enum {
     LRO_FETCHMIRRORS,  /*!< (long 1 or 0) If true - do not download anything,
                             except mirrorlist or metalink
                             (during lr_handle_perform()).*/
+    LRO_QUICKDOWNLOADFAIL, /*!< (long 1 or 0) If True - fail download when
+                            file has a bad checksum and do not try another
+                            mirror. */
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< (long 1 or 0) Check GPG signature if available */

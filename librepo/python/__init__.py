@@ -195,8 +195,14 @@ Constants
 
 .. data:: LRO_FETCHMIRRORS
 
-    *Boolean*. With this option enable. Only mirrorlist download and parsing
+    *Boolean*. With this option enabled, only mirrorlist download and parsing
     will be performed during :meth:`librepo.Handle.perform`.
+
+.. data:: LRO_QUICKDOWNLOADFAIL
+
+    *Boolean*. Fail downloading when some download was successfull but checksum
+    doesn't match. This prevent downloading gigabytes of data due buggy
+    mirroring.
 
 .. _handle-info-options-label:
 
@@ -469,6 +475,7 @@ LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_YUMBLIST        = _librepo.LRO_YUMBLIST
 LRO_FETCHMIRRORS    = _librepo.LRO_FETCHMIRRORS
+LRO_QUICKDOWNLOADFAIL = _librepo.LRO_QUICKDOWNLOADFAIL
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -498,6 +505,7 @@ ATTR_TO_LRO = {
     "yumdlist":         LRO_YUMDLIST,
     "yumblist":         LRO_YUMBLIST,
     "fetchmirrors":     LRO_FETCHMIRRORS,
+    "quickdownloadfail": LRO_QUICKDOWNLOADFAIL,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE

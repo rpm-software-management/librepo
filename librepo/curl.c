@@ -468,6 +468,10 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
                          * whole file (no resume) */
                         x--;
                     }
+
+                    if (handle->quickdownloadfail)
+                        break;  /* Do not try another mirror */
+
                     continue; /* Try next mirror */
                 }
             }
@@ -768,6 +772,13 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                 } else {
                     /* Succeeded */
                     t->downloaded = 1;
+                }
+
+                if (last_ret == LRE_BADCHECKSUM && handle->quickdownloadfail) {
+                    DPRINTF("%s: Checksum check failed and "
+                            "quick download options specified "
+                            "- Aborting download\n", __func__);
+                    goto cleanup; // Abort downloading
                 }
             }
         }
