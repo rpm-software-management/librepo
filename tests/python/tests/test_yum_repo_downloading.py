@@ -148,6 +148,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
+
     def test_download_repo_02(self):
         h = librepo.Handle()
         r = librepo.Result()
@@ -302,6 +305,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
+
     def test_download_repo_from_bad_url(self):
         h = librepo.Handle()
         r = librepo.Result()
@@ -311,6 +317,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
 
     def test_partial_download_repo_01(self):
         h = librepo.Handle()
@@ -351,6 +359,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
+
     def test_partial_download_repo_02(self):
         h = librepo.Handle()
         r = librepo.Result()
@@ -389,6 +400,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         for key in yum_repo.iterkeys():
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
+
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
 
     def test_partial_download_repo_03(self):
         h = librepo.Handle()
@@ -429,6 +443,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
 
     def test_download_repo_01_with_checksum_check(self):
         h = librepo.Handle()
@@ -594,6 +610,24 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
         self.assertTrue(yum_repomd)
 
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink,
+            {'timestamp': 1347459931L,
+             'hashes': [
+                 ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
+                 ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
+                 ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
+                 ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
+             'size': 2621L,
+             'urls': [{
+                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'type': 'http',
+                 'protocol': 'http',
+                 'location': 'CZ',
+                 'preference': 100L}],
+             'filename': 'repomd.xml'}
+            )
+
     def test_download_repo_01_via_metalink_02(self):
         h = librepo.Handle()
         r = librepo.Result()
@@ -719,6 +753,67 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+    def test_download_repo_01_with_baseurl_and_metalink_specified_only_fetchmirrors(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink,
+            {'timestamp': 1347459931L,
+             'hashes': [
+                 ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
+                 ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
+                 ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
+                 ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
+             'size': 2621L,
+             'urls': [{
+                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'type': 'http',
+                 'protocol': 'http',
+                 'location': 'CZ',
+                 'preference': 100L}],
+             'filename': 'repomd.xml'}
+            )
+
+    def test_download_repo_01_with_baseurl_and_metalink_specified(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink,
+            {'timestamp': 1347459931L,
+             'hashes': [
+                 ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
+                 ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
+                 ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
+                 ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
+             'size': 2621L,
+             'urls': [{
+                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'type': 'http',
+                 'protocol': 'http',
+                 'location': 'CZ',
+                 'preference': 100L}],
+             'filename': 'repomd.xml'}
+            )
+
 # Mirrorlist tests
 
     def test_download_only_mirrorlist(self):
@@ -837,6 +932,37 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         for key in yum_repo.iterkeys():
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
+
+    def test_download_repo_01_with_baseurl_and_mirrorlist_specified_only_fetchmirrors(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink, None)
+
+    def test_download_repo_01_with_baseurl_and_mirrorlist_specified(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink, None)
 
 # Update test
 

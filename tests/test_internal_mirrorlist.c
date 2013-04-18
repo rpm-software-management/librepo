@@ -2,7 +2,7 @@
 #include "test_internal_mirrorlist.h"
 #include "librepo/internal_mirrorlist.h"
 
-START_TEST(test_internalimirrorlist_append_mirrorlist)
+START_TEST(test_internalmirrorlist_append_mirrorlist)
 {
     lr_InternalMirrorlist iml = NULL;
     lr_InternalMirror mirror = NULL;
@@ -45,7 +45,7 @@ START_TEST(test_internalimirrorlist_append_mirrorlist)
 }
 END_TEST
 
-START_TEST(test_internalimirrorlist_append_metalink)
+START_TEST(test_internalmirrorlist_append_metalink)
 {
     lr_InternalMirrorlist iml = NULL;
     lr_InternalMirror mirror = NULL;
@@ -142,13 +142,97 @@ START_TEST(test_internalimirrorlist_append_metalink)
 }
 END_TEST
 
+START_TEST(test_internalmirrorlist_append_internalmirrorlist)
+{
+    lr_InternalMirrorlist iml = NULL;
+    lr_InternalMirror mirror = NULL;
+    char *url = NULL;
+    struct _lr_InternalMirror url1 = {
+            .url = "http://foo",
+            .preference = 100,
+            .fails = 0,
+        };
+    struct _lr_InternalMirror url2 = {
+            .url = "",
+            .preference = 50,
+            .fails = 0,
+        };
+    struct _lr_InternalMirror url3 = {
+            .url = NULL,
+            .preference = 1,
+            .fails = 0,
+        };
+    struct _lr_InternalMirror url4 = {
+            .url = "ftp://bar",
+            .preference = 95,
+            .fails = 0,
+        };
+    struct _lr_InternalMirrorlist ml = {
+        .mirrors = (lr_InternalMirror[4]) {
+            (lr_InternalMirror) &url1,
+            (lr_InternalMirror) &url2,
+            (lr_InternalMirror) &url3,
+            (lr_InternalMirror) &url4
+        },
+        .nom = 4,
+    };
+
+    iml = lr_internalmirrorlist_new();
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
+    lr_internalmirrorlist_append_internalmirrorlist(iml, NULL);
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
+
+    lr_internalmirrorlist_append_internalmirrorlist(iml, &ml);
+    fail_if(iml->nom != 2);  // 2 because element with empty url shoud be skipped
+    fail_if(strcmp(iml->mirrors[0]->url, "http://foo"));
+    fail_if(iml->mirrors[0]->preference != 100);
+    fail_if(iml->mirrors[0]->fails != 0);
+    fail_if(strcmp(iml->mirrors[1]->url, "ftp://bar"));
+    fail_if(iml->mirrors[1]->preference != 95);
+    fail_if(iml->mirrors[1]->fails != 0);
+
+    fail_if(lr_internalmirrorlist_len(iml) != 2);
+
+    mirror = lr_internalmirrorlist_get(iml, 0);
+    fail_if(mirror == NULL);
+    fail_if(strcmp(mirror->url, "http://foo"));
+    url = lr_internalmirrorlist_get_url(iml, 0);
+    fail_if(strcmp(url, "http://foo"));
+
+    mirror = lr_internalmirrorlist_get(iml, 1);
+    fail_if(mirror == NULL);
+    fail_if(strcmp(mirror->url, "ftp://bar"));
+    url = lr_internalmirrorlist_get_url(iml, 1);
+    fail_if(strcmp(url, "ftp://bar"));
+
+    lr_internalmirrorlist_free(iml);
+
+    // Try append on list with existing element
+    iml = lr_internalmirrorlist_new();
+    fail_if(lr_internalmirrorlist_len(iml) != 0);
+    lr_internalmirrorlist_append_url(iml, "http://abc");
+    fail_if(lr_internalmirrorlist_len(iml) != 1);
+    lr_internalmirrorlist_append_internalmirrorlist(iml, &ml);
+    fail_if(lr_internalmirrorlist_len(iml) != 3);
+    url = lr_internalmirrorlist_get_url(iml, 0);
+    fail_if(strcmp(url, "http://abc"));
+    url = lr_internalmirrorlist_get_url(iml, 1);
+    fail_if(strcmp(url, "http://foo"));
+    url = lr_internalmirrorlist_get_url(iml, 2);
+    fail_if(strcmp(url, "ftp://bar"));
+    lr_internalmirrorlist_free(iml);
+
+}
+END_TEST
+
 Suite *
 internal_mirrorlist_suite(void)
 {
     Suite *s = suite_create("internal_mirrorlist");
     TCase *tc = tcase_create("Main");
-    tcase_add_test(tc, test_internalimirrorlist_append_mirrorlist);
-    tcase_add_test(tc, test_internalimirrorlist_append_metalink);
+    tcase_add_test(tc, test_internalmirrorlist_append_mirrorlist);
+    tcase_add_test(tc, test_internalmirrorlist_append_metalink);
+    tcase_add_test(tc, test_internalmirrorlist_append_internalmirrorlist);
     suite_add_tcase(s, tc);
     return s;
 }

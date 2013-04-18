@@ -104,26 +104,37 @@ typedef enum {
 
 /** Handle options for the ::lr_handle_getinfo function. */
 typedef enum {
-    LRI_UPDATE,                 /* (long *) */
-    LRI_URL,                    /* (char **) */
-    LRI_MIRRORLIST,             /* (char **) */
-    LRI_LOCAL,                  /* (long *) */
-    LRI_PROGRESSCB,             /* (void *) */
-    LRI_PROGRESSDATA,           /* (lr_ProgressCb) */
-    LRI_DESTDIR,                /* (char **) */
-    LRI_REPOTYPE,               /* (long *) */
-    LRI_USERAGENT,              /* (char **) */
-    LRI_YUMDLIST,               /* (char ***) */
-    LRI_YUMBLIST,               /* (char ***) */
-    LRI_FETCHMIRRORS,           /* (long *) */
-    LRI_LASTCURLERR,            /* (long *) */
-    LRI_LASTCURLMERR,           /* (long *) */
-    LRI_LASTCURLSTRERR,         /* (char **) */
-    LRI_LASTCURLMSTRERR,        /* (char **) */
-    LRI_LASTBADSTATUSCODE,      /* (long *) */
-    LRI_MIRRORS,                /* (char **) Returned list must be freed
-                                   but its elements doesn't! */
-    LRI_METALINK,               /* (lr_Metalink *) */
+    LRI_UPDATE,                 /*!< (long *) */
+    LRI_URL,                    /*!< (char **) */
+    LRI_MIRRORLIST,             /*!< (char **) */
+    LRI_LOCAL,                  /*!< (long *) */
+    LRI_PROGRESSCB,             /*!< (void *) */
+    LRI_PROGRESSDATA,           /*!< (lr_ProgressCb) */
+    LRI_DESTDIR,                /*!< (char **) */
+    LRI_REPOTYPE,               /*!< (long *) */
+    LRI_USERAGENT,              /*!< (char **) */
+    LRI_YUMDLIST,               /*!< (char ***) */
+    LRI_YUMBLIST,               /*!< (char ***) */
+    LRI_FETCHMIRRORS,           /*!< (long *) */
+    LRI_LASTCURLERR,            /*!< (long *) */
+    LRI_LASTCURLMERR,           /*!< (long *) */
+    LRI_LASTCURLSTRERR,         /*!< (char **) */
+    LRI_LASTCURLMSTRERR,        /*!< (char **) */
+    LRI_LASTBADSTATUSCODE,      /*!< (long *) */
+    LRI_MIRRORS,                /*!< (char **)
+        Mirrorlist associated with the repository.
+
+        If LRO_MIRRORLIST was specified, then content of this list is
+        created from the specified mirrorlist.
+        If no LRO_MIRRORLIST was specified and repository is on a local
+        filesystem and contains its mirrorlist then this mirrorlist is
+        automatically loaded.
+        Mirrors from this list are used for downloading only if the
+        mirrorlist was specified by LRO_MIRRORLIST option! Automatically
+        loaded mirrorlist is not implicitly used for downloading!
+
+        NOTE: Returned list must be freed, but its elements doesn't! */
+    LRI_METALINK,               /*!< (lr_Metalink *) */
     LRI_SENTINEL,
 } lr_HandleInfoOption; /*!< Handle info options */
 

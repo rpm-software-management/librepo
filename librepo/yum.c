@@ -331,17 +331,21 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     }
 
     if (!handle->update) {
-        /* Locate mirrorlist if available */
-        path = lr_pathconcat(baseurl, "metalink.xml", NULL);
-        if (access(path, F_OK) == 0) {
-            repo->mirrorlist = path;
-        } else {
-            lr_free(path);
-            path = lr_pathconcat(baseurl, "mirrorlist", NULL);
-            if (access(path, F_OK) == 0)
-                repo->mirrorlist = path;
+        if (handle->mirrorlist_fd != -1) {
+            // Locate mirrorlist if available.
+            if (handle->metalink)
+                path = lr_pathconcat(baseurl, "metalink.xml", NULL);
             else
+                path = lr_pathconcat(baseurl, "mirrorlist", NULL);
+
+            if (access(path, F_OK) == 0) {
+                DPRINTF("%s: Found local mirrorlist: %s\n", __func__, path);
+                repo->mirrorlist = path;
+            } else {
+                repo->mirrorlist = NULL;
                 lr_free(path);
+            }
+
         }
 
         /* Open and parse repomd */
@@ -433,10 +437,6 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     repomd = result->yum_repomd;
 
     DPRINTF("%s: Downloading/Copying repo..\n", __func__);
-
-    rc = lr_handle_prepare_internal_mirrorlist(handle);
-    if (rc != LRE_OK)
-        return rc;
 
     path_to_repodata = lr_pathconcat(handle->destdir, "repodata", NULL);
 
