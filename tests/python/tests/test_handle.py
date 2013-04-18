@@ -203,6 +203,10 @@ class TestCaseHandle(unittest.TestCase):
         h.interruptible = None
         h.setopt(librepo.LRO_USERAGENT, None)
         h.useragent = None
+        h.setopt(librepo.LRO_FETCHMIRRORS, None)
+        h.fetchmirrors = None
+        h.setopt(librepo.LRO_MAXMIRRORTRIES, None)
+        h.maxmirrortries = None
         h.setopt(librepo.LRO_GPGCHECK, None)
         h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)

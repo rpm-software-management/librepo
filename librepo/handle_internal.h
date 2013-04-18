@@ -64,9 +64,7 @@ struct _lr_Handle {
                                       (blacklist). NULL as argument will
                                       disable blacklist. */
     int             fetchmirrors;   /*!< Only fetch and parse mirrorlist. */
-    int             quickdownloadfail; /*!< Do not try another mirror if
-                                      successfully downloaded file has
-                                      a bad checksum */
+    int             maxmirrortries; /*!< Try at most this number of mirrors. */
 };
 
 /**

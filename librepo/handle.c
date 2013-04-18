@@ -298,8 +298,10 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->fetchmirrors = va_arg(arg, long) ? 1 : 0;
         break;
 
-    case LRO_QUICKDOWNLOADFAIL:
-        handle->quickdownloadfail = va_arg(arg, long) ? 1 : 0;
+    case LRO_MAXMIRRORTRIES:
+        handle->maxmirrortries = va_arg(arg, long);
+        if (handle->maxmirrortries < 0)
+            handle->maxmirrortries = 0;
         break;
 
     default:

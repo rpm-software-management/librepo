@@ -456,7 +456,14 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             {
                 DPRINTF("%s: Checking checksum\n", __func__);
                 lseek(fd, 0, SEEK_SET);
-                if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
+                if (!lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
+                    // Checksum is OK
+                    if (handle->used_mirror)
+                        lr_free(handle->used_mirror);
+                    handle->used_mirror = lr_strdup(url);
+                    break; // Download successfull
+                } else {
+                    // Bad checksum
                     DPRINTF("%s: Bad checksum\n", __func__);
                     rc = LRE_BADCHECKSUM;
                     if (offset) {
@@ -468,23 +475,23 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
                          * whole file (no resume) */
                         x--;
                     }
-
-                    if (handle->quickdownloadfail)
-                        break;  /* Do not try another mirror */
-
-                    continue; /* Try next mirror */
                 }
+            } else {
+                // Download successfull and no checksum check wantedd
+                if (handle->used_mirror)
+                    lr_free(handle->used_mirror);
+                handle->used_mirror = lr_strdup(url);
+                break;  // Download successfull
             }
-
-            /* Store used mirror into the handler */
-            if (handle->used_mirror)
-                lr_free(handle->used_mirror);
-            handle->used_mirror = lr_strdup(url);
-            break;
-        }
+        } // if (rc == LRE_OK)
 
         if (rc == LRE_INTERRUPTED)
-            break;
+            break;  // Interrupted
+
+        if (handle->maxmirrortries > 0 && handle->maxmirrortries <= (x+1)) {
+            DPRINTF("%s: Maxmirrortries reached - Aborting download\n", __func__);
+            break;  // Do not try another mirror
+        }
     }
 
     return rc;
@@ -773,13 +780,6 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                     /* Succeeded */
                     t->downloaded = 1;
                 }
-
-                if (last_ret == LRE_BADCHECKSUM && handle->quickdownloadfail) {
-                    DPRINTF("%s: Checksum check failed and "
-                            "quick download options specified "
-                            "- Aborting download\n", __func__);
-                    goto cleanup; // Abort downloading
-                }
             }
         }
 
@@ -797,6 +797,10 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         if (failed_downloads == 0)
             break;
 
+        if (handle->maxmirrortries > 0 && handle->maxmirrortries <= (i+1)) {
+            DPRINTF("%s: Maxmirrortries reached - Aborting download\n", __func__);
+            break; // Abort downloading
+        }
     } /* End of iteration over mirrors */
 
 cleanup:

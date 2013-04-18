@@ -183,7 +183,7 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_CHECKSUM:
     case LRO_INTERRUPTIBLE:
     case LRO_FETCHMIRRORS:
-    case LRO_QUICKDOWNLOADFAIL:
+    case LRO_MAXMIRRORTRIES:
     {
         PY_LONG_LONG d;
 
