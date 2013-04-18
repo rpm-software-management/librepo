@@ -75,7 +75,7 @@ void lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml,
                                              lr_Mirrorlist mirrorlist);
 
 /**
- * Append mirrors from metalink to the internall mirrorlist.
+ * Append mirrors from metalink to the internal mirrorlist.
  * @param iml           Internal mirrorlist.
  * @param metalink      Metalink.
  * @param suffix        Suffix that shoud be removed from the metalink urls.
@@ -84,6 +84,13 @@ void lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
                                            lr_Metalink metalink,
                                            const char *suffix);
 
+/**
+ * Append mirrors from another internal mirrorlist to the internal mirrorlist.
+ * @param iml           Internal mirrorlist.
+ * @param ml            Other internal mirrorlist.
+ */
+void lr_internalmirrorlist_append_internalmirrorlist(lr_InternalMirrorlist iml,
+                                                     lr_InternalMirrorlist ml);
 /**
  * Get mirror on the selected position.
  * @param iml           Internal mirrorlist.

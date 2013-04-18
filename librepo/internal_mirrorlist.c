@@ -67,7 +67,7 @@ lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml, lr_Mirrorlist
         }
 
         im = lr_malloc(sizeof(struct _lr_InternalMirror));
-        im->url = lr_strdup(ml->urls[x]);
+        im->url = lr_strdup(url);
         im->preference = 100;
         im->fails = 0;
         iml->mirrors[current_id] = im;
@@ -113,6 +113,39 @@ lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
                 im->url[url_len-suffix_len] = '\0';
         }
         im->preference = ml->urls[x]->preference;
+        im->fails = 0;
+        iml->mirrors[current_id] = im;
+        current_id++;
+    }
+}
+
+void
+lr_internalmirrorlist_append_internalmirrorlist(lr_InternalMirrorlist iml,
+                                                lr_InternalMirrorlist ml)
+{
+    int nom_old;     // Number of mirrors in internal mirror list before append
+    int current_id;  // Id of currently inserted element into the internal mirrorlist
+
+    if (!iml || !ml || ml->nom == 0)
+        return;
+
+    nom_old = iml->nom;
+    iml->nom += ml->nom;
+    iml->mirrors = lr_realloc(iml->mirrors, sizeof(lr_InternalMirror *) * iml->nom);
+    current_id = nom_old;
+
+    for (int x=0; x < ml->nom; x++) {
+        lr_InternalMirror im;
+        char *url = ml->mirrors[x]->url;
+
+        if (!url || !strlen(url)) {
+            iml->nom--;
+            continue;  // No url present
+        }
+
+        im = lr_malloc(sizeof(struct _lr_InternalMirror));
+        im->url = lr_strdup(url);
+        im->preference = ml->mirrors[x]->preference;
         im->fails = 0;
         iml->mirrors[current_id] = im;
         current_id++;
