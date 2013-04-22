@@ -41,6 +41,7 @@ lr_result_clear(lr_Result result)
 {
     if (!result)
         return;
+    lr_free(result->destdir);
     lr_yum_repomd_free(result->yum_repomd);
     lr_yum_repo_free(result->yum_repo);
     memset(result, 0, sizeof(struct _lr_Result));

@@ -128,6 +128,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_URL:
+        if (handle->baseurl) lr_free(handle->baseurl);
         handle->baseurl = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
             // Clear previous mirrorlist stuff
@@ -137,6 +138,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_MIRRORLIST:
+        if (handle->mirrorlist) lr_free(handle->mirrorlist);
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
             // Clear previous mirrorlist stuff
@@ -226,6 +228,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         break;
 
     case LRO_DESTDIR:
+        if (handle->destdir) lr_free(handle->destdir);
         handle->destdir = lr_strdup(va_arg(arg, char *));
         break;
 
@@ -400,7 +403,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             local_path = handle->baseurl;
             if (handle->baseurl[0] == '/') {
                 /* Base URL is absolute path */
-                char *path_with_protocol;
+                char *path_with_protocol = NULL;
                 path_with_protocol = lr_strconcat("file://",
                                                   handle->baseurl,
                                                   NULL);
@@ -462,6 +465,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                     //repo->mirrorlist = path;
                 } else {
                     lr_free(full_path);
+                    full_path = NULL;
                 }
             }
 
