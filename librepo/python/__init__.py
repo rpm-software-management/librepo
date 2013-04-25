@@ -820,6 +820,11 @@ class Handle(_librepo.Handle):
             checksum_type = checksum_str_to_type(checksum_type)
         self.download_package(url, dest, checksum_type, checksum, base_url, resume)
 
+    def perform(self, result=None):
+        if result is None:
+            result = Result()
+        _librepo.Handle.perform(self, result)
+        return result
 
 class Result(_librepo.Result):
     """Librepo result class

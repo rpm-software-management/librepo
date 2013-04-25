@@ -446,6 +446,22 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertFalse(h.mirrors)
         self.assertFalse(h.metalink)
 
+    def test_download_repo_01_without_result_object(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_CHECKSUM, True)
+        r = h.perform()
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+
     def test_download_repo_01_with_checksum_check(self):
         h = librepo.Handle()
         r = librepo.Result()
