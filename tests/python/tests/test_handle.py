@@ -87,6 +87,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_YUMBLIST,  [None])
         self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), [])
 
+        self.assertEqual(h.getinfo(librepo.LRI_MAXMIRRORTRIES), 0)
+        h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
+        self.assertEqual(h.getinfo(librepo.LRI_MAXMIRRORTRIES), 1)
+        h.setopt(librepo.LRO_MAXMIRRORTRIES, None)
+        self.assertEqual(h.getinfo(librepo.LRI_MAXMIRRORTRIES), 0)
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -168,6 +174,12 @@ class TestCaseHandle(unittest.TestCase):
         self.assertEqual(h.yumblist, [])
         h.yumblist =  [None]
         self.assertEqual(h.yumblist, [])
+
+        self.assertEqual(h.maxmirrortries, 0)
+        h.maxmirrortries = 1
+        self.assertEqual(h.maxmirrortries, 1)
+        h.maxmirrortries = None
+        self.assertEqual(h.maxmirrortries, 0)
 
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""

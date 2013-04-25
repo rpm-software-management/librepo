@@ -183,7 +183,6 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_CHECKSUM:
     case LRO_INTERRUPTIBLE:
     case LRO_FETCHMIRRORS:
-    case LRO_MAXMIRRORTRIES:
     {
         PY_LONG_LONG d;
 
@@ -208,7 +207,8 @@ setopt(_HandleObject *self, PyObject *args)
      * Options with long/int arguments
      */
     case LRO_PROXYTYPE:
-    case LRO_REPOTYPE: {
+    case LRO_REPOTYPE:
+    {
         int badarg = 0;
         PY_LONG_LONG d;
 
@@ -240,7 +240,9 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXYPORT:
     case LRO_RETRIES:
     case LRO_MAXSPEED:
-    case LRO_CONNECTTIMEOUT: {
+    case LRO_CONNECTTIMEOUT:
+    case LRO_MAXMIRRORTRIES:
+    {
         PY_LONG_LONG d;
 
         if (PyInt_Check(obj))
@@ -253,7 +255,7 @@ setopt(_HandleObject *self, PyObject *args)
                 d = 1080;
             else if (option == LRO_RETRIES)
                 d = 1;
-            else if (option == LRO_MAXSPEED)
+            else if (option == LRO_MAXSPEED || option == LRO_MAXMIRRORTRIES)
                 d = 0;
             else if (option == LRO_CONNECTTIMEOUT)
                 d = 300;
@@ -404,6 +406,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_LASTCURLMERR:
     case LRI_LASTBADSTATUSCODE:
     case LRI_FETCHMIRRORS:
+    case LRI_MAXMIRRORTRIES:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &lval);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);

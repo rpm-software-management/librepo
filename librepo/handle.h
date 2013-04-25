@@ -119,6 +119,7 @@ typedef enum {
     LRI_YUMDLIST,               /*!< (char ***) */
     LRI_YUMBLIST,               /*!< (char ***) */
     LRI_FETCHMIRRORS,           /*!< (long *) */
+    LRI_MAXMIRRORTRIES,         /*!< (long *) */
     LRI_LASTCURLERR,            /*!< (long *) */
     LRI_LASTCURLMERR,           /*!< (long *) */
     LRI_LASTCURLSTRERR,         /*!< (char **) */

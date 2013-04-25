@@ -751,6 +751,11 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         *lnum = (long) handle->fetchmirrors;
         break;
 
+    case LRI_MAXMIRRORTRIES:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->maxmirrortries;
+        break;
+
     case LRI_LASTCURLERR:
         lnum = va_arg(arg, long *);
         *lnum = handle->last_curl_error;

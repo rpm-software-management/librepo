@@ -89,6 +89,10 @@ START_TEST(test_handle_getinfo)
     fail_if(strlist != NULL);
 
     num = -1;
+    lr_handle_getinfo(h, LRI_MAXMIRRORTRIES, &num);
+    fail_if(num != 0);
+
+    num = -1;
     lr_handle_getinfo(h, LRI_LASTCURLERR, &num);
     fail_if(num != 0);
 

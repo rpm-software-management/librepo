@@ -105,6 +105,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_USERAGENT", LRI_USERAGENT);
     PyModule_AddIntConstant(m, "LRI_YUMDLIST", LRI_YUMDLIST);
     PyModule_AddIntConstant(m, "LRI_YUMBLIST", LRI_YUMBLIST);
+    PyModule_AddIntConstant(m, "LRI_FETCHMIRRORS", LRI_FETCHMIRRORS);
+    PyModule_AddIntConstant(m, "LRI_MAXMIRRORTRIES", LRI_MAXMIRRORTRIES);
     PyModule_AddIntConstant(m, "LRI_LASTCURLERR", LRI_LASTCURLERR);
     PyModule_AddIntConstant(m, "LRI_LASTCURLMERR", LRI_LASTCURLMERR);
     PyModule_AddIntConstant(m, "LRI_LASTCURLSTRERR", LRI_LASTCURLSTRERR);
@@ -112,7 +114,6 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_LASTBADSTATUSCODE", LRI_LASTBADSTATUSCODE);
     PyModule_AddIntConstant(m, "LRI_MIRRORS", LRI_MIRRORS);
     PyModule_AddIntConstant(m, "LRI_METALINK", LRI_METALINK);
-    PyModule_AddIntConstant(m, "LRI_FETCHMIRRORS", LRI_FETCHMIRRORS);
 
     /* Check options */
     PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);
