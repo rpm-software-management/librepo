@@ -184,12 +184,12 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_INTERRUPTIBLE:
     case LRO_FETCHMIRRORS:
     {
-        PY_LONG_LONG d;
+        long d;
 
         if (PyInt_Check(obj))
-            d = (PY_LONG_LONG) PyInt_AS_LONG(obj);
+            d = PyInt_AS_LONG(obj);
         else if (PyLong_Check(obj))
-            d = PyLong_AsLongLong(obj);
+            d = PyLong_AsLong(obj);
         else if (PyObject_IsTrue(obj) == 1)
             d = 1;
         else if (PyObject_IsTrue(obj) == 0)
@@ -210,12 +210,12 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_REPOTYPE:
     {
         int badarg = 0;
-        PY_LONG_LONG d;
+        long d;
 
         if (PyInt_Check(obj))
-            d = (PY_LONG_LONG) PyInt_AS_LONG(obj);
+            d = PyInt_AS_LONG(obj);
         else if (PyLong_Check(obj))
-            d = PyLong_AsLongLong(obj);
+            d = PyLong_AsLong(obj);
         else if (obj == Py_None) {
             // None stands for default value
             if (option == LRO_PROXYTYPE)
@@ -243,12 +243,12 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_CONNECTTIMEOUT:
     case LRO_MAXMIRRORTRIES:
     {
-        PY_LONG_LONG d;
+        long d;
 
         if (PyInt_Check(obj))
-            d = (PY_LONG_LONG) PyInt_AS_LONG(obj);
+            d = PyInt_AS_LONG(obj);
         else if (PyLong_Check(obj))
-            d = PyLong_AsLongLong(obj);
+            d = PyLong_AsLong(obj);
         else if (obj == Py_None) {
             /* Default options */
             if (option == LRO_PROXYPORT)
