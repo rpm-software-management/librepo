@@ -73,9 +73,17 @@ void lr_free(void *mem);
 /** \ingroup util
  * Return new allocated memory containing copy of the string.
  * @param str           String.
- * @return              New allocated memory with copy of the string.
+ * @return              A Newly-allocated memory with copy of the str.
  */
 char *lr_strdup(const char *str);
+
+/** \ingroup util
+ * Return new allocated memory containing copy of n characters of the string.
+ * @param str           String.
+ * @param n             The maximum nomber of bytes to copy from str.
+ * @return              A newly-allocated string with the first n bytes of str.
+ */
+char *lr_strndup(const char *str, size_t n);
 
 /** \ingroup util
  * Concatenate all of given string into one long string. Variable argument

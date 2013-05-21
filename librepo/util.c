@@ -84,6 +84,17 @@ lr_strdup(const char *str)
 }
 
 char *
+lr_strndup(const char *str, size_t n)
+{
+    char *new;
+    if (!str)
+        return NULL;
+    new = strndup(str, n);
+    if (!new) lr_out_of_memory();
+    return new;
+}
+
+char *
 lr_strconcat(const char *str, ...)
 {
     va_list arg;
