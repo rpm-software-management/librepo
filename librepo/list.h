@@ -31,26 +31,27 @@ extern "C" {
  *  @{
  */
 
-typedef struct _lr_List * lr_List;
-typedef struct _lr_List {
-    lr_List next;
-    lr_List prev;
+typedef struct _lr_List lr_List;
+struct _lr_List {
+    lr_List *next;
+    lr_List *prev;
     void *data;
-} _lr_List;
+};
 
 typedef void (*lr_DestroyFunc) (void *data);
 
-#define lr_list_next(list)  ((list) ? (((lr_List)(list))->next) : NULL)
-#define lr_list_prev(list)  ((list) ? (((lr_List)(list))->prev) : NULL)
+#define lr_list_next(list)  ((list) ? (((lr_List *)(list))->next) : NULL)
+#define lr_list_prev(list)  ((list) ? (((lr_List *)(list))->prev) : NULL)
+#define lr_list_data(list)  ((list) ? (((lr_List *)(list))->data) : NULL)
 
-void lr_list_free(lr_List list);
-void lr_list_free_full(lr_List list, lr_DestroyFunc free_func);
-lr_List lr_list_first(lr_List list);
-lr_List lr_list_last(lr_List list);
-lr_List lr_list_append(lr_List list, void *data);
-lr_List lr_list_prepend(lr_List list, void *data);
-size_t lr_list_length(lr_List list);
-lr_List lr_list_remove(lr_List list, void *data);
+void lr_list_free(lr_List *list);
+void lr_list_free_full(lr_List *list, lr_DestroyFunc free_func);
+lr_List *lr_list_first(lr_List *list);
+lr_List *lr_list_last(lr_List *list);
+lr_List *lr_list_append(lr_List *list, void *data);
+lr_List *lr_list_prepend(lr_List *list, void *data);
+size_t lr_list_length(lr_List *list);
+lr_List *lr_list_remove(lr_List *list, void *data);
 
 /** @} */
 

@@ -17,7 +17,7 @@
 
 START_TEST(test_list_append)
 {
-    lr_List elem, list = NULL;
+    lr_List *elem, *list = NULL;
 
     list = lr_list_append(list, (void *) 1);
     fail_if(list == NULL);
@@ -37,7 +37,7 @@ END_TEST
 
 START_TEST(test_list_prepend)
 {
-    lr_List elem, list = NULL;
+    lr_List *elem, *list = NULL;
 
     list = lr_list_prepend(list, (void *) 1);
     fail_if(list == NULL);
@@ -57,7 +57,7 @@ END_TEST
 
 START_TEST(test_list_next_last_prev)
 {
-    lr_List elem, list = NULL;
+    lr_List *elem, *list = NULL;
 
     elem = lr_list_next(list);
     fail_if(elem != NULL);
@@ -108,7 +108,7 @@ void lr_my_free(void *data) { lr_free(data); }
 START_TEST(test_list_free_full)
 {
     void *data;
-    lr_List list = NULL;
+    lr_List *list = NULL;
     lr_list_free_full(list, lr_my_free);
 
     data = lr_malloc(sizeof(int));
@@ -123,7 +123,7 @@ END_TEST
 
 START_TEST(test_list_length)
 {
-    lr_List list = NULL;
+    lr_List *list = NULL;
     size_t len;
 
     len = lr_list_length(list);
@@ -143,7 +143,7 @@ END_TEST
 
 START_TEST(test_list_remove)
 {
-    lr_List list = NULL;
+    lr_List *list = NULL;
 
     list = lr_list_remove(list, (void *) 2);
     fail_if(list != NULL);
