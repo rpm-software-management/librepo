@@ -10,6 +10,7 @@ SET (librepotest_SRCS
      test_metalink.c
      test_mirrorlist.c
      test_repomd.c
+     test_url_substitution.c
      test_util.c
      testsys.c
     )

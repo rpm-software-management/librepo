@@ -87,7 +87,7 @@ char *
 lr_strndup(const char *str, size_t n)
 {
     char *new;
-    if (!str)
+    if (!str || n == 0)
         return NULL;
     new = strndup(str, n);
     if (!new) lr_out_of_memory();

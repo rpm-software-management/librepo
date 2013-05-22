@@ -64,6 +64,9 @@ START_TEST(test_strndup)
     dup = lr_strndup(NULL, 5);
     fail_if(dup != NULL);
 
+    dup = lr_strndup(NULL, 0);
+    fail_if(dup != NULL);
+
     dup = lr_strndup(msg, 5);
     fail_if(dup == NULL);
     fail_if(msg == dup);

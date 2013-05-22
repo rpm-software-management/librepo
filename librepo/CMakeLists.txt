@@ -14,6 +14,7 @@ SET (librepo_SRCS
      repomd.c
      repoutil_yum.c
      result.c
+     url_substitution.c
      util.c
      yum.c)
 
@@ -30,6 +31,7 @@ SET(librepo_HEADERS
     repoutil_yum.h
     result.h
     types.h
+    url_substitution.h
     util.h
     version.h
     yum.h)

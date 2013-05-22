@@ -34,6 +34,7 @@ extern "C" {
 #include "repoutil_yum.h"
 #include "result.h"
 #include "types.h"
+#include "url_substitution.h"
 #include "util.h"
 #include "version.h"
 #include "yum.h"
