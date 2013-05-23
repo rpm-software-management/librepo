@@ -91,8 +91,8 @@ typedef enum {
                             number of mirrors. 0 means try all available
                             mirrors. */
     LRO_VARSUB,        /*!< (lr_UrlVars *) Variables and its substitutions for
-                            repo URL. [{"ver", "f18"}], ...;
-                            (e.g.: http://foo/$ver => http://foo/f18)
+                            repo URL. [{"releasever", "f18"}], ...;
+                            (e.g.: http://foo/$releasever => http://foo/f18)
                             lr_UrlVars has to be constructed by
                             lr_urlvars_set() function. After set the list
                             to the handle, it has not to be freed! Handle

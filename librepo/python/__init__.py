@@ -205,8 +205,9 @@ Constants
 
 .. data:: LRO_VARSUB
 
-    *(String, String or None) or None*. Add substitution for a variable in
-    ulr (url example: "http://foo/$version/"). Eg.: ("version", "f18")
+    *[(String, String), ...] or None*. Set list of substitutions
+    for variables in ulrs (e.g.: "http://foo/$version/").
+    ``[("releasever", "f18"), ("basearch", "i386")]``
 
 .. _handle-info-options-label:
 
