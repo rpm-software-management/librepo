@@ -10,6 +10,7 @@
 #include "librepo/librepo.h"
 #include "librepo/rcodes.h"
 #include "librepo/handle.h"
+#include "librepo/url_substitution.h"
 
 #include "fixtures.h"
 #include "testsys.h"
@@ -37,6 +38,9 @@ START_TEST(test_handle)
     char *dlist[] = {"primary", "filelists", NULL};
     lr_handle_setopt(h, LRO_YUMDLIST, dlist);
     lr_handle_setopt(h, LRO_YUMBLIST, dlist);
+    lr_UrlVars *vars = NULL;
+    vars = lr_urlvars_set(vars, "foo", "bar");
+    lr_handle_setopt(h, LRO_VARSUB, vars);
     lr_handle_free(h);
     lr_global_cleanup();
 }
@@ -91,6 +95,10 @@ START_TEST(test_handle_getinfo)
     num = -1;
     lr_handle_getinfo(h, LRI_MAXMIRRORTRIES, &num);
     fail_if(num != 0);
+
+    lr_UrlVars *vars = NULL;
+    lr_handle_getinfo(h, LRI_VARSUB, &vars);
+    fail_if(strlist != NULL);
 
     num = -1;
     lr_handle_getinfo(h, LRI_LASTCURLERR, &num);

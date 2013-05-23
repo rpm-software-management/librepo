@@ -93,6 +93,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_MAXMIRRORTRIES, None)
         self.assertEqual(h.getinfo(librepo.LRI_MAXMIRRORTRIES), 0)
 
+        self.assertEqual(h.getinfo(librepo.LRI_VARSUB), None)
+        h.setopt(librepo.LRO_VARSUB, [("bar", "foo")])
+        self.assertEqual(h.getinfo(librepo.LRI_VARSUB), [("bar", "foo")])
+        h.setopt(librepo.LRO_VARSUB, None)
+        self.assertEqual(h.getinfo(librepo.LRI_VARSUB), None)
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -181,6 +187,12 @@ class TestCaseHandle(unittest.TestCase):
         h.maxmirrortries = None
         self.assertEqual(h.maxmirrortries, 0)
 
+        self.assertEqual(h.varsub, None)
+        h.varsub = [("foo", "bar")]
+        self.assertEqual(h.varsub, [("foo", "bar")])
+        h.varsub = None
+        self.assertEqual(h.varsub, None)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -219,6 +231,8 @@ class TestCaseHandle(unittest.TestCase):
         h.fetchmirrors = None
         h.setopt(librepo.LRO_MAXMIRRORTRIES, None)
         h.maxmirrortries = None
+        h.setopt(librepo.LRO_VARSUB, None)
+        h.varsub = None
         h.setopt(librepo.LRO_GPGCHECK, None)
         h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)

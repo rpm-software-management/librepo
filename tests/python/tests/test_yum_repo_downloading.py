@@ -1131,3 +1131,60 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(data["calls"] > 0)
         self.assertTrue(data["ttd"] == data["d"])
 
+# Var substitution test
+
+    def test_download_repo_01_with_url_substitution(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH_VAR)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.setopt(librepo.LRO_VARSUB, config.REPO_YUM_01_VARSUB_LIST)
+        h.perform(r)
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+        self.assertTrue(yum_repo["url"].endswith(config.REPO_YUM_01_PATH))
+
+    def test_download_repo_01_mirrorlist_with_url_substitution(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.MIRRORLIST_VARSUB)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.setopt(librepo.LRO_VARSUB, config.MIRRORLIST_VARSUB_LIST)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink, None)
+
+    def test_download_repo_01_metalink_with_url_substitution(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.METALINK_VARSUB)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.setopt(librepo.LRO_VARSUB, config.METALINK_VARSUB_LIST)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink["urls"],
+            [{
+                'url': 'http://127.0.0.1:5000/yum/static/$version/repodata/repomd.xml',
+                'type': 'http',
+                'protocol': 'http',
+                'location': 'CZ',
+                'preference': 100L}
+            ])

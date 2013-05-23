@@ -310,6 +310,58 @@ setopt(_HandleObject *self, PyObject *args)
         break;
     }
 
+    case LRO_VARSUB: {
+        Py_ssize_t len = 0;
+        lr_UrlVars *vars = NULL;
+
+        if (!PyList_Check(obj) && obj != Py_None) {
+            PyErr_SetString(PyExc_TypeError, "Only List of tuples or None type is supported with this option");
+            return NULL;
+        }
+
+        if (obj == Py_None) {
+            res = lr_handle_setopt(self->handle, (lr_HandleOption)option, NULL);
+            break;
+        }
+
+        // Check all list elements
+        len = PyList_Size(obj);
+        for (Py_ssize_t x = 0; x < len; x++) {
+            PyObject *item = PyList_GetItem(obj, x);
+            PyObject *tuple_item;
+
+            if (!PyTuple_Check(item) || PyTuple_Size(item) != 2) {
+                PyErr_SetString(PyExc_TypeError, "List elements has to be "
+                    "tuples with exactly 2 elements");
+                return NULL;
+            }
+
+            tuple_item = PyTuple_GetItem(item, 1);
+            if (!PyString_Check(PyTuple_GetItem(item, 0)) ||
+                (!PyString_Check(tuple_item) &&  tuple_item != Py_None)) {
+                PyErr_SetString(PyExc_TypeError, "Bad list format");
+                return NULL;
+            }
+        }
+
+        for (Py_ssize_t x = 0; x < len; x++) {
+            PyObject *item = PyList_GetItem(obj, x);
+            PyObject *tuple_item;
+            char *var, *val;
+
+            tuple_item = PyTuple_GetItem(item, 0);
+            var = PyString_AsString(tuple_item);
+
+            tuple_item = PyTuple_GetItem(item, 1);
+            val = (tuple_item == Py_None) ? NULL : PyString_AsString(tuple_item);
+
+            vars = lr_urlvars_set(vars, var, val);
+        }
+
+        res = lr_handle_setopt(self->handle, (lr_HandleOption)option, vars);
+        break;
+    }
+
     /*
      * Options with callable arguments
      */
@@ -411,6 +463,40 @@ getinfo(_HandleObject *self, PyObject *args)
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);
         return PyLong_FromLong(lval);
+
+    case LRI_VARSUB: {
+        lr_UrlVars *vars;
+        PyObject *list;
+
+        res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &vars);
+        if (res != LRE_OK)
+            RETURN_ERROR(res, self->handle);
+
+        if (vars == NULL)
+            Py_RETURN_NONE;
+
+        list = PyList_New(0);
+        for (lr_UrlVars *elem = vars; elem; elem = lr_list_next(elem)) {
+            PyObject *tuple, *obj;
+            lr_Var *var = elem->data;
+
+            tuple = PyTuple_New(2);
+            obj = PyString_FromString(var->var);
+            PyTuple_SetItem(tuple, 0, obj);
+
+            if (var->val != NULL) {
+                obj = PyString_FromString(var->val);
+            } else {
+                Py_INCREF(Py_None);
+                obj = Py_None;
+            }
+
+            PyTuple_SetItem(tuple, 1, obj);
+
+            PyList_Append(list, tuple);
+        }
+        return list;
+    }
 
     /* char*** options */
     case LRI_YUMDLIST:

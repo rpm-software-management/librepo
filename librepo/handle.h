@@ -90,6 +90,13 @@ typedef enum {
     LRO_MAXMIRRORTRIES,/*!< (long) If download fails try at most the specified
                             number of mirrors. 0 means try all available
                             mirrors. */
+    LRO_VARSUB,        /*!< (lr_UrlVars *) Variables and its substitutions for
+                            repo URL. [{"ver", "f18"}], ...;
+                            (e.g.: http://foo/$ver => http://foo/f18)
+                            lr_UrlVars has to be constructed by
+                            lr_urlvars_set() function. After set the list
+                            to the handle, it has not to be freed! Handle
+                            itself takes care about freeing the list. */
 
     /* Repo common options */
     LRO_GPGCHECK,    /*!< (long 1 or 0) Check GPG signature if available */
@@ -120,6 +127,7 @@ typedef enum {
     LRI_YUMBLIST,               /*!< (char ***) */
     LRI_FETCHMIRRORS,           /*!< (long *) */
     LRI_MAXMIRRORTRIES,         /*!< (long *) */
+    LRI_VARSUB,                 /*!< (lr_UrlVars **) */
     LRI_LASTCURLERR,            /*!< (long *) */
     LRI_LASTCURLMERR,           /*!< (long *) */
     LRI_LASTCURLSTRERR,         /*!< (char **) */

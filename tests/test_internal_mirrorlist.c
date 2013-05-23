@@ -15,10 +15,10 @@ START_TEST(test_internalmirrorlist_append_mirrorlist)
 
     iml = lr_internalmirrorlist_new();
     fail_if(lr_internalmirrorlist_len(iml) != 0);
-    lr_internalmirrorlist_append_mirrorlist(iml, NULL);
+    lr_internalmirrorlist_append_mirrorlist(iml, NULL, NULL);
     fail_if(lr_internalmirrorlist_len(iml) != 0);
 
-    lr_internalmirrorlist_append_mirrorlist(iml, &ml);
+    lr_internalmirrorlist_append_mirrorlist(iml, &ml, NULL);
     fail_if(iml->nom != 2);
     fail_if(strcmp(iml->mirrors[0]->url, "http://foo"));
     fail_if(iml->mirrors[0]->preference != 100);
@@ -97,10 +97,10 @@ START_TEST(test_internalmirrorlist_append_metalink)
 
     iml = lr_internalmirrorlist_new();
     fail_if(lr_internalmirrorlist_len(iml) != 0);
-    lr_internalmirrorlist_append_metalink(iml, NULL, NULL);
+    lr_internalmirrorlist_append_metalink(iml, NULL, NULL, NULL);
     fail_if(lr_internalmirrorlist_len(iml) != 0);
 
-    lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml");
+    lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml", NULL);
     fail_if(iml->nom != 2);  // 2 because element with empty url shoud be skipped
     fail_if(strcmp(iml->mirrors[0]->url, "http://foo"));
     fail_if(iml->mirrors[0]->preference != 100);
@@ -128,9 +128,9 @@ START_TEST(test_internalmirrorlist_append_metalink)
     // Try append on list with existing element
     iml = lr_internalmirrorlist_new();
     fail_if(lr_internalmirrorlist_len(iml) != 0);
-    lr_internalmirrorlist_append_url(iml, "http://abc");
+    lr_internalmirrorlist_append_url(iml, "http://abc", NULL);
     fail_if(lr_internalmirrorlist_len(iml) != 1);
-    lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml");
+    lr_internalmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml", NULL);
     fail_if(lr_internalmirrorlist_len(iml) != 3);
     url = lr_internalmirrorlist_get_url(iml, 0);
     fail_if(strcmp(url, "http://abc"));
@@ -210,7 +210,7 @@ START_TEST(test_internalmirrorlist_append_internalmirrorlist)
     // Try append on list with existing element
     iml = lr_internalmirrorlist_new();
     fail_if(lr_internalmirrorlist_len(iml) != 0);
-    lr_internalmirrorlist_append_url(iml, "http://abc");
+    lr_internalmirrorlist_append_url(iml, "http://abc", NULL);
     fail_if(lr_internalmirrorlist_len(iml) != 1);
     lr_internalmirrorlist_append_internalmirrorlist(iml, &ml);
     fail_if(lr_internalmirrorlist_len(iml) != 3);

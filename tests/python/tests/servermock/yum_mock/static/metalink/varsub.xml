@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/" type="dynamic" pubdate="Tue, 11 Sep 2012 07:36:51 GMT" generator="mirrormanager" xmlns:mm0="http://127.0.0.1:5000/yum/static/metalink">
+  <files>
+    <file name="repomd.xml">
+      <mm0:timestamp>1347459931</mm0:timestamp>
+      <size>2621</size>
+      <verification>
+        <hash type="md5">f76409f67a84bcd516131d5cc98e57e1</hash>
+        <hash type="sha1">75125e73304c21945257d9041a908d0d01d2ca16</hash>
+        <hash type="sha256">bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a</hash>
+        <hash type="sha512">e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0</hash>
+      </verification>
+      <resources maxconnections="1">
+        <url protocol="http" type="http" location="CZ" preference="100" mm0:private="True">http://127.0.0.1:5000/yum/static/$version/repodata/repomd.xml</url>
+      </resources>
+    </file>
+  </files>
+</metalink>

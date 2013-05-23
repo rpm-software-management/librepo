@@ -43,6 +43,7 @@
 #include "version.h"
 #include "curl.h"
 #include "yum_internal.h"
+#include "url_substitution.h"
 
 void
 lr_handle_free_list(char ***list)
@@ -104,6 +105,7 @@ lr_handle_free(lr_Handle handle)
     lr_metalink_free(handle->metalink);
     lr_handle_free_list(&handle->yumdlist);
     lr_handle_free_list(&handle->yumblist);
+    lr_urlvars_free(handle->urlvars);
     lr_free(handle);
 }
 
@@ -307,6 +309,21 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
             handle->maxmirrortries = 0;
         break;
 
+    case LRO_VARSUB: {
+        lr_UrlVars *vars = va_arg(arg, lr_UrlVars *);
+        lr_urlvars_free(handle->urlvars);
+        handle->urlvars = vars;
+
+        /* Do not do copy
+        for (lr_UrlVars *elem = vars; elem; elem = lr_list_next(elem)) {
+            lr_Var *var = elem->data;
+            handle->urlvars = lr_urlvars_set(handle->urlvars, var->var, var->val);
+        }
+        */
+
+        break;
+    }
+
     default:
         ret = LRE_UNKNOWNOPT;
         break;
@@ -392,10 +409,11 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
     if (handle->baseurl) {
         /* Repository URL specified by user insert it as the first element */
 
+        char *url = NULL;
+
         if (strstr(handle->baseurl, "://")) {
             /* Base URL has specified protocol */
-            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                             handle->baseurl);
+            url = lr_strdup(handle->baseurl);
             if (!strncmp(handle->baseurl, "file://", 7))
                 local_path = handle->baseurl + 7;
         } else {
@@ -403,30 +421,24 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             local_path = handle->baseurl;
             if (handle->baseurl[0] == '/') {
                 /* Base URL is absolute path */
-                char *path_with_protocol = NULL;
-                path_with_protocol = lr_strconcat("file://",
-                                                  handle->baseurl,
-                                                  NULL);
-                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                                 path_with_protocol);
-                lr_free(path_with_protocol);
+                url = lr_strconcat("file://", handle->baseurl, NULL);
             } else {
                 /* Base URL is relative path */
-                char *path_with_protocol;
-                char *resolved_path = NULL;
-                resolved_path = realpath(handle->baseurl, NULL);
+                char *resolved_path = realpath(handle->baseurl, NULL);
                 if (!resolved_path) {
                     DPRINTF("%s: realpath: %s\n", __func__, strerror(errno));
                     return LRE_BADURL;
                 }
-                path_with_protocol = lr_strconcat("file://",
-                                                  resolved_path,
-                                                  NULL);
-                lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                                 path_with_protocol);
+                url = lr_strconcat("file://", resolved_path, NULL);
                 free(resolved_path);
-                lr_free(path_with_protocol);
             }
+        }
+
+        if (url) {
+            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
+                                             url,
+                                             handle->urlvars);
+            lr_free(url);
         }
     }
 
@@ -567,12 +579,14 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 handle->metalink = metalink;
                 lr_internalmirrorlist_append_metalink(handle->mirrors,
                                                       metalink,
-                                                      metalink_suffix);
+                                                      metalink_suffix,
+                                                      handle->urlvars);
             }
 
             if (mirrorlist) {
                 lr_internalmirrorlist_append_mirrorlist(handle->mirrors,
-                                                        mirrorlist);
+                                                        mirrorlist,
+                                                        handle->urlvars);
             }
         }
 
@@ -755,6 +769,12 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->maxmirrortries;
         break;
+
+    case LRI_VARSUB: {
+        lr_UrlVars **vars = va_arg(arg, lr_UrlVars **);
+        *vars = handle->urlvars;
+        break;
+    }
 
     case LRI_LASTCURLERR:
         lnum = va_arg(arg, long *);

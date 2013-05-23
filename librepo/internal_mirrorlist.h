@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+#include "url_substitution.h"
 #include "mirrorlist.h"
 #include "metalink.h"
 
@@ -64,7 +65,8 @@ void lr_internalmirrorlist_free(lr_InternalMirrorlist iml);
  * @param url           Url.
  */
 void lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml,
-                                      const char *url);
+                                      const char *url,
+                                      lr_UrlVars *urlvars);
 
 /**
  * Append mirrors from mirrorlist to the internal mirrorlist.
@@ -72,7 +74,8 @@ void lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml,
  * @param mirrorlist    Mirrorlist.
  */
 void lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml,
-                                             lr_Mirrorlist mirrorlist);
+                                             lr_Mirrorlist mirrorlist,
+                                             lr_UrlVars *urlvars);
 
 /**
  * Append mirrors from metalink to the internal mirrorlist.
@@ -82,7 +85,8 @@ void lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml,
  */
 void lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
                                            lr_Metalink metalink,
-                                           const char *suffix);
+                                           const char *suffix,
+                                           lr_UrlVars *urlvars);
 
 /**
  * Append mirrors from another internal mirrorlist to the internal mirrorlist.

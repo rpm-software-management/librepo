@@ -26,15 +26,20 @@ lr_internalmirrorlist_free(lr_InternalMirrorlist ml)
 }
 
 void
-lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml, const char *url)
+lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml,
+                                 const char *url,
+                                 lr_UrlVars *urlvars)
 {
     lr_InternalMirror im;
+    char *expanded_url;
 
     if (!iml || !url)
         return;
 
+    expanded_url = lr_url_substitute(url, urlvars);
+
     im = lr_malloc(sizeof(struct _lr_InternalMirror));
-    im->url = lr_strdup(url);
+    im->url = expanded_url;
     im->preference = 100;
     im->fails = 0;
 
@@ -44,7 +49,9 @@ lr_internalmirrorlist_append_url(lr_InternalMirrorlist iml, const char *url)
 }
 
 void
-lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml, lr_Mirrorlist ml)
+lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml,
+                                        lr_Mirrorlist ml,
+                                        lr_UrlVars *urlvars)
 {
     int nom_old;
     int current_id;
@@ -59,15 +66,16 @@ lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml, lr_Mirrorlist
 
     for (int x=0; x < ml->nou; x++) {
         lr_InternalMirror im;
-        char *url = ml->urls[x];
+        char *url = lr_url_substitute(ml->urls[x], urlvars);
 
         if (!url || !strlen(url)) {
             iml->nom--;
+            lr_free(url);
             continue;  // No url present
         }
 
         im = lr_malloc(sizeof(struct _lr_InternalMirror));
-        im->url = lr_strdup(url);
+        im->url = url;
         im->preference = 100;
         im->fails = 0;
         iml->mirrors[current_id] = im;
@@ -78,7 +86,8 @@ lr_internalmirrorlist_append_mirrorlist(lr_InternalMirrorlist iml, lr_Mirrorlist
 void
 lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
                                       lr_Metalink ml,
-                                      const char *suffix)
+                                      const char *suffix,
+                                      lr_UrlVars *urlvars)
 {
     int nom_old;     // Number of mirrors in internal mirror list before append
     int current_id;  // Id of currently inserted element into the internal mirrorlist
@@ -97,15 +106,16 @@ lr_internalmirrorlist_append_metalink(lr_InternalMirrorlist iml,
 
     for (int x=0; x < ml->nou; x++) {
         lr_InternalMirror im;
-        char *url = ml->urls[x]->url;
+        char *url = lr_url_substitute(ml->urls[x]->url, urlvars);
 
         if (!url || !strlen(url)) {
             iml->nom--;
+            lr_free(url);
             continue;  // No url present
         }
 
         im = lr_malloc(sizeof(struct _lr_InternalMirror));
-        im->url = lr_strdup(url);
+        im->url = url;
         if (suffix_len) {
             /* Remove suffix if necessary */
             size_t url_len = strlen(url);

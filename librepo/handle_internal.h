@@ -29,6 +29,7 @@ extern "C" {
 #include "types.h"
 #include "handle.h"
 #include "internal_mirrorlist.h"
+#include "url_substitution.h"
 
 struct _lr_Handle {
     CURL            *curl_handle;   /*!< CURL handle */
@@ -65,6 +66,7 @@ struct _lr_Handle {
                                       disable blacklist. */
     int             fetchmirrors;   /*!< Only fetch and parse mirrorlist. */
     int             maxmirrortries; /*!< Try at most this number of mirrors. */
+    lr_UrlVars      *urlvars;       /*!< List with url substitutions */
 };
 
 /**

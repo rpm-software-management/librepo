@@ -203,6 +203,11 @@ Constants
     *Integer or None*. If download fails, try at most the specified number
     of mirrors. 0 (None) means try all available mirrors.
 
+.. data:: LRO_VARSUB
+
+    *(String, String or None) or None*. Add substitution for a variable in
+    ulr (url example: "http://foo/$version/"). Eg.: ("version", "f18")
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -224,6 +229,7 @@ Constants
 .. data:: LRI_YUMBLIST
 .. data:: LRI_FETCHMIRRORS
 .. data:: LRI_MAXMIRRORTRIES
+.. data:: LRI_VARSUB
 .. data:: LRI_LASTCURLERR
 .. data:: LRI_LASTCURLMERR
 .. data:: LRI_LASTCURLSTRERR
@@ -476,6 +482,7 @@ LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
 LRO_YUMBLIST        = _librepo.LRO_YUMBLIST
 LRO_FETCHMIRRORS    = _librepo.LRO_FETCHMIRRORS
 LRO_MAXMIRRORTRIES  = _librepo.LRO_MAXMIRRORTRIES
+LRO_VARSUB          = _librepo.LRO_VARSUB
 LRO_SENTINEL        = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -506,6 +513,7 @@ ATTR_TO_LRO = {
     "yumblist":         LRO_YUMBLIST,
     "fetchmirrors":     LRO_FETCHMIRRORS,
     "maxmirrortries":   LRO_MAXMIRRORTRIES,
+    "varsub":           LRO_VARSUB,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -521,6 +529,7 @@ LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
 LRI_YUMBLIST            = _librepo.LRI_YUMBLIST
 LRI_FETCHMIRRORS        = _librepo.LRI_FETCHMIRRORS
 LRI_MAXMIRRORTRIES      = _librepo.LRI_MAXMIRRORTRIES
+LRI_VARSUB              = _librepo.LRI_VARSUB
 LRI_LASTCURLERR         = _librepo.LRI_LASTCURLERR
 LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
 LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
@@ -543,6 +552,7 @@ ATTR_TO_LRI = {
     "yumblist":             LRI_YUMBLIST,
     "fetchmirrors":         LRI_FETCHMIRRORS,
     "maxmirrortries":       LRI_MAXMIRRORTRIES,
+    "varsub":               LRI_VARSUB,
     "lastcurlerr":          LRI_LASTCURLERR,
     "lastcurlmerr":         LRI_LASTCURLMERR,
     "lastcurlstrerr":       LRI_LASTCURLSTRERR,
