@@ -1,10 +1,9 @@
-%global timestamp xxxxxxxx
-%global gitrev xxxxxxx
-%global checkout %{timestamp}git%{gitrev}
+%global gitrev ffbc1d6
+# gitrev is output of: git rev-parse --short HEAD
 
 Name:		librepo
-Version:	@VERSION@
-Release:	3.%{checkout}%{?dist}
+Version:	0.0.4
+Release:	2%{?dist}
 Summary:	Repodata downloading library
 
 Group:		System Environment/Libraries
@@ -79,6 +78,19 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{python_sitearch}/librepo/
 
 %changelog
+* Wed Jun 12 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.4-2
+- Fix predefined lists in types.h (GitHub issue 4). Thank you hughsie
+
+* Thu May  2 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.4-1
+- Fix type conversion long long -> long.(RhBug: 957656)
+- python: Handle.perfrom() could be called without Result().
+- Add LRI_MAXMIRRORTRIES option. (RhBug: 954736)
+- py: unittests: Add metalink.xml and mirrorlist files. (RhBug: 954294)
+- Fix double free and memory leak. (RhBug: 954294)
+- New option LRO_MAXMIRRORTRIES. (RhBug: 949517)
+- LRI_MIRRORS return only content of mirrorlist file (without LRO_URL as first item).
+- Add LRO_FETCHMIRRORS option.
+
 * Mon Apr  8 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.2-3.git720d68d
 - Add CURL_GLOBAL_ACK_EINTR flag to curl init.
 - Proper multi handle cleanup. (RhBug: 947388)

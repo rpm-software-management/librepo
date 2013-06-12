@@ -1,7 +1,7 @@
 build/
 TAGS
 tags
-librepo.spec
+./librepo.spec
 librepo/version.h
 *.pyc
 doc/c/Doxyfile.in
