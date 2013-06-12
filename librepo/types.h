@@ -66,18 +66,18 @@ typedef enum {
 #define LR_YUM_FULL         NULL
 
 /** Predefined value for LRO_YUMDLIST option - Download only repomd.xml. */
-#define LR_YUM_REPOMDONLY   [NULL]
+#define LR_YUM_REPOMDONLY   {NULL}
 
 /** Predefined value for LRO_YUMDLIST option - Download only base xml files. */
-#define LR_YUM_BASEXML      ["primary", "filelists", "other", NULL]
+#define LR_YUM_BASEXML      {"primary", "filelists", "other", NULL}
 
 /** Predefined value for LRO_YUMDLIST option - Download only base db files. */
-#define LR_YUM_BASEDB       ["primary_db", "filelists_db", "other_db", NULL]
+#define LR_YUM_BASEDB       {"primary_db", "filelists_db", "other_db", NULL}
 
 /** Predefined value for LRO_YUMDLIST option - Download only primary,
  * filelists and prestodelta.
  */
-#define LR_YUM_HAWKEY       ["primary", "filelists", "prestodelta", NULL]
+#define LR_YUM_HAWKEY       {"primary", "filelists", "prestodelta", NULL}
 
 /** Progress callback prototype */
 typedef int (*lr_ProgressCb)(void *clientp,
