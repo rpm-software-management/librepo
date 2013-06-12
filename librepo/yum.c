@@ -82,7 +82,7 @@ lr_yum_repo_free(lr_YumRepo repo)
     lr_free(repo);
 }
 
-char *
+const char *
 lr_yum_repo_path(lr_YumRepo repo, const char *type)
 {
     assert(repo);
@@ -244,7 +244,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
 }
 
 int
-lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, char *path)
+lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, const char *path)
 {
     int ret, fd;
     char *expected_checksum;
@@ -295,7 +295,7 @@ lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
     for (int x=0; x < repomd->nor; x++) {
         int ret;
         lr_YumRepoMdRecord record  = repomd->records[x];
-        char *path = lr_yum_repo_path(repo, record->type);
+        const char *path = lr_yum_repo_path(repo, record->type);
         ret = lr_yum_check_checksum_of_md_record(record, path);
         DPRINTF("%s: Checksum rc: %d (%s)\n", __func__, ret, record->type);
         if (ret != LRE_OK)

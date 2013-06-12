@@ -77,7 +77,7 @@ void lr_yum_repo_free(lr_YumRepo repo);
  * @param type          Type of path. E.g. "primary", "filelists", ...
  * @return              Path or NULL.
  */
-char *lr_yum_repo_path(lr_YumRepo repo, const char *type);
+const char *lr_yum_repo_path(lr_YumRepo repo, const char *type);
 
 /** Append path to the repository object.
  * @param repo          Yum repo object.
