@@ -28,6 +28,12 @@ extern "C" {
 #define LR_VERSION_MINOR @LIBREPO_MINOR@
 #define LR_VERSION_PATCH @LIBREPO_PATCH@
 
+#define LR_VERSION_CHECK(major,minor,patch)    \
+    (LR_VERSION_MAJOR > (major) || \
+     (LR_VERSION_MAJOR == (major) && LR_VERSION_MINOR > (minor)) || \
+     (LR_VERSION_MAJOR == (major) && LR_VERSION_MINOR == (minor) && \
+      LR_VERSION_PATCH >= (patch)))
+
 #ifdef __cplusplus
 }
 #endif
