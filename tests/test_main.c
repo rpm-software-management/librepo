@@ -21,6 +21,7 @@
 #include "test_repomd.h"
 #include "test_url_substitution.h"
 #include "test_util.h"
+#include "test_version.h"
 
 
 static int
@@ -71,6 +72,7 @@ main(int argc, const char **argv)
     srunner_add_suite(sr, repomd_suite());
     srunner_add_suite(sr, url_substitution_suite());
     srunner_add_suite(sr, util_suite());
+    srunner_add_suite(sr, version_suite());
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);

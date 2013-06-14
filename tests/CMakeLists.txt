@@ -12,6 +12,7 @@ SET (librepotest_SRCS
      test_repomd.c
      test_url_substitution.c
      test_util.c
+     test_version.c
      testsys.c
     )
 
