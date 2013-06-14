@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #include "rcodes.h"
+#include "result.h"
 
 /** \defgroup yum       Yum repo manipulation
  *  \addtogroup yum
@@ -85,6 +86,13 @@ const char *lr_yum_repo_path(lr_YumRepo repo, const char *type);
  * @param path          Path to the file.
  */
 void lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path);
+
+/** Return age of the repomd.xml (based on mtime of the file
+ * and the current time)
+ * @param r         Result object
+ * @return          Age of the file (number of seconds since last modification)
+ */
+double lr_yum_repomd_get_age(lr_Result r);
 
 /** @} */
 

@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include "setup.h"
 #include "yum.h"
@@ -626,4 +627,22 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
     }
 
     return rc;
+}
+
+double
+lr_yum_repomd_get_age(lr_Result r)
+{
+    assert(r);
+
+    if (!r->yum_repo || !r->yum_repo->repomd)
+        return 0.0;
+
+    int rc;
+    struct stat st;
+
+    rc = stat(r->yum_repo->repomd, &st);
+    if (rc != 0)
+        return 0.0;
+
+   return difftime(time(NULL), st.st_mtime);
 }

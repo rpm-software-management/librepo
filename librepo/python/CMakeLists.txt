@@ -17,7 +17,8 @@ SET (librepomodule_SRCS
      handle-py.c
      librepomodule.c
      result-py.c
-     typeconversion.c)
+     typeconversion.c
+     yum-py.c)
 
 ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
 SET_TARGET_PROPERTIES(_librepomodule PROPERTIES PREFIX "")

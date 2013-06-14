@@ -865,3 +865,8 @@ class Result(_librepo.Result):
             raise AttributeError("'%s' object has no attribute '%s'" % \
                                  (self.__class__.__name__, attr))
         return self.getinfo(ATTR_TO_LRR[attr])
+
+
+# Functions
+
+yum_repomd_get_age = _librepo.yum_repomd_get_age

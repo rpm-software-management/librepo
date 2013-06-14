@@ -24,8 +24,11 @@
 #include "exception-py.h"
 #include "handle-py.h"
 #include "result-py.h"
+#include "yum-py.h"
 
 static struct PyMethodDef librepo_methods[] = {
+    { "yum_repomd_get_age",     (PyCFunction)py_yum_repomd_get_age,
+      METH_VARARGS, NULL },
     { NULL }
 };
 
