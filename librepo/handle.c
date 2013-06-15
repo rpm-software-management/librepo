@@ -192,7 +192,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
             default: break;
         }
         if (curl_proxy == -1)
-            c_rc = LRE_BADOPTARG;
+            ret = LRE_BADOPTARG;
         else
             c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, curl_proxy);
         break;
@@ -330,7 +330,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
     };
 
     /* Handle CURL error return code */
-    if (c_rc != CURLE_OK) {
+    if (ret == LRE_OK && c_rc != CURLE_OK) {
         handle->last_curl_error = c_rc;
         switch (c_rc) {
         case CURLE_FAILED_INIT:
