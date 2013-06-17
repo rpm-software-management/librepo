@@ -72,6 +72,8 @@ Note: .valgrindrc file is present in checkoutdir, this file contains the setting
 
     PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/
 
+Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/test_yum_repo_downloading.py:TestCaseYumRepoDownloading.test_download_and_update_repo_01``
+
 ## Links
 
 * [Red Hat Bugzilla](https://bugzilla.redhat.com/buglist.cgi?query_format=advanced&bug_status=NEW&bug_status=ASSIGNED&bug_status=MODIFIED&bug_status=VERIFIED&component=librepo)
