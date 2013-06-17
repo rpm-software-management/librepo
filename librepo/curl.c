@@ -456,7 +456,7 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
             {
                 DPRINTF("%s: Checking checksum\n", __func__);
                 lseek(fd, 0, SEEK_SET);
-                if (!lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
+                if (!lr_checksum_fd_cmp(checksum_type, fd, checksum, 1)) {
                     // Checksum is OK
                     if (handle->used_mirror)
                         lr_free(handle->used_mirror);
@@ -762,7 +762,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
                 {
                     DPRINTF("%s: Checking checksum\n", __func__);
                     lseek(t->fd, 0, SEEK_SET);
-                    if (lr_checksum_fd_cmp(t->checksum_type, t->fd, t->checksum)) {
+                    if (lr_checksum_fd_cmp(t->checksum_type, t->fd, t->checksum, 1)) {
                         DPRINTF("%s: Bad checksum\n", __func__);
                         last_ret = LRE_BADCHECKSUM;
                         failed = 1;

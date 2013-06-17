@@ -73,9 +73,13 @@ char *lr_checksum_fd(lr_ChecksumType type, int fd);
  * @param type      Checksum type
  * @param fd        File descriptor
  * @param expected  String with expected checksum value
+ * @param caching   (Cache|Use cached) checksum value as extended file attr.
  * @return          0 if calculated checksum == expected checksum
  */
-int lr_checksum_fd_cmp(lr_ChecksumType type, int fd, const char *expected);
+int lr_checksum_fd_cmp(lr_ChecksumType type,
+                       int fd,
+                       const char *expected,
+                       int caching);
 
 #ifdef __cplusplus
 }

@@ -141,7 +141,7 @@ lr_download_package(lr_Handle handle,
         if (rc == LRE_OK && checksum && checksum_type != LR_CHECKSUM_UNKNOWN) {
             DPRINTF("%s: Checking checksum\n", __func__);
             lseek(fd, 0, SEEK_SET);
-            if (lr_checksum_fd_cmp(checksum_type, fd, checksum)) {
+            if (lr_checksum_fd_cmp(checksum_type, fd, checksum, 0)) {
                 DPRINTF("%s: Bad checksum\n", __func__);
                 rc = LRE_BADCHECKSUM;
             }

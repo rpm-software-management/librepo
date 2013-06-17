@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <attr/xattr.h>
 
 #include "librepo/util.h"
 #include "librepo/checksum.h"
@@ -83,12 +84,61 @@ START_TEST(test_checksum_fd)
 }
 END_TEST
 
+START_TEST(test_cached_checksum)
+{
+    FILE *f;
+    int fd, ret;
+    char *filename;
+    static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
+    struct stat st;
+    char *key;
+    char buf[256];
+
+    filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum", NULL);
+    f = fopen(filename, "w");
+    fwrite("foo\nbar\n", 1, 8, f);
+    fclose(f);
+
+    // Assert no cached checksum exists
+    ret = stat(filename, &st);
+    fail_if(ret != 0);
+    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
+    ret = getxattr(filename, key, &buf, sizeof(buf));
+    lr_free(key);
+    fail_if(ret != -1);  // Cached checksum should not exists
+
+    // Calculate checksum
+    fail_if((fd = open(filename, O_RDONLY)) < 0);
+    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1);
+    fail_if(ret != 0, "Checksum doesn't match the expected one");
+    close(fd);
+
+    // Assert cached checksum exists
+    ret = stat(filename, &st);
+    fail_if(ret != 0);
+    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
+    ret = getxattr(filename, key, &buf, sizeof(buf));
+    lr_free(key);
+    fail_if(ret == -1);
+    fail_if(strcmp(buf, expected));
+
+    // Calculate checksum again (cached shoud be used this time)
+    fail_if((fd = open(filename, O_RDONLY)) < 0);
+    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1);
+    fail_if(ret != 0);
+    close(fd);
+
+    lr_free(filename);
+}
+END_TEST
+
 Suite *
 checksum_suite(void)
 {
     Suite *s = suite_create("cheksum");
     TCase *tc = tcase_create("Main");
     tcase_add_test(tc, test_checksum_fd);
+    tcase_add_test(tc, test_cached_checksum);
     suite_add_tcase(s, tc);
     return s;
 }

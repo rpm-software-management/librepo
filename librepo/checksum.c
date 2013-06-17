@@ -19,7 +19,10 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <attr/xattr.h>
 
 #include <openssl/evp.h>
 
@@ -102,7 +105,7 @@ char *
 lr_checksum_fd(lr_ChecksumType type, int fd)
 {
     int rc;
-    unsigned int len;
+    unsigned int len, checksum_str_len;
     ssize_t readed;
     char buf[BUFFER_SIZE];
     unsigned char raw_checksum[EVP_MAX_MD_SIZE];
@@ -142,7 +145,8 @@ lr_checksum_fd(lr_ChecksumType type, int fd)
 
     EVP_DigestFinal_ex(ctx, raw_checksum, &len);
     EVP_MD_CTX_destroy(ctx);
-    checksum = lr_malloc0(sizeof(char) * (len * 2 + 1));
+    checksum_str_len = len * 2 + 1;
+    checksum = lr_malloc0(sizeof(char) * checksum_str_len);
     for (size_t x = 0; x < len; x++)
         sprintf(checksum+(x*2), "%02x", raw_checksum[x]);
 
@@ -150,7 +154,10 @@ lr_checksum_fd(lr_ChecksumType type, int fd)
 }
 
 int
-lr_checksum_fd_cmp(lr_ChecksumType type, int fd, const char *expected)
+lr_checksum_fd_cmp(lr_ChecksumType type,
+                   int fd,
+                   const char *expected,
+                   int caching)
 {
     int ret;
     char *checksum;
@@ -160,12 +167,42 @@ lr_checksum_fd_cmp(lr_ChecksumType type, int fd, const char *expected)
     if (!expected)
         return 1;
 
-    checksum = lr_checksum_fd(type, fd);
-    if (!checksum) {
-        return 1;
+    if (caching) {
+        // Load cached checksum if enabled and used
+        struct stat st;
+        if (fstat(fd, &st) == 0) {
+            int ret;
+            char *key;
+            char buf[256];
+
+            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
+            ret = fgetxattr(fd, key, &buf, 256);
+            lr_free(key);
+            if (ret != -1) {
+                // Cached checksum found
+                DPRINTF("Using checksum cached in xattr: %s\n", buf);
+                return strcmp(expected, buf);
+            }
+        }
     }
 
+    checksum = lr_checksum_fd(type, fd);
+    if (!checksum)
+        return 1;
+
     ret = strcmp(expected, checksum);
+
+    if (caching && ret == 0) {
+        // Store checksum as extended file attribute if caching is enabled
+        struct stat st;
+        if (fstat(fd, &st) == 0) {
+            char *key;
+            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
+            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
+            lr_free(key);
+        }
+    }
+
     lr_free(checksum);
     return ret;
 }
