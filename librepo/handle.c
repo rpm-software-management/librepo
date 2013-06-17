@@ -393,8 +393,11 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
     if (handle->internal_mirrorlist)
         return LRE_OK;  /* Internal mirrorlist already exists */
 
-    if (!handle->baseurl && !handle->mirrorlist)
+    if (!handle->baseurl && !handle->mirrorlist) {
         return LRE_NOURL;
+    }
+
+    DPRINTF("Preparing internal mirrorlist");
 
     if (handle->repotype == LR_YUMREPO)
         metalink_suffix = "repodata/repomd.xml";
@@ -499,7 +502,10 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 goto mirrorlist_error;
             }
 
-            char *mirrorlist_url = lr_prepend_url_protocol(handle->mirrorlist);
+            char *prefixed_url =  lr_prepend_url_protocol(handle->mirrorlist);
+            char *mirrorlist_url = lr_url_substitute(prefixed_url,
+                                                     handle->urlvars);
+            lr_free(prefixed_url);
             rc = lr_curl_single_download(handle, mirrorlist_url, mirrors_fd);
             lr_free(mirrorlist_url);
 

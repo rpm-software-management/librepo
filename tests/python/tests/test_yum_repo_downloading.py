@@ -1152,6 +1152,21 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(yum_repomd)
         self.assertTrue(yum_repo["url"].endswith(config.REPO_YUM_01_PATH))
 
+    def test_download_repo_01_mirrorlist_substitution(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (MOCKURL, config.MIRRORLIST_VARED)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.setopt(librepo.LRO_VARSUB, config.MIRRORLIST_VARED_LIST)
+        h.perform(r)
+
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.metalink, None)
+
     def test_download_repo_01_mirrorlist_with_url_substitution(self):
         h = librepo.Handle()
         r = librepo.Result()
