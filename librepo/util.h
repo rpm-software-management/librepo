@@ -156,6 +156,15 @@ char *lr_prepend_url_protocol(const char *path);
  */
 int lr_vasprintf(char **strp, const char *format, va_list ap);
 
+/** \ingroup util
+ * Print to allocated string.
+ * @param strp          Location for the newly allocated string.
+ * @param format        A standard printf() format string.
+ * @param ...           The list of arguments to insert in the output.
+ * @return              The number of bytes printed
+ */
+int lr_asprintf(char **strp, const char *format, ...);
+
 #ifdef __cplusplus
 }
 #endif

@@ -350,3 +350,15 @@ lr_vasprintf(char **strp, const char *format, va_list va)
     return size;
 #endif
 }
+
+int
+lr_asprintf(char **strp, const char *format, ...)
+{
+    int len;
+    va_list args;
+
+    va_start(args, format);
+    len = lr_vasprintf(strp, format, args);
+    va_end(args);
+    return len;
+}

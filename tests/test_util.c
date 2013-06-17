@@ -187,6 +187,19 @@ START_TEST(test_remove_dir)
 }
 END_TEST
 
+START_TEST(test_asprintf)
+{
+    int len;
+    char *str;
+
+    len = lr_asprintf(&str, "Test %s", "foo");
+    fail_if(len != 8);
+    fail_if(str == NULL);
+    fail_if(strcmp(str, "Test foo"));
+    lr_free(str);
+}
+END_TEST
+
 Suite *
 util_suite(void)
 {
@@ -203,6 +216,7 @@ util_suite(void)
     tcase_add_test(tc, test_ends_with);
     tcase_add_test(tc, test_pathconcat);
     tcase_add_test(tc, test_remove_dir);
+    tcase_add_test(tc, test_asprintf);
     suite_add_tcase(s, tc);
     return s;
 }
