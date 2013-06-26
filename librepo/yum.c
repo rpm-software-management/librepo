@@ -232,7 +232,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
         target->checksum = lr_strdup(record->checksum);
         lr_curltargetlist_append(targets, target);
 
-        /* Becouse path may already exists in repo (while update) */
+        /* Because path may already exists in repo (while update) */
         lr_yum_repo_update(repo, record->type, path);
         lr_free(path);
     }
