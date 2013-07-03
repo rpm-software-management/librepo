@@ -687,6 +687,8 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
         DPRINTF("%s: Restoring an old SIGINT handler\n", __func__);
         if (sigaction(SIGINT, &old_sigact, NULL) == -1)
             return LRE_SIGACTION;
+        if (lr_interrupt)
+            return LRE_INTERRUPTED;
     }
 
     return rc;
