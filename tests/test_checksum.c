@@ -88,6 +88,7 @@ START_TEST(test_cached_checksum)
 {
     FILE *f;
     int fd, ret;
+    ssize_t attr_ret;
     char *filename;
     static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
     struct stat st;
@@ -102,10 +103,11 @@ START_TEST(test_cached_checksum)
     // Assert no cached checksum exists
     ret = stat(filename, &st);
     fail_if(ret != 0);
-    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
-    ret = getxattr(filename, key, &buf, sizeof(buf));
+    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
+                (unsigned long long) st.st_mtime);
+    attr_ret = getxattr(filename, key, &buf, sizeof(buf));
     lr_free(key);
-    fail_if(ret != -1);  // Cached checksum should not exists
+    fail_if(attr_ret != -1);  // Cached checksum should not exists
 
     // Calculate checksum
     fail_if((fd = open(filename, O_RDONLY)) < 0);
@@ -116,11 +118,23 @@ START_TEST(test_cached_checksum)
     // Assert cached checksum exists
     ret = stat(filename, &st);
     fail_if(ret != 0);
-    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
-    ret = getxattr(filename, key, &buf, sizeof(buf));
+    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
+                (unsigned long long) st.st_mtime);
+    attr_ret = getxattr(filename, key, &buf, sizeof(buf));
+
     lr_free(key);
-    fail_if(ret == -1);
-    fail_if(strcmp(buf, expected));
+
+    if (attr_ret == -1) {
+        // Error encountered
+        if (errno == ENOTSUP) {
+            // Extended attributes are not supported
+            goto exit_label;
+        }
+        // Any other errno means fail
+        fail_if(attr_ret == -1);
+    } else {
+        fail_if(strcmp(buf, expected));
+    }
 
     // Calculate checksum again (cached shoud be used this time)
     fail_if((fd = open(filename, O_RDONLY)) < 0);
@@ -128,6 +142,7 @@ START_TEST(test_cached_checksum)
     fail_if(ret != 0);
     close(fd);
 
+exit_label:
     lr_free(filename);
 }
 END_TEST

@@ -171,14 +171,15 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
         // Load cached checksum if enabled and used
         struct stat st;
         if (fstat(fd, &st) == 0) {
-            int ret;
+            ssize_t attr_ret;
             char *key;
             char buf[256];
 
-            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
-            ret = fgetxattr(fd, key, &buf, 256);
+            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
+                        (unsigned long long) st.st_mtime);
+            attr_ret = fgetxattr(fd, key, &buf, 256);
             lr_free(key);
-            if (ret != -1) {
+            if (attr_ret != -1) {
                 // Cached checksum found
                 DPRINTF("Using checksum cached in xattr: %s\n", buf);
                 return strcmp(expected, buf);
@@ -197,8 +198,9 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
         struct stat st;
         if (fstat(fd, &st) == 0) {
             char *key;
-            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]", st.st_mtime);
-            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
+            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
+                        (unsigned long long) st.st_mtime);
+            ret = fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
             lr_free(key);
         }
     }
