@@ -6,6 +6,7 @@ SET (librepo_SRCS
      handle.c
      internal_mirrorlist.c
      librepo.c
+     lrmirrorlist.c
      metalink.c
      mirrorlist.c
      package_downloader.c
