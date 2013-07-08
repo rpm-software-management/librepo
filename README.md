@@ -11,6 +11,7 @@ linux repository metadata and packages
 * cmake (http://www.cmake.org/) - in Fedora: cmake
 * expat (http://expat.sourceforge.net/) - in Fedora: expat-devel
 * gcc (http://gcc.gnu.org/)
+* glib2 (http://developer.gnome.org/glib/) - in Fedora: glib2-devel
 * gpgme (http://www.gnupg.org/) - in Fedora: gpgme-devel
 * libattr (http://www.bestbits.at/acl/) - in Fedora: libattr-devel
 * libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel

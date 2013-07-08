@@ -41,6 +41,7 @@ TARGET_LINK_LIBRARIES(librepo
                         ${EXPAT_LIBRARY}
                         ${CURL_LIBRARY}
                         ${GPGME_VANILLA_LIBRARIES}
+                        ${GLIB2_LIBRARIES}
                      )
 SET_TARGET_PROPERTIES(librepo PROPERTIES OUTPUT_NAME "repo")
 SET_TARGET_PROPERTIES(librepo PROPERTIES SOVERSION 0)

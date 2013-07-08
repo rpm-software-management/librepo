@@ -1,9 +1,9 @@
-%global gitrev ffbc1d6
+%global gitrev 9b535e8
 # gitrev is output of: git rev-parse --short HEAD
 
 Name:		librepo
-Version:	0.0.4
-Release:	2%{?dist}
+Version:	0.0.5
+Release:	1%{?dist}
 Summary:	Repodata downloading library
 
 Group:		System Environment/Libraries
@@ -19,7 +19,9 @@ BuildRequires:	check-devel
 BuildRequires:	cmake
 BuildRequires:	doxygen
 BuildRequires:	expat-devel
+BuildRequires:  glib2-devel >= 2.22.0
 BuildRequires:	gpgme-devel
+BuildRequires:	libattr-devel
 BuildRequires:	libcurl-devel
 BuildRequires:	openssl-devel
 BuildRequires:	pygpgme
@@ -78,8 +80,25 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{python_sitearch}/librepo/
 
 %changelog
+* Wed Jul  3 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.5-1
+- handle: After set python SIGINT handler back, check if librepo was
+  interrupted by CTRL+C. (RhBug: 977803)
+- cmake: Set required python version to 2. (GitHub issue 10)
+- Fix missing VAR substitution for mirrorlist. (GitHub issue 11)
+- cmake: Add FindXattr module.
+- Add support for caching checksum as extended file attribute. (GitHub issue 8)
+- util: Add lr_asprintf().
+- util: Add lr_vasprintf().
+- handle: Fix funky logic in internal error handling. (GitHub issue 9)
+- Add lr_yum_repomd_get_age() function. (GitHub issue 6)
+- test: Add test for LR_VERSION_CHECK macro.
+- Add a LR_VERSION_CHECK macro
+
 * Wed Jun 12 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.4-2
+- examples: Add C example of usage.
 - Fix predefined lists in types.h (GitHub issue 4). Thank you hughsie
+- Add LRO_VARSUB and LRI_VARSUB. (RhBug: 965131)
+- py: Change reported name from _librepo.Exception to librepo.LibrepoException
 
 * Thu May  2 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.4-1
 - Fix type conversion long long -> long.(RhBug: 957656)
@@ -108,5 +127,5 @@ make install DESTDIR=$RPM_BUILD_ROOT
 - Add LRI_PROGRESSCB and LRI_PROGRESSDATA options (RhBug: 919123)
 - Bindings: More pythonic operations with handle's attributes (RhBug: 919124)
 
-* Thu Oct  9 2012 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.1-1.gitc69642e
+* Tue Oct  9 2012 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.1-1.gitc69642e
 - Initial package
