@@ -7,6 +7,7 @@ linux repository metadata and packages
 
 ### Build requires:
 
+* cmake (http://www.cmake.org/) - in Fedora: cmake
 * check (http://check.sourceforge.net/) - in Fedora: check-devel
 * expat (http://expat.sourceforge.net/) - in Fedora: expat-devel
 * gcc (http://gcc.gnu.org/)
