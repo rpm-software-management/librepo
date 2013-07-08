@@ -424,6 +424,10 @@ LibRepo Error codes.
 
     Cannot set own signal handler. Sigaction system call failed.
 
+.. data:: LRE_ALREADYDOWNLOADED
+
+    The file is already downloaded and its checksum matches.
+
 .. data:: LRE_UNKNOWNERROR
 
     An unknown error.
@@ -612,6 +616,7 @@ LRE_BADGPG              = _librepo.LRE_BADGPG
 LRE_INCOMPLETEREPO      = _librepo.LRE_INCOMPLETEREPO
 LRE_INTERRUPTED         = _librepo.LRE_INTERRUPTED
 LRE_SIGACTION           = _librepo.LRE_SIGACTION
+LRE_ALREADYDOWNLOADED   = _librepo.LRE_ALREADYDOWNLOADED
 LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
 
 LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
@@ -632,6 +637,15 @@ CHECKSUM_SHA224     = _librepo.CHECKSUM_SHA224
 CHECKSUM_SHA256     = _librepo.CHECKSUM_SHA256
 CHECKSUM_SHA384     = _librepo.CHECKSUM_SHA384
 CHECKSUM_SHA512     = _librepo.CHECKSUM_SHA512
+
+MD2        = _librepo.CHECKSUM_MD2
+MD5        = _librepo.CHECKSUM_MD5
+SHA        = _librepo.CHECKSUM_SHA
+SHA1       = _librepo.CHECKSUM_SHA1
+SHA224     = _librepo.CHECKSUM_SHA224
+SHA256     = _librepo.CHECKSUM_SHA256
+SHA384     = _librepo.CHECKSUM_SHA384
+SHA512     = _librepo.CHECKSUM_SHA512
 
 _CHECKSUM_STR_TO_VAL_MAP = {
     'md2':      CHECKSUM_MD2,
@@ -799,6 +813,11 @@ class Handle(_librepo.Handle):
         :meth:`~librepo.Handle.url()` or :meth:`~librepo.Handle.mirrorlist()`
         method. If *base_url* is specified, url and mirrorlist in handle
         are ignored.
+
+        Note: If resume is True and checksum_type and checksum are specified
+        and downloaded package already exists, then checksum of the
+        existing package is checked. If checksum matches, then no downloading
+        is done and exception with LRE_ALREADYDOWNLOADED return code is raised.
 
         :param url: Relative path to the package in the repository.
         :param dest: Destination for package. Could be absolute/relative

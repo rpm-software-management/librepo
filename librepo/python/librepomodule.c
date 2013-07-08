@@ -167,6 +167,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_INCOMPLETEREPO", LRE_INCOMPLETEREPO);
     PyModule_AddIntConstant(m, "LRE_INTERRUPTED", LRE_INTERRUPTED);
     PyModule_AddIntConstant(m, "LRE_SIGACTION", LRE_SIGACTION);
+    PyModule_AddIntConstant(m, "LRE_ALREADYDOWNLOADED", LRE_ALREADYDOWNLOADED);
     PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
 
     /* Result option */

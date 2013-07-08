@@ -43,6 +43,9 @@ extern "C" {
 
 /** \ingroup package_downloader
  * Download package from repository or base_url.
+ * Note: If resume, checksum and checksum_type are specified and
+ * the downloaded package alredy exists and checksum matches, then
+ * no downloading is done and LRE_ALREADYDOWNLOADED return code is returned.
  * @param handle            Librepo handle.
  * @param relative_url      Relative part of url.
  * @param dest              Destination file, directory
@@ -53,6 +56,7 @@ extern "C" {
  *                          and this base_url is used for downloading.
  * @param resume            If != 0 try to resume downloading if dest file
  *                          already exists.
+ * @return                  Librepo return code.
  */
 int lr_download_package(lr_Handle handle,
                         const char *relative_url,

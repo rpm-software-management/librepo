@@ -131,6 +131,7 @@ lr_gpg_check_signature_fd(int signature_fd,
     }
 
     gpgme_release(context);
+    DPRINTF("%s: Bad GPG signature\n", __func__);
     return LRE_BADGPG;
 }
 

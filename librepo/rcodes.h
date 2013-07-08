@@ -77,6 +77,8 @@ typedef enum {
                                      signal. Only if LRO_INTERRUPTIBLE option
                                      is enabled. */
     LRE_SIGACTION,              /*!< (28) sigaction error */
+    LRE_ALREADYDOWNLOADED,      /*!< (29) File already exists and checksum is
+                                     ok.*/
     LRE_UNKNOWNERROR,           /*!< unknown error - sentinel of
                                      error codes enum */
 } lr_Rc; /*!< Return codes */
