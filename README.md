@@ -7,11 +7,12 @@ linux repository metadata and packages
 
 ### Build requires:
 
-* cmake (http://www.cmake.org/) - in Fedora: cmake
 * check (http://check.sourceforge.net/) - in Fedora: check-devel
+* cmake (http://www.cmake.org/) - in Fedora: cmake
 * expat (http://expat.sourceforge.net/) - in Fedora: expat-devel
 * gcc (http://gcc.gnu.org/)
 * gpgme (http://www.gnupg.org/) - in Fedora: gpgme-devel
+* libattr (http://www.bestbits.at/acl/) - in Fedora: libattr-devel
 * libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
 * openssl (http://www.openssl.org/) - in Fedora: openssl-devel
 * python (http://python.org/) - in Fedora: python2-devel
