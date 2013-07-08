@@ -1129,7 +1129,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
         self.assertTrue(data["calls"] > 0)
-        self.assertTrue(data["ttd"] == data["d"])
+        self.assertTrue(data["ttd"] == data["d"] or data["ttd"] == 0)
 
 # Var substitution test
 
