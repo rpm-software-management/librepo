@@ -200,7 +200,7 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
             char *key;
             lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
                         (unsigned long long) st.st_mtime);
-            ret = fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
+            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
             lr_free(key);
         }
     }
