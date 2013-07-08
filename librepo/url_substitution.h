@@ -24,8 +24,8 @@
 extern "C" {
 #endif
 
+#include <glib.h>
 #include <stdlib.h>
-#include "list.h"
 
 /** \defgroup   url_substitution    Module for substitute vars in url
  *  \addtogroup url_substitution
@@ -33,37 +33,34 @@ extern "C" {
  */
 
 /** Element of lr_UrlVars list */
-typedef struct _lr_Var {
+typedef struct {
     char *var;
     char *val;
 } lr_Var;
 
-/** List with variables and its substitution for url.
- * Each list element has the type lr_Var.
- */
-typedef lr_List lr_UrlVars;
+typedef GSList lr_UrlVars;
 
 /** Set value of variable. Use variable names without '$' prefix.
  * If value is NULL, variable will be removed from the list.
- * If urlvars is NULL, new UrlVars list will be created.
- * @param urlvars       a lr_UrlVars list
+ * If list is NULL, new list will be created.
+ * @param list          a GSList or NULL for the first item
  * @param var           a variable name (must not be a NULL)
  * @param value         a variable value
- * @return              the new start of the lr_UrlVars
+ * @return              the new start of the GSList of url substitutions
  */
-lr_UrlVars *lr_urlvars_set(lr_UrlVars *urlvars, const char *var, const char *value);
+lr_UrlVars *lr_urlvars_set(lr_UrlVars *list, const char *var, const char *value);
 
 /** Frees all of the memory used by lr_UrlVars.
- * @param urlvars       a lr_UrlVars list
+ * @param list          a list of substitutions
  */
-void lr_urlvars_free(lr_UrlVars *urlvars);
+void lr_urlvars_free(lr_UrlVars *list);
 
 /** Substitute variables in the url. Returns a newly allocated string.
  * @param url           a url
- * @param vars          a list of variables and its substitutions
+ * @param list          a list of variables and its substitutions or NULL
  * @return              a newly allocated string with substituted url
  */
-char *lr_url_substitute(const char *url, lr_UrlVars *vars);
+char *lr_url_substitute(const char *url, lr_UrlVars *list);
 
 /** @} */
 

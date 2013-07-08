@@ -476,7 +476,7 @@ getinfo(_HandleObject *self, PyObject *args)
             Py_RETURN_NONE;
 
         list = PyList_New(0);
-        for (lr_UrlVars *elem = vars; elem; elem = lr_list_next(elem)) {
+        for (lr_UrlVars *elem = vars; elem; elem = g_slist_next(elem)) {
             PyObject *tuple, *obj;
             lr_Var *var = elem->data;
 

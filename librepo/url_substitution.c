@@ -17,11 +17,11 @@
  * USA.
  */
 
+#include <glib.h>
 #include <assert.h>
 #include <string.h>
 #include "setup.h"
 #include "url_substitution.h"
-#include "list.h"
 #include "util.h"
 
 static lr_Var *
@@ -42,26 +42,26 @@ lr_var_free(lr_Var *var)
 }
 
 lr_UrlVars *
-lr_urlvars_set(lr_UrlVars *urlvars, const char *var, const char *value)
+lr_urlvars_set(lr_UrlVars *list, const char *var, const char *value)
 {
-    lr_UrlVars *ret = urlvars;
+    lr_UrlVars *ret = list;
 
     assert(var);
 
     if (!value) {
         // Remove var from the list
-        for (lr_List *elem = urlvars; elem; elem = lr_list_next(elem)) {
-            lr_Var *var_val = lr_list_data(elem);
+        for (lr_UrlVars *elem = list; elem; elem = g_slist_next(elem)) {
+            lr_Var *var_val = elem->data;
             if (!strcmp(var, var_val->var)) {
                 lr_var_free(var_val);
-                ret = lr_list_remove(urlvars, var_val);
+                ret = g_slist_remove(list, var_val);
                 return ret;
             }
         }
     } else {
         // Replace var
-        for (lr_List *elem = urlvars; elem; elem = lr_list_next(elem)) {
-            lr_Var *var_val = lr_list_data(elem);
+        for (lr_UrlVars *elem = list; elem; elem = g_slist_next(elem)) {
+            lr_Var *var_val = elem->data;
             if (!strcmp(var, var_val->var)) {
                 lr_free(var_val->val);
                 var_val->val = lr_strdup(value);
@@ -71,22 +71,22 @@ lr_urlvars_set(lr_UrlVars *urlvars, const char *var, const char *value)
 
         // Add var
         lr_Var *var_val = lr_var_new(var, value);
-        ret = lr_list_prepend(urlvars, var_val);
+        ret = g_slist_prepend(list, var_val);
     }
 
     return ret;
 }
 
 void
-lr_urlvars_free(lr_UrlVars *urlvars)
+lr_urlvars_free(lr_UrlVars *list)
 {
-    for (lr_List *elem = urlvars; elem; elem = lr_list_next(elem))
-        lr_var_free(lr_list_data(elem));
-    lr_list_free(urlvars);
+    for (lr_UrlVars *elem = list; elem; elem = g_slist_next(elem))
+        lr_var_free(elem->data);
+    g_slist_free(list);
 }
 
 char *
-lr_url_substitute(const char *url, lr_UrlVars *vars)
+lr_url_substitute(const char *url, lr_UrlVars *list)
 {
     const char *cur = url;
     const char *p = url;
@@ -95,7 +95,7 @@ lr_url_substitute(const char *url, lr_UrlVars *vars)
     if (!url)
         return NULL;
 
-    if (!vars)
+    if (!list)
         return lr_strdup(url);
 
     res = lr_strdup("");
@@ -112,8 +112,8 @@ lr_url_substitute(const char *url, lr_UrlVars *vars)
             }
 
             // Try to substitute the variable
-            for (lr_List *elem = vars; elem; elem = lr_list_next(elem)) {
-                lr_Var *var_val = lr_list_data(elem);
+            for (lr_UrlVars *elem = list; elem; elem = g_slist_next(elem)) {
+                lr_Var *var_val = elem->data;
                 size_t len = strlen(var_val->var);
                 if (!strncmp(var_val->var, (cur+1), len)) {
                     cur = cur + 1 + len;
