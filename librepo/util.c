@@ -19,6 +19,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 500
+#include <glib.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -361,4 +362,15 @@ lr_asprintf(char **strp, const char *format, ...)
     len = lr_vasprintf(strp, format, args);
     va_end(args);
     return len;
+}
+
+gchar *
+lr_string_chunk_insert(GStringChunk *chunk, const gchar *string)
+{
+    assert(chunk);
+
+    if (!string)
+        return NULL;
+
+    return g_string_chunk_insert(chunk, string);
 }

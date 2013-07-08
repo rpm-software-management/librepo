@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+#include <glib.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -164,6 +165,15 @@ int lr_vasprintf(char **strp, const char *format, va_list ap);
  * @return              The number of bytes printed
  */
 int lr_asprintf(char **strp, const char *format, ...);
+
+/** Same as g_string_chunk_insert, but allows NULL as string.
+ * If the string is NULL, then returns NULL and do nothing.
+ * @param chunk         String chunk
+ * @param string        String or NULL
+ * @return              a pointer to the copy of string within the chunk
+ */
+gchar *
+lr_string_chunk_insert(GStringChunk *chunk, const gchar *string);
 
 #ifdef __cplusplus
 }
