@@ -62,20 +62,26 @@ All unit tests run from librepo checkout dir
 
 To check memoryleaks:
 
-    CK_FORK=no valgrind --leak-check=full build/tests/test_main tests/test_data/
+Add this line to your ``~/.bashrc`` file
+
+    alias gvalgrind='G_SLICE=always-malloc G_DEBUG=gc-friendly valgrind'
+
+And then run:
+
+    CK_FORK=no gvalgrind --leak-check=full build/tests/test_main tests/test_data/
 
 Supress known still_reachable memory:
 
-    CK_FORK=no valgrind --leak-check=full --suppressions=still_reachable.supp build/tests/test_main tests/test_data/
+    CK_FORK=no gvalgrind --leak-check=full --suppressions=still_reachable.supp build/tests/test_main tests/test_data/
 
 Note: .valgrindrc file is present in checkoutdir, this file contains the settings:
 `--memcheck:leak-check=full --suppressions=./valgrind.supp`
 
 ### Run (from your checkout dir) - Python unittests:
 
-    PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/
+    PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/
 
-Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s tests/python/tests/test_yum_repo_downloading.py:TestCaseYumRepoDownloading.test_download_and_update_repo_01``
+Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/test_yum_repo_downloading.py:TestCaseYumRepoDownloading.test_download_and_update_repo_01``
 
 ## Links
 
