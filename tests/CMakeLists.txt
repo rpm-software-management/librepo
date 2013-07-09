@@ -4,15 +4,15 @@ SET (librepotest_SRCS
      test_curltargetlist.c
      test_gpg.c
      test_handle.c
-     test_internal_mirrorlist.c
+     test_lrmirrorlist.c
      test_main.c
      test_metalink.c
      test_mirrorlist.c
      test_repomd.c
+     testsys.c
      test_url_substitution.c
      test_util.c
      test_version.c
-     testsys.c
     )
 
 #ADD_LIBRARY(testsys STATIC testsys.c)

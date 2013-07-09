@@ -34,6 +34,7 @@
 #include "util.h"
 #include "handle_internal.h"
 #include "curltargetlist.h"
+#include "lrmirrorlist.h"
 
 /* Callback stuff */
 
@@ -420,12 +421,12 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
 {
     int rc;
     int mirrors;
-    lr_InternalMirrorlist iml = handle->internal_mirrorlist;
+    lr_LrMirrorlist *iml = handle->internal_mirrorlist;
 
     if (!iml)
         return LRE_NOURL;
 
-    mirrors = lr_internalmirrorlist_len(handle->internal_mirrorlist);
+    mirrors = g_slist_length(handle->internal_mirrorlist);
     if (mirrors < 1)
         return LRE_NOURL;
 
@@ -433,7 +434,8 @@ lr_curl_single_mirrored_download_resume(lr_Handle handle,
 
     for (int x=0; x < mirrors; x++) {
         char *full_url;
-        char *url = lr_internalmirrorlist_get_url(iml, x);
+        char *url = ((lr_LrMirror *) g_slist_nth(iml, x)->data)->url;
+        assert(url);
         DPRINTF("%s: Trying mirror: %s\n", __func__, url);
 
         lseek(fd, 0, SEEK_SET);
@@ -509,7 +511,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
     FILE *open_files[not];
     CURLMcode cm_rc;
     CURLM *cm_h = NULL; /* Curl Multi Handle */
-    lr_InternalMirrorlist iml;
+    lr_LrMirrorlist *iml;
 
     struct _lr_SharedCallbackData shared_cb_data;
     struct _lr_CallbackData cb_data[not];
@@ -527,7 +529,7 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
         return LRE_NOURL;
     }
 
-    nom = lr_internalmirrorlist_len(iml);
+    nom = g_slist_length(iml);
     if (nom < 1) {
         DPRINTF("%s: No urls in internal mirrorlist\n", __func__);
         return LRE_NOURL;
@@ -552,10 +554,12 @@ lr_curl_multi_download(lr_Handle handle, lr_CurlTargetList targets)
 
     for (int i = 0; i < nom; i++) {
         int used = 0;
-        char *mirror = lr_internalmirrorlist_get_url(iml, i);
+        char *mirror = ((lr_LrMirror *) g_slist_nth(iml, i)->data)->url;
         int still_running;  /* Number of still running downloads */
         CURLMsg *msg;  /* for picking up messages with the transfer status */
         int msgs_left; /* how many messages are left */
+
+        assert(mirror);
 
         if (lr_interrupt) {
             ret = LRE_INTERRUPTED;

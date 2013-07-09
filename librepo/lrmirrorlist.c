@@ -37,7 +37,7 @@ lr_lrmirrorlist_append_url(lr_LrMirrorlist *list,
                            const char *url,
                            lr_UrlVars *urlvars)
 {
-    if (!url)
+    if (!url || !strlen(url))
         return list;
 
     lr_LrMirror *mirror = lr_lrmirror_new(url, urlvars);
@@ -55,12 +55,10 @@ lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
         return list;
 
     for (int x=0; x < mirrorlist->nou; x++) {
-        char *url = lr_url_substitute(mirrorlist->urls[x], urlvars);
+        char *url = mirrorlist->urls[x];
 
-        if (!url || !strlen(url)) {
-            lr_free(url);
-            continue;  // No url present
-        }
+        if (!url || !strlen(url))
+            continue;
 
         lr_LrMirror *mirror = lr_lrmirror_new(url, urlvars);
         mirror->preference = 100;
@@ -132,4 +130,19 @@ lr_lrmirrorlist_append_lrmirrorlist(lr_LrMirrorlist *list,
     }
 
     return list;
+}
+
+lr_LrMirror *
+lr_lrmirrorlist_nth(lr_LrMirrorlist *list,
+                    unsigned int nth)
+{
+    return g_slist_nth_data(list, nth);
+}
+
+char *
+lr_lrmirrorlist_nth_url(lr_LrMirrorlist *list,
+                        unsigned int nth)
+{
+    lr_LrMirror *mirror = g_slist_nth_data(list, nth);
+    return (mirror) ? mirror->url : NULL;
 }

@@ -100,8 +100,8 @@ lr_handle_free(lr_Handle handle)
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
     lr_free(handle->useragent);
-    lr_internalmirrorlist_free(handle->internal_mirrorlist);
-    lr_internalmirrorlist_free(handle->mirrors);
+    lr_lrmirrorlist_free(handle->internal_mirrorlist);
+    lr_lrmirrorlist_free(handle->mirrors);
     lr_metalink_free(handle->metalink);
     lr_handle_free_list(&handle->yumdlist);
     lr_handle_free_list(&handle->yumblist);
@@ -134,7 +134,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->baseurl = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
             // Clear previous mirrorlist stuff
-            lr_internalmirrorlist_free(handle->internal_mirrorlist);
+            lr_lrmirrorlist_free(handle->internal_mirrorlist);
             handle->internal_mirrorlist = NULL;
         }
         break;
@@ -144,9 +144,9 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         handle->mirrorlist = lr_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
             // Clear previous mirrorlist stuff
-            lr_internalmirrorlist_free(handle->internal_mirrorlist);
+            lr_lrmirrorlist_free(handle->internal_mirrorlist);
             handle->internal_mirrorlist = NULL;
-            lr_internalmirrorlist_free(handle->mirrors);
+            lr_lrmirrorlist_free(handle->mirrors);
             handle->mirrors = NULL;
             lr_metalink_free(handle->metalink);
             handle->metalink = NULL;
@@ -403,7 +403,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
         metalink_suffix = "repodata/repomd.xml";
 
     /* Create internal mirrorlist */
-    handle->internal_mirrorlist = lr_internalmirrorlist_new();
+    handle->internal_mirrorlist = NULL;
 
     /*
      * handle->baseurl (LRO_URL)
@@ -438,9 +438,10 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
         }
 
         if (url) {
-            lr_internalmirrorlist_append_url(handle->internal_mirrorlist,
-                                             url,
-                                             handle->urlvars);
+            handle->internal_mirrorlist = lr_lrmirrorlist_append_url(
+                                                handle->internal_mirrorlist,
+                                                url,
+                                                handle->urlvars);
             lr_free(url);
         }
     }
@@ -579,20 +580,21 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             /* Set fill mirrorlist stuff at the handle  */
 
             assert(handle->mirrors == NULL);
-            handle->mirrors = lr_internalmirrorlist_new();
 
             if (metalink) {
                 handle->metalink = metalink;
-                lr_internalmirrorlist_append_metalink(handle->mirrors,
-                                                      metalink,
-                                                      metalink_suffix,
-                                                      handle->urlvars);
+                handle->mirrors = lr_lrmirrorlist_append_metalink(
+                                                            handle->mirrors,
+                                                            metalink,
+                                                            metalink_suffix,
+                                                            handle->urlvars);
             }
 
             if (mirrorlist) {
-                lr_internalmirrorlist_append_mirrorlist(handle->mirrors,
-                                                        mirrorlist,
-                                                        handle->urlvars);
+                handle->mirrors = lr_lrmirrorlist_append_mirrorlist(
+                                                            handle->mirrors,
+                                                            mirrorlist,
+                                                            handle->urlvars);
             }
         }
 
@@ -615,8 +617,9 @@ mirrorlist_error:
     // Append mirrorlist from handle->mirrors to the internal mirrorlist
     if (include_in_internal_mirrorlist && handle->mirrors) {
         DPRINTF("%s: Mirrorlist will be used for downloading if needed\n", __func__);
-        lr_internalmirrorlist_append_internalmirrorlist(handle->internal_mirrorlist,
-                                                       handle->mirrors);
+        handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
+                                                handle->internal_mirrorlist,
+                                                handle->mirrors);
     }
 
     return rc;
@@ -813,13 +816,20 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         int x;
         char ***list = va_arg(arg, char ***);
         *list = NULL;
-        lr_InternalMirrorlist ml = handle->mirrors;
+        lr_LrMirrorlist *ml = handle->mirrors;
+
         if (!ml)
-            break;  // lr_handle_perform() or lr_download_package() was not called yet
+            // lr_handle_perform() or lr_download_package() was not called yet
+            break;
+
         /* Make list of urls from internal mirrorlist */
-        *list = lr_malloc((ml->nom + 1) * sizeof(char *));
-        for (x = 0; x < ml->nom; x++)
-            (*list)[x] = ml->mirrors[x]->url;
+        x = 0;
+        *list = lr_malloc((g_slist_length(ml) + 1) * sizeof(char *));
+        for (lr_LrMirrorlist *elem = ml; elem; elem = g_slist_next(elem)) {
+            lr_LrMirror *mirror = elem->data;
+            (*list)[x] = mirror->url;
+            x++;
+        }
         (*list)[x] = NULL;
         break;
     }

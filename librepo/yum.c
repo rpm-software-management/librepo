@@ -43,7 +43,6 @@
 #include "handle_internal.h"
 #include "result_internal.h"
 #include "yum_internal.h"
-#include "internal_mirrorlist.h"
 #include "curltargetlist.h"
 #include "gpg.h"
 

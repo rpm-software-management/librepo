@@ -30,7 +30,6 @@ extern "C" {
 #include "handle.h"
 #include "checksum.h"
 #include "rcodes.h"
-#include "internal_mirrorlist.h"
 #include "curltargetlist.h"
 
 /** \defgroup   curl    Set of function for downloading via curl

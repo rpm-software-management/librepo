@@ -81,6 +81,24 @@ lr_LrMirrorlist *
 lr_lrmirrorlist_append_lrmirrorlist(lr_LrMirrorlist *list,
                                     lr_LrMirrorlist *other);
 
+/** Return mirror on the given position.
+ * @param list          a lr_LrMirrorlist
+ * @param nth           the position of the mirror
+ * @return              the mirror
+ */
+lr_LrMirror *
+lr_lrmirrorlist_nth(lr_LrMirrorlist *list,
+                    unsigned int nth);
+
+/** Return url of the mirror on at the given position.
+ * @param list          a lr_LrMirrorlist
+ * @param nth           the position of the mirror
+ * @return              the url
+ */
+char *
+lr_lrmirrorlist_nth_url(lr_LrMirrorlist *list,
+                        unsigned int nth);
+
 /** Free lr_LrMirrorlist.
  * @param list          Internal mirrorlist
  */

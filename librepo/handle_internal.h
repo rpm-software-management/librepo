@@ -28,20 +28,20 @@ extern "C" {
 
 #include "types.h"
 #include "handle.h"
-#include "internal_mirrorlist.h"
+#include "lrmirrorlist.h"
 #include "url_substitution.h"
 
 struct _lr_Handle {
     CURL            *curl_handle;   /*!< CURL handle */
     int             update;         /*!< Just update existing repo */
     char            *baseurl;       /*!< Base URL of repo */
-    lr_InternalMirrorlist internal_mirrorlist; /*!< Internal list of mirrors
+    lr_LrMirrorlist *internal_mirrorlist; /*!< Internal list of mirrors
                                         (Real used mirrorlist = baseurl + mirrors) */
 
     // Mirrorlist related stuff
     char            *mirrorlist;    /*!< Mirrorlist or metalink URL */
     lr_Metalink     metalink;       /*!< Parsed metalink for repomd.xml */
-    lr_InternalMirrorlist mirrors;  /*!< Mirrors from metalink or mirrorlist */
+    lr_LrMirrorlist *mirrors;       /*!< Mirrors from metalink or mirrorlist */
     int             mirrorlist_fd;  /*!< Raw downloaded file */
 
     int             local;          /*!< Do not duplicate local data */

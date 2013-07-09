@@ -4,7 +4,6 @@ SET (librepo_SRCS
      curltargetlist.c
      gpg.c
      handle.c
-     internal_mirrorlist.c
      librepo.c
      lrmirrorlist.c
      metalink.c
