@@ -101,22 +101,24 @@ lr_download_package(lr_Handle handle,
         }
     }
 
-    if (resume) {
-        if (access(dest_path, R_OK) == 0) {
-            /* Check checksum of existing file (if file exists).
-             * If file exists and checksum is ok, then is pointless to
-             * use a resume, because resume always fails in this case. */
-            int fd_r = open(dest_path, O_RDONLY);
-            if (fd_r != -1) {
-                int ret = lr_checksum_fd_cmp(checksum_type, fd_r, checksum, 0);
-                close(fd_r);
-                if (ret == 0) {
-                    lr_free(dest_path);
-                    return LRE_ALREADYDOWNLOADED;
-                }
+    if (access(dest_path, R_OK) == 0) {
+        /* Check checksum of the existing file (if the file exists).
+         * If the file exists and checksum is ok, then is pointless to
+         * download the file again.
+         * Moreover, if the resume is enabled and the file is already
+         * completely downloaded, then the download is going to fail. */
+        int fd_r = open(dest_path, O_RDONLY);
+        if (fd_r != -1) {
+            int ret = lr_checksum_fd_cmp(checksum_type, fd_r, checksum, 0);
+            close(fd_r);
+            if (ret == 0) {
+                lr_free(dest_path);
+                return LRE_ALREADYDOWNLOADED;
             }
         }
+    }
 
+    if (resume) {
         /* Enable autodetection for resume download */
         offset = -1;                /* Autodetect offset */
         open_flags &= ~O_TRUNC;     /* Do NOT truncate the dest file */
