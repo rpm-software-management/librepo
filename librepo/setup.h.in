@@ -24,6 +24,9 @@
 extern "C" {
 #endif
 
+#undef G_LOG_DOMAIN
+#define G_LOG_DOMAIN    "librepo"
+
 // HAVE_VSNPRINTF
 // Define if vsnprintf is available.
 #cmakedefine HAVE_VSNPRINTF 1

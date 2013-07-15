@@ -2,6 +2,8 @@ SET (librepo_SRCS
      checksum.c
      curl.c
      curltargetlist.c
+     downloader.c
+     downloadtarget.c
      gpg.c
      handle.c
      librepo.c
@@ -19,6 +21,7 @@ SET (librepo_SRCS
 
 SET(librepo_HEADERS
     checksum.h
+    downloadtarget.h
     gpg.h
     handle.h
     librepo.h

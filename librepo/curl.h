@@ -31,12 +31,10 @@ extern "C" {
 #include "checksum.h"
 #include "rcodes.h"
 #include "curltargetlist.h"
+#include "downloader.h"
 
 /** \defgroup   curl    Set of function for downloading via curl
  */
-
-extern volatile sig_atomic_t lr_interrupt;
-void lr_sigint_handler(int sig);
 
 /** \ingroup curl
  * Simplified version lr_curl_single_download_resume. Whole file is

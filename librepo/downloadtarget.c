@@ -21,9 +21,11 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib/gprintf.h>
 
 #include "util.h"
 #include "downloadtarget.h"
+#include "downloadtarget_internal.h"
 
 lr_DownloadTarget *
 lr_downloadtarget_new(const char *path,
@@ -31,7 +33,9 @@ lr_downloadtarget_new(const char *path,
                       int fd,
                       lr_ChecksumType checksumtype,
                       const char *checksum,
-                      int resume)
+                      int resume,
+                      lr_ProgressCb progresscb,
+                      void *cbdata)
 {
     lr_DownloadTarget *target;
 
@@ -47,6 +51,9 @@ lr_downloadtarget_new(const char *path,
     target->checksumtype = checksumtype;
     target->checksum     = lr_string_chunk_insert(target->chunk, checksum);
     target->resume       = resume;
+    target->progresscb   = progresscb;
+    target->cbdata       = cbdata;
+    target->rcode        = LRE_UNFINISHED;
 
     return target;
 }
@@ -59,4 +66,51 @@ lr_downloadtarget_free(lr_DownloadTarget *target)
 
     g_string_chunk_free(target->chunk);
     lr_free(target);
+}
+
+void
+lr_downloadtarget_set_error(lr_DownloadTarget *target,
+                            lr_Rc code,
+                            const char *format,
+                            ...)
+{
+    assert(target);
+    assert(code == LRE_OK || format);
+
+    if (format) {
+        int ret;
+        va_list vl;
+        gchar *message = NULL;
+
+        va_start(vl, format);
+        ret = g_vasprintf(&message, format, vl);
+        va_end(vl);
+
+        if (ret < 0) {
+            assert(0);
+            target->err = "";
+            return;
+        }
+
+        target->err = lr_string_chunk_insert(target->chunk, message);
+        g_free(message);
+    } else {
+        target->err = NULL;
+    }
+
+    target->rcode = code;
+}
+
+void
+lr_downloadtarget_set_usedmirror(lr_DownloadTarget *target, const char *url)
+{
+    assert(target);
+    target->usedmirror = lr_string_chunk_insert(target->chunk, url);
+}
+
+void
+lr_downloadtarget_set_effectiveurl(lr_DownloadTarget *target, const char *url)
+{
+    assert(target);
+    target->effectiveurl = lr_string_chunk_insert(target->chunk, url);
 }

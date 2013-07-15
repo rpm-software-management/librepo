@@ -69,13 +69,19 @@ struct _lr_Handle {
     lr_UrlVars      *urlvars;       /*!< List with url substitutions */
 };
 
+/** Return new CURL easy handle with some default options setted.
+ */
+CURL *
+lr_get_curl_handle();
+
 /**
  * Create (if do not exists) internal mirrorlist. Insert baseurl (if
  * specified) and download, parse and insert mirrors from mirrorlist url.
  * @param handle            Librepo handle.
  *  @return                 Librepo return code.
  */
-int lr_handle_prepare_internal_mirrorlist(lr_Handle handle);
+int
+lr_handle_prepare_internal_mirrorlist(lr_Handle handle);
 
 
 #ifdef __cplusplus

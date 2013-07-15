@@ -45,6 +45,15 @@
 #include "yum_internal.h"
 #include "url_substitution.h"
 
+CURL *
+lr_get_curl_handle()
+{
+    CURL *h = curl_easy_init();
+    curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6);
+    return h;
+}
+
 void
 lr_handle_free_list(char ***list)
 {
@@ -66,7 +75,7 @@ lr_Handle
 lr_handle_init()
 {
     lr_Handle handle;
-    CURL *curl = curl_easy_init();
+    CURL *curl = lr_get_curl_handle();
 
     if (!curl)
         return NULL;
@@ -78,10 +87,6 @@ lr_handle_init()
     handle->last_curl_error = CURLE_OK;
     handle->last_curlm_error = CURLM_OK;
     handle->checks |= LR_CHECK_CHECKSUM;
-
-    /* Default options */
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 6);
 
     return handle;
 }
@@ -507,6 +512,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             char *mirrorlist_url = lr_url_substitute(prefixed_url,
                                                      handle->urlvars);
             lr_free(prefixed_url);
+            //rc = lr_download_url(handle, mirrorlist_url, mirrors_fd, NULL);
             rc = lr_curl_single_download(handle, mirrorlist_url, mirrors_fd);
             lr_free(mirrorlist_url);
 

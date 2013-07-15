@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <assert.h>
+#include <ctype.h>
 #include <check.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 #include "fixtures.h"
 #include "test_checksum.h"
 #include "test_curltargetlist.h"
+#include "test_downloader.h"
 #include "test_gpg.h"
 #include "test_handle.h"
 #include "test_lrmirrorlist.h"
@@ -40,21 +42,61 @@ free_test_globals(struct TestGlobals_s *tg)
     lr_free(tg->testdata_dir);
 }
 
-int
-main(int argc, const char **argv)
+void
+print_help(const char *prog)
 {
+    fprintf(stderr, "usage: %s [-v] [-d] <repos_directory>\n", prog);
+    fprintf(stderr, \
+            "\n"\
+            "-v    Verbose output.\n"\
+            "-d    Do downloading tests (Needs internet connection).\n"\
+            "\n");
+}
+
+int
+main(int argc, char **argv)
+{
+    int c;
+    int verbose = 0;
+    int downloading = 0;
     int number_failed;
     struct stat s;
+    const char *repos_dir;
 
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <repos_directory>\n", argv[0]);
+    while ((c = getopt (argc, argv, "vd")) != -1)
+        switch (c) {
+        case 'v':
+            verbose = 1;
+            break;
+        case 'd':
+            downloading = 1;
+            break;
+        default:
+            print_help(argv[0]);
+            exit(1);
+        }
+
+    if ((argc - optind) != 1) {
+        print_help(argv[0]);
         exit(1);
     }
-    if (stat(argv[1], &s) || !S_ISDIR(s.st_mode)) {
-        fprintf(stderr, "can not read repos at '%s'.\n", argv[1]);
+
+    repos_dir = argv[optind];
+
+    if (verbose) {
+        // Setup logging
+        g_log_set_handler("librepo", G_LOG_LEVEL_ERROR |
+                                     G_LOG_LEVEL_CRITICAL |
+                                     G_LOG_LEVEL_DEBUG |
+                                     G_LOG_LEVEL_WARNING,
+                          test_log_handler_cb, NULL);
+    }
+
+    if (stat(repos_dir, &s) || !S_ISDIR(s.st_mode)) {
+        fprintf(stderr, "can not read repos at '%s'.\n", repos_dir);
         exit(1);
     }
-    if (init_test_globals(&test_globals, argv[1])) {
+    if (init_test_globals(&test_globals, repos_dir)) {
         fprintf(stderr, "failed initializing test engine.\n");
         exit(1);
     }
@@ -62,6 +104,8 @@ main(int argc, const char **argv)
 
     SRunner *sr = srunner_create(checksum_suite());
     srunner_add_suite(sr, curltargetlist_suite());
+    if (downloading)
+        srunner_add_suite(sr, downloader_suite());
     srunner_add_suite(sr, gpg_suite());
     srunner_add_suite(sr, handle_suite());
     srunner_add_suite(sr, lrmirrorlist_suite());

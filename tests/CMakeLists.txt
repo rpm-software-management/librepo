@@ -2,6 +2,7 @@ SET (librepotest_SRCS
      fixtures.c
      test_checksum.c
      test_curltargetlist.c
+     test_downloader.c
      test_gpg.c
      test_handle.c
      test_lrmirrorlist.c

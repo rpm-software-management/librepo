@@ -25,7 +25,9 @@ extern "C" {
 #endif
 
 #include <glib.h>
+#include "rcodes.h"
 #include "checksum.h"
+#include "types.h"
 
 /** Single download target
  */
@@ -49,15 +51,50 @@ typedef struct {
     int resume; /*!<
         Resume:
          0  - no resume, download whole file,
-        -1 - autodetect offset for resume */
+         otherwise - autodetect offset for resume */
+
+    lr_ProgressCb progresscb; /*!<
+        Progression callback for the target */
+
+    void *cbdata; /*!<
+        Callback user data */
 
     GStringChunk *chunk; /*!<
         Chunk for strings used in this structure. */
 
+    // Items filled by downloader
+
+    char *usedmirror; /*!<
+        Used mirror. Filled only if transfer was successfull. */
+
+    char *effectiveurl; /*!<
+        Effective url. Could be only concatenation of used_mirror and
+        path or completely different url (if there were some
+        redirects, etc.). Filled only if transfer was successfull. */
+
+    lr_Rc rcode; /*!<
+        Return code */
+
+    char *err; /*!<
+        NULL or error message */
+
 } lr_DownloadTarget;
 
 /** Create new empty ::lr_DownloadTarget.
- * @return              New allocated target.
+ * @param path          Absolute or relative URL path
+ * @param baseurl       Base URL for relative path specified in path param
+ * @param fd            Opened file descriptor where data will be written
+ * @param checksumtype  Type of used checksum or LR_CHECKSUM_UNKNOWN if
+ *                      checksum is not used or should not be checked.
+ * @param checksum      Checksum value to check or NULL. If checksumtype is
+ *                      set to LR_CHECKSUM_UNKNOWN then this param is ignored.
+ * @param resume        If 0 then no resume is done and whole file is
+ *                      downloaded again. Otherwise offset will be
+ *                      automaticaly detected from opened file descriptor by
+ *                      seek to the end.
+ * @param progresscb    Progression callback or NULL
+ * @param cbdata        Callback data or NULL
+ * @return              New allocated target
  */
 lr_DownloadTarget *
 lr_downloadtarget_new(const char *path,
@@ -65,7 +102,9 @@ lr_downloadtarget_new(const char *path,
                       int fd,
                       lr_ChecksumType checksumtype,
                       const char *checksum,
-                      int resume);
+                      int resume,
+                      lr_ProgressCb progresscb,
+                      void *cbdata);
 
 /** Free a ::lr_DownloadTarget element and its content.
  * @param target        Target to free.

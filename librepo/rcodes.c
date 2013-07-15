@@ -83,7 +83,17 @@ lr_strerror(int rc)
         return "Cannot set own signal handler - sigaction system call failed";
     case LRE_ALREADYDOWNLOADED:
         return "File already exists and checksum is ok";
+    case LRE_UNFINISHED:
+        return "Download wasn't or cannot be finished";
+    case LRE_SELECT:
+        return "select() call failed";
     }
 
     return "Unknown error";
+}
+
+GQuark
+lr_downloader_error_quark(void)
+{
+    return g_quark_from_static_string("lr_downloader_error");
 }

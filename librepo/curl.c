@@ -38,15 +38,6 @@
 
 /* Callback stuff */
 
-volatile sig_atomic_t lr_interrupt = 0;
-
-void
-lr_sigint_handler(int sig)
-{
-    LR_UNUSED(sig);
-    lr_interrupt = 1;
-}
-
 struct _lr_SharedCallbackData {
     short *counted;     /*!< wich downloads have already been included into
                              the total_size*/

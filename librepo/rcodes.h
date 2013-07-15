@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <glib.h>
+
 /** \defgroup   rcodes      Librepo return codes
  */
 
@@ -95,7 +97,12 @@ typedef enum {
         (28) sigaction error */
     LRE_ALREADYDOWNLOADED, /*!<
         (29) File already exists and checksum is ok.*/
-    LRE_UNKNOWNERROR, /*!< unknown error - sentinel of error codes enum */
+    LRE_UNFINISHED, /*!<
+        (30) The download wasn't or cannot be finished. */
+    LRE_SELECT, /*!<
+        (31) select() call failed. */
+    LRE_UNKNOWNERROR, /*!<
+        (xx) unknown error - sentinel of error codes enum */
 } lr_Rc; /*!< Return codes */
 
 /** Converts lr_Rc return code to error string.
@@ -103,6 +110,11 @@ typedef enum {
  * @return          Error string
  */
 const char *lr_strerror(int rc);
+
+/** Error domains for GError */
+#define LR_DOWNLOADER_ERROR         lr_downloader_error_quark()
+
+GQuark lr_downloader_error_quark(void);
 
 #ifdef __cplusplus
 }
