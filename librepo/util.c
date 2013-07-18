@@ -282,7 +282,7 @@ lr_remove_dir_cb(const char *fpath,
     LR_UNUSED(ftwbuf);
     int rv = remove(fpath);
     if (rv)
-        DPRINTF("%s: Cannot remove: %s: %s", __func__, fpath, strerror(errno));
+        g_debug("%s: Cannot remove: %s: %s", __func__, fpath, strerror(errno));
     return rv;
 }
 
@@ -322,7 +322,7 @@ lr_prepend_url_protocol(const char *path)
 
     char *path_with_protocol, *resolved_path = realpath(path, NULL);
     if (!resolved_path) {
-        DPRINTF("%s: %s - realpath: %s ", __func__, path, strerror(errno));
+        g_debug("%s: %s - realpath: %s ", __func__, path, strerror(errno));
         return NULL;
     }
     path_with_protocol = lr_strconcat("file://", resolved_path, NULL);

@@ -39,11 +39,11 @@ lr_global_init()
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
 
-    DPRINTF("Librepo version: %d.%d.%d%s (%s)\n", LR_VERSION_MAJOR,
-                                                   LR_VERSION_MINOR,
-                                                   LR_VERSION_PATCH,
-                                                   EINTR_SUPPORT,
-                                                   curl_version());
+    g_debug("Librepo version: %d.%d.%d%s (%s)", LR_VERSION_MAJOR,
+                                                LR_VERSION_MINOR,
+                                                LR_VERSION_PATCH,
+                                                EINTR_SUPPORT,
+                                                curl_version());
 }
 
 void

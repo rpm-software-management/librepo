@@ -73,7 +73,7 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
 
     f = fdopen(dup(fd), "r");
     if (!f) {
-        DPRINTF("%s: Cannot fdopen(mirrorlist_fd): %s\n", __func__, strerror(errno));
+        g_debug("%s: Cannot fdopen(mirrorlist_fd): %s", __func__, strerror(errno));
         return LRE_IO;
     }
 

@@ -156,7 +156,7 @@ lr_yum_download_repomd(lr_Handle handle,
     char *checksum = NULL;
     GError *tmp_err = NULL;
 
-    DPRINTF("%s: Downloading repomd.xml via mirrorlist\n", __func__);
+    g_debug("%s: Downloading repomd.xml via mirrorlist", __func__);
 
     if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
         /* Select the best checksum type */
@@ -174,7 +174,7 @@ lr_yum_download_repomd(lr_Handle handle,
             }
         }
 
-        DPRINTF("%s: selected repomd.xml checksum to check: (%s) %s\n",
+        g_debug("%s: selected repomd.xml checksum to check: (%s) %s",
                 __func__, lr_checksum_type_to_str(checksum_type), checksum);
     }
 
@@ -205,7 +205,7 @@ lr_yum_download_repomd(lr_Handle handle,
 
     if (rc != LRE_OK) {
         /* Download of repomd.xml was not successful */
-        DPRINTF("%s: repomd.xml download was unsuccessful\n", __func__);
+        g_debug("%s: repomd.xml download was unsuccessful", __func__);
         return rc;
     }
 
@@ -237,7 +237,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
         path = lr_pathconcat(destdir, record->location_href, NULL);
         fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0666);
         if (fd < 0) {
-            DPRINTF("%s: Cannot create/open %s (%s)\n",
+            g_debug("%s: Cannot create/open %s (%s)",
                     __func__, path, strerror(errno));
             lr_free(path);
             return LRE_IO;
@@ -298,22 +298,22 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, const char *path)
     expected_checksum = rec->checksum;
     checksum_type = lr_checksum_type(rec->checksum_type);
 
-    DPRINTF("%s: Checking checksum of %s (expected: %s [%s])\n",
+    g_debug("%s: Checking checksum of %s (expected: %s [%s])",
                        __func__, path, expected_checksum, rec->checksum_type);
 
     if (!expected_checksum) {
-        DPRINTF("%s: No checksum in repomd\n", __func__);
+        g_debug("%s: No checksum in repomd", __func__);
         return LRE_OK;  /* Empty checksum - suppose it's ok */
     }
 
     if (checksum_type == LR_CHECKSUM_UNKNOWN) {
-        DPRINTF("%s: Unknown checksum: %s\n", __func__, rec->checksum_type);
+        g_debug("%s: Unknown checksum: %s", __func__, rec->checksum_type);
         return LRE_UNKNOWNCHECKSUM;
     }
 
     fd = open(path, O_RDONLY);
     if (fd < 0) {
-        DPRINTF("%s: Cannot open %s\n", __func__, path);
+        g_debug("%s: Cannot open %s", __func__, path);
         return LRE_IO;
     }
 
@@ -322,11 +322,11 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, const char *path)
     close(fd);
 
     if (ret) {
-        DPRINTF("%s: Checksum check - Failed\n", __func__);
+        g_debug("%s: Checksum check - Failed", __func__);
         return LRE_BADCHECKSUM;
     }
 
-    DPRINTF("%s: Checksum check - Passed\n", __func__);
+    g_debug("%s: Checksum check - Passed", __func__);
 
     return LRE_OK;
 }
@@ -339,7 +339,7 @@ lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
         lr_YumRepoMdRecord record  = repomd->records[x];
         const char *path = lr_yum_repo_path(repo, record->type);
         ret = lr_yum_check_checksum_of_md_record(record, path);
-        DPRINTF("%s: Checksum rc: %d (%s)\n", __func__, ret, record->type);
+        g_debug("%s: Checksum rc: %d (%s)", __func__, ret, record->type);
         if (ret != LRE_OK)
             return ret;
     }
@@ -357,7 +357,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     lr_YumRepo repo;
     lr_YumRepoMd repomd;
 
-    DPRINTF("%s: Locating repo..\n", __func__);
+    g_debug("%s: Locating repo..", __func__);
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
@@ -381,7 +381,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
                 path = lr_pathconcat(baseurl, "mirrorlist", NULL);
 
             if (access(path, F_OK) == 0) {
-                DPRINTF("%s: Found local mirrorlist: %s\n", __func__, path);
+                g_debug("%s: Found local mirrorlist: %s", __func__, path);
                 repo->mirrorlist = path;
             } else {
                 repo->mirrorlist = NULL;
@@ -396,15 +396,15 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
         fd = open(path, O_RDONLY);
         if (fd < 0) {
-            DPRINTF("%s: open(%s): %s\n", __func__, path, strerror(errno));
+            g_debug("%s: open(%s): %s", __func__, path, strerror(errno));
             lr_free(path);
             return LRE_IO;
         }
 
-        DPRINTF("%s: Parsing repomd.xml\n", __func__);
+        g_debug("%s: Parsing repomd.xml", __func__);
         rc = lr_yum_repomd_parse_file(repomd, fd);
         if (rc != LRE_OK) {
-            DPRINTF("%s: Parsing unsuccessful (%d)\n", __func__, rc);
+            g_debug("%s: Parsing unsuccessful (%d)", __func__, rc);
             lr_free(path);
             return rc;
         }
@@ -427,13 +427,13 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         if (handle->checks & LR_CHECK_GPG && repo->signature) {
             rc = lr_gpg_check_signature(repo->signature, repo->repomd, NULL);
             if (rc != LRE_OK) {
-                DPRINTF("%s: GPG signature verification failed\n", __func__);
+                g_debug("%s: GPG signature verification failed", __func__);
                 return rc;
             }
         }
 
 
-        DPRINTF("%s: Repomd revision: %s\n", __func__, repomd->revision);
+        g_debug("%s: Repomd revision: %s", __func__, repomd->revision);
     }
 
     /* Locate rest of metadata files */
@@ -451,7 +451,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
             if (access(path, F_OK) == -1) {
                 /* A repo file is missing */
                 if (!handle->ignoremissing) {
-                    DPRINTF("%s: Incomplete repository\n", __func__);
+                    g_debug("%s: Incomplete repository", __func__);
                     lr_free(path);
                     return LRE_INCOMPLETEREPO;
                 }
@@ -461,7 +461,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         }
     }
 
-    DPRINTF("%s: Repository was successfully located\n", __func__);
+    g_debug("%s: Repository was successfully located", __func__);
     return LRE_OK;
 }
 
@@ -478,7 +478,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
 
-    DPRINTF("%s: Downloading/Copying repo..\n", __func__);
+    g_debug("%s: Downloading/Copying repo..", __func__);
 
     path_to_repodata = lr_pathconcat(handle->destdir, "repodata", NULL);
 
@@ -493,7 +493,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         /* Prepare repodata/ subdir */
         rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
         if (rc == -1) {
-            DPRINTF("%s: Cannot create dir: %s (%s)\n",
+            g_debug("%s: Cannot create dir: %s (%s)",
                     __func__, path_to_repodata, strerror(errno));
             lr_free(path_to_repodata);
             return LRE_CANNOTCREATEDIR;
@@ -514,14 +514,14 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
                 ml_file_path = lr_pathconcat(handle->destdir, "mirrorlist", NULL);
             fd = open(ml_file_path, O_CREAT|O_TRUNC|O_RDWR, 0666);
             if (fd < 0) {
-                DPRINTF("%s: Cannot create: %s\n", __func__, ml_file_path);
+                g_debug("%s: Cannot create: %s", __func__, ml_file_path);
                 lr_free(ml_file_path);
                 return LRE_IO;
             }
             ret = lr_copy_content(handle->mirrorlist_fd, fd);
             close(fd);
             if (ret != 0) {
-                DPRINTF("%s: Cannot copy content of mirrorlist file\n", __func__);
+                g_debug("%s: Cannot copy content of mirrorlist file", __func__);
                 lr_free(ml_file_path);
                 return LRE_IO;
             }
@@ -560,7 +560,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
             signature = lr_pathconcat(handle->destdir, "repodata/repomd.xml.asc", NULL);
             fd_sig = open(signature, O_CREAT|O_TRUNC|O_RDWR, 0666);
             if (fd_sig == -1) {
-                DPRINTF("%s: Cannot open: %s\n", __func__, signature);
+                g_debug("%s: Cannot open: %s", __func__, signature);
                 close(fd);
                 lr_free(path);
                 lr_free(signature);
@@ -573,7 +573,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
             close(fd_sig);
             if (rc != LRE_OK) {
                 // Signature doesn't exist
-                DPRINTF("%s: GPG signature doesn't exists\n", __func__);
+                g_debug("%s: GPG signature doesn't exists", __func__);
                 unlink(signature);
                 lr_free(signature);
             } else {
@@ -581,24 +581,24 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
                 repo->signature = lr_strdup(signature);
                 rc = lr_gpg_check_signature(signature, path, NULL);
                 if (rc != LRE_OK) {
-                    DPRINTF("%s: GPG signature verification failed\n", __func__);
+                    g_debug("%s: GPG signature verification failed", __func__);
                     close(fd);
                     lr_free(path);
                     lr_free(signature);
                     return rc;
                 }
-                DPRINTF("%s: GPG signature successfully verified\n", __func__);
+                g_debug("%s: GPG signature successfully verified", __func__);
             }
         }
 
         lseek(fd, 0, SEEK_SET);
 
         /* Parse repomd */
-        DPRINTF("%s: Parsing repomd.xml\n", __func__);
+        g_debug("%s: Parsing repomd.xml", __func__);
         rc = lr_yum_repomd_parse_file(repomd, fd);
         close(fd);
         if (rc != LRE_OK) {
-            DPRINTF("%s: Parsing unsuccessful (%d)\n", __func__, rc);
+            g_debug("%s: Parsing unsuccessful (%d)", __func__, rc);
             lr_free(path);
             return rc;
         }
@@ -612,12 +612,12 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
         else
             repo->url = lr_strdup(handle->baseurl);
 
-        DPRINTF("%s: Repomd revision: %s\n", repomd->revision, __func__);
+        g_debug("%s: Repomd revision: %s", repomd->revision, __func__);
     }
 
     /* Download rest of metadata files */
     rc = lr_yum_download_repo(handle, repo, repomd);
-    DPRINTF("%s: Repository download rc: %d (%s)\n", __func__, rc, lr_strerror(rc));
+    g_debug("%s: Repository download rc: %d (%s)", __func__, rc, lr_strerror(rc));
     return rc;
 }
 

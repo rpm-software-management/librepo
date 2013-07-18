@@ -57,7 +57,7 @@ lr_download_package(lr_Handle handle,
 
     if (handle->interruptible) {
         /* Setup sighandler */
-        DPRINTF("%s: Using own SIGINT handler\n", __func__);
+        g_debug("%s: Using own SIGINT handler", __func__);
         struct sigaction sigact;
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
@@ -70,7 +70,7 @@ lr_download_package(lr_Handle handle,
     if (handle->repotype == LR_YUMREPO)
         rc = lr_handle_prepare_internal_mirrorlist(handle);
     else {
-        DPRINTF("%s: Bad repo type\n", __func__);
+        g_debug("%s: Bad repo type", __func__);
         assert(0);
     }
 
@@ -123,7 +123,7 @@ lr_download_package(lr_Handle handle,
 
     fd = open(dest_path, open_flags, 0666);
     if (fd < 0) {
-        DPRINTF("%s: open(\"%s\"): %s\n", __func__, dest_path, strerror(errno));
+        g_debug("%s: open(\"%s\"): %s", __func__, dest_path, strerror(errno));
         lr_free(dest_path);
         return LRE_IO;
     }
@@ -154,7 +154,7 @@ lr_download_package(lr_Handle handle,
 
     if (handle->interruptible) {
         /* Restore signal handler */
-        DPRINTF("%s: Restoring an old SIGINT handler\n", __func__);
+        g_debug("%s: Restoring an old SIGINT handler", __func__);
         if (sigaction(SIGINT, &old_sigact, NULL) == -1)
             return LRE_SIGACTION;
     }

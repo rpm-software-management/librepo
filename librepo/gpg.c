@@ -17,6 +17,7 @@
  * USA.
  */
 
+#include <glib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -46,20 +47,20 @@ lr_gpg_check_signature_fd(int signature_fd,
     gpgme_check_version(NULL);
     err = gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_engine_check_version: %s\n",
+        g_debug("%s: gpgme_engine_check_version: %s",
                  __func__, gpgme_strerror(err));
         return LRE_GPGNOTSUPPORTED;
     }
 
     err = gpgme_new(&context);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_new: %s\n", __func__, gpgme_strerror(err));
+        g_debug("%s: gpgme_new: %s", __func__, gpgme_strerror(err));
         return LRE_GPGERROR;
     }
 
     err = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_set_protocol: %s\n", __func__, gpgme_strerror(err));
+        g_debug("%s: gpgme_set_protocol: %s", __func__, gpgme_strerror(err));
         gpgme_release(context);
         return LRE_GPGERROR;
     }
@@ -68,7 +69,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         err = gpgme_ctx_set_engine_info(context, GPGME_PROTOCOL_OpenPGP,
                                         NULL, home_dir);
         if (err != GPG_ERR_NO_ERROR) {
-            DPRINTF("%s: gpgme_ctx_set_engine_info: %s\n", __func__, gpgme_strerror(err));
+            g_debug("%s: gpgme_ctx_set_engine_info: %s", __func__, gpgme_strerror(err));
             gpgme_release(context);
             return LRE_GPGERROR;
         }
@@ -78,7 +79,7 @@ lr_gpg_check_signature_fd(int signature_fd,
 
     err = gpgme_data_new_from_fd(&signature_data, signature_fd);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_data_new_from_fd: %s\n",
+        g_debug("%s: gpgme_data_new_from_fd: %s",
                  __func__, gpgme_strerror(err));
         gpgme_release(context);
         return LRE_GPGERROR;
@@ -86,7 +87,7 @@ lr_gpg_check_signature_fd(int signature_fd,
 
     err = gpgme_data_new_from_fd(&data_data, data_fd);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_data_new_from_fd: %s\n",
+        g_debug("%s: gpgme_data_new_from_fd: %s",
                  __func__, gpgme_strerror(err));
         gpgme_data_release(signature_data);
         gpgme_release(context);
@@ -98,14 +99,14 @@ lr_gpg_check_signature_fd(int signature_fd,
     gpgme_data_release(signature_data);
     gpgme_data_release(data_data);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_op_verify: %s\n", __func__, gpgme_strerror(err));
+        g_debug("%s: gpgme_op_verify: %s", __func__, gpgme_strerror(err));
         gpgme_release(context);
         return LRE_GPGERROR;
     }
 
     result = gpgme_op_verify_result(context);
     if (!result) {
-        DPRINTF("%s: gpgme_op_verify_result: error\n", __func__);
+        g_debug("%s: gpgme_op_verify_result: error", __func__);
         gpgme_release(context);
         return LRE_GPGERROR;
     }
@@ -113,7 +114,7 @@ lr_gpg_check_signature_fd(int signature_fd,
     // Check result of verification
     sig = result->signatures;
     if(!sig) {
-        DPRINTF("%s: signature verify error (no signatures)\n", __func__);
+        g_debug("%s: signature verify error (no signatures)", __func__);
         gpgme_release(context);
         return LRE_BADGPG;
     }
@@ -131,7 +132,7 @@ lr_gpg_check_signature_fd(int signature_fd,
     }
 
     gpgme_release(context);
-    DPRINTF("%s: Bad GPG signature\n", __func__);
+    g_debug("%s: Bad GPG signature", __func__);
     return LRE_BADGPG;
 }
 
@@ -144,14 +145,14 @@ lr_gpg_check_signature(const char *signature_fn,
 
     signature_fd = open(signature_fn, O_RDONLY);
     if (signature_fd == -1) {
-        DPRINTF("%s: Opening signature %s: %s\n",
+        g_debug("%s: Opening signature %s: %s",
                 __func__, signature_fn, strerror(errno));
         return LRE_IO;
     }
 
     data_fd = open(data_fn, O_RDONLY);
     if (signature_fd == -1) {
-        DPRINTF("%s: Opening data %s: %s\n",
+        g_debug("%s: Opening data %s: %s",
                 __func__, data_fn, strerror(errno));
         close(signature_fd);
         return LRE_IO;
@@ -177,20 +178,20 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
     gpgme_check_version(NULL);
     err = gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_engine_check_version: %s\n",
+        g_debug("%s: gpgme_engine_check_version: %s",
                  __func__, gpgme_strerror(err));
         return LRE_GPGNOTSUPPORTED;
     }
 
     err = gpgme_new(&context);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_new: %s\n", __func__, gpgme_strerror(err));
+        g_debug("%s: gpgme_new: %s", __func__, gpgme_strerror(err));
         return LRE_GPGERROR;
     }
 
     err = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_set_protocol: %s\n", __func__, gpgme_strerror(err));
+        g_debug("%s: gpgme_set_protocol: %s", __func__, gpgme_strerror(err));
         gpgme_release(context);
         return LRE_GPGERROR;
     }
@@ -199,7 +200,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
         err = gpgme_ctx_set_engine_info(context, GPGME_PROTOCOL_OpenPGP,
                                         NULL, home_dir);
         if (err != GPG_ERR_NO_ERROR) {
-            DPRINTF("%s: gpgme_ctx_set_engine_info: %s\n", __func__, gpgme_strerror(err));
+            g_debug("%s: gpgme_ctx_set_engine_info: %s", __func__, gpgme_strerror(err));
             gpgme_release(context);
             return LRE_GPGERROR;
         }
@@ -211,14 +212,14 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
 
     key_fd = open(key_fn, O_RDONLY);
     if (key_fd == -1) {
-        DPRINTF("%s: Opening key: %s\n", __func__, strerror(errno));
+        g_debug("%s: Opening key: %s", __func__, strerror(errno));
         gpgme_release(context);
         return LRE_IO;
     }
 
     err = gpgme_data_new_from_fd(&key_data, key_fd);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_data_new_from_fd: %s\n",
+        g_debug("%s: gpgme_data_new_from_fd: %s",
                  __func__, gpgme_strerror(err));
         gpgme_release(context);
         close(key_fd);
@@ -228,7 +229,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir)
     err = gpgme_op_import(context, key_data);
     gpgme_data_release(key_data);
     if (err != GPG_ERR_NO_ERROR) {
-        DPRINTF("%s: gpgme_op_import: %s\n", __func__, gpgme_strerror(err));
+        g_debug("%s: gpgme_op_import: %s", __func__, gpgme_strerror(err));
         gpgme_release(context);
         close(key_fd);
         return LRE_GPGERROR;

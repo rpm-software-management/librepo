@@ -124,7 +124,8 @@ lr_checksum_fd(lr_ChecksumType type, int fd)
         case LR_CHECKSUM_SHA512:    ctx_type = EVP_sha512(); break;
         case LR_CHECKSUM_UNKNOWN:
         default:
-            DEBUGASSERT(0);
+            g_debug("%s: Unknown checksum type", __func__);
+            assert(0);
             return NULL;
     }
 
@@ -134,6 +135,8 @@ lr_checksum_fd(lr_ChecksumType type, int fd)
         EVP_MD_CTX_destroy(ctx);
         return NULL;
     }
+
+    lseek(fd, 0, SEEK_SET);
 
     while ((readed = read(fd, buf, BUFFER_SIZE)) > 0)
         EVP_DigestUpdate(ctx, buf, readed);
@@ -178,12 +181,14 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
             lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
                         (unsigned long long) st.st_mtime);
             attr_ret = fgetxattr(fd, key, &buf, 256);
-            lr_free(key);
             if (attr_ret != -1) {
                 // Cached checksum found
-                DPRINTF("Using checksum cached in xattr: %s\n", buf);
+                g_debug("%s: Using checksum cached in xattr: [%s] %s",
+                        __func__, key, buf);
+                lr_free(key);
                 return strcmp(expected, buf);
             }
+            lr_free(key);
         }
     }
 

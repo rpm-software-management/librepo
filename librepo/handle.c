@@ -20,6 +20,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _BSD_SOURCE
 
+#include <glib.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -402,7 +403,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
         return LRE_NOURL;
     }
 
-    DPRINTF("Preparing internal mirrorlist");
+    g_debug("Preparing internal mirrorlist");
 
     if (handle->repotype == LR_YUMREPO)
         metalink_suffix = "repodata/repomd.xml";
@@ -434,7 +435,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 /* Base URL is relative path */
                 char *resolved_path = realpath(handle->baseurl, NULL);
                 if (!resolved_path) {
-                    DPRINTF("%s: realpath: %s\n", __func__, strerror(errno));
+                    g_debug("%s: realpath: %s", __func__, strerror(errno));
                     return LRE_BADURL;
                 }
                 url = lr_strconcat("file://", resolved_path, NULL);
@@ -474,14 +475,14 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             char *full_path = NULL; // Path to local metalink.xml/mirrorlist file
             full_path = lr_pathconcat(local_path, "metalink.xml", NULL);
             if (access(full_path, F_OK) == 0) {
-                DPRINTF("%s: Local metalink.xml found\n", __func__);
+                g_debug("%s: Local metalink.xml found", __func__);
                 mirror_type = TYPE_METALINK;
                 //repo->mirrorlist = path;
             } else {
                 lr_free(full_path);
                 full_path = lr_pathconcat(local_path, "mirrorlist", NULL);
                 if (access(full_path, F_OK) == 0) {
-                    DPRINTF("%s: Local mirrorlist found\n", __func__);
+                    g_debug("%s: Local mirrorlist found", __func__);
                     mirror_type = TYPE_MIRRORLIST;
                     //repo->mirrorlist = path;
                 } else {
@@ -495,7 +496,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 lr_free(full_path);
                 if (mirrors_fd < 1) {
                     rc = LRE_IO;
-                    DPRINTF("%s: Cannot open: %s\n", __func__, full_path);
+                    g_debug("%s: Cannot open: %s", __func__, full_path);
                 }
             }
         } else if (handle->mirrorlist) {
@@ -504,7 +505,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             mirrors_fd = lr_gettmpfile();
             if (mirrors_fd < 1) {
                 rc = LRE_IO;
-                DPRINTF("%s: Cannot create a temporary file\n", __func__);
+                g_debug("%s: Cannot create a temporary file", __func__);
                 goto mirrorlist_error;
             }
 
@@ -533,44 +534,44 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
         if (mirrors_fd > 0) {
             /* We got fd of mirrorlist - parse it and fill handle */
 
-            DPRINTF("%s: Got fd\n", __func__);
+            g_debug("%s: Got fd", __func__);
 
             if (mirror_type == TYPE_METALINK) {
                 /* Metalink */
-                DPRINTF("%s: Got metalink\n", __func__);
+                g_debug("%s: Got metalink", __func__);
 
                 /* Parse metalink */
                 metalink = lr_metalink_init();
                 rc = lr_metalink_parse_file(metalink, mirrors_fd, "repomd.xml");
                 if (rc != LRE_OK) {
-                    DPRINTF("%s: Cannot parse metalink (%d)\n", __func__, rc);
+                    g_debug("%s: Cannot parse metalink (%d)", __func__, rc);
                     goto mirrorlist_error;
                 }
 
                 if (strcmp("repomd.xml", metalink->filename)) {
-                    DPRINTF("%s: No repomd.xml file in metalink\n", __func__);
+                    g_debug("%s: No repomd.xml file in metalink", __func__);
                     rc = LRE_MLBAD;
                     goto mirrorlist_error;
                 }
 
                 if (metalink->nou <= 0) {
-                    DPRINTF("%s: No URLs in metalink\n", __func__);
+                    g_debug("%s: No URLs in metalink", __func__);
                     rc = LRE_MLBAD;
                     goto mirrorlist_error;
                 }
             } else if (mirror_type == TYPE_MIRRORLIST) {
                 /* Mirrorlist */
-                DPRINTF("%s: Got mirrorlist\n", __func__);
+                g_debug("%s: Got mirrorlist", __func__);
 
                 mirrorlist = lr_mirrorlist_init();
                 rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
                 if (rc != LRE_OK) {
-                    DPRINTF("%s: Cannot parse mirrorlist (%d)\n", __func__, rc);
+                    g_debug("%s: Cannot parse mirrorlist (%d)", __func__, rc);
                     goto mirrorlist_error;
                 }
 
                 if (mirrorlist->nou <= 0) {
-                    DPRINTF("%s: No URLs in mirrorlist (%d)\n", __func__, rc);
+                    g_debug("%s: No URLs in mirrorlist (%d)", __func__, rc);
                     rc = LRE_MLBAD;
                     goto mirrorlist_error;
                 }
@@ -621,7 +622,7 @@ mirrorlist_error:
 
     // Append mirrorlist from handle->mirrors to the internal mirrorlist
     if (include_in_internal_mirrorlist && handle->mirrors) {
-        DPRINTF("%s: Mirrorlist will be used for downloading if needed\n", __func__);
+        g_debug("%s: Mirrorlist will be used for downloading if needed", __func__);
         handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
                                                 handle->internal_mirrorlist,
                                                 handle->mirrors);
@@ -657,12 +658,12 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
             return LRE_CANNOTCREATETMP;
     }
 
-    DPRINTF("%s: Using dir: %s\n", __func__, handle->destdir);
+    g_debug("%s: Using dir: %s", __func__, handle->destdir);
 
     struct sigaction old_sigact;
     if (handle->interruptible) {
         /* Setup sighandler */
-        DPRINTF("%s: Using own SIGINT handler\n", __func__);
+        g_debug("%s: Using own SIGINT handler", __func__);
         struct sigaction sigact;
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
@@ -675,16 +676,16 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
 
     if (handle->fetchmirrors) {
         /* Only download and parse mirrorlist */
-        DPRINTF("%s: Only fetching mirrorlist/metalink\n", __func__);
+        g_debug("%s: Only fetching mirrorlist/metalink", __func__);
     } else {
         /* Do the other stuff */
         switch (handle->repotype) {
         case LR_YUMREPO:
-            DPRINTF("%s: Downloading/Locating yum repo\n", __func__);
+            g_debug("%s: Downloading/Locating yum repo", __func__);
             rc = lr_yum_perform(handle, result);
             break;
         default:
-            DPRINTF("%s: Bad repo type\n", __func__);
+            g_debug("%s: Bad repo type", __func__);
             assert(0);
             break;
         };
@@ -692,7 +693,7 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
 
     if (handle->interruptible) {
         /* Restore signal handler */
-        DPRINTF("%s: Restoring an old SIGINT handler\n", __func__);
+        g_debug("%s: Restoring an old SIGINT handler", __func__);
         if (sigaction(SIGINT, &old_sigact, NULL) == -1)
             return LRE_SIGACTION;
         if (lr_interrupt)
