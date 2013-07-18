@@ -101,6 +101,8 @@ typedef enum {
         (30) The download wasn't or cannot be finished. */
     LRE_SELECT, /*!<
         (31) select() call failed. */
+    LRE_OPENSSL, /*!<
+        (32) OpenSSL library related error. */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
 } lr_Rc; /*!< Return codes */
@@ -112,8 +114,10 @@ typedef enum {
 const char *lr_strerror(int rc);
 
 /** Error domains for GError */
+#define LR_CHECKSUM_ERROR           lr_checksum_error_quark()
 #define LR_DOWNLOADER_ERROR         lr_downloader_error_quark()
 
+GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
 
 #ifdef __cplusplus

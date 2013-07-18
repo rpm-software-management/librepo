@@ -528,17 +528,33 @@ check_transfer_statuses(lr_Download *dd, GError **err)
             && target->target->checksum
             && target->target->checksumtype != LR_CHECKSUM_UNKNOWN)
         {
-            int fd;
+            int fd, ret;
+
             fflush(target->f);
             fd = fileno(target->f);
             lseek(fd, 0, SEEK_SET);
-            if (lr_checksum_fd_cmp(target->target->checksumtype,
-                                   fd, target->target->checksum, 1) != 0)
-            {
+
+            ret = lr_checksum_fd_cmp(target->target->checksumtype,
+                                     fd,
+                                     target->target->checksum,
+                                     1,
+                                     &tmp_err);
+            if (ret == 1) {
+                // Checksums doesn't match
                 g_set_error(&tmp_err,
                         LR_DOWNLOADER_ERROR,
                         LRE_BADCHECKSUM,
                         "Downloading successfull, but checksum doesn't match");
+            } else if (ret == -1) {
+                // Error while checksum calculation
+                int code = tmp_err->code;
+                g_propagate_prefixed_error(err, tmp_err, "Downloading from %s "
+                        "was successfull but error encountered while "
+                        "checksuming: ", effective_url);
+                fclose(target->f);
+                target->f = NULL;
+                lr_free(effective_url);
+                return code;
             }
         }
 

@@ -109,7 +109,7 @@ lr_download_package(lr_Handle handle,
          * completely downloaded, then the download is going to fail. */
         int fd_r = open(dest_path, O_RDONLY);
         if (fd_r != -1) {
-            int ret = lr_checksum_fd_cmp(checksum_type, fd_r, checksum, 0);
+            int ret = lr_checksum_fd_cmp(checksum_type, fd_r, checksum, 0, NULL);
             close(fd_r);
             if (ret == 0) {
                 lr_free(dest_path);

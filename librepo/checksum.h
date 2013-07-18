@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <glib.h>
+
 /** \defgroup checksum Functions for checksum calculating and checking.
  */
 
@@ -61,11 +63,12 @@ const char *lr_checksum_type_to_str(lr_ChecksumType type);
 /** \ingroup checksum
  * Calculate checksum for data pointed by file descriptor.
  * @param type      Checksum type
- * @param fd        Opened file descriptor. Note: Function call only read()
- *                  on the descriptor and do not perform close() or seek()
- *                  to the beginning of file.
+ * @param fd        Opened file descriptor. Function seeks to the begin
+ *                  of the file.
+ * @param err       GError **
+ * @return          Malloced checksum string or NULL on error.
  */
-char *lr_checksum_fd(lr_ChecksumType type, int fd);
+char *lr_checksum_fd(lr_ChecksumType type, int fd, GError **err);
 
 /** \ingroup checksum
  * Calculate checksum for data pointed by file descriptor and
@@ -74,12 +77,16 @@ char *lr_checksum_fd(lr_ChecksumType type, int fd);
  * @param fd        File descriptor
  * @param expected  String with expected checksum value
  * @param caching   (Cache|Use cached) checksum value as extended file attr.
- * @return          0 if calculated checksum == expected checksum
+ * @param err       GError **
+ * @return          0 if calculated checksum == expected checksum,
+ *                  1 if calculated checksum doesn't match
+ *                  -1 on error.
  */
 int lr_checksum_fd_cmp(lr_ChecksumType type,
                        int fd,
                        const char *expected,
-                       int caching);
+                       int caching,
+                       GError **err);
 
 #ifdef __cplusplus
 }

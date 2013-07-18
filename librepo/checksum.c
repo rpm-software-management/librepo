@@ -26,8 +26,9 @@
 
 #include <openssl/evp.h>
 
-#include "setup.h"
 #include "checksum.h"
+#include "rcodes.h"
+#include "setup.h"
 #include "util.h"
 
 #define BUFFER_SIZE             2048
@@ -102,16 +103,18 @@ lr_checksum_type_to_str(lr_ChecksumType type)
 }
 
 char *
-lr_checksum_fd(lr_ChecksumType type, int fd)
+lr_checksum_fd(lr_ChecksumType type, int fd, GError **err)
 {
-    int rc;
-    unsigned int len, checksum_str_len;
+    unsigned int len;
     ssize_t readed;
     char buf[BUFFER_SIZE];
     unsigned char raw_checksum[EVP_MAX_MD_SIZE];
     char *checksum;
     EVP_MD_CTX *ctx;
     const EVP_MD *ctx_type;
+
+    assert(fd > -1);
+    assert(!err || *err == NULL);
 
     switch (type) {
         case LR_CHECKSUM_MD2:       ctx_type = EVP_md2();    break;
@@ -126,30 +129,55 @@ lr_checksum_fd(lr_ChecksumType type, int fd)
         default:
             g_debug("%s: Unknown checksum type", __func__);
             assert(0);
+            g_set_error(err, LR_CHECKSUM_ERROR, LRE_BADFUNCARG,
+                        "Unknown checksum type: %d", type);
             return NULL;
     }
 
     ctx = EVP_MD_CTX_create();
-    rc = EVP_DigestInit_ex(ctx, ctx_type, NULL);
-    if (!rc) {
+    if (!ctx) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
+                    "EVP_MD_CTX_create() failed");
+        return NULL;
+    }
+
+    if (!EVP_DigestInit_ex(ctx, ctx_type, NULL)) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
+                    "EVP_DigestInit_ex() failed");
         EVP_MD_CTX_destroy(ctx);
         return NULL;
     }
 
-    lseek(fd, 0, SEEK_SET);
+    if (lseek(fd, 0, SEEK_SET) == -1) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_IO,
+                    "Cannot seek to the begin of the file. "
+                    "lseek(%d, 0, SEEK_SET) error: %s", fd, strerror(errno));
+        return NULL;
+    }
 
     while ((readed = read(fd, buf, BUFFER_SIZE)) > 0)
-        EVP_DigestUpdate(ctx, buf, readed);
+        if (!EVP_DigestUpdate(ctx, buf, readed)) {
+            g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
+                        "EVP_DigestUpdate() failed");
+            return NULL;
+        }
 
     if (readed == -1) {
         EVP_MD_CTX_destroy(ctx);
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_IO,
+                    "read(%d) failed: %s", fd, strerror(errno));
         return NULL;
     }
 
-    EVP_DigestFinal_ex(ctx, raw_checksum, &len);
+    if (!EVP_DigestFinal_ex(ctx, raw_checksum, &len)) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
+                    "EVP_DigestFinal_ex() failed");
+        return NULL;
+    }
+
     EVP_MD_CTX_destroy(ctx);
-    checksum_str_len = len * 2 + 1;
-    checksum = lr_malloc0(sizeof(char) * checksum_str_len);
+
+    checksum = lr_malloc0(sizeof(char) * (len * 2 + 1));
     for (size_t x = 0; x < len; x++)
         sprintf(checksum+(x*2), "%02x", raw_checksum[x]);
 
@@ -160,15 +188,20 @@ int
 lr_checksum_fd_cmp(lr_ChecksumType type,
                    int fd,
                    const char *expected,
-                   int caching)
+                   int caching,
+                   GError **err)
 {
     int ret;
     char *checksum;
 
-    DEBUGASSERT(fd >= 0);
+    assert(fd >= 0);
+    assert(!err || *err == NULL);
 
-    if (!expected)
-        return 1;
+    if (!expected) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_BADFUNCARG,
+                    "No expected checksum passed");
+        return -1;
+    }
 
     if (caching) {
         // Load cached checksum if enabled and used
@@ -186,17 +219,17 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
                 g_debug("%s: Using checksum cached in xattr: [%s] %s",
                         __func__, key, buf);
                 lr_free(key);
-                return strcmp(expected, buf);
+                return strcmp(expected, buf) ? 1 : 0;
             }
             lr_free(key);
         }
     }
 
-    checksum = lr_checksum_fd(type, fd);
+    checksum = lr_checksum_fd(type, fd, err);
     if (!checksum)
-        return 1;
+        return -1;
 
-    ret = strcmp(expected, checksum);
+    ret = (strcmp(expected, checksum)) ? 1 : 0;
 
     if (caching && ret == 0) {
         // Store checksum as extended file attribute if caching is enabled
@@ -211,5 +244,6 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
     }
 
     lr_free(checksum);
+
     return ret;
 }

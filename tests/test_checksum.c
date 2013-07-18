@@ -46,9 +46,11 @@ test_checksum(const char *filename, lr_ChecksumType ch_type, char *expected)
 {
     int fd;
     char *checksum;
+    GError *tmp_err = NULL;
 
     fail_if((fd = open(filename, O_RDONLY)) < 0);
-    fail_if((checksum = lr_checksum_fd(ch_type, fd)) == NULL);
+    fail_if((checksum = lr_checksum_fd(ch_type, fd, &tmp_err)) == NULL);
+    fail_if(tmp_err);
     fail_if(strcmp(checksum, expected),
         "Checksum is %s instead of %s", checksum, expected);
     lr_free(checksum);
@@ -94,6 +96,7 @@ START_TEST(test_cached_checksum)
     struct stat st;
     char *key;
     char buf[256];
+    GError *tmp_err = NULL;
 
     filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum", NULL);
     f = fopen(filename, "w");
@@ -111,7 +114,8 @@ START_TEST(test_cached_checksum)
 
     // Calculate checksum
     fail_if((fd = open(filename, O_RDONLY)) < 0);
-    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1);
+    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1, &tmp_err);
+    fail_if(tmp_err, "There was an error");
     fail_if(ret != 0, "Checksum doesn't match the expected one");
     close(fd);
 
@@ -138,7 +142,8 @@ START_TEST(test_cached_checksum)
 
     // Calculate checksum again (cached shoud be used this time)
     fail_if((fd = open(filename, O_RDONLY)) < 0);
-    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1);
+    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1, &tmp_err);
+    fail_if(tmp_err);
     fail_if(ret != 0);
     close(fd);
 

@@ -317,7 +317,7 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, const char *path)
         return LRE_IO;
     }
 
-    ret = lr_checksum_fd_cmp(checksum_type, fd, expected_checksum, 1);
+    ret = lr_checksum_fd_cmp(checksum_type, fd, expected_checksum, 1, NULL);
 
     close(fd);
 
