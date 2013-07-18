@@ -888,4 +888,5 @@ class Result(_librepo.Result):
 
 # Functions
 
-yum_repomd_get_age = _librepo.yum_repomd_get_age
+yum_repomd_get_age    = _librepo.yum_repomd_get_age
+set_debug_log_handler = _librepo.set_debug_log_handler

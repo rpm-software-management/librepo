@@ -18,6 +18,7 @@
  */
 
 #include <Python.h>
+#include <glib.h>
 
 #include "librepo/librepo.h"
 
@@ -26,11 +27,82 @@
 #include "result-py.h"
 #include "yum-py.h"
 
+PyObject *debug_cb = NULL;
+PyObject *debug_cb_data = NULL;
+gint      debug_handler_id = -1;
+
+void
+py_debug_cb(const gchar *log_domain, GLogLevelFlags log_level,
+            const gchar *message, gpointer user_data)
+{
+    PyObject *arglist, *data, *result;
+
+    LR_UNUSED(log_domain);
+    LR_UNUSED(log_level);
+    LR_UNUSED(user_data);
+
+    if (!debug_cb)
+        return;
+
+    data = (debug_cb_data) ? debug_cb_data : Py_None;
+    arglist = Py_BuildValue("(sO)", message, data);
+    result = PyObject_CallObject(debug_cb, arglist);
+    Py_DECREF(arglist);
+    Py_XDECREF(result);
+}
+
+PyObject *
+py_set_debug_log_handler(PyObject *self, PyObject *args)
+{
+    PyObject *cb, *cb_data = NULL;
+
+    LR_UNUSED(self);
+
+    if (!PyArg_ParseTuple(args, "O|O:py_set_debug_log_handler", &cb, cb_data))
+        return NULL;
+
+    if (cb == Py_None)
+        cb = NULL;
+
+    if (cb && !PyCallable_Check(cb)) {
+        PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+       return NULL;
+    }
+
+    Py_XDECREF(debug_cb);
+    Py_XDECREF(debug_cb_data);
+
+    debug_cb      = cb;
+    debug_cb_data = cb_data;
+
+    Py_XINCREF(debug_cb);
+    Py_XINCREF(debug_cb_data);
+
+    if (debug_cb) {
+        debug_handler_id = g_log_set_handler("librepo", G_LOG_LEVEL_DEBUG,
+                                             py_debug_cb, NULL);
+    } else if (debug_handler_id != -1) {
+        g_log_remove_handler("librepo", debug_handler_id);
+    }
+
+    Py_RETURN_NONE;
+}
+
 static struct PyMethodDef librepo_methods[] = {
     { "yum_repomd_get_age",     (PyCFunction)py_yum_repomd_get_age,
       METH_VARARGS, NULL },
+    { "set_debug_log_handler",  (PyCFunction)py_set_debug_log_handler,
+      METH_VARARGS, NULL },
     { NULL }
 };
+
+void
+exit_librepo(void)
+{
+    Py_XDECREF(debug_cb);
+    Py_XDECREF(debug_cb_data);
+    lr_global_cleanup();
+}
 
 PyMODINIT_FUNC
 init_librepo(void)
@@ -58,6 +130,8 @@ init_librepo(void)
 
     /* Init module */
     lr_global_init();
+
+    Py_AtExit(exit_librepo);
 
     /* Module constants */
 
