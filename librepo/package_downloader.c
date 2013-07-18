@@ -29,9 +29,9 @@
 #include "setup.h"
 #include "types.h"
 #include "util.h"
-#include "curl.h"
 #include "package_downloader.h"
 #include "handle_internal.h"
+#include "downloader.h"
 
 /* Do NOT use resume on successfully downloaded files - download will fail */
 
@@ -46,12 +46,12 @@ lr_download_package(lr_Handle handle,
 {
     int rc = LRE_OK;
     int fd;
-    long offset = 0;
     char *dest_path;
     char *file_basename;
     char *dest_basename;
     int open_flags = O_CREAT|O_TRUNC|O_RDWR;
     struct sigaction old_sigact;
+    GError *tmp_err = NULL;
 
     assert(handle);
 
@@ -118,11 +118,8 @@ lr_download_package(lr_Handle handle,
         }
     }
 
-    if (resume) {
-        /* Enable autodetection for resume download */
-        offset = -1;                /* Autodetect offset */
-        open_flags &= ~O_TRUNC;     /* Do NOT truncate the dest file */
-    }
+    if (resume)
+        open_flags &= ~O_TRUNC;  // Do NOT truncate the dest file
 
     fd = open(dest_path, open_flags, 0666);
     if (fd < 0) {
@@ -130,40 +127,30 @@ lr_download_package(lr_Handle handle,
         lr_free(dest_path);
         return LRE_IO;
     }
+    lr_free(dest_path);
 
-    if (!base_url) {
-        /* Use internal mirrorlist to download */
-        DPRINTF("%s: Trying to download package: [mirror]/%s to: %s (resume: %d)\n",
-                __func__, relative_url, dest_path, resume);
+    // Download!
+    g_debug("%s: Downloading package: %s", __func__, relative_url);
+    lr_DownloadTarget *target = lr_downloadtarget_new(relative_url,
+                                                      base_url,
+                                                      fd,
+                                                      checksum_type,
+                                                      checksum,
+                                                      resume,
+                                                      handle->user_cb,
+                                                      handle->user_data);
+    rc = lr_download_target(handle, target, &tmp_err);
 
-        rc = lr_curl_single_mirrored_download_resume(handle,
-                                                     relative_url,
-                                                     fd,
-                                                     checksum_type,
-                                                     checksum,
-                                                     offset,
-                                                     1);
-    } else {
-        /* Use base url instead of mirrorlist */
-        char *full_url;
-
-        full_url = lr_pathconcat(base_url, relative_url, NULL);
-        DPRINTF("%s: Trying to download package: %s to: %s (resume: %d)\n",
-                __func__, full_url, dest_path, resume);
-
-        rc = lr_curl_single_download_resume(handle, full_url, fd, offset, 1);
-        lr_free(full_url);
-
-        /* Check checksum */
-        if (rc == LRE_OK && checksum && checksum_type != LR_CHECKSUM_UNKNOWN) {
-            DPRINTF("%s: Checking checksum\n", __func__);
-            lseek(fd, 0, SEEK_SET);
-            if (lr_checksum_fd_cmp(checksum_type, fd, checksum, 0)) {
-                DPRINTF("%s: Bad checksum\n", __func__);
-                rc = LRE_BADCHECKSUM;
-            }
-        }
+    if (tmp_err) {
+        assert(rc == tmp_err->code); // XXX: DEBUG
+        //g_propagate_error(err, tmp_err);
+        g_error_free(tmp_err);
+    } else if (target->err) {
+        rc = target->rcode;
+        //g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, target->err);
     }
+
+    lr_downloadtarget_free(target);
 
     if (handle->interruptible) {
         /* Restore signal handler */
@@ -172,6 +159,8 @@ lr_download_package(lr_Handle handle,
             return LRE_SIGACTION;
     }
 
-    lr_free(dest_path);
+    if (lr_interrupt)
+        return LRE_INTERRUPTED;
+
     return rc;
 }

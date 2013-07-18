@@ -33,17 +33,15 @@
 #include <time.h>
 
 #include "setup.h"
-#include "yum.h"
 #include "util.h"
 #include "metalink.h"
 #include "mirrorlist.h"
 #include "repomd.h"
-#include "curl.h"
+#include "downloader.h"
 #include "checksum.h"
 #include "handle_internal.h"
 #include "result_internal.h"
 #include "yum_internal.h"
-#include "curltargetlist.h"
 #include "gpg.h"
 
 /* helper functions for YumRepo manipulation */
@@ -156,7 +154,7 @@ lr_yum_download_repomd(lr_Handle handle,
     int rc = LRE_OK;
     lr_ChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
     char *checksum = NULL;
-
+    GError *tmp_err = NULL;
 
     DPRINTF("%s: Downloading repomd.xml via mirrorlist\n", __func__);
 
@@ -180,11 +178,30 @@ lr_yum_download_repomd(lr_Handle handle,
                 __func__, lr_checksum_type_to_str(checksum_type), checksum);
     }
 
-    rc = lr_curl_single_mirrored_download(handle,
-                                          "repodata/repomd.xml",
-                                          fd,
-                                          checksum_type,
-                                          checksum);
+    lr_DownloadTarget *target = lr_downloadtarget_new("repodata/repomd.xml",
+                                                      NULL,
+                                                      fd,
+                                                      checksum_type,
+                                                      checksum,
+                                                      0,
+                                                      NULL,
+                                                      NULL);
+
+    rc = lr_download_target(handle, target, &tmp_err);
+
+    if (tmp_err) {
+        assert(rc == tmp_err->code);  // XXX: DEBUG
+        //g_propagate_error(err, tmp_err);
+        g_error_free(tmp_err);
+    } else if (target->err) {
+        rc = target->rcode;
+        //g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, target->err);
+    } else {
+        // Set mirror used for download a repomd.xml to the handle
+        handle->used_mirror = lr_strdup(target->usedmirror);
+    }
+
+    lr_downloadtarget_free(target);
 
     if (rc != LRE_OK) {
         /* Download of repomd.xml was not successful */
@@ -200,7 +217,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
 {
     int ret = LRE_OK;
     char *destdir;  /* Destination dir */
-    lr_CurlTargetList targets = lr_curltargetlist_new();
+    GSList *targets = NULL;
 
     destdir = handle->destdir;
     DEBUGASSERT(destdir);
@@ -209,8 +226,10 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
     for (int x = 0; x < repomd->nor; x++) {
         int fd;
         char *path;
-        lr_CurlTarget target;
+        //lr_CurlTarget target;
+        lr_DownloadTarget *target;
         lr_YumRepoMdRecord record = repomd->records[x];
+        lr_ChecksumType checksumtype;
 
         if (!lr_yum_repomd_record_enabled(handle, record->type))
             continue;
@@ -224,22 +243,45 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
             return LRE_IO;
         }
 
-        target = lr_curltarget_new();
-        target->path = lr_strdup(record->location_href);
-        target->fd = fd;
-        target->checksum_type = lr_checksum_type(record->checksum_type);
-        target->checksum = lr_strdup(record->checksum);
-        lr_curltargetlist_append(targets, target);
+        if (handle->checks & LR_CHECK_CHECKSUM)
+            // Select proper checksum type only if checksum check is enabled
+            checksumtype = lr_checksum_type(record->checksum_type);
+        else
+            checksumtype = LR_CHECKSUM_UNKNOWN;
+
+        target = lr_downloadtarget_new(record->location_href,
+                                       NULL,
+                                       fd,
+                                       checksumtype,
+                                       record->checksum,
+                                       0,
+                                       NULL,
+                                       NULL);
+
+        targets = g_slist_append(targets, target);
 
         /* Because path may already exists in repo (while update) */
         lr_yum_repo_update(repo, record->type, path);
         lr_free(path);
     }
 
-    if (lr_curltargetlist_len(targets) > 0)
-        ret = lr_curl_multi_download(handle, targets);
+    if (targets)
+        ret = lr_download_single_cb(handle,
+                                    targets,
+                                    handle->user_cb,
+                                    handle->user_data,
+                                    NULL);
 
-    lr_curltargetlist_free(targets);
+    // TODO: Error handling
+
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        lr_DownloadTarget *target = elem->data;
+        // TODO: Error handling
+        if (ret == LRE_OK && target->rcode != LRE_OK)
+            ret = target->rcode;
+        lr_downloadtarget_free(target);
+    }
+
     return ret;
 }
 
@@ -526,7 +568,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
             }
 
             url = lr_pathconcat(handle->used_mirror, "repodata/repomd.xml.asc", NULL);
-            rc = lr_curl_single_download(handle, url, fd_sig);
+            rc = lr_download_url(handle, url, fd_sig, NULL);
             lr_free(url);
             close(fd_sig);
             if (rc != LRE_OK) {

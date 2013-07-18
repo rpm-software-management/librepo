@@ -41,9 +41,9 @@
 #include "util.h"
 #include "yum.h"
 #include "version.h"
-#include "curl.h"
 #include "yum_internal.h"
 #include "url_substitution.h"
+#include "downloader.h"
 
 CURL *
 lr_get_curl_handle()
@@ -512,8 +512,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             char *mirrorlist_url = lr_url_substitute(prefixed_url,
                                                      handle->urlvars);
             lr_free(prefixed_url);
-            //rc = lr_download_url(handle, mirrorlist_url, mirrors_fd, NULL);
-            rc = lr_curl_single_download(handle, mirrorlist_url, mirrors_fd);
+            rc = lr_download_url(handle, mirrorlist_url, mirrors_fd, NULL);
             lr_free(mirrorlist_url);
 
             if (rc != LRE_OK)
