@@ -60,6 +60,11 @@ All unit tests run from librepo checkout dir
 
     build/tests/test_main tests/test_data/
 
+Available params:
+
+* ``-v`` Run tests verbosely (Show Librepo debug messages)
+* ``-d`` Run download tests (This tests need internet connection)
+
 To check memoryleaks:
 
 Add this line to your ``~/.bashrc`` file
