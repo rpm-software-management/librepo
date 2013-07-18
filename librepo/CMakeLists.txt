@@ -1,7 +1,5 @@
 SET (librepo_SRCS
      checksum.c
-     curl.c
-     curltargetlist.c
      downloader.c
      downloadtarget.c
      gpg.c

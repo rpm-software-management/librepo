@@ -11,7 +11,6 @@
 
 #include "fixtures.h"
 #include "test_checksum.h"
-#include "test_curltargetlist.h"
 #include "test_downloader.h"
 #include "test_gpg.h"
 #include "test_handle.h"
@@ -103,7 +102,6 @@ main(int argc, char **argv)
     printf("Tests using directory: %s\n", test_globals.tmpdir);
 
     SRunner *sr = srunner_create(checksum_suite());
-    srunner_add_suite(sr, curltargetlist_suite());
     if (downloading)
         srunner_add_suite(sr, downloader_suite());
     srunner_add_suite(sr, gpg_suite());
