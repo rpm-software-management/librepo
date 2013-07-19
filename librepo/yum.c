@@ -425,7 +425,10 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
 
         /* Signature checking */
         if (handle->checks & LR_CHECK_GPG && repo->signature) {
-            rc = lr_gpg_check_signature(repo->signature, repo->repomd, NULL);
+            rc = lr_gpg_check_signature(repo->signature,
+                                        repo->repomd,
+                                        NULL,
+                                        NULL);
             if (rc != LRE_OK) {
                 g_debug("%s: GPG signature verification failed", __func__);
                 return rc;
@@ -579,7 +582,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
             } else {
                 // Signature downloaded
                 repo->signature = lr_strdup(signature);
-                rc = lr_gpg_check_signature(signature, path, NULL);
+                rc = lr_gpg_check_signature(signature, path, NULL, NULL);
                 if (rc != LRE_OK) {
                     g_debug("%s: GPG signature verification failed", __func__);
                     close(fd);

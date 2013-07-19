@@ -102,4 +102,9 @@ GQuark
 lr_downloader_error_quark(void)
 {
     return g_quark_from_static_string("lr_downloader_error");
+
+GQuark
+lr_gpg_error_quark(void)
+{
+    return g_quark_from_static_string("lr_gpg_error");
 }

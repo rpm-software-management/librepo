@@ -85,7 +85,7 @@ typedef enum {
     LRE_GPGNOTSUPPORTED, /*!<
         (23) OpenPGP protocol is not supported */
     LRE_GPGERROR, /*!<
-        (24) GPG error */
+        (24) GPGME related error */
     LRE_BADGPG, /*!<
         (25) Bad GPG signature */
     LRE_INCOMPLETEREPO, /*!<
@@ -116,9 +116,11 @@ const char *lr_strerror(int rc);
 /** Error domains for GError */
 #define LR_CHECKSUM_ERROR           lr_checksum_error_quark()
 #define LR_DOWNLOADER_ERROR         lr_downloader_error_quark()
+#define LR_GPG_ERROR                lr_gpg_error_quark()
 
 GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
+GQuark lr_gpg_error_quark(void);
 
 #ifdef __cplusplus
 }

@@ -35,10 +35,13 @@ extern "C" {
  * @param home_dir          Configuration directory of OpenPGP engine
  *                          (e.g. "/home/user/.gnupg/"), if NULL default
  *                          config directory is used.
+ * @param err               GError **
+ * @return                  lr_Rc code
  */
 int lr_gpg_check_signature_fd(int signature_fd,
                               int data_fd,
-                              const char *home_dir);
+                              const char *home_dir,
+                              GError **err);
 
 /** Check detached signature of data.
  * @param signature_fn      Filename (path) of signature file.
@@ -46,19 +49,25 @@ int lr_gpg_check_signature_fd(int signature_fd,
  * @param home_dir          Configuration directory of OpenPGP engine
  *                          (e.g. "/home/user/.gnupg/"), if NULL default
  *                          config directory is used.
+ * @param err               GError **
+ * @return                  lr_Rc code
  */
 int lr_gpg_check_signature(const char *signature_fn,
                            const char *data_fn,
-                           const char *home_dir);
+                           const char *home_dir,
+                           GError **err);
 
 /** Import key into the keyring.
  * @param key_fn            Filename (path) of key file.
  * @param home_dir          Configuration directory of OpenPGP engine
  *                          (e.g. "/home/user/.gnupg/"), if NULL default
  *                          config directory is used.
+ * @param err               GError **
+ * @return                  lr_Rc code
  */
 int lr_gpg_import_key(const char *key_fn,
-                      const char *home_dir);
+                      const char *home_dir,
+                      GError **err);
 
 /** @} */
 

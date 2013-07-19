@@ -22,6 +22,7 @@ START_TEST(test_gpg_check_signature)
     char *data_path, *_data_path;
     char *signature_path, *_signature_path;
     char *tmp_home_path;
+    GError *tmp_err = NULL;
 
     tmp_home_path = lr_gettmpdir();
     key_path = lr_pathconcat(test_globals.testdata_dir,
@@ -37,36 +38,70 @@ START_TEST(test_gpg_check_signature)
     _signature_path = lr_pathconcat(test_globals.testdata_dir,
                              "repo_yum_01/repodata/repomd.xml_bad.asc", NULL);
 
-    rc = lr_gpg_import_key(key_path, tmp_home_path);
+    rc = lr_gpg_import_key(key_path, tmp_home_path, &tmp_err);
     fail_if(rc != LRE_OK);
+    fail_if(tmp_err);
 
     // Valid key and data
-    rc = lr_gpg_check_signature(signature_path, data_path, tmp_home_path);
+    rc = lr_gpg_check_signature(signature_path,
+                                data_path,
+                                tmp_home_path,
+                                &tmp_err);
     fail_if(rc != LRE_OK);
+    fail_if(tmp_err)
 
     // Bad signature signed with unknown key
-    rc = lr_gpg_check_signature(_signature_path, data_path, tmp_home_path);
+    rc = lr_gpg_check_signature(_signature_path,
+                                data_path,
+                                tmp_home_path,
+                                &tmp_err);
     fail_if(rc == LRE_OK);
+    fail_if(!tmp_err)
+    g_error_free(tmp_err);
+    tmp_err = NULL;
 
     // Bad data
-    rc = lr_gpg_check_signature(signature_path, _data_path, tmp_home_path);
+    rc = lr_gpg_check_signature(signature_path,
+                                _data_path,
+                                tmp_home_path,
+                                &tmp_err);
     fail_if(rc == LRE_OK);
+    fail_if(!tmp_err)
+    g_error_free(tmp_err);
+    tmp_err = NULL;
 
     // Import the 2nd key
-    rc = lr_gpg_import_key(_key_path, tmp_home_path);
+    rc = lr_gpg_import_key(_key_path, tmp_home_path, &tmp_err);
     fail_if(rc != LRE_OK);
+    fail_if(tmp_err)
 
     // Valid key and data
-    rc = lr_gpg_check_signature(_signature_path, _data_path, tmp_home_path);
+    rc = lr_gpg_check_signature(_signature_path,
+                                _data_path,
+                                tmp_home_path,
+                                &tmp_err);
     fail_if(rc != LRE_OK);
+    fail_if(tmp_err)
 
     // Bad signature signed with known key
-    rc = lr_gpg_check_signature(_signature_path, data_path, tmp_home_path);
+    rc = lr_gpg_check_signature(_signature_path,
+                                data_path,
+                                tmp_home_path,
+                                &tmp_err);
     fail_if(rc == LRE_OK);
+    fail_if(!tmp_err)
+    g_error_free(tmp_err);
+    tmp_err = NULL;
 
     // Bad data 2
-    rc = lr_gpg_check_signature(_signature_path, data_path, tmp_home_path);
+    rc = lr_gpg_check_signature(_signature_path,
+                                data_path,
+                                tmp_home_path,
+                                &tmp_err);
     fail_if(rc == LRE_OK);
+    fail_if(!tmp_err)
+    g_error_free(tmp_err);
+    tmp_err = NULL;
 
     lr_remove_dir(tmp_home_path);
     lr_free(key_path);
