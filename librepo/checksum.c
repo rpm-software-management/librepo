@@ -17,6 +17,7 @@
  * USA.
  */
 
+#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -52,15 +53,14 @@ lr_checksum_type(const char *type)
 
     if (!strncmp(type_lower, "md", 2)) {
         // MD* family
-        if (type_lower[2] == '2')
-            return LR_CHECKSUM_MD2;
-        else if (type_lower[2] == '5')
+        char *md_type = type_lower + 2;
+        if (strcmp(md_type, "5"))
             return LR_CHECKSUM_MD5;
     } else if (!strncmp(type_lower, "sha", 3)) {
         // SHA* family
         char *sha_type = type_lower + 3;
         if (!strcmp(sha_type, ""))
-            return LR_CHECKSUM_SHA1;
+            return LR_CHECKSUM_SHA;
         else if (!strcmp(sha_type, "1"))
             return LR_CHECKSUM_SHA1;
         else if (!strcmp(sha_type, "224"))
@@ -82,8 +82,6 @@ lr_checksum_type_to_str(lr_ChecksumType type)
     switch (type) {
     case LR_CHECKSUM_UNKNOWN:
         return "Unknown checksum";
-    case LR_CHECKSUM_MD2:
-        return "md2";
     case LR_CHECKSUM_MD5:
         return "md5";
     case LR_CHECKSUM_SHA:
@@ -117,7 +115,6 @@ lr_checksum_fd(lr_ChecksumType type, int fd, GError **err)
     assert(!err || *err == NULL);
 
     switch (type) {
-        case LR_CHECKSUM_MD2:       ctx_type = EVP_md2();    break;
         case LR_CHECKSUM_MD5:       ctx_type = EVP_md5();    break;
         case LR_CHECKSUM_SHA:       ctx_type = EVP_sha();    break;
         case LR_CHECKSUM_SHA1:      ctx_type = EVP_sha1();   break;
