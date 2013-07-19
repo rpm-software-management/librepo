@@ -25,7 +25,6 @@ extern "C" {
 #endif
 
 #include "checksum.h"
-#include "downloadtarget.h"
 #include "gpg.h"
 #include "handle.h"
 #include "metalink.h"

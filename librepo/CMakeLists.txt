@@ -19,7 +19,6 @@ SET (librepo_SRCS
 
 SET(librepo_HEADERS
     checksum.h
-    downloadtarget.h
     gpg.h
     handle.h
     librepo.h
