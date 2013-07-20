@@ -100,24 +100,6 @@ START_TEST(test_handle_getinfo)
     lr_handle_getinfo(h, LRI_VARSUB, &vars);
     fail_if(strlist != NULL);
 
-    num = -1;
-    lr_handle_getinfo(h, LRI_LASTCURLERR, &num);
-    fail_if(num != 0);
-
-    num = -1;
-    lr_handle_getinfo(h, LRI_LASTCURLMERR, &num);
-    fail_if(num != 0);
-
-    str = NULL;
-    lr_handle_getinfo(h, LRI_LASTCURLSTRERR, &str);
-
-    str = NULL;
-    lr_handle_getinfo(h, LRI_LASTCURLMSTRERR, &str);
-
-    num = -1;
-    lr_handle_getinfo(h, LRI_LASTBADSTATUSCODE, &num);
-    fail_if(num != 0);
-
     lr_handle_free(h);
     lr_global_cleanup();
 }

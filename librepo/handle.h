@@ -128,11 +128,6 @@ typedef enum {
     LRI_FETCHMIRRORS,           /*!< (long *) */
     LRI_MAXMIRRORTRIES,         /*!< (long *) */
     LRI_VARSUB,                 /*!< (lr_UrlVars **) */
-    LRI_LASTCURLERR,            /*!< (long *) */
-    LRI_LASTCURLMERR,           /*!< (long *) */
-    LRI_LASTCURLSTRERR,         /*!< (char **) */
-    LRI_LASTCURLMSTRERR,        /*!< (char **) */
-    LRI_LASTBADSTATUSCODE,      /*!< (long *) */
     LRI_MIRRORS,                /*!< (char **)
         Mirrorlist associated with the repository.
 
@@ -185,39 +180,10 @@ int lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...);
 /** Perform repodata download or location.
  * @param handle        Librepo handle.
  * @param result        Librepo result.
+ * @param err           GError **
  * @return              Librepo return code from ::lr_Rc enum.
  */
-int lr_handle_perform(lr_Handle handle, lr_Result result);
-
-/** Return last encountered cURL error code from cURL.
- * @param handle        Librepo handle.
- * @return              cURL (CURLcode) return code.
- */
-int lr_handle_last_curl_error(lr_Handle handle);
-
-/** Return last encoutered cURL error code from cURL multi handle.
- * @param handle        Librepo handle.
- * @return              cURL multi (CURLMcode) return code.
- */
-int lr_handle_last_curlm_error(lr_Handle handle);
-
-/** Return last encountered HTTP/FTP status code (e.g. 404).
- * @param handle        Librepo handle.
- * @return              Last encountered HTTP/FTP status code.
- */
-long lr_handle_last_bad_status_code(lr_Handle handle);
-
-/** Return string representation of last encountered cURL error.
- * @param handle        Librepo handle.
- * @return              String with text description of error.
- */
-const char *lr_handle_last_curl_strerror(lr_Handle handle);
-
-/** Return string representation of last encountered cURL multi error.
- * @param handle        Librepo handle.
- * @return              String with text description of error.
- */
-const char *lr_handle_last_curlm_strerror(lr_Handle handle);
+int lr_handle_perform(lr_Handle handle, lr_Result result, GError **err);
 
 /** @} */
 

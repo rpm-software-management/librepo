@@ -108,3 +108,9 @@ lr_gpg_error_quark(void)
 {
     return g_quark_from_static_string("lr_gpg_error");
 }
+
+GQuark
+lr_handle_error_quark(void)
+{
+    return g_quark_from_static_string("lr_handle_error");
+}

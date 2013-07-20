@@ -441,8 +441,6 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
     case LRI_USERAGENT:
-    case LRI_LASTCURLSTRERR:
-    case LRI_LASTCURLMSTRERR:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &str);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);
@@ -454,9 +452,6 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_UPDATE:
     case LRI_LOCAL:
     case LRI_REPOTYPE:
-    case LRI_LASTCURLERR:
-    case LRI_LASTCURLMERR:
-    case LRI_LASTBADSTATUSCODE:
     case LRI_FETCHMIRRORS:
     case LRI_MAXMIRRORTRIES:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &lval);
@@ -571,7 +566,7 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
-    ret = lr_handle_perform(self->handle, result);
+    ret = lr_handle_perform(self->handle, result, NULL);
 
     if (ret == LRE_INTERRUPTED) {
         PyErr_SetInterrupt();

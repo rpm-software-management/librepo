@@ -117,10 +117,12 @@ const char *lr_strerror(int rc);
 #define LR_CHECKSUM_ERROR           lr_checksum_error_quark()
 #define LR_DOWNLOADER_ERROR         lr_downloader_error_quark()
 #define LR_GPG_ERROR                lr_gpg_error_quark()
+#define LR_HANDLE_ERROR             lr_handle_error_quark()
 
 GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
 GQuark lr_gpg_error_quark(void);
+GQuark lr_handle_error_quark(void);
 
 #ifdef __cplusplus
 }

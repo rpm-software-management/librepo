@@ -67,13 +67,13 @@ lr_download_package(lr_Handle handle,
     }
 
 
-    if (handle->repotype == LR_YUMREPO)
-        rc = lr_handle_prepare_internal_mirrorlist(handle);
-    else {
+    if (handle->repotype != LR_YUMREPO) {
         g_debug("%s: Bad repo type", __func__);
         assert(0);
+        return rc;
     }
 
+    rc = lr_handle_prepare_internal_mirrorlist(handle, NULL);
     if (rc != LRE_OK)
         return rc;
 

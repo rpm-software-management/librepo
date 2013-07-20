@@ -352,54 +352,24 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
     return ret;
 }
 
-int
-lr_handle_last_curl_error(lr_Handle handle)
-{
-    assert(handle);
-    return handle->last_curl_error;
-}
-
-int
-lr_handle_last_curlm_error(lr_Handle handle)
-{
-    assert(handle);
-    return handle->last_curlm_error;
-}
-
-long
-lr_handle_last_bad_status_code(lr_Handle handle)
-{
-    return handle->status_code;
-}
-
-const char *
-lr_handle_last_curl_strerror(lr_Handle handle)
-{
-    assert(handle);
-    return curl_easy_strerror(handle->last_curl_error);
-}
-
-const char *
-lr_handle_last_curlm_strerror(lr_Handle handle)
-{
-    assert(handle);
-    return curl_multi_strerror(handle->last_curlm_error);
-}
-
 #define TYPE_METALINK   1
 #define TYPE_MIRRORLIST 2
 
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
+lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
 {
     int rc = LRE_OK;
     char *metalink_suffix = NULL;
     char *local_path = NULL;
 
+    assert(!err || *err == NULL);
+
     if (handle->internal_mirrorlist)
         return LRE_OK;  /* Internal mirrorlist already exists */
 
     if (!handle->baseurl && !handle->mirrorlist) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
+                    "No usable URL (no base url nor mirrorlist url)");
         return LRE_NOURL;
     }
 
@@ -436,6 +406,9 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 char *resolved_path = realpath(handle->baseurl, NULL);
                 if (!resolved_path) {
                     g_debug("%s: realpath: %s", __func__, strerror(errno));
+                    g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
+                                "realpath(%s) error: %s",
+                                handle->baseurl, strerror(errno));
                     return LRE_BADURL;
                 }
                 url = lr_strconcat("file://", resolved_path, NULL);
@@ -497,6 +470,9 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 if (mirrors_fd < 1) {
                     rc = LRE_IO;
                     g_debug("%s: Cannot open: %s", __func__, full_path);
+                    g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                                "Cannot open %s: %s",
+                                full_path, strerror(errno));
                 }
             }
         } else if (handle->mirrorlist) {
@@ -506,6 +482,8 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             if (mirrors_fd < 1) {
                 rc = LRE_IO;
                 g_debug("%s: Cannot create a temporary file", __func__);
+                g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                            "Cannot create a temporary file");
                 goto mirrorlist_error;
             }
 
@@ -513,7 +491,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
             char *mirrorlist_url = lr_url_substitute(prefixed_url,
                                                      handle->urlvars);
             lr_free(prefixed_url);
-            rc = lr_download_url(handle, mirrorlist_url, mirrors_fd, NULL);
+            rc = lr_download_url(handle, mirrorlist_url, mirrors_fd, err);
             lr_free(mirrorlist_url);
 
             if (rc != LRE_OK)
@@ -521,6 +499,9 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
 
             if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
                 rc = LRE_IO;
+                g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                            "lseek(%s, 0, SEEK_SET) error: %s",
+                            mirrors_fd, strerror(errno));
                 goto mirrorlist_error;
             }
 
@@ -545,18 +526,25 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 rc = lr_metalink_parse_file(metalink, mirrors_fd, "repomd.xml");
                 if (rc != LRE_OK) {
                     g_debug("%s: Cannot parse metalink (%d)", __func__, rc);
+                    g_set_error(err, LR_HANDLE_ERROR, rc,
+                                "Cannot parse metalink: (%d)", rc);
                     goto mirrorlist_error;
                 }
 
                 if (strcmp("repomd.xml", metalink->filename)) {
                     g_debug("%s: No repomd.xml file in metalink", __func__);
                     rc = LRE_MLBAD;
+                    g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
+                                "No repomd.xml file in metalink (%s)",
+                                metalink->filename);
                     goto mirrorlist_error;
                 }
 
                 if (metalink->nou <= 0) {
                     g_debug("%s: No URLs in metalink", __func__);
                     rc = LRE_MLBAD;
+                    g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
+                                "No URLs in metalink");
                     goto mirrorlist_error;
                 }
             } else if (mirror_type == TYPE_MIRRORLIST) {
@@ -567,12 +555,16 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
                 rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
                 if (rc != LRE_OK) {
                     g_debug("%s: Cannot parse mirrorlist (%d)", __func__, rc);
+                    g_set_error(err, LR_HANDLE_ERROR, rc,
+                                "Cannot parse mirrorlist (%d)", rc);
                     goto mirrorlist_error;
                 }
 
                 if (mirrorlist->nou <= 0) {
-                    g_debug("%s: No URLs in mirrorlist (%d)", __func__, rc);
                     rc = LRE_MLBAD;
+                    g_debug("%s: No URLs in mirrorlist (%d)", __func__, rc);
+                    g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
+                                "No URLs in mirrorlist (%d)", rc)
                     goto mirrorlist_error;
                 }
             } else {
@@ -585,6 +577,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
         if (rc == LRE_OK) {
             /* Set fill mirrorlist stuff at the handle  */
 
+            assert(!err || *err == NULL);
             assert(handle->mirrors == NULL);
 
             if (metalink) {
@@ -607,6 +600,8 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle)
 mirrorlist_error:
 
         if (rc != LRE_OK) {
+            assert(!err || *err);
+
             if (mirrors_fd > 0) {
                 close(mirrors_fd);
                 mirrors_fd = -1;
@@ -632,30 +627,47 @@ mirrorlist_error:
 }
 
 int
-lr_handle_perform(lr_Handle handle, lr_Result result)
+lr_handle_perform(lr_Handle handle, lr_Result result, GError **err)
 {
     int rc = LRE_OK;
+
     assert(handle);
+    assert(!err || *err == NULL);
 
-    if (!result)
+    if (!result) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
+                    "No result argument passed");
         return LRE_BADFUNCARG;
+    }
 
-    if (!handle->baseurl && !handle->mirrorlist)
+    if (!handle->baseurl && !handle->mirrorlist) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
+                    "No LRO_URL nor LRO_MIRRORLIST specified");
         return LRE_NOURL;
+    }
 
-    if (handle->repotype != LR_YUMREPO)
+    if (handle->repotype != LR_YUMREPO) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
+                    "Bad LRO_REPOTYPE specified");
         return LRE_BADFUNCARG;
+    }
 
     /* Setup destination directory */
     if (handle->update) {
-        if (!result->destdir)
+        if (!result->destdir) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_INCOMPLETERESULT,
+                        "Incomplete result object, destdir is missing");
             return LRE_INCOMPLETERESULT;
+        }
         lr_free(handle->destdir);
         handle->destdir = lr_strdup(result->destdir);
     } else if (!handle->destdir && !handle->local) {
         handle->destdir = lr_strdup(TMP_DIR_TEMPLATE);
-        if (!mkdtemp(handle->destdir))
+        if (!mkdtemp(handle->destdir)) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_CANNOTCREATETMP,
+                        "Cannot create tmpdir: %s", strerror(errno));
             return LRE_CANNOTCREATETMP;
+        }
     }
 
     g_debug("%s: Using dir: %s", __func__, handle->destdir);
@@ -668,11 +680,14 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
         sigact.sa_flags = 0;
-        if (sigaction(SIGINT, &sigact, &old_sigact) == -1)
+        if (sigaction(SIGINT, &sigact, &old_sigact) == -1) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_SIGACTION,
+                        "sigaction(SIGINT,,) error");
             return LRE_SIGACTION;
+        }
     }
 
-    rc = lr_handle_prepare_internal_mirrorlist(handle);
+    rc = lr_handle_prepare_internal_mirrorlist(handle, NULL);
 
     if (handle->fetchmirrors) {
         /* Only download and parse mirrorlist */
@@ -682,7 +697,7 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
         switch (handle->repotype) {
         case LR_YUMREPO:
             g_debug("%s: Downloading/Locating yum repo", __func__);
-            rc = lr_yum_perform(handle, result);
+            rc = lr_yum_perform(handle, result, NULL);
             break;
         default:
             g_debug("%s: Bad repo type", __func__);
@@ -694,10 +709,22 @@ lr_handle_perform(lr_Handle handle, lr_Result result)
     if (handle->interruptible) {
         /* Restore signal handler */
         g_debug("%s: Restoring an old SIGINT handler", __func__);
-        if (sigaction(SIGINT, &old_sigact, NULL) == -1)
+        if (sigaction(SIGINT, &old_sigact, NULL) == -1) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_SIGACTION,
+                        "sigaction(SIGINT,,) error");
             return LRE_SIGACTION;
-        if (lr_interrupt)
+        }
+
+        if (lr_interrupt) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_INTERRUPTED,
+                        "Librepo was interrupted by a signal");
             return LRE_INTERRUPTED;
+        }
+    }
+
+    if (rc != LRE_OK) {
+        g_set_error(err, LR_HANDLE_ERROR, rc,
+                    "%s", lr_strerror(rc));
     }
 
     return rc;
@@ -792,31 +819,6 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
         *vars = handle->urlvars;
         break;
     }
-
-    case LRI_LASTCURLERR:
-        lnum = va_arg(arg, long *);
-        *lnum = handle->last_curl_error;
-        break;
-
-    case LRI_LASTCURLMERR:
-        lnum = va_arg(arg, long *);
-        *lnum = handle->last_curlm_error;
-        break;
-
-    case LRI_LASTCURLSTRERR:
-        str = va_arg(arg, char **);
-        *str = (char *) curl_easy_strerror(handle->last_curl_error);
-        break;
-
-    case LRI_LASTCURLMSTRERR:
-        str = va_arg(arg, char **);
-        *str = (char *) curl_multi_strerror(handle->last_curlm_error);
-        break;
-
-    case LRI_LASTBADSTATUSCODE:
-        lnum = va_arg(arg, long *);
-        *lnum = handle->status_code;
-        break;
 
     case LRI_MIRRORS: {
         int x;

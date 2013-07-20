@@ -43,7 +43,6 @@ return_error(int rc, lr_Handle h)
      **/
 
     PyObject *err;
-    PyObject *err_msg = NULL;
     PyObject *err_extra = NULL;
 
     if (!h) {
@@ -53,35 +52,7 @@ return_error(int rc, lr_Handle h)
         return NULL;
     }
 
-    // We have a handle - Build more detailed error message if possible
-
-    if (rc == LRE_CURL) {
-        err_msg = PyString_FromFormat("%s: %s", lr_strerror(rc),
-                                      lr_handle_last_curl_strerror(h));
-        err_extra = Py_BuildValue("(is)",
-                                  (int) lr_handle_last_curl_error(h),
-                                  lr_handle_last_curl_strerror(h));
-    }
-
-    if (rc == LRE_CURLM) {
-        err_msg = PyString_FromFormat("%s: %s", lr_strerror(rc),
-                                      lr_handle_last_curlm_strerror(h));
-        err_extra = Py_BuildValue("(is)",
-                                  (int) lr_handle_last_curlm_error(h),
-                                  lr_handle_last_curlm_strerror(h));
-    }
-
-    if (rc == LRE_BADSTATUS) {
-        err_msg = PyString_FromFormat("%s: %ld", lr_strerror(rc),
-                                      lr_handle_last_bad_status_code(h));
-        err_extra = Py_BuildValue("l", (long) lr_handle_last_bad_status_code(h));
-    }
-
-
-    if (err_msg)
-        err = Py_BuildValue("iNN", rc, err_msg, err_extra);
-    else
-        err = Py_BuildValue("isO", rc, lr_strerror(rc), Py_None);
+    err = Py_BuildValue("isO", rc, lr_strerror(rc), Py_None);
 
     PyErr_SetObject(LrErr_Exception, err);
 

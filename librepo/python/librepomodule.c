@@ -186,11 +186,6 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_FETCHMIRRORS", LRI_FETCHMIRRORS);
     PyModule_AddIntConstant(m, "LRI_MAXMIRRORTRIES", LRI_MAXMIRRORTRIES);
     PyModule_AddIntConstant(m, "LRI_VARSUB", LRI_VARSUB);
-    PyModule_AddIntConstant(m, "LRI_LASTCURLERR", LRI_LASTCURLERR);
-    PyModule_AddIntConstant(m, "LRI_LASTCURLMERR", LRI_LASTCURLMERR);
-    PyModule_AddIntConstant(m, "LRI_LASTCURLSTRERR", LRI_LASTCURLSTRERR);
-    PyModule_AddIntConstant(m, "LRI_LASTCURLMSTRERR", LRI_LASTCURLMSTRERR);
-    PyModule_AddIntConstant(m, "LRI_LASTBADSTATUSCODE", LRI_LASTBADSTATUSCODE);
     PyModule_AddIntConstant(m, "LRI_MIRRORS", LRI_MIRRORS);
     PyModule_AddIntConstant(m, "LRI_METALINK", LRI_METALINK);
 

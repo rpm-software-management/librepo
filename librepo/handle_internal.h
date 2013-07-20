@@ -51,9 +51,6 @@ struct _lr_Handle {
     char            *useragent;     /*!< User agent */
     lr_Repotype     repotype;       /*!< Type of repository */
     lr_Checks       checks;         /*!< Which check sould be applied */
-    long            status_code;    /*!< Last HTTP or FTP status code */
-    CURLcode        last_curl_error;/*!< Last curl error code */
-    CURLMcode       last_curlm_error;/*!< Last curl multi handle error code */
     lr_ProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
     int             ignoremissing;  /*!< Ignore missing metadata files */
@@ -78,10 +75,11 @@ lr_get_curl_handle();
  * Create (if do not exists) internal mirrorlist. Insert baseurl (if
  * specified) and download, parse and insert mirrors from mirrorlist url.
  * @param handle            Librepo handle.
- *  @return                 Librepo return code.
+ * @param err               GError **
+ * @return                  Librepo return code.
  */
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle handle);
+lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err);
 
 
 #ifdef __cplusplus

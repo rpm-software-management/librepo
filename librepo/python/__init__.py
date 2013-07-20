@@ -231,11 +231,6 @@ Constants
 .. data:: LRI_FETCHMIRRORS
 .. data:: LRI_MAXMIRRORTRIES
 .. data:: LRI_VARSUB
-.. data:: LRI_LASTCURLERR
-.. data:: LRI_LASTCURLMERR
-.. data:: LRI_LASTCURLSTRERR
-.. data:: LRI_LASTCURLMSTRERR
-.. data:: LRI_LASTBADSTATUSCODE
 .. data:: LRI_MIRRORS
 .. data:: LRI_METALINK
 
@@ -535,11 +530,6 @@ LRI_YUMBLIST            = _librepo.LRI_YUMBLIST
 LRI_FETCHMIRRORS        = _librepo.LRI_FETCHMIRRORS
 LRI_MAXMIRRORTRIES      = _librepo.LRI_MAXMIRRORTRIES
 LRI_VARSUB              = _librepo.LRI_VARSUB
-LRI_LASTCURLERR         = _librepo.LRI_LASTCURLERR
-LRI_LASTCURLMERR        = _librepo.LRI_LASTCURLMERR
-LRI_LASTCURLSTRERR      = _librepo.LRI_LASTCURLSTRERR
-LRI_LASTCURLMSTRERR     = _librepo.LRI_LASTCURLMSTRERR
-LRI_LASTBADSTATUSCODE   = _librepo.LRI_LASTBADSTATUSCODE
 LRI_MIRRORS             = _librepo.LRI_MIRRORS
 LRI_METALINK            = _librepo.LRI_METALINK
 
@@ -558,11 +548,6 @@ ATTR_TO_LRI = {
     "fetchmirrors":         LRI_FETCHMIRRORS,
     "maxmirrortries":       LRI_MAXMIRRORTRIES,
     "varsub":               LRI_VARSUB,
-    "lastcurlerr":          LRI_LASTCURLERR,
-    "lastcurlmerr":         LRI_LASTCURLMERR,
-    "lastcurlstrerr":       LRI_LASTCURLSTRERR,
-    "lastcurlmstrerr":      LRI_LASTCURLMSTRERR,
-    "lastbadstatuscode":    LRI_LASTBADSTATUSCODE,
     "mirrors":              LRI_MIRRORS,
     "metalink":             LRI_METALINK,
 }
