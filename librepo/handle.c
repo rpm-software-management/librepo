@@ -428,7 +428,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
 
     int include_in_internal_mirrorlist = (handle->mirrorlist) ? 1 : 0;
     lr_Metalink *metalink = NULL;
-    lr_Mirrorlist mirrorlist = NULL;
+    lr_Mirrorlist *mirrorlist = NULL;
 
     if (handle->mirrorlist_fd == -1) {
         /* If handle->mirrorlist_fd != -1 then we should have a mirrorlist
@@ -553,15 +553,17 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
                 g_debug("%s: Got mirrorlist", __func__);
 
                 mirrorlist = lr_mirrorlist_init();
-                rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd);
+
+                GError *tmp_err = NULL;
+                rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd, &tmp_err);
                 if (rc != LRE_OK) {
+                    assert(tmp_err);
                     g_debug("%s: Cannot parse mirrorlist (%d)", __func__, rc);
-                    g_set_error(err, LR_HANDLE_ERROR, rc,
-                                "Cannot parse mirrorlist (%d)", rc);
+                    g_propagate_error(err, tmp_err);
                     goto mirrorlist_error;
                 }
 
-                if (mirrorlist->nou <= 0) {
+                if (!mirrorlist->urls) {
                     rc = LRE_MLBAD;
                     g_debug("%s: No URLs in mirrorlist (%d)", __func__, rc);
                     g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,

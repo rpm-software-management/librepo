@@ -56,7 +56,7 @@ lr_lrmirrorlist_append_url(lr_LrMirrorlist *list,
  */
 lr_LrMirrorlist *
 lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
-                                  lr_Mirrorlist mirrorlist,
+                                  lr_Mirrorlist *mirrorlist,
                                   lr_UrlVars *urlvars);
 
 /** Append mirrors from metalink to the internal mirrorlist.

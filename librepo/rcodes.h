@@ -119,12 +119,14 @@ const char *lr_strerror(int rc);
 #define LR_GPG_ERROR                lr_gpg_error_quark()
 #define LR_HANDLE_ERROR             lr_handle_error_quark()
 #define LR_METALINK_ERROR           lr_metalink_error_quark()
+#define LR_MIRRORLIST_ERROR         lr_mirrorlist_error_quark()
 
 GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
 GQuark lr_gpg_error_quark(void);
 GQuark lr_handle_error_quark(void);
 GQuark lr_metalink_error_quark(void);
+GQuark lr_mirrorlist_error_quark(void);
 
 #ifdef __cplusplus
 }

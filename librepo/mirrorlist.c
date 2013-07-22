@@ -32,48 +32,46 @@
 
 #define BUF_LEN 4096
 
-lr_Mirrorlist
+lr_Mirrorlist *
 lr_mirrorlist_init()
 {
-    return lr_malloc0(sizeof(struct _lr_Mirrorlist));
+    return lr_malloc0(sizeof(lr_Mirrorlist));
 }
 
 void
-lr_mirrorlist_free(lr_Mirrorlist mirrorlist)
+lr_mirrorlist_free(lr_Mirrorlist *mirrorlist)
 {
     if (!mirrorlist)
         return;
-    for (int x = 0; x < mirrorlist->nou; x++)
-        lr_free(mirrorlist->urls[x]);
-    lr_free(mirrorlist->urls);
+
+    g_slist_free_full(mirrorlist->urls, (GDestroyNotify)lr_free);
     lr_free(mirrorlist);
 }
 
-void
-lr_mirrorlist_append_url(lr_Mirrorlist m, char *url)
-{
-    if (m->nou+1 > m->lou) {
-        m->lou += 5;
-        m->urls = lr_realloc(m->urls, m->lou * sizeof(char *));
-    }
-
-    m->urls[m->nou] = url;
-    m->nou++;
-    return;
-}
-
 int
-lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
+lr_mirrorlist_parse_file(lr_Mirrorlist *mirrorlist, int fd, GError **err)
 {
     FILE *f;
+    int fd_dup;
     char buf[BUF_LEN], *p;
 
     assert(mirrorlist);
-    DEBUGASSERT(fd >= 0);
+    assert(fd >= 0);
+    assert(!err || *err == NULL);
 
-    f = fdopen(dup(fd), "r");
+
+    fd_dup = dup(fd);
+    if (fd_dup == -1) {
+        g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
+                    "dup(%d) error: %s", fd, strerror(errno));
+        return LRE_IO;
+    }
+
+    f = fdopen(fd_dup, "r");
     if (!f) {
         g_debug("%s: Cannot fdopen(mirrorlist_fd): %s", __func__, strerror(errno));
+        g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
+                    "fdopen(%d, \"r\") error: %s", fd_dup, strerror(errno));
         return LRE_IO;
     }
 
@@ -98,7 +96,7 @@ lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd)
 
         /* Append URL */
         if (p[0] != '\0' && (strstr(p, "://") || p[0] == '/'))
-            lr_mirrorlist_append_url(mirrorlist, lr_strdup(p));
+            mirrorlist->urls = g_slist_append(mirrorlist->urls, lr_strdup(p));
     }
 
     fclose(f);

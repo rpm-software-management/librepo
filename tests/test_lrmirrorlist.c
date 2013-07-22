@@ -7,11 +7,12 @@ START_TEST(test_lrmirrorlist_append_mirrorlist)
     lr_LrMirrorlist *iml = NULL;
     lr_LrMirror *mirror = NULL;
     char *url = NULL;
-    struct _lr_Mirrorlist ml = {
-        .urls = (char*[4]) {"http://foo", "", NULL, "ftp://bar"},
-        .nou = 4,
-        .lou = 4,
+    lr_Mirrorlist ml = {
+        .urls = NULL,
     };
+
+    ml.urls = g_slist_prepend(ml.urls, "ftp://bar");
+    ml.urls = g_slist_prepend(ml.urls, "http://foo");
 
     fail_if(g_slist_length(iml) != 0);
     iml = lr_lrmirrorlist_append_mirrorlist(iml, NULL, NULL);

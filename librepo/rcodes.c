@@ -121,3 +121,9 @@ lr_metalink_error_quark(void)
 {
     return g_quark_from_static_string("lr_metalink_error");
 }
+
+GQuark
+lr_mirrorlist_error_quark(void)
+{
+    return g_quark_from_static_string("lr_mirrorlist_error");
+}

@@ -48,14 +48,14 @@ lr_lrmirrorlist_append_url(lr_LrMirrorlist *list,
 
 lr_LrMirrorlist *
 lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
-                                  lr_Mirrorlist mirrorlist,
+                                  lr_Mirrorlist *mirrorlist,
                                   lr_UrlVars *urlvars)
 {
-    if (!mirrorlist || mirrorlist->nou == 0)
+    if (!mirrorlist || !mirrorlist->urls)
         return list;
 
-    for (int x=0; x < mirrorlist->nou; x++) {
-        char *url = mirrorlist->urls[x];
+    for (GSList *elem = mirrorlist->urls; elem; elem = g_slist_next(elem)) {
+        char *url = elem->data;
 
         if (!url || !strlen(url))
             continue;
@@ -84,6 +84,7 @@ lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
 
     for (GSList *elem = metalink->urls; elem; elem = g_slist_next(elem)) {
         lr_MetalinkUrl *metalinkurl = elem->data;
+        assert(metalinkurl);
         char *url = metalinkurl->url;
 
         if (!url)

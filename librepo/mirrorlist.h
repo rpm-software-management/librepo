@@ -25,34 +25,30 @@ extern "C" {
 #endif
 
 /** Mirrorlist */
-struct _lr_Mirrorlist {
-    char **urls;    /*!< List of URLs, could be NULL */
-    int nou;        /*!< Number of urls */
-    int lou;        /*!< Lenght of urls list (items allocated) */
-};
-
-/** Pointer to ::_lr_Mirrorlist */
-typedef struct _lr_Mirrorlist * lr_Mirrorlist;
+typedef struct {
+    GSList *urls;    /*!< List URLs (char *), could be NULL */
+} lr_Mirrorlist;
 
 /**
  * Create new empty mirrorlist.
  * @return              New empty mirrorlist.
  */
-lr_Mirrorlist lr_mirrorlist_init();
+lr_Mirrorlist *lr_mirrorlist_init();
 
 /**
  * Parse mirrorlist file.
  * @param mirrorlist    Mirrorlist object.
  * @param fd            Opened file descriptor of mirrorlist file.
+ * @param err           GError **
  * @return              Librepo return code ::lr_Rc.
  */
-int lr_mirrorlist_parse_file(lr_Mirrorlist mirrorlist, int fd);
+int lr_mirrorlist_parse_file(lr_Mirrorlist *mirrorlist, int fd, GError **err);
 
 /**
  * Free mirrorlist and all its content.
  * @param mirrorlist    Mirrorlist object.
  */
-void lr_mirrorlist_free(lr_Mirrorlist mirrorlist);
+void lr_mirrorlist_free(lr_Mirrorlist *mirrorlist);
 
 #ifdef __cplusplus
 }

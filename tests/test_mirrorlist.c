@@ -15,7 +15,7 @@
 
 START_TEST(test_mirrorlist_init)
 {
-    lr_Mirrorlist ml = NULL;
+    lr_Mirrorlist *ml = NULL;
 
     ml = lr_mirrorlist_init();
     fail_if(ml == NULL);
@@ -28,7 +28,9 @@ START_TEST(test_mirrorlist_01)
     int fd;
     int ret;
     char *path;
-    lr_Mirrorlist ml = NULL;
+    GSList *elem = NULL;
+    lr_Mirrorlist *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
                          "mirrorlist_01", NULL);
@@ -37,13 +39,20 @@ START_TEST(test_mirrorlist_01)
     fail_if(fd < 0);
     ml = lr_mirrorlist_init();
     fail_if(ml == NULL);
-    ret = lr_mirrorlist_parse_file(ml, fd);
+    ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
     fail_if(ret != LRE_OK);
+    fail_if(tmp_err);
 
-    fail_if(ml->nou != 2);
-    fail_if(strcmp(ml->urls[0], "http://foo.bar/fedora/linux/"));
-    fail_if(strcmp(ml->urls[1], "ftp://ftp.bar.foo/Fedora/17/"));
+    fail_if(g_slist_length(ml->urls) != 2);
+
+    elem = g_slist_nth(ml->urls, 0);
+    fail_if(!elem);
+    fail_if(g_strcmp0(elem->data, "http://foo.bar/fedora/linux/"));
+
+    elem = g_slist_nth(ml->urls, 1);
+    fail_if(!elem);
+    fail_if(g_strcmp0(elem->data, "ftp://ftp.bar.foo/Fedora/17/"));
     lr_mirrorlist_free(ml);
 }
 END_TEST
@@ -53,7 +62,8 @@ START_TEST(test_mirrorlist_02)
     int fd;
     int ret;
     char *path;
-    lr_Mirrorlist ml = NULL;
+    lr_Mirrorlist *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
                          "mirrorlist_02", NULL);
@@ -62,10 +72,11 @@ START_TEST(test_mirrorlist_02)
     fail_if(fd < 0);
     ml = lr_mirrorlist_init();
     fail_if(ml == NULL);
-    ret = lr_mirrorlist_parse_file(ml, fd);
+    ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
     fail_if(ret != LRE_OK);
-    fail_if(ml->nou != 0);
+    fail_if(tmp_err);
+    fail_if(g_slist_length(ml->urls) != 0);
     lr_mirrorlist_free(ml);
 }
 END_TEST
@@ -75,7 +86,8 @@ START_TEST(test_mirrorlist_03)
     int fd;
     int ret;
     char *path;
-    lr_Mirrorlist ml = NULL;
+    lr_Mirrorlist *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
                          "mirrorlist_03", NULL);
@@ -84,10 +96,11 @@ START_TEST(test_mirrorlist_03)
     fail_if(fd < 0);
     ml = lr_mirrorlist_init();
     fail_if(ml == NULL);
-    ret = lr_mirrorlist_parse_file(ml, fd);
+    ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
     fail_if(ret != LRE_OK);
-    fail_if(ml->nou != 0);
+    fail_if(tmp_err);
+    fail_if(g_slist_length(ml->urls) != 0);
     lr_mirrorlist_free(ml);
 }
 END_TEST
