@@ -42,6 +42,7 @@ START_TEST(test_downloader_single_file)
     int fd1;
     char *tmpfn1;
     lr_DownloadTarget *t1;
+    GError *tmp_err = NULL;
 
     // Prepare list of download targets
 
@@ -64,7 +65,8 @@ START_TEST(test_downloader_single_file)
     fail_if(handle == NULL);
 
     lr_handle_setopt(handle, LRO_URL, "http://www.google.com");
-    lr_handle_prepare_internal_mirrorlist(handle);
+    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    fail_if(tmp_err);
 
     ret = lr_download(handle, list, &err);
     fail_if(ret != LRE_OK);
@@ -141,6 +143,7 @@ START_TEST(test_downloader_two_files)
     int fd1, fd2;
     char *tmpfn1, *tmpfn2;
     lr_DownloadTarget *t1, *t2;
+    GError *tmp_err = NULL;
 
     // Prepare list of download targets
 
@@ -171,7 +174,8 @@ START_TEST(test_downloader_two_files)
     fail_if(handle == NULL);
 
     lr_handle_setopt(handle, LRO_URL, "http://www.google.com");
-    lr_handle_prepare_internal_mirrorlist(handle);
+    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    fail_if(tmp_err);
 
     ret = lr_download(handle, list, &err);
     fail_if(ret != LRE_OK);
@@ -203,6 +207,7 @@ START_TEST(test_downloader_three_files_with_error)
     int fd1, fd2, fd3;
     char *tmpfn1, *tmpfn2, *tmpfn3;
     lr_DownloadTarget *t1, *t2, *t3;
+    GError *tmp_err = NULL;
 
     // Prepare list of download targets
 
@@ -241,7 +246,8 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(handle == NULL);
 
     lr_handle_setopt(handle, LRO_URL, "http://www.google.com");
-    lr_handle_prepare_internal_mirrorlist(handle);
+    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    fail_if(tmp_err);
 
     ret = lr_download(handle, list, &err);
     fail_if(ret != LRE_OK);

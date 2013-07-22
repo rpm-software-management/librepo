@@ -246,7 +246,6 @@ init_librepo(void)
 
     /* Checksums */
     PyModule_AddIntConstant(m, "CHECKSUM_UNKNOWN", LR_CHECKSUM_UNKNOWN);
-    PyModule_AddIntConstant(m, "CHECKSUM_MD2", LR_CHECKSUM_MD2);
     PyModule_AddIntConstant(m, "CHECKSUM_MD5", LR_CHECKSUM_MD5);
     PyModule_AddIntConstant(m, "CHECKSUM_SHA", LR_CHECKSUM_SHA);
     PyModule_AddIntConstant(m, "CHECKSUM_SHA1", LR_CHECKSUM_SHA1);

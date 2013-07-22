@@ -85,8 +85,6 @@ lr_handle_init()
     handle->curl_handle = curl;
     handle->retries = 1;
     handle->mirrorlist_fd = -1;
-    handle->last_curl_error = CURLE_OK;
-    handle->last_curlm_error = CURLM_OK;
     handle->checks |= LR_CHECK_CHECKSUM;
 
     return handle;
@@ -337,7 +335,6 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     /* Handle CURL error return code */
     if (ret == LRE_OK && c_rc != CURLE_OK) {
-        handle->last_curl_error = c_rc;
         switch (c_rc) {
         case CURLE_FAILED_INIT:
             ret = LRE_CURLSETOPT;
@@ -500,7 +497,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
             if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
                 rc = LRE_IO;
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
-                            "lseek(%s, 0, SEEK_SET) error: %s",
+                            "lseek(%d, 0, SEEK_SET) error: %s",
                             mirrors_fd, strerror(errno));
                 goto mirrorlist_error;
             }
@@ -564,7 +561,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
                     rc = LRE_MLBAD;
                     g_debug("%s: No URLs in mirrorlist (%d)", __func__, rc);
                     g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
-                                "No URLs in mirrorlist (%d)", rc)
+                                "No URLs in mirrorlist (%d)", rc);
                     goto mirrorlist_error;
                 }
             } else {
@@ -697,7 +694,7 @@ lr_handle_perform(lr_Handle handle, lr_Result result, GError **err)
         switch (handle->repotype) {
         case LR_YUMREPO:
             g_debug("%s: Downloading/Locating yum repo", __func__);
-            rc = lr_yum_perform(handle, result, NULL);
+            rc = lr_yum_perform(handle, result);
             break;
         default:
             g_debug("%s: Bad repo type", __func__);

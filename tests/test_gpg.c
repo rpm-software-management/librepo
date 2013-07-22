@@ -48,7 +48,7 @@ START_TEST(test_gpg_check_signature)
                                 tmp_home_path,
                                 &tmp_err);
     fail_if(rc != LRE_OK);
-    fail_if(tmp_err)
+    fail_if(tmp_err);
 
     // Bad signature signed with unknown key
     rc = lr_gpg_check_signature(_signature_path,
@@ -56,7 +56,7 @@ START_TEST(test_gpg_check_signature)
                                 tmp_home_path,
                                 &tmp_err);
     fail_if(rc == LRE_OK);
-    fail_if(!tmp_err)
+    fail_if(!tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 
@@ -66,14 +66,14 @@ START_TEST(test_gpg_check_signature)
                                 tmp_home_path,
                                 &tmp_err);
     fail_if(rc == LRE_OK);
-    fail_if(!tmp_err)
+    fail_if(!tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 
     // Import the 2nd key
     rc = lr_gpg_import_key(_key_path, tmp_home_path, &tmp_err);
     fail_if(rc != LRE_OK);
-    fail_if(tmp_err)
+    fail_if(tmp_err);
 
     // Valid key and data
     rc = lr_gpg_check_signature(_signature_path,
@@ -81,7 +81,7 @@ START_TEST(test_gpg_check_signature)
                                 tmp_home_path,
                                 &tmp_err);
     fail_if(rc != LRE_OK);
-    fail_if(tmp_err)
+    fail_if(tmp_err);
 
     // Bad signature signed with known key
     rc = lr_gpg_check_signature(_signature_path,
@@ -89,7 +89,7 @@ START_TEST(test_gpg_check_signature)
                                 tmp_home_path,
                                 &tmp_err);
     fail_if(rc == LRE_OK);
-    fail_if(!tmp_err)
+    fail_if(!tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 
@@ -99,7 +99,7 @@ START_TEST(test_gpg_check_signature)
                                 tmp_home_path,
                                 &tmp_err);
     fail_if(rc == LRE_OK);
-    fail_if(!tmp_err)
+    fail_if(!tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 

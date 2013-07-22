@@ -614,7 +614,6 @@ ATTR_TO_LRR = {
 }
 
 CHECKSUM_UNKNOWN    = _librepo.CHECKSUM_UNKNOWN
-CHECKSUM_MD2        = _librepo.CHECKSUM_MD2
 CHECKSUM_MD5        = _librepo.CHECKSUM_MD5
 CHECKSUM_SHA        = _librepo.CHECKSUM_SHA
 CHECKSUM_SHA1       = _librepo.CHECKSUM_SHA1
@@ -623,7 +622,6 @@ CHECKSUM_SHA256     = _librepo.CHECKSUM_SHA256
 CHECKSUM_SHA384     = _librepo.CHECKSUM_SHA384
 CHECKSUM_SHA512     = _librepo.CHECKSUM_SHA512
 
-MD2        = _librepo.CHECKSUM_MD2
 MD5        = _librepo.CHECKSUM_MD5
 SHA        = _librepo.CHECKSUM_SHA
 SHA1       = _librepo.CHECKSUM_SHA1
@@ -633,7 +631,6 @@ SHA384     = _librepo.CHECKSUM_SHA384
 SHA512     = _librepo.CHECKSUM_SHA512
 
 _CHECKSUM_STR_TO_VAL_MAP = {
-    'md2':      CHECKSUM_MD2,
     'md5':      CHECKSUM_MD5,
     'sha':      CHECKSUM_SHA,
     'sha1':     CHECKSUM_SHA1,

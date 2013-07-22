@@ -55,7 +55,7 @@ lr_repoutil_yum_check_repo(const char *path)
     if ((rc = lr_handle_setopt(h, LRO_LOCAL, 1)) != LRE_OK)
         return rc;
 
-    rc = lr_handle_perform(h, result);
+    rc = lr_handle_perform(h, result, NULL);
 
     lr_result_free(result);
     lr_handle_free(h);

@@ -43,7 +43,6 @@ return_error(int rc, lr_Handle h)
      **/
 
     PyObject *err;
-    PyObject *err_extra = NULL;
 
     if (!h) {
         // No handle specified
