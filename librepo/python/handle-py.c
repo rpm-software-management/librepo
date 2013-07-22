@@ -502,8 +502,13 @@ getinfo(_HandleObject *self, PyObject *args)
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &strlist);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);
-        if (strlist == NULL)
-            Py_RETURN_NONE;
+        if (strlist == NULL) {
+            if (option == LRI_MIRRORS) {
+                return PyList_New(0);
+            } else {
+                Py_RETURN_NONE;
+            }
+        }
         list = PyList_New(0);
         for (int x=0; strlist[x] != NULL; x++) {
             PyList_Append(list, PyString_FromString(strlist[x]));
