@@ -427,7 +427,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
      */
 
     int include_in_internal_mirrorlist = (handle->mirrorlist) ? 1 : 0;
-    lr_Metalink metalink = NULL;
+    lr_Metalink *metalink = NULL;
     lr_Mirrorlist mirrorlist = NULL;
 
     if (handle->mirrorlist_fd == -1) {
@@ -519,12 +519,16 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
                 g_debug("%s: Got metalink", __func__);
 
                 /* Parse metalink */
+                GError *tmp_err = NULL;
                 metalink = lr_metalink_init();
-                rc = lr_metalink_parse_file(metalink, mirrors_fd, "repomd.xml");
+                rc = lr_metalink_parse_file(metalink,
+                                            mirrors_fd,
+                                            "repomd.xml",
+                                            &tmp_err);
                 if (rc != LRE_OK) {
+                    assert(tmp_err);
                     g_debug("%s: Cannot parse metalink (%d)", __func__, rc);
-                    g_set_error(err, LR_HANDLE_ERROR, rc,
-                                "Cannot parse metalink: (%d)", rc);
+                    g_propagate_error(err, tmp_err);
                     goto mirrorlist_error;
                 }
 
@@ -537,7 +541,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
                     goto mirrorlist_error;
                 }
 
-                if (metalink->nou <= 0) {
+                if (!metalink->urls) {
                     g_debug("%s: No URLs in metalink", __func__);
                     rc = LRE_MLBAD;
                     g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
@@ -840,7 +844,7 @@ lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
     }
 
     case LRI_METALINK: {
-        lr_Metalink *metalink = va_arg(arg, lr_Metalink *);
+        lr_Metalink **metalink = va_arg(arg, lr_Metalink **);
         *metalink = handle->metalink;
         break;
     }

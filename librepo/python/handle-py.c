@@ -537,7 +537,7 @@ getinfo(_HandleObject *self, PyObject *args)
     /* metalink */
     case LRI_METALINK: {
         PyObject *py_metalink;
-        lr_Metalink metalink;
+        lr_Metalink *metalink;
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &metalink);
         if (res != LRE_OK)
             RETURN_ERROR(res, self->handle);

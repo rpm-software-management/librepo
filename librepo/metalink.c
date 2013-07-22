@@ -30,45 +30,36 @@
 #include "util.h"
 #include "metalink.h"
 
+/** TODO:
+ * - Better xml parsing error messages
+ * - (?) Use GStringChunk
+ */
+
 #define CHUNK_SIZE              8192
-#define HASHES_REALLOC_STEP     5
-#define URLS_REALLOC_STEP       10
 #define CONTENT_REALLOC_STEP    256
 
 /* Metalink object manipulation helpers */
 
-lr_MetalinkHash
-lr_new_metalinkhash(lr_Metalink m)
+static lr_MetalinkHash *
+lr_new_metalinkhash(lr_Metalink *m)
 {
     assert(m);
-
-    if (m->noh+1 > m->loh) {
-        m->loh += HASHES_REALLOC_STEP;
-        m->hashes = lr_realloc(m->hashes, m->loh * sizeof(lr_MetalinkHash));
-    }
-
-    m->hashes[m->noh] = lr_malloc0(sizeof(struct _lr_MetalinkHash));
-    m->noh++;
-    return m->hashes[m->noh-1];
+    lr_MetalinkHash *hash = lr_malloc0(sizeof(*hash));
+    m->hashes = g_slist_append(m->hashes, hash);
+    return hash;
 }
 
-lr_MetalinkUrl
-lr_new_metalinkurl(lr_Metalink m)
+static lr_MetalinkUrl *
+lr_new_metalinkurl(lr_Metalink *m)
 {
     assert(m);
-
-    if (m->nou+1 > m->lou) {
-        m->lou += URLS_REALLOC_STEP;
-        m->urls = lr_realloc(m->urls, m->lou * sizeof(lr_MetalinkUrl));
-    }
-
-    m->urls[m->nou] = lr_malloc0(sizeof(struct _lr_MetalinkUrl));
-    m->nou++;
-    return m->urls[m->nou-1];
+    lr_MetalinkUrl *url = lr_malloc0(sizeof(*url));
+    m->urls = g_slist_append(m->urls, url);
+    return url;
 }
 
-void
-lr_free_metalinkhash(lr_MetalinkHash metalinkhash)
+static void
+lr_free_metalinkhash(lr_MetalinkHash *metalinkhash)
 {
     if (!metalinkhash) return;
     lr_free(metalinkhash->type);
@@ -76,8 +67,8 @@ lr_free_metalinkhash(lr_MetalinkHash metalinkhash)
     lr_free(metalinkhash);
 }
 
-void
-lr_free_metalinkurl(lr_MetalinkUrl metalinkurl)
+static void
+lr_free_metalinkurl(lr_MetalinkUrl *metalinkurl)
 {
     if (!metalinkurl) return;
     lr_free(metalinkurl->protocol);
@@ -87,24 +78,21 @@ lr_free_metalinkurl(lr_MetalinkUrl metalinkurl)
     lr_free(metalinkurl);
 }
 
-lr_Metalink
+lr_Metalink *
 lr_metalink_init()
 {
-    return lr_malloc0(sizeof(struct _lr_Metalink));
+    return lr_malloc0(sizeof(lr_Metalink));
 }
 
 void
-lr_metalink_free(lr_Metalink metalink)
+lr_metalink_free(lr_Metalink *metalink)
 {
     if (!metalink)
         return;
+
     lr_free(metalink->filename);
-    for (int x = 0; x < metalink->noh; x++)
-        lr_free_metalinkhash(metalink->hashes[x]);
-    lr_free(metalink->hashes);
-    for (int x = 0; x < metalink->nou; x++)
-        lr_free_metalinkurl(metalink->urls[x]);
-    lr_free(metalink->urls);
+    g_slist_free_full(metalink->hashes, (GDestroyNotify)lr_free_metalinkhash);
+    g_slist_free_full(metalink->urls, (GDestroyNotify)lr_free_metalinkurl);
     lr_free(metalink);
 }
 
@@ -164,7 +152,9 @@ typedef struct _ParserData {
     int ignore;             /*!< ignore all subelements of the current file element */
     int found;              /*!< wanted file was already parsed */
 
-    lr_Metalink metalink;   /*!< metalink object */
+    lr_Metalink *metalink;          /*!< metalink object */
+    lr_MetalinkUrl *metalinkurl;    /*!< Url in progress or NULL */
+    lr_MetalinkHash *metalinkhash;  /*!< Hash in progress or NULL */
 } ParserData;
 
 static inline const char *
@@ -244,7 +234,8 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         break;
 
     case STATE_HASH: {
-        lr_MetalinkHash mh;
+        lr_MetalinkHash *mh;
+        assert(!pd->metalinkhash);
         const char *type = lr_find_attr("type", attr);
         if (!type) {
             g_debug("%s: hash element doesn't have type attribute", __func__);
@@ -253,6 +244,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         }
         mh = lr_new_metalinkhash(pd->metalink);
         mh->type = lr_strdup(type);
+        pd->metalinkhash = mh;
         break;
     }
 
@@ -261,7 +253,8 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
 
     case STATE_URL: {
         const char *val;
-        lr_MetalinkUrl url = lr_new_metalinkurl(pd->metalink);
+        assert(!pd->metalinkurl);
+        lr_MetalinkUrl *url = lr_new_metalinkurl(pd->metalink);
         if ((val = lr_find_attr("protocol", attr)))
             url->protocol = lr_strdup(val);
         if ((val = lr_find_attr("type", attr)))
@@ -270,6 +263,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
             url->location = lr_strdup(val);
         if ((val = lr_find_attr("preference", attr)))
             url->preference = atol(val);
+        pd->metalinkurl = url;
         break;
     }
 
@@ -352,21 +346,15 @@ lr_metalink_end_handler(void *pdata, const char *name)
         break;
 
     case STATE_HASH:
-        if (!pd->metalink->noh) {
-            g_debug("%s: there are no checksums", __func__);
-            pd->ret = LRE_MLXML;
-            break;
-        }
-        pd->metalink->hashes[pd->metalink->noh-1]->value = lr_strdup(pd->content);
+        assert(pd->metalinkhash);
+        pd->metalinkhash->value = lr_strdup(pd->content);
+        pd->metalinkhash = NULL;
         break;
 
     case STATE_URL:
-        if (!pd->metalink->nou) {
-            g_debug("%s: there are no urls", __func__);
-            pd->ret = LRE_MLXML;
-            break;
-        }
-        pd->metalink->urls[pd->metalink->nou-1]->url = lr_strdup(pd->content);
+        assert(pd->metalinkurl);
+        pd->metalinkurl->url = lr_strdup(pd->content);
+        pd->metalinkurl = NULL;
         break;
 
     default:
@@ -380,7 +368,10 @@ lr_metalink_end_handler(void *pdata, const char *name)
 }
 
 int
-lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
+lr_metalink_parse_file(lr_Metalink *metalink,
+                       int fd,
+                       const char *filename,
+                       GError **err)
 {
     int ret = LRE_OK;
     XML_Parser parser;
@@ -388,7 +379,9 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
     lr_StatesSwitch *sw;
 
     assert(metalink);
-    DEBUGASSERT(fd >= 0);
+    assert(fd >= 0);
+    assert(filename);
+    assert(!err || *err == NULL);
 
     /* Parser configuration */
     parser = XML_ParserCreate(NULL);
@@ -430,6 +423,8 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
         if (len < 0) {
             g_debug("%s: Cannot read for parsing : %s",
                     __func__, strerror(errno));
+            g_set_error(err, LR_METALINK_ERROR, LRE_IO,
+                        "Cannot read metalink fd %d: %s", fd, strerror(errno));
             ret = LRE_IO;
             break;
         }
@@ -437,6 +432,9 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
         if (!XML_ParseBuffer(parser, len, len == 0)) {
             g_debug("%s: parsing error: %s",
                     __func__, XML_ErrorString(XML_GetErrorCode(parser)));
+            g_set_error(err, LR_METALINK_ERROR, LRE_MLXML,
+                        "Metalink parser error: %s",
+                        XML_ErrorString(XML_GetErrorCode(parser)));
             ret = LRE_MLXML;
             break;
         }
@@ -446,6 +444,8 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
 
         if (pd.ret != LRE_OK) {
             ret = pd.ret;
+            g_set_error(err, LR_METALINK_ERROR, ret,
+                        "Error while parsing metalink: %s", lr_strerror(ret));
             break;
         }
     }
@@ -454,8 +454,11 @@ lr_metalink_parse_file(lr_Metalink metalink, int fd, const char *filename)
     lr_free(pd.content);
     XML_ParserFree(parser);
 
-    if (!pd.found)
+    if (!pd.found) {
+        g_set_error(err, LR_METALINK_ERROR, LRE_MLBAD,
+                    "Bad metalink, file %s was not found", filename);
         return LRE_MLBAD; /* The wanted file was not found in metalink */
+    }
 
     return ret;
 }

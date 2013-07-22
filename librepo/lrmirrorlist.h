@@ -68,7 +68,7 @@ lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
  */
 lr_LrMirrorlist *
 lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
-                                lr_Metalink metalink,
+                                lr_Metalink *metalink,
                                 const char *suffix,
                                 lr_UrlVars *urlvars);
 

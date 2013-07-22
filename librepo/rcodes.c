@@ -115,3 +115,9 @@ lr_handle_error_quark(void)
 {
     return g_quark_from_static_string("lr_handle_error");
 }
+
+GQuark
+lr_metalink_error_quark(void)
+{
+    return g_quark_from_static_string("lr_metalink_error");
+}

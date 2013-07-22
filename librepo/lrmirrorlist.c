@@ -70,20 +70,21 @@ lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
 
 lr_LrMirrorlist *
 lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
-                                lr_Metalink metalink,
+                                lr_Metalink *metalink,
                                 const char *suffix,
                                 lr_UrlVars *urlvars)
 {
     size_t suffix_len = 0;
 
-    if (!metalink || metalink->nou == 0)
+    if (!metalink || !metalink->urls)
         return list;
 
     if (suffix)
         suffix_len = strlen(suffix);
 
-    for (int x=0; x < metalink->nou; x++) {
-        char *url = metalink->urls[x]->url;
+    for (GSList *elem = metalink->urls; elem; elem = g_slist_next(elem)) {
+        lr_MetalinkUrl *metalinkurl = elem->data;
+        char *url = metalinkurl->url;
 
         if (!url)
             continue;  // No url present
@@ -106,7 +107,7 @@ lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
             url_copy = lr_strdup(url);
 
         lr_LrMirror *mirror = lr_lrmirror_new(url_copy, urlvars);
-        mirror->preference = metalink->urls[x]->preference;
+        mirror->preference = metalinkurl->preference;
         lr_free(url_copy);
         list = g_slist_append(list, mirror);
     }

@@ -18,6 +18,7 @@
  */
 
 #include <Python.h>
+#include <glib.h>
 #include "typeconversion.h"
 
 PyObject *
@@ -128,7 +129,7 @@ PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
 }
 
 PyObject *
-PyObject_FromMetalink(lr_Metalink metalink)
+PyObject_FromMetalink(lr_Metalink *metalink)
 {
     PyObject *dict, *sub_list;
 
@@ -149,14 +150,15 @@ PyObject_FromMetalink(lr_Metalink metalink)
     }
     PyDict_SetItemString(dict, "hashes", sub_list);
 
-    for (int x = 0; x < metalink->noh; x++) {
+    for (GSList *elem = metalink->hashes; elem; elem = g_slist_next(elem)) {
+        lr_MetalinkHash *metalinkhash = elem->data;
         PyObject *tuple;
         if ((tuple = PyTuple_New(2)) == NULL) {
             PyDict_Clear(dict);
             return NULL;
         }
-        PyTuple_SetItem(tuple, 0, PyStringOrNone_FromString(metalink->hashes[x]->type));
-        PyTuple_SetItem(tuple, 1, PyStringOrNone_FromString(metalink->hashes[x]->value));
+        PyTuple_SetItem(tuple, 0, PyStringOrNone_FromString(metalinkhash->type));
+        PyTuple_SetItem(tuple, 1, PyStringOrNone_FromString(metalinkhash->value));
         PyList_Append(sub_list, tuple);
     }
 
@@ -167,22 +169,23 @@ PyObject_FromMetalink(lr_Metalink metalink)
     }
     PyDict_SetItemString(dict, "urls", sub_list);
 
-    for (int x = 0; x < metalink->nou; x++) {
+    for (GSList *elem = metalink->urls; elem; elem = g_slist_next(elem)) {
+        lr_MetalinkUrl *metalinkurl = elem->data;
         PyObject *udict;
         if ((udict = PyDict_New()) == NULL) {
             PyDict_Clear(dict);
             return NULL;
         }
         PyDict_SetItemString(udict, "protocol",
-                PyStringOrNone_FromString(metalink->urls[x]->protocol));
+                PyStringOrNone_FromString(metalinkurl->protocol));
         PyDict_SetItemString(udict, "type",
-                PyStringOrNone_FromString(metalink->urls[x]->type));
+                PyStringOrNone_FromString(metalinkurl->type));
         PyDict_SetItemString(udict, "location",
-                PyStringOrNone_FromString(metalink->urls[x]->location));
+                PyStringOrNone_FromString(metalinkurl->location));
         PyDict_SetItemString(udict, "preference",
-                PyLong_FromLong((long) metalink->urls[x]->preference));
+                PyLong_FromLong((long) metalinkurl->preference));
         PyDict_SetItemString(udict, "url",
-                PyStringOrNone_FromString(metalink->urls[x]->url));
+                PyStringOrNone_FromString(metalinkurl->url));
         PyList_Append(sub_list, udict);
     }
 

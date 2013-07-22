@@ -148,7 +148,7 @@ lr_yum_repomd_record_enabled(lr_Handle handle, const char *type)
 
 int
 lr_yum_download_repomd(lr_Handle handle,
-                       lr_Metalink metalink,
+                       lr_Metalink *metalink,
                        int fd)
 {
     int rc = LRE_OK;
@@ -160,9 +160,9 @@ lr_yum_download_repomd(lr_Handle handle,
 
     if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
         /* Select the best checksum type */
-        for (int x = 0; x < metalink->noh; x++) {
+        for (GSList *elem = metalink->hashes; elem; elem = g_slist_next(elem)) {
             lr_ChecksumType mtype;
-            lr_MetalinkHash mhash = metalink->hashes[x];
+            lr_MetalinkHash *mhash = elem->data;
 
             if (!mhash->type || !mhash->value)
                 continue;

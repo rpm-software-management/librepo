@@ -40,7 +40,7 @@ struct _lr_Handle {
 
     // Mirrorlist related stuff
     char            *mirrorlist;    /*!< Mirrorlist or metalink URL */
-    lr_Metalink     metalink;       /*!< Parsed metalink for repomd.xml */
+    lr_Metalink     *metalink;      /*!< Parsed metalink for repomd.xml */
     lr_LrMirrorlist *mirrors;       /*!< Mirrors from metalink or mirrorlist */
     int             mirrorlist_fd;  /*!< Raw downloaded file */
 

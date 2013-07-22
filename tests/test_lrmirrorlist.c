@@ -47,50 +47,46 @@ START_TEST(test_lrmirrorlist_append_metalink)
     lr_LrMirrorlist *iml = NULL;
     lr_LrMirror *mirror = NULL;
     char *url = NULL;
-    struct _lr_MetalinkUrl url1 = {
+    lr_MetalinkUrl url1 = {
             .protocol = "http",
             .type = "http",
             .location = "CZ",
             .preference = 100,
             .url = "http://foo/repodata/repomd.xml",
         };
-    struct _lr_MetalinkUrl url2 = {
+    lr_MetalinkUrl url2 = {
             .protocol = "rsync",
             .type = "rsync",
             .location = "US",
             .preference = 50,
             .url = "",
         };
-    struct _lr_MetalinkUrl url3 = {
+    lr_MetalinkUrl url3 = {
             .protocol = "ftp",
             .type = "ftp",
             .location = "CZ",
             .preference = 1,
             .url = NULL,
         };
-    struct _lr_MetalinkUrl url4 = {
+    lr_MetalinkUrl url4 = {
             .protocol = "ftp",
             .type = "ftp",
             .location = "US",
             .preference = 95,
             .url = "ftp://bar/repodata/repomd.xml",
         };
-    struct _lr_Metalink ml = {
+    lr_Metalink ml = {
         .filename = NULL,
         .timestamp = 1,
         .size = 1,
         .hashes = NULL,
-        .urls = (lr_MetalinkUrl[4]) {
-            (lr_MetalinkUrl) &url1,
-            (lr_MetalinkUrl) &url2,
-            (lr_MetalinkUrl) &url3,
-            (lr_MetalinkUrl) &url4
-        },
-        .noh = 0,
-        .nou = 4,
-        .loh = 0,
-        .lou = 4,
+        .urls = NULL,
     };
+
+    ml.urls = g_slist_prepend(ml.urls, &url4);
+    ml.urls = g_slist_prepend(ml.urls, &url3);
+    ml.urls = g_slist_prepend(ml.urls, &url2);
+    ml.urls = g_slist_prepend(ml.urls, &url1);
 
     fail_if(g_slist_length(iml) != 0);
     iml = lr_lrmirrorlist_append_metalink(iml, NULL, NULL, NULL);

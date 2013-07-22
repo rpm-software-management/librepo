@@ -26,7 +26,7 @@
 
 START_TEST(test_metalink_init)
 {
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
 
     ml = lr_metalink_init();
     fail_if(ml == NULL);
@@ -39,7 +39,11 @@ START_TEST(test_metalink_good_01)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    lr_MetalinkHash *mlhash = NULL;
+    lr_MetalinkUrl *mlurl = NULL;
+    GSList *elem = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_good_01", NULL);
@@ -48,72 +52,97 @@ START_TEST(test_metalink_good_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret != LRE_OK);
+    fail_if(tmp_err);
     close(fd);
 
     fail_if(ml->filename == NULL);
     fail_if(strcmp(ml->filename, "repomd.xml"));
     fail_if(ml->timestamp != 1337942396);
     fail_if(ml->size != 4309);
-    fail_if(ml->noh != 4);
-    fail_if(ml->nou != 106);
+    fail_if(g_slist_length(ml->hashes) != 4);
+    fail_if(g_slist_length(ml->urls) != 106);
 
-    fail_if(ml->hashes[0]->type == NULL);
-    fail_if(strcmp(ml->hashes[0]->type, "md5"));
-    fail_if(ml->hashes[0]->value == NULL);
-    fail_if(strcmp(ml->hashes[0]->value,
-                    "20b6d77930574ae541108e8e7987ad3f"));
+    elem = g_slist_nth(ml->hashes, 0);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "md5"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, "20b6d77930574ae541108e8e7987ad3f"));
 
-    fail_if(ml->hashes[1]->type == NULL);
-    fail_if(strcmp(ml->hashes[1]->type, "sha1"));
-    fail_if(ml->hashes[1]->value == NULL);
-    fail_if(strcmp(ml->hashes[1]->value,
-                    "4a5ae1831a567b58e2e0f0de1529ca199d1d8319"));
+    elem = g_slist_nth(ml->hashes, 1);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "sha1"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, "4a5ae1831a567b58e2e0f0de1529ca199d1d8319"));
 
-    fail_if(ml->hashes[2]->type == NULL);
-    fail_if(strcmp(ml->hashes[2]->type, "sha256"));
-    fail_if(ml->hashes[2]->value == NULL);
-    fail_if(strcmp(ml->hashes[2]->value,
-                    "0076c44aabd352da878d5c4d794901ac87f66afac869488f6a4ef166de018cdf"));
+    elem = g_slist_nth(ml->hashes, 2);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "sha256"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, "0076c44aabd352da878d5c4d794901ac87f66afac869488f6a4ef166de018cdf"));
 
-    fail_if(ml->hashes[3]->type == NULL);
-    fail_if(strcmp(ml->hashes[3]->type, "sha512"));
-    fail_if(ml->hashes[3]->value == NULL);
-    fail_if(strcmp(ml->hashes[3]->value,
-                    "884dc465da67fee8fe3f11dab321a99d9a13b22ce97f84ceff210e82b6b1a8c635ccd196add1dd738807686714c3a0a048897e2d0650bc05302b3ee26de521fd"));
+    elem = g_slist_nth(ml->hashes, 3);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "sha512"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, "884dc465da67fee8fe3f11dab321a99d9a13b22ce97f84ceff210e82b6b1a8c635ccd196add1dd738807686714c3a0a048897e2d0650bc05302b3ee26de521fd"));
 
-    fail_if(ml->urls[0]->protocol == NULL);
-    fail_if(strcmp(ml->urls[0]->protocol, "http"));
-    fail_if(ml->urls[0]->type == NULL);
-    fail_if(strcmp(ml->urls[0]->type, "http"));
-    fail_if(ml->urls[0]->location == NULL);
-    fail_if(strcmp(ml->urls[0]->location, "US"));
-    fail_if(ml->urls[0]->preference != 99);
-    fail_if(ml->urls[0]->url == NULL);
-    fail_if(strcmp(ml->urls[0]->url,
+    elem = g_slist_nth(ml->urls, 0);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol == NULL);
+    fail_if(strcmp(mlurl->protocol, "http"));
+    fail_if(mlurl->type == NULL);
+    fail_if(strcmp(mlurl->type, "http"));
+    fail_if(mlurl->location == NULL);
+    fail_if(strcmp(mlurl->location, "US"));
+    fail_if(mlurl->preference != 99);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "http://mirror.pnl.gov/fedora/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
-    fail_if(ml->urls[2]->protocol == NULL);
-    fail_if(strcmp(ml->urls[2]->protocol, "ftp"));
-    fail_if(ml->urls[2]->type == NULL);
-    fail_if(strcmp(ml->urls[2]->type, "ftp"));
-    fail_if(ml->urls[2]->location == NULL);
-    fail_if(strcmp(ml->urls[2]->location, "US"));
-    fail_if(ml->urls[2]->preference != 98);
-    fail_if(ml->urls[2]->url == NULL);
-    fail_if(strcmp(ml->urls[2]->url,
+    elem = g_slist_nth(ml->urls, 2);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol == NULL);
+    fail_if(strcmp(mlurl->protocol, "ftp"));
+    fail_if(mlurl->type == NULL);
+    fail_if(strcmp(mlurl->type, "ftp"));
+    fail_if(mlurl->location == NULL);
+    fail_if(strcmp(mlurl->location, "US"));
+    fail_if(mlurl->preference != 98);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "ftp://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
-    fail_if(ml->urls[104]->protocol == NULL);
-    fail_if(strcmp(ml->urls[104]->protocol, "rsync"));
-    fail_if(ml->urls[104]->type == NULL);
-    fail_if(strcmp(ml->urls[104]->type, "rsync"));
-    fail_if(ml->urls[104]->location == NULL);
-    fail_if(strcmp(ml->urls[104]->location, "CA"));
-    fail_if(ml->urls[104]->preference != 48);
-    fail_if(ml->urls[104]->url == NULL);
-    fail_if(strcmp(ml->urls[104]->url,
+    elem = g_slist_nth(ml->urls, 104);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol == NULL);
+    fail_if(strcmp(mlurl->protocol, "rsync"));
+    fail_if(mlurl->type == NULL);
+    fail_if(strcmp(mlurl->type, "rsync"));
+    fail_if(mlurl->location == NULL);
+    fail_if(strcmp(mlurl->location, "CA"));
+    fail_if(mlurl->preference != 48);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "rsync://mirror.csclub.uwaterloo.ca/fedora-enchilada/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
     lr_metalink_free(ml);
@@ -125,7 +154,8 @@ START_TEST(test_metalink_good_02)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_good_02", NULL);
@@ -134,26 +164,31 @@ START_TEST(test_metalink_good_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret != LRE_OK);
+    fail_if(tmp_err);
     close(fd);
 
     fail_if(ml->filename == NULL);
     fail_if(strcmp(ml->filename, "repomd.xml"));
     fail_if(ml->timestamp != 0);
     fail_if(ml->size != 0);
-    fail_if(ml->noh != 0);
-    fail_if(ml->nou != 3);
+    fail_if(g_slist_length(ml->hashes) != 0);
+    fail_if(g_slist_length(ml->urls) != 3);
 
-    fail_if(ml->urls[0]->protocol == NULL);
-    fail_if(strcmp(ml->urls[0]->protocol, "http"));
-    fail_if(ml->urls[0]->type == NULL);
-    fail_if(strcmp(ml->urls[0]->type, "http"));
-    fail_if(ml->urls[0]->location == NULL);
-    fail_if(strcmp(ml->urls[0]->location, "US"));
-    fail_if(ml->urls[0]->preference != 97);
-    fail_if(ml->urls[0]->url == NULL);
-    fail_if(strcmp(ml->urls[0]->url,
+    GSList *list = g_slist_nth(ml->urls, 0);
+    fail_if(!list);
+    lr_MetalinkUrl *mlurl = list->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol == NULL);
+    fail_if(strcmp(mlurl->protocol, "http"));
+    fail_if(mlurl->type == NULL);
+    fail_if(strcmp(mlurl->type, "http"));
+    fail_if(mlurl->location == NULL);
+    fail_if(strcmp(mlurl->location, "US"));
+    fail_if(mlurl->preference != 97);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "http://mirror.pnl.gov/fedora/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
     lr_metalink_free(ml);
@@ -165,7 +200,8 @@ START_TEST(test_metalink_good_03)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_good_03", NULL);
@@ -174,16 +210,17 @@ START_TEST(test_metalink_good_03)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret != LRE_OK);
+    fail_if(tmp_err);
     close(fd);
 
     fail_if(ml->filename == NULL);
     fail_if(strcmp(ml->filename, "repomd.xml"));
     fail_if(ml->timestamp != 0);
     fail_if(ml->size != 0);
-    fail_if(ml->noh != 0);
-    fail_if(ml->nou != 0);
+    fail_if(g_slist_length(ml->hashes) != 0);
+    fail_if(g_slist_length(ml->urls) != 0);
 
     lr_metalink_free(ml);
 }
@@ -194,7 +231,11 @@ START_TEST(test_metalink_bad_01)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    lr_MetalinkHash *mlhash = NULL;
+    lr_MetalinkUrl *mlurl = NULL;
+    GSList *elem = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_bad_01", NULL);
@@ -203,73 +244,107 @@ START_TEST(test_metalink_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret != LRE_OK);
+    fail_if(tmp_err);
     close(fd);
 
     fail_if(ml->filename == NULL);
     fail_if(strcmp(ml->filename, "repomd.xml"));
     fail_if(ml->timestamp != 0);
     fail_if(ml->size != 0);
-    fail_if(ml->noh != 4);
-    fail_if(ml->nou != 4);
+    fail_if(g_slist_length(ml->hashes) != 4);
+    fail_if(g_slist_length(ml->urls) != 4);
 
-    fail_if(ml->hashes[0]->type == NULL);
-    fail_if(strcmp(ml->hashes[0]->type, "md5"));
-    fail_if(ml->hashes[0]->value == NULL);
-    fail_if(strcmp(ml->hashes[0]->value,
+
+    elem = g_slist_nth(ml->hashes, 0);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "md5"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value,
                     "20b6d77930574ae541108e8e7987ad3f"));
 
-    fail_if(ml->hashes[1]->type == NULL);
-    fail_if(strcmp(ml->hashes[1]->type, "foo"));
-    fail_if(ml->hashes[1]->value == NULL);
-    fail_if(strcmp(ml->hashes[1]->value, ""));
+    elem = g_slist_nth(ml->hashes, 1);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "foo"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, ""));
 
-    fail_if(ml->hashes[2]->type == NULL);
-    fail_if(strcmp(ml->hashes[2]->type, "sha256"));
-    fail_if(ml->hashes[2]->value == NULL);
-    fail_if(strcmp(ml->hashes[2]->value,
+    elem = g_slist_nth(ml->hashes, 2);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "sha256"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value,
                     "0076c44aabd352da878d5c4d794901ac87f66afac869488f6a4ef166de018cdf"));
 
-    fail_if(ml->hashes[3]->type == NULL);
-    fail_if(strcmp(ml->hashes[3]->type, "sha512"));
-    fail_if(ml->hashes[3]->value == NULL);
-    fail_if(strcmp(ml->hashes[3]->value,
+    elem = g_slist_nth(ml->hashes, 3);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "sha512"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value,
                     "884dc465da67fee8fe3f11dab321a99d9a13b22ce97f84ceff210e82b6b1a8c635ccd196add1dd738807686714c3a0a048897e2d0650bc05302b3ee26de521fd"));
 
-    fail_if(ml->urls[0]->protocol == NULL);
-    fail_if(strcmp(ml->urls[0]->protocol, "http"));
-    fail_if(ml->urls[0]->type == NULL);
-    fail_if(strcmp(ml->urls[0]->type, "http"));
-    fail_if(ml->urls[0]->location == NULL);
-    fail_if(strcmp(ml->urls[0]->location, "US"));
-    fail_if(ml->urls[0]->preference != 0);
-    fail_if(ml->urls[0]->url == NULL);
-    fail_if(strcmp(ml->urls[0]->url,
+    elem = g_slist_nth(ml->urls, 0);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol == NULL);
+    fail_if(strcmp(mlurl->protocol, "http"));
+    fail_if(mlurl->type == NULL);
+    fail_if(strcmp(mlurl->type, "http"));
+    fail_if(mlurl->location == NULL);
+    fail_if(strcmp(mlurl->location, "US"));
+    fail_if(mlurl->preference != 0);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "http://mirror.pnl.gov/fedora/linux/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
-    fail_if(ml->urls[1]->protocol != NULL);
-    fail_if(ml->urls[1]->type != NULL);
-    fail_if(ml->urls[1]->location != NULL);
-    fail_if(ml->urls[1]->preference != -5);
-    fail_if(ml->urls[1]->url == NULL);
-    fail_if(strcmp(ml->urls[1]->url,
+    elem = g_slist_nth(ml->urls, 1);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol != NULL);
+    fail_if(mlurl->type != NULL);
+    fail_if(mlurl->location != NULL);
+    fail_if(mlurl->preference != -5);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "ftp://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
-    fail_if(ml->urls[2]->protocol != NULL);
-    fail_if(ml->urls[2]->type != NULL);
-    fail_if(ml->urls[2]->location != NULL);
-    fail_if(ml->urls[2]->preference != 0);
-    fail_if(ml->urls[2]->url == NULL);
-    fail_if(strcmp(ml->urls[2]->url,
+    elem = g_slist_nth(ml->urls, 2);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol != NULL);
+    fail_if(mlurl->type != NULL);
+    fail_if(mlurl->location != NULL);
+    fail_if(mlurl->preference != 0);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url,
                    "rsync://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml"));
 
-    fail_if(ml->urls[3]->protocol != NULL);
-    fail_if(ml->urls[3]->type != NULL);
-    fail_if(ml->urls[3]->location != NULL);
-    fail_if(ml->urls[3]->preference != 0);
-    fail_if(ml->urls[3]->url == NULL);
-    fail_if(strcmp(ml->urls[3]->url, ""));
+    elem = g_slist_nth(ml->urls, 3);
+    fail_if(!elem);
+    mlurl = elem->data;
+    fail_if(!mlurl);
+    fail_if(mlurl->protocol != NULL);
+    fail_if(mlurl->type != NULL);
+    fail_if(mlurl->location != NULL);
+    fail_if(mlurl->preference != 0);
+    fail_if(mlurl->url == NULL);
+    fail_if(strcmp(mlurl->url, ""));
 
     lr_metalink_free(ml);
 }
@@ -280,7 +355,8 @@ START_TEST(test_metalink_bad_02)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_bad_02", NULL);
@@ -289,10 +365,11 @@ START_TEST(test_metalink_bad_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret != LRE_OK);
+    fail_if(tmp_err);
     close(fd);
-    fail_if(ml->nou != 0);
+    fail_if(g_slist_length(ml->urls) != 0);
     lr_metalink_free(ml);
 }
 END_TEST
@@ -302,7 +379,8 @@ START_TEST(test_metalink_really_bad_01)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_really_bad_01", NULL);
@@ -311,8 +389,10 @@ START_TEST(test_metalink_really_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret == LRE_OK);
+    fail_if(!tmp_err);
+    g_error_free(tmp_err);
     close(fd);
     lr_metalink_free(ml);
 }
@@ -323,7 +403,8 @@ START_TEST(test_metalink_really_bad_02)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_really_bad_02", NULL);
@@ -332,8 +413,10 @@ START_TEST(test_metalink_really_bad_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret == LRE_OK);
+    fail_if(!tmp_err);
+    g_error_free(tmp_err);
     close(fd);
     lr_metalink_free(ml);
 }
@@ -344,7 +427,8 @@ START_TEST(test_metalink_really_bad_03)
     int fd;
     int ret;
     char *path;
-    lr_Metalink ml = NULL;
+    lr_Metalink *ml = NULL;
+    GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_really_bad_03", NULL);
@@ -353,8 +437,10 @@ START_TEST(test_metalink_really_bad_03)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
     fail_if(ret == LRE_OK);
+    fail_if(!tmp_err);
+    g_error_free(tmp_err);
     close(fd);
     lr_metalink_free(ml);
 }
