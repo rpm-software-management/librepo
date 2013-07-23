@@ -103,7 +103,7 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
     while (*cur != '\0') {
         if (*cur == '$') {
             if (cur-p) {
-                char *tmp = lr_strndup(p, cur-p);
+                char *tmp = g_strndup(p, cur-p);
                 tmp_res = g_strconcat(res, tmp, NULL);
                 lr_free(tmp);
                 lr_free(res);

@@ -56,25 +56,6 @@ START_TEST(test_strdup)
 }
 END_TEST
 
-START_TEST(test_strndup)
-{
-    char msg[] = "Luke! I am your father!";
-    char *dup = NULL;
-
-    dup = lr_strndup(NULL, 5);
-    fail_if(dup != NULL);
-
-    dup = lr_strndup(NULL, 0);
-    fail_if(dup != NULL);
-
-    dup = lr_strndup(msg, 5);
-    fail_if(dup == NULL);
-    fail_if(msg == dup);
-    fail_if(strcmp(dup, "Luke!") != 0);
-    lr_free(dup);
-}
-END_TEST
-
 START_TEST(test_gettmpfile)
 {
     int fd = 0;
@@ -163,7 +144,6 @@ util_suite(void)
     tcase_add_test(tc, test_malloc0);
     tcase_add_test(tc, test_free);
     tcase_add_test(tc, test_strdup);
-    tcase_add_test(tc, test_strndup);
     tcase_add_test(tc, test_gettmpfile);
     tcase_add_test(tc, test_gettmpdir);
     tcase_add_test(tc, test_pathconcat);
