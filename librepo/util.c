@@ -149,24 +149,6 @@ lr_gettmpdir()
     return dir;
 }
 
-int
-lr_ends_with(const char *str, const char *suffix)
-{
-    int str_len;
-    int suffix_len;
-
-    if (!str || !suffix)
-        return 0;
-
-    str_len = strlen(str);
-    suffix_len = strlen(suffix);
-
-    if (str_len < suffix_len)
-        return 0;
-
-    return strcmp(str + str_len - suffix_len, suffix) == 0;
-}
-
 char *
 lr_pathconcat(const char *first, ...)
 {
@@ -328,40 +310,6 @@ lr_prepend_url_protocol(const char *path)
     path_with_protocol = lr_strconcat("file://", resolved_path, NULL);
     free(resolved_path);
     return path_with_protocol;
-}
-
-int
-lr_vasprintf(char **strp, const char *format, va_list va)
-{
-    int size;
-#ifdef HAVE_VASPRINTF
-    size = vasprintf(strp, format, va);
-    if (size == -1)
-        lr_out_of_memory();
-    return size;
-#else
-    va_list va2;
-
-    va_copy(va2, va);
-    size = vsnprintf(NULL, 0, format, va2);
-    va_end(va2);
-    *strp = lr_malloc(size + 1);
-    vsnprintf(*strp, size + 1, format, va);
-    (*strp)[size] = 0;
-    return size;
-#endif
-}
-
-int
-lr_asprintf(char **strp, const char *format, ...)
-{
-    int len;
-    va_list args;
-
-    va_start(args, format);
-    len = lr_vasprintf(strp, format, args);
-    va_end(args);
-    return len;
 }
 
 gchar *

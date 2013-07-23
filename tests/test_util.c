@@ -113,19 +113,6 @@ START_TEST(test_gettmpdir)
 }
 END_TEST
 
-START_TEST(test_ends_with)
-{
-    fail_if(lr_ends_with(NULL, NULL) != 0);
-    fail_if(lr_ends_with(NULL, "ET phone home") != 0);
-    fail_if(lr_ends_with("Bazinga!", NULL) != 0);
-    fail_if(lr_ends_with("If I’m not back in five minutes", ", just wait longer") != 0);
-    fail_if(lr_ends_with("Legen... Wait for it... dary", "dary") == 0);
-    fail_if(lr_ends_with("Reskept", "") == 0);
-    fail_if(lr_ends_with("", "") == 0);
-    fail_if(lr_ends_with("", "Suit up!") != 0);
-}
-END_TEST
-
 START_TEST(test_pathconcat)
 {
     char *path = NULL;
@@ -200,7 +187,6 @@ util_suite(void)
     tcase_add_test(tc, test_strconcat);
     tcase_add_test(tc, test_gettmpfile);
     tcase_add_test(tc, test_gettmpdir);
-    tcase_add_test(tc, test_ends_with);
     tcase_add_test(tc, test_pathconcat);
     tcase_add_test(tc, test_remove_dir);
     suite_add_tcase(s, tc);

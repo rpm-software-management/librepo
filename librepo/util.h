@@ -108,14 +108,6 @@ int lr_gettmpfile();
 char *lr_gettmpdir();
 
 /** \ingroup util
- * Looks whether string ends with suffix.
- * @param str           String.
- * @param suffix        Suffix.
- * @returns             0 if str don't end with suffix, other if end.
- */
-int lr_ends_with(const char *str, const char *suffix);
-
-/** \ingroup util
  * Concatenate all of given part of path.
  * If last chunk is "" then separator will be appended to the result.
  * @param str           First part of the path.
