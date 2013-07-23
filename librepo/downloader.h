@@ -54,7 +54,7 @@ lr_sigint_handler(int sig);
  * @return          lr_Rc code
  */
 int
-lr_download(lr_Handle handle, GSList *targets, GError **err);
+lr_download(lr_Handle *handle, GSList *targets, GError **err);
 
 /** Wrapper over ::lr_download that takes only single ::lr_DownloadTarget.
  * @param handle    See ::lr_download
@@ -63,7 +63,7 @@ lr_download(lr_Handle handle, GSList *targets, GError **err);
  * @return          See ::lr_download
  */
 int
-lr_download_target(lr_Handle handle, lr_DownloadTarget *target, GError **err);
+lr_download_target(lr_Handle *handle, lr_DownloadTarget *target, GError **err);
 
 /** Wrapper over the ::lr_download_target that takes only url and fd.
  * @param handle    See ::lr_download
@@ -73,7 +73,7 @@ lr_download_target(lr_Handle handle, lr_DownloadTarget *target, GError **err);
  * @return          See ::lr_download
  */
 int
-lr_download_url(lr_Handle handle, const char *url, int fd, GError **err);
+lr_download_url(lr_Handle *handle, const char *url, int fd, GError **err);
 
 /** Wrapper over the ::lr_download that calculate collective statistics of
  * all downloads and repord them via callback. Note: All callbacks and
@@ -86,7 +86,7 @@ lr_download_url(lr_Handle handle, const char *url, int fd, GError **err);
  * @return          See ::lr_download
  */
 int
-lr_download_single_cb(lr_Handle handle,
+lr_download_single_cb(lr_Handle *handle,
                       GSList *targets,
                       lr_ProgressCb cb,
                       void *cbdata,

@@ -58,7 +58,7 @@ extern "C" {
  *                          already exists.
  * @return                  Librepo return code.
  */
-int lr_download_package(lr_Handle handle,
+int lr_download_package(lr_Handle *handle,
                         const char *relative_url,
                         const char *dest,
                         lr_ChecksumType checksum_type,

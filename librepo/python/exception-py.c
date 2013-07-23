@@ -35,7 +35,7 @@ init_exceptions()
 
 
 void *
-return_error(int rc, lr_Handle h)
+return_error(int rc, lr_Handle *h)
 {
     /* Create an exception based on rc (and handle - optionaly).
      * Exception type is LrErr_Exception and value is tuple:

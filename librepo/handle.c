@@ -72,16 +72,16 @@ lr_handle_free_list(char ***list)
     *list = NULL;
 }
 
-lr_Handle
+lr_Handle *
 lr_handle_init()
 {
-    lr_Handle handle;
+    lr_Handle *handle;
     CURL *curl = lr_get_curl_handle();
 
     if (!curl)
         return NULL;
 
-    handle = lr_malloc0(sizeof(struct _lr_Handle));
+    handle = lr_malloc0(sizeof(lr_Handle));
     handle->curl_handle = curl;
     handle->retries = 1;
     handle->mirrorlist_fd = -1;
@@ -91,7 +91,7 @@ lr_handle_init()
 }
 
 void
-lr_handle_free(lr_Handle handle)
+lr_handle_free(lr_Handle *handle)
 {
     if (!handle)
         return;
@@ -114,7 +114,7 @@ lr_handle_free(lr_Handle handle)
 }
 
 int
-lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
+lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...)
 {
     lr_Rc ret = LRE_OK;
     va_list arg;
@@ -353,7 +353,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 #define TYPE_MIRRORLIST 2
 
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
+lr_handle_prepare_internal_mirrorlist(lr_Handle *handle, GError **err)
 {
     int rc = LRE_OK;
     char *metalink_suffix = NULL;
@@ -630,7 +630,7 @@ mirrorlist_error:
 }
 
 int
-lr_handle_perform(lr_Handle handle, lr_Result *result, GError **err)
+lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err)
 {
     int rc = LRE_OK;
 
@@ -734,7 +734,7 @@ lr_handle_perform(lr_Handle handle, lr_Result *result, GError **err)
 }
 
 int
-lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...)
+lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
 {
     int rc = LRE_OK;
     va_list arg;

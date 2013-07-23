@@ -79,7 +79,7 @@ lr_get_curl_handle();
  * @return                  Librepo return code.
  */
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err);
+lr_handle_prepare_internal_mirrorlist(lr_Handle *handle, GError **err);
 
 
 #ifdef __cplusplus

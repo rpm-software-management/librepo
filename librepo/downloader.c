@@ -109,7 +109,7 @@ typedef struct {
 
     // Data
 
-    lr_Handle lr_handle; /*!<
+    lr_Handle *lr_handle; /*!<
         Librepo handle */
 
     CURLM *multi_handle; /*!<
@@ -135,7 +135,7 @@ typedef struct {
  * | int max_connection_par_host  |
  * | int max_mirrors_to_try       |
  * |                              |
- * | lr_Handle lr_handle          |
+ * | lr_Handle *lr_handle         |
  * | CURLM *multi_handle          |
  * |                              |
  * | GSList *mirrors             ------\
@@ -753,7 +753,7 @@ lr_perform(lr_Download *dd, GError **err)
 }
 
 int
-lr_download(lr_Handle lr_handle, GSList *targets, GError **err)
+lr_download(lr_Handle *lr_handle, GSList *targets, GError **err)
 {
     int ret = LRE_OK;
     lr_Download dd;             // dd stands for Download Data
@@ -886,7 +886,7 @@ lr_download_cleanup:
 }
 
 int
-lr_download_target(lr_Handle lr_handle,
+lr_download_target(lr_Handle *lr_handle,
                    lr_DownloadTarget *target,
                    GError **err)
 {
@@ -908,7 +908,7 @@ lr_download_target(lr_Handle lr_handle,
 }
 
 int
-lr_download_url(lr_Handle lr_handle, const char *url, int fd, GError **err)
+lr_download_url(lr_Handle *lr_handle, const char *url, int fd, GError **err)
 {
     int ret = LRE_OK;
     lr_DownloadTarget *target;
@@ -1000,7 +1000,7 @@ lr_multi_progress_func(void* ptr,
 }
 
 int
-lr_download_single_cb(lr_Handle lr_handle,
+lr_download_single_cb(lr_Handle *lr_handle,
                       GSList *targets,
                       lr_ProgressCb cb,
                       void *cbdata,

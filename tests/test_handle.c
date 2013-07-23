@@ -18,7 +18,7 @@
 
 START_TEST(test_handle)
 {
-    lr_Handle h = NULL;
+    lr_Handle *h = NULL;
 
     lr_global_init();
     h = lr_handle_init();
@@ -51,7 +51,7 @@ START_TEST(test_handle_getinfo)
     long num;
     char *str;
     char **strlist;
-    lr_Handle h = NULL;
+    lr_Handle *h = NULL;
 
     lr_global_init();
     h = lr_handle_init();

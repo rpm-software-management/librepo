@@ -39,7 +39,7 @@ int
 lr_repoutil_yum_check_repo(const char *path, GError **err)
 {
     int rc;
-    lr_Handle h;
+    lr_Handle *h;
     lr_Result *result;
 
     assert(path);

@@ -36,7 +36,7 @@ END_TEST
 START_TEST(test_downloader_single_file)
 {
     int ret;
-    lr_Handle handle;
+    lr_Handle *handle;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1;
@@ -137,7 +137,7 @@ END_TEST
 START_TEST(test_downloader_two_files)
 {
     int ret;
-    lr_Handle handle;
+    lr_Handle *handle;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1, fd2;
@@ -201,7 +201,7 @@ END_TEST
 START_TEST(test_downloader_three_files_with_error)
 {
     int ret;
-    lr_Handle handle;
+    lr_Handle *handle;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1, fd2, fd3;

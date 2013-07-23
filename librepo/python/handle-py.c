@@ -30,13 +30,13 @@
 
 typedef struct {
     PyObject_HEAD
-    lr_Handle handle;
+    lr_Handle *handle;
     /* Callback */
     PyObject *progress_cb;
     PyObject *progress_cb_data;
 } _HandleObject;
 
-lr_Handle
+lr_Handle *
 Handle_FromPyObject(PyObject *o)
 {
     if (!HandleObject_Check(o)) {

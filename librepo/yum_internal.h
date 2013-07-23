@@ -28,7 +28,7 @@ extern "C" {
 #include "result.h"
 #include "handle.h"
 
-int lr_yum_perform(lr_Handle handle, lr_Result *result);
+int lr_yum_perform(lr_Handle *handle, lr_Result *result);
 
 #ifdef __cplusplus
 }

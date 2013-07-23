@@ -40,7 +40,7 @@ typedef struct {
 
 /** Yum repository */
 typedef struct {
-    GSList *paths;      /*!< Paths to repo files. List of lr_YumRepoPath*s */
+    GSList *paths;      /*!< Paths to repo files. List of ::lr_YumRepoPath*s */
     char *repomd;       /*!< Path to repomd.xml */
     char *url;          /*!< URL from where repo was downloaded */
     char *destdir;      /*!< Local path to the repo */

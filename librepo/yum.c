@@ -124,7 +124,7 @@ lr_yum_repo_update(lr_YumRepo *repo, const char *type, const char *path)
 /* main bussines logic */
 
 int
-lr_yum_repomd_record_enabled(lr_Handle handle, const char *type)
+lr_yum_repomd_record_enabled(lr_Handle *handle, const char *type)
 {
     // Blacklist check
     if (handle->yumblist) {
@@ -150,7 +150,7 @@ lr_yum_repomd_record_enabled(lr_Handle handle, const char *type)
 }
 
 int
-lr_yum_download_repomd(lr_Handle handle,
+lr_yum_download_repomd(lr_Handle *handle,
                        lr_Metalink *metalink,
                        int fd)
 {
@@ -216,7 +216,7 @@ lr_yum_download_repomd(lr_Handle handle,
 }
 
 int
-lr_yum_download_repo(lr_Handle handle, lr_YumRepo *repo, lr_YumRepoMd *repomd)
+lr_yum_download_repo(lr_Handle *handle, lr_YumRepo *repo, lr_YumRepoMd *repomd)
 {
     int ret = LRE_OK;
     char *destdir;  /* Destination dir */
@@ -354,7 +354,7 @@ lr_yum_check_repo_checksums(lr_YumRepo *repo, lr_YumRepoMd *repomd)
 }
 
 int
-lr_yum_use_local(lr_Handle handle, lr_Result *result)
+lr_yum_use_local(lr_Handle *handle, lr_Result *result)
 {
     char *path;
     int rc = LRE_OK;
@@ -477,7 +477,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result *result)
 }
 
 int
-lr_yum_download_remote(lr_Handle handle, lr_Result *result)
+lr_yum_download_remote(lr_Handle *handle, lr_Result *result)
 {
     int rc = LRE_OK;
     int fd;
@@ -633,7 +633,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result *result)
 }
 
 int
-lr_yum_perform(lr_Handle handle, lr_Result *result)
+lr_yum_perform(lr_Handle *handle, lr_Result *result)
 {
     int rc = LRE_OK;
     lr_YumRepo *repo;

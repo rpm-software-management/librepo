@@ -28,6 +28,6 @@ int init_exceptions();
 
 #define RETURN_ERROR(rc, h) do { return return_error((rc), (h)); } while(0)
 
-void *return_error(int rc, lr_Handle h);
+void *return_error(int rc, lr_Handle *h);
 
 #endif

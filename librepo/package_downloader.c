@@ -36,7 +36,7 @@
 /* Do NOT use resume on successfully downloaded files - download will fail */
 
 int
-lr_download_package(lr_Handle handle,
+lr_download_package(lr_Handle *handle,
                     const char *relative_url,
                     const char *dest,
                     lr_ChecksumType checksum_type,

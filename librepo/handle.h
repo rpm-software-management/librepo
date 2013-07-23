@@ -34,7 +34,7 @@ extern "C" {
 /** Handle object containing configration for repository metadata and
  * package downloading.
  */
-typedef struct _lr_Handle *lr_Handle;
+typedef struct _lr_Handle lr_Handle;
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
@@ -148,12 +148,12 @@ typedef enum {
 /** Return new handle.
  * @return              New allocated handle.
  */
-lr_Handle lr_handle_init();
+lr_Handle *lr_handle_init();
 
 /** Frees handle and its content.
  * @param handle        Handle.
  */
-void lr_handle_free(lr_Handle handle);
+void lr_handle_free(lr_Handle *handle);
 
 /** Set option (::lr_HandleOption) of the handle.
  * @param handle         Handle.
@@ -161,7 +161,7 @@ void lr_handle_free(lr_Handle handle);
  * @param ...           Value for the option.
  * @return              Librepo return code from ::lr_Rc enum.
  */
-int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
+int lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...);
 
 /** Get information from handle.
  * Most of returned pointers point directly to the handle internal
@@ -175,7 +175,7 @@ int lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...);
  * @param ...           Apropriate variable fro the selected option.
  * @return              Librepo return code ::lr_Rc.
  */
-int lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...);
+int lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...);
 
 /** Perform repodata download or location.
  * @param handle        Librepo handle.
@@ -183,7 +183,7 @@ int lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...);
  * @param err           GError **
  * @return              Librepo return code from ::lr_Rc enum.
  */
-int lr_handle_perform(lr_Handle handle, lr_Result *result, GError **err);
+int lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err);
 
 /** @} */
 
