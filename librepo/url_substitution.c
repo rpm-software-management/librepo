@@ -28,8 +28,8 @@ static lr_Var *
 lr_var_new(const char *var, const char *val)
 {
     lr_Var *var_val = lr_malloc0(sizeof(lr_Var));
-    var_val->var = lr_strdup(var);
-    var_val->val = lr_strdup(val);
+    var_val->var = g_strdup(var);
+    var_val->val = g_strdup(val);
     return var_val;
 }
 
@@ -64,7 +64,7 @@ lr_urlvars_set(lr_UrlVars *list, const char *var, const char *value)
             lr_Var *var_val = elem->data;
             if (!strcmp(var, var_val->var)) {
                 lr_free(var_val->val);
-                var_val->val = lr_strdup(value);
+                var_val->val = g_strdup(value);
                 return ret;
             }
         }
@@ -96,9 +96,9 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
         return NULL;
 
     if (!list)
-        return lr_strdup(url);
+        return g_strdup(url);
 
-    res = lr_strdup("");
+    res = g_strdup("");
 
     while (*cur != '\0') {
         if (*cur == '$') {

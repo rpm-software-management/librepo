@@ -135,7 +135,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRO_URL:
         if (handle->baseurl) lr_free(handle->baseurl);
-        handle->baseurl = lr_strdup(va_arg(arg, char *));
+        handle->baseurl = g_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
             // Clear previous mirrorlist stuff
             lr_lrmirrorlist_free(handle->internal_mirrorlist);
@@ -145,7 +145,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRO_MIRRORLIST:
         if (handle->mirrorlist) lr_free(handle->mirrorlist);
-        handle->mirrorlist = lr_strdup(va_arg(arg, char *));
+        handle->mirrorlist = g_strdup(va_arg(arg, char *));
         if (handle->internal_mirrorlist) {
             // Clear previous mirrorlist stuff
             lr_lrmirrorlist_free(handle->internal_mirrorlist);
@@ -235,7 +235,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
 
     case LRO_DESTDIR:
         if (handle->destdir) lr_free(handle->destdir);
-        handle->destdir = lr_strdup(va_arg(arg, char *));
+        handle->destdir = g_strdup(va_arg(arg, char *));
         break;
 
     case LRO_REPOTYPE:
@@ -259,7 +259,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
     case LRO_USERAGENT: {
         char *useragent = va_arg(arg, char *);
         if (handle->useragent) lr_free(handle->useragent);
-        handle->useragent = lr_strdup(useragent);
+        handle->useragent = g_strdup(useragent);
         c_rc = curl_easy_setopt(c_h, CURLOPT_USERAGENT, useragent);
         break;
     }
@@ -299,7 +299,7 @@ lr_handle_setopt(lr_Handle handle, lr_HandleOption option, ...)
         size++;
         *handle_list = lr_malloc0(size * sizeof(char *));
         for (int x = 0; x < size; x++)
-            (*handle_list)[x] = lr_strdup(list[x]);
+            (*handle_list)[x] = g_strdup(list[x]);
         break;
     }
 
@@ -389,7 +389,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
 
         if (strstr(handle->baseurl, "://")) {
             /* Base URL has specified protocol */
-            url = lr_strdup(handle->baseurl);
+            url = g_strdup(handle->baseurl);
             if (!strncmp(handle->baseurl, "file://", 7))
                 local_path = handle->baseurl + 7;
         } else {
@@ -663,9 +663,9 @@ lr_handle_perform(lr_Handle handle, lr_Result *result, GError **err)
             return LRE_INCOMPLETERESULT;
         }
         lr_free(handle->destdir);
-        handle->destdir = lr_strdup(result->destdir);
+        handle->destdir = g_strdup(result->destdir);
     } else if (!handle->destdir && !handle->local) {
-        handle->destdir = lr_strdup(TMP_DIR_TEMPLATE);
+        handle->destdir = g_strdup(TMP_DIR_TEMPLATE);
         if (!mkdtemp(handle->destdir)) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_CANNOTCREATETMP,
                         "Cannot create tmpdir: %s", strerror(errno));

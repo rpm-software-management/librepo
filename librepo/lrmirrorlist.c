@@ -105,7 +105,7 @@ lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
         }
 
         if (!url_copy)
-            url_copy = lr_strdup(url);
+            url_copy = g_strdup(url);
 
         lr_LrMirror *mirror = lr_lrmirror_new(url_copy, urlvars);
         mirror->preference = metalinkurl->preference;

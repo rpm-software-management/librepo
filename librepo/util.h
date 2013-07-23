@@ -72,13 +72,6 @@ void *lr_realloc(void *ptr, size_t len);
 void lr_free(void *mem);
 
 /** \ingroup util
- * Return new allocated memory containing copy of the string.
- * @param str           String.
- * @return              A Newly-allocated memory with copy of the str.
- */
-char *lr_strdup(const char *str);
-
-/** \ingroup util
  * Create temporary librepo file in /tmp directory.
  * @return              File descriptor.
  */

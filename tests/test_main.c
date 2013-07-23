@@ -28,7 +28,7 @@ static int
 init_test_globals(struct TestGlobals_s *tg, const char *testdata_dir)
 {
     tg->testdata_dir = lr_pathconcat(testdata_dir, "/", NULL);
-    tg->tmpdir = lr_strdup(UNITTEST_DIR);
+    tg->tmpdir = g_strdup(UNITTEST_DIR);
     if (mkdtemp(tg->tmpdir) == NULL)
         return 1;
     return 0;

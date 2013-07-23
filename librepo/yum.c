@@ -98,8 +98,8 @@ lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path)
     assert(path);
     repo->paths = lr_realloc(repo->paths, (repo->nop+1) * sizeof(lr_YumRepoMd));
     repo->paths[repo->nop] = lr_malloc(sizeof(struct _lr_YumRepoPath));
-    repo->paths[repo->nop]->type = lr_strdup(type);
-    repo->paths[repo->nop]->path = lr_strdup(path);
+    repo->paths[repo->nop]->type = g_strdup(type);
+    repo->paths[repo->nop]->path = g_strdup(path);
     repo->nop++;
 }
 
@@ -112,7 +112,7 @@ lr_yum_repo_update(lr_YumRepo repo, const char *type, const char *path)
     for (int x = 0; x < repo->nop; x++)
         if (!strcmp(repo->paths[x]->type, type)) {
             lr_free(repo->paths[x]->path);
-            repo->paths[x]->path = lr_strdup(path);
+            repo->paths[x]->path = g_strdup(path);
             return;
         }
     lr_yum_repo_append(repo, type, path);
@@ -198,7 +198,7 @@ lr_yum_download_repomd(lr_Handle handle,
         //g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, target->err);
     } else {
         // Set mirror used for download a repomd.xml to the handle
-        handle->used_mirror = lr_strdup(target->usedmirror);
+        handle->used_mirror = g_strdup(target->usedmirror);
     }
 
     lr_downloadtarget_free(target);
@@ -415,8 +415,8 @@ lr_yum_use_local(lr_Handle handle, lr_Result *result)
         close(fd);
 
         /* Fill result object */
-        result->destdir = lr_strdup(baseurl);
-        repo->destdir = lr_strdup(baseurl);
+        result->destdir = g_strdup(baseurl);
+        repo->destdir = g_strdup(baseurl);
         repo->repomd = path;
 
         /* Check if signature file exists */
@@ -586,7 +586,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result *result)
                 lr_free(signature);
             } else {
                 // Signature downloaded
-                repo->signature = lr_strdup(signature);
+                repo->signature = g_strdup(signature);
                 rc = lr_gpg_check_signature(signature, path, NULL, NULL);
                 if (rc != LRE_OK) {
                     g_debug("%s: GPG signature verification failed", __func__);
@@ -612,13 +612,13 @@ lr_yum_download_remote(lr_Handle handle, lr_Result *result)
         }
 
         /* Fill result object */
-        result->destdir = lr_strdup(handle->destdir);
-        repo->destdir = lr_strdup(handle->destdir);
+        result->destdir = g_strdup(handle->destdir);
+        repo->destdir = g_strdup(handle->destdir);
         repo->repomd = path;
         if (handle->used_mirror)
-            repo->url = lr_strdup(handle->used_mirror);
+            repo->url = g_strdup(handle->used_mirror);
         else
-            repo->url = lr_strdup(handle->baseurl);
+            repo->url = g_strdup(handle->baseurl);
 
         g_debug("%s: Repomd revision: %s", repomd->revision, __func__);
     }

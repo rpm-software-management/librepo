@@ -88,13 +88,13 @@ lr_download_package(lr_Handle handle,
             dest_path = lr_pathconcat(dest, file_basename, NULL);
         } else {
             /* Whole path including filename is specified */
-            dest_path = lr_strdup(dest);
+            dest_path = g_strdup(dest);
         }
     } else {
         /* No path specified */
         if (!handle->destdir) {
             /* No destdir in handle - use current working dir */
-            dest_path = lr_strdup(file_basename);
+            dest_path = g_strdup(file_basename);
         } else {
             /* Use dir specified in handle */
             dest_path = lr_pathconcat(handle->destdir, file_basename, NULL);

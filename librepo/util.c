@@ -73,17 +73,6 @@ lr_free(void *m)
     if (m) free(m);
 }
 
-char *
-lr_strdup(const char *str)
-{
-    char *new;
-    if (!str)
-        return NULL;
-    new = strdup(str);
-    if (!new) lr_out_of_memory();
-    return new;
-}
-
 int
 lr_gettmpfile()
 {
@@ -100,7 +89,7 @@ lr_gettmpfile()
 char *
 lr_gettmpdir()
 {
-    char *template = lr_strdup("/tmp/librepo-tmpdir-XXXXXX");
+    char *template = g_strdup("/tmp/librepo-tmpdir-XXXXXX");
     char *dir = mkdtemp(template);
     if (!dir)
         lr_free(template);
@@ -132,7 +121,7 @@ lr_pathconcat(const char *first, ...)
     va_end(args);
 
     if (total_len == 0)
-        return lr_strdup("");
+        return g_strdup("");
 
     res = lr_malloc(total_len + separator_len + 1);
 
@@ -195,7 +184,7 @@ lr_pathconcat(const char *first, ...)
 
     if (offset == 0) {
         lr_free(res);
-        return lr_strdup(first);
+        return g_strdup(first);
     }
 
     /* If last element was emtpy string, append separator to the end */
@@ -255,7 +244,7 @@ lr_prepend_url_protocol(const char *path)
         return NULL;
 
     if (strstr(path, "://"))  // Protocol was specified
-        return lr_strdup(path);
+        return g_strdup(path);
 
     if (path[0] == '/')  // Path is absolute path
         return g_strconcat("file://", path, NULL);

@@ -225,7 +225,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
             pd->ignore = 0;
             pd->found = 1;
         }
-        pd->metalink->filename = lr_strdup(name);
+        pd->metalink->filename = g_strdup(name);
         break;
     }
     case STATE_TIMESTAMP:
@@ -243,7 +243,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
             break;
         }
         mh = lr_new_metalinkhash(pd->metalink);
-        mh->type = lr_strdup(type);
+        mh->type = g_strdup(type);
         pd->metalinkhash = mh;
         break;
     }
@@ -256,11 +256,11 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         assert(!pd->metalinkurl);
         lr_MetalinkUrl *url = lr_new_metalinkurl(pd->metalink);
         if ((val = lr_find_attr("protocol", attr)))
-            url->protocol = lr_strdup(val);
+            url->protocol = g_strdup(val);
         if ((val = lr_find_attr("type", attr)))
-            url->type = lr_strdup(val);
+            url->type = g_strdup(val);
         if ((val = lr_find_attr("location", attr)))
-            url->location = lr_strdup(val);
+            url->location = g_strdup(val);
         if ((val = lr_find_attr("preference", attr)))
             url->preference = atol(val);
         pd->metalinkurl = url;
@@ -347,13 +347,13 @@ lr_metalink_end_handler(void *pdata, const char *name)
 
     case STATE_HASH:
         assert(pd->metalinkhash);
-        pd->metalinkhash->value = lr_strdup(pd->content);
+        pd->metalinkhash->value = g_strdup(pd->content);
         pd->metalinkhash = NULL;
         break;
 
     case STATE_URL:
         assert(pd->metalinkurl);
-        pd->metalinkurl->url = lr_strdup(pd->content);
+        pd->metalinkurl->url = g_strdup(pd->content);
         pd->metalinkurl = NULL;
         break;
 

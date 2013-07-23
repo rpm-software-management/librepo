@@ -96,7 +96,7 @@ lr_mirrorlist_parse_file(lr_Mirrorlist *mirrorlist, int fd, GError **err)
 
         /* Append URL */
         if (p[0] != '\0' && (strstr(p, "://") || p[0] == '/'))
-            mirrorlist->urls = g_slist_append(mirrorlist->urls, lr_strdup(p));
+            mirrorlist->urls = g_slist_append(mirrorlist->urls, g_strdup(p));
     }
 
     fclose(f);

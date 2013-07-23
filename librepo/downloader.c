@@ -248,7 +248,7 @@ prepare_next_transfer(lr_Download *dd, GError **err)
     // Select a base part of url (use the baseurl or some mirror)
     if (complete_url_in_path) {
         // In path we got a complete url, do not use mirror or basepath
-        full_url = lr_strdup(target->target->path);
+        full_url = g_strdup(target->target->path);
     } else if (target->target->baseurl) {
         // Use base URL
         full_url = lr_pathconcat(target->target->baseurl,
@@ -463,7 +463,7 @@ check_transfer_statuses(lr_Download *dd, GError **err)
                           CURLINFO_EFFECTIVE_URL,
                           &effective_url);
 
-        effective_url = lr_strdup(effective_url); // Make the effetive url
+        effective_url = g_strdup(effective_url); // Make the effetive url
                                                   // persistent to survive
                                                   // the curl_easy_cleanup()
 
