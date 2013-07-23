@@ -13,8 +13,9 @@
 START_TEST(test_repomd_parsing)
 {
     int fd, rc;
-    lr_YumRepoMd repomd;
+    lr_YumRepoMd *repomd;
     char *repomd_path;
+    GError *tmp_err = NULL;
 
     repomd_path = lr_pathconcat(test_globals.testdata_dir,
                                 "repo_yum_02/repodata/repomd.xml",
@@ -24,9 +25,9 @@ START_TEST(test_repomd_parsing)
     fd = open(repomd_path, O_RDONLY);
     fail_if(fd < 0);
 
-    rc = lr_yum_repomd_parse_file(repomd, fd);
+    rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
     fail_if(rc != LRE_OK);
-    fail_if(repomd->nor != 12);
+    fail_if(g_slist_length(repomd->records) != 12);
     fail_if(!lr_yum_repomd_get_record(repomd, "primary"));
     fail_if(!lr_yum_repomd_get_record(repomd, "filelists"));
     fail_if(!lr_yum_repomd_get_record(repomd, "other"));

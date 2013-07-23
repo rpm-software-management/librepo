@@ -25,123 +25,124 @@
 #include <expat.h>
 #include <errno.h>
 
+#include "repomd.h"
+#include "xmlparser_internal.h"
 #include "setup.h"
 #include "rcodes.h"
 #include "util.h"
-#include "repomd.h"
 
 #define CHUNK_SIZE              8192
 #define CONTENT_REALLOC_STEP    256
 
 /* Repomd object manipulation helpers */
 
-lr_YumDistroTag
-lr_yum_distrotag_init()
+static lr_YumRepoMdRecord *
+lr_yum_repomdrecord_init(const char *type)
 {
-    return lr_malloc0(sizeof(struct _lr_YumDistroTag));
+    lr_YumRepoMdRecord *record = lr_malloc0(sizeof(*record));
+    record->chunk = g_string_chunk_new(128);
+    record->type = lr_string_chunk_insert(record->chunk, type);
+    return record;
 }
 
-void
-lr_yum_distrotag_free(lr_YumDistroTag dt)
-{
-    if (!dt)
-        return;
-    lr_free(dt->cpeid);
-    lr_free(dt->value);
-    lr_free(dt);
-}
-
-lr_YumRepoMdRecord
-lr_yum_repomdrecord_init()
-{
-    return lr_malloc0(sizeof(struct _lr_YumRepoMdRecord));
-}
-
-void
-lr_yum_repomdrecord_free(lr_YumRepoMdRecord rec)
+static void
+lr_yum_repomdrecord_free(lr_YumRepoMdRecord *rec)
 {
     if (!rec)
         return;
-    lr_free(rec->type);
-    lr_free(rec->location_href);
-    lr_free(rec->location_base);
-    lr_free(rec->checksum);
-    lr_free(rec->checksum_type);
-    lr_free(rec->checksum_open);
-    lr_free(rec->checksum_open_type);
+    g_string_chunk_free(rec->chunk);
     lr_free(rec);
 }
 
-lr_YumRepoMd
+lr_YumRepoMd *
 lr_yum_repomd_init()
 {
-    return lr_malloc0(sizeof(struct _lr_YumRepoMd));
+    lr_YumRepoMd *repomd = lr_malloc0(sizeof(*repomd));
+    repomd->chunk = g_string_chunk_new(32);
+    return repomd;
 }
 
 void
-lr_yum_repomd_clear(lr_YumRepoMd repomd)
+lr_yum_repomd_free(lr_YumRepoMd *repomd)
 {
     if (!repomd)
         return;
-    lr_free(repomd->revision);
-    for (int x = 0; x < repomd->nort; x++)
-        lr_free(repomd->repo_tags[x]);
-    lr_free(repomd->repo_tags);
-    for (int x = 0; x < repomd->nodt; x++)
-        lr_yum_distrotag_free(repomd->distro_tags[x]);
-    lr_free(repomd->distro_tags);
-    for (int x = 0; x < repomd->noct; x++)
-        lr_free(repomd->content_tags[x]);
-    lr_free(repomd->content_tags);
-    for (int x = 0; x < repomd->nor; x++)
-        lr_yum_repomdrecord_free(repomd->records[x]);
-    lr_free(repomd->records);
-    memset(repomd, 0, sizeof(struct _lr_YumRepoMd));
+    g_slist_free_full(repomd->records, (GDestroyNotify) lr_yum_repomdrecord_free);
+    g_slist_free(repomd->repo_tags);
+    g_slist_free(repomd->content_tags);
+    g_slist_free_full(repomd->distro_tags, (GDestroyNotify) g_free);
+    g_string_chunk_free(repomd->chunk);
+    g_free(repomd);
 }
 
-void
-lr_yum_repomd_free(lr_YumRepoMd repomd)
+static void
+lr_yum_repomd_set_record(lr_YumRepoMd *repomd,
+                         lr_YumRepoMdRecord *record)
 {
-    if (!repomd)
-        return;
-    lr_yum_repomd_clear(repomd);
-    lr_free(repomd);
+    if (!repomd || !record) return;
+    repomd->records = g_slist_append(repomd->records, record);
 }
 
-void
-lr_yum_repomd_add_repo_tag(lr_YumRepoMd r_md, char *tag)
+static void
+lr_yum_repomd_set_revision(lr_YumRepoMd *repomd, const char *revision)
 {
-    assert(r_md);
-    r_md->nort++;
-    r_md->repo_tags = lr_realloc(r_md->repo_tags, r_md->nort * sizeof(char *));
-    r_md->repo_tags[r_md->nort-1] = tag;
+    if (!repomd) return;
+    repomd->revision = lr_string_chunk_insert(repomd->chunk, revision);
 }
 
-void
-lr_yum_repomd_add_distro_tag(lr_YumRepoMd r_md, lr_YumDistroTag tag)
+static void
+lr_yum_repomd_add_repo_tag(lr_YumRepoMd *repomd, char *tag)
 {
-    assert(r_md);
-    r_md->nodt++;
-    r_md->distro_tags = lr_realloc(r_md->distro_tags,
-                                   r_md->nodt * sizeof(lr_YumDistroTag));
-    r_md->distro_tags[r_md->nodt-1] = tag;
+    assert(repomd);
+    if (!tag) return;
+    repomd->repo_tags = g_slist_append(repomd->repo_tags,
+                                g_string_chunk_insert(repomd->chunk, tag));
 }
 
-void
-lr_yum_repomd_add_content_tag(lr_YumRepoMd r_md, char *tag)
+static void
+lr_yum_repomd_add_content_tag(lr_YumRepoMd *repomd, char *tag)
 {
-    assert(r_md);
-    r_md->noct++;
-    r_md->content_tags = lr_realloc(r_md->content_tags, r_md->noct * sizeof(char *));
-    r_md->content_tags[r_md->noct-1] = tag;
+    assert(repomd);
+    if (!tag) return;
+    repomd->content_tags = g_slist_append(repomd->content_tags,
+                                g_string_chunk_insert(repomd->chunk, tag));
 }
 
-/* Idea of parser implementation is borrowed from libsolv */
+static void
+lr_yum_repomd_add_distro_tag(lr_YumRepoMd *repomd,
+                             const char *cpeid,
+                             const char *tag)
+{
+    assert(repomd);
+    if (!tag) return;
+
+    lr_YumDistroTag *distrotag = lr_malloc0(sizeof(*distrotag));
+    distrotag->cpeid = lr_string_chunk_insert(repomd->chunk, cpeid);
+    distrotag->tag   = g_string_chunk_insert(repomd->chunk, tag);
+    repomd->distro_tags = g_slist_append(repomd->distro_tags, distrotag);
+}
+
+lr_YumRepoMdRecord *
+lr_yum_repomd_get_record(lr_YumRepoMd *repomd, const char *type)
+{
+    assert(repomd);
+    assert(type);
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
+        lr_YumRepoMdRecord *record = elem->data;
+        assert(record);
+        if (!g_strcmp0(record->type, type))
+            return record;
+    }
+    return NULL;
+}
+
+// repomd.xml parser
 
 typedef enum {
     STATE_START,
     STATE_REPOMD,
     STATE_REVISION,
+    STATE_REPOID,
     STATE_TAGS,
     STATE_REPO,
     STATE_CONTENT,
@@ -155,19 +156,17 @@ typedef enum {
     STATE_OPENSIZE,
     STATE_DBVERSION,
     NUMSTATES
-} lr_State;
+} lr_RepomdState;
 
-typedef struct {
-  lr_State from;
-  char *ename;
-  lr_State to;
-  int docontent;
-} lr_StatesSwitch;
-
-/* Same states in the first column must be together */
+/* NOTE: Same states in the first column must be together!!!
+* Performance tip: More frequent elements shoud be listed
+* first in its group (eg: element "package" (STATE_PACKAGE)
+* has a "file" element listed first, because it is more frequent
+* than a "version" element). */
 static lr_StatesSwitch stateswitches[] = {
     { STATE_START,      "repomd",           STATE_REPOMD,       0 },
     { STATE_REPOMD,     "revision",         STATE_REVISION,     1 },
+    { STATE_REPOMD,     "repoid",           STATE_REPOID,       1 },
     { STATE_REPOMD,     "tags",             STATE_TAGS,         0 },
     { STATE_REPOMD,     "data",             STATE_DATA,         0 },
     { STATE_TAGS,       "repo",             STATE_REPO,         1 },
@@ -183,70 +182,46 @@ static lr_StatesSwitch stateswitches[] = {
     { NUMSTATES,        NULL,               NUMSTATES,          0 }
 };
 
-typedef struct _ParserData {
-    int ret;        /*!< status of parsing (return code) */
-    int depth;
-    int statedepth;
-    lr_State state; /*!< current state */
-
-    int docontent;  /*!< tell if store text from the current element */
-    char *content;  /*!< text content of the element */
-    int lcontent;   /*!< content lenght */
-    int acontent;   /*!< available bytes in the content */
-
-    XML_Parser *parser;                 /*!< parser */
-    lr_StatesSwitch *swtab[NUMSTATES];  /*!< pointers to statesswitches table */
-    lr_State sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
-
-    lr_YumRepoMd repomd;            /*!< repomd object */
-    lr_YumRepoMdRecord repomd_rec;  /*!< current repomd record */
-} ParserData;
-
-static inline const char *
-lr_find_attr(const char *name, const char **attr)
-{
-    while (*attr) {
-        if (!strcmp(name, *attr))
-            return attr[1];
-        attr += 2;
-    }
-
-    return NULL;
-}
-
-
 static void XMLCALL
 lr_start_handler(void *pdata, const char *element, const char **attr)
 {
-    ParserData *pd = pdata;
+    lr_ParserData *pd = pdata;
     lr_StatesSwitch *sw;
 
-    if (pd->ret != LRE_OK)
-        return; /* There was an error -> do nothing */
+    if (pd->err)
+        return; // There was an error -> do nothing
 
     if (pd->depth != pd->statedepth) {
-        /* There probably was an unknown element */
+        // We are inside of unknown element
         pd->depth++;
         return;
     }
     pd->depth++;
 
-    if (!pd->swtab[pd->state])
-         return; /* Current element should not have any sub elements */
+    if (!pd->swtab[pd->state]) {
+        // Current element should not have any sub elements
+        return;
+    }
 
-    /* Find current state by its name */
+    // Find current state by its name
     for (sw = pd->swtab[pd->state]; sw->from == pd->state; sw++)
         if (!strcmp(element, sw->ename))
             break;
-    if (sw->from != pd->state)
-      return; /* There is no state for the name -> skip */
+    if (sw->from != pd->state) {
+        // No state for current element (unknown element)
+        lr_xml_parser_warning(pd, LR_XML_WARNING_UNKNOWNTAG,
+                              "Unknown element \"%s\"", element);
+        return;
+    }
 
-    /* Update parser data */
+    // Update parser data
     pd->state = sw->to;
     pd->docontent = sw->docontent;
     pd->statedepth = pd->depth;
     pd->lcontent = 0;
     pd->content[0] = '\0';
+
+    const char *val;
 
     switch(pd->state) {
     case STATE_START:
@@ -257,51 +232,92 @@ lr_start_handler(void *pdata, const char *element, const char **attr)
     case STATE_CONTENT:
         break;
 
-    case STATE_DISTRO: {
-        const char *cpeid = lr_find_attr("cpeid", attr);
-        lr_YumDistroTag tag = lr_yum_distrotag_init();
-        if (cpeid)
-            tag->cpeid = lr_strdup(cpeid);
-        lr_yum_repomd_add_distro_tag(pd->repomd, tag);
-        break;
-    }
+    case STATE_REPOID:
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
 
-    case STATE_DATA: {
-        const char *type= lr_find_attr("type", attr);
-        if (!type) break;
-        pd->repomd_rec = lr_yum_repomdrecord_init();
-        pd->repomd_rec->type = lr_strdup(type);
-        /* Append record to lr_YumRepoMd->records */
-        pd->repomd->nor += 1;
-        pd->repomd->records = lr_realloc(pd->repomd->records,
-                        sizeof(struct _lr_YumRepoMdRecord)*pd->repomd->nor);
-        pd->repomd->records[pd->repomd->nor-1] = pd->repomd_rec;
+        val = lr_find_attr("type", attr);
+        if (val)
+            pd->repomd->repoid_type = g_string_chunk_insert(pd->repomd->chunk,
+                                                            val);
         break;
-    }
 
-    case STATE_LOCATION: {
-        const char *href = lr_find_attr("href", attr);
-        const char *base = lr_find_attr("base", attr);
-	if (pd->repomd_rec && href)
-            pd->repomd_rec->location_href = lr_strdup(href);
-        if (pd->repomd_rec && base)
-            pd->repomd_rec->location_base = lr_strdup(base);
-        break;
-    }
+    case STATE_DISTRO:
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
 
-    case STATE_CHECKSUM: {
-        const char *type = lr_find_attr("type", attr);
-        if (pd->repomd_rec && type)
-            pd->repomd_rec->checksum_type = lr_strdup(type);
+        val = lr_find_attr("cpeid", attr);
+        if (val)
+            pd->cpeid = g_strdup(val);
         break;
-    }
 
-    case STATE_OPENCHECKSUM: {
-        const char *type= lr_find_attr("type", attr);
-	if (pd->repomd_rec && type)
-            pd->repomd_rec->checksum_open_type = lr_strdup(type);
+    case STATE_DATA:
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
+
+        val = lr_find_attr("type", attr);
+        if (!val) {
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                           "Missing attribute \"type\" of a data element");
+            val = "unknown";
+        }
+
+        pd->repomdrecord = lr_yum_repomdrecord_init(val);
+        lr_yum_repomd_set_record(pd->repomd, pd->repomdrecord);
         break;
-    }
+
+    case STATE_LOCATION:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        val = lr_find_attr("href", attr);
+        if (val)
+            pd->repomdrecord->location_href = g_string_chunk_insert(
+                                                    pd->repomdrecord->chunk,
+                                                    val);
+        else
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                    "Missing attribute \"href\" of a location element");
+
+        val = lr_find_attr("xml:base", attr);
+        if (val)
+            pd->repomdrecord->location_base = g_string_chunk_insert(
+                                                    pd->repomdrecord->chunk,
+                                                    val);
+
+        break;
+
+    case STATE_CHECKSUM:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        val = lr_find_attr("type", attr);
+        if (!val) {
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                    "Missing attribute \"type\" of a checksum element");
+            break;
+        }
+
+        pd->repomdrecord->checksum_type = g_string_chunk_insert(
+                                                    pd->repomdrecord->chunk,
+                                                    val);
+        break;
+
+    case STATE_OPENCHECKSUM:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        val = lr_find_attr("type", attr);
+        if (!val) {
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                    "Missing attribute \"type\" of an open checksum element");
+            break;
+        }
+
+        pd->repomdrecord->checksum_open_type = g_string_chunk_insert(
+                                                    pd->repomdrecord->chunk,
+                                                    val);
+        break;
 
     case STATE_TIMESTAMP:
     case STATE_SIZE:
@@ -309,220 +325,192 @@ lr_start_handler(void *pdata, const char *element, const char **attr)
     case STATE_DBVERSION:
     default:
         break;
-    };
-
-    return;
-}
-
-static void XMLCALL
-lr_char_handler(void *pdata, const XML_Char *s, int len)
-{
-    int l;
-    char *c;
-    ParserData *pd = pdata;
-
-    if (pd->ret != LRE_OK)
-        return;  /* There was an error -> do nothing */
-
-    if (!pd->docontent)
-        return;  /* Do not store the content */
-
-    l = pd->lcontent + len + 1;
-    if (l > pd->acontent) {
-        pd->acontent = l + CONTENT_REALLOC_STEP;;
-        pd->content = lr_realloc(pd->content, pd->acontent);
     }
-
-    c = pd->content + pd->lcontent;
-    pd->lcontent += len;
-    while (len-- > 0)
-        *c++ = *s++;
-    *c = '\0';
 }
 
 static void XMLCALL
 lr_end_handler(void *pdata, const char *element)
 {
-    ParserData *pd = pdata;
+    lr_ParserData *pd = pdata;
+    unsigned int state = pd->state;
 
     LR_UNUSED(element);
 
-    if (pd->ret != LRE_OK)
-        return;  /* There was an error -> do nothing */
+    if (pd->err)
+        return; // There was an error -> do nothing
 
     if (pd->depth != pd->statedepth) {
-        /* Back from the unknown state */
+        // Back from the unknown state
         pd->depth--;
         return;
     }
 
     pd->depth--;
     pd->statedepth--;
+    pd->state = pd->sbtab[pd->state];
+    pd->docontent = 0;
 
-    switch (pd->state) {
+    switch (state) {
     case STATE_START:
     case STATE_REPOMD:
         break;
 
     case STATE_REVISION:
-        pd->repomd->revision = lr_strdup(pd->content);
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
+
+        if (pd->lcontent == 0) {
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGVAL,
+                    "Missing value of a revision element");
+            break;
+        }
+
+        lr_yum_repomd_set_revision(pd->repomd, pd->content);
+        break;
+
+    case STATE_REPOID:
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
+
+        pd->repomd->repoid = g_string_chunk_insert(pd->repomd->chunk,
+                                                   pd->content);
         break;
 
     case STATE_TAGS:
         break;
 
     case STATE_REPO:
-        lr_yum_repomd_add_repo_tag(pd->repomd, lr_strdup(pd->content));
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
+
+        lr_yum_repomd_add_repo_tag(pd->repomd, pd->content);
         break;
 
     case STATE_CONTENT:
-        lr_yum_repomd_add_content_tag(pd->repomd, lr_strdup(pd->content));
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
+
+        lr_yum_repomd_add_content_tag(pd->repomd, pd->content);
         break;
 
     case STATE_DISTRO:
-        if (pd->repomd->nodt < 1) {
-            pd->ret = LRE_REPOMDXML;
-            break;
+        assert(pd->repomd);
+        assert(!pd->repomdrecord);
+
+        lr_yum_repomd_add_distro_tag(pd->repomd, pd->cpeid, pd->content);
+        if (pd->cpeid) {
+            g_free(pd->cpeid);
+            pd->cpeid = NULL;
         }
-        pd->repomd->distro_tags[pd->repomd->nodt-1]->value = lr_strdup(pd->content);
         break;
 
     case STATE_DATA:
-        pd->repomd_rec = NULL;
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord = NULL;
         break;
 
     case STATE_LOCATION:
         break;
 
     case STATE_CHECKSUM:
-        if (!pd->repomd_rec)
-            break;
-        pd->repomd_rec->checksum = lr_strdup(pd->content);
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->checksum = lr_string_chunk_insert(
+                                            pd->repomdrecord->chunk,
+                                            pd->content);
         break;
 
     case STATE_OPENCHECKSUM:
-        if (!pd->repomd_rec)
-            break;
-        pd->repomd_rec->checksum_open = lr_strdup(pd->content);
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->checksum_open = lr_string_chunk_insert(
+                                            pd->repomdrecord->chunk,
+                                            pd->content);
         break;
 
     case STATE_TIMESTAMP:
-        if (!pd->repomd_rec)
-            break;
-        pd->repomd_rec->timestamp = atol(pd->content);
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->timestamp = atol(pd->content);
         break;
 
     case STATE_SIZE:
-        if (!pd->repomd_rec)
-            break;
-        pd->repomd_rec->size = atol(pd->content);
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->size = atol(pd->content);
         break;
 
     case STATE_OPENSIZE:
-        if (!pd->repomd_rec)
-            break;
-        pd->repomd_rec->size_open = atol(pd->content);
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->size_open = atol(pd->content);
         break;
 
     case STATE_DBVERSION:
-        if (!pd->repomd_rec)
-            break;
-        pd->repomd_rec->db_version = atol(pd->content);
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->db_version = atol(pd->content);
         break;
 
     default:
         break;
-    };
-
-    pd->state = pd->sbtab[pd->state];
-    pd->docontent = 0;
-
-    return;
+    }
 }
 
 int
-lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd)
+lr_yum_repomd_parse_file(lr_YumRepoMd *repomd,
+                         int fd,
+                         lr_XmlParserWarningCb warningcb,
+                         void *warningcb_data,
+                         GError **err)
 {
     int ret = LRE_OK;
+    lr_ParserData *pd;
     XML_Parser parser;
-    ParserData pd;
-    lr_StatesSwitch *sw;
+    GError *tmp_err = NULL;
 
+    assert(fd >= 0);
     assert(repomd);
-    DEBUGASSERT(fd >= 0);
+    assert(!err || *err == NULL);
 
-    /* Parser configuration */
+    // Init
+
     parser = XML_ParserCreate(NULL);
-    XML_SetUserData(parser, (void *) &pd);
     XML_SetElementHandler(parser, lr_start_handler, lr_end_handler);
     XML_SetCharacterDataHandler(parser, lr_char_handler);
 
-    /* Initialization of parser data */
-    memset(&pd, 0, sizeof(pd));
-    pd.ret = LRE_OK;
-    pd.depth = 0;
-    pd.state = STATE_START;
-    pd.statedepth = 0;
-    pd.docontent = 0;
-    pd.content = lr_malloc(CONTENT_REALLOC_STEP);
-    pd.lcontent = 0;
-    pd.acontent = CONTENT_REALLOC_STEP;
-    pd.parser = &parser;
-    pd.repomd = repomd;
-    for (sw = stateswitches; sw->from != NUMSTATES; sw++) {
-        if (!pd.swtab[sw->from])
-            pd.swtab[sw->from] = sw;
-        pd.sbtab[sw->to] = sw->from;
+    pd = lr_xml_parser_data_new(NUMSTATES);
+    pd->parser = &parser;
+    pd->state = STATE_START;
+    pd->repomd = repomd;
+    pd->warningcb = warningcb;
+    pd->warningcb_data = warningcb_data;
+    for (lr_StatesSwitch *sw = stateswitches; sw->from != NUMSTATES; sw++) {
+        if (!pd->swtab[sw->from])
+            pd->swtab[sw->from] = sw;
+        pd->sbtab[sw->to] = sw->from;
     }
 
-    /* Parse */
+    XML_SetUserData(parser, pd);
 
-    for (;;) {
-        char *buf;
-        int len;
+    // Parsing
 
-        buf = XML_GetBuffer(parser, CHUNK_SIZE);
-        if (!buf)
-            lr_out_of_memory();
+    ret = lr_xml_parser_generic(parser, pd, fd, &tmp_err);
+    if (tmp_err)
+        g_propagate_error(err, tmp_err);
 
-        len = read(fd, (void *) buf, CHUNK_SIZE);
-        if (len < 0) {
-            g_debug("%s: Cannot read for parsing : %s",
-                    __func__, strerror(errno));
-            ret = LRE_IO;
-            break;
-        }
+    // Clean up
 
-        if (!XML_ParseBuffer(parser, len, len == 0)) {
-            g_debug("%s: parsing error: %s",
-                    __func__, XML_ErrorString(XML_GetErrorCode(parser)));
-            ret = LRE_REPOMDXML;
-            break;
-        }
-
-        if (len == 0)
-            break;
-
-        if (pd.ret != LRE_OK) {
-            ret = pd.ret;
-            break;
-        }
-    }
-
-    /* Parser data cleanup */
-    lr_free(pd.content);
+    lr_xml_parser_data_free(pd);
     XML_ParserFree(parser);
 
     return ret;
-}
-
-lr_YumRepoMdRecord
-lr_yum_repomd_get_record(lr_YumRepoMd repomd, const char *type)
-{
-    assert(repomd);
-    assert(type);
-    for (int x=0; x < repomd->nor; x++)
-        if (!strcmp(repomd->records[x]->type, type))
-            return repomd->records[x];
-    return NULL;
 }

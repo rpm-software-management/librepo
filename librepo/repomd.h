@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <glib.h>
+#include "xmlparser.h"
 #include "types.h"
 
 /** \defgroup repomd        Repomd parser
@@ -32,16 +34,13 @@ extern "C" {
  */
 
 /** Yum repomd distro tag. */
-struct _lr_YumDistroTag {
+typedef struct {
     char *cpeid;    /*!< Tag cpeid value or NULL. */
-    char *value;    /*!< Tag value. */
-};
-
-/** Pointer to ::_lr_YumDistroTag. */
-typedef struct _lr_YumDistroTag *lr_YumDistroTag;
+    char *tag;      /*!< Tag value. */
+} lr_YumDistroTag;
 
 /** Yum repomd record. */
-struct _lr_YumRepoMdRecord {
+typedef struct {
     char *type;                 /*!< Type of record (e.g. "primary") */
     char *location_href;        /*!< Location href attribute */
     char *location_base;        /*!< Location base attribute */
@@ -49,61 +48,64 @@ struct _lr_YumRepoMdRecord {
     char *checksum_type;        /*!< Type of checksum */
     char *checksum_open;        /*!< Checksum of uncompressed file */
     char *checksum_open_type;   /*!< Type of checksum of uncompressed file */
-    long timestamp;             /*!< File timestamp */
-    long size;                  /*!< File size */
-    long size_open;             /*!< Size of uncompressed file */
+    gint64 timestamp;           /*!< File timestamp */
+    gint64 size;                /*!< File size */
+    gint64 size_open;           /*!< Size of uncompressed file */
     int db_version;             /*!< Version of database */
-};
 
-/** Pointer to ::_lr_YumRepoMdRecord */
-typedef struct _lr_YumRepoMdRecord *lr_YumRepoMdRecord;
+    GStringChunk *chunk;        /*!< String chunk */
+} lr_YumRepoMdRecord;
 
 /** Yum repomd.xml. */
-struct _lr_YumRepoMd {
-    char *revision;                 /*!< Revision string*/
-    char **repo_tags;               /*!< List of repo tags */
-    lr_YumDistroTag *distro_tags;   /*!< List of distro tags */
-    char **content_tags;            /*!< List of content tags */
-    lr_YumRepoMdRecord *records;    /*!< List of repomd records */
+typedef struct {
+    char *revision;         /*!< Revision string*/
+    char *repoid;           /*!< RepoId */
+    char *repoid_type;      /*!< RepoId type ("sha256", ...) */
+    GSList *repo_tags;      /*!< List of strings */
+    GSList *content_tags;   /*!< List of strings */
+    GSList *distro_tags;    /*!< List of lr_YumDistroTag* */
+    GSList *records;        /*!< List with lr_YumRepoMdRecords */
 
-    int nort;   /*!< Number of repo tags */
-    int nodt;   /*!< Number of distro tags */
-    int noct;   /*!< Number of content tags */
-    int nor;    /*!< Number of records */
-};
-
-/** Pointer to ::_lr_YumRepoMd */
-typedef struct _lr_YumRepoMd *lr_YumRepoMd;
+    GStringChunk *chunk;    /*!< String chunk for repomd strings
+                                 (Note: lr_YumRepomdRecord strings are stored
+                                 in lr_YumRepomdRecord->chunk) */
+} lr_YumRepoMd;
 
 /** Create new empty repomd object.
  * @return              New repomd object.
  */
-lr_YumRepoMd lr_yum_repomd_init();
-
-/** Free all repomd content.
- * @param repomd        Repomd object.
- */
-void lr_yum_repomd_clear(lr_YumRepoMd repomd);
+lr_YumRepoMd *
+lr_yum_repomd_init();
 
 /** Free repomd content and repomd object itself.
  * @param repomd        Repomd object.
  */
-void lr_yum_repomd_free(lr_YumRepoMd repomd);
+void
+lr_yum_repomd_free(lr_YumRepoMd *repomd);
 
 /** Parse repomd.xml file.
- * @param repomd        Empty repomd object.
- * @param fd            File descriptor.
- * @return              Librepo return code ::lr_Rc.
+ * @param repomd            Empty repomd object.
+ * @param fd                File descriptor.
+ * @param warningcb         Callback for warnings
+ * @param warningcb_data    Warning callback user data
+ * @param err               GError **
+ * @return                  Librepo return code ::lr_Rc.
  */
-int lr_yum_repomd_parse_file(lr_YumRepoMd repomd, int fd);
+int
+lr_yum_repomd_parse_file(lr_YumRepoMd *repomd,
+                         int fd,
+                         lr_XmlParserWarningCb warningcb,
+                         void *warningcb_data,
+                         GError **err);
 
 /** Get repomd record from the repomd object.
  * @param repomd        Repomd record.
  * @param type          Type of record e.g. "primary", "filelists", ...
  * @return              Record of desired type or NULL.
  */
-lr_YumRepoMdRecord lr_yum_repomd_get_record(lr_YumRepoMd repomd,
-                                            const char *type);
+lr_YumRepoMdRecord *
+lr_yum_repomd_get_record(lr_YumRepoMd *repomd,
+                         const char *type);
 
 /** @} */
 

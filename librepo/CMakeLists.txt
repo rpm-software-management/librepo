@@ -15,6 +15,7 @@ SET (librepo_SRCS
      result.c
      url_substitution.c
      util.c
+     xmlparser.c
      yum.c)
 
 SET(librepo_HEADERS
@@ -32,6 +33,7 @@ SET(librepo_HEADERS
     url_substitution.h
     util.h
     version.h
+    xmlparser.h
     yum.h)
 
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})

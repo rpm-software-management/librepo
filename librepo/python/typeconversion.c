@@ -56,7 +56,7 @@ PyObject_FromYumRepo(lr_YumRepo repo)
 }
 
 PyObject *
-PyObject_FromRepoMdRecord(lr_YumRepoMdRecord rec)
+PyObject_FromRepoMdRecord(lr_YumRepoMdRecord *rec)
 {
     PyObject *dict;
 
@@ -80,7 +80,7 @@ PyObject_FromRepoMdRecord(lr_YumRepoMdRecord rec)
 }
 
 PyObject *
-PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
+PyObject_FromYumRepoMd(lr_YumRepoMd *repomd)
 {
     PyObject *dict, *list;
 
@@ -90,20 +90,28 @@ PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "revision", PyStringOrNone_FromString(repomd->revision));
+    PyDict_SetItemString(dict,
+                         "revision",
+                         PyStringOrNone_FromString(repomd->revision));
 
     list = PyList_New(0);
-    for (int i=0; i < repomd->nort; i++) {
-        char *tag = repomd->repo_tags[i];
+    for (GSList *elem = repomd->repo_tags; elem; elem = g_slist_next(elem)) {
+        char *tag = elem->data;
         if (tag)
             PyList_Append(list, PyStringOrNone_FromString(tag));
     }
     PyDict_SetItemString(dict, "repo_tags", list);
 
     list = PyList_New(0);
-    for (int i=0; i < repomd->nodt; i++) {
-        char *cpeid = repomd->distro_tags[i]->cpeid;
-        char *value = repomd->distro_tags[i]->value;
+    for (GSList *elem = repomd->distro_tags; elem; elem = g_slist_next(elem)) {
+        lr_YumDistroTag *distrotag = elem->data;
+
+        if (!elem->data)
+            continue;
+
+        char *cpeid = distrotag->cpeid;
+        char *value = distrotag->tag;
+
         if (value) {
             PyList_Append(list, Py_BuildValue("(NN)",
                                     PyStringOrNone_FromString(cpeid),
@@ -113,17 +121,23 @@ PyObject_FromYumRepoMd(lr_YumRepoMd repomd)
     PyDict_SetItemString(dict, "distro_tags", list);
 
     list = PyList_New(0);
-    for (int i=0; i < repomd->noct; i++) {
-        char *tag = repomd->content_tags[i];
+    for (GSList *elem = repomd->content_tags; elem; elem = g_slist_next(elem)) {
+        char *tag = elem->data;
         if (tag)
             PyList_Append(list, PyStringOrNone_FromString(tag));
     }
     PyDict_SetItemString(dict, "content_tags", list);
 
-    for (int x=0; x < repomd->nor; x++)
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
+        lr_YumRepoMdRecord *record = elem->data;
+
+        if (!record)
+            continue;
+
         PyDict_SetItemString(dict,
-                repomd->records[x]->type,
-                PyObject_FromRepoMdRecord(repomd->records[x]));
+                            record->type,
+                            PyObject_FromRepoMdRecord(record));
+    }
 
     return dict;
 }

@@ -133,7 +133,7 @@ getinfo(_ResultObject *self, PyObject *args)
     }
 
     case LRR_YUM_REPOMD: {
-        lr_YumRepoMd repomd;
+        lr_YumRepoMd *repomd;
         res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repomd);
         if (res != LRE_OK)
             RETURN_ERROR(res, NULL);

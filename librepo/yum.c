@@ -213,7 +213,7 @@ lr_yum_download_repomd(lr_Handle handle,
 }
 
 int
-lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
+lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd *repomd)
 {
     int ret = LRE_OK;
     char *destdir;  /* Destination dir */
@@ -223,13 +223,15 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
     DEBUGASSERT(destdir);
     DEBUGASSERT(strlen(destdir));
 
-    for (int x = 0; x < repomd->nor; x++) {
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         int fd;
         char *path;
         //lr_CurlTarget target;
         lr_DownloadTarget *target;
-        lr_YumRepoMdRecord record = repomd->records[x];
+        lr_YumRepoMdRecord *record = elem->data;
         lr_ChecksumType checksumtype;
+
+        assert(record);
 
         if (!lr_yum_repomd_record_enabled(handle, record->type))
             continue;
@@ -286,7 +288,7 @@ lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd repomd)
 }
 
 int
-lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, const char *path)
+lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord *rec, const char *path)
 {
     int ret, fd;
     char *expected_checksum;
@@ -332,11 +334,12 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord rec, const char *path)
 }
 
 int
-lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd repomd)
+lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd *repomd)
 {
-    for (int x=0; x < repomd->nor; x++) {
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         int ret;
-        lr_YumRepoMdRecord record  = repomd->records[x];
+        lr_YumRepoMdRecord *record = elem->data;
+        assert(record);
         const char *path = lr_yum_repo_path(repo, record->type);
         ret = lr_yum_check_checksum_of_md_record(record, path);
         g_debug("%s: Checksum rc: %d (%s)", __func__, ret, record->type);
@@ -355,7 +358,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     int fd;
     char *baseurl;
     lr_YumRepo repo;
-    lr_YumRepoMd repomd;
+    lr_YumRepoMd *repomd;
 
     g_debug("%s: Locating repo..", __func__);
 
@@ -402,7 +405,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
         }
 
         g_debug("%s: Parsing repomd.xml", __func__);
-        rc = lr_yum_repomd_parse_file(repomd, fd);
+        rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, NULL);
         if (rc != LRE_OK) {
             g_debug("%s: Parsing unsuccessful (%d)", __func__, rc);
             lr_free(path);
@@ -440,9 +443,11 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
     }
 
     /* Locate rest of metadata files */
-    for (int x = 0; x < repomd->nor; x++) {
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         char *path;
-        lr_YumRepoMdRecord record = repomd->records[x];
+        lr_YumRepoMdRecord *record = elem->data;
+
+        assert(record);
 
         if (!lr_yum_repomd_record_enabled(handle, record->type))
             continue;
@@ -476,7 +481,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
     int create_repodata_dir = 1;
     char *path_to_repodata;
     lr_YumRepo repo;
-    lr_YumRepoMd repomd;
+    lr_YumRepoMd *repomd;
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
@@ -598,7 +603,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
 
         /* Parse repomd */
         g_debug("%s: Parsing repomd.xml", __func__);
-        rc = lr_yum_repomd_parse_file(repomd, fd);
+        rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, NULL);
         close(fd);
         if (rc != LRE_OK) {
             g_debug("%s: Parsing unsuccessful (%d)", __func__, rc);
@@ -629,7 +634,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
 {
     int rc = LRE_OK;
     lr_YumRepo repo;
-    lr_YumRepoMd repomd;
+    lr_YumRepoMd *repomd;
 
     assert(handle);
 

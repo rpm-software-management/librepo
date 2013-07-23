@@ -103,6 +103,12 @@ typedef enum {
         (31) select() call failed. */
     LRE_OPENSSL, /*!<
         (32) OpenSSL library related error. */
+    LRE_MEMORY, /*!<
+        (33) Cannot allocate more memory  */
+    LRE_XMLPARSER, /*!<
+        (34) XML parser error */
+    LRE_CBINTERRUPTED, /*!<
+        (35) Interrupted by user cb */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
 } lr_Rc; /*!< Return codes */
@@ -120,6 +126,8 @@ const char *lr_strerror(int rc);
 #define LR_HANDLE_ERROR             lr_handle_error_quark()
 #define LR_METALINK_ERROR           lr_metalink_error_quark()
 #define LR_MIRRORLIST_ERROR         lr_mirrorlist_error_quark()
+#define LR_XML_PARSER_ERROR         lr_xml_parser_error_quark()
+#define LR_REPOUTIL_YUM_ERROR       lr_repoutil_yum_error_quark()
 
 GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
@@ -127,6 +135,8 @@ GQuark lr_gpg_error_quark(void);
 GQuark lr_handle_error_quark(void);
 GQuark lr_metalink_error_quark(void);
 GQuark lr_mirrorlist_error_quark(void);
+GQuark lr_xml_parser_error_quark(void);
+GQuark lr_repoutil_yum_error_quark(void);
 
 #ifdef __cplusplus
 }

@@ -27,28 +27,30 @@ extern "C" {
 #include "repomd.h"
 
 /** \defgroup   repoutil_yum      High level Functions for yum repos
+ *  \addtogroup repoutil_yum
+ *  @{
  */
 
-/** \ingroup repoutil_yum
- * Check checksum of selected repository.
+/** Check checksum of selected repository.
  * @param path          Path to directory containing "repodata" subdir.
+ * @param err           GError **
  * @return              Librepo return code ::lr_Rc.
  */
-int lr_repoutil_yum_check_repo(const char *path);
+int lr_repoutil_yum_check_repo(const char *path, GError **err);
 
-/** \ingroup repoutil_yum
- * Parse repomd.xml file.
- * @param path          Path to repository or to the repomd file.
- * @param repomd        Empty repomd object.
- * @return              Librepo return code ::lr_Rc.
+/** Parse repomd.xml file.
+ * @param path          Path to repository or to the repomd file
+ * @param repomd        Empty repomd object
+ * @param err           GError **
+ * @return              Librepo return code ::lr_Rc
  */
-int lr_repoutil_yum_parse_repomd(const char *path, lr_YumRepoMd repomd);
+int
+lr_repoutil_yum_parse_repomd(const char *path,
+                             lr_YumRepoMd *repomd,
+                             GError **err);
 
-/*
-int lr_repoutil_yum_update_repo(const char *path,
-                                const char *url,
-                                lr_update_cb cb);
-*/
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif

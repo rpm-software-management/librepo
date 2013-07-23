@@ -127,3 +127,15 @@ lr_mirrorlist_error_quark(void)
 {
     return g_quark_from_static_string("lr_mirrorlist_error");
 }
+
+GQuark
+lr_xml_parser_error_quark(void)
+{
+    return g_quark_from_static_string("lr_xml_parser_error");
+}
+
+GQuark
+lr_repoutil_yum_error_quark(void)
+{
+    return g_quark_from_static_string("lr_repoutil_yum_error");
+}

@@ -23,6 +23,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <assert.h>
 
 #include "rcodes.h"
 #include "util.h"
@@ -32,56 +35,89 @@
 #include "result.h"
 
 int
-lr_repoutil_yum_check_repo(const char *path)
+lr_repoutil_yum_check_repo(const char *path, GError **err)
 {
     int rc;
     lr_Handle h;
     lr_Result result;
 
+    assert(path);
+    assert(!err || *err == NULL);
+
     h = lr_handle_init();
     result = lr_result_init();
-    if (!h)
-        return LRE_UNKNOWNERROR;
 
-    if ((rc = lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO)) != LRE_OK) {
+        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
+                    "lr_handle_setopt(, LRO_REPOTYPE, LR_YUMREPO) error: %s",
+                    lr_strerror(rc));
         return rc;
+    }
 
-    if ((rc = lr_handle_setopt(h, LRO_URL, path)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_URL, path)) != LRE_OK) {
+        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
+                    "lr_handle_setopt(, LRO_URL, %s) error: %s",
+                    path, lr_strerror(rc));
         return rc;
+    }
 
-    if ((rc = lr_handle_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK) {
+        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
+                    "lr_handle_setopt(, LRO_CHECKSUM, 1) error: %s",
+                    lr_strerror(rc));
         return rc;
+    }
 
-    if ((rc = lr_handle_setopt(h, LRO_LOCAL, 1)) != LRE_OK)
+    if ((rc = lr_handle_setopt(h, LRO_LOCAL, 1)) != LRE_OK) {
+        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
+                    "lr_handle_setopt(, LRO_LOCAL, 1) error: %s",
+                    lr_strerror(rc));
         return rc;
+    }
 
-    rc = lr_handle_perform(h, result, NULL);
+    rc = lr_handle_perform(h, result, err);
 
     lr_result_free(result);
     lr_handle_free(h);
+
     return rc;
 }
 
 int
-lr_repoutil_yum_parse_repomd(const char *path, lr_YumRepoMd repomd)
+lr_repoutil_yum_parse_repomd(const char *in_path,
+                             lr_YumRepoMd *repomd,
+                             GError **err)
 {
     int fd, rc;
     struct stat st;
+    char *path;
 
-    if (stat(path, &st) != 0)
+    assert(in_path);
+    assert(!err || *err == NULL);
+
+    if (stat(in_path, &st) != 0) {
+        g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
+                    "stat(%s,) error: %s", in_path, strerror(errno));
         return LRE_IO;
+    }
 
-    if (st.st_mode & S_IFDIR) {
-        char *path2 = lr_pathconcat(path, "repodata/repomd.xml", NULL);
-        fd = open(path2, O_RDONLY);
-        lr_free(path2);
-    } else
-        fd = open(path, O_RDONLY);
+    if (st.st_mode & S_IFDIR)
+        path = lr_pathconcat(in_path, "repodata/repomd.xml", NULL);
+    else
+        path = lr_strdup(in_path);
 
-    if (fd < 0)
+    fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
+                    "open(%s, O_RDONLY) error: %s", path, strerror(errno));
+        lr_free(path);
         return LRE_IO;
+    }
 
-    rc = lr_yum_repomd_parse_file(repomd, fd);
+    lr_free(path);
+
+    rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, err);
     close(fd);
+
     return rc;
 }
