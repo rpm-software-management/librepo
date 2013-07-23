@@ -48,19 +48,22 @@ typedef GSList lr_UrlVars;
  * @param value         a variable value
  * @return              the new start of the GSList of url substitutions
  */
-lr_UrlVars *lr_urlvars_set(lr_UrlVars *list, const char *var, const char *value);
+lr_UrlVars *
+lr_urlvars_set(lr_UrlVars *list, const char *var, const char *value);
 
 /** Frees all of the memory used by lr_UrlVars.
  * @param list          a list of substitutions
  */
-void lr_urlvars_free(lr_UrlVars *list);
+void
+lr_urlvars_free(lr_UrlVars *list);
 
 /** Substitute variables in the url. Returns a newly allocated string.
  * @param url           a url
  * @param list          a list of variables and its substitutions or NULL
  * @return              a newly allocated string with substituted url
  */
-char *lr_url_substitute(const char *url, lr_UrlVars *list);
+char
+*lr_url_substitute(const char *url, lr_UrlVars *list);
 
 /** @} */
 

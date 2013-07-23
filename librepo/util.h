@@ -148,24 +148,6 @@ int lr_copy_content(int source, int dest);
  */
 char *lr_prepend_url_protocol(const char *path);
 
-/** \ingroup util
- * Print to allocated string.
- * @param strp          Location for the newly allocated string.
- * @param format        A standard printf() format string.
- * @param ap            The list of arguments to insert in the output.
- * @return              The number of bytes printed
- */
-int lr_vasprintf(char **strp, const char *format, va_list ap);
-
-/** \ingroup util
- * Print to allocated string.
- * @param strp          Location for the newly allocated string.
- * @param format        A standard printf() format string.
- * @param ...           The list of arguments to insert in the output.
- * @return              The number of bytes printed
- */
-int lr_asprintf(char **strp, const char *format, ...);
-
 /** Same as g_string_chunk_insert, but allows NULL as string.
  * If the string is NULL, then returns NULL and do nothing.
  * @param chunk         String chunk

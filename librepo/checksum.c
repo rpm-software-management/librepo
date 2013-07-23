@@ -17,6 +17,8 @@
  * USA.
  */
 
+#include <glib.h>
+#include <glib/gprintf.h>
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
@@ -24,7 +26,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <attr/xattr.h>
-
 #include <openssl/evp.h>
 
 #include "checksum.h"
@@ -208,8 +209,8 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
             char *key;
             char buf[256];
 
-            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
-                        (unsigned long long) st.st_mtime);
+            key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
+                                  (unsigned long long) st.st_mtime);
             attr_ret = fgetxattr(fd, key, &buf, 256);
             if (attr_ret != -1) {
                 // Cached checksum found
@@ -233,8 +234,8 @@ lr_checksum_fd_cmp(lr_ChecksumType type,
         struct stat st;
         if (fstat(fd, &st) == 0) {
             char *key;
-            lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
-                        (unsigned long long) st.st_mtime);
+            key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
+                                  (unsigned long long) st.st_mtime);
             fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
             lr_free(key);
         }

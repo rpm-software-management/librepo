@@ -106,8 +106,8 @@ START_TEST(test_cached_checksum)
     // Assert no cached checksum exists
     ret = stat(filename, &st);
     fail_if(ret != 0);
-    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
-                (unsigned long long) st.st_mtime);
+    key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
+                          (unsigned long long) st.st_mtime);
     attr_ret = getxattr(filename, key, &buf, sizeof(buf));
     lr_free(key);
     fail_if(attr_ret != -1);  // Cached checksum should not exists
@@ -122,8 +122,8 @@ START_TEST(test_cached_checksum)
     // Assert cached checksum exists
     ret = stat(filename, &st);
     fail_if(ret != 0);
-    lr_asprintf(&key, "user.Zif.MdChecksum[%llu]",
-                (unsigned long long) st.st_mtime);
+    key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
+                          (unsigned long long) st.st_mtime);
     attr_ret = getxattr(filename, key, &buf, sizeof(buf));
 
     lr_free(key);
