@@ -29,10 +29,10 @@
 
 typedef struct {
     PyObject_HEAD
-    lr_Result result;
+    lr_Result *result;
 } _ResultObject;
 
-lr_Result
+lr_Result *
 Result_FromPyObject(PyObject *o)
 {
     if (!ResultObject_Check(o)) {

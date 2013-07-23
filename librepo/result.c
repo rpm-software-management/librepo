@@ -30,14 +30,14 @@
 #include "yum.h"
 #include "repomd.h"
 
-lr_Result
+lr_Result *
 lr_result_init()
 {
     return lr_malloc0(sizeof(struct _lr_Result));
 }
 
 void
-lr_result_clear(lr_Result result)
+lr_result_clear(lr_Result *result)
 {
     if (!result)
         return;
@@ -48,7 +48,7 @@ lr_result_clear(lr_Result result)
 }
 
 void
-lr_result_free(lr_Result result)
+lr_result_free(lr_Result *result)
 {
     if (!result)
         return;
@@ -57,7 +57,7 @@ lr_result_free(lr_Result result)
 }
 
 int
-lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...)
+lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...)
 {
     int rc = LRE_OK;
     va_list arg;

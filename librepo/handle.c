@@ -630,7 +630,7 @@ mirrorlist_error:
 }
 
 int
-lr_handle_perform(lr_Handle handle, lr_Result result, GError **err)
+lr_handle_perform(lr_Handle handle, lr_Result *result, GError **err)
 {
     int rc = LRE_OK;
 

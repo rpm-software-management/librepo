@@ -92,7 +92,7 @@ void lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path);
  * @param r         Result object
  * @return          Age of the file (number of seconds since last modification)
  */
-double lr_yum_repomd_get_age(lr_Result r);
+double lr_yum_repomd_get_age(lr_Result *r);
 
 /** @} */
 

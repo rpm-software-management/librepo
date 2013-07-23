@@ -29,6 +29,8 @@ extern "C" {
 /** \defgroup   result      Result object
  */
 
+typedef struct _lr_Result lr_Result;
+
 /** \ingroup result
  * Result options for ::lr_result_getinfo.
  */
@@ -42,19 +44,19 @@ typedef enum {
  * Return new allocated ::lr_Result object
  * @return          New allocated ::lr_Result object
  */
-lr_Result lr_result_init();
+lr_Result *lr_result_init();
 
 /** \ingroup result
  * Clean result object.
  * @param result    Result object.
  */
-void lr_result_clear(lr_Result result);
+void lr_result_clear(lr_Result *result);
 
 /** \ingroup result
  * Free result object.
  * @param result    Result object.
  */
-void lr_result_free(lr_Result result);
+void lr_result_free(lr_Result *result);
 
 /** \ingroup result
  * Get information about downloaded/localised repository from result object.
@@ -63,7 +65,7 @@ void lr_result_free(lr_Result result);
  * @param ...       Apropriate variable for the selected option.
  * @return          Librepo return code ::lr_Rc.
  */
-int lr_result_getinfo(lr_Result result, lr_ResultInfoOption option, ...);
+int lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...);
 
 #ifdef __cplusplus
 }

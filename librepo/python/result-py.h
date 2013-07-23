@@ -26,6 +26,6 @@ extern PyTypeObject Result_Type;
 
 #define ResultObject_Check(o)   PyObject_TypeCheck(o, &Result_Type)
 
-lr_Result Result_FromPyObject(PyObject *o);
+lr_Result *Result_FromPyObject(PyObject *o);
 
 #endif

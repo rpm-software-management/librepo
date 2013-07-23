@@ -561,7 +561,7 @@ static PyObject *
 perform(_HandleObject *self, PyObject *args)
 {
     PyObject *result_obj;
-    lr_Result result;
+    lr_Result *result;
     int ret;
 
     if (!PyArg_ParseTuple(args, "O:perform", &result_obj))

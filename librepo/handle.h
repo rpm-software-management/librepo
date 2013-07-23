@@ -183,7 +183,7 @@ int lr_handle_getinfo(lr_Handle handle, lr_HandleOption option, ...);
  * @param err           GError **
  * @return              Librepo return code from ::lr_Rc enum.
  */
-int lr_handle_perform(lr_Handle handle, lr_Result result, GError **err);
+int lr_handle_perform(lr_Handle handle, lr_Result *result, GError **err);
 
 /** @} */
 

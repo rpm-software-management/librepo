@@ -351,7 +351,7 @@ lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd *repomd)
 }
 
 int
-lr_yum_use_local(lr_Handle handle, lr_Result result)
+lr_yum_use_local(lr_Handle handle, lr_Result *result)
 {
     char *path;
     int rc = LRE_OK;
@@ -474,7 +474,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result result)
 }
 
 int
-lr_yum_download_remote(lr_Handle handle, lr_Result result)
+lr_yum_download_remote(lr_Handle handle, lr_Result *result)
 {
     int rc = LRE_OK;
     int fd;
@@ -630,7 +630,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result result)
 }
 
 int
-lr_yum_perform(lr_Handle handle, lr_Result result)
+lr_yum_perform(lr_Handle handle, lr_Result *result)
 {
     int rc = LRE_OK;
     lr_YumRepo repo;
@@ -679,7 +679,7 @@ lr_yum_perform(lr_Handle handle, lr_Result result)
 }
 
 double
-lr_yum_repomd_get_age(lr_Result r)
+lr_yum_repomd_get_age(lr_Result *r)
 {
     assert(r);
 
