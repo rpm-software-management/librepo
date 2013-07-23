@@ -104,7 +104,7 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
         if (*cur == '$') {
             if (cur-p) {
                 char *tmp = lr_strndup(p, cur-p);
-                tmp_res = lr_strconcat(res, tmp, NULL);
+                tmp_res = g_strconcat(res, tmp, NULL);
                 lr_free(tmp);
                 lr_free(res);
                 res = tmp_res;
@@ -118,7 +118,7 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
                 if (!strncmp(var_val->var, (cur+1), len)) {
                     cur = cur + 1 + len;
                     p = cur;
-                    tmp_res = lr_strconcat(res, var_val->val, NULL);
+                    tmp_res = g_strconcat(res, var_val->val, NULL);
                     lr_free(res);
                     res = tmp_res;
                     break;
@@ -129,7 +129,7 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
         ++cur;
     }
 
-    tmp_res = lr_strconcat(res, p, NULL);
+    tmp_res = g_strconcat(res, p, NULL);
     lr_free(res);
     res = tmp_res;
 

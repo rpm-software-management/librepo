@@ -397,7 +397,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
             local_path = handle->baseurl;
             if (handle->baseurl[0] == '/') {
                 /* Base URL is absolute path */
-                url = lr_strconcat("file://", handle->baseurl, NULL);
+                url = g_strconcat("file://", handle->baseurl, NULL);
             } else {
                 /* Base URL is relative path */
                 char *resolved_path = realpath(handle->baseurl, NULL);
@@ -408,7 +408,7 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle handle, GError **err)
                                 handle->baseurl, strerror(errno));
                     return LRE_BADURL;
                 }
-                url = lr_strconcat("file://", resolved_path, NULL);
+                url = g_strconcat("file://", resolved_path, NULL);
                 free(resolved_path);
             }
         }

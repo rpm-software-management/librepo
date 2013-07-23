@@ -75,26 +75,6 @@ START_TEST(test_strndup)
 }
 END_TEST
 
-START_TEST(test_strconcat)
-{
-    char *msg = NULL;
-
-    msg = lr_strconcat(NULL);
-    fail_if(msg != NULL);
-
-    msg = lr_strconcat("I see dead people.", NULL);
-    fail_if(msg == NULL);
-    fail_if(strcmp(msg, "I see dead people.") != 0);
-    lr_free(msg);
-
-    msg = NULL;
-    msg = lr_strconcat("Houston, " "we have " "a problem", NULL);
-    fail_if(msg == NULL);
-    fail_if(strcmp(msg, "Houston, we have a problem") != 0);
-    lr_free(msg);
-}
-END_TEST
-
 START_TEST(test_gettmpfile)
 {
     int fd = 0;
@@ -184,7 +164,6 @@ util_suite(void)
     tcase_add_test(tc, test_free);
     tcase_add_test(tc, test_strdup);
     tcase_add_test(tc, test_strndup);
-    tcase_add_test(tc, test_strconcat);
     tcase_add_test(tc, test_gettmpfile);
     tcase_add_test(tc, test_gettmpdir);
     tcase_add_test(tc, test_pathconcat);

@@ -95,37 +95,6 @@ lr_strndup(const char *str, size_t n)
     return new;
 }
 
-char *
-lr_strconcat(const char *str, ...)
-{
-    va_list arg;
-    char *chunk, *res;
-    size_t offset, total_len;
-
-    if (!str)
-        return NULL;
-
-    offset = strlen(str);
-    total_len = offset;
-
-    va_start(arg, str);
-    while ((chunk = va_arg(arg, char *)))
-        total_len += strlen(chunk);
-    va_end(arg);
-
-    res = lr_malloc(total_len + 1);
-
-    strcpy(res, str);
-    va_start(arg, str);
-    while ((chunk = va_arg(arg, char *))) {
-        strcpy(res + offset, chunk);
-        offset += strlen(chunk);
-    }
-    va_end(arg);
-
-    return res;
-}
-
 int
 lr_gettmpfile()
 {
@@ -300,14 +269,14 @@ lr_prepend_url_protocol(const char *path)
         return lr_strdup(path);
 
     if (path[0] == '/')  // Path is absolute path
-        return lr_strconcat("file://", path, NULL);
+        return g_strconcat("file://", path, NULL);
 
     char *path_with_protocol, *resolved_path = realpath(path, NULL);
     if (!resolved_path) {
         g_debug("%s: %s - realpath: %s ", __func__, path, strerror(errno));
         return NULL;
     }
-    path_with_protocol = lr_strconcat("file://", resolved_path, NULL);
+    path_with_protocol = g_strconcat("file://", resolved_path, NULL);
     free(resolved_path);
     return path_with_protocol;
 }

@@ -87,15 +87,6 @@ char *lr_strdup(const char *str);
 char *lr_strndup(const char *str, size_t n);
 
 /** \ingroup util
- * Concatenate all of given string into one long string. Variable argument
- * list must end with NULL.
- * @param str           First string param.
- * @param ...           NULL terminated list of strings.
- * @return              One long string.
- */
-char *lr_strconcat(const char *str, ...);
-
-/** \ingroup util
  * Create temporary librepo file in /tmp directory.
  * @return              File descriptor.
  */
