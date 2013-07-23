@@ -27,10 +27,6 @@ extern "C" {
 #undef G_LOG_DOMAIN
 #define G_LOG_DOMAIN    "librepo"
 
-// HAVE_VSNPRINTF
-// Define if vsnprintf is available.
-/* #undef HAVE_VSNPRINTF */
-
 #define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
 
 #ifdef DEBUG

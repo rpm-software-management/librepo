@@ -26,11 +26,12 @@ extern "C" {
 
 #include <glib.h>
 
-/** \defgroup checksum Functions for checksum calculating and checking.
+/** \defgroup   checksum    Checksum calculation and checking
+ *  \addtogroup checksum
+ *  @{
  */
 
-/** \ingroup checksum
- * Enum of supported checksum types.
+/** Enum of supported checksum types.
  * NOTE! This enum guarantee to be sorted by "hash quality"
  */
 typedef enum {
@@ -44,23 +45,20 @@ typedef enum {
     LR_CHECKSUM_SHA512,     /*    The most secure hash  */
 } lr_ChecksumType;
 
-/** \ingroup checksum
- * Convert checksum name (string) to ::lr_ChecksumType.
+/** Convert checksum name (string) to ::lr_ChecksumType.
  * @param type      String with a checksum name (e.g. "sha1", "SHA256", ...)
  * @return          ::lr_ChecksumType value representing the checksum
  *                  or LR_CHECKSUM_UNKNOWN
  */
 lr_ChecksumType lr_checksum_type(const char *type);
 
-/** \ingroup checksum
- * Convert lr_ChecksumType to string
+/** Convert lr_ChecksumType to string
  * @param type      Checksum type
  * @return          Constant string with name of the checksum
  */
 const char *lr_checksum_type_to_str(lr_ChecksumType type);
 
-/** \ingroup checksum
- * Calculate checksum for data pointed by file descriptor.
+/** Calculate checksum for data pointed by file descriptor.
  * @param type      Checksum type
  * @param fd        Opened file descriptor. Function seeks to the begin
  *                  of the file.
@@ -69,8 +67,7 @@ const char *lr_checksum_type_to_str(lr_ChecksumType type);
  */
 char *lr_checksum_fd(lr_ChecksumType type, int fd, GError **err);
 
-/** \ingroup checksum
- * Calculate checksum for data pointed by file descriptor and
+/** Calculate checksum for data pointed by file descriptor and
  * compare it to the expected checksum value.
  * @param type      Checksum type
  * @param fd        File descriptor
@@ -86,6 +83,8 @@ int lr_checksum_fd_cmp(lr_ChecksumType type,
                        const char *expected,
                        int caching,
                        GError **err);
+
+/** @} */
 
 #ifdef __cplusplus
 }

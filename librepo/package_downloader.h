@@ -28,11 +28,12 @@ extern "C" {
 #include "handle.h"
 #include "checksum.h"
 
-/** \defgroup package_downloader    Package downloading
+/** \defgroup   package_downloader    Package downloading
+ *  \addtogroup package_downloader
+ *  @{
  */
 
-/** \ingroup package_downloader
- * Download package from repository.
+/** Download package from repository.
  * @param handle            Librepo handle.
  * @param relative_url      Relative part of url.
  * @return                  Librepo return code ::lr_Rc.
@@ -41,8 +42,7 @@ extern "C" {
                     lr_download_package((handle), (relative_url), NULL, 0, \
                                         NULL, NULL, 0)
 
-/** \ingroup package_downloader
- * Download package from repository or base_url.
+/** Download package from repository or base_url.
  * Note: If resume, checksum and checksum_type are specified and
  * the downloaded package alredy exists and checksum matches, then
  * no downloading is done and LRE_ALREADYDOWNLOADED return code is returned.
@@ -65,6 +65,8 @@ int lr_download_package(lr_Handle handle,
                         const char *checksum,
                         const char *base_url,
                         int resume);
+
+/** @} */
 
 #ifdef __cplusplus
 }

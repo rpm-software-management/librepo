@@ -24,6 +24,11 @@
 extern "C" {
 #endif
 
+/** \defgroup   version   Library version constatnts and check macros
+ *  \addtogroup version
+ *  @{
+ */
+
 #define LR_VERSION_MAJOR @LIBREPO_MAJOR@
 #define LR_VERSION_MINOR @LIBREPO_MINOR@
 #define LR_VERSION_PATCH @LIBREPO_PATCH@
@@ -33,6 +38,8 @@ extern "C" {
      (LR_VERSION_MAJOR == (major) && LR_VERSION_MINOR > (minor)) || \
      (LR_VERSION_MAJOR == (major) && LR_VERSION_MINOR == (minor) && \
       LR_VERSION_PATCH >= (patch)))
+
+/** @} */
 
 #ifdef __cplusplus
 }

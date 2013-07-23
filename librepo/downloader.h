@@ -29,9 +29,9 @@ extern "C" {
 #include "handle.h"
 #include "downloadtarget.h"
 
-/** \defgroup downloader    Downloading API
- * \addtogroup downloader
- * @{
+/** \defgroup   downloader    Downloading API
+ *  \addtogroup downloader
+ *  @{
  */
 
 /** Global variable signalizing if SIGINT was catched.

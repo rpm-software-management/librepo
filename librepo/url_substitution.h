@@ -27,7 +27,7 @@ extern "C" {
 #include <glib.h>
 #include <stdlib.h>
 
-/** \defgroup   url_substitution    Module for substitute vars in url
+/** \defgroup   url_substitution    Substitution of variables in url
  *  \addtogroup url_substitution
  *  @{
  */

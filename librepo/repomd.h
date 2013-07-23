@@ -28,7 +28,7 @@ extern "C" {
 #include "xmlparser.h"
 #include "types.h"
 
-/** \defgroup repomd        Repomd parser
+/** \defgroup   repomd        Repomd (repomd.xml) parser
  *  \addtogroup repomd
  *  @{
  */

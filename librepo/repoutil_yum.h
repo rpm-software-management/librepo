@@ -26,7 +26,7 @@ extern "C" {
 
 #include "repomd.h"
 
-/** \defgroup   repoutil_yum      High level Functions for yum repos
+/** \defgroup   repoutil_yum      Yum repo high level function
  *  \addtogroup repoutil_yum
  *  @{
  */

@@ -39,18 +39,20 @@ extern "C" {
 #include "version.h"
 #include "yum.h"
 
-/** \defgroup librepo       Librepo library init function
+/** \defgroup   librepo     Librepo library init and cleanup
+ *  \addtogroup librepo
+ *  @{
  */
 
-/** \ingroup librepo
- * Initialize librepo library.
+/** Initialize librepo library.
  */
 void lr_global_init();
 
-/** \ingroup librepo
- * Clean up librepo library.
+/** Clean up librepo library.
  */
 void lr_global_cleanup();
+
+/** @} */
 
 #ifdef __cplusplus
 }

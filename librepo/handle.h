@@ -26,7 +26,7 @@ extern "C" {
 
 #include "result.h"
 
-/** \defgroup   handle    Handle for downloading data
+/** \defgroup   handle    Librepo Handle
  *  \addtogroup handle
  *  @{
  */

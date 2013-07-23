@@ -24,6 +24,11 @@
 extern "C" {
 #endif
 
+/** \defgroup   mirrorlist    Mirrorlist parser
+ *  \addtogroup mirrorlist
+ *  @{
+ */
+
 /** Mirrorlist */
 typedef struct {
     GSList *urls;    /*!< List URLs (char *), could be NULL */
@@ -49,6 +54,8 @@ int lr_mirrorlist_parse_file(lr_Mirrorlist *mirrorlist, int fd, GError **err);
  * @param mirrorlist    Mirrorlist object.
  */
 void lr_mirrorlist_free(lr_Mirrorlist *mirrorlist);
+
+/** @} */
 
 #ifdef __cplusplus
 }

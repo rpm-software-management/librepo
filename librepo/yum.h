@@ -27,7 +27,7 @@ extern "C" {
 #include "rcodes.h"
 #include "result.h"
 
-/** \defgroup yum       Yum repo manipulation
+/** \defgroup   yum       Yum repo manipulation
  *  \addtogroup yum
  *  @{
  */

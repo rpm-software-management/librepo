@@ -27,12 +27,15 @@ extern "C" {
 #include "types.h"
 
 /** \defgroup   result      Result object
+ *  \addtogroup result
+ *  @{
  */
 
+/** Result object
+ */
 typedef struct _lr_Result lr_Result;
 
-/** \ingroup result
- * Result options for ::lr_result_getinfo.
+/** Result options for ::lr_result_getinfo.
  */
 typedef enum {
     LRR_YUM_REPO,       /*!< (lr_YumRepo *) Reference to ::lr_YumRepo in result */
@@ -40,32 +43,30 @@ typedef enum {
     LRR_SENTINEL,
 } lr_ResultInfoOption;
 
-/** \ingroup result
- * Return new allocated ::lr_Result object
+/** Return new allocated ::lr_Result object
  * @return          New allocated ::lr_Result object
  */
 lr_Result *lr_result_init();
 
-/** \ingroup result
- * Clean result object.
+/** Clean result object.
  * @param result    Result object.
  */
 void lr_result_clear(lr_Result *result);
 
-/** \ingroup result
- * Free result object.
+/** Free result object.
  * @param result    Result object.
  */
 void lr_result_free(lr_Result *result);
 
-/** \ingroup result
- * Get information about downloaded/localised repository from result object.
+/** Get information about downloaded/localised repository from result object.
  * @param result    Result object.
  * @param option    Option from ::lr_ResultInfoOption enum.
  * @param ...       Apropriate variable for the selected option.
  * @return          Librepo return code ::lr_Rc.
  */
 int lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...);
+
+/** @} */
 
 #ifdef __cplusplus
 }

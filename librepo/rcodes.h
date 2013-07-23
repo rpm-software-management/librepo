@@ -26,11 +26,12 @@ extern "C" {
 
 #include <glib.h>
 
-/** \defgroup   rcodes      Librepo return codes
+/** \defgroup   rcodes      Error/Return codes
+ *  \addtogroup rcodes
+ *  @{
  */
 
-/** \ingroup rcodes
- * Return/Error codes
+/** Librepo return/error codes
  */
 typedef enum {
     LRE_OK, /*!<
@@ -137,6 +138,8 @@ GQuark lr_metalink_error_quark(void);
 GQuark lr_mirrorlist_error_quark(void);
 GQuark lr_xml_parser_error_quark(void);
 GQuark lr_repoutil_yum_error_quark(void);
+
+/** @} */
 
 #ifdef __cplusplus
 }

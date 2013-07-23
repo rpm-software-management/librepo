@@ -24,6 +24,11 @@
 extern "C" {
 #endif
 
+/** \defgoupt   metalink  Metalink parser
+ *  \addtogroup metalink
+ *  @{
+ */
+
 /** Single checksum for the metalink target file. */
 typedef struct {
     char *type;     /*!< Type of checksum (e.g. "md5", "sha1", "sha256", ... */
@@ -48,14 +53,12 @@ typedef struct {
     GSList *urls;   /*!< List of pointers to lr_MetalinkUrls (could be NULL) */
 } lr_Metalink;
 
-/**
- * Create new empty metalink object.
+/** Create new empty metalink object.
  * @return              New metalink object.
  */
 lr_Metalink *lr_metalink_init();
 
-/**
- * Parse metalink file.
+/** Parse metalink file.
  * @param metalink      Metalink object.
  * @param fd            File descriptor.
  * @param filename      File to look for in metalink file.
@@ -67,11 +70,12 @@ int lr_metalink_parse_file(lr_Metalink *metalink,
                            const char *filename,
                            GError **err);
 
-/**
- * Free metalink object and all its content.
+/** Free metalink object and all its content.
  * @param metalink      Metalink object.
  */
 void lr_metalink_free(lr_Metalink *metalink);
+
+/** @} */
 
 #ifdef __cplusplus
 }
