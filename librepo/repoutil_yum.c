@@ -33,6 +33,7 @@
 #include "yum.h"
 #include "handle.h"
 #include "result.h"
+#include "result_internal.h"
 
 int
 lr_repoutil_yum_check_repo(const char *path, GError **err)
@@ -120,4 +121,22 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
     close(fd);
 
     return rc;
+}
+
+double
+lr_yum_repomd_get_age(lr_Result *result)
+{
+    assert(result);
+
+    if (!result->yum_repo || !result->yum_repo->repomd)
+        return 0.0;
+
+    int rc;
+    struct stat st;
+
+    rc = stat(result->yum_repo->repomd, &st);
+    if (rc != 0)
+        return 0.0;
+
+   return difftime(time(NULL), st.st_mtime);
 }

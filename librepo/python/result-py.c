@@ -125,7 +125,7 @@ getinfo(_ResultObject *self, PyObject *args)
      * YUM related options
      */
     case LRR_YUM_REPO: {
-        lr_YumRepo repo;
+        lr_YumRepo *repo;
         res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repo);
         if (res != LRE_OK)
             RETURN_ERROR(res, NULL);

@@ -69,8 +69,8 @@ lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...)
 
     switch (option) {
     case LRR_YUM_REPO: {
-        lr_YumRepo *repo;
-        repo = va_arg(arg, lr_YumRepo *);
+        lr_YumRepo **repo;
+        repo = va_arg(arg, lr_YumRepo **);
         *repo = result->yum_repo;
         break;
     }

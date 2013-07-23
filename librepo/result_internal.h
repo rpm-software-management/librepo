@@ -34,7 +34,7 @@ struct _lr_Result {
     lr_YumRepoMd    *yum_repomd; /*!<
         Pointer to struct representingrepomd.xml */
 
-    lr_YumRepo      yum_repo; /*!<
+    lr_YumRepo      *yum_repo; /*!<
         Pointer to struct with info about yum repo */
 };
 

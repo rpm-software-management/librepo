@@ -30,7 +30,7 @@ PyStringOrNone_FromString(const char *str)
 }
 
 PyObject *
-PyObject_FromYumRepo(lr_YumRepo repo)
+PyObject_FromYumRepo(lr_YumRepo *repo)
 {
     PyObject *dict;
 
@@ -46,10 +46,12 @@ PyObject_FromYumRepo(lr_YumRepo repo)
     PyDict_SetItemString(dict, "signature", PyStringOrNone_FromString(repo->signature));
     PyDict_SetItemString(dict, "mirrorlist", PyStringOrNone_FromString(repo->mirrorlist));
 
-    for (int x = 0; x < repo->nop; x++) {
+    for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
+        lr_YumRepoPath *yumrepopath = elem->data;
+        if (!yumrepopath || !yumrepopath->type) continue;
         PyDict_SetItemString(dict,
-                             repo->paths[x]->type,
-                             PyStringOrNone_FromString(repo->paths[x]->path));
+                             yumrepopath->type,
+                             PyStringOrNone_FromString(yumrepopath->path));
     }
 
     return dict;

@@ -46,75 +46,78 @@
 
 /* helper functions for YumRepo manipulation */
 
-lr_YumRepo
+lr_YumRepo *
 lr_yum_repo_init()
 {
-    return lr_malloc0(sizeof(struct _lr_YumRepo));
+    return lr_malloc0(sizeof(lr_YumRepo));
 }
 
 void
-lr_yum_repo_clear(lr_YumRepo repo)
+lr_yum_repo_free(lr_YumRepo *repo)
 {
     if (!repo)
         return;
-    for (int x = 0; x < repo->nop; x++) {
-        lr_free(repo->paths[x]->type);
-        lr_free(repo->paths[x]->path);
-        lr_free(repo->paths[x]);
+
+    for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
+        lr_YumRepoPath *yumrepopath = elem->data;
+        assert(yumrepopath);
+        lr_free(yumrepopath->type);
+        lr_free(yumrepopath->path);
+        lr_free(yumrepopath);
     }
-    lr_free(repo->paths);
+
     lr_free(repo->repomd);
     lr_free(repo->url);
     lr_free(repo->destdir);
     lr_free(repo->signature);
     lr_free(repo->mirrorlist);
-    memset(repo, 0, sizeof(struct _lr_YumRepo));
-}
-
-void
-lr_yum_repo_free(lr_YumRepo repo)
-{
-    if (!repo)
-        return;
-    lr_yum_repo_clear(repo);
     lr_free(repo);
 }
 
 const char *
-lr_yum_repo_path(lr_YumRepo repo, const char *type)
+lr_yum_repo_path(lr_YumRepo *repo, const char *type)
 {
     assert(repo);
-    for (int x = 0; x < repo->nop; x++)
-        if (!strcmp(repo->paths[x]->type, type))
-            return repo->paths[x]->path;
+    for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
+        lr_YumRepoPath *yumrepopath = elem->data;
+        assert(yumrepopath);
+        if (!strcmp(yumrepopath->type, type))
+            return yumrepopath->path;
+    }
     return NULL;
 }
 
 void
-lr_yum_repo_append(lr_YumRepo repo, const char *type, const char *path)
+lr_yum_repo_append(lr_YumRepo *repo, const char *type, const char *path)
 {
     assert(repo);
     assert(type);
     assert(path);
-    repo->paths = lr_realloc(repo->paths, (repo->nop+1) * sizeof(lr_YumRepoMd));
-    repo->paths[repo->nop] = lr_malloc(sizeof(struct _lr_YumRepoPath));
-    repo->paths[repo->nop]->type = g_strdup(type);
-    repo->paths[repo->nop]->path = g_strdup(path);
-    repo->nop++;
+
+    lr_YumRepoPath *yumrepopath = lr_malloc(sizeof(lr_YumRepoPath));
+    yumrepopath->type = g_strdup(type);
+    yumrepopath->path = g_strdup(path);
+    repo->paths = g_slist_append(repo->paths, yumrepopath);
 }
 
 void
-lr_yum_repo_update(lr_YumRepo repo, const char *type, const char *path)
+lr_yum_repo_update(lr_YumRepo *repo, const char *type, const char *path)
 {
     assert(repo);
     assert(type);
     assert(path);
-    for (int x = 0; x < repo->nop; x++)
-        if (!strcmp(repo->paths[x]->type, type)) {
-            lr_free(repo->paths[x]->path);
-            repo->paths[x]->path = g_strdup(path);
+
+    for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
+        lr_YumRepoPath *yumrepopath = elem->data;
+        assert(yumrepopath);
+
+        if (!strcmp(yumrepopath->type, type)) {
+            lr_free(yumrepopath->path);
+            yumrepopath->path = g_strdup(path);
             return;
         }
+    }
+
     lr_yum_repo_append(repo, type, path);
 }
 
@@ -213,7 +216,7 @@ lr_yum_download_repomd(lr_Handle handle,
 }
 
 int
-lr_yum_download_repo(lr_Handle handle, lr_YumRepo repo, lr_YumRepoMd *repomd)
+lr_yum_download_repo(lr_Handle handle, lr_YumRepo *repo, lr_YumRepoMd *repomd)
 {
     int ret = LRE_OK;
     char *destdir;  /* Destination dir */
@@ -334,7 +337,7 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord *rec, const char *path)
 }
 
 int
-lr_yum_check_repo_checksums(lr_YumRepo repo, lr_YumRepoMd *repomd)
+lr_yum_check_repo_checksums(lr_YumRepo *repo, lr_YumRepoMd *repomd)
 {
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         int ret;
@@ -357,7 +360,7 @@ lr_yum_use_local(lr_Handle handle, lr_Result *result)
     int rc = LRE_OK;
     int fd;
     char *baseurl;
-    lr_YumRepo repo;
+    lr_YumRepo *repo;
     lr_YumRepoMd *repomd;
 
     g_debug("%s: Locating repo..", __func__);
@@ -480,7 +483,7 @@ lr_yum_download_remote(lr_Handle handle, lr_Result *result)
     int fd;
     int create_repodata_dir = 1;
     char *path_to_repodata;
-    lr_YumRepo repo;
+    lr_YumRepo *repo;
     lr_YumRepoMd *repomd;
 
     repo   = result->yum_repo;
@@ -633,7 +636,7 @@ int
 lr_yum_perform(lr_Handle handle, lr_Result *result)
 {
     int rc = LRE_OK;
-    lr_YumRepo repo;
+    lr_YumRepo *repo;
     lr_YumRepoMd *repomd;
 
     assert(handle);
@@ -676,22 +679,4 @@ lr_yum_perform(lr_Handle handle, lr_Result *result)
     }
 
     return rc;
-}
-
-double
-lr_yum_repomd_get_age(lr_Result *r)
-{
-    assert(r);
-
-    if (!r->yum_repo || !r->yum_repo->repomd)
-        return 0.0;
-
-    int rc;
-    struct stat st;
-
-    rc = stat(r->yum_repo->repomd, &st);
-    if (rc != 0)
-        return 0.0;
-
-   return difftime(time(NULL), st.st_mtime);
 }
