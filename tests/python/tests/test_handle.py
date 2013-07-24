@@ -78,6 +78,8 @@ class TestCaseHandle(unittest.TestCase):
         self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), [])
         h.setopt(librepo.LRO_YUMDLIST,  [None])
         self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), [])
+        h.setopt(librepo.LRO_YUMDLIST,  None)
+        self.assertEqual(h.getinfo(librepo.LRI_YUMDLIST), None)
 
         self.assertEqual(h.getinfo(librepo.LRI_YUMBLIST), None)
         h.setopt(librepo.LRO_YUMBLIST,  ["primary", "other"])

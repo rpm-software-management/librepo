@@ -514,8 +514,7 @@ getinfo(_HandleObject *self, PyObject *args)
             PyList_Append(list, PyString_FromString(strlist[x]));
         }
 
-        if (option == LRI_MIRRORS)
-            lr_free(strlist);
+        g_strfreev(strlist);
 
         return list;
     }

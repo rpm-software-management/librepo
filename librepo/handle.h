@@ -123,24 +123,31 @@ typedef enum {
     LRI_DESTDIR,                /*!< (char **) */
     LRI_REPOTYPE,               /*!< (long *) */
     LRI_USERAGENT,              /*!< (char **) */
-    LRI_YUMDLIST,               /*!< (char ***) */
-    LRI_YUMBLIST,               /*!< (char ***) */
+    LRI_YUMDLIST,               /*!< (char ***)
+        NOTE: Returned list must be freed as well as all its items!
+        You could use g_strfreev() function. */
+    LRI_YUMBLIST,               /*!< (char ***)
+        NOTE: Returned list must be freed as well as all its items!
+        You could use g_strfreev() function. */
     LRI_FETCHMIRRORS,           /*!< (long *) */
     LRI_MAXMIRRORTRIES,         /*!< (long *) */
     LRI_VARSUB,                 /*!< (lr_UrlVars **) */
-    LRI_MIRRORS,                /*!< (char **)
+    LRI_MIRRORS,                /*!< (char ***)
         Mirrorlist associated with the repository.
 
         If LRO_MIRRORLIST was specified, then content of this list is
         created from the specified mirrorlist.
         If no LRO_MIRRORLIST was specified and repository is on a local
-        filesystem and contains its mirrorlist then this mirrorlist is
+        filesystem and contains a mirrorlist then the mirrorlist is
         automatically loaded.
+
         Mirrors from this list are used for downloading only if the
         mirrorlist was specified by LRO_MIRRORLIST option! Automatically
-        loaded mirrorlist is not implicitly used for downloading!
+        loaded mirrorlist from a local repository is not implicitly
+        used for downloading!
 
-        NOTE: Returned list must be freed, but its elements doesn't! */
+        NOTE: Returned list must be freed as well as all its items!
+        You could use g_strfreev() function. */
     LRI_METALINK,               /*!< (lr_Metalink *) */
     LRI_SENTINEL,
 } lr_HandleInfoOption; /*!< Handle info options */

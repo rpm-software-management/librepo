@@ -796,14 +796,46 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
         break;
 
     case LRI_YUMDLIST: {
+        int x;
+        guint length;
         char ***strlist = va_arg(arg, char ***);
-        *strlist = handle->yumdlist;
+
+        if (!handle->yumdlist) {
+            *strlist = NULL;
+            break;
+        }
+
+        x = 0;
+        length = g_strv_length(handle->yumdlist);
+        *strlist = lr_malloc((length + 1) * sizeof(char *));
+        for (char *item = handle->yumdlist[x]; item;) {
+            (*strlist)[x] = g_strdup(item);
+            x++;
+            item = handle->yumdlist[x];
+        }
+        (*strlist)[x] = NULL;
         break;
     }
 
     case LRI_YUMBLIST: {
+        int x;
+        guint length;
         char ***strlist = va_arg(arg, char ***);
-        *strlist = handle->yumblist;
+
+        if (!handle->yumblist) {
+            *strlist = NULL;
+            break;
+        }
+
+        x = 0;
+        length = g_strv_length(handle->yumblist);
+        *strlist = lr_malloc((length + 1) * sizeof(char *));
+        for (char *item = handle->yumblist[x]; item;) {
+            (*strlist)[x] = g_strdup(item);
+            x++;
+            item = handle->yumblist[x];
+        }
+        (*strlist)[x] = NULL;
         break;
     }
 
@@ -838,7 +870,7 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
         *list = lr_malloc((g_slist_length(ml) + 1) * sizeof(char *));
         for (lr_LrMirrorlist *elem = ml; elem; elem = g_slist_next(elem)) {
             lr_LrMirror *mirror = elem->data;
-            (*list)[x] = mirror->url;
+            (*list)[x] = g_strdup(mirror->url);
             x++;
         }
         (*list)[x] = NULL;
