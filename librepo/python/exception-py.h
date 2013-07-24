@@ -26,8 +26,12 @@ extern PyObject *LrErr_Exception;
 
 int init_exceptions();
 
-#define RETURN_ERROR(rc, h) do { return return_error((rc), (h)); } while(0)
+#define RETURN_ERROR(...) \
+    do { return return_error(__VA_ARGS__); } while(0)
 
-void *return_error(int rc, lr_Handle *h);
+/** Set exception and return NULL.
+ * If err is passed, then rc param is ignored.
+ */
+void *return_error(GError **err, int rc, const char *format, ...);
 
 #endif

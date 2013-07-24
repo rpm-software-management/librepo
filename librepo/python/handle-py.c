@@ -377,14 +377,14 @@ setopt(_HandleObject *self, PyObject *args)
             self->progress_cb = NULL;
             res = lr_handle_setopt(self->handle, (lr_HandleOption)option, NULL);
             if (res != LRE_OK)
-                RETURN_ERROR(res, self->handle);
+                RETURN_ERROR(NULL, res, NULL);
         } else {
             // New callback object
             Py_XINCREF(obj);
             self->progress_cb = obj;
             res = lr_handle_setopt(self->handle, (lr_HandleOption)option, progress_callback);
             if (res != LRE_OK)
-                RETURN_ERROR(res, self->handle);
+                RETURN_ERROR(NULL, res, NULL);
             res = lr_handle_setopt(self->handle, LRO_PROGRESSDATA, self);
         }
         break;
@@ -412,7 +412,7 @@ setopt(_HandleObject *self, PyObject *args)
     }
 
     if (res != LRE_OK)
-        RETURN_ERROR(res, self->handle);
+        RETURN_ERROR(NULL, res, NULL);
     Py_RETURN_NONE;
 }
 
@@ -443,7 +443,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_USERAGENT:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &str);
         if (res != LRE_OK)
-            RETURN_ERROR(res, self->handle);
+            RETURN_ERROR(NULL, res, NULL);
         if (str == NULL)
             Py_RETURN_NONE;
         return PyString_FromString(str);
@@ -456,7 +456,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_MAXMIRRORTRIES:
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &lval);
         if (res != LRE_OK)
-            RETURN_ERROR(res, self->handle);
+            RETURN_ERROR(NULL, res, NULL);
         return PyLong_FromLong(lval);
 
     case LRI_VARSUB: {
@@ -465,7 +465,7 @@ getinfo(_HandleObject *self, PyObject *args)
 
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &vars);
         if (res != LRE_OK)
-            RETURN_ERROR(res, self->handle);
+            RETURN_ERROR(NULL, res, NULL);
 
         if (vars == NULL)
             Py_RETURN_NONE;
@@ -501,7 +501,7 @@ getinfo(_HandleObject *self, PyObject *args)
         char **strlist;
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &strlist);
         if (res != LRE_OK)
-            RETURN_ERROR(res, self->handle);
+            RETURN_ERROR(NULL, res, NULL);
         if (strlist == NULL) {
             if (option == LRI_MIRRORS) {
                 return PyList_New(0);
@@ -539,7 +539,7 @@ getinfo(_HandleObject *self, PyObject *args)
         lr_Metalink *metalink;
         res = lr_handle_getinfo(self->handle, (lr_HandleInfoOption)option, &metalink);
         if (res != LRE_OK)
-            RETURN_ERROR(res, self->handle);
+            RETURN_ERROR(NULL, res, NULL);
         if (metalink == NULL)
             Py_RETURN_NONE;
         py_metalink = PyObject_FromMetalink(metalink);
@@ -552,7 +552,7 @@ getinfo(_HandleObject *self, PyObject *args)
     }
 
     if (res != LRE_OK)
-        RETURN_ERROR(res, self->handle);
+        RETURN_ERROR(NULL, res, NULL);
     Py_RETURN_NONE;
 }
 
@@ -562,6 +562,7 @@ perform(_HandleObject *self, PyObject *args)
     PyObject *result_obj;
     lr_Result *result;
     int ret;
+    GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "O:perform", &result_obj))
         return NULL;
@@ -570,7 +571,7 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
-    ret = lr_handle_perform(self->handle, result, NULL);
+    ret = lr_handle_perform(self->handle, result, &tmp_err);
 
     if (ret == LRE_INTERRUPTED) {
         PyErr_SetInterrupt();
@@ -578,8 +579,10 @@ perform(_HandleObject *self, PyObject *args)
         return NULL;
     }
 
+    assert(ret == LRE_OK || tmp_err);
+
     if (ret != LRE_OK)
-        RETURN_ERROR(ret, self->handle);
+        RETURN_ERROR(&tmp_err, ret, NULL);
 
     Py_RETURN_NONE;
 }
@@ -611,7 +614,7 @@ download_package(_HandleObject *self, PyObject *args)
     }
 
     if (ret != LRE_OK)
-        RETURN_ERROR(ret, self->handle);
+        RETURN_ERROR(NULL, ret, NULL);
 
     Py_RETURN_NONE;
 }

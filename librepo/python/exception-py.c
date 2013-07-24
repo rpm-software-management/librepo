@@ -17,6 +17,8 @@
  * USA.
  */
 
+#include <glib.h>
+#include <glib/gprintf.h>
 #include <Python.h>
 #include "exception-py.h"
 
@@ -33,27 +35,88 @@ init_exceptions()
     return 1;
 }
 
-
 void *
-return_error(int rc, lr_Handle *h)
+return_error(GError **err, int rc, const char *format, ...)
 {
-    /* Create an exception based on rc (and handle - optionaly).
-     * Exception type is LrErr_Exception and value is tuple:
-     * ((long) return_code, (string) error_message, extra_info)
-     **/
+    int ret, code;
+    va_list vl;
+    gchar *message, *err_message, *usr_message = NULL;
+    PyObject *exception_type, *exception_val;
 
-    PyObject *err;
+    assert(err || rc > 0);
+    assert(!err || *err);
 
-    if (!h) {
-        // No handle specified
-        err = Py_BuildValue("(isO)", rc, lr_strerror(rc), Py_None);
-        PyErr_SetObject(LrErr_Exception, err);
-        return NULL;
+    if (format) {
+        // Prepare user message
+        va_start(vl, format);
+        ret = g_vasprintf(&usr_message, format, vl);
+        va_end(vl);
+
+        if (ret < 0) {
+            // vasprintf failed - silently ignore this error
+            g_free(usr_message);
+            usr_message = NULL;
+        }
     }
 
-    err = Py_BuildValue("isO", rc, lr_strerror(rc), Py_None);
+    // Select error message
+    if (err)
+        err_message = (*err)->message;
+    else
+        err_message = (char *) lr_strerror(rc);
 
-    PyErr_SetObject(LrErr_Exception, err);
+    // Prepare complete message
+    if (usr_message)
+        message = g_strdup_printf("%s%s", usr_message, err_message);
+    else
+        message = g_strdup(err_message);
+
+    g_free(usr_message);
+
+    if (err)
+        code = (*err)->code;
+    else
+        code = rc;
+
+    g_clear_error(err);
+
+    // Select appropriate exception type
+    switch (code) {
+        case LRE_IO:
+        case LRE_CANNOTCREATEDIR:
+        case LRE_CANNOTCREATETMP:
+            exception_type = PyExc_IOError;
+            break;
+        case LRE_MEMORY:
+            exception_type = PyExc_MemoryError;
+            break;
+        case LRE_BADFUNCARG:
+        case LRE_BADOPTARG:
+            exception_type = PyExc_ValueError;
+            break;
+        default:
+            exception_type = LrErr_Exception;
+    }
+
+    // Set exception
+    if (exception_type == PyExc_IOError) {
+        // Because of IOError exception has a special formating
+        // It Looks like:
+        // [Errno unknown] Cannot create output directory: 'Cannot create output directory'
+        exception_val = Py_BuildValue("(sss)",
+                                      "unknown",
+                                      message,
+                                      lr_strerror(code));
+    } else {
+        exception_val = Py_BuildValue("(iss)",
+                                      (int) code,
+                                      message,
+                                      lr_strerror(code));
+    }
+
+    PyErr_SetObject(exception_type, exception_val);
+
+    g_free(message);
 
     return NULL;
 }

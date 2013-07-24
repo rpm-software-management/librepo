@@ -128,7 +128,7 @@ getinfo(_ResultObject *self, PyObject *args)
         lr_YumRepo *repo;
         res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repo);
         if (res != LRE_OK)
-            RETURN_ERROR(res, NULL);
+            RETURN_ERROR(NULL, res, NULL);
         return PyObject_FromYumRepo(repo);
     }
 
@@ -136,7 +136,7 @@ getinfo(_ResultObject *self, PyObject *args)
         lr_YumRepoMd *repomd;
         res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repomd);
         if (res != LRE_OK)
-            RETURN_ERROR(res, NULL);
+            RETURN_ERROR(NULL, res, NULL);
         return PyObject_FromYumRepoMd(repomd);
     }
 
@@ -149,7 +149,7 @@ getinfo(_ResultObject *self, PyObject *args)
     }
 
     if (res != LRE_OK)
-        RETURN_ERROR(res, NULL);
+        RETURN_ERROR(NULL, res, NULL);
     Py_RETURN_NONE;
 }
 
