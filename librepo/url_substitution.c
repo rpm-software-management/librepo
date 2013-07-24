@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 #include "setup.h"
 #include "url_substitution.h"
 #include "util.h"
@@ -116,8 +117,8 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
                 lr_Var *var_val = elem->data;
                 size_t len = strlen(var_val->var);
                 if (!strncmp(var_val->var, (cur+1), len)) {
-                    cur = cur + 1 + len;
-                    p = cur;
+                    cur = cur + len;
+                    p = cur + 1;
                     tmp_res = g_strconcat(res, var_val->val, NULL);
                     lr_free(res);
                     res = tmp_res;
@@ -129,9 +130,11 @@ lr_url_substitute(const char *url, lr_UrlVars *list)
         ++cur;
     }
 
-    tmp_res = g_strconcat(res, p, NULL);
-    lr_free(res);
-    res = tmp_res;
+    if (*p != '\0') {
+        tmp_res = g_strconcat(res, p, NULL);
+        lr_free(res);
+        res = tmp_res;
+    }
 
     return res;
 }

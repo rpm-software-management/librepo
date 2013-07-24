@@ -88,6 +88,14 @@ START_TEST(test_url_substitute)
     fail_if(strcmp(url, "http://version?id=repo"));
     lr_free(url);
 
+    url = lr_url_substitute("http://$foo$bar", urlvars);
+    fail_if(strcmp(url, "http://versionrepo"));
+    lr_free(url);
+
+    url = lr_url_substitute("http://$foo$bar/", urlvars);
+    fail_if(strcmp(url, "http://versionrepo/"));
+    lr_free(url);
+
     lr_urlvars_free(urlvars);
 }
 END_TEST

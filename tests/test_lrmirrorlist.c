@@ -40,6 +40,7 @@ START_TEST(test_lrmirrorlist_append_mirrorlist)
     fail_if(strcmp(url, "ftp://bar"));
 
     lr_lrmirrorlist_free(iml);
+    g_slist_free(ml.urls);
 }
 END_TEST
 
@@ -129,7 +130,9 @@ START_TEST(test_lrmirrorlist_append_metalink)
     fail_if(strcmp(url, "http://foo"));
     url = lr_lrmirrorlist_nth_url(iml, 2);
     fail_if(strcmp(url, "ftp://bar"));
+
     lr_lrmirrorlist_free(iml);
+    g_slist_free(ml.urls);
 }
 END_TEST
 

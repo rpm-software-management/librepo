@@ -66,6 +66,7 @@ lr_yum_repo_free(lr_YumRepo *repo)
         lr_free(yumrepopath);
     }
 
+    g_slist_free(repo->paths);
     lr_free(repo->repomd);
     lr_free(repo->url);
     lr_free(repo->destdir);
@@ -286,6 +287,8 @@ lr_yum_download_repo(lr_Handle *handle, lr_YumRepo *repo, lr_YumRepoMd *repomd)
             ret = target->rcode;
         lr_downloadtarget_free(target);
     }
+
+    g_slist_free(targets);
 
     return ret;
 }
