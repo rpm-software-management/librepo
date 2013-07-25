@@ -129,6 +129,12 @@ lr_mirrorlist_error_quark(void)
 }
 
 GQuark
+lr_package_downloader_error_quark(void)
+{
+    return g_quark_from_static_string("lr_package_downloader_error");
+}
+
+GQuark
 lr_xml_parser_error_quark(void)
 {
     return g_quark_from_static_string("lr_xml_parser_error");

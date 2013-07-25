@@ -36,11 +36,12 @@ extern "C" {
 /** Download package from repository.
  * @param handle            Librepo handle.
  * @param relative_url      Relative part of url.
+ * @param err               GError **
  * @return                  Librepo return code ::lr_Rc.
  */
-#define lr_download_simple(handle, relative_url) \
+#define lr_download_simple(handle, relative_url, err) \
                     lr_download_package((handle), (relative_url), NULL, 0, \
-                                        NULL, NULL, 0)
+                                        NULL, NULL, 0, (err))
 
 /** Download package from repository or base_url.
  * Note: If resume, checksum and checksum_type are specified and
@@ -56,6 +57,7 @@ extern "C" {
  *                          and this base_url is used for downloading.
  * @param resume            If != 0 try to resume downloading if dest file
  *                          already exists.
+ * @param err               GError **
  * @return                  Librepo return code.
  */
 int lr_download_package(lr_Handle *handle,
@@ -64,7 +66,8 @@ int lr_download_package(lr_Handle *handle,
                         lr_ChecksumType checksum_type,
                         const char *checksum,
                         const char *base_url,
-                        int resume);
+                        int resume,
+                        GError **err);
 
 /** @} */
 

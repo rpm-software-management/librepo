@@ -574,6 +574,7 @@ perform(_HandleObject *self, PyObject *args)
     ret = lr_handle_perform(self->handle, result, &tmp_err);
 
     if (ret == LRE_INTERRUPTED) {
+        g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
@@ -593,6 +594,7 @@ download_package(_HandleObject *self, PyObject *args)
     int ret;
     char *relative_url, *checksum, *dest, *base_url;
     int resume, checksum_type;
+    GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "szizzi:download_package", &relative_url,
                                                            &dest,
@@ -605,16 +607,19 @@ download_package(_HandleObject *self, PyObject *args)
         return NULL;
 
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
-                              checksum, base_url, resume);
+                              checksum, base_url, resume, &tmp_err);
 
     if (ret == LRE_INTERRUPTED) {
+        g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
     }
 
+    assert(ret == LRE_OK || tmp_err);
+
     if (ret != LRE_OK)
-        RETURN_ERROR(NULL, ret, NULL);
+        RETURN_ERROR(&tmp_err, ret, NULL);
 
     Py_RETURN_NONE;
 }

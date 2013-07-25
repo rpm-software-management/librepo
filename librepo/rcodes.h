@@ -127,6 +127,7 @@ const char *lr_strerror(int rc);
 #define LR_HANDLE_ERROR             lr_handle_error_quark()
 #define LR_METALINK_ERROR           lr_metalink_error_quark()
 #define LR_MIRRORLIST_ERROR         lr_mirrorlist_error_quark()
+#define LR_PACKAGE_DOWNLOADER_ERROR lr_package_downloader_error_quark()
 #define LR_XML_PARSER_ERROR         lr_xml_parser_error_quark()
 #define LR_REPOUTIL_YUM_ERROR       lr_repoutil_yum_error_quark()
 
@@ -136,6 +137,7 @@ GQuark lr_gpg_error_quark(void);
 GQuark lr_handle_error_quark(void);
 GQuark lr_metalink_error_quark(void);
 GQuark lr_mirrorlist_error_quark(void);
+GQuark lr_package_downloader_error_quark(void);
 GQuark lr_xml_parser_error_quark(void);
 GQuark lr_repoutil_yum_error_quark(void);
 
