@@ -75,7 +75,12 @@ lr_yum_repo_free(lr_YumRepo *repo)
     lr_free(repo);
 }
 
-const char *
+/** Retruns path for the file from repository.
+ * @param repo          Yum repo object.
+ * @param type          Type of path. E.g. "primary", "filelists", ...
+ * @return              Path or NULL.
+ */
+static const char *
 lr_yum_repo_path(lr_YumRepo *repo, const char *type)
 {
     assert(repo);
@@ -88,7 +93,12 @@ lr_yum_repo_path(lr_YumRepo *repo, const char *type)
     return NULL;
 }
 
-void
+/** Append path to the repository object.
+ * @param repo          Yum repo object.
+ * @param type          Type of file. E.g. "primary", "filelists", ...
+ * @param path          Path to the file.
+ */
+static void
 lr_yum_repo_append(lr_YumRepo *repo, const char *type, const char *path)
 {
     assert(repo);
@@ -101,7 +111,7 @@ lr_yum_repo_append(lr_YumRepo *repo, const char *type, const char *path)
     repo->paths = g_slist_append(repo->paths, yumrepopath);
 }
 
-void
+static void
 lr_yum_repo_update(lr_YumRepo *repo, const char *type, const char *path)
 {
     assert(repo);
@@ -124,7 +134,7 @@ lr_yum_repo_update(lr_YumRepo *repo, const char *type, const char *path)
 
 /* main bussines logic */
 
-int
+static int
 lr_yum_repomd_record_enabled(lr_Handle *handle, const char *type)
 {
     // Blacklist check
@@ -150,7 +160,7 @@ lr_yum_repomd_record_enabled(lr_Handle *handle, const char *type)
     return 1;
 }
 
-int
+static int
 lr_yum_download_repomd(lr_Handle *handle,
                        lr_Metalink *metalink,
                        int fd)
@@ -216,7 +226,7 @@ lr_yum_download_repomd(lr_Handle *handle,
     return LRE_OK;
 }
 
-int
+static int
 lr_yum_download_repo(lr_Handle *handle, lr_YumRepo *repo, lr_YumRepoMd *repomd)
 {
     int ret = LRE_OK;
@@ -293,7 +303,7 @@ lr_yum_download_repo(lr_Handle *handle, lr_YumRepo *repo, lr_YumRepoMd *repomd)
     return ret;
 }
 
-int
+static int
 lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord *rec, const char *path)
 {
     int ret, fd;
@@ -339,7 +349,7 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord *rec, const char *path)
     return LRE_OK;
 }
 
-int
+static int
 lr_yum_check_repo_checksums(lr_YumRepo *repo, lr_YumRepoMd *repomd)
 {
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
@@ -356,7 +366,7 @@ lr_yum_check_repo_checksums(lr_YumRepo *repo, lr_YumRepoMd *repomd)
     return LRE_OK;
 }
 
-int
+static int
 lr_yum_use_local(lr_Handle *handle, lr_Result *result)
 {
     char *path;
@@ -479,7 +489,7 @@ lr_yum_use_local(lr_Handle *handle, lr_Result *result)
     return LRE_OK;
 }
 
-int
+static int
 lr_yum_download_remote(lr_Handle *handle, lr_Result *result)
 {
     int rc = LRE_OK;

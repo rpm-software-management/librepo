@@ -158,7 +158,8 @@ lr_download_package(lr_Handle *handle,
         g_error_free(tmp_err);
     } else if (target->err) {
         rc = target->rcode;
-        g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, target->err);
+        g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, "%s: %s",
+                    target->path, target->err);
     }
 
     lr_downloadtarget_free(target);
