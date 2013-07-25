@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include "librepo/librepo.h"
+#include "librepo/handle_internal.h"
 
 #include "exception-py.h"
 #include "handle-py.h"
@@ -574,6 +575,11 @@ perform(_HandleObject *self, PyObject *args)
     if (check_HandleStatus(self))
         return NULL;
 
+    if (self->handle->repotype != LR_YUMREPO) {
+        PyErr_SetString(LrErr_Exception, "Bad/No repo type specified");
+        return NULL;
+    }
+
     result = Result_FromPyObject(result_obj);
 
     ret = lr_handle_perform(self->handle, result);
@@ -606,6 +612,11 @@ download_package(_HandleObject *self, PyObject *args)
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
+
+    if (self->handle->repotype != LR_YUMREPO) {
+        PyErr_SetString(LrErr_Exception, "Bad/No repo type specified");
+        return NULL;
+    }
 
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, base_url, resume);
