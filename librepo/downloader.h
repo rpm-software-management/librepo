@@ -20,14 +20,12 @@
 #ifndef LR_DOWNLOADER_H
 #define LR_DOWNLOADER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
 
 #include "handle.h"
 #include "downloadtarget.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup   downloader    Downloading API
  *  \addtogroup downloader
@@ -94,8 +92,6 @@ lr_download_single_cb(LrHandle *handle,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

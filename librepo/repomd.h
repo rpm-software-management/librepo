@@ -20,13 +20,12 @@
 #ifndef LR_REPOMD_H
 #define LR_REPOMD_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
+
 #include "xmlparser.h"
 #include "types.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup   repomd        Repomd (repomd.xml) parser
  *  \addtogroup repomd
@@ -109,8 +108,6 @@ lr_yum_repomd_get_record(LrYumRepoMd *repomd,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

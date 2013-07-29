@@ -20,16 +20,15 @@
 #ifndef LR_HANDLE_INTERNAL_H
 #define LR_HANDLE_INTERNAL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <glib.h>
 #include <curl/curl.h>
 
 #include "types.h"
 #include "handle.h"
 #include "lrmirrorlist.h"
 #include "url_substitution.h"
+
+G_BEGIN_DECLS
 
 struct _LrHandle {
     CURL            *curl_handle;   /*!< CURL handle */
@@ -82,8 +81,6 @@ int
 lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err);
 
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

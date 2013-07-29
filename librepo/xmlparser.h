@@ -20,9 +20,9 @@
 #ifndef LR_XMLPARSER_H
 #define LR_XMLPARSER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup xmlparser     Common stuff for XML parsers in Librepo (datatypes, etc.)
  *  \addtogroup xmlparser
@@ -60,8 +60,6 @@ typedef int (*LrXmlParserWarningCb)(LrXmlParserWarningType type,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

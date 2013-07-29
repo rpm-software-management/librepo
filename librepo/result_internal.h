@@ -20,12 +20,12 @@
 #ifndef LR_RESULT_INTERNAL_H
 #define LR_RESULT_INTERNAL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "repomd.h"
 #include "yum.h"
+
+G_BEGIN_DECLS
 
 struct _LrResult {
     char            *destdir; /*!<
@@ -38,8 +38,6 @@ struct _LrResult {
         Pointer to struct with info about yum repo */
 };
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

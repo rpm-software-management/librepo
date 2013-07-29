@@ -20,11 +20,11 @@
 #ifndef LR_REPOUTIL_YUM_H
 #define LR_REPOUTIL_YUM_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "repomd.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup   repoutil_yum      Yum repo high level function
  *  \addtogroup repoutil_yum
@@ -58,8 +58,6 @@ double lr_yum_repomd_get_age(LrResult *result);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

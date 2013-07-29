@@ -20,9 +20,9 @@
 #ifndef LR_MIRRORLIST_H
 #define LR_MIRRORLIST_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   mirrorlist    Mirrorlist parser
  *  \addtogroup mirrorlist
@@ -57,8 +57,6 @@ void lr_mirrorlist_free(LrMirrorlist *mirrorlist);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

@@ -20,13 +20,12 @@
 #ifndef LR_DOWNLOADTARGET_INTERNAL_H
 #define LR_DOWNLOADTARGET_INTERNAL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
+
 #include "downloadtarget.h"
 #include "types.h"
+
+G_BEGIN_DECLS
 
 /** Helper function to comfortable setting of error to the ::LrDownloadTarget.
  */
@@ -48,8 +47,6 @@ lr_downloadtarget_set_usedmirror(LrDownloadTarget *target, const char *url);
 void
 lr_downloadtarget_set_effectiveurl(LrDownloadTarget *target, const char *url);
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

@@ -20,11 +20,9 @@
 #ifndef LR_RETURN_CODES_H
 #define LR_RETURN_CODES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   rcodes      Error/Return codes
  *  \addtogroup rcodes
@@ -145,8 +143,6 @@ GQuark lr_yum_error_quark(void);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

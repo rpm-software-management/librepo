@@ -20,13 +20,13 @@
 #ifndef LR_PACKAGE_DOWNLOADER_H
 #define LR_PACKAGE_DOWNLOADER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "rcodes.h"
 #include "handle.h"
 #include "checksum.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup   package_downloader    Package downloading
  *  \addtogroup package_downloader
@@ -71,8 +71,6 @@ int lr_download_package(LrHandle *handle,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

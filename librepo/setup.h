@@ -20,9 +20,9 @@
 #ifndef LR_SETUP_H
 #define LR_SETUP_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 #undef G_LOG_DOMAIN
 #define G_LOG_DOMAIN    "librepo"
@@ -45,8 +45,6 @@ extern "C" {
 #define DEBUGASSERT(x) do {} while(0)
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

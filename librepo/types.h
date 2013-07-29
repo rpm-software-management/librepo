@@ -20,9 +20,9 @@
 #ifndef LR_TYPES_H
 #define LR_TYPES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   types   Basic types and constants
  *  \addtogroup types
@@ -82,8 +82,6 @@ typedef int (*LrProgressCb)(void *clientp,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

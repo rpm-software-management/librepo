@@ -20,13 +20,13 @@
 #ifndef LR_LRMIRRORLIST_H
 #define LR_LRMIRRORLIST_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "url_substitution.h"
 #include "mirrorlist.h"
 #include "metalink.h"
+
+G_BEGIN_DECLS
 
 /** A internal representation of a mirror */
 typedef struct {
@@ -105,8 +105,6 @@ lr_lrmirrorlist_nth_url(LrInternalMirrorlist *list,
 void
 lr_lrmirrorlist_free(LrInternalMirrorlist *list);
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

@@ -20,12 +20,12 @@
 #ifndef LR_XMLPARSER_INTERNAL_H
 #define LR_XMLPARSER_INTERNAL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <glib.h>
 #include <string.h>
+
 #include "repomd.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup xmlparser_internal Common stuff for XML parsers in Librepo (datatypes, etc.)
  *  \addtogroup xmlparser_internal
@@ -138,8 +138,6 @@ lr_xml_parser_generic(XML_Parser parser,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

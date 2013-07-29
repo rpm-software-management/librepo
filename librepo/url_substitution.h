@@ -20,12 +20,10 @@
 #ifndef LR_URL_SUBSTITUTION_H
 #define LR_URL_SUBSTITUTION_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
 #include <stdlib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   url_substitution    Substitution of variables in url
  *  \addtogroup url_substitution
@@ -67,8 +65,6 @@ char
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

@@ -20,9 +20,9 @@
 #ifndef LR_METALINK_H
 #define LR_METALINK_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgoupt   metalink  Metalink parser
  *  \addtogroup metalink
@@ -77,8 +77,6 @@ void lr_metalink_free(LrMetalink *metalink);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

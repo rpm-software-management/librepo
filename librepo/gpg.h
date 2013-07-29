@@ -20,9 +20,9 @@
 #ifndef LR_GPG_H
 #define LR_GPG_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   gpg GPG signature verification
  *  \addtogroup gpg
@@ -71,8 +71,6 @@ int lr_gpg_import_key(const char *key_fn,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

@@ -20,9 +20,7 @@
 #ifndef LR_LIBREPO_H
 #define LR_LIBREPO_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "checksum.h"
 #include "gpg.h"
@@ -40,6 +38,8 @@ extern "C" {
 #include "xmlparser.h"
 #include "yum.h"
 
+G_BEGIN_DECLS
+
 /** \defgroup   librepo     Librepo library init and cleanup
  *  \addtogroup librepo
  *  @{
@@ -55,8 +55,6 @@ void lr_global_cleanup();
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

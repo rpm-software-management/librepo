@@ -20,14 +20,13 @@
 #ifndef LR_DOWNLOADTARGET_H
 #define LR_DOWNLOADTARGET_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
+
 #include "rcodes.h"
 #include "checksum.h"
 #include "types.h"
+
+G_BEGIN_DECLS
 
 /** Single download target
  */
@@ -112,8 +111,6 @@ lr_downloadtarget_new(const char *path,
 void
 lr_downloadtarget_free(LrDownloadTarget *target);
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

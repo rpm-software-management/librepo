@@ -20,12 +20,12 @@
 #ifndef LR_YUMREPO_H
 #define LR_YUMREPO_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "rcodes.h"
 #include "result.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup   yum       Yum repo manipulation
  *  \addtogroup yum
@@ -64,8 +64,6 @@ lr_yum_repo_free(LrYumRepo *repo);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

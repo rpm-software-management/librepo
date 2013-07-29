@@ -20,11 +20,9 @@
 #ifndef LR_CHECKSUM_H
 #define LR_CHECKSUM_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   checksum    Checksum calculation and checking
  *  \addtogroup checksum
@@ -86,8 +84,6 @@ int lr_checksum_fd_cmp(LrChecksumType type,
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

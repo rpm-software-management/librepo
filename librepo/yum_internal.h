@@ -20,18 +20,16 @@
 #ifndef LR_YUM_INTERNAL_H
 #define LR_YUM_INTERNAL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "rcodes.h"
 #include "result.h"
 #include "handle.h"
 
+G_BEGIN_DECLS
+
 int lr_yum_perform(LrHandle *handle, LrResult *result, GError **err);
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

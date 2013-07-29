@@ -20,13 +20,11 @@
 #ifndef LR_UTIL_H
 #define LR_UTIL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glib.h>
 #include <stdlib.h>
 #include <stdarg.h>
+
+G_BEGIN_DECLS
 
 /** \defgroup   util    Utility functions and macros
  *  \addtogroup util
@@ -117,8 +115,6 @@ lr_string_chunk_insert(GStringChunk *chunk, const gchar *string);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif

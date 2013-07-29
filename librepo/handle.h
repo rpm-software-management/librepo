@@ -20,11 +20,11 @@
 #ifndef LR_HANDLE_H
 #define LR_HANDLE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <glib.h>
 
 #include "result.h"
+
+G_BEGIN_DECLS
 
 /** \defgroup   handle    Librepo Handle
  *  \addtogroup handle
@@ -194,8 +194,6 @@ int lr_handle_perform(LrHandle *handle, LrResult *result, GError **err);
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif
