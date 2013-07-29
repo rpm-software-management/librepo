@@ -33,7 +33,6 @@
 #include "downloadtarget_internal.h"
 #include "handle.h"
 #include "handle_internal.h"
-#include "setup.h"
 
 volatile sig_atomic_t lr_interrupt = 0;
 

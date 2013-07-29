@@ -37,7 +37,6 @@
 #include "handle.h"
 #include "result_internal.h"
 #include "repomd.h"
-#include "setup.h"
 #include "rcodes.h"
 #include "util.h"
 #include "yum.h"

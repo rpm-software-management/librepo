@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include <expat.h>
 
-#include "setup.h"
 #include "rcodes.h"
 #include "util.h"
 #include "metalink.h"

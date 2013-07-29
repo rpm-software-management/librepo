@@ -25,7 +25,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "setup.h"
 #include "rcodes.h"
 #include "util.h"
 #include "mirrorlist.h"

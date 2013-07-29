@@ -30,7 +30,6 @@
 #include <stdarg.h>
 #include <ftw.h>
 
-#include "setup.h"
 #include "util.h"
 
 #define DIR_SEPARATOR   "/"

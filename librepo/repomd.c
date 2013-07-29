@@ -27,7 +27,6 @@
 
 #include "repomd.h"
 #include "xmlparser_internal.h"
-#include "setup.h"
 #include "rcodes.h"
 #include "util.h"
 

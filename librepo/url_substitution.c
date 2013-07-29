@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include "setup.h"
 #include "url_substitution.h"
 #include "util.h"
 

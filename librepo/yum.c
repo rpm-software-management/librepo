@@ -32,7 +32,6 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "setup.h"
 #include "util.h"
 #include "metalink.h"
 #include "mirrorlist.h"

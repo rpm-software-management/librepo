@@ -21,7 +21,6 @@
 #include <stdlib.h>
 
 #include "types.h"
-#include "setup.h"
 #include "rcodes.h"
 #include "librepo.h"
 #include "handle_internal.h"

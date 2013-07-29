@@ -28,7 +28,6 @@
 #include <unistd.h>
 
 #include "rcodes.h"
-#include "setup.h"
 #include "util.h"
 #include "gpg.h"
 

@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "setup.h"
 #include "librepo.h"
 #include "util.h"
 #include "result.h"

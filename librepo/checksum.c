@@ -30,7 +30,6 @@
 
 #include "checksum.h"
 #include "rcodes.h"
-#include "setup.h"
 #include "util.h"
 
 #define BUFFER_SIZE             2048

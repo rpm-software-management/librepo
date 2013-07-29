@@ -26,7 +26,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "setup.h"
 #include "types.h"
 #include "util.h"
 #include "package_downloader.h"

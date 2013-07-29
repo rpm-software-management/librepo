@@ -30,6 +30,8 @@
 
 G_BEGIN_DECLS
 
+#define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
+
 struct _LrHandle {
     CURL            *curl_handle;   /*!< CURL handle */
     int             update;         /*!< Just update existing repo */
