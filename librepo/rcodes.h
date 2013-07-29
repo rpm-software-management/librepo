@@ -45,9 +45,9 @@ typedef enum {
     LRE_CURLSETOPT, /*!<
         (4) cURL doesn't know the option. Too old curl version? */
     LRE_ALREADYUSEDRESULT, /*!<
-        (5) lr_Result object is not clean */
+        (5) LrResult object is not clean */
     LRE_INCOMPLETERESULT, /*!<
-        (6) lr_Result doesn't contain all what is needed */
+        (6) LrResult doesn't contain all what is needed */
     LRE_CURLDUP, /*!<
         (7) cannot duplicate curl handle */
     LRE_CURL, /*!<
@@ -112,10 +112,10 @@ typedef enum {
         (35) Interrupted by user cb */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
-} lr_Rc; /*!< Return codes */
+} LrRc; /*!< Return codes */
 
-/** Converts lr_Rc return code to error string.
- * @param rc        lr_Rc code
+/** Converts LrRc return code to error string.
+ * @param rc        LrRc code
  * @return          Error string
  */
 const char *lr_strerror(int rc);

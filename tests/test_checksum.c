@@ -42,7 +42,7 @@ build_test_file(const char *filename, const char *content)
 }
 
 static void
-test_checksum(const char *filename, lr_ChecksumType ch_type, char *expected)
+test_checksum(const char *filename, LrChecksumType ch_type, char *expected)
 {
     int fd;
     char *checksum;

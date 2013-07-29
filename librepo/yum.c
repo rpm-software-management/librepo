@@ -46,20 +46,20 @@
 
 /* helper functions for YumRepo manipulation */
 
-lr_YumRepo *
+LrYumRepo *
 lr_yum_repo_init()
 {
-    return lr_malloc0(sizeof(lr_YumRepo));
+    return lr_malloc0(sizeof(LrYumRepo));
 }
 
 void
-lr_yum_repo_free(lr_YumRepo *repo)
+lr_yum_repo_free(LrYumRepo *repo)
 {
     if (!repo)
         return;
 
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoPath *yumrepopath = elem->data;
+        LrYumRepoPath *yumrepopath = elem->data;
         assert(yumrepopath);
         lr_free(yumrepopath->type);
         lr_free(yumrepopath->path);
@@ -81,11 +81,11 @@ lr_yum_repo_free(lr_YumRepo *repo)
  * @return              Path or NULL.
  */
 static const char *
-lr_yum_repo_path(lr_YumRepo *repo, const char *type)
+lr_yum_repo_path(LrYumRepo *repo, const char *type)
 {
     assert(repo);
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoPath *yumrepopath = elem->data;
+        LrYumRepoPath *yumrepopath = elem->data;
         assert(yumrepopath);
         if (!strcmp(yumrepopath->type, type))
             return yumrepopath->path;
@@ -99,27 +99,27 @@ lr_yum_repo_path(lr_YumRepo *repo, const char *type)
  * @param path          Path to the file.
  */
 static void
-lr_yum_repo_append(lr_YumRepo *repo, const char *type, const char *path)
+lr_yum_repo_append(LrYumRepo *repo, const char *type, const char *path)
 {
     assert(repo);
     assert(type);
     assert(path);
 
-    lr_YumRepoPath *yumrepopath = lr_malloc(sizeof(lr_YumRepoPath));
+    LrYumRepoPath *yumrepopath = lr_malloc(sizeof(LrYumRepoPath));
     yumrepopath->type = g_strdup(type);
     yumrepopath->path = g_strdup(path);
     repo->paths = g_slist_append(repo->paths, yumrepopath);
 }
 
 static void
-lr_yum_repo_update(lr_YumRepo *repo, const char *type, const char *path)
+lr_yum_repo_update(LrYumRepo *repo, const char *type, const char *path)
 {
     assert(repo);
     assert(type);
     assert(path);
 
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoPath *yumrepopath = elem->data;
+        LrYumRepoPath *yumrepopath = elem->data;
         assert(yumrepopath);
 
         if (!strcmp(yumrepopath->type, type)) {
@@ -135,7 +135,7 @@ lr_yum_repo_update(lr_YumRepo *repo, const char *type, const char *path)
 /* main bussines logic */
 
 static int
-lr_yum_repomd_record_enabled(lr_Handle *handle, const char *type)
+lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
 {
     // Blacklist check
     if (handle->yumblist) {
@@ -161,13 +161,13 @@ lr_yum_repomd_record_enabled(lr_Handle *handle, const char *type)
 }
 
 static int
-lr_yum_download_repomd(lr_Handle *handle,
-                       lr_Metalink *metalink,
+lr_yum_download_repomd(LrHandle *handle,
+                       LrMetalink *metalink,
                        int fd,
                        GError **err)
 {
     int rc = LRE_OK;
-    lr_ChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
+    LrChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
     char *checksum = NULL;
     GError *tmp_err = NULL;
 
@@ -178,8 +178,8 @@ lr_yum_download_repomd(lr_Handle *handle,
     if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
         /* Select the best checksum type */
         for (GSList *elem = metalink->hashes; elem; elem = g_slist_next(elem)) {
-            lr_ChecksumType mtype;
-            lr_MetalinkHash *mhash = elem->data;
+            LrChecksumType mtype;
+            LrMetalinkHash *mhash = elem->data;
 
             if (!mhash->type || !mhash->value)
                 continue;
@@ -195,7 +195,7 @@ lr_yum_download_repomd(lr_Handle *handle,
                 __func__, lr_checksum_type_to_str(checksum_type), checksum);
     }
 
-    lr_DownloadTarget *target = lr_downloadtarget_new("repodata/repomd.xml",
+    LrDownloadTarget *target = lr_downloadtarget_new("repodata/repomd.xml",
                                                       NULL,
                                                       fd,
                                                       checksum_type,
@@ -232,9 +232,9 @@ lr_yum_download_repomd(lr_Handle *handle,
 }
 
 static int
-lr_yum_download_repo(lr_Handle *handle,
-                     lr_YumRepo *repo,
-                     lr_YumRepoMd *repomd,
+lr_yum_download_repo(LrHandle *handle,
+                     LrYumRepo *repo,
+                     LrYumRepoMd *repomd,
                      GError **err)
 {
     int ret = LRE_OK;
@@ -250,10 +250,9 @@ lr_yum_download_repo(lr_Handle *handle,
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         int fd;
         char *path;
-        //lr_CurlTarget target;
-        lr_DownloadTarget *target;
-        lr_YumRepoMdRecord *record = elem->data;
-        lr_ChecksumType checksumtype;
+        LrDownloadTarget *target;
+        LrYumRepoMdRecord *record = elem->data;
+        LrChecksumType checksumtype;
 
         assert(record);
 
@@ -313,7 +312,7 @@ lr_yum_download_repo(lr_Handle *handle,
         char *error_summary = NULL;
 
         for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-            lr_DownloadTarget *target = elem->data;
+            LrDownloadTarget *target = elem->data;
             if (target->rcode != LRE_OK) {
                 if (ret == LRE_OK) {
                     // First failed download target found
@@ -338,13 +337,13 @@ lr_yum_download_repo(lr_Handle *handle,
 }
 
 static int
-lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord *rec,
+lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
                                    const char *path,
                                    GError **err)
 {
     int ret, fd;
     char *expected_checksum;
-    lr_ChecksumType checksum_type;
+    LrChecksumType checksum_type;
     GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
@@ -403,8 +402,8 @@ lr_yum_check_checksum_of_md_record(lr_YumRepoMdRecord *rec,
 // This function shoud return True if no error, False if error is set
 // Add gboolean param for signalize that checksums matches or do not matches
 static int
-lr_yum_check_repo_checksums(lr_YumRepo *repo,
-                            lr_YumRepoMd *repomd,
+lr_yum_check_repo_checksums(LrYumRepo *repo,
+                            LrYumRepoMd *repomd,
                             GError **err)
 {
     int ret = LRE_OK;
@@ -412,7 +411,7 @@ lr_yum_check_repo_checksums(lr_YumRepo *repo,
     assert(!err || *err == NULL);
 
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoMdRecord *record = elem->data;
+        LrYumRepoMdRecord *record = elem->data;
 
         assert(record);
 
@@ -432,14 +431,14 @@ lr_yum_check_repo_checksums(lr_YumRepo *repo,
 }
 
 static int
-lr_yum_use_local(lr_Handle *handle, lr_Result *result, GError **err)
+lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 {
     char *path;
     int rc = LRE_OK;
     int fd;
     char *baseurl;
-    lr_YumRepo *repo;
-    lr_YumRepoMd *repomd;
+    LrYumRepo *repo;
+    LrYumRepoMd *repomd;
     GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
@@ -540,7 +539,7 @@ lr_yum_use_local(lr_Handle *handle, lr_Result *result, GError **err)
     /* Locate rest of metadata files */
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         char *path;
-        lr_YumRepoMdRecord *record = elem->data;
+        LrYumRepoMdRecord *record = elem->data;
 
         assert(record);
 
@@ -573,14 +572,14 @@ lr_yum_use_local(lr_Handle *handle, lr_Result *result, GError **err)
 }
 
 static int
-lr_yum_download_remote(lr_Handle *handle, lr_Result *result, GError **err)
+lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
 {
     int rc = LRE_OK;
     int fd;
     int create_repodata_dir = 1;
     char *path_to_repodata;
-    lr_YumRepo *repo;
-    lr_YumRepoMd *repomd;
+    LrYumRepo *repo;
+    LrYumRepoMd *repomd;
     GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
@@ -755,11 +754,11 @@ lr_yum_download_remote(lr_Handle *handle, lr_Result *result, GError **err)
 }
 
 int
-lr_yum_perform(lr_Handle *handle, lr_Result *result, GError **err)
+lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
 {
     int rc = LRE_OK;
-    lr_YumRepo *repo;
-    lr_YumRepoMd *repomd;
+    LrYumRepo *repo;
+    LrYumRepoMd *repomd;
 
     assert(handle);
     assert(!err || *err == NULL);

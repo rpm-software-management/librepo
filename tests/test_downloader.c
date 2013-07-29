@@ -36,12 +36,12 @@ END_TEST
 START_TEST(test_downloader_single_file)
 {
     int ret;
-    lr_Handle *handle;
+    LrHandle *handle;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1;
     char *tmpfn1;
-    lr_DownloadTarget *t1;
+    LrDownloadTarget *t1;
     GError *tmp_err = NULL;
 
     // Prepare list of download targets
@@ -78,7 +78,7 @@ START_TEST(test_downloader_single_file)
     // Check results
 
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
-            lr_DownloadTarget *dtarget = elem->data;
+            LrDownloadTarget *dtarget = elem->data;
             if (dtarget->err) {
                 printf("Error msg: %s\n", dtarget->err);
                 ck_abort();
@@ -96,7 +96,7 @@ START_TEST(test_downloader_single_file_2)
     GError *err = NULL;
     int fd1;
     char *tmpfn1;
-    lr_DownloadTarget *t1;
+    LrDownloadTarget *t1;
 
     // Prepare list of download targets
 
@@ -123,7 +123,7 @@ START_TEST(test_downloader_single_file_2)
     // Check results
 
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
-            lr_DownloadTarget *dtarget = elem->data;
+            LrDownloadTarget *dtarget = elem->data;
             if (dtarget->err) {
                 printf("Error msg: %s\n", dtarget->err);
                 ck_abort();
@@ -137,12 +137,12 @@ END_TEST
 START_TEST(test_downloader_two_files)
 {
     int ret;
-    lr_Handle *handle;
+    LrHandle *handle;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1, fd2;
     char *tmpfn1, *tmpfn2;
-    lr_DownloadTarget *t1, *t2;
+    LrDownloadTarget *t1, *t2;
     GError *tmp_err = NULL;
 
     // Prepare list of download targets
@@ -187,7 +187,7 @@ START_TEST(test_downloader_two_files)
     // Check results
 
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
-            lr_DownloadTarget *dtarget = elem->data;
+            LrDownloadTarget *dtarget = elem->data;
             if (dtarget->err) {
                 printf("Error msg: %s\n", dtarget->err);
                 ck_abort();
@@ -201,12 +201,12 @@ END_TEST
 START_TEST(test_downloader_three_files_with_error)
 {
     int ret;
-    lr_Handle *handle;
+    LrHandle *handle;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1, fd2, fd3;
     char *tmpfn1, *tmpfn2, *tmpfn3;
-    lr_DownloadTarget *t1, *t2, *t3;
+    LrDownloadTarget *t1, *t2, *t3;
     GError *tmp_err = NULL;
 
     // Prepare list of download targets
@@ -260,7 +260,7 @@ START_TEST(test_downloader_three_files_with_error)
 
     int x = 0;
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
-            lr_DownloadTarget *dtarget = elem->data;
+            LrDownloadTarget *dtarget = elem->data;
             ++x;
 
             if (x != 3 && dtarget->err) {

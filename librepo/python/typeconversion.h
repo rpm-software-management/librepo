@@ -24,8 +24,8 @@
 #include "librepo/yum.h"
 #include "librepo/metalink.h"
 
-PyObject *PyObject_FromYumRepo(lr_YumRepo *repo);
-PyObject *PyObject_FromYumRepoMd(lr_YumRepoMd *repomd);
-PyObject *PyObject_FromMetalink(lr_Metalink *metalink);
+PyObject *PyObject_FromYumRepo(LrYumRepo *repo);
+PyObject *PyObject_FromYumRepoMd(LrYumRepoMd *repomd);
+PyObject *PyObject_FromMetalink(LrMetalink *metalink);
 
 #endif

@@ -30,25 +30,25 @@
 #include "yum.h"
 #include "repomd.h"
 
-lr_Result *
+LrResult *
 lr_result_init()
 {
-    return lr_malloc0(sizeof(struct _lr_Result));
+    return lr_malloc0(sizeof(struct _LrResult));
 }
 
 void
-lr_result_clear(lr_Result *result)
+lr_result_clear(LrResult *result)
 {
     if (!result)
         return;
     lr_free(result->destdir);
     lr_yum_repomd_free(result->yum_repomd);
     lr_yum_repo_free(result->yum_repo);
-    memset(result, 0, sizeof(struct _lr_Result));
+    memset(result, 0, sizeof(struct _LrResult));
 }
 
 void
-lr_result_free(lr_Result *result)
+lr_result_free(LrResult *result)
 {
     if (!result)
         return;
@@ -57,7 +57,7 @@ lr_result_free(lr_Result *result)
 }
 
 int
-lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...)
+lr_result_getinfo(LrResult *result, LrResultInfoOption option, ...)
 {
     int rc = LRE_OK;
     va_list arg;
@@ -69,14 +69,14 @@ lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...)
 
     switch (option) {
     case LRR_YUM_REPO: {
-        lr_YumRepo **repo;
-        repo = va_arg(arg, lr_YumRepo **);
+        LrYumRepo **repo;
+        repo = va_arg(arg, LrYumRepo **);
         *repo = result->yum_repo;
         break;
     }
 
     case LRR_YUM_REPOMD: {
-        lr_YumRepoMd **repomd = va_arg(arg, lr_YumRepoMd **);
+        LrYumRepoMd **repomd = va_arg(arg, LrYumRepoMd **);
         *repomd = result->yum_repomd;
         break;
     }

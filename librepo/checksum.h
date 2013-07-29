@@ -43,20 +43,20 @@ typedef enum {
     LR_CHECKSUM_SHA256,     /*  |                       */
     LR_CHECKSUM_SHA384,     /* \|/                      */
     LR_CHECKSUM_SHA512,     /*    The most secure hash  */
-} lr_ChecksumType;
+} LrChecksumType;
 
-/** Convert checksum name (string) to ::lr_ChecksumType.
+/** Convert checksum name (string) to ::LrChecksumType.
  * @param type      String with a checksum name (e.g. "sha1", "SHA256", ...)
- * @return          ::lr_ChecksumType value representing the checksum
+ * @return          ::LrChecksumType value representing the checksum
  *                  or LR_CHECKSUM_UNKNOWN
  */
-lr_ChecksumType lr_checksum_type(const char *type);
+LrChecksumType lr_checksum_type(const char *type);
 
-/** Convert lr_ChecksumType to string
+/** Convert LrChecksumType to string
  * @param type      Checksum type
  * @return          Constant string with name of the checksum
  */
-const char *lr_checksum_type_to_str(lr_ChecksumType type);
+const char *lr_checksum_type_to_str(LrChecksumType type);
 
 /** Calculate checksum for data pointed by file descriptor.
  * @param type      Checksum type
@@ -65,7 +65,7 @@ const char *lr_checksum_type_to_str(lr_ChecksumType type);
  * @param err       GError **
  * @return          Malloced checksum string or NULL on error.
  */
-char *lr_checksum_fd(lr_ChecksumType type, int fd, GError **err);
+char *lr_checksum_fd(LrChecksumType type, int fd, GError **err);
 
 /** Calculate checksum for data pointed by file descriptor and
  * compare it to the expected checksum value.
@@ -78,7 +78,7 @@ char *lr_checksum_fd(lr_ChecksumType type, int fd, GError **err);
  *                  1 if calculated checksum doesn't match
  *                  -1 on error.
  */
-int lr_checksum_fd_cmp(lr_ChecksumType type,
+int lr_checksum_fd_cmp(LrChecksumType type,
                        int fd,
                        const char *expected,
                        int caching,

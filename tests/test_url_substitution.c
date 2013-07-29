@@ -17,25 +17,25 @@
 
 START_TEST(test_urlvars_set)
 {
-    lr_UrlVars *urlvars = NULL;
+    LrUrlVars *urlvars = NULL;
 
     urlvars = lr_urlvars_set(urlvars, "foo", "bar");
     fail_if(urlvars == NULL);
-    fail_if(strcmp(((lr_Var *)urlvars->data)->var, "foo") != 0);
+    fail_if(strcmp(((LrVar *)urlvars->data)->var, "foo") != 0);
 
     urlvars = lr_urlvars_set(urlvars, "foo1", "bar1");
     fail_if(urlvars == NULL);
 
     urlvars = lr_urlvars_set(urlvars, "foo", NULL);
     fail_if(urlvars == NULL);
-    fail_if(strcmp(((lr_Var *)urlvars->data)->var, "foo1") != 0);
+    fail_if(strcmp(((LrVar *)urlvars->data)->var, "foo1") != 0);
 
     urlvars = lr_urlvars_set(urlvars, "foo1", NULL);
     fail_if(urlvars != NULL);
 
     urlvars = lr_urlvars_set(urlvars, "bar", "foo");
     fail_if(urlvars == NULL);
-    fail_if(strcmp(((lr_Var *)urlvars->data)->var, "bar") != 0);
+    fail_if(strcmp(((LrVar *)urlvars->data)->var, "bar") != 0);
 
     lr_urlvars_free(urlvars);
 }
@@ -44,7 +44,7 @@ END_TEST
 START_TEST(test_url_substitute_without_urlvars)
 {
     char *url;
-    lr_UrlVars *urlvars = NULL;
+    LrUrlVars *urlvars = NULL;
 
     urlvars = lr_urlvars_set(urlvars, "foo", "bar");
 
@@ -67,7 +67,7 @@ END_TEST
 START_TEST(test_url_substitute)
 {
     char *url;
-    lr_UrlVars *urlvars = NULL;
+    LrUrlVars *urlvars = NULL;
 
     urlvars = lr_urlvars_set(urlvars, "foo", "version");
     urlvars = lr_urlvars_set(urlvars, "bar", "repo");
@@ -103,7 +103,7 @@ END_TEST
 START_TEST(test_url_substitute_empty_var)
 {
     char *url;
-    lr_UrlVars *urlvars = NULL;
+    LrUrlVars *urlvars = NULL;
 
     urlvars = lr_urlvars_set(urlvars, "", "version");
     urlvars = lr_urlvars_set(urlvars, "bar", "repo");

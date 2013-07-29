@@ -33,77 +33,77 @@ typedef struct {
     char *url;      /*!< URL of the mirror */
     int preference; /*!< Integer number 1-100 - higher is better */
     int fails;      /*!< Number of failed downloads from this mirror */
-} lr_LrMirror;
+} LrInternalMirror;
 
-typedef GSList lr_LrMirrorlist;
+typedef GSList LrInternalMirrorlist;
 
  /** Append url to the mirrorlist.
- * @param list          a lr_LrMirrorlist or NULL
+ * @param list          a LrInternalMirrorlist or NULL
  * @param url           the Url
- * @param urlvars       a lr_UrlVars or NULL
- * @return              the new start of the lr_LrMirrorlist
+ * @param urlvars       a LrUrlVars or NULL
+ * @return              the new start of the LrInternalMirrorlist
  */
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_url(lr_LrMirrorlist *list,
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_url(LrInternalMirrorlist *list,
                            const char *url,
-                           lr_UrlVars *urlvars);
+                           LrUrlVars *urlvars);
 
 /** Append mirrors from mirrorlist to the internal mirrorlist.
  * @param iml           Internal mirrorlist or NULL
  * @param mirrorlist    Mirrorlist
- * @param urlvars       a lr_UrlVars or NULL
- * @return              the new start of the lr_LrMirrorlist
+ * @param urlvars       a LrUrlVars or NULL
+ * @return              the new start of the LrInternalMirrorlist
  */
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
-                                  lr_Mirrorlist *mirrorlist,
-                                  lr_UrlVars *urlvars);
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_mirrorlist(LrInternalMirrorlist *list,
+                                  LrMirrorlist *mirrorlist,
+                                  LrUrlVars *urlvars);
 
 /** Append mirrors from metalink to the internal mirrorlist.
  * @param iml           Internal mirrorlist or NULL
  * @param metalink      Metalink
  * @param suffix        Suffix that shoud be removed from the metalink urls
- * @param urlvars       a lr_UrlVars or NULL
- * @return              the new start of the lr_LrMirrorlist
+ * @param urlvars       a LrUrlVars or NULL
+ * @return              the new start of the LrInternalMirrorlist
  */
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
-                                lr_Metalink *metalink,
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_metalink(LrInternalMirrorlist *list,
+                                LrMetalink *metalink,
                                 const char *suffix,
-                                lr_UrlVars *urlvars);
+                                LrUrlVars *urlvars);
 
-/** Append mirrors from another lr_LrMirrorlist.
+/** Append mirrors from another LrInternalMirrorlist.
  * @param iml           Internal mirrorlist
  * @param ml            Other internal mirrorlist
- * @return              the new start of the lr_LrMirrorlist
+ * @return              the new start of the LrInternalMirrorlist
  */
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_lrmirrorlist(lr_LrMirrorlist *list,
-                                    lr_LrMirrorlist *other);
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_lrmirrorlist(LrInternalMirrorlist *list,
+                                    LrInternalMirrorlist *other);
 
 /** Return mirror on the given position.
- * @param list          a lr_LrMirrorlist
+ * @param list          a LrInternalMirrorlist
  * @param nth           the position of the mirror
  * @return              the mirror
  */
-lr_LrMirror *
-lr_lrmirrorlist_nth(lr_LrMirrorlist *list,
+LrInternalMirror *
+lr_lrmirrorlist_nth(LrInternalMirrorlist *list,
                     unsigned int nth);
 
 /** Return url of the mirror on at the given position.
- * @param list          a lr_LrMirrorlist
+ * @param list          a LrInternalMirrorlist
  * @param nth           the position of the mirror
  * @return              the url
  */
 char *
-lr_lrmirrorlist_nth_url(lr_LrMirrorlist *list,
+lr_lrmirrorlist_nth_url(LrInternalMirrorlist *list,
                         unsigned int nth);
 
-/** Free lr_LrMirrorlist.
+/** Free LrInternalMirrorlist.
  * @param list          Internal mirrorlist
  */
 void
-lr_lrmirrorlist_free(lr_LrMirrorlist *list);
+lr_lrmirrorlist_free(LrInternalMirrorlist *list);
 
 #ifdef __cplusplus
 }

@@ -36,11 +36,11 @@ extern "C" {
 typedef struct {
     char *type;  /*!< Type of record (e.g. "primary") */
     char *path;  /*!< Path to the file (e.g. foo/bar/repodata/primary.xml) */
-} lr_YumRepoPath;
+} LrYumRepoPath;
 
 /** Yum repository */
 typedef struct {
-    GSList *paths;      /*!< Paths to repo files. List of ::lr_YumRepoPath*s */
+    GSList *paths;      /*!< Paths to repo files. List of ::LrYumRepoPath*s */
     char *repomd;       /*!< Path to repomd.xml */
     char *url;          /*!< URL from where repo was downloaded */
     char *destdir;      /*!< Local path to the repo */
@@ -48,19 +48,19 @@ typedef struct {
                              signature was downloaded (GPG check
                              was enabled during repo downloading) */
     char *mirrorlist;   /*!< Mirrolist file */
-} lr_YumRepo;
+} LrYumRepo;
 
 /** Allocate new yum repo object.
  * @return              New yum repo object.
  */
-lr_YumRepo *
+LrYumRepo *
 lr_yum_repo_init();
 
 /** Free yum repo - free its item and the repo itself.
  * @param repo          Yum repo object.
  */
 void
-lr_yum_repo_free(lr_YumRepo *repo);
+lr_yum_repo_free(LrYumRepo *repo);
 
 /** @} */
 

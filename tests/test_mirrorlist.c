@@ -15,7 +15,7 @@
 
 START_TEST(test_mirrorlist_init)
 {
-    lr_Mirrorlist *ml = NULL;
+    LrMirrorlist *ml = NULL;
 
     ml = lr_mirrorlist_init();
     fail_if(ml == NULL);
@@ -29,7 +29,7 @@ START_TEST(test_mirrorlist_01)
     int ret;
     char *path;
     GSList *elem = NULL;
-    lr_Mirrorlist *ml = NULL;
+    LrMirrorlist *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
@@ -62,7 +62,7 @@ START_TEST(test_mirrorlist_02)
     int fd;
     int ret;
     char *path;
-    lr_Mirrorlist *ml = NULL;
+    LrMirrorlist *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
@@ -86,7 +86,7 @@ START_TEST(test_mirrorlist_03)
     int fd;
     int ret;
     char *path;
-    lr_Mirrorlist *ml = NULL;
+    LrMirrorlist *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,

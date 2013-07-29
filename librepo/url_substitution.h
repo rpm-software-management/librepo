@@ -32,13 +32,13 @@ extern "C" {
  *  @{
  */
 
-/** Element of lr_UrlVars list */
+/** Element of LrUrlVars list */
 typedef struct {
     char *var;
     char *val;
-} lr_Var;
+} LrVar;
 
-typedef GSList lr_UrlVars;
+typedef GSList LrUrlVars;
 
 /** Set value of variable. Use variable names without '$' prefix.
  * If value is NULL, variable will be removed from the list.
@@ -48,14 +48,14 @@ typedef GSList lr_UrlVars;
  * @param value         a variable value
  * @return              the new start of the GSList of url substitutions
  */
-lr_UrlVars *
-lr_urlvars_set(lr_UrlVars *list, const char *var, const char *value);
+LrUrlVars *
+lr_urlvars_set(LrUrlVars *list, const char *var, const char *value);
 
-/** Frees all of the memory used by lr_UrlVars.
+/** Frees all of the memory used by LrUrlVars.
  * @param list          a list of substitutions
  */
 void
-lr_urlvars_free(lr_UrlVars *list);
+lr_urlvars_free(LrUrlVars *list);
 
 /** Substitute variables in the url. Returns a newly allocated string.
  * @param url           a url
@@ -63,7 +63,7 @@ lr_urlvars_free(lr_UrlVars *list);
  * @return              a newly allocated string with substituted url
  */
 char
-*lr_url_substitute(const char *url, lr_UrlVars *list);
+*lr_url_substitute(const char *url, LrUrlVars *list);
 
 /** @} */
 

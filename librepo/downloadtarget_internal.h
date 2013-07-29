@@ -28,25 +28,25 @@ extern "C" {
 #include "downloadtarget.h"
 #include "types.h"
 
-/** Helper function to comfortable setting of error to the ::lr_DownloadTarget.
+/** Helper function to comfortable setting of error to the ::LrDownloadTarget.
  */
 void
-lr_downloadtarget_set_error(lr_DownloadTarget *target,
-                            lr_Rc code,
+lr_downloadtarget_set_error(LrDownloadTarget *target,
+                            LrRc code,
                             const char *format,
                             ...);
 
 /** Helper function to comfortable setting usedmirror attribute
- * of ::lr_DownloadTarget.
+ * of ::LrDownloadTarget.
  */
 void
-lr_downloadtarget_set_usedmirror(lr_DownloadTarget *target, const char *url);
+lr_downloadtarget_set_usedmirror(LrDownloadTarget *target, const char *url);
 
 /** Helper function to comfortable setting effectiveurl attribute
  * of ::ld_DownloadTarget
  */
 void
-lr_downloadtarget_set_effectiveurl(lr_DownloadTarget *target, const char *url);
+lr_downloadtarget_set_effectiveurl(LrDownloadTarget *target, const char *url);
 
 #ifdef __cplusplus
 }

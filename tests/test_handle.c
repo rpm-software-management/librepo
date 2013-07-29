@@ -18,7 +18,7 @@
 
 START_TEST(test_handle)
 {
-    lr_Handle *h = NULL;
+    LrHandle *h = NULL;
 
     lr_global_init();
     h = lr_handle_init();
@@ -38,7 +38,7 @@ START_TEST(test_handle)
     char *dlist[] = {"primary", "filelists", NULL};
     lr_handle_setopt(h, LRO_YUMDLIST, dlist);
     lr_handle_setopt(h, LRO_YUMBLIST, dlist);
-    lr_UrlVars *vars = NULL;
+    LrUrlVars *vars = NULL;
     vars = lr_urlvars_set(vars, "foo", "bar");
     lr_handle_setopt(h, LRO_VARSUB, vars);
     lr_handle_free(h);
@@ -51,7 +51,7 @@ START_TEST(test_handle_getinfo)
     long num;
     char *str;
     char **strlist;
-    lr_Handle *h = NULL;
+    LrHandle *h = NULL;
 
     lr_global_init();
     h = lr_handle_init();
@@ -96,7 +96,7 @@ START_TEST(test_handle_getinfo)
     lr_handle_getinfo(h, LRI_MAXMIRRORTRIES, &num);
     fail_if(num != 0);
 
-    lr_UrlVars *vars = NULL;
+    LrUrlVars *vars = NULL;
     lr_handle_getinfo(h, LRI_VARSUB, &vars);
     fail_if(strlist != NULL);
 

@@ -27,14 +27,14 @@ extern "C" {
 #include "repomd.h"
 #include "yum.h"
 
-struct _lr_Result {
+struct _LrResult {
     char            *destdir; /*!<
         Directory with repo */
 
-    lr_YumRepoMd    *yum_repomd; /*!<
+    LrYumRepoMd    *yum_repomd; /*!<
         Pointer to struct representingrepomd.xml */
 
-    lr_YumRepo      *yum_repo; /*!<
+    LrYumRepo      *yum_repo; /*!<
         Pointer to struct with info about yum repo */
 };
 

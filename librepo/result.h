@@ -33,38 +33,38 @@ extern "C" {
 
 /** Result object
  */
-typedef struct _lr_Result lr_Result;
+typedef struct _LrResult LrResult;
 
 /** Result options for ::lr_result_getinfo.
  */
 typedef enum {
-    LRR_YUM_REPO,       /*!< (lr_YumRepo *) Reference to ::lr_YumRepo in result */
-    LRR_YUM_REPOMD,     /*!< (lr_YumRepoMd *) Reference to ::lr_YumRepoMd in result */
+    LRR_YUM_REPO,       /*!< (LrYumRepo *) Reference to ::LrYumRepo in result */
+    LRR_YUM_REPOMD,     /*!< (LrYumRepoMd *) Reference to ::LrYumRepoMd in result */
     LRR_SENTINEL,
-} lr_ResultInfoOption;
+} LrResultInfoOption;
 
-/** Return new allocated ::lr_Result object
- * @return          New allocated ::lr_Result object
+/** Return new allocated ::LrResult object
+ * @return          New allocated ::LrResult object
  */
-lr_Result *lr_result_init();
+LrResult *lr_result_init();
 
 /** Clean result object.
  * @param result    Result object.
  */
-void lr_result_clear(lr_Result *result);
+void lr_result_clear(LrResult *result);
 
 /** Free result object.
  * @param result    Result object.
  */
-void lr_result_free(lr_Result *result);
+void lr_result_free(LrResult *result);
 
 /** Get information about downloaded/localised repository from result object.
  * @param result    Result object.
- * @param option    Option from ::lr_ResultInfoOption enum.
+ * @param option    Option from ::LrResultInfoOption enum.
  * @param ...       Apropriate variable for the selected option.
- * @return          Librepo return code ::lr_Rc.
+ * @return          Librepo return code ::LrRc.
  */
-int lr_result_getinfo(lr_Result *result, lr_ResultInfoOption option, ...);
+int lr_result_getinfo(LrResult *result, LrResultInfoOption option, ...);
 
 /** @} */
 

@@ -32,14 +32,14 @@
 
 #define BUF_LEN 4096
 
-lr_Mirrorlist *
+LrMirrorlist *
 lr_mirrorlist_init()
 {
-    return lr_malloc0(sizeof(lr_Mirrorlist));
+    return lr_malloc0(sizeof(LrMirrorlist));
 }
 
 void
-lr_mirrorlist_free(lr_Mirrorlist *mirrorlist)
+lr_mirrorlist_free(LrMirrorlist *mirrorlist)
 {
     if (!mirrorlist)
         return;
@@ -49,7 +49,7 @@ lr_mirrorlist_free(lr_Mirrorlist *mirrorlist)
 }
 
 int
-lr_mirrorlist_parse_file(lr_Mirrorlist *mirrorlist, int fd, GError **err)
+lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
 {
     FILE *f;
     int fd_dup;

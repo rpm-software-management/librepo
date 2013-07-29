@@ -37,7 +37,7 @@ extern "C" {
  * @param handle            Librepo handle.
  * @param relative_url      Relative part of url.
  * @param err               GError **
- * @return                  Librepo return code ::lr_Rc.
+ * @return                  Librepo return code ::LrRc.
  */
 #define lr_download_simple(handle, relative_url, err) \
                     lr_download_package((handle), (relative_url), NULL, 0, \
@@ -60,10 +60,10 @@ extern "C" {
  * @param err               GError **
  * @return                  Librepo return code.
  */
-int lr_download_package(lr_Handle *handle,
+int lr_download_package(LrHandle *handle,
                         const char *relative_url,
                         const char *dest,
-                        lr_ChecksumType checksum_type,
+                        LrChecksumType checksum_type,
                         const char *checksum,
                         const char *base_url,
                         int resume,

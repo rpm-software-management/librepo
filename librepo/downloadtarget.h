@@ -42,7 +42,7 @@ typedef struct {
     int fd; /*!<
         Opened file descriptor where data will be written */
 
-    lr_ChecksumType checksumtype; /*!<
+    LrChecksumType checksumtype; /*!<
         Checksum type */
 
     char *checksum; /*!<
@@ -53,7 +53,7 @@ typedef struct {
          0  - no resume, download whole file,
          otherwise - autodetect offset for resume */
 
-    lr_ProgressCb progresscb; /*!<
+    LrProgressCb progresscb; /*!<
         Progression callback for the target */
 
     void *cbdata; /*!<
@@ -72,15 +72,15 @@ typedef struct {
         path or completely different url (if there were some
         redirects, etc.). Filled only if transfer was successfull. */
 
-    lr_Rc rcode; /*!<
+    LrRc rcode; /*!<
         Return code */
 
     char *err; /*!<
         NULL or error message */
 
-} lr_DownloadTarget;
+} LrDownloadTarget;
 
-/** Create new empty ::lr_DownloadTarget.
+/** Create new empty ::LrDownloadTarget.
  * @param path          Absolute or relative URL path
  * @param baseurl       Base URL for relative path specified in path param
  * @param fd            Opened file descriptor where data will be written
@@ -96,21 +96,21 @@ typedef struct {
  * @param cbdata        Callback data or NULL
  * @return              New allocated target
  */
-lr_DownloadTarget *
+LrDownloadTarget *
 lr_downloadtarget_new(const char *path,
                       const char *baseurl,
                       int fd,
-                      lr_ChecksumType checksumtype,
+                      LrChecksumType checksumtype,
                       const char *checksum,
                       int resume,
-                      lr_ProgressCb progresscb,
+                      LrProgressCb progresscb,
                       void *cbdata);
 
-/** Free a ::lr_DownloadTarget element and its content.
+/** Free a ::LrDownloadTarget element and its content.
  * @param target        Target to free.
  */
 void
-lr_downloadtarget_free(lr_DownloadTarget *target);
+lr_downloadtarget_free(LrDownloadTarget *target);
 
 #ifdef __cplusplus
 }

@@ -31,17 +31,17 @@ extern "C" {
 #include "lrmirrorlist.h"
 #include "url_substitution.h"
 
-struct _lr_Handle {
+struct _LrHandle {
     CURL            *curl_handle;   /*!< CURL handle */
     int             update;         /*!< Just update existing repo */
     char            *baseurl;       /*!< Base URL of repo */
-    lr_LrMirrorlist *internal_mirrorlist; /*!< Internal list of mirrors
+    LrInternalMirrorlist *internal_mirrorlist; /*!< Internal list of mirrors
                                         (Real used mirrorlist = baseurl + mirrors) */
 
     // Mirrorlist related stuff
     char            *mirrorlist;    /*!< Mirrorlist or metalink URL */
-    lr_Metalink     *metalink;      /*!< Parsed metalink for repomd.xml */
-    lr_LrMirrorlist *mirrors;       /*!< Mirrors from metalink or mirrorlist */
+    LrMetalink     *metalink;      /*!< Parsed metalink for repomd.xml */
+    LrInternalMirrorlist *mirrors;       /*!< Mirrors from metalink or mirrorlist */
     int             mirrorlist_fd;  /*!< Raw downloaded file */
 
     int             local;          /*!< Do not duplicate local data */
@@ -49,9 +49,9 @@ struct _lr_Handle {
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
     char            *useragent;     /*!< User agent */
-    lr_Repotype     repotype;       /*!< Type of repository */
-    lr_Checks       checks;         /*!< Which check sould be applied */
-    lr_ProgressCb   user_cb;        /*!< User progress callback */
+    LrRepotype     repotype;       /*!< Type of repository */
+    LrChecks       checks;         /*!< Which check sould be applied */
+    LrProgressCb   user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
     int             ignoremissing;  /*!< Ignore missing metadata files */
     int             interruptible;  /*!< Setup own SIGTERM handler*/
@@ -63,7 +63,7 @@ struct _lr_Handle {
                                       disable blacklist. */
     int             fetchmirrors;   /*!< Only fetch and parse mirrorlist. */
     int             maxmirrortries; /*!< Try at most this number of mirrors. */
-    lr_UrlVars      *urlvars;       /*!< List with url substitutions */
+    LrUrlVars      *urlvars;       /*!< List with url substitutions */
 };
 
 /** Return new CURL easy handle with some default options setted.
@@ -79,7 +79,7 @@ lr_get_curl_handle();
  * @return                  Librepo return code.
  */
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle *handle, GError **err);
+lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err);
 
 
 #ifdef __cplusplus

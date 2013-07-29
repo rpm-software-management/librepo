@@ -13,7 +13,7 @@
 START_TEST(test_repomd_parsing)
 {
     int fd, rc;
-    lr_YumRepoMd *repomd;
+    LrYumRepoMd *repomd;
     char *repomd_path;
     GError *tmp_err = NULL;
 

@@ -53,10 +53,10 @@ typedef enum {
         The transfer is successfully finished. */
     LR_DS_FAILED, /*!<
         The transfer is finished without success. */
-} lr_DownloadState;
+} LrDownloadState;
 
 typedef struct {
-    lr_LrMirror *mirror; /*!<
+    LrInternalMirror *mirror; /*!<
         Mirror */
     int running_transfers; /*!<
         How many transfers from this mirror are currently in progres. */
@@ -64,14 +64,14 @@ typedef struct {
         How many transfers was finished successfully from the mirror. */
     int failed_transfers; /*!<
         How many transfers failed. */
-} lr_Mirror;
+} LrMirror;
 
 typedef struct {
-    lr_DownloadState state; /*!<
+    LrDownloadState state; /*!<
         State of the download (transfer). */
-    lr_DownloadTarget *target; /*!<
+    LrDownloadTarget *target; /*!<
         Download target */
-    lr_Mirror *mirror; /*!<
+    LrMirror *mirror; /*!<
         Mirror is:
         If a base_location is used then NULL.
         If state is LR_DS_WAITING then could be NULL (if no download
@@ -85,14 +85,14 @@ typedef struct {
     CURL *curl_handle; /*!<
         Used curl handle or NULL */
     FILE *f; /*!<
-        fdopened file descriptor from lr_DownloadTarget and used
+        fdopened file descriptor from LrDownloadTarget and used
         in curl_handle. */
     GSList *tried_mirrors; /*!<
         List of already tried mirrors. This mirrors won't be tried again. */
     gint64 original_offset; /*!<
         If resume is enabled, this is the determinet offset where to resume
         the downloading. If resume is not enabled, then value is -1. */
-} lr_Target;
+} LrTarget;
 
 typedef struct {
 
@@ -109,33 +109,33 @@ typedef struct {
 
     // Data
 
-    lr_Handle *lr_handle; /*!<
+    LrHandle *lr_handle; /*!<
         Librepo handle */
 
     CURLM *multi_handle; /*!<
         Curl Multi handle */
 
     GSList *mirrors; /*!<
-        All mirrors (list of pointers to lr_Mirror structures) */
+        All mirrors (list of pointers to LrMirror structures) */
 
     GSList *targets; /*!<
-        List of all targets (list of pointers to lr_Target stuctures) */
+        List of all targets (list of pointers to LrTarget stuctures) */
 
     GSList *running_transfers; /*!<
-        List of running transfers (list of pointer to lr_Target structures) */
+        List of running transfers (list of pointer to LrTarget structures) */
 
-} lr_Download;
+} LrDownload;
 
 /** Schema of structures as used in downloader module:
  *
  * +------------------------------+
- * |           lr_Download        |
+ * |           LrDownload         |
  * +------------------------------+
  * | int max_parallel_connections |
  * | int max_connection_par_host  |
  * | int max_mirrors_to_try       |
  * |                              |
- * | lr_Handle *lr_handle         |
+ * | LrHandle *lr_handle          |
  * | CURLM *multi_handle          |
  * |                              |
  * | GSList *mirrors             ------\
@@ -148,32 +148,32 @@ typedef struct {
  *  |   /------------------------------/
  *  |  |
  *  |  |       +---------------------------+
- *  |  |       |         lr_Mirror         |
+ *  |  |       |         LrMirror          |
  *  |  |     +---------------------------+-|
- *  |  |     |         lr_Mirror         | |
+ *  |  |     |         LrMirror          | |
  *  |  |   +---------------------------+-| |
- *  |   \->|         lr_Mirror         | | |
- *  |      +---------------------------+ | |    +----------------+
- *  |      | lr_LrMirror *mirror      --------->|   lr_LrMirror  |
- *  |      | int running_transfers     | |   /->+----------------+
- *  |      | int successfull_transfers |-+   |  | char *url      |
- *  |      | int failed_transfers      |     |  | int preference |
- *  |      +---------------------------+     |  | int fails      |
- *  |                                        |  +----------------+
+ *  |   \->|         LrMirror          | | |
+ *  |      +---------------------------+ | |    +---------------------+
+ *  |      | LrInternalMirror *mirror --------->|   LrInternalMirror  |
+ *  |      | int running_transfers     | |   /->+---------------------+
+ *  |      | int successfull_transfers |-+   |  | char *url           |
+ *  |      | int failed_transfers      |     |  | int preference      |
+ *  |      +---------------------------+     |  | int fails           |
+ *  |                                        |  +---------------------+
  *  |                                        |
  *  |        +----------------------------+  |
- *  |        |          lr_Target         |  |
+ *  |        |          LrTarget          |  |
  *  |      +----------------------------+-|  |
- *  |      |          lr_Target         | |  |     +--------------------------+
- *  |    +----------------------------+-| |  |  /->|      lr_DownloadTarget   |
- *   \-> |          lr_Target         | | |  |  |  +--------------------------+
+ *  |      |          LrTarget          | |  |     +--------------------------+
+ *  |    +----------------------------+-| |  |  /->|      LrDownloadTarget    |
+ *   \-> |          LrTarget          | | |  |  |  +--------------------------+
  *       +----------------------------+ | |  |  |  | char *path               |
- *       | lr_DownloadState state     | | |  |  |  | char *baseurl            |
- *       | lr_DownloadTarget *target ----------/   | int fd                   |
- *       | lr_Mirror *mirror         -------/      | lr_ChecksumType checks.. |
+ *       | LrDownloadState state      | | |  |  |  | char *baseurl            |
+ *       | LrDownloadTarget *target  ----------/   | int fd                   |
+ *       | LrMirror *mirror          -------/      | LrChecksumType checks..  |
  *       | CURL *curl_handle          |-+          | char *checksum           |
  *       | FILE *f                    |            | int resume               |
- *       | GSList *tried_mirrors      |            | lr_ProgressCb progresscb |
+ *       | GSList *tried_mirrors      |            | LrProgressCb progresscb  |
  *       +----------------------------+            | void *cbdata             |
  *                                                 | GStringChunk *chunk      |
  *                                                 | int rcode                |
@@ -188,7 +188,7 @@ lr_progresscb(void *ptr,
               double total_to_upload,
               double now_uploaded)
 {
-    lr_Target *target = ptr;
+    LrTarget *target = ptr;
 
     LR_UNUSED(total_to_upload);
     LR_UNUSED(now_uploaded);
@@ -205,10 +205,10 @@ lr_progresscb(void *ptr,
 }
 
 static int
-prepare_next_transfer(lr_Download *dd, GError **err)
+prepare_next_transfer(LrDownload *dd, GError **err)
 {
-    lr_Target *target = NULL;
-    lr_Mirror *mirror = NULL;
+    LrTarget *target = NULL;
+    LrMirror *mirror = NULL;
     char *full_url = NULL;
     int complete_url_in_path = 0;
 
@@ -218,7 +218,7 @@ prepare_next_transfer(lr_Download *dd, GError **err)
     // Select a waiting target
 
     for (GSList *elem = dd->targets; elem; elem = g_slist_next(elem)) {
-        lr_Target *c_target = elem->data;
+        LrTarget *c_target = elem->data;
         if (c_target->state == LR_DS_WAITING) {
             target = c_target;
             break;
@@ -262,7 +262,7 @@ prepare_next_transfer(lr_Download *dd, GError **err)
         // were already tried and the transfer shoud be marked as failed.
 
         for (GSList *elem = dd->mirrors; elem; elem = g_slist_next(elem)) {
-            lr_Mirror *c_mirror = elem->data;
+            LrMirror *c_mirror = elem->data;
 
             if (g_slist_find(target->tried_mirrors, c_mirror)) {
                 // This mirror was already tried for this target
@@ -429,7 +429,7 @@ prepare_next_transfer(lr_Download *dd, GError **err)
 }
 
 static int
-check_transfer_statuses(lr_Download *dd, GError **err)
+check_transfer_statuses(LrDownload *dd, GError **err)
 {
     assert(dd);
     assert(!err || *err == NULL);
@@ -439,7 +439,7 @@ check_transfer_statuses(lr_Download *dd, GError **err)
     CURLMsg *msg;
 
     while (msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue)) {
-        lr_Target *target = NULL;
+        LrTarget *target = NULL;
         char *effective_url = NULL;
         GError *tmp_err = NULL;
 
@@ -450,7 +450,7 @@ check_transfer_statuses(lr_Download *dd, GError **err)
 
         // Find the target with this curl easy handle
         for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
-            lr_Target *ltarget = elem->data;
+            LrTarget *ltarget = elem->data;
             if (ltarget->curl_handle == msg->easy_handle)
                 target = ltarget;
         }
@@ -642,7 +642,7 @@ check_transfer_statuses(lr_Download *dd, GError **err)
 }
 
 static int
-lr_perform(lr_Download *dd, GError **err)
+lr_perform(LrDownload *dd, GError **err)
 {
     CURLMcode cm_rc;    // CurlM_ReturnCode
     int still_running;
@@ -753,10 +753,10 @@ lr_perform(lr_Download *dd, GError **err)
 }
 
 int
-lr_download(lr_Handle *lr_handle, GSList *targets, GError **err)
+lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
 {
     int ret = LRE_OK;
-    lr_Download dd;             // dd stands for Download Data
+    LrDownload dd;             // dd stands for Download Data
     GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
@@ -786,27 +786,27 @@ lr_download(lr_Handle *lr_handle, GSList *targets, GError **err)
         return LRE_CURLM;
     }
 
-    // Prepare list of lr_Mirrors
+    // Prepare list of LrMirrors
     dd.mirrors = NULL;
     for (GSList *elem = (lr_handle) ? lr_handle->internal_mirrorlist : NULL;
          elem;
          elem = g_slist_next(elem))
     {
-        lr_LrMirror *imirror = elem->data;
+        LrInternalMirror *imirror = elem->data;
 
         assert(imirror);
         assert(imirror->url);
         g_debug("%s: Mirror: %s", __func__, imirror->url);
 
-        lr_Mirror *mirror = lr_malloc0(sizeof(*mirror));
+        LrMirror *mirror = lr_malloc0(sizeof(*mirror));
         mirror->mirror = imirror;
         dd.mirrors = g_slist_append(dd.mirrors, mirror);
     }
 
-    // Prepare list of lr_Targets
+    // Prepare list of LrTargets
     dd.targets = NULL;
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        lr_DownloadTarget *dtarget = elem->data;
+        LrDownloadTarget *dtarget = elem->data;
 
         assert(dtarget);
         assert(dtarget->path);
@@ -815,7 +815,7 @@ lr_download(lr_Handle *lr_handle, GSList *targets, GError **err)
                 dtarget->path,
                 (dtarget->baseurl) ? dtarget->baseurl : "-");
 
-        lr_Target *target = lr_malloc0(sizeof(*target));
+        LrTarget *target = lr_malloc0(sizeof(*target));
         target->state           = LR_DS_WAITING;
         target->target          = dtarget;
         target->original_offset = -1;
@@ -844,7 +844,7 @@ lr_download_cleanup:
         g_debug("%s: Error while downloading: %s", __func__, tmp_err->message);
 
         for (GSList *elem = dd.running_transfers; elem; elem = g_slist_next(elem)){
-            lr_Target *target = elem->data;
+            LrTarget *target = elem->data;
 
             curl_multi_remove_handle(dd.multi_handle, target->curl_handle);
             curl_easy_cleanup(target->curl_handle);
@@ -868,13 +868,13 @@ lr_download_cleanup:
     curl_multi_cleanup(dd.multi_handle);
 
     for (GSList *elem = dd.mirrors; elem; elem = g_slist_next(elem)) {
-        lr_Mirror *mirror = elem->data;
+        LrMirror *mirror = elem->data;
         lr_free(mirror);
     }
     g_slist_free(dd.mirrors);
 
     for (GSList *elem = dd.targets; elem; elem = g_slist_next(elem)) {
-        lr_Target *target = elem->data;
+        LrTarget *target = elem->data;
         assert(target->curl_handle == NULL);
         assert(target->f == NULL);
         g_slist_free(target->tried_mirrors);
@@ -886,8 +886,8 @@ lr_download_cleanup:
 }
 
 int
-lr_download_target(lr_Handle *lr_handle,
-                   lr_DownloadTarget *target,
+lr_download_target(LrHandle *lr_handle,
+                   LrDownloadTarget *target,
                    GError **err)
 {
     int ret = LRE_OK;
@@ -908,10 +908,10 @@ lr_download_target(lr_Handle *lr_handle,
 }
 
 int
-lr_download_url(lr_Handle *lr_handle, const char *url, int fd, GError **err)
+lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 {
     int ret = LRE_OK;
-    lr_DownloadTarget *target;
+    LrDownloadTarget *target;
     GError *tmp_err = NULL;
 
     assert(url);
@@ -948,27 +948,27 @@ typedef struct {
     int transfers; /*!<
         Number of transfers */
 
-    lr_ProgressCb cb; /*!<
+    LrProgressCb cb; /*!<
         User callback */
 
     void *cbdata; /*!<
         User callback data */
 
-} lr_SharedCallbackData;
+} LrSharedCallbackData;
 
 typedef struct {
     int totalsizereported;
     double downloaded;
-    lr_SharedCallbackData *sharedcbdata;
-} lr_CallbackData;
+    LrSharedCallbackData *sharedcbdata;
+} LrCallbackData;
 
 int
 lr_multi_progress_func(void* ptr,
                        double total_to_download,
                        double now_downloaded)
 {
-    lr_CallbackData *cbdata = ptr;
-    lr_SharedCallbackData *shared_cbdata = cbdata->sharedcbdata;
+    LrCallbackData *cbdata = ptr;
+    LrSharedCallbackData *shared_cbdata = cbdata->sharedcbdata;
 
     if (total_to_download && !cbdata->totalsizereported) {
         // Report total size to the shared callback data
@@ -1000,14 +1000,14 @@ lr_multi_progress_func(void* ptr,
 }
 
 int
-lr_download_single_cb(lr_Handle *lr_handle,
+lr_download_single_cb(LrHandle *lr_handle,
                       GSList *targets,
-                      lr_ProgressCb cb,
+                      LrProgressCb cb,
                       void *cbdata,
                       GError **err)
 {
     int ret = LRE_OK;
-    lr_SharedCallbackData shared_cbdata;
+    LrSharedCallbackData shared_cbdata;
 
     assert(!err || *err == NULL);
 
@@ -1020,9 +1020,9 @@ lr_download_single_cb(lr_Handle *lr_handle,
 
     // "Inject" callbacks and callback data to the targets
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        lr_DownloadTarget *target = elem->data;
+        LrDownloadTarget *target = elem->data;
 
-        lr_CallbackData *cbdata = lr_malloc(sizeof(*cbdata));
+        LrCallbackData *cbdata = lr_malloc(sizeof(*cbdata));
         cbdata->totalsizereported = 0;
         cbdata->downloaded        = 0.0;
         cbdata->sharedcbdata      = &shared_cbdata;
@@ -1035,7 +1035,7 @@ lr_download_single_cb(lr_Handle *lr_handle,
 
     // Remove callbacks and callback data
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        lr_DownloadTarget *target = elem->data;
+        LrDownloadTarget *target = elem->data;
         lr_free(target->cbdata);
         target->cbdata = NULL;
         target->progresscb = NULL;

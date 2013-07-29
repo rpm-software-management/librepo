@@ -39,8 +39,8 @@ int
 lr_repoutil_yum_check_repo(const char *path, GError **err)
 {
     int rc;
-    lr_Handle *h;
-    lr_Result *result;
+    LrHandle *h;
+    LrResult *result;
 
     assert(path);
     assert(!err || *err == NULL);
@@ -86,7 +86,7 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
 
 int
 lr_repoutil_yum_parse_repomd(const char *in_path,
-                             lr_YumRepoMd *repomd,
+                             LrYumRepoMd *repomd,
                              GError **err)
 {
     int fd, rc;
@@ -124,7 +124,7 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
 }
 
 double
-lr_yum_repomd_get_age(lr_Result *result)
+lr_yum_repomd_get_age(LrResult *result)
 {
     assert(result);
 

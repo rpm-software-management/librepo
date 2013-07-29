@@ -30,7 +30,7 @@
 PyObject *
 py_yum_repomd_get_age(PyObject *self, PyObject *args)
 {
-    lr_Result *res;
+    LrResult *res;
     PyObject *py_res;
     double age;
 

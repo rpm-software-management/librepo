@@ -34,11 +34,11 @@ extern "C" {
 /** Handle object containing configration for repository metadata and
  * package downloading.
  */
-typedef struct _lr_Handle lr_Handle;
+typedef struct _LrHandle LrHandle;
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
-    LRO_UPDATE,      /*!< (long 1 or 0) Update existing repo in ::lr_Result.
+    LRO_UPDATE,      /*!< (long 1 or 0) Update existing repo in ::LrResult.
                           Update means download missing (previously omitted)
                           metadata file(s). */
     LRO_URL,         /*!< (char *) Base repo URL */
@@ -53,12 +53,12 @@ typedef enum {
                           "proxy-host.com:8080" */
     LRO_PROXYPORT,   /*!< (long) Set port number for proxy separately. Default
                           port is 1080. */
-    LRO_PROXYTYPE,   /*!< (::lr_ProxyType) Type of the proxy used. */
+    LRO_PROXYTYPE,   /*!< (::LrProxyType) Type of the proxy used. */
     LRO_PROXYAUTH,   /*!< (long 1 or 0) Enable all supported method for proxy
                           authentification */
     LRO_PROXYUSERPWD,/*!< (char *) User and password for proxy in format
                           user:password */
-    LRO_PROGRESSCB,  /*!< (::lr_ProgressCb) Progress callback */
+    LRO_PROGRESSCB,  /*!< (::LrProgressCb) Progress callback */
     LRO_PROGRESSDATA,/*!< (void *) Progress callback user data */
     LRO_RETRIES,     /*!< (long) Number of maximum retries for each file - TODO */
     LRO_MAXSPEED,    /*!< (unsigned long long) Maximum download speed
@@ -66,7 +66,7 @@ typedef enum {
                           download speed. */
     LRO_DESTDIR,     /*!< (char *) Where to save downloaded files */
 
-    LRO_REPOTYPE,    /*!< (::lr_Repotype) Type of downloaded repo, currently
+    LRO_REPOTYPE,    /*!< (::LrRepotype) Type of downloaded repo, currently
                           only supported is LR_YUMREPO. */
     LRO_CONNECTTIMEOUT,/*!< (long) Max time in sec for connection phase.
                             default timeout is 300 seconds. */
@@ -90,10 +90,10 @@ typedef enum {
     LRO_MAXMIRRORTRIES,/*!< (long) If download fails try at most the specified
                             number of mirrors. 0 means try all available
                             mirrors. */
-    LRO_VARSUB,        /*!< (lr_UrlVars *) Variables and its substitutions for
+    LRO_VARSUB,        /*!< (LrUrlVars *) Variables and its substitutions for
                             repo URL. [{"releasever", "f18"}], ...;
                             (e.g.: http://foo/$releasever => http://foo/f18)
-                            lr_UrlVars has to be constructed by
+                            LrUrlVars has to be constructed by
                             lr_urlvars_set() function. After set the list
                             to the handle, it has not to be freed! Handle
                             itself takes care about freeing the list. */
@@ -110,7 +110,7 @@ typedef enum {
                           from repomd (blacklist).
                           Note: Last element of the list must be NULL! */
     LRO_SENTINEL,    /*!<  */
-} lr_HandleOption; /*!< Handle config options */
+} LrHandleOption; /*!< Handle config options */
 
 /** Handle options for the ::lr_handle_getinfo function. */
 typedef enum {
@@ -119,7 +119,7 @@ typedef enum {
     LRI_MIRRORLIST,             /*!< (char **) */
     LRI_LOCAL,                  /*!< (long *) */
     LRI_PROGRESSCB,             /*!< (void *) */
-    LRI_PROGRESSDATA,           /*!< (lr_ProgressCb) */
+    LRI_PROGRESSDATA,           /*!< (LrProgressCb) */
     LRI_DESTDIR,                /*!< (char **) */
     LRI_REPOTYPE,               /*!< (long *) */
     LRI_USERAGENT,              /*!< (char **) */
@@ -131,7 +131,7 @@ typedef enum {
         You could use g_strfreev() function. */
     LRI_FETCHMIRRORS,           /*!< (long *) */
     LRI_MAXMIRRORTRIES,         /*!< (long *) */
-    LRI_VARSUB,                 /*!< (lr_UrlVars **) */
+    LRI_VARSUB,                 /*!< (LrUrlVars **) */
     LRI_MIRRORS,                /*!< (char ***)
         Mirrorlist associated with the repository.
 
@@ -148,27 +148,27 @@ typedef enum {
 
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
-    LRI_METALINK,               /*!< (lr_Metalink *) */
+    LRI_METALINK,               /*!< (LrMetalink *) */
     LRI_SENTINEL,
-} lr_HandleInfoOption; /*!< Handle info options */
+} LrHandleInfoOption; /*!< Handle info options */
 
 /** Return new handle.
  * @return              New allocated handle.
  */
-lr_Handle *lr_handle_init();
+LrHandle *lr_handle_init();
 
 /** Frees handle and its content.
  * @param handle        Handle.
  */
-void lr_handle_free(lr_Handle *handle);
+void lr_handle_free(LrHandle *handle);
 
-/** Set option (::lr_HandleOption) of the handle.
+/** Set option (::LrHandleOption) of the handle.
  * @param handle         Handle.
- * @param option        Option from ::lr_HandleOption enum.
+ * @param option        Option from ::LrHandleOption enum.
  * @param ...           Value for the option.
- * @return              Librepo return code from ::lr_Rc enum.
+ * @return              Librepo return code from ::LrRc enum.
  */
-int lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...);
+int lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...);
 
 /** Get information from handle.
  * Most of returned pointers point directly to the handle internal
@@ -178,19 +178,19 @@ int lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...);
  * NOTE: You should not free or modify the memory returned by this
  * function unless it is explicitly mentioned!
  * @param handle        Librepo handle.
- * @param option        Option from ::lr_HandleInfoOption enum.
+ * @param option        Option from ::LrHandleInfoOption enum.
  * @param ...           Apropriate variable fro the selected option.
- * @return              Librepo return code ::lr_Rc.
+ * @return              Librepo return code ::LrRc.
  */
-int lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...);
+int lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...);
 
 /** Perform repodata download or location.
  * @param handle        Librepo handle.
  * @param result        Librepo result.
  * @param err           GError **
- * @return              Librepo return code from ::lr_Rc enum.
+ * @return              Librepo return code from ::LrRc enum.
  */
-int lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err);
+int lr_handle_perform(LrHandle *handle, LrResult *result, GError **err);
 
 /** @} */
 

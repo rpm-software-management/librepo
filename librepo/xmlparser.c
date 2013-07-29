@@ -27,20 +27,20 @@
 #include "xmlparser_internal.h"
 #include "rcodes.h"
 
-lr_ParserData *
+LrParserData *
 lr_xml_parser_data_new(unsigned int numstates)
 {
-    lr_ParserData *pd = g_new0(lr_ParserData, 1);
+    LrParserData *pd = g_new0(LrParserData, 1);
     pd->content = g_malloc(CONTENT_REALLOC_STEP);
     pd->acontent = CONTENT_REALLOC_STEP;
-    pd->swtab = g_malloc0(sizeof(lr_StatesSwitch *) * numstates);
+    pd->swtab = g_malloc0(sizeof(LrStatesSwitch *) * numstates);
     pd->sbtab = g_malloc(sizeof(unsigned int) * numstates);
 
     return pd;
 }
 
 void
-lr_xml_parser_data_free(lr_ParserData *pd)
+lr_xml_parser_data_free(LrParserData *pd)
 {
     g_free(pd->content);
     g_free(pd->swtab);
@@ -53,7 +53,7 @@ lr_char_handler(void *pdata, const XML_Char *s, int len)
 {
     int l;
     char *c;
-    lr_ParserData *pd = pdata;
+    LrParserData *pd = pdata;
 
     if (pd->err)
         return; /* There was an error -> do nothing */
@@ -75,8 +75,8 @@ lr_char_handler(void *pdata, const XML_Char *s, int len)
 }
 
 int
-lr_xml_parser_warning(lr_ParserData *pd,
-                      lr_XmlParserWarningType type,
+lr_xml_parser_warning(LrParserData *pd,
+                      LrXmlParserWarningType type,
                       const char *msg,
                       ...)
 {
@@ -114,7 +114,7 @@ lr_xml_parser_warning(lr_ParserData *pd,
 }
 
 gint64
-lr_xml_parser_strtoll(lr_ParserData *pd,
+lr_xml_parser_strtoll(LrParserData *pd,
                       const char *nptr,
                       unsigned int base)
 {
@@ -141,11 +141,11 @@ lr_xml_parser_strtoll(lr_ParserData *pd,
 
 int
 lr_xml_parser_generic(XML_Parser parser,
-                      lr_ParserData *pd,
+                      LrParserData *pd,
                       int fd,
                       GError **err)
 {
-    /* Note: This function uses .err members of lr_ParserData! */
+    /* Note: This function uses .err members of LrParserData! */
 
     int ret = LRE_OK;
 

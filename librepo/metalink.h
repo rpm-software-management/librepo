@@ -33,7 +33,7 @@ extern "C" {
 typedef struct {
     char *type;     /*!< Type of checksum (e.g. "md5", "sha1", "sha256", ... */
     char *value;    /*!< Value of the checksum */
-} lr_MetalinkHash;
+} LrMetalinkHash;
 
 /** Single metalink URL */
 typedef struct {
@@ -42,30 +42,30 @@ typedef struct {
     char *location;     /*!< ISO 3166-1 alpha-2 code ("US", "CZ", ..) */
     int preference;     /*!< Integer number 1-100, higher is better */
     char *url;          /*!< URL to the target file */
-} lr_MetalinkUrl;
+} LrMetalinkUrl;
 
 /** Metalink */
 typedef struct {
     char *filename; /*!< Filename */
     long timestamp; /*!< File timestamp */
     long size;      /*!< File size */
-    GSList *hashes; /*!< List of pointers to lr_MetalinkHashes (could be NULL) */
-    GSList *urls;   /*!< List of pointers to lr_MetalinkUrls (could be NULL) */
-} lr_Metalink;
+    GSList *hashes; /*!< List of pointers to LrMetalinkHashes (could be NULL) */
+    GSList *urls;   /*!< List of pointers to LrMetalinkUrls (could be NULL) */
+} LrMetalink;
 
 /** Create new empty metalink object.
  * @return              New metalink object.
  */
-lr_Metalink *lr_metalink_init();
+LrMetalink *lr_metalink_init();
 
 /** Parse metalink file.
  * @param metalink      Metalink object.
  * @param fd            File descriptor.
  * @param filename      File to look for in metalink file.
  * @param err           GError **
- * @return              Librepo return code ::lr_Rc.
+ * @return              Librepo return code ::LrRc.
  */
-int lr_metalink_parse_file(lr_Metalink *metalink,
+int lr_metalink_parse_file(LrMetalink *metalink,
                            int fd,
                            const char *filename,
                            GError **err);
@@ -73,7 +73,7 @@ int lr_metalink_parse_file(lr_Metalink *metalink,
 /** Free metalink object and all its content.
  * @param metalink      Metalink object.
  */
-void lr_metalink_free(lr_Metalink *metalink);
+void lr_metalink_free(LrMetalink *metalink);
 
 /** @} */
 

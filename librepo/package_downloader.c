@@ -36,10 +36,10 @@
 /* Do NOT use resume on successfully downloaded files - download will fail */
 
 int
-lr_download_package(lr_Handle *handle,
+lr_download_package(LrHandle *handle,
                     const char *relative_url,
                     const char *dest,
-                    lr_ChecksumType checksum_type,
+                    LrChecksumType checksum_type,
                     const char *checksum,
                     const char *base_url,
                     int resume,
@@ -142,7 +142,7 @@ lr_download_package(lr_Handle *handle,
 
     // Download!
     g_debug("%s: Downloading package: %s", __func__, relative_url);
-    lr_DownloadTarget *target = lr_downloadtarget_new(relative_url,
+    LrDownloadTarget *target = lr_downloadtarget_new(relative_url,
                                                       base_url,
                                                       fd,
                                                       checksum_type,

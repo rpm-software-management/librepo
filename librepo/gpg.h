@@ -36,7 +36,7 @@ extern "C" {
  *                          (e.g. "/home/user/.gnupg/"), if NULL default
  *                          config directory is used.
  * @param err               GError **
- * @return                  lr_Rc code
+ * @return                  LrRc code
  */
 int lr_gpg_check_signature_fd(int signature_fd,
                               int data_fd,
@@ -50,7 +50,7 @@ int lr_gpg_check_signature_fd(int signature_fd,
  *                          (e.g. "/home/user/.gnupg/"), if NULL default
  *                          config directory is used.
  * @param err               GError **
- * @return                  lr_Rc code
+ * @return                  LrRc code
  */
 int lr_gpg_check_signature(const char *signature_fn,
                            const char *data_fn,
@@ -63,7 +63,7 @@ int lr_gpg_check_signature(const char *signature_fn,
  *                          (e.g. "/home/user/.gnupg/"), if NULL default
  *                          config directory is used.
  * @param err               GError **
- * @return                  lr_Rc code
+ * @return                  LrRc code
  */
 int lr_gpg_import_key(const char *key_fn,
                       const char *home_dir,

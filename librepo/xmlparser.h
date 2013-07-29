@@ -41,7 +41,7 @@ typedef enum {
     LR_XML_WARNING_BADATTRVAL,  /*!< Bad attribute value */
     LR_XML_WARNING_MISSINGVAL,  /*!< Missing tag value */
     LR_XML_WARNING_SENTINEL,
-} lr_XmlParserWarningType;
+} LrXmlParserWarningType;
 
 /** Callback for XML parser warnings. All reported warnings are non-fatal,
  * and ignored by default. But if callback return LR_CB_RET_ERR instead of
@@ -53,7 +53,7 @@ typedef enum {
  * @param err       GError **
  * @return          LR_CB_RET_OK (0) or LR_CB_RET_ERR (1) - stops the parsing
  */
-typedef int (*lr_XmlParserWarningCb)(lr_XmlParserWarningType type,
+typedef int (*LrXmlParserWarningCb)(LrXmlParserWarningType type,
                                      char *msg,
                                      void *cbdata,
                                      GError **err);

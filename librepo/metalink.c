@@ -40,26 +40,26 @@
 
 /* Metalink object manipulation helpers */
 
-static lr_MetalinkHash *
-lr_new_metalinkhash(lr_Metalink *m)
+static LrMetalinkHash *
+lr_new_metalinkhash(LrMetalink *m)
 {
     assert(m);
-    lr_MetalinkHash *hash = lr_malloc0(sizeof(*hash));
+    LrMetalinkHash *hash = lr_malloc0(sizeof(*hash));
     m->hashes = g_slist_append(m->hashes, hash);
     return hash;
 }
 
-static lr_MetalinkUrl *
-lr_new_metalinkurl(lr_Metalink *m)
+static LrMetalinkUrl *
+lr_new_metalinkurl(LrMetalink *m)
 {
     assert(m);
-    lr_MetalinkUrl *url = lr_malloc0(sizeof(*url));
+    LrMetalinkUrl *url = lr_malloc0(sizeof(*url));
     m->urls = g_slist_append(m->urls, url);
     return url;
 }
 
 static void
-lr_free_metalinkhash(lr_MetalinkHash *metalinkhash)
+lr_free_metalinkhash(LrMetalinkHash *metalinkhash)
 {
     if (!metalinkhash) return;
     lr_free(metalinkhash->type);
@@ -68,7 +68,7 @@ lr_free_metalinkhash(lr_MetalinkHash *metalinkhash)
 }
 
 static void
-lr_free_metalinkurl(lr_MetalinkUrl *metalinkurl)
+lr_free_metalinkurl(LrMetalinkUrl *metalinkurl)
 {
     if (!metalinkurl) return;
     lr_free(metalinkurl->protocol);
@@ -78,14 +78,14 @@ lr_free_metalinkurl(lr_MetalinkUrl *metalinkurl)
     lr_free(metalinkurl);
 }
 
-lr_Metalink *
+LrMetalink *
 lr_metalink_init()
 {
-    return lr_malloc0(sizeof(lr_Metalink));
+    return lr_malloc0(sizeof(LrMetalink));
 }
 
 void
-lr_metalink_free(lr_Metalink *metalink)
+lr_metalink_free(LrMetalink *metalink)
 {
     if (!metalink)
         return;
@@ -110,17 +110,17 @@ typedef enum {
     STATE_RESOURCES,
     STATE_URL,
     NUMSTATES
-} lr_State;
+} LrState;
 
 typedef struct {
-    lr_State from;  /*!< source state */
+    LrState from;  /*!< source state */
     char *ename;    /*!< element name */
-    lr_State to;    /*!< target state */
+    LrState to;    /*!< target state */
     int docontent;  /*!< store the text of the element */
-} lr_StatesSwitch;
+} LrStatesSwitch;
 
 /* Same states in the first column must be together */
-static lr_StatesSwitch stateswitches[] = {
+static LrStatesSwitch stateswitches[] = {
     { STATE_START,      "metalink",         STATE_METALINK,     0 },
     { STATE_METALINK,   "files",            STATE_FILES,        0 },
     { STATE_FILES,      "file",             STATE_FILE,         0 },
@@ -137,7 +137,7 @@ typedef struct _ParserData {
     int ret;            /*!< status of parsing (return code) */
     int depth;
     int statedepth;
-    lr_State state;     /*!< current state */
+    LrState state;     /*!< current state */
 
     int docontent;  /*!< tell if store text from the current element */
     char *content;  /*!< text content of element */
@@ -145,16 +145,16 @@ typedef struct _ParserData {
     int acontent;   /*!< availbable bytes in the content */
 
     XML_Parser *parser;                 /*!< parser */
-    lr_StatesSwitch *swtab[NUMSTATES];  /*!< pointers to stateswitches table */
-    lr_State sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
+    LrStatesSwitch *swtab[NUMSTATES];  /*!< pointers to stateswitches table */
+    LrState sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
 
     char *filename;         /*!< filename we are looking for in metalink */
     int ignore;             /*!< ignore all subelements of the current file element */
     int found;              /*!< wanted file was already parsed */
 
-    lr_Metalink *metalink;          /*!< metalink object */
-    lr_MetalinkUrl *metalinkurl;    /*!< Url in progress or NULL */
-    lr_MetalinkHash *metalinkhash;  /*!< Hash in progress or NULL */
+    LrMetalink *metalink;          /*!< metalink object */
+    LrMetalinkUrl *metalinkurl;    /*!< Url in progress or NULL */
+    LrMetalinkHash *metalinkhash;  /*!< Hash in progress or NULL */
 } ParserData;
 
 static inline const char *
@@ -173,7 +173,7 @@ static void XMLCALL
 lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
 {
     ParserData *pd = pdata;
-    lr_StatesSwitch *sw;
+    LrStatesSwitch *sw;
 
     if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */
@@ -234,7 +234,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         break;
 
     case STATE_HASH: {
-        lr_MetalinkHash *mh;
+        LrMetalinkHash *mh;
         assert(!pd->metalinkhash);
         const char *type = lr_find_attr("type", attr);
         if (!type) {
@@ -254,7 +254,7 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
     case STATE_URL: {
         const char *val;
         assert(!pd->metalinkurl);
-        lr_MetalinkUrl *url = lr_new_metalinkurl(pd->metalink);
+        LrMetalinkUrl *url = lr_new_metalinkurl(pd->metalink);
         if ((val = lr_find_attr("protocol", attr)))
             url->protocol = g_strdup(val);
         if ((val = lr_find_attr("type", attr)))
@@ -368,7 +368,7 @@ lr_metalink_end_handler(void *pdata, const char *name)
 }
 
 int
-lr_metalink_parse_file(lr_Metalink *metalink,
+lr_metalink_parse_file(LrMetalink *metalink,
                        int fd,
                        const char *filename,
                        GError **err)
@@ -376,7 +376,7 @@ lr_metalink_parse_file(lr_Metalink *metalink,
     int ret = LRE_OK;
     XML_Parser parser;
     ParserData pd;
-    lr_StatesSwitch *sw;
+    LrStatesSwitch *sw;
 
     assert(metalink);
     assert(fd >= 0);

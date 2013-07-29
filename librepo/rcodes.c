@@ -34,9 +34,9 @@ lr_strerror(int rc)
     case LRE_CURLSETOPT:
         return "curl_*_setopt() failed (too old curl version?)";
     case LRE_ALREADYUSEDRESULT:
-        return "lr_Result object is not clean";
+        return "LrResult object is not clean";
     case LRE_INCOMPLETERESULT:
-        return "lr_Result object doesn't contain all needed info";
+        return "LrResult object doesn't contain all needed info";
     case LRE_CURLDUP:
         return "Cannot duplicate curl handle";
     case LRE_CURL:

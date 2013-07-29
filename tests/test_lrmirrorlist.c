@@ -4,10 +4,10 @@
 
 START_TEST(test_lrmirrorlist_append_mirrorlist)
 {
-    lr_LrMirrorlist *iml = NULL;
-    lr_LrMirror *mirror = NULL;
+    LrInternalMirrorlist *iml = NULL;
+    LrInternalMirror *mirror = NULL;
     char *url = NULL;
-    lr_Mirrorlist ml = {
+    LrMirrorlist ml = {
         .urls = NULL,
     };
 
@@ -46,38 +46,38 @@ END_TEST
 
 START_TEST(test_lrmirrorlist_append_metalink)
 {
-    lr_LrMirrorlist *iml = NULL;
-    lr_LrMirror *mirror = NULL;
+    LrInternalMirrorlist *iml = NULL;
+    LrInternalMirror *mirror = NULL;
     char *url = NULL;
-    lr_MetalinkUrl url1 = {
+    LrMetalinkUrl url1 = {
             .protocol = "http",
             .type = "http",
             .location = "CZ",
             .preference = 100,
             .url = "http://foo/repodata/repomd.xml",
         };
-    lr_MetalinkUrl url2 = {
+    LrMetalinkUrl url2 = {
             .protocol = "rsync",
             .type = "rsync",
             .location = "US",
             .preference = 50,
             .url = "",
         };
-    lr_MetalinkUrl url3 = {
+    LrMetalinkUrl url3 = {
             .protocol = "ftp",
             .type = "ftp",
             .location = "CZ",
             .preference = 1,
             .url = NULL,
         };
-    lr_MetalinkUrl url4 = {
+    LrMetalinkUrl url4 = {
             .protocol = "ftp",
             .type = "ftp",
             .location = "US",
             .preference = 95,
             .url = "ftp://bar/repodata/repomd.xml",
         };
-    lr_Metalink ml = {
+    LrMetalink ml = {
         .filename = NULL,
         .timestamp = 1,
         .size = 1,
@@ -138,8 +138,8 @@ END_TEST
 
 START_TEST(test_lrmirrorlist_append_lrmirrorlist)
 {
-    lr_LrMirrorlist *iml = NULL, *iml_2 = NULL;
-    lr_LrMirror *mirror = NULL;
+    LrInternalMirrorlist *iml = NULL, *iml_2 = NULL;
+    LrInternalMirror *mirror = NULL;
     char *url = NULL;
 
     iml_2 = lr_lrmirrorlist_append_url(iml_2, "http://foo", NULL);

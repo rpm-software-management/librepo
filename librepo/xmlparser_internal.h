@@ -42,7 +42,7 @@ typedef struct {
     char            *ename;     /*!< String name of sub-tag */
     unsigned int    to;         /*!< State of sub-tag */
     int             docontent;  /*!< Read text content of element? */
-} lr_StatesSwitch;
+} LrStatesSwitch;
 
 /** Parser data
  */
@@ -60,34 +60,34 @@ typedef struct {
     int     acontent;   /*!< Available bytes in the content */
 
     XML_Parser      *parser;    /*!< The parser */
-    lr_StatesSwitch **swtab;    /*!< Pointers to statesswitches table */
+    LrStatesSwitch **swtab;    /*!< Pointers to statesswitches table */
     unsigned int    *sbtab;     /*!< stab[to_state] = from_state */
 
     void *warningcb_data; /*!<
         User data fot he warningcb. */
-    lr_XmlParserWarningCb warningcb; /*!<
+    LrXmlParserWarningCb warningcb; /*!<
         Warning callback */
 
     /* Repomd related stuff */
 
-    lr_YumRepoMd *repomd; /*!<
+    LrYumRepoMd *repomd; /*!<
         Repomd object */
-    lr_YumRepoMdRecord *repomdrecord; /*!<
+    LrYumRepoMdRecord *repomdrecord; /*!<
         Repomd record object for a currently parsed element */
     char *cpeid; /*!<
         cpeid value for the currently parsed distro tag */
 
-} lr_ParserData;
+} LrParserData;
 
 /** Malloc and initialize common part of XML parser data.
  */
-lr_ParserData *
+LrParserData *
 lr_xml_parser_data_new(unsigned int numstates);
 
 /** Frees XML parser data
  */
 void
-lr_xml_parser_data_free(lr_ParserData *pd);
+lr_xml_parser_data_free(LrParserData *pd);
 
 /** XML character handler
  */
@@ -116,15 +116,15 @@ lr_find_attr(const char *name, const char **attr)
  * va_args, calls warningcb and propagate (set) error if necessary.
  */
 int
-lr_xml_parser_warning(lr_ParserData *pd,
-                      lr_XmlParserWarningType type,
+lr_xml_parser_warning(LrParserData *pd,
+                      LrXmlParserWarningType type,
                       const char *msg,
                       ...);
 
 /** strtoll with ability to call warning cb if error during conversion.
  */
 gint64
-lr_xml_parser_strtoll(lr_ParserData *pd,
+lr_xml_parser_strtoll(LrParserData *pd,
                       const char *nptr,
                       unsigned int base);
 
@@ -132,7 +132,7 @@ lr_xml_parser_strtoll(lr_ParserData *pd,
  */
 int
 lr_xml_parser_generic(XML_Parser parser,
-                      lr_ParserData *pd,
+                      LrParserData *pd,
                       int fd,
                       GError **err);
 

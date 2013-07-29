@@ -27,17 +27,17 @@
 #include "downloadtarget.h"
 #include "downloadtarget_internal.h"
 
-lr_DownloadTarget *
+LrDownloadTarget *
 lr_downloadtarget_new(const char *path,
                       const char *baseurl,
                       int fd,
-                      lr_ChecksumType checksumtype,
+                      LrChecksumType checksumtype,
                       const char *checksum,
                       int resume,
-                      lr_ProgressCb progresscb,
+                      LrProgressCb progresscb,
                       void *cbdata)
 {
-    lr_DownloadTarget *target;
+    LrDownloadTarget *target;
 
     assert(path);
     assert(fd > 0);
@@ -59,7 +59,7 @@ lr_downloadtarget_new(const char *path,
 }
 
 void
-lr_downloadtarget_free(lr_DownloadTarget *target)
+lr_downloadtarget_free(LrDownloadTarget *target)
 {
     if (!target)
         return;
@@ -69,8 +69,8 @@ lr_downloadtarget_free(lr_DownloadTarget *target)
 }
 
 void
-lr_downloadtarget_set_error(lr_DownloadTarget *target,
-                            lr_Rc code,
+lr_downloadtarget_set_error(LrDownloadTarget *target,
+                            LrRc code,
                             const char *format,
                             ...)
 {
@@ -102,14 +102,14 @@ lr_downloadtarget_set_error(lr_DownloadTarget *target,
 }
 
 void
-lr_downloadtarget_set_usedmirror(lr_DownloadTarget *target, const char *url)
+lr_downloadtarget_set_usedmirror(LrDownloadTarget *target, const char *url)
 {
     assert(target);
     target->usedmirror = lr_string_chunk_insert(target->chunk, url);
 }
 
 void
-lr_downloadtarget_set_effectiveurl(lr_DownloadTarget *target, const char *url)
+lr_downloadtarget_set_effectiveurl(LrDownloadTarget *target, const char *url)
 {
     assert(target);
     target->effectiveurl = lr_string_chunk_insert(target->chunk, url);

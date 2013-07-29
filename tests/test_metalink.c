@@ -26,7 +26,7 @@
 
 START_TEST(test_metalink_init)
 {
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
 
     ml = lr_metalink_init();
     fail_if(ml == NULL);
@@ -39,9 +39,9 @@ START_TEST(test_metalink_good_01)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
-    lr_MetalinkHash *mlhash = NULL;
-    lr_MetalinkUrl *mlurl = NULL;
+    LrMetalink *ml = NULL;
+    LrMetalinkHash *mlhash = NULL;
+    LrMetalinkUrl *mlurl = NULL;
     GSList *elem = NULL;
     GError *tmp_err = NULL;
 
@@ -154,7 +154,7 @@ START_TEST(test_metalink_good_02)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
@@ -178,7 +178,7 @@ START_TEST(test_metalink_good_02)
 
     GSList *list = g_slist_nth(ml->urls, 0);
     fail_if(!list);
-    lr_MetalinkUrl *mlurl = list->data;
+    LrMetalinkUrl *mlurl = list->data;
     fail_if(!mlurl);
     fail_if(mlurl->protocol == NULL);
     fail_if(strcmp(mlurl->protocol, "http"));
@@ -200,7 +200,7 @@ START_TEST(test_metalink_good_03)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
@@ -231,9 +231,9 @@ START_TEST(test_metalink_bad_01)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
-    lr_MetalinkHash *mlhash = NULL;
-    lr_MetalinkUrl *mlurl = NULL;
+    LrMetalink *ml = NULL;
+    LrMetalinkHash *mlhash = NULL;
+    LrMetalinkUrl *mlurl = NULL;
     GSList *elem = NULL;
     GError *tmp_err = NULL;
 
@@ -355,7 +355,7 @@ START_TEST(test_metalink_bad_02)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
@@ -379,7 +379,7 @@ START_TEST(test_metalink_really_bad_01)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
@@ -403,7 +403,7 @@ START_TEST(test_metalink_really_bad_02)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
@@ -427,7 +427,7 @@ START_TEST(test_metalink_really_bad_03)
     int fd;
     int ret;
     char *path;
-    lr_Metalink *ml = NULL;
+    LrMetalink *ml = NULL;
     GError *tmp_err = NULL;
 
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,

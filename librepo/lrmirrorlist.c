@@ -5,10 +5,10 @@
 #include "util.h"
 #include "lrmirrorlist.h"
 
-static lr_LrMirror *
-lr_lrmirror_new(const char *url, lr_UrlVars *urlvars)
+static LrInternalMirror *
+lr_lrmirror_new(const char *url, LrUrlVars *urlvars)
 {
-    lr_LrMirror *mirror;
+    LrInternalMirror *mirror;
 
     mirror = lr_malloc0(sizeof(*mirror));
     mirror->url = lr_url_substitute(url, urlvars);
@@ -18,13 +18,13 @@ lr_lrmirror_new(const char *url, lr_UrlVars *urlvars)
 static void
 lr_lrmirror_free(void *data)
 {
-    lr_LrMirror *mirror = data;
+    LrInternalMirror *mirror = data;
     lr_free(mirror->url);
     lr_free(mirror);
 }
 
 void
-lr_lrmirrorlist_free(lr_LrMirrorlist *list)
+lr_lrmirrorlist_free(LrInternalMirrorlist *list)
 {
     if (!list)
         return;
@@ -32,24 +32,24 @@ lr_lrmirrorlist_free(lr_LrMirrorlist *list)
     g_slist_free_full(list, lr_lrmirror_free);
 }
 
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_url(lr_LrMirrorlist *list,
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_url(LrInternalMirrorlist *list,
                            const char *url,
-                           lr_UrlVars *urlvars)
+                           LrUrlVars *urlvars)
 {
     if (!url || !strlen(url))
         return list;
 
-    lr_LrMirror *mirror = lr_lrmirror_new(url, urlvars);
+    LrInternalMirror *mirror = lr_lrmirror_new(url, urlvars);
     mirror->preference = 100;
 
     return g_slist_append(list, mirror);
 }
 
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
-                                  lr_Mirrorlist *mirrorlist,
-                                  lr_UrlVars *urlvars)
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_mirrorlist(LrInternalMirrorlist *list,
+                                  LrMirrorlist *mirrorlist,
+                                  LrUrlVars *urlvars)
 {
     if (!mirrorlist || !mirrorlist->urls)
         return list;
@@ -60,7 +60,7 @@ lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
         if (!url || !strlen(url))
             continue;
 
-        lr_LrMirror *mirror = lr_lrmirror_new(url, urlvars);
+        LrInternalMirror *mirror = lr_lrmirror_new(url, urlvars);
         mirror->preference = 100;
         list = g_slist_append(list, mirror);
     }
@@ -68,11 +68,11 @@ lr_lrmirrorlist_append_mirrorlist(lr_LrMirrorlist *list,
     return list;
 }
 
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
-                                lr_Metalink *metalink,
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_metalink(LrInternalMirrorlist *list,
+                                LrMetalink *metalink,
                                 const char *suffix,
-                                lr_UrlVars *urlvars)
+                                LrUrlVars *urlvars)
 {
     size_t suffix_len = 0;
 
@@ -83,7 +83,7 @@ lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
         suffix_len = strlen(suffix);
 
     for (GSList *elem = metalink->urls; elem; elem = g_slist_next(elem)) {
-        lr_MetalinkUrl *metalinkurl = elem->data;
+        LrMetalinkUrl *metalinkurl = elem->data;
         assert(metalinkurl);
         char *url = metalinkurl->url;
 
@@ -107,7 +107,7 @@ lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
         if (!url_copy)
             url_copy = g_strdup(url);
 
-        lr_LrMirror *mirror = lr_lrmirror_new(url_copy, urlvars);
+        LrInternalMirror *mirror = lr_lrmirror_new(url_copy, urlvars);
         mirror->preference = metalinkurl->preference;
         lr_free(url_copy);
         list = g_slist_append(list, mirror);
@@ -116,16 +116,16 @@ lr_lrmirrorlist_append_metalink(lr_LrMirrorlist *list,
     return list;
 }
 
-lr_LrMirrorlist *
-lr_lrmirrorlist_append_lrmirrorlist(lr_LrMirrorlist *list,
-                                    lr_LrMirrorlist *other)
+LrInternalMirrorlist *
+lr_lrmirrorlist_append_lrmirrorlist(LrInternalMirrorlist *list,
+                                    LrInternalMirrorlist *other)
 {
     if (!other)
         return list;
 
-    for (lr_LrMirrorlist *elem = other; elem; elem = g_slist_next(elem)) {
-        lr_LrMirror *oth = elem->data;
-        lr_LrMirror *mirror = lr_lrmirror_new(oth->url, NULL);
+    for (LrInternalMirrorlist *elem = other; elem; elem = g_slist_next(elem)) {
+        LrInternalMirror *oth = elem->data;
+        LrInternalMirror *mirror = lr_lrmirror_new(oth->url, NULL);
         mirror->preference = oth->preference;
         mirror->fails      = oth->fails;
         list = g_slist_append(list, mirror);
@@ -134,17 +134,17 @@ lr_lrmirrorlist_append_lrmirrorlist(lr_LrMirrorlist *list,
     return list;
 }
 
-lr_LrMirror *
-lr_lrmirrorlist_nth(lr_LrMirrorlist *list,
+LrInternalMirror *
+lr_lrmirrorlist_nth(LrInternalMirrorlist *list,
                     unsigned int nth)
 {
     return g_slist_nth_data(list, nth);
 }
 
 char *
-lr_lrmirrorlist_nth_url(lr_LrMirrorlist *list,
+lr_lrmirrorlist_nth_url(LrInternalMirrorlist *list,
                         unsigned int nth)
 {
-    lr_LrMirror *mirror = g_slist_nth_data(list, nth);
+    LrInternalMirror *mirror = g_slist_nth_data(list, nth);
     return (mirror) ? mirror->url : NULL;
 }

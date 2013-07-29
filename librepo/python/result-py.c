@@ -29,10 +29,10 @@
 
 typedef struct {
     PyObject_HEAD
-    lr_Result *result;
+    LrResult *result;
 } _ResultObject;
 
-lr_Result *
+LrResult *
 Result_FromPyObject(PyObject *o)
 {
     if (!ResultObject_Check(o)) {
@@ -44,9 +44,9 @@ Result_FromPyObject(PyObject *o)
 
 /*
 int
-result_converter(PyObject *o, lr_Handle *handle_ptr)
+result_converter(PyObject *o, LrHandle *handle_ptr)
 {
-    lr_Handle handle = handleFromPyObject(o);
+    LrHandle handle = handleFromPyObject(o);
     if (handle == NULL)
         return 0;
     *handle_ptr = handle;
@@ -125,16 +125,16 @@ getinfo(_ResultObject *self, PyObject *args)
      * YUM related options
      */
     case LRR_YUM_REPO: {
-        lr_YumRepo *repo;
-        res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repo);
+        LrYumRepo *repo;
+        res = lr_result_getinfo(self->result, (LrResultInfoOption)option, &repo);
         if (res != LRE_OK)
             RETURN_ERROR(NULL, res, NULL);
         return PyObject_FromYumRepo(repo);
     }
 
     case LRR_YUM_REPOMD: {
-        lr_YumRepoMd *repomd;
-        res = lr_result_getinfo(self->result, (lr_ResultInfoOption)option, &repomd);
+        LrYumRepoMd *repomd;
+        res = lr_result_getinfo(self->result, (LrResultInfoOption)option, &repomd);
         if (res != LRE_OK)
             RETURN_ERROR(NULL, res, NULL);
         return PyObject_FromYumRepoMd(repomd);

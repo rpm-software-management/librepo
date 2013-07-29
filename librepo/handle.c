@@ -72,16 +72,16 @@ lr_handle_free_list(char ***list)
     *list = NULL;
 }
 
-lr_Handle *
+LrHandle *
 lr_handle_init()
 {
-    lr_Handle *handle;
+    LrHandle *handle;
     CURL *curl = lr_get_curl_handle();
 
     if (!curl)
         return NULL;
 
-    handle = lr_malloc0(sizeof(lr_Handle));
+    handle = lr_malloc0(sizeof(LrHandle));
     handle->curl_handle = curl;
     handle->retries = 1;
     handle->mirrorlist_fd = -1;
@@ -91,7 +91,7 @@ lr_handle_init()
 }
 
 void
-lr_handle_free(lr_Handle *handle)
+lr_handle_free(LrHandle *handle)
 {
     if (!handle)
         return;
@@ -114,9 +114,9 @@ lr_handle_free(lr_Handle *handle)
 }
 
 int
-lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...)
+lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
 {
-    lr_Rc ret = LRE_OK;
+    LrRc ret = LRE_OK;
     va_list arg;
     CURLcode c_rc = CURLE_OK;
     CURL *c_h;
@@ -214,7 +214,7 @@ lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...)
         break;
 
     case LRO_PROGRESSCB:
-        handle->user_cb = va_arg(arg, lr_ProgressCb);
+        handle->user_cb = va_arg(arg, LrProgressCb);
         break;
 
     case LRO_PROGRESSDATA:
@@ -239,7 +239,7 @@ lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...)
         break;
 
     case LRO_REPOTYPE:
-        handle->repotype = va_arg(arg, lr_Repotype);
+        handle->repotype = va_arg(arg, LrRepotype);
         if (handle->repotype != LR_YUMREPO)
             ret = LRE_BADOPTARG;
         break;
@@ -314,13 +314,13 @@ lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...)
         break;
 
     case LRO_VARSUB: {
-        lr_UrlVars *vars = va_arg(arg, lr_UrlVars *);
+        LrUrlVars *vars = va_arg(arg, LrUrlVars *);
         lr_urlvars_free(handle->urlvars);
         handle->urlvars = vars;
 
         /* Do not do copy
-        for (lr_UrlVars *elem = vars; elem; elem = lr_list_next(elem)) {
-            lr_Var *var = elem->data;
+        for (LrUrlVars *elem = vars; elem; elem = lr_list_next(elem)) {
+            LrVar *var = elem->data;
             handle->urlvars = lr_urlvars_set(handle->urlvars, var->var, var->val);
         }
         */
@@ -353,7 +353,7 @@ lr_handle_setopt(lr_Handle *handle, lr_HandleOption option, ...)
 #define TYPE_MIRRORLIST 2
 
 int
-lr_handle_prepare_internal_mirrorlist(lr_Handle *handle, GError **err)
+lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 {
     int rc = LRE_OK;
     char *metalink_suffix = NULL;
@@ -427,8 +427,8 @@ lr_handle_prepare_internal_mirrorlist(lr_Handle *handle, GError **err)
      */
 
     int include_in_internal_mirrorlist = (handle->mirrorlist) ? 1 : 0;
-    lr_Metalink *metalink = NULL;
-    lr_Mirrorlist *mirrorlist = NULL;
+    LrMetalink *metalink = NULL;
+    LrMirrorlist *mirrorlist = NULL;
 
     if (handle->mirrorlist_fd == -1) {
         /* If handle->mirrorlist_fd != -1 then we should have a mirrorlist
@@ -630,7 +630,7 @@ mirrorlist_error:
 }
 
 int
-lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err)
+lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
 {
     int rc = LRE_OK;
     GError *tmp_err = NULL;
@@ -737,7 +737,7 @@ lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err)
 }
 
 int
-lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
+lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...)
 {
     int rc = LRE_OK;
     va_list arg;
@@ -772,7 +772,7 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
         break;
 
     case LRI_PROGRESSCB: {
-        lr_ProgressCb *cb= va_arg(arg, lr_ProgressCb *);
+        LrProgressCb *cb= va_arg(arg, LrProgressCb *);
         *cb = handle->user_cb;
         break;
     }
@@ -853,7 +853,7 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
         break;
 
     case LRI_VARSUB: {
-        lr_UrlVars **vars = va_arg(arg, lr_UrlVars **);
+        LrUrlVars **vars = va_arg(arg, LrUrlVars **);
         *vars = handle->urlvars;
         break;
     }
@@ -862,7 +862,7 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
         int x;
         char ***list = va_arg(arg, char ***);
         *list = NULL;
-        lr_LrMirrorlist *ml = handle->mirrors;
+        LrInternalMirrorlist *ml = handle->mirrors;
 
         if (!ml)
             // lr_handle_perform() or lr_download_package() was not called yet
@@ -871,8 +871,8 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
         /* Make list of urls from internal mirrorlist */
         x = 0;
         *list = lr_malloc((g_slist_length(ml) + 1) * sizeof(char *));
-        for (lr_LrMirrorlist *elem = ml; elem; elem = g_slist_next(elem)) {
-            lr_LrMirror *mirror = elem->data;
+        for (LrInternalMirrorlist *elem = ml; elem; elem = g_slist_next(elem)) {
+            LrInternalMirror *mirror = elem->data;
             (*list)[x] = g_strdup(mirror->url);
             x++;
         }
@@ -881,7 +881,7 @@ lr_handle_getinfo(lr_Handle *handle, lr_HandleOption option, ...)
     }
 
     case LRI_METALINK: {
-        lr_Metalink **metalink = va_arg(arg, lr_Metalink **);
+        LrMetalink **metalink = va_arg(arg, LrMetalink **);
         *metalink = handle->metalink;
         break;
     }

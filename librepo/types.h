@@ -37,14 +37,14 @@ extern "C" {
 typedef enum {
     LR_CHECK_GPG        = (1<<0),   /*!< GPG check */
     LR_CHECK_CHECKSUM   = (1<<1),   /*!< Checksum check */
-} lr_Checks;
+} LrChecks;
 
 /** Repo types flags. */
 typedef enum {
     LR_YUMREPO          = (1<<1),   /*!< Yum repository */
     LR_SUSEREPO         = (1<<2),   /*!< YaST2 repository - Not implemented yet */
     LR_DEBREPO          = (1<<3),   /*!< Debian repository - Not implemented yet */
-} lr_Repotype;
+} LrRepotype;
 
 /** Proxy types. */
 typedef enum {
@@ -54,7 +54,7 @@ typedef enum {
     LR_PROXY_SOCKS5,            /*!< SOCKS5 proxy */
     LR_PROXY_SOCKS4A,           /*!< SOCKS4A proxy */
     LR_PROXY_SOCKS5_HOSTNAME,   /*!< SOCKS5 proxy */
-} lr_ProxyType;
+} LrProxyType;
 
 /* Some common used arrays for LRO_YUMDLIST */
 
@@ -76,9 +76,9 @@ typedef enum {
 #define LR_YUM_HAWKEY       {"primary", "filelists", "prestodelta", NULL}
 
 /** Progress callback prototype */
-typedef int (*lr_ProgressCb)(void *clientp,
-                              double total_to_download,
-                              double now_downloaded);
+typedef int (*LrProgressCb)(void *clientp,
+                            double total_to_download,
+                            double now_downloaded);
 
 /** @} */
 

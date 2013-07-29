@@ -34,7 +34,7 @@ extern "C" {
 /** Check checksum of selected repository.
  * @param path          Path to directory containing "repodata" subdir.
  * @param err           GError **
- * @return              Librepo return code ::lr_Rc.
+ * @return              Librepo return code ::LrRc.
  */
 int lr_repoutil_yum_check_repo(const char *path, GError **err);
 
@@ -42,11 +42,11 @@ int lr_repoutil_yum_check_repo(const char *path, GError **err);
  * @param path          Path to repository or to the repomd file
  * @param repomd        Empty repomd object
  * @param err           GError **
- * @return              Librepo return code ::lr_Rc
+ * @return              Librepo return code ::LrRc
  */
 int
 lr_repoutil_yum_parse_repomd(const char *path,
-                             lr_YumRepoMd *repomd,
+                             LrYumRepoMd *repomd,
                              GError **err);
 
 /** Return age of the repomd.xml (based on mtime of the file
@@ -54,7 +54,7 @@ lr_repoutil_yum_parse_repomd(const char *path,
  * @param r         Result object
  * @return          Age of the file (number of seconds since last modification)
  */
-double lr_yum_repomd_get_age(lr_Result *result);
+double lr_yum_repomd_get_age(LrResult *result);
 
 /** @} */
 

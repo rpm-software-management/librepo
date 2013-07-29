@@ -36,7 +36,7 @@
 #define BUFFER_SIZE             2048
 #define MAX_CHECKSUM_NAME_LEN   7
 
-lr_ChecksumType
+LrChecksumType
 lr_checksum_type(const char *type)
 {
     size_t len;
@@ -78,7 +78,7 @@ lr_checksum_type(const char *type)
 }
 
 const char *
-lr_checksum_type_to_str(lr_ChecksumType type)
+lr_checksum_type_to_str(LrChecksumType type)
 {
     switch (type) {
     case LR_CHECKSUM_UNKNOWN:
@@ -102,7 +102,7 @@ lr_checksum_type_to_str(lr_ChecksumType type)
 }
 
 char *
-lr_checksum_fd(lr_ChecksumType type, int fd, GError **err)
+lr_checksum_fd(LrChecksumType type, int fd, GError **err)
 {
     unsigned int len;
     ssize_t readed;
@@ -183,7 +183,7 @@ lr_checksum_fd(lr_ChecksumType type, int fd, GError **err)
 }
 
 int
-lr_checksum_fd_cmp(lr_ChecksumType type,
+lr_checksum_fd_cmp(LrChecksumType type,
                    int fd,
                    const char *expected,
                    int caching,

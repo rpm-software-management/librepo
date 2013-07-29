@@ -36,17 +36,17 @@
 
 /* Repomd object manipulation helpers */
 
-static lr_YumRepoMdRecord *
+static LrYumRepoMdRecord *
 lr_yum_repomdrecord_init(const char *type)
 {
-    lr_YumRepoMdRecord *record = lr_malloc0(sizeof(*record));
+    LrYumRepoMdRecord *record = lr_malloc0(sizeof(*record));
     record->chunk = g_string_chunk_new(128);
     record->type = lr_string_chunk_insert(record->chunk, type);
     return record;
 }
 
 static void
-lr_yum_repomdrecord_free(lr_YumRepoMdRecord *rec)
+lr_yum_repomdrecord_free(LrYumRepoMdRecord *rec)
 {
     if (!rec)
         return;
@@ -54,16 +54,16 @@ lr_yum_repomdrecord_free(lr_YumRepoMdRecord *rec)
     lr_free(rec);
 }
 
-lr_YumRepoMd *
+LrYumRepoMd *
 lr_yum_repomd_init()
 {
-    lr_YumRepoMd *repomd = lr_malloc0(sizeof(*repomd));
+    LrYumRepoMd *repomd = lr_malloc0(sizeof(*repomd));
     repomd->chunk = g_string_chunk_new(32);
     return repomd;
 }
 
 void
-lr_yum_repomd_free(lr_YumRepoMd *repomd)
+lr_yum_repomd_free(LrYumRepoMd *repomd)
 {
     if (!repomd)
         return;
@@ -76,22 +76,22 @@ lr_yum_repomd_free(lr_YumRepoMd *repomd)
 }
 
 static void
-lr_yum_repomd_set_record(lr_YumRepoMd *repomd,
-                         lr_YumRepoMdRecord *record)
+lr_yum_repomd_set_record(LrYumRepoMd *repomd,
+                         LrYumRepoMdRecord *record)
 {
     if (!repomd || !record) return;
     repomd->records = g_slist_append(repomd->records, record);
 }
 
 static void
-lr_yum_repomd_set_revision(lr_YumRepoMd *repomd, const char *revision)
+lr_yum_repomd_set_revision(LrYumRepoMd *repomd, const char *revision)
 {
     if (!repomd) return;
     repomd->revision = lr_string_chunk_insert(repomd->chunk, revision);
 }
 
 static void
-lr_yum_repomd_add_repo_tag(lr_YumRepoMd *repomd, char *tag)
+lr_yum_repomd_add_repo_tag(LrYumRepoMd *repomd, char *tag)
 {
     assert(repomd);
     if (!tag) return;
@@ -100,7 +100,7 @@ lr_yum_repomd_add_repo_tag(lr_YumRepoMd *repomd, char *tag)
 }
 
 static void
-lr_yum_repomd_add_content_tag(lr_YumRepoMd *repomd, char *tag)
+lr_yum_repomd_add_content_tag(LrYumRepoMd *repomd, char *tag)
 {
     assert(repomd);
     if (!tag) return;
@@ -109,26 +109,26 @@ lr_yum_repomd_add_content_tag(lr_YumRepoMd *repomd, char *tag)
 }
 
 static void
-lr_yum_repomd_add_distro_tag(lr_YumRepoMd *repomd,
+lr_yum_repomd_add_distro_tag(LrYumRepoMd *repomd,
                              const char *cpeid,
                              const char *tag)
 {
     assert(repomd);
     if (!tag) return;
 
-    lr_YumDistroTag *distrotag = lr_malloc0(sizeof(*distrotag));
+    LrYumDistroTag *distrotag = lr_malloc0(sizeof(*distrotag));
     distrotag->cpeid = lr_string_chunk_insert(repomd->chunk, cpeid);
     distrotag->tag   = g_string_chunk_insert(repomd->chunk, tag);
     repomd->distro_tags = g_slist_append(repomd->distro_tags, distrotag);
 }
 
-lr_YumRepoMdRecord *
-lr_yum_repomd_get_record(lr_YumRepoMd *repomd, const char *type)
+LrYumRepoMdRecord *
+lr_yum_repomd_get_record(LrYumRepoMd *repomd, const char *type)
 {
     assert(repomd);
     assert(type);
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoMdRecord *record = elem->data;
+        LrYumRepoMdRecord *record = elem->data;
         assert(record);
         if (!g_strcmp0(record->type, type))
             return record;
@@ -156,14 +156,14 @@ typedef enum {
     STATE_OPENSIZE,
     STATE_DBVERSION,
     NUMSTATES
-} lr_RepomdState;
+} LrRepomdState;
 
 /* NOTE: Same states in the first column must be together!!!
 * Performance tip: More frequent elements shoud be listed
 * first in its group (eg: element "package" (STATE_PACKAGE)
 * has a "file" element listed first, because it is more frequent
 * than a "version" element). */
-static lr_StatesSwitch stateswitches[] = {
+static LrStatesSwitch stateswitches[] = {
     { STATE_START,      "repomd",           STATE_REPOMD,       0 },
     { STATE_REPOMD,     "revision",         STATE_REVISION,     1 },
     { STATE_REPOMD,     "repoid",           STATE_REPOID,       1 },
@@ -185,8 +185,8 @@ static lr_StatesSwitch stateswitches[] = {
 static void XMLCALL
 lr_start_handler(void *pdata, const char *element, const char **attr)
 {
-    lr_ParserData *pd = pdata;
-    lr_StatesSwitch *sw;
+    LrParserData *pd = pdata;
+    LrStatesSwitch *sw;
 
     if (pd->err)
         return; // There was an error -> do nothing
@@ -331,7 +331,7 @@ lr_start_handler(void *pdata, const char *element, const char **attr)
 static void XMLCALL
 lr_end_handler(void *pdata, const char *element)
 {
-    lr_ParserData *pd = pdata;
+    LrParserData *pd = pdata;
     unsigned int state = pd->state;
 
     LR_UNUSED(element);
@@ -466,14 +466,14 @@ lr_end_handler(void *pdata, const char *element)
 }
 
 int
-lr_yum_repomd_parse_file(lr_YumRepoMd *repomd,
+lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
                          int fd,
-                         lr_XmlParserWarningCb warningcb,
+                         LrXmlParserWarningCb warningcb,
                          void *warningcb_data,
                          GError **err)
 {
     int ret = LRE_OK;
-    lr_ParserData *pd;
+    LrParserData *pd;
     XML_Parser parser;
     GError *tmp_err = NULL;
 
@@ -493,7 +493,7 @@ lr_yum_repomd_parse_file(lr_YumRepoMd *repomd,
     pd->repomd = repomd;
     pd->warningcb = warningcb;
     pd->warningcb_data = warningcb_data;
-    for (lr_StatesSwitch *sw = stateswitches; sw->from != NUMSTATES; sw++) {
+    for (LrStatesSwitch *sw = stateswitches; sw->from != NUMSTATES; sw++) {
         if (!pd->swtab[sw->from])
             pd->swtab[sw->from] = sw;
         pd->sbtab[sw->to] = sw->from;

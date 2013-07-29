@@ -30,7 +30,7 @@ PyStringOrNone_FromString(const char *str)
 }
 
 PyObject *
-PyObject_FromYumRepo(lr_YumRepo *repo)
+PyObject_FromYumRepo(LrYumRepo *repo)
 {
     PyObject *dict;
 
@@ -47,7 +47,7 @@ PyObject_FromYumRepo(lr_YumRepo *repo)
     PyDict_SetItemString(dict, "mirrorlist", PyStringOrNone_FromString(repo->mirrorlist));
 
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoPath *yumrepopath = elem->data;
+        LrYumRepoPath *yumrepopath = elem->data;
         if (!yumrepopath || !yumrepopath->type) continue;
         PyDict_SetItemString(dict,
                              yumrepopath->type,
@@ -58,7 +58,7 @@ PyObject_FromYumRepo(lr_YumRepo *repo)
 }
 
 PyObject *
-PyObject_FromRepoMdRecord(lr_YumRepoMdRecord *rec)
+PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
 {
     PyObject *dict;
 
@@ -82,7 +82,7 @@ PyObject_FromRepoMdRecord(lr_YumRepoMdRecord *rec)
 }
 
 PyObject *
-PyObject_FromYumRepoMd(lr_YumRepoMd *repomd)
+PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
 {
     PyObject *dict, *list;
 
@@ -106,7 +106,7 @@ PyObject_FromYumRepoMd(lr_YumRepoMd *repomd)
 
     list = PyList_New(0);
     for (GSList *elem = repomd->distro_tags; elem; elem = g_slist_next(elem)) {
-        lr_YumDistroTag *distrotag = elem->data;
+        LrYumDistroTag *distrotag = elem->data;
 
         if (!elem->data)
             continue;
@@ -131,7 +131,7 @@ PyObject_FromYumRepoMd(lr_YumRepoMd *repomd)
     PyDict_SetItemString(dict, "content_tags", list);
 
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
-        lr_YumRepoMdRecord *record = elem->data;
+        LrYumRepoMdRecord *record = elem->data;
 
         if (!record)
             continue;
@@ -145,7 +145,7 @@ PyObject_FromYumRepoMd(lr_YumRepoMd *repomd)
 }
 
 PyObject *
-PyObject_FromMetalink(lr_Metalink *metalink)
+PyObject_FromMetalink(LrMetalink *metalink)
 {
     PyObject *dict, *sub_list;
 
@@ -167,7 +167,7 @@ PyObject_FromMetalink(lr_Metalink *metalink)
     PyDict_SetItemString(dict, "hashes", sub_list);
 
     for (GSList *elem = metalink->hashes; elem; elem = g_slist_next(elem)) {
-        lr_MetalinkHash *metalinkhash = elem->data;
+        LrMetalinkHash *metalinkhash = elem->data;
         PyObject *tuple;
         if ((tuple = PyTuple_New(2)) == NULL) {
             PyDict_Clear(dict);
@@ -186,7 +186,7 @@ PyObject_FromMetalink(lr_Metalink *metalink)
     PyDict_SetItemString(dict, "urls", sub_list);
 
     for (GSList *elem = metalink->urls; elem; elem = g_slist_next(elem)) {
-        lr_MetalinkUrl *metalinkurl = elem->data;
+        LrMetalinkUrl *metalinkurl = elem->data;
         PyObject *udict;
         if ((udict = PyDict_New()) == NULL) {
             PyDict_Clear(dict);

@@ -37,6 +37,7 @@ extern "C" {
 #include "url_substitution.h"
 #include "util.h"
 #include "version.h"
+#include "xmlparser.h"
 #include "yum.h"
 
 /** \defgroup   librepo     Librepo library init and cleanup
