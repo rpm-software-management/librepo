@@ -19,6 +19,7 @@
 
 #define _XOPEN_SOURCE   500 // Because of fdopen() and ftruncate()
 
+#include <glib.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -37,9 +38,8 @@
 volatile sig_atomic_t lr_interrupt = 0;
 
 void
-lr_sigint_handler(int sig)
+lr_sigint_handler(G_GNUC_UNUSED int sig)
 {
-    LR_UNUSED(sig);
     lr_interrupt = 1;
 }
 
@@ -184,13 +184,10 @@ static int
 lr_progresscb(void *ptr,
               double total_to_download,
               double now_downloaded,
-              double total_to_upload,
-              double now_uploaded)
+              G_GNUC_UNUSED double total_to_upload,
+              G_GNUC_UNUSED double now_uploaded)
 {
     LrTarget *target = ptr;
-
-    LR_UNUSED(total_to_upload);
-    LR_UNUSED(now_uploaded);
 
     assert(target);
     assert(target->target);

@@ -31,11 +31,6 @@ G_BEGIN_DECLS
  *  @{
  */
 
-/** Macro for unused function params (removes compiler warnings).
- * @param x     Unused parameter.
- */
-#define LR_UNUSED(x) (void)(x)
-
 /** Print "Out of memory" message to stderr and abort program execution.
  * This function is used when malloc call fails.
  */

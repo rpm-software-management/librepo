@@ -88,12 +88,11 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
 /* Function on the type */
 
 static PyObject *
-handle_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+handle_new(PyTypeObject *type,
+           G_GNUC_UNUSED PyObject *args,
+           G_GNUC_UNUSED PyObject *kwds)
 {
     _HandleObject *self = (_HandleObject *)type->tp_alloc(type, 0);
-
-    LR_UNUSED(args);
-    LR_UNUSED(kwds);
 
     if (self) {
         self->handle = NULL;

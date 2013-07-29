@@ -303,11 +303,9 @@ lr_metalink_char_handler(void *pdata, const XML_Char *s, int len)
 }
 
 static void XMLCALL
-lr_metalink_end_handler(void *pdata, const char *name)
+lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *name)
 {
     ParserData *pd = pdata;
-
-    LR_UNUSED(name);
 
     if (pd->ret != LRE_OK)
         return; /* There was an error -> do nothing */

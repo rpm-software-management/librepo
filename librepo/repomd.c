@@ -328,12 +328,10 @@ lr_start_handler(void *pdata, const char *element, const char **attr)
 }
 
 static void XMLCALL
-lr_end_handler(void *pdata, const char *element)
+lr_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
 {
     LrParserData *pd = pdata;
     unsigned int state = pd->state;
-
-    LR_UNUSED(element);
 
     if (pd->err)
         return; // There was an error -> do nothing

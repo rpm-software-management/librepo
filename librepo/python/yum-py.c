@@ -17,6 +17,7 @@
  * USA.
  */
 
+#include <glib.h>
 #include <Python.h>
 #undef NDEBUG
 #include <assert.h>
@@ -28,13 +29,11 @@
 #include "result-py.h"
 
 PyObject *
-py_yum_repomd_get_age(PyObject *self, PyObject *args)
+py_yum_repomd_get_age(G_GNUC_UNUSED PyObject *self, PyObject *args)
 {
     LrResult *res;
     PyObject *py_res;
     double age;
-
-    LR_UNUSED(self);
 
     if (!PyArg_ParseTuple(args, "O!:py_yum_repomd_get_age",
             &Result_Type, &py_res))

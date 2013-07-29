@@ -17,6 +17,7 @@
  * USA.
  */
 
+#include <glib.h>
 #include <Python.h>
 #undef NDEBUG
 #include <assert.h>
@@ -69,10 +70,10 @@ check_ResultStatus(const _ResultObject *self)
 /* Function on the type */
 
 static PyObject *
-result_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+result_new(PyTypeObject *type,
+           G_GNUC_UNUSED PyObject *args,
+           G_GNUC_UNUSED PyObject *kwds)
 {
-    LR_UNUSED(args);
-    LR_UNUSED(kwds);
     _ResultObject *self = (_ResultObject *)type->tp_alloc(type, 0);
     if (self)
         self->result = NULL;
@@ -154,9 +155,8 @@ getinfo(_ResultObject *self, PyObject *args)
 }
 
 static PyObject *
-clear(_ResultObject *self, PyObject *noarg)
+clear(_ResultObject *self, G_GNUC_UNUSED PyObject *noarg)
 {
-    LR_UNUSED(noarg);
     if (check_ResultStatus(self))
         return NULL;
     lr_result_clear(self->result);

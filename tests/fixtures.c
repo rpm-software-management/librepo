@@ -13,15 +13,14 @@
 struct TestGlobals_s test_globals;
 
 void
-test_log_handler_cb(const gchar *log_domain, GLogLevelFlags log_level,
-                    const gchar *message, gpointer user_data)
+test_log_handler_cb(G_GNUC_UNUSED const gchar *log_domain,
+                    GLogLevelFlags log_level,
+                    const gchar *message,
+                    G_GNUC_UNUSED gpointer user_data)
 {
     time_t rawtime;
     char buffer[255];
     gchar *level = "";
-
-    LR_UNUSED(log_domain);
-    LR_UNUSED(user_data);
 
     switch(log_level) {
         case G_LOG_LEVEL_ERROR:     level = "ERROR"; break;

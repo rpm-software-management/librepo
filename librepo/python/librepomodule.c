@@ -17,8 +17,8 @@
  * USA.
  */
 
-#include <Python.h>
 #include <glib.h>
+#include <Python.h>
 
 #include "librepo/librepo.h"
 
@@ -32,14 +32,12 @@ PyObject *debug_cb_data = NULL;
 gint      debug_handler_id = -1;
 
 void
-py_debug_cb(const gchar *log_domain, GLogLevelFlags log_level,
-            const gchar *message, gpointer user_data)
+py_debug_cb(G_GNUC_UNUSED const gchar *log_domain,
+            G_GNUC_UNUSED GLogLevelFlags log_level,
+            const gchar *message,
+            G_GNUC_UNUSED gpointer user_data)
 {
     PyObject *arglist, *data, *result;
-
-    LR_UNUSED(log_domain);
-    LR_UNUSED(log_level);
-    LR_UNUSED(user_data);
 
     if (!debug_cb)
         return;
@@ -52,11 +50,9 @@ py_debug_cb(const gchar *log_domain, GLogLevelFlags log_level,
 }
 
 PyObject *
-py_set_debug_log_handler(PyObject *self, PyObject *args)
+py_set_debug_log_handler(G_GNUC_UNUSED PyObject *self, PyObject *args)
 {
     PyObject *cb, *cb_data = NULL;
-
-    LR_UNUSED(self);
 
     if (!PyArg_ParseTuple(args, "O|O:py_set_debug_log_handler", &cb, cb_data))
         return NULL;

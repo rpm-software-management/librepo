@@ -201,13 +201,10 @@ lr_pathconcat(const char *first, ...)
 
 int
 lr_remove_dir_cb(const char *fpath,
-                 const struct stat *sb,
-                 int typeflag,
-                 struct FTW *ftwbuf)
+                 G_GNUC_UNUSED const struct stat *sb,
+                 G_GNUC_UNUSED int typeflag,
+                 G_GNUC_UNUSED struct FTW *ftwbuf)
 {
-    LR_UNUSED(sb);
-    LR_UNUSED(typeflag);
-    LR_UNUSED(ftwbuf);
     int rv = remove(fpath);
     if (rv)
         g_debug("%s: Cannot remove: %s: %s", __func__, fpath, strerror(errno));

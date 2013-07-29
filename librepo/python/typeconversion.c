@@ -17,8 +17,8 @@
  * USA.
  */
 
-#include <Python.h>
 #include <glib.h>
+#include <Python.h>
 #include "typeconversion.h"
 
 PyObject *
