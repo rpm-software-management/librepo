@@ -340,9 +340,10 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
                                    const char *path,
                                    GError **err)
 {
-    int ret, fd;
+    int fd;
     char *expected_checksum;
     LrChecksumType checksum_type;
+    gboolean ret, matches;
     GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
@@ -378,18 +379,30 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
         return LRE_IO;
     }
 
-    ret = lr_checksum_fd_cmp(checksum_type, fd, expected_checksum, 1, &tmp_err);
+    ret = lr_checksum_fd_cmp(checksum_type,
+                             fd,
+                             expected_checksum,
+                             1,
+                             &matches,
+                             &tmp_err);
 
     close(fd);
 
-    assert((ret == 0) || tmp_err);
+    assert(ret || tmp_err);
 
-    if (ret) {
+    if (!ret) {
+        // Checksum calculation error
         int code = tmp_err->code;
-        g_debug("%s: Checksum check - Failed: %s", __func__, tmp_err->message);
+        g_debug("%s: Checksum check %s - Error: %s",
+                __func__, path, tmp_err->message);
         g_propagate_prefixed_error(err, tmp_err,
-                                   "Checksum error for %s: ", path);
+                                   "Checksum error %s: ", path);
         return code;
+    } else if (!matches) {
+        g_debug("%s: Checksum check %s - Mismatch", __func__, path);
+        g_set_error(err, LR_YUM_ERROR, LRE_BADCHECKSUM,
+                    "Checksum mismatch %s: ", path);
+        return LRE_BADCHECKSUM;
     }
 
     g_debug("%s: Checksum check - Passed", __func__);

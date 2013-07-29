@@ -47,7 +47,7 @@ typedef struct {
     char *checksum; /*!<
         Expected checksum value or NULL */
 
-    int resume; /*!<
+    gboolean resume; /*!<
         Resume:
          0  - no resume, download whole file,
          otherwise - autodetect offset for resume */

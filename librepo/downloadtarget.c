@@ -33,7 +33,7 @@ lr_downloadtarget_new(const char *path,
                       int fd,
                       LrChecksumType checksumtype,
                       const char *checksum,
-                      int resume,
+                      gboolean resume,
                       LrProgressCb progresscb,
                       void *cbdata)
 {

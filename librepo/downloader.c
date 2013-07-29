@@ -366,8 +366,8 @@ prepare_next_transfer(LrDownload *dd, GError **err)
     }
 
     // Resume - set offset to resume incomplete download
-    if (target->target->resume != 0) {
-        gint64 used_offset = target->target->resume;
+    if (target->target->resume) {
+        gint64 used_offset;
 
         // Determine offset
         if (target->original_offset == -1) {
@@ -524,7 +524,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             && target->target->checksum
             && target->target->checksumtype != LR_CHECKSUM_UNKNOWN)
         {
-            int fd, ret;
+            int fd;
+            gboolean ret, matches;
 
             fflush(target->f);
             fd = fileno(target->f);
@@ -534,14 +535,15 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                                      fd,
                                      target->target->checksum,
                                      1,
+                                     &matches,
                                      &tmp_err);
-            if (ret == 1) {
+            if (ret && !matches) {
                 // Checksums doesn't match
                 g_set_error(&tmp_err,
                         LR_DOWNLOADER_ERROR,
                         LRE_BADCHECKSUM,
                         "Downloading successfull, but checksum doesn't match");
-            } else if (ret == -1) {
+            } else if (ret == FALSE) {
                 // Error while checksum calculation
                 int code = tmp_err->code;
                 g_propagate_prefixed_error(err, tmp_err, "Downloading from %s "

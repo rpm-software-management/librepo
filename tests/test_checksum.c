@@ -90,6 +90,7 @@ START_TEST(test_cached_checksum)
 {
     FILE *f;
     int fd, ret;
+    gboolean checksum_ret, matches;
     ssize_t attr_ret;
     char *filename;
     static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
@@ -114,9 +115,15 @@ START_TEST(test_cached_checksum)
 
     // Calculate checksum
     fail_if((fd = open(filename, O_RDONLY)) < 0);
-    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1, &tmp_err);
-    fail_if(tmp_err, "There was an error");
-    fail_if(ret != 0, "Checksum doesn't match the expected one");
+    checksum_ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256,
+                                      fd,
+                                      expected,
+                                      1,
+                                      &matches,
+                                      &tmp_err);
+    fail_if(tmp_err);
+    fail_if(!checksum_ret);
+    fail_if(!matches);
     close(fd);
 
     // Assert cached checksum exists
@@ -142,9 +149,15 @@ START_TEST(test_cached_checksum)
 
     // Calculate checksum again (cached shoud be used this time)
     fail_if((fd = open(filename, O_RDONLY)) < 0);
-    ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256, fd, expected, 1, &tmp_err);
+    checksum_ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256,
+                                      fd,
+                                      expected,
+                                      1,
+                                      &matches,
+                                      &tmp_err);
     fail_if(tmp_err);
-    fail_if(ret != 0);
+    fail_if(!checksum_ret);
+    fail_if(!matches);
     close(fd);
 
 exit_label:

@@ -41,7 +41,7 @@ lr_download_package(LrHandle *handle,
                     LrChecksumType checksum_type,
                     const char *checksum,
                     const char *base_url,
-                    int resume,
+                    gboolean resume,
                     GError **err)
 {
     int rc = LRE_OK;
@@ -115,9 +115,15 @@ lr_download_package(LrHandle *handle,
          * completely downloaded, then the download is going to fail. */
         int fd_r = open(dest_path, O_RDONLY);
         if (fd_r != -1) {
-            int ret = lr_checksum_fd_cmp(checksum_type, fd_r, checksum, 0, NULL);
+            gboolean ret, matches;
+            ret = lr_checksum_fd_cmp(checksum_type,
+                                     fd_r,
+                                     checksum,
+                                     0,
+                                     &matches,
+                                     NULL);
             close(fd_r);
-            if (ret == 0) {
+            if (ret && matches) {
                 g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_ALREADYDOWNLOADED,
                             "Package: %s is already downloaded", dest_path);
                 lr_free(dest_path);

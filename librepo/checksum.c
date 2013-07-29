@@ -181,23 +181,25 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
     return checksum;
 }
 
-int
+gboolean
 lr_checksum_fd_cmp(LrChecksumType type,
                    int fd,
                    const char *expected,
-                   int caching,
+                   gboolean caching,
+                   gboolean *matches,
                    GError **err)
 {
-    int ret;
     char *checksum;
 
     assert(fd >= 0);
     assert(!err || *err == NULL);
 
+    *matches = FALSE;
+
     if (!expected) {
         g_set_error(err, LR_CHECKSUM_ERROR, LRE_BADFUNCARG,
                     "No expected checksum passed");
-        return -1;
+        return FALSE;
     }
 
     if (caching) {
@@ -216,7 +218,8 @@ lr_checksum_fd_cmp(LrChecksumType type,
                 g_debug("%s: Using checksum cached in xattr: [%s] %s",
                         __func__, key, buf);
                 lr_free(key);
-                return strcmp(expected, buf) ? 1 : 0;
+                *matches = strcmp(expected, buf) ? FALSE : TRUE;
+                return TRUE;
             }
             lr_free(key);
         }
@@ -224,11 +227,11 @@ lr_checksum_fd_cmp(LrChecksumType type,
 
     checksum = lr_checksum_fd(type, fd, err);
     if (!checksum)
-        return -1;
+        return FALSE;
 
-    ret = (strcmp(expected, checksum)) ? 1 : 0;
+    *matches = (strcmp(expected, checksum)) ? FALSE : TRUE;
 
-    if (caching && ret == 0) {
+    if (caching && *matches) {
         // Store checksum as extended file attribute if caching is enabled
         struct stat st;
         if (fstat(fd, &st) == 0) {
@@ -242,5 +245,5 @@ lr_checksum_fd_cmp(LrChecksumType type,
 
     lr_free(checksum);
 
-    return ret;
+    return TRUE;
 }
