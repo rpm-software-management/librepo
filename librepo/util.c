@@ -180,7 +180,7 @@ lr_pathconcat(const char *first, ...)
     }
     va_end(args);
 
-    DEBUGASSERT(offset <= total_len);
+    assert(offset <= total_len);
 
     if (offset == 0) {
         lr_free(res);
@@ -193,7 +193,7 @@ lr_pathconcat(const char *first, ...)
         offset += separator_len;
     }
 
-    DEBUGASSERT(offset <= total_len);
+    assert(offset <= total_len);
 
     res[offset] = '\0';
 

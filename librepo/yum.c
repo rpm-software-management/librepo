@@ -243,8 +243,8 @@ lr_yum_download_repo(LrHandle *handle,
     GError *tmp_err = NULL;
 
     destdir = handle->destdir;
-    DEBUGASSERT(destdir);
-    DEBUGASSERT(strlen(destdir));
+    assert(destdir);
+    assert(strlen(destdir));
     assert(!err || *err == NULL);
 
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
