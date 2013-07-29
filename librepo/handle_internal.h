@@ -40,8 +40,8 @@ struct _LrHandle {
 
     // Mirrorlist related stuff
     char            *mirrorlist;    /*!< Mirrorlist or metalink URL */
-    LrMetalink     *metalink;      /*!< Parsed metalink for repomd.xml */
-    LrInternalMirrorlist *mirrors;       /*!< Mirrors from metalink or mirrorlist */
+    LrMetalink      *metalink;      /*!< Parsed metalink for repomd.xml */
+    LrInternalMirrorlist *mirrors;  /*!< Mirrors from metalink or mirrorlist */
     int             mirrorlist_fd;  /*!< Raw downloaded file */
 
     int             local;          /*!< Do not duplicate local data */
@@ -49,9 +49,9 @@ struct _LrHandle {
     int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
     char            *useragent;     /*!< User agent */
-    LrRepotype     repotype;       /*!< Type of repository */
-    LrChecks       checks;         /*!< Which check sould be applied */
-    LrProgressCb   user_cb;        /*!< User progress callback */
+    LrRepotype      repotype;       /*!< Type of repository */
+    LrChecks        checks;         /*!< Which check sould be applied */
+    LrProgressCb    user_cb;        /*!< User progress callback */
     void            *user_data;     /*!< User data for callback */
     int             ignoremissing;  /*!< Ignore missing metadata files */
     int             interruptible;  /*!< Setup own SIGTERM handler*/
@@ -63,7 +63,7 @@ struct _LrHandle {
                                       disable blacklist. */
     int             fetchmirrors;   /*!< Only fetch and parse mirrorlist. */
     int             maxmirrortries; /*!< Try at most this number of mirrors. */
-    LrUrlVars      *urlvars;       /*!< List with url substitutions */
+    LrUrlVars       *urlvars;       /*!< List with url substitutions */
 };
 
 /** Return new CURL easy handle with some default options setted.

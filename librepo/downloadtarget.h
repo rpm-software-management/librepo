@@ -88,7 +88,7 @@ typedef struct {
  *                      checksum is not used or should not be checked.
  * @param checksum      Checksum value to check or NULL. If checksumtype is
  *                      set to LR_CHECKSUM_UNKNOWN then this param is ignored.
- * @param resume        If 0 then no resume is done and whole file is
+ * @param resume        If FALSE, then no resume is done and whole file is
  *                      downloaded again. Otherwise offset will be
  *                      automaticaly detected from opened file descriptor by
  *                      seek to the end.
@@ -102,7 +102,7 @@ lr_downloadtarget_new(const char *path,
                       int fd,
                       LrChecksumType checksumtype,
                       const char *checksum,
-                      int resume,
+                      gboolean resume,
                       LrProgressCb progresscb,
                       void *cbdata);
 

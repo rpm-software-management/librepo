@@ -55,7 +55,7 @@ extern "C" {
  * @param checksum          Checksum value or NULL.
  * @param base_url          If specified, mirrors from handle are ignored
  *                          and this base_url is used for downloading.
- * @param resume            If != 0 try to resume downloading if dest file
+ * @param resume            If TRUE try to resume downloading if dest file
  *                          already exists.
  * @param err               GError **
  * @return                  Librepo return code.
@@ -66,7 +66,7 @@ int lr_download_package(LrHandle *handle,
                         LrChecksumType checksum_type,
                         const char *checksum,
                         const char *base_url,
-                        int resume,
+                        gboolean resume,
                         GError **err);
 
 /** @} */
