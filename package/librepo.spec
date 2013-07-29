@@ -1,9 +1,9 @@
-%global gitrev 9b535e8
+%global gitrev 024ef3d
 # gitrev is output of: git rev-parse --short HEAD
 
 Name:		librepo
 Version:	0.0.5
-Release:	1%{?dist}
+Release:	3%{?dist}
 Summary:	Repodata downloading library
 
 Group:		System Environment/Libraries
@@ -80,7 +80,24 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{python_sitearch}/librepo/
 
 %changelog
-* Wed Jul  3 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.5-1
+* Thu Jul  25 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.5-3
+- python: Raise exception if handle has bad repo type configured
+  (RhBug: 988013)
+
+* Mon Jul  22 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.5-2
+- Bump version in versioh.h to 0.0.5
+- Python: Fix Handle.mirrors to return empty list instead of None if
+  no mirrors available (RhBug: 986228)
+
+* Wed Jul  17 2013 Tomas Mlcoch <tmlcoch at redhat.com> - 0.0.5-1
+- Return LRE_ALREADYDOWNLOADED if the file exists even if no resume
+  is specified. (GitHub issue 15)
+- downloadtarget: New module, future replacement for curltarget module.
+- Librepo migrated to lr_LrMirrorlist from lr_InternalMirrorlist.
+- test: Run python unittest verbosely
+- lrmirrorlis: New module. GLib2 ready replacement for the internal_mirrorlist
+  module.
+- package_downloader: Add LRE_ALREADYDOWNLOADED rc code. (GitHub issue 15)
 - handle: After set python SIGINT handler back, check if librepo was
   interrupted by CTRL+C. (RhBug: 977803)
 - cmake: Set required python version to 2. (GitHub issue 10)
