@@ -87,6 +87,14 @@ lr_strerror(int rc)
         return "Download wasn't or cannot be finished";
     case LRE_SELECT:
         return "select() call failed";
+    case LRE_OPENSSL:
+        return "OpenSSL library related error";
+    case LRE_MEMORY:
+        return "Cannot allocate more memory";
+    case LRE_XMLPARSER:
+        return "XML parser error";
+    case LRE_CBINTERRUPTED:
+        return "Interrupted by user cb";
     }
 
     return "Unknown error";
