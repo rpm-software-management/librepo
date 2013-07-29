@@ -24,9 +24,6 @@
 
 G_BEGIN_DECLS
 
-#undef G_LOG_DOMAIN
-#define G_LOG_DOMAIN    "librepo"
-
 #define TMP_DIR_TEMPLATE    "librepo-XXXXXX"
 
 G_END_DECLS

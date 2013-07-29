@@ -11,6 +11,9 @@ IF(CMAKE_BUILD_TYPE AND (CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE S
     MESSAGE("Build type is set do DEBUG!")
 ENDIF()
 
+# Set librepo log domain
+
+add_definitions( -DG_LOG_DOMAIN="librepo" )
 
 # Add path with own cmake modules
 
