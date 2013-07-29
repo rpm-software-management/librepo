@@ -633,6 +633,7 @@ int
 lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err)
 {
     int rc = LRE_OK;
+    GError *tmp_err = NULL;
 
     assert(handle);
     assert(!err || *err == NULL);
@@ -700,7 +701,7 @@ lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err)
         switch (handle->repotype) {
         case LR_YUMREPO:
             g_debug("%s: Downloading/Locating yum repo", __func__);
-            rc = lr_yum_perform(handle, result);
+            rc = lr_yum_perform(handle, result, &tmp_err);
             break;
         default:
             g_debug("%s: Bad repo type", __func__);
@@ -715,20 +716,22 @@ lr_handle_perform(lr_Handle *handle, lr_Result *result, GError **err)
         if (sigaction(SIGINT, &old_sigact, NULL) == -1) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_SIGACTION,
                         "sigaction(SIGINT,,) error");
+            g_error_free(tmp_err);
             return LRE_SIGACTION;
         }
 
         if (lr_interrupt) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_INTERRUPTED,
                         "Librepo was interrupted by a signal");
+            g_error_free(tmp_err);
             return LRE_INTERRUPTED;
         }
     }
 
-    if (rc != LRE_OK) {
-        g_set_error(err, LR_HANDLE_ERROR, rc,
-                    "%s", lr_strerror(rc));
-    }
+    assert((rc == LRE_OK) || tmp_err);
+
+    if (tmp_err)
+        g_propagate_error(err, tmp_err);
 
     return rc;
 }

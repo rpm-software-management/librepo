@@ -130,6 +130,7 @@ const char *lr_strerror(int rc);
 #define LR_PACKAGE_DOWNLOADER_ERROR lr_package_downloader_error_quark()
 #define LR_XML_PARSER_ERROR         lr_xml_parser_error_quark()
 #define LR_REPOUTIL_YUM_ERROR       lr_repoutil_yum_error_quark()
+#define LR_YUM_ERROR                lr_yum_error_quark()
 
 GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
@@ -140,6 +141,7 @@ GQuark lr_mirrorlist_error_quark(void);
 GQuark lr_package_downloader_error_quark(void);
 GQuark lr_xml_parser_error_quark(void);
 GQuark lr_repoutil_yum_error_quark(void);
+GQuark lr_yum_error_quark(void);
 
 /** @} */
 

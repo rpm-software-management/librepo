@@ -296,7 +296,7 @@ prepare_next_transfer(lr_Download *dd, GError **err)
             g_debug("%s: All mirrors were tried without success", __func__);
             target->state = LR_DS_FAILED;
             lr_downloadtarget_set_error(target->target, LRE_NOURL,
-                        "Cannot download, all mirrors were alredy tried "
+                        "Cannot download, all mirrors were already tried "
                         "without success");
             return LRE_OK;
         }
