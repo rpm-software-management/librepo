@@ -25,11 +25,9 @@ START_TEST(test_downloader_no_list)
     int ret;
     GError *err = NULL;
 
-    lr_global_init();
     ret = lr_download(NULL, NULL, &err);
     fail_if(ret != LRE_OK);
     fail_if(err);
-    lr_global_cleanup();
 }
 END_TEST
 
@@ -60,7 +58,6 @@ START_TEST(test_downloader_single_file)
 
     // Download
 
-    lr_global_init();
     handle = lr_handle_init();
     fail_if(handle == NULL);
 
@@ -73,7 +70,6 @@ START_TEST(test_downloader_single_file)
     fail_if(err);
 
     lr_handle_free(handle);
-    lr_global_cleanup();
 
     // Check results
 
@@ -114,11 +110,9 @@ START_TEST(test_downloader_single_file_2)
 
     // Download
 
-    lr_global_init();
     ret = lr_download(NULL, list, &err);
     fail_if(ret != LRE_OK);
     fail_if(err);
-    lr_global_cleanup();
 
     // Check results
 
@@ -169,7 +163,6 @@ START_TEST(test_downloader_two_files)
 
     // Download
 
-    lr_global_init();
     handle = lr_handle_init();
     fail_if(handle == NULL);
 
@@ -182,7 +175,6 @@ START_TEST(test_downloader_two_files)
     fail_if(err);
 
     lr_handle_free(handle);
-    lr_global_cleanup();
 
     // Check results
 
@@ -241,7 +233,6 @@ START_TEST(test_downloader_three_files_with_error)
 
     // Download
 
-    lr_global_init();
     handle = lr_handle_init();
     fail_if(handle == NULL);
 
@@ -254,7 +245,6 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(err);
 
     lr_handle_free(handle);
-    lr_global_cleanup();
 
     // Check results
 

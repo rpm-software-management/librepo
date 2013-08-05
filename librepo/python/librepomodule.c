@@ -97,7 +97,6 @@ exit_librepo(void)
 {
     Py_XDECREF(debug_cb);
     Py_XDECREF(debug_cb_data);
-    lr_global_cleanup();
 }
 
 PyMODINIT_FUNC
@@ -125,8 +124,7 @@ init_librepo(void)
     PyModule_AddObject(m, "Result", (PyObject *)&Result_Type);
 
     /* Init module */
-    lr_global_init();
-
+//    lr_global_init();
     Py_AtExit(exit_librepo);
 
     /* Module constants */

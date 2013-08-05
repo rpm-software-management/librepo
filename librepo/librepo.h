@@ -38,23 +38,4 @@
 #include "xmlparser.h"
 #include "yum.h"
 
-G_BEGIN_DECLS
-
-/** \defgroup   librepo     Librepo library init and cleanup
- *  \addtogroup librepo
- *  @{
- */
-
-/** Initialize librepo library.
- */
-void lr_global_init();
-
-/** Clean up librepo library.
- */
-void lr_global_cleanup();
-
-/** @} */
-
-G_END_DECLS
-
 #endif

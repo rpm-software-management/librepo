@@ -48,7 +48,11 @@
 CURL *
 lr_get_curl_handle()
 {
-    CURL *h = curl_easy_init();
+    CURL *h;
+
+    lr_global_init();
+
+    h = curl_easy_init();
     curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6);
     return h;

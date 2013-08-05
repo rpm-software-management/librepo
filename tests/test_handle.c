@@ -20,7 +20,6 @@ START_TEST(test_handle)
 {
     LrHandle *h = NULL;
 
-    lr_global_init();
     h = lr_handle_init();
     fail_if(h == NULL);
     lr_handle_free(h);
@@ -42,7 +41,6 @@ START_TEST(test_handle)
     vars = lr_urlvars_set(vars, "foo", "bar");
     lr_handle_setopt(h, LRO_VARSUB, vars);
     lr_handle_free(h);
-    lr_global_cleanup();
 }
 END_TEST
 
@@ -53,7 +51,6 @@ START_TEST(test_handle_getinfo)
     char **strlist;
     LrHandle *h = NULL;
 
-    lr_global_init();
     h = lr_handle_init();
 
     num = -1;
@@ -101,7 +98,6 @@ START_TEST(test_handle_getinfo)
     fail_if(strlist != NULL);
 
     lr_handle_free(h);
-    lr_global_cleanup();
 }
 END_TEST
 

@@ -31,6 +31,16 @@ G_BEGIN_DECLS
  *  @{
  */
 
+/** Initialize librepo library.
+ * This is called automatically to initialize libzif.
+ * You normally don't have to call this function manually.
+ */
+void lr_global_init();
+
+/** Clean up librepo library.
+void lr_global_cleanup();
+*/
+
 /** Print "Out of memory" message to stderr and abort program execution.
  * This function is used when malloc call fails.
  */

@@ -20,6 +20,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 500
 #include <glib.h>
+#include <curl/curl.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -31,8 +32,44 @@
 #include <ftw.h>
 
 #include "util.h"
+#include "version.h"
 
 #define DIR_SEPARATOR   "/"
+
+static gpointer
+lr_init_once_cb(gpointer user_data G_GNUC_UNUSED)
+{
+#ifdef CURL_GLOBAL_ACK_EINTR
+#define EINTR_SUPPORT " with CURL_GLOBAL_ACK_EINTR support"
+    curl_global_init(CURL_GLOBAL_ALL|CURL_GLOBAL_ACK_EINTR);
+#else
+#define EINTR_SUPPORT ""
+    curl_global_init(CURL_GLOBAL_ALL);
+#endif
+
+    g_debug("Librepo version: %d.%d.%d%s (%s)", LR_VERSION_MAJOR,
+                                                LR_VERSION_MINOR,
+                                                LR_VERSION_PATCH,
+                                                EINTR_SUPPORT,
+                                                curl_version());
+
+    return GINT_TO_POINTER(1);
+}
+
+void
+lr_global_init()
+{
+    static GOnce init_once = G_ONCE_INIT;
+    g_once(&init_once, lr_init_once_cb, NULL);
+}
+
+/*
+void
+lr_global_cleanup()
+{
+    curl_global_cleanup();
+}
+*/
 
 void
 lr_out_of_memory()
