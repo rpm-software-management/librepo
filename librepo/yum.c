@@ -662,7 +662,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot open %s: %s", path, strerror(errno));
             lr_free(path);
-            return LRE_IO;
+            return FALSE;
         }
 
         /* Download repomd.xml */
