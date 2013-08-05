@@ -34,17 +34,18 @@ G_BEGIN_DECLS
 /** Check checksum of selected repository.
  * @param path          Path to directory containing "repodata" subdir.
  * @param err           GError **
- * @return              Librepo return code ::LrRc.
+ * @return              TRUE is everything is ok, FALSE if err is set.
  */
-int lr_repoutil_yum_check_repo(const char *path, GError **err);
+gboolean
+lr_repoutil_yum_check_repo(const char *path, GError **err);
 
 /** Parse repomd.xml file.
  * @param path          Path to repository or to the repomd file
  * @param repomd        Empty repomd object
  * @param err           GError **
- * @return              Librepo return code ::LrRc
+ * @return              TRUE is everything is ok, FALSE if err is set.
  */
-int
+gboolean
 lr_repoutil_yum_parse_repomd(const char *path,
                              LrYumRepoMd *repomd,
                              GError **err);

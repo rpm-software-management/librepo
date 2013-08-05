@@ -35,10 +35,11 @@
 #include "result.h"
 #include "result_internal.h"
 
-int
+gboolean
 lr_repoutil_yum_check_repo(const char *path, GError **err)
 {
     int rc;
+    gboolean ret;
     LrHandle *h;
     LrResult *result;
 
@@ -52,44 +53,45 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
                     "lr_handle_setopt(, LRO_REPOTYPE, LR_YUMREPO) error: %s",
                     lr_strerror(rc));
-        return rc;
+        return FALSE;
     }
 
     if ((rc = lr_handle_setopt(h, LRO_URL, path)) != LRE_OK) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
                     "lr_handle_setopt(, LRO_URL, %s) error: %s",
                     path, lr_strerror(rc));
-        return rc;
+        return FALSE;
     }
 
     if ((rc = lr_handle_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
                     "lr_handle_setopt(, LRO_CHECKSUM, 1) error: %s",
                     lr_strerror(rc));
-        return rc;
+        return FALSE;
     }
 
     if ((rc = lr_handle_setopt(h, LRO_LOCAL, 1)) != LRE_OK) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
                     "lr_handle_setopt(, LRO_LOCAL, 1) error: %s",
                     lr_strerror(rc));
-        return rc;
+        return FALSE;
     }
 
-    rc = lr_handle_perform(h, result, err);
+    ret = lr_handle_perform(h, result, err);
 
     lr_result_free(result);
     lr_handle_free(h);
 
-    return rc;
+    return ret;
 }
 
-int
+gboolean
 lr_repoutil_yum_parse_repomd(const char *in_path,
                              LrYumRepoMd *repomd,
                              GError **err)
 {
-    int fd, rc;
+    int fd;
+    gboolean ret;
     struct stat st;
     char *path;
 
@@ -99,7 +101,7 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
     if (stat(in_path, &st) != 0) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
                     "stat(%s,) error: %s", in_path, strerror(errno));
-        return LRE_IO;
+        return FALSE;
     }
 
     if (st.st_mode & S_IFDIR)
@@ -112,15 +114,15 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
                     "open(%s, O_RDONLY) error: %s", path, strerror(errno));
         lr_free(path);
-        return LRE_IO;
+        return FALSE;
     }
 
     lr_free(path);
 
-    rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, err);
+    ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, err);
     close(fd);
 
-    return rc;
+    return ret;
 }
 
 double

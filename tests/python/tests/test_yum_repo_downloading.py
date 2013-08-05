@@ -668,16 +668,16 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        self.assertRaises(librepo.LibrepoException, h.perform, (r))
+        self.assertRaisesRegexp(librepo.LibrepoException,
+                                "repomd.xml was not found in metalink",
+                                h.perform,
+                                (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
-        # All values shoud be None, [], {} or equivalent
-        for key in yum_repo.iterkeys():
-            self.assertFalse(yum_repo[key])
-        for key in yum_repomd.iterkeys():
-            self.assertFalse(yum_repomd[key])
+        self.assertEqual(yum_repo, None)
+        self.assertEqual(yum_repomd, None)
 
     def test_download_repo_01_via_metalink_badchecksum(self):
         h = librepo.Handle()
@@ -710,16 +710,14 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        self.assertRaises(librepo.LibrepoException, h.perform, (r))
+        self.assertRaisesRegexp(librepo.LibrepoException,
+                                ".* No URLs in metalink", h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
-        # All values shoud be None, [], {} or equivalent
-        for key in yum_repo.iterkeys():
-            self.assertFalse(yum_repo[key])
-        for key in yum_repomd.iterkeys():
-            self.assertFalse(yum_repomd[key])
+        self.assertEqual(yum_repo, None)
+        self.assertEqual(yum_repomd, None)
 
     def test_download_repo_01_via_metalink_badfirsturl(self):
         h = librepo.Handle()
@@ -895,11 +893,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
-        # All values shoud be None, [], {} or equivalent
-        for key in yum_repo.iterkeys():
-            self.assertFalse(yum_repo[key])
-        for key in yum_repomd.iterkeys():
-            self.assertFalse(yum_repomd[key])
+        self.assertEqual(yum_repo, None)
+        self.assertEqual(yum_repomd, None)
 
     def test_download_repo_01_via_mirrorlist_badfirsturl(self):
         h = librepo.Handle()

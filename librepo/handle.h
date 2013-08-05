@@ -155,12 +155,14 @@ typedef enum {
 /** Return new handle.
  * @return              New allocated handle.
  */
-LrHandle *lr_handle_init();
+LrHandle *
+lr_handle_init();
 
 /** Frees handle and its content.
  * @param handle        Handle.
  */
-void lr_handle_free(LrHandle *handle);
+void
+lr_handle_free(LrHandle *handle);
 
 /** Set option (::LrHandleOption) of the handle.
  * @param handle         Handle.
@@ -168,7 +170,8 @@ void lr_handle_free(LrHandle *handle);
  * @param ...           Value for the option.
  * @return              Librepo return code from ::LrRc enum.
  */
-int lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...);
+int
+lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...);
 
 /** Get information from handle.
  * Most of returned pointers point directly to the handle internal
@@ -182,15 +185,17 @@ int lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...);
  * @param ...           Apropriate variable fro the selected option.
  * @return              Librepo return code ::LrRc.
  */
-int lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...);
+int
+lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...);
 
 /** Perform repodata download or location.
  * @param handle        Librepo handle.
  * @param result        Librepo result.
  * @param err           GError **
- * @return              Librepo return code from ::LrRc enum.
+ * @return              TRUE if everything is ok, FALSE if err is set.
  */
-int lr_handle_perform(LrHandle *handle, LrResult *result, GError **err);
+gboolean
+lr_handle_perform(LrHandle *handle, LrResult *result, GError **err);
 
 /** @} */
 

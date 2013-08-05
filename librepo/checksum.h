@@ -48,13 +48,15 @@ typedef enum {
  * @return          ::LrChecksumType value representing the checksum
  *                  or LR_CHECKSUM_UNKNOWN
  */
-LrChecksumType lr_checksum_type(const char *type);
+LrChecksumType
+lr_checksum_type(const char *type);
 
 /** Convert LrChecksumType to string
  * @param type      Checksum type
  * @return          Constant string with name of the checksum
  */
-const char *lr_checksum_type_to_str(LrChecksumType type);
+const char *
+lr_checksum_type_to_str(LrChecksumType type);
 
 /** Calculate checksum for data pointed by file descriptor.
  * @param type      Checksum type
@@ -63,7 +65,8 @@ const char *lr_checksum_type_to_str(LrChecksumType type);
  * @param err       GError **
  * @return          Malloced checksum string or NULL on error.
  */
-char *lr_checksum_fd(LrChecksumType type, int fd, GError **err);
+char *
+lr_checksum_fd(LrChecksumType type, int fd, GError **err);
 
 /** Calculate checksum for data pointed by file descriptor and
  * compare it to the expected checksum value.
@@ -75,12 +78,13 @@ char *lr_checksum_fd(LrChecksumType type, int fd, GError **err);
  * @param err       GError **
  * @return          returns TRUE if error is not set and FALSE if it is
  */
-gboolean lr_checksum_fd_cmp(LrChecksumType type,
-                            int fd,
-                            const char *expected,
-                            gboolean caching,
-                            gboolean *matches,
-                            GError **err);
+gboolean
+lr_checksum_fd_cmp(LrChecksumType type,
+                   int fd,
+                   const char *expected,
+                   gboolean caching,
+                   gboolean *matches,
+                   GError **err);
 
 /** @} */
 

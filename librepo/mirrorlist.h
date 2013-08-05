@@ -38,22 +38,25 @@ typedef struct {
  * Create new empty mirrorlist.
  * @return              New empty mirrorlist.
  */
-LrMirrorlist *lr_mirrorlist_init();
+LrMirrorlist *
+lr_mirrorlist_init();
 
 /**
  * Parse mirrorlist file.
  * @param mirrorlist    Mirrorlist object.
  * @param fd            Opened file descriptor of mirrorlist file.
  * @param err           GError **
- * @return              Librepo return code ::LrRc.
+ * @return              TRUE if everything is ok, FALSE if err is set.
  */
-int lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err);
+gboolean
+lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err);
 
 /**
  * Free mirrorlist and all its content.
  * @param mirrorlist    Mirrorlist object.
  */
-void lr_mirrorlist_free(LrMirrorlist *mirrorlist);
+void
+lr_mirrorlist_free(LrMirrorlist *mirrorlist);
 
 /** @} */
 

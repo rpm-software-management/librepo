@@ -351,22 +351,22 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
 #define TYPE_METALINK   1
 #define TYPE_MIRRORLIST 2
 
-int
+gboolean
 lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 {
-    int rc = LRE_OK;
+    int ret = TRUE;
     char *metalink_suffix = NULL;
     char *local_path = NULL;
 
     assert(!err || *err == NULL);
 
     if (handle->internal_mirrorlist)
-        return LRE_OK;  /* Internal mirrorlist already exists */
+        return TRUE;  /* Internal mirrorlist already exists */
 
     if (!handle->baseurl && !handle->mirrorlist) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
                     "No usable URL (no base url nor mirrorlist url)");
-        return LRE_NOURL;
+        return FALSE;
     }
 
     g_debug("Preparing internal mirrorlist");
@@ -405,7 +405,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                     g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
                                 "realpath(%s) error: %s",
                                 handle->baseurl, strerror(errno));
-                    return LRE_BADURL;
+                    return FALSE;
                 }
                 url = g_strconcat("file://", resolved_path, NULL);
                 free(resolved_path);
@@ -464,7 +464,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                 mirrors_fd = open(full_path, O_RDONLY);
                 lr_free(full_path);
                 if (mirrors_fd < 1) {
-                    rc = LRE_IO;
+                    ret = FALSE;
                     g_debug("%s: Cannot open: %s", __func__, full_path);
                     g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                                 "Cannot open %s: %s",
@@ -476,7 +476,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 
             mirrors_fd = lr_gettmpfile();
             if (mirrors_fd < 1) {
-                rc = LRE_IO;
+                ret = FALSE;
                 g_debug("%s: Cannot create a temporary file", __func__);
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                             "Cannot create a temporary file");
@@ -487,14 +487,14 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
             char *mirrorlist_url = lr_url_substitute(prefixed_url,
                                                      handle->urlvars);
             lr_free(prefixed_url);
-            rc = lr_download_url(handle, mirrorlist_url, mirrors_fd, err);
+            ret = lr_download_url(handle, mirrorlist_url, mirrors_fd, err);
             lr_free(mirrorlist_url);
 
-            if (rc != LRE_OK)
+            if (!ret)
                 goto mirrorlist_error;
 
             if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
-                rc = LRE_IO;
+                ret = FALSE;
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                             "lseek(%d, 0, SEEK_SET) error: %s",
                             mirrors_fd, strerror(errno));
@@ -520,20 +520,21 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                 /* Parse metalink */
                 GError *tmp_err = NULL;
                 metalink = lr_metalink_init();
-                rc = lr_metalink_parse_file(metalink,
-                                            mirrors_fd,
-                                            "repomd.xml",
-                                            &tmp_err);
-                if (rc != LRE_OK) {
+                ret = lr_metalink_parse_file(metalink,
+                                             mirrors_fd,
+                                             "repomd.xml",
+                                             &tmp_err);
+                if (!ret) {
                     assert(tmp_err);
-                    g_debug("%s: Cannot parse metalink (%d)", __func__, rc);
+                    g_debug("%s: Cannot parse metalink: %s",
+                            __func__, tmp_err->message);
                     g_propagate_error(err, tmp_err);
                     goto mirrorlist_error;
                 }
 
                 if (strcmp("repomd.xml", metalink->filename)) {
+                    ret = FALSE;
                     g_debug("%s: No repomd.xml file in metalink", __func__);
-                    rc = LRE_MLBAD;
                     g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
                                 "No repomd.xml file in metalink (%s)",
                                 metalink->filename);
@@ -541,12 +542,14 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                 }
 
                 if (!metalink->urls) {
+                    ret = FALSE;
                     g_debug("%s: No URLs in metalink", __func__);
-                    rc = LRE_MLBAD;
                     g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
                                 "No URLs in metalink");
                     goto mirrorlist_error;
                 }
+
+                g_debug("%s: Metalink parsed", __func__);
             } else if (mirror_type == TYPE_MIRRORLIST) {
                 /* Mirrorlist */
                 g_debug("%s: Got mirrorlist", __func__);
@@ -554,21 +557,24 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                 mirrorlist = lr_mirrorlist_init();
 
                 GError *tmp_err = NULL;
-                rc = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd, &tmp_err);
-                if (rc != LRE_OK) {
+                ret = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd, &tmp_err);
+                if (!ret) {
                     assert(tmp_err);
-                    g_debug("%s: Cannot parse mirrorlist (%d)", __func__, rc);
+                    g_debug("%s: Cannot parse mirrorlist: %s",
+                            __func__, tmp_err->message);
                     g_propagate_error(err, tmp_err);
                     goto mirrorlist_error;
                 }
 
                 if (!mirrorlist->urls) {
-                    rc = LRE_MLBAD;
-                    g_debug("%s: No URLs in mirrorlist (%d)", __func__, rc);
+                    ret = FALSE;
+                    g_debug("%s: No URLs in mirrorlist", __func__);
                     g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
-                                "No URLs in mirrorlist (%d)", rc);
+                                "No URLs in mirrorlist");
                     goto mirrorlist_error;
                 }
+
+                g_debug("%s: Mirrorlist parsed", __func__);
             } else {
                 assert(0); // This shoudn't happend
             }
@@ -576,7 +582,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
             handle->mirrorlist_fd = mirrors_fd;
         } // end of if (mirrors_fd > 0)
 
-        if (rc == LRE_OK) {
+        if (ret) {
             /* Set fill mirrorlist stuff at the handle  */
 
             assert(!err || *err == NULL);
@@ -601,7 +607,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 
 mirrorlist_error:
 
-        if (rc != LRE_OK) {
+        if (!ret) {
             assert(!err || *err);
 
             if (mirrors_fd > 0) {
@@ -625,13 +631,13 @@ mirrorlist_error:
                                                 handle->mirrors);
     }
 
-    return rc;
+    return ret;
 }
 
-int
+gboolean
 lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
 {
-    int rc = LRE_OK;
+    int ret = TRUE;
     GError *tmp_err = NULL;
 
     assert(handle);
@@ -640,19 +646,19 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
     if (!result) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
                     "No result argument passed");
-        return LRE_BADFUNCARG;
+        return FALSE;
     }
 
     if (!handle->baseurl && !handle->mirrorlist) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
                     "No LRO_URL nor LRO_MIRRORLIST specified");
-        return LRE_NOURL;
+        return FALSE;
     }
 
     if (handle->repotype != LR_YUMREPO) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
                     "Bad LRO_REPOTYPE specified");
-        return LRE_BADFUNCARG;
+        return FALSE;
     }
 
     /* Setup destination directory */
@@ -660,7 +666,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         if (!result->destdir) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_INCOMPLETERESULT,
                         "Incomplete result object, destdir is missing");
-            return LRE_INCOMPLETERESULT;
+            return FALSE;
         }
         lr_free(handle->destdir);
         handle->destdir = g_strdup(result->destdir);
@@ -669,7 +675,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         if (!mkdtemp(handle->destdir)) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_CANNOTCREATETMP,
                         "Cannot create tmpdir: %s", strerror(errno));
-            return LRE_CANNOTCREATETMP;
+            return FALSE;
         }
     }
 
@@ -686,11 +692,17 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         if (sigaction(SIGINT, &sigact, &old_sigact) == -1) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_SIGACTION,
                         "sigaction(SIGINT,,) error");
-            return LRE_SIGACTION;
+            return FALSE;
         }
     }
 
-    rc = lr_handle_prepare_internal_mirrorlist(handle, NULL);
+    ret = lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    if (!ret) {
+        g_debug("Cannot prepare internal mirrorlist: %s", tmp_err->message);
+        g_propagate_prefixed_error(err, tmp_err,
+                                   "Cannot prepare internal mirrorlist: ");
+        return FALSE;
+    }
 
     if (handle->fetchmirrors) {
         /* Only download and parse mirrorlist */
@@ -700,11 +712,14 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         switch (handle->repotype) {
         case LR_YUMREPO:
             g_debug("%s: Downloading/Locating yum repo", __func__);
-            rc = lr_yum_perform(handle, result, &tmp_err);
+            ret = lr_yum_perform(handle, result, &tmp_err);
             break;
         default:
             g_debug("%s: Bad repo type", __func__);
             assert(0);
+            ret = FALSE;
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
+                        "Bad repo type: %d", handle->repotype);
             break;
         };
     }
@@ -712,27 +727,22 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
     if (handle->interruptible) {
         /* Restore signal handler */
         g_debug("%s: Restoring an old SIGINT handler", __func__);
-        if (sigaction(SIGINT, &old_sigact, NULL) == -1) {
-            g_set_error(err, LR_HANDLE_ERROR, LRE_SIGACTION,
-                        "sigaction(SIGINT,,) error");
-            g_error_free(tmp_err);
-            return LRE_SIGACTION;
-        }
+        sigaction(SIGINT, &old_sigact, NULL);
 
         if (lr_interrupt) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_INTERRUPTED,
                         "Librepo was interrupted by a signal");
             g_error_free(tmp_err);
-            return LRE_INTERRUPTED;
+            return FALSE;
         }
     }
 
-    assert((rc == LRE_OK) || tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (tmp_err)
         g_propagate_error(err, tmp_err);
 
-    return rc;
+    return ret;
 }
 
 int

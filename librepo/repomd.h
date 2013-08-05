@@ -88,9 +88,9 @@ lr_yum_repomd_free(LrYumRepoMd *repomd);
  * @param warningcb         Callback for warnings
  * @param warningcb_data    Warning callback user data
  * @param err               GError **
- * @return                  Librepo return code ::LrRc.
+ * @return                  TRUE if everything is ok, FALSE if err is set.
  */
-int
+gboolean
 lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
                          int fd,
                          LrXmlParserWarningCb warningcb,

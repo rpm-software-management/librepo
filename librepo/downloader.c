@@ -200,7 +200,7 @@ lr_progresscb(void *ptr,
                                       now_downloaded);
 }
 
-static int
+static gboolean
 prepare_next_transfer(LrDownload *dd, GError **err)
 {
     LrTarget *target = NULL;
@@ -222,7 +222,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
     }
 
     if (!target)  // No target is waiting
-        return LRE_OK;
+        return TRUE;
 
     // Check if path is a complete URL
     complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
@@ -236,7 +236,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
         g_debug("%s: Empty mirrorlist and no basepath specified", __func__);
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
                     "Empty mirrorlist and no basepath specified!");
-        return LRE_NOURL;
+        return FALSE;
     }
 
     g_debug("%s: Selecting mirror for: %s", __func__, target->target->path);
@@ -294,14 +294,14 @@ prepare_next_transfer(LrDownload *dd, GError **err)
             lr_downloadtarget_set_error(target->target, LRE_NOURL,
                         "Cannot download, all mirrors were already tried "
                         "without success");
-            return LRE_OK;
+            return TRUE;
         }
     }
 
     if (!full_url) {
         // No free mirror
         g_debug("%s: No free mirror", __func__);
-        return LRE_OK;
+        return TRUE;
     }
 
     g_debug("%s: URL: %s", __func__, full_url);
@@ -317,7 +317,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
         // Something went wrong
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
                     "curl_easy_duphandle() call failed");
-        return LRE_CURL;
+        return FALSE;
     }
 
     // Set URL
@@ -328,7 +328,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
                     full_url, curl_easy_strerror(c_rc));
         lr_free(full_url);
         curl_easy_cleanup(h);
-        return LRE_CURL;
+        return FALSE;
     }
 
     lr_free(full_url);
@@ -340,7 +340,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
                     "dup(%d) failed: %s",
                     target->target->fd, strerror(errno));
         curl_easy_cleanup(h);
-        return LRE_IO;
+        return FALSE;
     }
 
     FILE *f = fdopen(new_fd, "w+b");
@@ -349,7 +349,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
                     "fdopen(%d) failed: %s",
                     new_fd, strerror(errno));
         curl_easy_cleanup(h);
-        return LRE_IO;
+        return FALSE;
     }
 
     target->f = f;
@@ -362,7 +362,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
                     curl_easy_strerror(c_rc));
         fclose(f);
         curl_easy_cleanup(h);
-        return LRE_CURL;
+        return FALSE;
     }
 
     // Resume - set offset to resume incomplete download
@@ -395,7 +395,7 @@ prepare_next_transfer(LrDownload *dd, GError **err)
                         used_offset, curl_easy_strerror(c_rc));
             fclose(f);
             curl_easy_cleanup(h);
-            return LRE_CURL;
+            return FALSE;
         }
     }
 
@@ -421,10 +421,10 @@ prepare_next_transfer(LrDownload *dd, GError **err)
     // Add the transfer to the list of running transfers
     dd->running_transfers = g_slist_append(dd->running_transfers, target);
 
-    return LRE_OK;
+    return TRUE;
 }
 
-static int
+static gboolean
 check_transfer_statuses(LrDownload *dd, GError **err)
 {
     assert(dd);
@@ -545,14 +545,13 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                         "Downloading successfull, but checksum doesn't match");
             } else if (ret == FALSE) {
                 // Error while checksum calculation
-                int code = tmp_err->code;
                 g_propagate_prefixed_error(err, tmp_err, "Downloading from %s "
                         "was successfull but error encountered while "
                         "checksuming: ", effective_url);
                 fclose(target->f);
                 target->f = NULL;
                 lr_free(effective_url);
-                return code;
+                return FALSE;
             }
         }
 
@@ -603,14 +602,14 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 lr_free(effective_url);
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                             "ftruncate() failed: %s", strerror(errno));
-                return LRE_IO;
+                return FALSE;
             }
             off_t rc_offset = lseek(target->target->fd, original_offset, SEEK_SET);
             if (rc_offset == -1) {
                 lr_free(effective_url);
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                             "lseek() failed: %s", strerror(errno));
-                return LRE_IO;
+                return FALSE;
             }
         } else {
             // No error encountered, transfer finished successfully
@@ -631,15 +630,15 @@ check_transfer_statuses(LrDownload *dd, GError **err)
     // from the multi_handle, we could add new waiting transfers.
 
     for (int x = 0; x < freed_transfers; x++) {
-        int rc = prepare_next_transfer(dd, err);
-        if (rc != LRE_OK)
-            return rc;
+        gboolean rc = prepare_next_transfer(dd, err);
+        if (!rc)
+            return FALSE;
     }
 
-    return LRE_OK;
+    return TRUE;
 }
 
-static int
+static gboolean
 lr_perform(LrDownload *dd, GError **err)
 {
     CURLMcode cm_rc;    // CurlM_ReturnCode
@@ -656,7 +655,7 @@ lr_perform(LrDownload *dd, GError **err)
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
                     "curl_multi_perform() error: %s",
                     curl_multi_strerror(cm_rc));
-        return LRE_CURLM;
+        return FALSE;
     }
 
     while (dd->running_transfers) {
@@ -679,7 +678,7 @@ lr_perform(LrDownload *dd, GError **err)
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
                         "curl_multi_timeout() error: %s",
                         curl_multi_strerror(cm_rc));
-            return LRE_CURLM;
+            return FALSE;
         }
 
         if (curl_timeout >= 0) {
@@ -697,7 +696,7 @@ lr_perform(LrDownload *dd, GError **err)
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
                         "curl_multi_fdset() error: %s",
                         curl_multi_strerror(cm_rc));
-            return LRE_CURLM;
+            return FALSE;
         }
 
         rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
@@ -708,7 +707,7 @@ lr_perform(LrDownload *dd, GError **err)
             } else {
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_SELECT,
                             "select() error: %s", strerror(errno));
-                return LRE_SELECT;
+                return FALSE;
             }
         }
 
@@ -724,13 +723,13 @@ lr_perform(LrDownload *dd, GError **err)
             // Check if any handle finished and potentialy add one or more
             // waiting downloads to the multi_handle.
             rc = check_transfer_statuses(dd, err);
-            if (rc != LRE_OK)
-                return rc;
+            if (!rc)
+                return FALSE;
 
             if (lr_interrupt) {
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
                             "Interrupted by signal");
-                return LRE_INTERRUPTED;
+                return FALSE;
             }
 
             // Do curl_multi_perform()
@@ -742,7 +741,7 @@ lr_perform(LrDownload *dd, GError **err)
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
                             "curl_multi_perform() error: %s",
                             curl_multi_strerror(cm_rc));
-                return LRE_CURLM;
+                return FALSE;
             }
         } while (still_running == 0 && dd->running_transfers);
     }
@@ -750,10 +749,10 @@ lr_perform(LrDownload *dd, GError **err)
     return check_transfer_statuses(dd, err);
 }
 
-int
+gboolean
 lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret;
     LrDownload dd;             // dd stands for Download Data
     GError *tmp_err = NULL;
 
@@ -762,12 +761,12 @@ lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
     if (lr_interrupt) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
                     "Interrupted by signal");
-        return LRE_INTERRUPTED;
+        return FALSE;
     }
 
     if (!targets) {
         g_debug("%s: No targets", __func__);
-        return LRE_OK;
+        return TRUE;
     }
 
     // Prepare download data
@@ -781,7 +780,7 @@ lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
         // Something went wrong
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
                     "curl_multi_init() call failed");
-        return LRE_CURLM;
+        return FALSE;
     }
 
     // Prepare list of LrMirrors
@@ -827,13 +826,15 @@ lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
     // Prepare the first set of transfers
     for (int x = 0; x < dd.max_parallel_connections; x++) {
         ret = prepare_next_transfer(&dd, &tmp_err);
-        if (ret != LRE_OK)
+        if (!ret)
             goto lr_download_cleanup;
     }
 
     // Perform!
     g_debug("%s: Downloading started", __func__);
     ret = lr_perform(&dd, &tmp_err);
+
+    assert(ret || tmp_err);
 
 lr_download_cleanup:
 
@@ -883,18 +884,18 @@ lr_download_cleanup:
     return ret;
 }
 
-int
+gboolean
 lr_download_target(LrHandle *lr_handle,
                    LrDownloadTarget *target,
                    GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret;
     GSList *list = NULL;
 
     assert(!err || *err == NULL);
 
     if (!target)
-        return ret;
+        return TRUE;
 
     list = g_slist_prepend(list, target);
 
@@ -905,10 +906,10 @@ lr_download_target(LrHandle *lr_handle,
     return ret;
 }
 
-int
+gboolean
 lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret;
     LrDownloadTarget *target;
     GError *tmp_err = NULL;
 
@@ -920,11 +921,12 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 
     ret = lr_download_target(lr_handle, target, &tmp_err);
 
-    if (tmp_err) {
-        ret = tmp_err->code;
+    assert(ret || tmp_err);
+
+    if (!ret) {
         g_propagate_error(err, tmp_err);
     } else if (target->err) {
-        ret = target->rcode;
+        ret = FALSE;
         g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, target->err);
     }
 
@@ -997,14 +999,14 @@ lr_multi_progress_func(void* ptr,
                              shared_cbdata->downloaded);
 }
 
-int
+gboolean
 lr_download_single_cb(LrHandle *lr_handle,
                       GSList *targets,
                       LrProgressCb cb,
                       void *cbdata,
                       GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret;
     LrSharedCallbackData shared_cbdata;
 
     assert(!err || *err == NULL);

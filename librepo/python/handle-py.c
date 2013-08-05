@@ -560,7 +560,7 @@ perform(_HandleObject *self, PyObject *args)
 {
     PyObject *result_obj;
     LrResult *result;
-    int ret;
+    gboolean ret;
     GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "O:perform", &result_obj))
@@ -571,18 +571,17 @@ perform(_HandleObject *self, PyObject *args)
     result = Result_FromPyObject(result_obj);
 
     ret = lr_handle_perform(self->handle, result, &tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
 
-    if (ret == LRE_INTERRUPTED) {
+    if (!ret && tmp_err->code == LRE_INTERRUPTED) {
         g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
     }
 
-    assert(ret == LRE_OK || tmp_err);
-
-    if (ret != LRE_OK)
-        RETURN_ERROR(&tmp_err, ret, NULL);
+    if (!ret)
+        RETURN_ERROR(&tmp_err, -1, NULL);
 
     Py_RETURN_NONE;
 }
@@ -590,7 +589,7 @@ perform(_HandleObject *self, PyObject *args)
 static PyObject *
 download_package(_HandleObject *self, PyObject *args)
 {
-    int ret;
+    gboolean ret;
     char *relative_url, *checksum, *dest, *base_url;
     int resume, checksum_type;
     GError *tmp_err = NULL;
@@ -608,17 +607,17 @@ download_package(_HandleObject *self, PyObject *args)
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, base_url, resume, &tmp_err);
 
-    if (ret == LRE_INTERRUPTED) {
+    assert((ret && !tmp_err) || (!ret && tmp_err));
+
+    if (!ret && tmp_err->code == LRE_INTERRUPTED) {
         g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
     }
 
-    assert(ret == LRE_OK || tmp_err);
-
-    if (ret != LRE_OK)
-        RETURN_ERROR(&tmp_err, ret, NULL);
+    if (!ret)
+        RETURN_ERROR(&tmp_err, -1, NULL);
 
     Py_RETURN_NONE;
 }

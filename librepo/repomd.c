@@ -462,14 +462,14 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
     }
 }
 
-int
+gboolean
 lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
                          int fd,
                          LrXmlParserWarningCb warningcb,
                          void *warningcb_data,
                          GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret = TRUE;
     LrParserData *pd;
     XML_Parser parser;
     GError *tmp_err = NULL;

@@ -56,24 +56,27 @@ typedef struct {
 /** Create new empty metalink object.
  * @return              New metalink object.
  */
-LrMetalink *lr_metalink_init();
+LrMetalink *
+lr_metalink_init();
 
 /** Parse metalink file.
  * @param metalink      Metalink object.
  * @param fd            File descriptor.
  * @param filename      File to look for in metalink file.
  * @param err           GError **
- * @return              Librepo return code ::LrRc.
+ * @return              TRUE if everything is ok, FALSE if err is set.
  */
-int lr_metalink_parse_file(LrMetalink *metalink,
-                           int fd,
-                           const char *filename,
-                           GError **err);
+gboolean
+lr_metalink_parse_file(LrMetalink *metalink,
+                       int fd,
+                       const char *filename,
+                       GError **err);
 
 /** Free metalink object and all its content.
  * @param metalink      Metalink object.
  */
-void lr_metalink_free(LrMetalink *metalink);
+void
+lr_metalink_free(LrMetalink *metalink);
 
 /** @} */
 

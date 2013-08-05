@@ -30,44 +30,47 @@ G_BEGIN_DECLS
  */
 
 /** Check detached signature of data.
- * @param signature_fd      File descriptor of signature file.
- * @param data_fd           File descriptor of data to verify.
- * @param home_dir          Configuration directory of OpenPGP engine
- *                          (e.g. "/home/user/.gnupg/"), if NULL default
- *                          config directory is used.
- * @param err               GError **
- * @return                  LrRc code
+ * @param signature_fd  File descriptor of signature file.
+ * @param data_fd       File descriptor of data to verify.
+ * @param home_dir      Configuration directory of OpenPGP engine
+ *                      (e.g. "/home/user/.gnupg/"), if NULL default
+ *                      config directory is used.
+ * @param err           GError **
+ * @return              returns TRUE if error is not set and FALSE if it is.
  */
-int lr_gpg_check_signature_fd(int signature_fd,
-                              int data_fd,
-                              const char *home_dir,
-                              GError **err);
+gboolean
+lr_gpg_check_signature_fd(int signature_fd,
+                          int data_fd,
+                          const char *home_dir,
+                          GError **err);
 
 /** Check detached signature of data.
- * @param signature_fn      Filename (path) of signature file.
- * @param data_fn           Filename (path) of data to verify.
- * @param home_dir          Configuration directory of OpenPGP engine
- *                          (e.g. "/home/user/.gnupg/"), if NULL default
- *                          config directory is used.
- * @param err               GError **
- * @return                  LrRc code
+ * @param signature_fn  Filename (path) of signature file.
+ * @param data_fn       Filename (path) of data to verify.
+ * @param home_dir      Configuration directory of OpenPGP engine
+ *                      (e.g. "/home/user/.gnupg/"), if NULL default
+ *                      config directory is used.
+ * @param err           GError **
+ * @return              returns TRUE if error is not set and FALSE if it is.
  */
-int lr_gpg_check_signature(const char *signature_fn,
-                           const char *data_fn,
-                           const char *home_dir,
-                           GError **err);
+gboolean
+lr_gpg_check_signature(const char *signature_fn,
+                       const char *data_fn,
+                       const char *home_dir,
+                       GError **err);
 
 /** Import key into the keyring.
- * @param key_fn            Filename (path) of key file.
- * @param home_dir          Configuration directory of OpenPGP engine
- *                          (e.g. "/home/user/.gnupg/"), if NULL default
- *                          config directory is used.
- * @param err               GError **
- * @return                  LrRc code
+ * @param key_fn        Filename (path) of key file.
+ * @param home_dir      Configuration directory of OpenPGP engine
+ *                      (e.g. "/home/user/.gnupg/"), if NULL default
+ *                      config directory is used.
+ * @param err           GError **
+ * @return              returns TRUE if error is not set and FALSE if it is.
  */
-int lr_gpg_import_key(const char *key_fn,
-                      const char *home_dir,
-                      GError **err);
+gboolean
+lr_gpg_import_key(const char *key_fn,
+                  const char *home_dir,
+                  GError **err);
 
 /** @} */
 

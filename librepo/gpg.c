@@ -31,7 +31,7 @@
 #include "util.h"
 #include "gpg.h"
 
-int
+gboolean
 lr_gpg_check_signature_fd(int signature_fd,
                           int data_fd,
                           const char *home_dir,
@@ -55,7 +55,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_set_error(err, LR_GPG_ERROR, LRE_GPGNOTSUPPORTED,
                     "gpgme_engine_check_version() error: %s",
                     gpgme_strerror(gpgerr));
-        return LRE_GPGNOTSUPPORTED;
+        return FALSE;
     }
 
     gpgerr = gpgme_new(&context);
@@ -63,7 +63,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_debug("%s: gpgme_new: %s", __func__, gpgme_strerror(gpgerr));
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_new() error: %s", gpgme_strerror(gpgerr));
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     gpgerr = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
@@ -72,7 +72,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_set_protocol() error: %s", gpgme_strerror(gpgerr));
         gpgme_release(context);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     if (home_dir) {
@@ -85,7 +85,7 @@ lr_gpg_check_signature_fd(int signature_fd,
                         "gpgme_ctx_set_engine_info() error: %s",
                         gpgme_strerror(gpgerr));
             gpgme_release(context);
-            return LRE_GPGERROR;
+            return FALSE;
         }
     }
 
@@ -99,7 +99,7 @@ lr_gpg_check_signature_fd(int signature_fd,
                     "gpgme_data_new_from_fd(_, %d) error: %s",
                     signature_fd, gpgme_strerror(gpgerr));
         gpgme_release(context);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     gpgerr = gpgme_data_new_from_fd(&data_data, data_fd);
@@ -111,7 +111,7 @@ lr_gpg_check_signature_fd(int signature_fd,
                     data_fd, gpgme_strerror(gpgerr));
         gpgme_data_release(signature_data);
         gpgme_release(context);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     // Verify
@@ -123,7 +123,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_op_verify() error: %s", gpgme_strerror(gpgerr));
         gpgme_release(context);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     result = gpgme_op_verify_result(context);
@@ -133,7 +133,7 @@ lr_gpg_check_signature_fd(int signature_fd,
                     "gpgme_op_verify_result() error: %s",
                     gpgme_strerror(gpgerr));
         gpgme_release(context);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     // Check result of verification
@@ -143,7 +143,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_set_error(err, LR_GPG_ERROR, LRE_BADGPG,
                     "Signature verify error - no signatures");
         gpgme_release(context);
-        return LRE_BADGPG;
+        return FALSE;
     }
 
     // Example of signature usage could be found in gpgme git repository
@@ -154,23 +154,24 @@ lr_gpg_check_signature_fd(int signature_fd,
             (sig->summary == 0 && sig->status == GPG_ERR_NO_ERROR)) // Valid but key is not certified with a trusted signature
         {
             gpgme_release(context);
-            return LRE_OK;
+            return TRUE;
         }
     }
 
     gpgme_release(context);
     g_debug("%s: Bad GPG signature", __func__);
     g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad GPG signature");
-    return LRE_BADGPG;
+    return FALSE;
 }
 
-int
+gboolean
 lr_gpg_check_signature(const char *signature_fn,
                        const char *data_fn,
                        const char *home_dir,
                        GError **err)
 {
-    int rc, signature_fd, data_fd;
+    gboolean ret;
+    int signature_fd, data_fd;
 
     assert(!err || *err == NULL);
 
@@ -181,7 +182,7 @@ lr_gpg_check_signature(const char *signature_fn,
         g_set_error(err, LR_GPG_ERROR, LRE_IO,
                     "Error while opening signature %s: %s",
                     signature_fn, strerror(errno));
-        return LRE_IO;
+        return FALSE;
     }
 
     data_fd = open(data_fn, O_RDONLY);
@@ -192,18 +193,18 @@ lr_gpg_check_signature(const char *signature_fn,
                     "Error while opening %s: %s",
                     data_fn, strerror(errno));
         close(signature_fd);
-        return LRE_IO;
+        return FALSE;
     }
 
-     rc = lr_gpg_check_signature_fd(signature_fd, data_fd, home_dir, err);
+     ret = lr_gpg_check_signature_fd(signature_fd, data_fd, home_dir, err);
 
      close(signature_fd);
      close(data_fd);
 
-     return rc;
+     return ret;
 }
 
-int
+gboolean
 lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
 {
     gpgme_error_t gpgerr;
@@ -222,7 +223,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
         g_set_error(err, LR_GPG_ERROR, LRE_GPGNOTSUPPORTED,
                     "gpgme_engine_check_version() error: %s",
                     gpgme_strerror(gpgerr));
-        return LRE_GPGNOTSUPPORTED;
+        return FALSE;
     }
 
     gpgerr = gpgme_new(&context);
@@ -230,7 +231,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
         g_debug("%s: gpgme_new: %s", __func__, gpgme_strerror(gpgerr));
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_new() error: %s", gpgme_strerror(gpgerr));
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     gpgerr = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
@@ -239,7 +240,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_set_protocol() error: %s", gpgme_strerror(gpgerr));
         gpgme_release(context);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     if (home_dir) {
@@ -251,7 +252,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
                         "gpgme_ctx_set_engine_info() error: %s",
                         gpgme_strerror(gpgerr));
             gpgme_release(context);
-            return LRE_GPGERROR;
+            return FALSE;
         }
     }
 
@@ -266,7 +267,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
                     "Error while opening key %s: %s",
                     key_fn, strerror(errno));
         gpgme_release(context);
-        return LRE_IO;
+        return FALSE;
     }
 
     gpgerr = gpgme_data_new_from_fd(&key_data, key_fd);
@@ -278,7 +279,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
                     key_fd, gpgme_strerror(gpgerr));
         gpgme_release(context);
         close(key_fd);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     gpgerr = gpgme_op_import(context, key_data);
@@ -289,11 +290,11 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
                     "gpgme_op_import() error: %s", gpgme_strerror(gpgerr));
         gpgme_release(context);
         close(key_fd);
-        return LRE_GPGERROR;
+        return FALSE;
     }
 
     close(key_fd);
     gpgme_release(context);
 
-    return LRE_OK;
+    return TRUE;
 }

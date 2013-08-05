@@ -130,7 +130,7 @@ lr_xml_parser_strtoll(LrParserData *pd,
 
 /** Generic parser.
  */
-int
+gboolean
 lr_xml_parser_generic(XML_Parser parser,
                       LrParserData *pd,
                       int fd,

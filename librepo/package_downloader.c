@@ -34,7 +34,7 @@
 
 /* Do NOT use resume on successfully downloaded files - download will fail */
 
-int
+gboolean
 lr_download_package(LrHandle *handle,
                     const char *relative_url,
                     const char *dest,
@@ -44,7 +44,7 @@ lr_download_package(LrHandle *handle,
                     gboolean resume,
                     GError **err)
 {
-    int rc = LRE_OK;
+    gboolean ret = TRUE;
     int fd;
     char *dest_path;
     char *file_basename;
@@ -66,7 +66,7 @@ lr_download_package(LrHandle *handle,
         if (sigaction(SIGINT, &sigact, &old_sigact) == -1) {
             g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_SIGACTION,
                         "Cannot set Librepo SIGINT handler");
-            return LRE_SIGACTION;
+            return FALSE;
         }
     }
 
@@ -76,12 +76,12 @@ lr_download_package(LrHandle *handle,
         assert(0);
         g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_BADFUNCARG,
                     "Bad repo type");
-        return LRE_BADFUNCARG;
+        return FALSE;
     }
 
-    rc = lr_handle_prepare_internal_mirrorlist(handle, err);
-    if (rc != LRE_OK)
-        return rc;
+    ret = lr_handle_prepare_internal_mirrorlist(handle, err);
+    if (!ret)
+        return FALSE;
 
     file_basename = basename(relative_url);
     dest_basename = (dest) ? basename(dest) : "";
@@ -115,7 +115,7 @@ lr_download_package(LrHandle *handle,
          * completely downloaded, then the download is going to fail. */
         int fd_r = open(dest_path, O_RDONLY);
         if (fd_r != -1) {
-            gboolean ret, matches;
+            gboolean matches;
             ret = lr_checksum_fd_cmp(checksum_type,
                                      fd_r,
                                      checksum,
@@ -127,7 +127,7 @@ lr_download_package(LrHandle *handle,
                 g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_ALREADYDOWNLOADED,
                             "Package: %s is already downloaded", dest_path);
                 lr_free(dest_path);
-                return LRE_ALREADYDOWNLOADED;
+                return FALSE;
             }
         }
     }
@@ -141,7 +141,7 @@ lr_download_package(LrHandle *handle,
         g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
                     "Cannot open %s: %s", dest_path, strerror(errno));
         lr_free(dest_path);
-        return LRE_IO;
+        return FALSE;
     }
     lr_free(dest_path);
 
@@ -155,15 +155,11 @@ lr_download_package(LrHandle *handle,
                                                       resume,
                                                       handle->user_cb,
                                                       handle->user_data);
-    rc = lr_download_target(handle, target, &tmp_err);
+    ret = lr_download_target(handle, target, &tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
 
-    if (tmp_err) {
-        assert(rc == tmp_err->code); // XXX: DEBUG
-        g_propagate_error(err, tmp_err);
-        g_error_free(tmp_err);
-    } else if (target->err) {
-        rc = target->rcode;
-        g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, "%s: %s",
+    if (!tmp_err && target->err) {
+        g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, target->rcode, "%s: %s",
                     target->path, target->err);
     }
 
@@ -172,18 +168,22 @@ lr_download_package(LrHandle *handle,
     if (handle->interruptible) {
         /* Restore signal handler */
         g_debug("%s: Restoring an old SIGINT handler", __func__);
-        if (sigaction(SIGINT, &old_sigact, NULL) == -1) {
-            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_SIGACTION,
-                        "Cannot unset Librepo SIGINT handler");
-            return LRE_SIGACTION;
-        }
+        sigaction(SIGINT, &old_sigact, NULL);
     }
 
     if (lr_interrupt) {
+        if (tmp_err)
+            g_error_free(tmp_err);
+
         g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_INTERRUPTED,
                     "Insterupted by a SIGINT signal");
-        return LRE_INTERRUPTED;
+        return FALSE;
     }
 
-    return rc;
+    if (tmp_err) {
+        g_propagate_error(err, tmp_err);
+        return FALSE;
+    }
+
+    return TRUE;
 }

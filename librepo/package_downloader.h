@@ -37,7 +37,7 @@ G_BEGIN_DECLS
  * @param handle            Librepo handle.
  * @param relative_url      Relative part of url.
  * @param err               GError **
- * @return                  Librepo return code ::LrRc.
+ * @return                  See ::lr_download_package
  */
 #define lr_download_simple(handle, relative_url, err) \
                     lr_download_package((handle), (relative_url), NULL, 0, \
@@ -58,16 +58,17 @@ G_BEGIN_DECLS
  * @param resume            If TRUE try to resume downloading if dest file
  *                          already exists.
  * @param err               GError **
- * @return                  Librepo return code.
+ * @return                  TRUE if everything is ok, FALSE if err is set.
  */
-int lr_download_package(LrHandle *handle,
-                        const char *relative_url,
-                        const char *dest,
-                        LrChecksumType checksum_type,
-                        const char *checksum,
-                        const char *base_url,
-                        gboolean resume,
-                        GError **err);
+gboolean
+lr_download_package(LrHandle *handle,
+                    const char *relative_url,
+                    const char *dest,
+                    LrChecksumType checksum_type,
+                    const char *checksum,
+                    const char *base_url,
+                    gboolean resume,
+                    GError **err);
 
 /** @} */
 

@@ -77,9 +77,9 @@ lr_get_curl_handle();
  * specified) and download, parse and insert mirrors from mirrorlist url.
  * @param handle            Librepo handle.
  * @param err               GError **
- * @return                  Librepo return code.
+ * @return                  returns TRUE if error is not set and FALSE if it is.
  */
-int
+gboolean
 lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err);
 
 

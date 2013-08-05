@@ -133,7 +133,7 @@ lr_yum_repo_update(LrYumRepo *repo, const char *type, const char *path)
 
 /* main bussines logic */
 
-static int
+static gboolean
 lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
 {
     // Blacklist check
@@ -141,7 +141,7 @@ lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
         int x = 0;
         while (handle->yumblist[x]) {
             if (!strcmp(handle->yumblist[x], type))
-                return 0;
+                return FALSE;
             x++;
         }
     }
@@ -151,21 +151,22 @@ lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
         int x = 0;
         while (handle->yumdlist[x]) {
             if (!strcmp(handle->yumdlist[x], type))
-                return 1;
+                return TRUE;
             x++;
         }
-        return 0;
+        return FALSE;
     }
-    return 1;
+
+    return TRUE;
 }
 
-static int
+static gboolean
 lr_yum_download_repomd(LrHandle *handle,
                        LrMetalink *metalink,
                        int fd,
                        GError **err)
 {
-    int rc = LRE_OK;
+    int ret = TRUE;
     LrChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
     char *checksum = NULL;
     GError *tmp_err = NULL;
@@ -203,40 +204,40 @@ lr_yum_download_repomd(LrHandle *handle,
                                                       NULL,
                                                       NULL);
 
-    rc = lr_download_target(handle, target, &tmp_err);
+    ret = lr_download_target(handle, target, &tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (tmp_err) {
-        assert(rc == tmp_err->code);  // XXX: DEBUG
         g_propagate_prefixed_error(err, tmp_err,
                                    "Cannot download repomd.xml: ");
     } else if (target->err) {
-        rc = target->rcode;
+        ret = FALSE;
         g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode,
                     "Cannot download repomd.xml: %s",target->err);
     } else {
         // Set mirror used for download a repomd.xml to the handle
-        // TODO: Get rid of use_mirror
+        // TODO: Get rid of use_mirror attr
         lr_free(handle->used_mirror);
         handle->used_mirror = g_strdup(target->usedmirror);
     }
 
     lr_downloadtarget_free(target);
 
-    if (rc != LRE_OK) {
+    if (!ret) {
         /* Download of repomd.xml was not successful */
         g_debug("%s: repomd.xml download was unsuccessful", __func__);
     }
 
-    return rc;
+    return ret;
 }
 
-static int
+static gboolean
 lr_yum_download_repo(LrHandle *handle,
                      LrYumRepo *repo,
                      LrYumRepoMd *repomd,
                      GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret = TRUE;
     char *destdir;  /* Destination dir */
     GSList *targets = NULL;
     GError *tmp_err = NULL;
@@ -268,7 +269,7 @@ lr_yum_download_repo(LrHandle *handle,
             // TODO: TEST THIS
             lr_free(path);
             g_slist_free_full(targets, (GDestroyNotify) lr_downloadtarget_free);
-            return LRE_IO;
+            return FALSE;
         }
 
         if (handle->checks & LR_CHECK_CHECKSUM)
@@ -293,29 +294,32 @@ lr_yum_download_repo(LrHandle *handle,
         lr_free(path);
     }
 
-    if (targets)
-        ret = lr_download_single_cb(handle,
-                                    targets,
-                                    handle->user_cb,
-                                    handle->user_data,
-                                    &tmp_err);
+    if (!targets)
+        return TRUE;
+
+    ret = lr_download_single_cb(handle,
+                                targets,
+                                handle->user_cb,
+                                handle->user_data,
+                                &tmp_err);
 
     // Error handling
 
-    assert((ret == LRE_OK) || tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (tmp_err) {
         g_propagate_prefixed_error(err, tmp_err,
                                    "Downloading error: ");
     } else {
+        int code = LRE_OK;
         char *error_summary = NULL;
 
         for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
             LrDownloadTarget *target = elem->data;
             if (target->rcode != LRE_OK) {
-                if (ret == LRE_OK) {
+                if (code == LRE_OK) {
                     // First failed download target found
-                    ret = target->rcode;
+                    code = target->rcode;
                     error_summary = g_strdup(target->err);
                 } else {
                     error_summary = g_strconcat(error_summary,
@@ -326,8 +330,13 @@ lr_yum_download_repo(LrHandle *handle,
             }
         }
 
-        g_set_error(err, LR_DOWNLOADER_ERROR, ret,
-                    "Downloading error(s): %s", error_summary);
+        if (code != LRE_OK) {
+            // At least one target failed
+            ret = FALSE;
+            g_set_error(err, LR_DOWNLOADER_ERROR, code,
+                        "Downloading error(s): %s", error_summary);
+            g_free(error_summary);
+        }
     }
 
     g_slist_free_full(targets, (GDestroyNotify)lr_downloadtarget_free);
@@ -335,7 +344,7 @@ lr_yum_download_repo(LrHandle *handle,
     return ret;
 }
 
-static int
+static gboolean
 lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
                                    const char *path,
                                    GError **err)
@@ -349,7 +358,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
     assert(!err || *err == NULL);
 
     if (!rec || !path)
-        return LRE_OK;
+        return TRUE;
 
     expected_checksum = rec->checksum;
     checksum_type = lr_checksum_type(rec->checksum_type);
@@ -360,7 +369,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
     if (!expected_checksum) {
         // Empty checksum - suppose it's ok
         g_debug("%s: No checksum in repomd", __func__);
-        return LRE_OK;
+        return TRUE;
     }
 
     if (checksum_type == LR_CHECKSUM_UNKNOWN) {
@@ -368,7 +377,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
         g_set_error(err, LR_YUM_ERROR, LRE_UNKNOWNCHECKSUM,
                     "Unknown checksum type \"%s\" for %s",
                     rec->checksum_type, path);
-        return LRE_UNKNOWNCHECKSUM;
+        return FALSE;
     }
 
     fd = open(path, O_RDONLY);
@@ -376,7 +385,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
         g_debug("%s: Cannot open %s", __func__, path);
         g_set_error(err, LR_YUM_ERROR, LRE_IO,
                     "Cannot open %s: %s", path, strerror(errno));
-        return LRE_IO;
+        return FALSE;
     }
 
     ret = lr_checksum_fd_cmp(checksum_type,
@@ -392,61 +401,50 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
 
     if (!ret) {
         // Checksum calculation error
-        int code = tmp_err->code;
         g_debug("%s: Checksum check %s - Error: %s",
                 __func__, path, tmp_err->message);
         g_propagate_prefixed_error(err, tmp_err,
                                    "Checksum error %s: ", path);
-        return code;
+        return FALSE;
     } else if (!matches) {
         g_debug("%s: Checksum check %s - Mismatch", __func__, path);
         g_set_error(err, LR_YUM_ERROR, LRE_BADCHECKSUM,
-                    "Checksum mismatch %s: ", path);
-        return LRE_BADCHECKSUM;
+                    "Checksum mismatch %s", path);
+        return FALSE;
     }
 
     g_debug("%s: Checksum check - Passed", __func__);
 
-    return LRE_OK;
+    return TRUE;
 }
 
-// TODO:
-// This function shoud return True if no error, False if error is set
-// Add gboolean param for signalize that checksums matches or do not matches
-static int
+static gboolean
 lr_yum_check_repo_checksums(LrYumRepo *repo,
                             LrYumRepoMd *repomd,
                             GError **err)
 {
-    int ret = LRE_OK;
-
     assert(!err || *err == NULL);
 
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
+        gboolean ret;
         LrYumRepoMdRecord *record = elem->data;
 
         assert(record);
 
         const char *path = lr_yum_repo_path(repo, record->type);
-        ret = lr_yum_check_checksum_of_md_record(record, path, NULL);
-        g_debug("%s: Checksum rc: %d (%s)", __func__, ret, record->type);
-        if (ret != LRE_OK)
-            break;
+        ret = lr_yum_check_checksum_of_md_record(record, path, err);
+        if (!ret)
+            return FALSE;
     }
 
-    // TODO proper error checking
-
-    if (ret != LRE_OK)
-        g_set_error(err, LR_YUM_ERROR, ret, "%s", lr_strerror(ret));
-
-    return ret;
+    return TRUE;
 }
 
-static int
+static gboolean
 lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 {
+    gboolean ret;
     char *path;
-    int rc = LRE_OK;
     int fd;
     char *baseurl;
     LrYumRepo *repo;
@@ -467,7 +465,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
             g_set_error(err, LR_YUM_ERROR, LRE_NOTLOCAL,
                         "URL: %s doesn't seem to be a local repository",
                         baseurl);
-            return LRE_NOTLOCAL;
+            return FALSE;
         }
     } else {
         /* Skip file:// in baseurl */
@@ -502,17 +500,17 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot open %s: %s", path, strerror(errno));
             lr_free(path);
-            return LRE_IO;
+            return FALSE;
         }
 
         g_debug("%s: Parsing repomd.xml", __func__);
-        rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
-        if (rc != LRE_OK) {
+        ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
+        if (!ret) {
             g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);
             g_propagate_prefixed_error(err, tmp_err,
                                        "repomd.xml parser error: ");
             lr_free(path);
-            return rc;
+            return FALSE;
         }
 
         close(fd);
@@ -531,16 +529,16 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 
         /* Signature checking */
         if (handle->checks & LR_CHECK_GPG && repo->signature) {
-            rc = lr_gpg_check_signature(repo->signature,
+            ret = lr_gpg_check_signature(repo->signature,
                                         repo->repomd,
                                         NULL,
                                         &tmp_err);
-            if (rc != LRE_OK) {
+            if (!ret) {
                 g_debug("%s: repomd.xml GPG signature verification failed: %s",
                         __func__, tmp_err->message);
                 g_propagate_prefixed_error(err, tmp_err,
                             "repomd.xml GPG signature verification failed: ");
-                return rc;
+                return FALSE;
             }
         }
 
@@ -571,7 +569,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
                                 "Incomplete repository - %s is missing",
                                 path);
                     lr_free(path);
-                    return LRE_INCOMPLETEREPO;
+                    return FALSE;
                 }
             } else
                 lr_yum_repo_append(repo, record->type, path);
@@ -580,13 +578,14 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
     }
 
     g_debug("%s: Repository was successfully located", __func__);
-    return LRE_OK;
+    return TRUE;
 }
 
-static int
+static gboolean
 lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
 {
-    int rc = LRE_OK;
+    int rc;
+    gboolean ret = TRUE;
     int fd;
     int create_repodata_dir = 1;
     char *path_to_repodata;
@@ -620,13 +619,12 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                         "Cannot create directory: %s: %s",
                         path_to_repodata, strerror(errno));
             lr_free(path_to_repodata);
-            return LRE_CANNOTCREATEDIR;
+            return FALSE;
         }
     }
     lr_free(path_to_repodata);
 
     if (!handle->update) {
-        int ret;
         char *path;
 
         /* Store mirrorlist file */
@@ -642,17 +640,17 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot create %s: %s", ml_file_path, strerror(errno));
                 lr_free(ml_file_path);
-                return LRE_IO;
+                return FALSE;
             }
-            ret = lr_copy_content(handle->mirrorlist_fd, fd);
+            rc = lr_copy_content(handle->mirrorlist_fd, fd);
             close(fd);
-            if (ret != 0) {
+            if (rc != 0) {
                 g_debug("%s: Cannot copy content of mirrorlist file", __func__);
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot copy content of mirrorlist file %s: %s",
                         ml_file_path, strerror(errno));
                 lr_free(ml_file_path);
-                return LRE_IO;
+                return FALSE;
             }
             repo->mirrorlist = ml_file_path;
         }
@@ -668,11 +666,11 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
         }
 
         /* Download repomd.xml */
-        rc = lr_yum_download_repomd(handle, handle->metalink, fd, err);
-        if (rc != LRE_OK) {
+        ret = lr_yum_download_repomd(handle, handle->metalink, fd, err);
+        if (!ret) {
             close(fd);
             lr_free(path);
-            return rc;
+            return FALSE;
         }
 
         /* Check repomd.xml.asc if available.
@@ -697,14 +695,14 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                 close(fd);
                 lr_free(path);
                 lr_free(signature);
-                return LRE_IO;
+                return FALSE;
             }
 
             url = lr_pathconcat(handle->used_mirror, "repodata/repomd.xml.asc", NULL);
-            rc = lr_download_url(handle, url, fd_sig, &tmp_err);
+            ret = lr_download_url(handle, url, fd_sig, &tmp_err);
             lr_free(url);
             close(fd_sig);
-            if (rc != LRE_OK) {
+            if (!ret) {
                 // Signature doesn't exist
                 g_debug("%s: GPG signature doesn't exists: %s",
                         __func__, tmp_err->message);
@@ -714,8 +712,8 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             } else {
                 // Signature downloaded
                 repo->signature = g_strdup(signature);
-                rc = lr_gpg_check_signature(signature, path, NULL, &tmp_err);
-                if (rc != LRE_OK) {
+                ret = lr_gpg_check_signature(signature, path, NULL, &tmp_err);
+                if (!ret) {
                     g_debug("%s: GPG signature verification failed: %s",
                             __func__, tmp_err->message);
                     g_propagate_prefixed_error(err, tmp_err,
@@ -723,7 +721,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                     close(fd);
                     lr_free(path);
                     lr_free(signature);
-                    return rc;
+                    return FALSE;
                 }
                 g_debug("%s: GPG signature successfully verified", __func__);
             }
@@ -733,14 +731,14 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
 
         /* Parse repomd */
         g_debug("%s: Parsing repomd.xml", __func__);
-        rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
+        ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
         close(fd);
-        if (rc != LRE_OK) {
+        if (!ret) {
             g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);
             g_propagate_prefixed_error(err, tmp_err,
                                        "repomd.xml parser error: ");
             lr_free(path);
-            return rc;
+            return FALSE;
         }
 
         /* Fill result object */
@@ -756,19 +754,22 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
     }
 
     /* Download rest of metadata files */
-    rc = lr_yum_download_repo(handle, repo, repomd, &tmp_err);
-    if (rc) {
+    ret = lr_yum_download_repo(handle, repo, repomd, &tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
+
+    if (!ret) {
         g_debug("%s: Repository download error: %s", __func__, tmp_err->message);
         g_propagate_prefixed_error(err, tmp_err, "Yum repo downloading error: ");
+        return FALSE;
     }
 
-    return rc;
+    return TRUE;
 }
 
-int
+gboolean
 lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
 {
-    int rc = LRE_OK;
+    int ret = TRUE;
     LrYumRepo *repo;
     LrYumRepoMd *repomd;
 
@@ -778,36 +779,36 @@ lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
     if (!result) {
         g_set_error(err, LR_YUM_ERROR, LRE_BADFUNCARG,
                     "Missing result parameter");
-        return LRE_BADFUNCARG;
+        return FALSE;
     }
 
     if (!handle->baseurl && !handle->mirrorlist) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
                     "No base url nor mirrorlist specified");
-        return LRE_NOURL;
+        return FALSE;
     }
 
     if (handle->local && !handle->baseurl) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
                     "Localrepo specified, but no LRO_URL set");
-        return LRE_NOURL;
+        return FALSE;
     }
 
     if (handle->update) {
-        /* Download/Locate only specified files */
+        // Download/Locate only specified files
         if (!result->yum_repo || !result->yum_repomd) {
             g_set_error(err, LR_YUM_ERROR, LRE_INCOMPLETERESULT,
                     "Incomplete result object - "
                     "Cannot update on this result object");
-            return LRE_INCOMPLETERESULT;
+            return FALSE;
         }
     } else {
-        /* Download/Locate from scratch */
+        // Download/Locate from scratch
         if (result->yum_repo || result->yum_repomd) {
             g_set_error(err, LR_YUM_ERROR, LRE_ALREADYUSEDRESULT,
                         "This result object is not clear - "
                         "Already used result object");
-            return LRE_ALREADYUSEDRESULT;
+            return FALSE;
         }
         result->yum_repo = lr_yum_repo_init();
         result->yum_repomd = lr_yum_repomd_init();
@@ -817,17 +818,20 @@ lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
     repomd = result->yum_repomd;
 
     if (handle->local) {
-        /* Do not duplicate repository, just use the existing local one */
-        rc = lr_yum_use_local(handle, result, err);
-        if (rc != LRE_OK)
-            return rc;
+        // Do not duplicate repository, just use the existing local one
+
+        ret = lr_yum_use_local(handle, result, err);
+        if (!ret)
+            return FALSE;
+
         if (handle->checks & LR_CHECK_CHECKSUM)
-            rc = lr_yum_check_repo_checksums(repo, repomd, err);
+            ret = lr_yum_check_repo_checksums(repo, repomd, err);
     } else {
-        /* Download remote/Duplicate local repository */
-        rc = lr_yum_download_remote(handle, result, err);
-        /* All checksums are checked while downloading */
+        // Download remote/Duplicate local repository
+        // Note: All checksums are checked while downloading
+
+        ret = lr_yum_download_remote(handle, result, err);
     }
 
-    return rc;
+    return ret;
 }

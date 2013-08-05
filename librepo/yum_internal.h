@@ -28,7 +28,8 @@
 
 G_BEGIN_DECLS
 
-int lr_yum_perform(LrHandle *handle, LrResult *result, GError **err);
+gboolean
+lr_yum_perform(LrHandle *handle, LrResult *result, GError **err);
 
 G_END_DECLS
 

@@ -47,7 +47,7 @@ lr_mirrorlist_free(LrMirrorlist *mirrorlist)
     lr_free(mirrorlist);
 }
 
-int
+gboolean
 lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
 {
     FILE *f;
@@ -63,7 +63,7 @@ lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
     if (fd_dup == -1) {
         g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
                     "dup(%d) error: %s", fd, strerror(errno));
-        return LRE_IO;
+        return FALSE;
     }
 
     f = fdopen(fd_dup, "r");
@@ -71,7 +71,7 @@ lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
         g_debug("%s: Cannot fdopen(mirrorlist_fd): %s", __func__, strerror(errno));
         g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
                     "fdopen(%d, \"r\") error: %s", fd_dup, strerror(errno));
-        return LRE_IO;
+        return FALSE;
     }
 
     while ((p = fgets(buf, BUF_LEN, f))) {
@@ -100,5 +100,5 @@ lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
 
     fclose(f);
 
-    return LRE_OK;
+    return TRUE;
 }

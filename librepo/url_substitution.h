@@ -60,8 +60,8 @@ lr_urlvars_free(LrUrlVars *list);
  * @param list          a list of variables and its substitutions or NULL
  * @return              a newly allocated string with substituted url
  */
-char
-*lr_url_substitute(const char *url, LrUrlVars *list);
+char *
+lr_url_substitute(const char *url, LrUrlVars *list);
 
 /** @} */
 

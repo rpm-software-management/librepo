@@ -12,7 +12,8 @@
 
 START_TEST(test_repomd_parsing)
 {
-    int fd, rc;
+    int fd;
+    gboolean ret;
     LrYumRepoMd *repomd;
     char *repomd_path;
     GError *tmp_err = NULL;
@@ -25,8 +26,9 @@ START_TEST(test_repomd_parsing)
     fd = open(repomd_path, O_RDONLY);
     fail_if(fd < 0);
 
-    rc = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
-    fail_if(rc != LRE_OK);
+    ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
+    fail_if(!ret);
+    fail_if(tmp_err);
     fail_if(g_slist_length(repomd->records) != 12);
     fail_if(!lr_yum_repomd_get_record(repomd, "primary"));
     fail_if(!lr_yum_repomd_get_record(repomd, "filelists"));

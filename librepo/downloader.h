@@ -49,9 +49,12 @@ lr_sigint_handler(int sig);
  *                  Could be NULL. Then return immediately with LRE_OK
  *                  return code.
  * @param err       GError **
- * @return          LrRc code
+ * @return          Return TRUE if downloading was completed without error.
+ *                  Note: TRUE doesn't mean that all targets was
+ *                  downloaded successfully! You have to check
+ *                  status of all downloaded targets.
  */
-int
+gboolean
 lr_download(LrHandle *handle, GSList *targets, GError **err);
 
 /** Wrapper over ::lr_download that takes only single ::LrDownloadTarget.
@@ -60,7 +63,7 @@ lr_download(LrHandle *handle, GSList *targets, GError **err);
  * @param err       GError **
  * @return          See ::lr_download
  */
-int
+gboolean
 lr_download_target(LrHandle *handle, LrDownloadTarget *target, GError **err);
 
 /** Wrapper over the ::lr_download_target that takes only url and fd.
@@ -70,7 +73,7 @@ lr_download_target(LrHandle *handle, LrDownloadTarget *target, GError **err);
  * @param err       GError **
  * @return          See ::lr_download
  */
-int
+gboolean
 lr_download_url(LrHandle *handle, const char *url, int fd, GError **err);
 
 /** Wrapper over the ::lr_download that calculate collective statistics of
@@ -83,7 +86,7 @@ lr_download_url(LrHandle *handle, const char *url, int fd, GError **err);
  * @param err       GError **
  * @return          See ::lr_download
  */
-int
+gboolean
 lr_download_single_cb(LrHandle *handle,
                       GSList *targets,
                       LrProgressCb cb,

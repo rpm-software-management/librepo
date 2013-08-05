@@ -26,7 +26,7 @@ END_TEST
 START_TEST(test_mirrorlist_01)
 {
     int fd;
-    int ret;
+    gboolean ret;
     char *path;
     GSList *elem = NULL;
     LrMirrorlist *ml = NULL;
@@ -41,7 +41,7 @@ START_TEST(test_mirrorlist_01)
     fail_if(ml == NULL);
     ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(tmp_err);
 
     fail_if(g_slist_length(ml->urls) != 2);
@@ -60,7 +60,7 @@ END_TEST
 START_TEST(test_mirrorlist_02)
 {
     int fd;
-    int ret;
+    gboolean ret;
     char *path;
     LrMirrorlist *ml = NULL;
     GError *tmp_err = NULL;
@@ -74,7 +74,7 @@ START_TEST(test_mirrorlist_02)
     fail_if(ml == NULL);
     ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(tmp_err);
     fail_if(g_slist_length(ml->urls) != 0);
     lr_mirrorlist_free(ml);
@@ -84,7 +84,7 @@ END_TEST
 START_TEST(test_mirrorlist_03)
 {
     int fd;
-    int ret;
+    gboolean ret;
     char *path;
     LrMirrorlist *ml = NULL;
     GError *tmp_err = NULL;
@@ -98,7 +98,7 @@ START_TEST(test_mirrorlist_03)
     fail_if(ml == NULL);
     ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(tmp_err);
     fail_if(g_slist_length(ml->urls) != 0);
     lr_mirrorlist_free(ml);

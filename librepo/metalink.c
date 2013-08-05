@@ -364,13 +364,13 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *name)
     return;
 }
 
-int
+gboolean
 lr_metalink_parse_file(LrMetalink *metalink,
                        int fd,
                        const char *filename,
                        GError **err)
 {
-    int ret = LRE_OK;
+    gboolean ret = TRUE;
     XML_Parser parser;
     ParserData pd;
     LrStatesSwitch *sw;
@@ -422,7 +422,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
                     __func__, strerror(errno));
             g_set_error(err, LR_METALINK_ERROR, LRE_IO,
                         "Cannot read metalink fd %d: %s", fd, strerror(errno));
-            ret = LRE_IO;
+            ret = FALSE;
             break;
         }
 
@@ -432,7 +432,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
             g_set_error(err, LR_METALINK_ERROR, LRE_MLXML,
                         "Metalink parser error: %s",
                         XML_ErrorString(XML_GetErrorCode(parser)));
-            ret = LRE_MLXML;
+            ret = FALSE;
             break;
         }
 
@@ -440,7 +440,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
             break;
 
         if (pd.ret != LRE_OK) {
-            ret = pd.ret;
+            ret = FALSE;
             g_set_error(err, LR_METALINK_ERROR, ret,
                         "Error while parsing metalink: %s", lr_strerror(ret));
             break;
@@ -453,8 +453,8 @@ lr_metalink_parse_file(LrMetalink *metalink,
 
     if (!pd.found) {
         g_set_error(err, LR_METALINK_ERROR, LRE_MLBAD,
-                    "Bad metalink, file %s was not found", filename);
-        return LRE_MLBAD; /* The wanted file was not found in metalink */
+                    "file %s was not found in metalink", filename);
+        return FALSE; /* The wanted file was not found in metalink */
     }
 
     return ret;

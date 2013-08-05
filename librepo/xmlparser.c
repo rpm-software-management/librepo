@@ -139,7 +139,7 @@ lr_xml_parser_strtoll(LrParserData *pd,
     return val;
 }
 
-int
+gboolean
 lr_xml_parser_generic(XML_Parser parser,
                       LrParserData *pd,
                       int fd,
@@ -147,7 +147,7 @@ lr_xml_parser_generic(XML_Parser parser,
 {
     /* Note: This function uses .err members of LrParserData! */
 
-    int ret = LRE_OK;
+    gboolean ret = TRUE;
 
     assert(parser);
     assert(pd);
@@ -158,27 +158,27 @@ lr_xml_parser_generic(XML_Parser parser,
         int len;
         void *buf = XML_GetBuffer(parser, XML_BUFFER_SIZE);
         if (!buf) {
-            ret = LRE_MEMORY;
-            g_set_error(err, LR_XML_PARSER_ERROR, ret,
+            ret = FALSE;
+            g_set_error(err, LR_XML_PARSER_ERROR, LRE_MEMORY,
                         "Out of memory: Cannot allocate buffer for xml parser");
             break;
         }
 
         len = read(fd, (void *) buf, XML_BUFFER_SIZE);
         if (len < 0) {
-            ret = LRE_IO;
+            ret = FALSE;
             g_critical("%s: Error while reading xml : %s\n",
                        __func__, strerror(errno));
-            g_set_error(err, LR_XML_PARSER_ERROR, ret,
+            g_set_error(err, LR_XML_PARSER_ERROR, LRE_IO,
                         "Error while reading xml: %s", strerror(errno));
             break;
         }
 
         if (!XML_ParseBuffer(parser, len, len == 0)) {
-            ret = LRE_XMLPARSER;
+            ret = FALSE;
             g_critical("%s: parsing error: %s\n",
                        __func__, XML_ErrorString(XML_GetErrorCode(parser)));
-            g_set_error(err, LR_XML_PARSER_ERROR, ret,
+            g_set_error(err, LR_XML_PARSER_ERROR, LRE_XMLPARSER,
                         "Parse error at line: %d (%s)",
                         (int) XML_GetCurrentLineNumber(parser),
                         (char *) XML_ErrorString(XML_GetErrorCode(parser)));
@@ -186,7 +186,7 @@ lr_xml_parser_generic(XML_Parser parser,
         }
 
         if (pd->err) {
-            ret = pd->err->code;
+            ret = FALSE;
             g_propagate_error(err, pd->err);
             break;
         }
