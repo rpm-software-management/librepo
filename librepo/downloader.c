@@ -97,6 +97,9 @@ typedef struct {
 
     // Configuration
 
+    gboolean failfast; /*!<
+        Fail fast */
+
     int max_parallel_connections; /*!<
         Maximal number of parallel downloads. */
 
@@ -294,6 +297,12 @@ prepare_next_transfer(LrDownload *dd, GError **err)
             lr_downloadtarget_set_error(target->target, LRE_NOURL,
                         "Cannot download, all mirrors were already tried "
                         "without success");
+            if (dd->failfast) {
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+                            "Cannot download %s: All mirrors were tried",
+                            target->target->path);
+                return FALSE;
+            }
             return TRUE;
         }
     }
@@ -558,6 +567,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         fclose(target->f);
         target->f = NULL;
 
+        GError *fail_fast_error = NULL;
+
         if (tmp_err) {
             // There was an error during transfer
 
@@ -574,8 +585,6 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 g_debug("%s: Ignore error - Try another mirror", __func__);
                 target->state = LR_DS_WAITING;
                 g_error_free(tmp_err);  // Ignore the error
-
-
             } else {
                 // No more retry (or baseurl used) => set target as failed
                 g_debug("%s: No more retries (tried: %d)",
@@ -585,7 +594,10 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                                             tmp_err->code,
                                             "Download failed: %s",
                                             tmp_err->message);
-                g_error_free(tmp_err);
+                if (dd->failfast)
+                    g_propagate_error(&fail_fast_error, tmp_err);
+                else
+                    g_error_free(tmp_err);
             }
 
             // Truncate file - remove downloaded garbage (error html page etc.)
@@ -624,6 +636,12 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
         lr_free(effective_url);
         freed_transfers++;
+
+        if (fail_fast_error) {
+            // A single download failed - interrupt whole downloading
+            g_propagate_error(err, fail_fast_error);
+            return FALSE;
+        }
     }
 
     // At this point, after handles of finished transfers were removed
@@ -750,7 +768,10 @@ lr_perform(LrDownload *dd, GError **err)
 }
 
 gboolean
-lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
+lr_download(LrHandle *lr_handle,
+            GSList *targets,
+            gboolean failfast,
+            GError **err)
 {
     gboolean ret;
     LrDownload dd;             // dd stands for Download Data
@@ -770,6 +791,7 @@ lr_download(LrHandle *lr_handle, GSList *targets, GError **err)
     }
 
     // Prepare download data
+    dd.failfast = failfast;
     dd.max_parallel_connections = 3; // TODO
     dd.max_connection_per_host = 2; // TODO
     dd.max_mirrors_to_try = (lr_handle) ? lr_handle->maxmirrortries : 0;
@@ -899,7 +921,7 @@ lr_download_target(LrHandle *lr_handle,
 
     list = g_slist_prepend(list, target);
 
-    ret = lr_download(lr_handle, list, err);
+    ret = lr_download(lr_handle, list, TRUE, err);
 
     g_slist_free(list);
 
@@ -922,12 +944,10 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     ret = lr_download_target(lr_handle, target, &tmp_err);
 
     assert(ret || tmp_err);
+    assert(!(target->err) || !ret);
 
     if (!ret) {
         g_propagate_error(err, tmp_err);
-    } else if (target->err) {
-        ret = FALSE;
-        g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode, target->err);
     }
 
     lr_downloadtarget_free(target);
@@ -1002,6 +1022,7 @@ lr_multi_progress_func(void* ptr,
 gboolean
 lr_download_single_cb(LrHandle *lr_handle,
                       GSList *targets,
+                      gboolean failfast,
                       LrProgressCb cb,
                       void *cbdata,
                       GError **err)
@@ -1031,7 +1052,7 @@ lr_download_single_cb(LrHandle *lr_handle,
         target->cbdata      = cbdata;
     }
 
-    ret = lr_download(lr_handle, targets, err);
+    ret = lr_download(lr_handle, targets, failfast, err);
 
     // Remove callbacks and callback data
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {

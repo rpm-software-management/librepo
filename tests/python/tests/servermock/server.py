@@ -7,4 +7,4 @@ app.register_blueprint(yum_mock, url_prefix='/yum')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, threaded=True)

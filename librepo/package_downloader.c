@@ -157,11 +157,7 @@ lr_download_package(LrHandle *handle,
                                                       handle->user_data);
     ret = lr_download_target(handle, target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
-
-    if (!tmp_err && target->err) {
-        g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, target->rcode, "%s: %s",
-                    target->path, target->err);
-    }
+    assert(!target->err || !ret);
 
     lr_downloadtarget_free(target);
 
