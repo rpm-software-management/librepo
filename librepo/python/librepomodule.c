@@ -24,6 +24,7 @@
 
 #include "exception-py.h"
 #include "handle-py.h"
+#include "packagetarget-py.h"
 #include "result-py.h"
 #include "yum-py.h"
 
@@ -106,35 +107,42 @@ init_librepo(void)
     if (!m)
         return;
 
-    /* Exceptions */
+    // Exceptions
     if (!init_exceptions())
         return;
     PyModule_AddObject(m, "LibrepoException", LrErr_Exception);
 
-    /* Objects */
-    /* _librepo.Handle */
+    // Objects
+
+    // _librepo.Handle
     if (PyType_Ready(&Handle_Type) < 0)
         return;
     Py_INCREF(&Handle_Type);
     PyModule_AddObject(m, "Handle", (PyObject *)&Handle_Type);
-    /* _librepo.Result */
+
+    // _librepo.Result
     if (PyType_Ready(&Result_Type) < 0)
         return;
     Py_INCREF(&Result_Type);
     PyModule_AddObject(m, "Result", (PyObject *)&Result_Type);
 
-    /* Init module */
-//    lr_global_init();
+    // _librepo.PackageTarget
+    if (PyType_Ready(&PackageTarget_Type) < 0)
+        return;
+    Py_INCREF(&PackageTarget_Type);
+    PyModule_AddObject(m, "PackageTarget", (PyObject *)&PackageTarget_Type);
+
+    // Init module
     Py_AtExit(exit_librepo);
 
-    /* Module constants */
+    // Module constants
 
-    /* Version */
+    // Version
     PyModule_AddIntConstant(m, "VERSION_MAJOR", LR_VERSION_MAJOR);
     PyModule_AddIntConstant(m, "VERSION_MINOR", LR_VERSION_MINOR);
     PyModule_AddIntConstant(m, "VERSION_PATCH", LR_VERSION_PATCH);
 
-    /* Handle options */
+    // Handle options
     PyModule_AddIntConstant(m, "LRO_UPDATE", LRO_UPDATE);
     PyModule_AddIntConstant(m, "LRO_URL", LRO_URL);
     PyModule_AddIntConstant(m, "LRO_MIRRORLIST", LRO_MIRRORLIST);
@@ -165,7 +173,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_YUMBLIST", LRO_YUMBLIST);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
-    /* Handle info options */
+    // Handle info options
     PyModule_AddIntConstant(m, "LRI_UPDATE", LRI_UPDATE);
     PyModule_AddIntConstant(m, "LRI_URL", LRI_URL);
     PyModule_AddIntConstant(m, "LRI_MIRRORLIST", LRI_MIRRORLIST);
@@ -183,16 +191,16 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_MIRRORS", LRI_MIRRORS);
     PyModule_AddIntConstant(m, "LRI_METALINK", LRI_METALINK);
 
-    /* Check options */
+    // Check options
     PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);
     PyModule_AddIntConstant(m, "LR_CHECK_CHECKSUM", LR_CHECK_CHECKSUM);
 
-    /* Repo type */
+    // Repo type
     PyModule_AddIntConstant(m, "LR_YUMREPO", LR_YUMREPO);
     PyModule_AddIntConstant(m, "LR_SUSEREPO", LR_SUSEREPO);
     PyModule_AddIntConstant(m, "LR_DEBREPO", LR_DEBREPO);
 
-    /* Proxy type */
+    // Proxy type
     PyModule_AddIntConstant(m, "LR_PROXY_HTTP", LR_PROXY_HTTP);
     PyModule_AddIntConstant(m, "LR_PROXY_HTTP_1_0", LR_PROXY_HTTP_1_0);
     PyModule_AddIntConstant(m, "LR_PROXY_SOCKS4", LR_PROXY_SOCKS4);
@@ -200,7 +208,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LR_PROXY_SOCKS4A", LR_PROXY_SOCKS4A);
     PyModule_AddIntConstant(m, "LR_PROXY_SOCKS5_HOSTNAME", LR_PROXY_SOCKS5_HOSTNAME);
 
-    /* Return codes */
+    // Return codes
     PyModule_AddIntConstant(m, "LRE_OK", LRE_OK);
     PyModule_AddIntConstant(m, "LRE_BADFUNCARG", LRE_BADFUNCARG);
     PyModule_AddIntConstant(m, "LRE_BADOPTARG", LRE_BADOPTARG);
@@ -233,12 +241,12 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_ALREADYDOWNLOADED", LRE_ALREADYDOWNLOADED);
     PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
 
-    /* Result option */
+    // Result option
     PyModule_AddIntConstant(m, "LRR_YUM_REPO", LRR_YUM_REPO);
     PyModule_AddIntConstant(m, "LRR_YUM_REPOMD", LRR_YUM_REPOMD);
     PyModule_AddIntConstant(m, "LRR_SENTINEL", LRR_SENTINEL);
 
-    /* Checksums */
+    // Checksums
     PyModule_AddIntConstant(m, "CHECKSUM_UNKNOWN", LR_CHECKSUM_UNKNOWN);
     PyModule_AddIntConstant(m, "CHECKSUM_MD5", LR_CHECKSUM_MD5);
     PyModule_AddIntConstant(m, "CHECKSUM_SHA", LR_CHECKSUM_SHA);

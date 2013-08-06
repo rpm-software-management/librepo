@@ -555,9 +555,16 @@ ATTR_TO_LRI = {
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
 LR_CHECK_CHECKSUM   = _librepo.LR_CHECK_CHECKSUM
 
+CHECK_GPG        = LR_CHECK_GPG
+CHECK_CHECKSUM   = LR_CHECK_CHECKSUM
+
 LR_YUMREPO  = _librepo.LR_YUMREPO
 LR_SUSEREPO = _librepo.LR_SUSEREPO
 LR_DEBREPO  = _librepo.LR_DEBREPO
+
+YUMREPO  = LR_YUMREPO
+SUSEREPO = LR_SUSEREPO
+DEBREPO  = LR_DEBREPO
 
 LR_PROXY_HTTP               = _librepo.LR_PROXY_HTTP
 LR_PROXY_HTTP_1_0           = _librepo.LR_PROXY_HTTP_1_0
@@ -566,11 +573,24 @@ LR_PROXY_SOCKS5             = _librepo.LR_PROXY_SOCKS5
 LR_PROXY_SOCKS4A            = _librepo.LR_PROXY_SOCKS4A
 LR_PROXY_SOCKS5_HOSTNAME    = _librepo.LR_PROXY_SOCKS5_HOSTNAME
 
+PROXY_HTTP               = _librepo.LR_PROXY_HTTP
+PROXY_HTTP_1_0           = _librepo.LR_PROXY_HTTP_1_0
+PROXY_SOCKS4             = _librepo.LR_PROXY_SOCKS4
+PROXY_SOCKS5             = _librepo.LR_PROXY_SOCKS5
+PROXY_SOCKS4A            = _librepo.LR_PROXY_SOCKS4A
+PROXY_SOCKS5_HOSTNAME    = _librepo.LR_PROXY_SOCKS5_HOSTNAME
+
 LR_YUM_FULL         = None
 LR_YUM_REPOMDONLY   = [None]
 LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
 LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
 LR_YUM_BASEHAWKEY   = ["primary", "filelists", "prestodelta", None]
+
+YUM_FULL         = LR_YUM_FULL
+YUM_REPOMDONLY   = LR_YUM_REPOMDONLY
+YUM_BASEXML      = LR_YUM_BASEXML
+YUM_BASEDB       = LR_YUM_BASEDB
+YUM_BASEHAWKEY   = LR_YUM_BASEHAWKEY
 
 LRE_OK                  = _librepo.LRE_OK
 LRE_BADFUNCARG          = _librepo.LRE_BADFUNCARG
@@ -838,6 +858,20 @@ class Handle(_librepo.Handle):
         _librepo.Handle.perform(self, result)
         return result
 
+    def download_packages(self, list, failfast=False):
+        """
+        Download list of packages. *list* is a list of PackageTarget objects.
+        If the *failfast* is True, then if any of download fails, the
+        whole downloading is stoped immediately  and an exception is raised.
+        If the *failfast* is False, then the function returns after all
+        downloads finish (no matter if successfully or unsuccessfully).
+        If *failfast* is False an exception is raised only if a nonrecoverable
+        error related to the function itself is meet (Errors related to
+        downloads are ignored and will be reported via related PackageTarget
+        objects).
+        """
+        return _librepo.Handle.download_packages(self, list, failfast)
+
 class Result(_librepo.Result):
     """Librepo result class
 
@@ -867,6 +901,18 @@ class Result(_librepo.Result):
                                  (self.__class__.__name__, attr))
         return self.getinfo(ATTR_TO_LRR[attr])
 
+class PackageTarget(_librepo.PackageTarget):
+    """
+    Represent a single package that will be downloaded by
+    :meth:`~librepo.Handle.download_packages()`.
+    """
+
+    def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
+                 checksum=None, base_url=None, resume=False, progresscb=None,
+                 cbdata=None):
+        _librepo.PackageTarget.__init__(self, relative_url, dest, checksum_type,
+                                        checksum, base_url, resume, progresscb,
+                                        cbdata)
 
 # Functions
 

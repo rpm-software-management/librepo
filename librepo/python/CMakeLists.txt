@@ -16,6 +16,7 @@ SET (librepomodule_SRCS
      exception-py.c
      handle-py.c
      librepomodule.c
+     packagetarget-py.c
      result-py.c
      typeconversion.c
      yum-py.c)

@@ -25,6 +25,7 @@
 
 #include "exception-py.h"
 #include "handle-py.h"
+#include "packagetarget-py.h"
 #include "result-py.h"
 #include "typeconversion.h"
 
@@ -60,7 +61,7 @@ check_HandleStatus(const _HandleObject *self)
 
 /* Callback stuff */
 
-int
+static int
 progress_callback(void *data, double total_to_download, double now_downloaded)
 {
     _HandleObject *self;
@@ -622,12 +623,61 @@ download_package(_HandleObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+download_packages(_HandleObject *self, PyObject *args)
+{
+    gboolean ret;
+    PyObject *py_list;
+    int failfast;
+    GError *tmp_err = NULL;
+
+    if (!PyArg_ParseTuple(args, "O!i:download_packages",
+                          &PyList_Type, &py_list, &failfast))
+        return NULL;
+
+    if (check_HandleStatus(self))
+        return NULL;
+
+    // Convert python list to GSList
+    GSList *list = NULL;
+    Py_ssize_t len = PyList_Size(py_list);
+    for (Py_ssize_t x=0; x < len; x++) {
+        PyObject *py_packagetarget = PyList_GetItem(py_list, x);
+        LrPackageTarget *target = PackageTarget_FromPyObject(py_packagetarget);
+        if (!target)
+            return NULL;
+        list = g_slist_append(list, target);
+    }
+
+    Py_XINCREF(py_list);
+
+    ret = lr_download_packages(self->handle, list, failfast, &tmp_err);
+
+    assert((ret && !tmp_err) || (!ret && tmp_err));
+
+    if (!ret && tmp_err->code == LRE_INTERRUPTED) {
+        Py_XDECREF(py_list);
+        g_error_free(tmp_err);
+        PyErr_SetInterrupt();
+        PyErr_CheckSignals();
+        return NULL;
+    }
+
+    Py_XDECREF(py_list);
+
+    if (!ret)
+        RETURN_ERROR(&tmp_err, -1, NULL);
+
+    Py_RETURN_NONE;
+}
+
 static struct
 PyMethodDef handle_methods[] = {
     { "setopt", (PyCFunction)setopt, METH_VARARGS, NULL },
     { "getinfo", (PyCFunction)getinfo, METH_VARARGS, NULL },
     { "perform", (PyCFunction)perform, METH_VARARGS, NULL },
     { "download_package", (PyCFunction)download_package, METH_VARARGS, NULL },
+    { "download_packages", (PyCFunction)download_packages, METH_VARARGS, NULL },
     { NULL }
 };
 
