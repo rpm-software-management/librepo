@@ -204,10 +204,16 @@ lr_packagetarget_new(const char *relative_url,
 {
     LrPackageTarget *target;
 
-    assert(!err || *err == NULL);
     assert(relative_url);
+    assert(!err || *err == NULL);
 
     target = lr_malloc0(sizeof(*target));
+    if (!target) {
+        g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_MEMORY,
+                    "Out of memory");
+        return NULL;
+    }
+
     target->chunk = g_string_chunk_new(16);
 
     target->relative_url = lr_string_chunk_insert(target->chunk, relative_url);
@@ -223,7 +229,7 @@ lr_packagetarget_new(const char *relative_url,
 }
 
 void
-lr_packagetraget_free(LrPackageTarget *target)
+lr_packagetarget_free(LrPackageTarget *target)
 {
     g_string_chunk_free(target->chunk);
     g_free(target);

@@ -121,7 +121,7 @@ lr_packagetarget_new(const char *relative_url,
                      GError **err);
 
 void
-lr_packagetraget_free(LrPackageTarget *target);
+lr_packagetarget_free(LrPackageTarget *target);
 
 gboolean
 lr_download_packages(LrHandle *handle,
