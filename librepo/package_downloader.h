@@ -70,6 +70,7 @@ lr_download_package(LrHandle *handle,
                     gboolean resume,
                     GError **err);
 
+/** LrPackageTarget structure */
 typedef struct {
 
     char *relative_url; /*!<
@@ -109,6 +110,26 @@ typedef struct {
 
 } LrPackageTarget;
 
+/** Create new LrPackageTarget object.
+ * @param relative_url      Relative part of URL to download.
+ *                          First part of URL will be picked from the LrHandle
+ *                          (LRO_URL or mirror) during download proccess or
+ *                          base_url will be used if it is specified.
+ * @param dest              Destination filename or just directory (filename
+ *                          itself will be derived from the relative_url) or
+ *                          NULL (current working directory + filename derived
+ *                          from relative_url will be used).
+ * @param checksum_type     Type of checksum or LR_CHECKSUM_UNKNOWN.
+ * @param checksum          Expected checksum value or NULL.
+ * @param base_url          Base URL or NULL
+ * @param resume            If TRUE, then downloader try to resume download
+ *                          if destination file exists. If the file doesn't
+ *                          exists, it will be normally downloaded again.
+ * @param progresscb        Progress callback for this transfer.
+ * @param cbdata            User data for the callback
+ * @param err               GError **
+ * @return                  Newly allocated LrPackageTarget or NULL on error
+ */
 LrPackageTarget *
 lr_packagetarget_new(const char *relative_url,
                      const char *dest,
@@ -120,9 +141,29 @@ lr_packagetarget_new(const char *relative_url,
                      void *cbdata,
                      GError **err);
 
+/** Free ::LrPackageTarget object.
+ * @param target        LrPackageTarget object
+ */
 void
 lr_packagetarget_free(LrPackageTarget *target);
 
+/** Download all LrPackageTargets at the targets GSList.
+ * @param handle            ::LrHandle object
+ * @param targets           GSList where each element is a ::LrPackageTarget
+ *                          object
+ * @param failfast          If TRUE, then whole downloading is stoped
+ *                          immediately when any of download fails
+ *                          (FALSE is returned and err is set).
+ *                          If the failfast is FALSE, then this function
+ *                          returns after all downloads finish (no matter
+ *                          if successfully or unsuccessfully) and FALSE
+ *                          is returned only if a nonrecoverable
+ *                          error related to the function itself is meet
+ *                          (Errors related to individual downloads are
+ *                          reported via corresponding PackageTarget objects).
+ * @param err               GError **
+ * @return                  If FALSE then err is set.
+ */
 gboolean
 lr_download_packages(LrHandle *handle,
                      GSList *targets,

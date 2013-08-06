@@ -861,14 +861,14 @@ class Handle(_librepo.Handle):
     def download_packages(self, list, failfast=False):
         """
         Download list of packages. *list* is a list of PackageTarget objects.
-        If the *failfast* is True, then if any of download fails, the
-        whole downloading is stoped immediately  and an exception is raised.
-        If the *failfast* is False, then the function returns after all
-        downloads finish (no matter if successfully or unsuccessfully).
-        If *failfast* is False an exception is raised only if a nonrecoverable
-        error related to the function itself is meet (Errors related to
-        downloads are ignored and will be reported via related PackageTarget
-        objects).
+        If the *failfast* is True, then whole downloading is stoped
+        immediately when any of download fails (and exception is raised).
+        If the failfast is False, then this function returns after all
+        downloads finish (no matter if successfully or unsuccessfully)
+        and exception is raised only if a nonrecoverable
+        error related to the function itself is meet
+        (Errors related to individual downloads are
+        reported via corresponding PackageTarget objects)
         """
         return _librepo.Handle.download_packages(self, list, failfast)
 
