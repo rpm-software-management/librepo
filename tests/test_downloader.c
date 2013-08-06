@@ -24,7 +24,7 @@ START_TEST(test_downloader_no_list)
     GError *err = NULL;
 
     ret = lr_download(NULL, NULL, FALSE, &err);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(err);
 }
 END_TEST
@@ -64,7 +64,7 @@ START_TEST(test_downloader_single_file)
     fail_if(tmp_err);
 
     ret = lr_download(handle, list, FALSE, &err);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(err);
 
     lr_handle_free(handle);
@@ -109,7 +109,7 @@ START_TEST(test_downloader_single_file_2)
     // Download
 
     ret = lr_download(NULL, list, FALSE, &err);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(err);
 
     // Check results
@@ -169,7 +169,7 @@ START_TEST(test_downloader_two_files)
     fail_if(tmp_err);
 
     ret = lr_download(handle, list, FALSE, &err);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(err);
 
     lr_handle_free(handle);
@@ -240,7 +240,7 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(tmp_err);
 
     ret = lr_download(handle, list, FALSE, &err);
-    fail_if(ret != LRE_OK);
+    fail_if(!ret);
     fail_if(err);
 
     lr_handle_free(handle);
