@@ -287,8 +287,8 @@ lr_download_packages(LrHandle *handle,
 
         // Prepare destination filename
         if (packagetarget->dest) {
-            if (g_str_has_suffix(packagetarget->dest, ""G_DIR_SEPARATOR_S)) {
-                // Dir specified (nobasename specified)
+            if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
+                // Dir specified
                 gchar *file_basename = g_path_get_basename(packagetarget->relative_url);
                 local_path = g_build_filename(packagetarget->dest,
                                               file_basename,

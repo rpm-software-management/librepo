@@ -142,3 +142,282 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         pkg = os.path.join(self.tmpdir, config.PACKAGE_01_01)
         self.assertTrue(os.path.isfile(pkg))
 
+class TestCaseYumPackagesDownloading(TestCaseWithFlask):
+    application = app
+
+#    @classmethod
+#    def setUpClass(cls):
+#        super(TestCaseYumPackageDownloading, cls).setUpClass()
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir)
+
+    def test_download_packages_00(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        h.download_packages(pkgs)
+
+    def test_download_packages_01(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir))
+
+        h.download_packages(pkgs)
+
+        for pkg in pkgs:
+            self.assertTrue(pkg.err is None)
+            self.assertTrue(os.path.isfile(pkg.local_path))
+
+    def test_download_packages_02(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir))
+        dest = os.path.join(self.tmpdir, "foo-haha-lol.rpm")
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=dest))
+
+        h.download_packages(pkgs)
+
+        for pkg in pkgs:
+            self.assertTrue(pkg.err is None)
+            self.assertTrue(os.path.isfile(pkg.local_path))
+
+        self.assertTrue(os.path.isfile(dest))
+
+    def test_download_packages_02_with_failfast(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir))
+        dest = os.path.join(self.tmpdir, "foo-haha-lol.rpm")
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=dest))
+
+        h.download_packages(pkgs, failfast=True)
+
+        for pkg in pkgs:
+            self.assertTrue(pkg.err is None)
+            self.assertTrue(os.path.isfile(pkg.local_path))
+
+        self.assertTrue(os.path.isfile(dest))
+
+    def test_download_packages_one_url_is_bad_01(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget("so_bad_url_of_foo_rpm.rpm",
+                                          dest=self.tmpdir))
+
+        h.download_packages(pkgs)
+
+        self.assertTrue(pkgs[0].err is None)
+        self.assertTrue(os.path.isfile(pkgs[0].local_path))
+
+        self.assertTrue(pkgs[1].err is not None)
+        self.assertTrue(os.path.isfile(pkgs[1].local_path))
+
+    def test_download_packages_one_url_is_bad_with_failfast(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget("so_bad_url_of_foo_rpm.rpm",
+                                          dest=self.tmpdir))
+
+        self.assertRaises(librepo.LibrepoException, h.download_packages,
+                pkgs, failfast=True)
+
+        # Err state is undefined, it could be error because of interruption
+        # of could bo None because it was downloaded at one shot before
+        # second download fails.
+
+        #self.assertTrue(pkgs[0].err is not None)
+        self.assertTrue(os.path.isfile(pkgs[0].local_path))
+
+        self.assertTrue(pkgs[1].err is not None)
+        self.assertTrue(os.path.isfile(pkgs[1].local_path))
+
+    def test_download_packages_with_checksum_check(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          checksum_type=librepo.SHA256,
+                                          checksum=config.PACKAGE_01_01_SHA256))
+
+        h.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertEqual(pkg.relative_url, config.PACKAGE_01_01)
+        self.assertEqual(pkg.dest, self.tmpdir)
+        self.assertEqual(pkg.base_url, None)
+        self.assertEqual(pkg.checksum_type, librepo.SHA256)
+        self.assertEqual(pkg.checksum, config.PACKAGE_01_01_SHA256)
+        self.assertEqual(pkg.resume, 0)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        self.assertEqual(pkg.local_path, os.path.join(self.tmpdir,
+                                    os.path.basename(config.PACKAGE_01_01)))
+        self.assertTrue(pkg.err is None)
+
+    def test_download_packages_with_bad_checksum(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          checksum_type=librepo.SHA256,
+                                          checksum="badchecksum"))
+
+        h.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err)
+
+    def test_download_packages_with_bad_checksum_with_failfast(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          checksum_type=librepo.SHA256,
+                                          checksum="badchecksum"))
+
+        self.assertRaises(librepo.LibrepoException, h.download_packages,
+                          pkgs, failfast=True)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err)
+
+    def test_download_packages_with_baseurl(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, ".")
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          base_url=url))
+
+        h.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
+    def test_download_packages_with_resume(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          resume=False))
+
+        h.download_packages(pkgs)
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
+        # Again with resume on
+        # Because the package already exists and checksum matches,
+        # then download should not be performed!
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          resume=True,
+                                          checksum_type=librepo.SHA256,
+                                          checksum=config.PACKAGE_01_01_SHA256))
+
+        h.download_packages(pkgs)
+        pkg = pkgs[0]
+        self.assertEqual(pkg.err, "Already downloaded")
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
+        ## Failfast ignore this type of error (Already downloaded error)
+        h.download_packages(pkgs, failfast=True)
+        pkg = pkgs[0]
+        self.assertEqual(pkg.err, "Already downloaded")
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
+    def test_download_packages_with_callback(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        cbdata = {'called': 0}
+        def cb(cbdata, total, downloaded):
+            cbdata["called"] += 1
+            cbdata["total"] = total
+            cbdata["downloaded"] = downloaded
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          dest=self.tmpdir,
+                                          progresscb=cb,
+                                          cbdata=cbdata))
+
+        h.download_packages(pkgs)
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        self.assertTrue(cbdata["called"] > 0)
+        self.assertTrue(cbdata["downloaded"] > 0)
+        self.assertTrue(cbdata["total"] > 0)
+        self.assertEqual(cbdata["downloaded"], cbdata["total"])
+
