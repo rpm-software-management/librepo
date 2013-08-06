@@ -18,8 +18,6 @@
 #include "testsys.h"
 #include "test_url_substitution.h"
 
-// TODO: disable this dest by default (enable it by special compile flag)
-
 START_TEST(test_downloader_no_list)
 {
     int ret;

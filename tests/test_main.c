@@ -17,6 +17,7 @@
 #include "test_lrmirrorlist.h"
 #include "test_metalink.h"
 #include "test_mirrorlist.h"
+#include "test_package_downloader.h"
 #include "test_repomd.h"
 #include "test_url_substitution.h"
 #include "test_util.h"
@@ -102,13 +103,15 @@ main(int argc, char **argv)
     printf("Tests using directory: %s\n", test_globals.tmpdir);
 
     SRunner *sr = srunner_create(checksum_suite());
-    if (downloading)
+    if (downloading) {
         srunner_add_suite(sr, downloader_suite());
+    }
     srunner_add_suite(sr, gpg_suite());
     srunner_add_suite(sr, handle_suite());
     srunner_add_suite(sr, lrmirrorlist_suite());
     srunner_add_suite(sr, metalink_suite());
     srunner_add_suite(sr, mirrorlist_suite());
+    srunner_add_suite(sr, package_downloader_suite());
     srunner_add_suite(sr, repomd_suite());
     srunner_add_suite(sr, url_substitution_suite());
     srunner_add_suite(sr, util_suite());
