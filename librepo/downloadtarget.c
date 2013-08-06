@@ -35,7 +35,8 @@ lr_downloadtarget_new(const char *path,
                       const char *checksum,
                       gboolean resume,
                       LrProgressCb progresscb,
-                      void *cbdata)
+                      void *cbdata,
+                      void *userdata)
 {
     LrDownloadTarget *target;
 
@@ -54,6 +55,7 @@ lr_downloadtarget_new(const char *path,
     target->progresscb   = progresscb;
     target->cbdata       = cbdata;
     target->rcode        = LRE_UNFINISHED;
+    target->userdata     = userdata;
 
     return target;
 }

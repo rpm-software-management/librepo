@@ -70,6 +70,65 @@ lr_download_package(LrHandle *handle,
                     gboolean resume,
                     GError **err);
 
+typedef struct {
+
+    char *relative_url; /*!<
+        Relative part of URL */
+
+    char *dest; /*!<
+        Destination: filename, dirname or NULL */
+
+    char *base_url; /*!<
+        Base URL for this target */
+
+    LrChecksumType checksum_type; /*!<
+        Checksum type */
+
+    char *checksum; /*!<
+        Expected checksum value */
+
+    gboolean resume; /*!<
+        Indicate if resume is enabled */
+
+    LrProgressCb progresscb; /*!<
+        Progress callback */
+
+    void *cbdata; /*!<
+        Callback data */
+
+    // Will be filled by ::lr_download_packages()
+
+    char *local_path; /*!<
+        Local path */
+
+    char *err; /*!<
+        Error message or NULL. NULL means no error. */
+
+    GStringChunk *chunk; /*!<
+        String chunk */
+
+} LrPackageTarget;
+
+LrPackageTarget *
+lr_packagetarget_new(const char *relative_url,
+                     const char *dest,
+                     LrChecksumType checksum_type,
+                     const char *checksum,
+                     const char *base_url,
+                     gboolean resume,
+                     LrProgressCb progresscb,
+                     void *cbdata,
+                     GError **err);
+
+void
+lr_packagetraget_free(LrPackageTarget *target);
+
+gboolean
+lr_download_packages(LrHandle *handle,
+                     GSList *targets,
+                     gboolean failfast,
+                     GError **err);
+
 /** @} */
 
 G_END_DECLS

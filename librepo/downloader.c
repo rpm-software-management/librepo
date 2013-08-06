@@ -939,7 +939,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     assert(!err || *err == NULL);
 
     target = lr_downloadtarget_new(url, NULL, fd, LR_CHECKSUM_UNKNOWN,
-                                    NULL, 0, NULL, NULL);
+                                    NULL, 0, NULL, NULL, NULL);
 
     ret = lr_download_target(lr_handle, target, &tmp_err);
 

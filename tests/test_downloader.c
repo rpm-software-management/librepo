@@ -52,7 +52,7 @@ START_TEST(test_downloader_single_file)
     fail_if(fd1 == -1);
 
     t1 = lr_downloadtarget_new("index.html", NULL, fd1, 0, NULL,
-                               0, NULL, NULL);
+                               0, NULL, NULL, NULL);
 
     list = g_slist_append(list, t1);
 
@@ -104,7 +104,7 @@ START_TEST(test_downloader_single_file_2)
     fail_if(fd1 == -1);
 
     t1 = lr_downloadtarget_new("http://seznam.cz/index.html", NULL, fd1,
-                               0, NULL, 0, NULL, NULL);
+                               0, NULL, 0, NULL, NULL, NULL);
 
     list = g_slist_append(list, t1);
 
@@ -154,9 +154,9 @@ START_TEST(test_downloader_two_files)
     fail_if(fd2 == -1);
 
     t1 = lr_downloadtarget_new("index.html", NULL, fd1, 0, NULL,
-                               0, NULL, NULL);
+                               0, NULL, NULL, NULL);
     t2 = lr_downloadtarget_new("index.html", "http://seznam.cz", fd2, 0, NULL,
-                               0, NULL, NULL);
+                               0, NULL, NULL, NULL);
 
     list = g_slist_append(list, t1);
     list = g_slist_append(list, t2);
@@ -221,11 +221,12 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(fd3 == -1);
 
     t1 = lr_downloadtarget_new("index.html", NULL, fd1, 0, NULL,
-                               0, NULL, NULL);
+                               0, NULL, NULL, NULL);
     t2 = lr_downloadtarget_new("index.html", "http://seznam.cz", fd2, 0, NULL,
-                               0, NULL, NULL);
+                               0, NULL, NULL, NULL);
     t3 = lr_downloadtarget_new("i_hope_this_page_doesnt_exists.html",
-                               "http://google.com", fd3, 0, NULL, 0, NULL, NULL);
+                               "http://google.com", fd3, 0, NULL, 0, NULL,
+                               NULL, NULL);
 
     list = g_slist_append(list, t1);
     list = g_slist_append(list, t2);

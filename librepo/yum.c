@@ -202,6 +202,7 @@ lr_yum_download_repomd(LrHandle *handle,
                                                       checksum,
                                                       0,
                                                       NULL,
+                                                      NULL,
                                                       NULL);
 
     ret = lr_download_target(handle, target, &tmp_err);
@@ -285,6 +286,7 @@ lr_yum_download_repo(LrHandle *handle,
                                        checksumtype,
                                        record->checksum,
                                        0,
+                                       NULL,
                                        NULL,
                                        NULL);
 

@@ -77,6 +77,10 @@ typedef struct {
     char *err; /*!<
         NULL or error message */
 
+    void *userdata; /*!<
+        User data - This data are not used by lr_downloader or touched
+        by lr_downloadtarget_free. */
+
 } LrDownloadTarget;
 
 /** Create new empty ::LrDownloadTarget.
@@ -93,6 +97,9 @@ typedef struct {
  *                      seek to the end.
  * @param progresscb    Progression callback or NULL
  * @param cbdata        Callback data or NULL
+ * @param userdata      This variable could be used to store some user data.
+ *                      This data are not used/touched by lr_download*
+ *                      functions or by lr_downloadtarget_free().
  * @return              New allocated target
  */
 LrDownloadTarget *
@@ -103,7 +110,8 @@ lr_downloadtarget_new(const char *path,
                       const char *checksum,
                       gboolean resume,
                       LrProgressCb progresscb,
-                      void *cbdata);
+                      void *cbdata,
+                      void *userdata);
 
 /** Free a ::LrDownloadTarget element and its content.
  * @param target        Target to free.
