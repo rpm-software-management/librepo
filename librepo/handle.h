@@ -36,6 +36,17 @@ G_BEGIN_DECLS
  */
 typedef struct _LrHandle LrHandle;
 
+#define LRO_PROXYPORT_DEFAULT               1080
+
+#define LRO_PROXYTYPE_DEFAULT               LR_PROXY_HTTP
+
+#define LRO_MAXSPEED_DEFAULT                0  // Unlimited speed
+
+#define LRO_CONNECTTIMEOUT_DEFAULT          300
+
+#define LRO_MAXMIRRORTRIES_DEFAULT          0
+#define LRO_MAXMIRRORTRIES_MIN              0
+
 #define LRO_MAXPARALLELDOWNLOADS_DEFAULT    3
 #define LRO_MAXPARALLELDOWNLOADS_MIN        1
 #define LRO_MAXPARALLELDOWNLOADS_MAX        20

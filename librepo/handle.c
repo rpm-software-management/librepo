@@ -307,32 +307,34 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
         break;
 
     case LRO_MAXMIRRORTRIES:
-        handle->maxmirrortries = va_arg(arg, long);
-        if (handle->maxmirrortries < 0)
-            handle->maxmirrortries = 0;
+        val_long = va_arg(arg, long);
+
+        if (handle->maxmirrortries < LRO_MAXMIRRORTRIES_MIN)
+            ret = LRE_BADOPTARG;
+        else
+            handle->maxmirrortries = val_long;
+
         break;
 
     case LRO_MAXPARALLELDOWNLOADS:
         val_long = va_arg(arg, long);
 
         if (val_long < LRO_MAXPARALLELDOWNLOADS_MIN ||
-            val_long > LRO_MAXPARALLELDOWNLOADS_MAX) {
+            val_long > LRO_MAXPARALLELDOWNLOADS_MAX)
             ret = LRE_BADOPTARG;
-            break;
-        }
+        else
+            handle->maxparalleldownloads = val_long;
 
-        handle->maxparalleldownloads = val_long;
         break;
 
     case LRO_MAXDOWNLOADSPERMIRROR:
         val_long = va_arg(arg, long);
 
-        if (val_long < LRO_MAXDOWNLOADSPERMIRROR_MIN) {
+        if (val_long < LRO_MAXDOWNLOADSPERMIRROR_MIN)
             ret = LRE_BADOPTARG;
-            break;
-        }
+        else
+            handle->maxdownloadspermirror = val_long;
 
-        handle->maxdownloadspermirror = val_long;
         break;
 
     case LRO_VARSUB: {

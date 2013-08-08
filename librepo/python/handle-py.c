@@ -219,7 +219,7 @@ setopt(_HandleObject *self, PyObject *args)
         else if (obj == Py_None) {
             // None stands for default value
             if (option == LRO_PROXYTYPE)
-                d = LR_PROXY_HTTP;
+                d = LRO_PROXYTYPE_DEFAULT;
             else
                 badarg = 1;
         } else
@@ -253,11 +253,13 @@ setopt(_HandleObject *self, PyObject *args)
         else if (obj == Py_None) {
             /* Default options */
             if (option == LRO_PROXYPORT)
-                d = 1080;
-            else if (option == LRO_MAXSPEED || option == LRO_MAXMIRRORTRIES)
-                d = 0;
+                d = LRO_PROXYPORT_DEFAULT;
+            else if (option == LRO_MAXSPEED)
+                d = LRO_MAXSPEED_DEFAULT;
+            else if (option == LRO_MAXMIRRORTRIES)
+                d = LRO_MAXMIRRORTRIES_DEFAULT;
             else if (option == LRO_CONNECTTIMEOUT)
-                d = 300;
+                d = LRO_CONNECTTIMEOUT_DEFAULT;
             else if (option == LRO_MAXPARALLELDOWNLOADS)
                 d = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
             else if (option == LRO_MAXDOWNLOADSPERMIRROR)
