@@ -792,8 +792,8 @@ lr_download(LrHandle *lr_handle,
 
     // Prepare download data
     dd.failfast = failfast;
-    dd.max_parallel_connections = 3; // TODO
-    dd.max_connection_per_host = 2; // TODO
+    dd.max_parallel_connections = lr_handle->maxparalleldownloads;
+    dd.max_connection_per_host = lr_handle->maxdownloadspermirror;
     dd.max_mirrors_to_try = (lr_handle) ? lr_handle->maxmirrortries : 0;
     dd.lr_handle = lr_handle;
 

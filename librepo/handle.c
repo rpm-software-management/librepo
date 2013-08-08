@@ -88,6 +88,8 @@ lr_handle_init()
     handle->curl_handle = curl;
     handle->mirrorlist_fd = -1;
     handle->checks |= LR_CHECK_CHECKSUM;
+    handle->maxparalleldownloads = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
+    handle->maxdownloadspermirror = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
 
     return handle;
 }
@@ -122,6 +124,9 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
     va_list arg;
     CURLcode c_rc = CURLE_OK;
     CURL *c_h;
+
+    // Variables for values from va_arg
+    long val_long;
 
     if (!handle)
         return LRE_BADFUNCARG;
@@ -305,6 +310,29 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
         handle->maxmirrortries = va_arg(arg, long);
         if (handle->maxmirrortries < 0)
             handle->maxmirrortries = 0;
+        break;
+
+    case LRO_MAXPARALLELDOWNLOADS:
+        val_long = va_arg(arg, long);
+
+        if (val_long < LRO_MAXPARALLELDOWNLOADS_MIN ||
+            val_long > LRO_MAXPARALLELDOWNLOADS_MAX) {
+            ret = LRE_BADOPTARG;
+            break;
+        }
+
+        handle->maxparalleldownloads = val_long;
+        break;
+
+    case LRO_MAXDOWNLOADSPERMIRROR:
+        val_long = va_arg(arg, long);
+
+        if (val_long < LRO_MAXDOWNLOADSPERMIRROR_MIN) {
+            ret = LRE_BADOPTARG;
+            break;
+        }
+
+        handle->maxdownloadspermirror = val_long;
         break;
 
     case LRO_VARSUB: {
