@@ -60,11 +60,16 @@ main(void)
 
     // Download all targets
 
-    // We enable failfast feature. This means that if any of download
-    // will fail, then lr_download_package returns immediately with error.
-    // If failfast is FALSE, then lr_download_packages returns after all
-    // download are finished (no matter if successfully or unsuccessfully).
-    ret = lr_download_packages(h, packages, TRUE, &tmp_err);
+    // Note that failfast feature is enabled. This means that if any of
+    // downloads will fail, then lr_download_package returns immediately
+    // with an error.
+    // If the failfast is disabled, then lr_download_packages doesn't returns
+    // sooner then all downloads are finished (no matter if successfully
+    // or unsuccessfully) or some critical error is meet.
+    ret = lr_download_packages(h,
+                               packages,
+                               LR_PACKAGEDOWNLOAD_FAILFAST,
+                               &tmp_err);
     if (!ret) {
         fprintf(stderr, "Error encountered: %d: %s\n",
                 tmp_err->code, tmp_err->message);

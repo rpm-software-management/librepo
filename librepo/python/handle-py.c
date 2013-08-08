@@ -626,6 +626,7 @@ download_packages(_HandleObject *self, PyObject *args)
     gboolean ret;
     PyObject *py_list;
     int failfast;
+    LrPackageDownloadFlag flags = 0;
     GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "O!i:download_packages",
@@ -648,7 +649,10 @@ download_packages(_HandleObject *self, PyObject *args)
 
     Py_XINCREF(py_list);
 
-    ret = lr_download_packages(self->handle, list, failfast, &tmp_err);
+    if (failfast)
+        flags |= LR_PACKAGEDOWNLOAD_FAILFAST;
+
+    ret = lr_download_packages(self->handle, list, flags, &tmp_err);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 

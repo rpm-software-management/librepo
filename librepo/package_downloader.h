@@ -147,27 +147,29 @@ lr_packagetarget_new(const char *relative_url,
 void
 lr_packagetarget_free(LrPackageTarget *target);
 
+typedef enum {
+    LR_PACKAGEDOWNLOAD_FAILFAST    = 1 << 0, /*!<
+        If TRUE, then whole downloading is stoped immediately when any
+        of download fails (FALSE is returned and err is set). If the failfast
+        is FALSE, then this function returns after all downloads finish
+        (no matter if successfully or unsuccessfully) and FALSE is returned
+        only if a nonrecoverable error related to the function itself is meet
+        (Errors related to individual downloads are reported via corresponding
+        PackageTarget objects). */
+} LrPackageDownloadFlag;
+
 /** Download all LrPackageTargets at the targets GSList.
  * @param handle            ::LrHandle object
  * @param targets           GSList where each element is a ::LrPackageTarget
  *                          object
- * @param failfast          If TRUE, then whole downloading is stoped
- *                          immediately when any of download fails
- *                          (FALSE is returned and err is set).
- *                          If the failfast is FALSE, then this function
- *                          returns after all downloads finish (no matter
- *                          if successfully or unsuccessfully) and FALSE
- *                          is returned only if a nonrecoverable
- *                          error related to the function itself is meet
- *                          (Errors related to individual downloads are
- *                          reported via corresponding PackageTarget objects).
+ * @param flags             Bitfield with flags to download
  * @param err               GError **
  * @return                  If FALSE then err is set.
  */
 gboolean
 lr_download_packages(LrHandle *handle,
                      GSList *targets,
-                     gboolean failfast,
+                     LrPackageDownloadFlag flags,
                      GError **err);
 
 /** @} */

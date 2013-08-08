@@ -83,10 +83,11 @@ lr_packagetarget_free(LrPackageTarget *target)
 gboolean
 lr_download_packages(LrHandle *handle,
                      GSList *targets,
-                     gboolean failfast,
+                     LrPackageDownloadFlag flags,
                      GError **err)
 {
     gboolean ret;
+    gboolean failfast = flags & LR_PACKAGEDOWNLOAD_FAILFAST;
     struct sigaction old_sigact;
     GSList *downloadtargets = NULL;
 
@@ -277,7 +278,10 @@ lr_download_package(LrHandle *handle,
     GSList *targets = NULL;
     targets = g_slist_append(targets, target);
 
-    gboolean ret = lr_download_packages(handle, targets, TRUE, err);
+    gboolean ret = lr_download_packages(handle,
+                                        targets,
+                                        LR_PACKAGEDOWNLOAD_FAILFAST,
+                                        err);
 
     g_slist_free_full(targets, (GDestroyNotify)lr_packagetarget_free);
 
