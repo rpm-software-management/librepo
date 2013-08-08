@@ -302,3 +302,13 @@ lr_string_chunk_insert(GStringChunk *chunk, const gchar *string)
 
     return g_string_chunk_insert(chunk, string);
 }
+
+int
+lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
+                             char *msg,
+                             void *cbdata,
+                             GError **err G_GNUC_UNUSED)
+{
+    g_debug("WARNING: %s: %s", (char *) cbdata, msg);
+    return LR_CB_RET_OK;
+}

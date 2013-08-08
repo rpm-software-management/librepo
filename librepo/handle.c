@@ -548,8 +548,8 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                 ret = lr_metalink_parse_file(metalink,
                                              mirrors_fd,
                                              "repomd.xml",
-                                             NULL,
-                                             NULL,
+                                             lr_xml_parser_warning_logger,
+                                             "Metalink xml parser",
                                              &tmp_err);
                 if (!ret) {
                     assert(tmp_err);

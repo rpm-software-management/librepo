@@ -226,6 +226,16 @@ START_TEST(test_metalink_good_03)
 }
 END_TEST
 
+static int
+warning_cb(LrXmlParserWarningType type G_GNUC_UNUSED,
+           char *msg G_GNUC_UNUSED,
+           void *cbdata,
+           GError **err G_GNUC_UNUSED)
+{
+    *((int *) cbdata) += 1;
+    return LR_CB_RET_OK;
+}
+
 START_TEST(test_metalink_bad_01)
 {
     int fd;
@@ -244,9 +254,11 @@ START_TEST(test_metalink_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    int call_counter = 0;
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, warning_cb, &call_counter, &tmp_err);
     fail_if(!ret);
     fail_if(tmp_err);
+    fail_if(call_counter <= 0);
     close(fd);
 
     fail_if(ml->filename == NULL);
@@ -318,7 +330,7 @@ START_TEST(test_metalink_bad_01)
     fail_if(mlurl->protocol != NULL);
     fail_if(mlurl->type != NULL);
     fail_if(mlurl->location != NULL);
-    fail_if(mlurl->preference != -5);
+    fail_if(mlurl->preference < 0 || mlurl->preference > 100);
     fail_if(mlurl->url == NULL);
     fail_if(strcmp(mlurl->url,
                    "ftp://mirrors.syringanetworks.net/fedora/releases/17/Everything/x86_64/os/repodata/repomd.xml"));

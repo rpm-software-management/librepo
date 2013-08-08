@@ -668,6 +668,7 @@ WARN_LOGFILE           =
 INPUT                  = @CMAKE_SOURCE_DIR@/librepo/checksum.h \
                          @CMAKE_SOURCE_DIR@/librepo/gpg.h \
                          @CMAKE_SOURCE_DIR@/librepo/handle.h \
+                         @CMAKE_SOURCE_DIR@/librepo/metalink.h \
                          @CMAKE_SOURCE_DIR@/librepo/librepo.h \
                          @CMAKE_SOURCE_DIR@/librepo/package_downloader.h \
                          @CMAKE_SOURCE_DIR@/librepo/rcodes.h \
@@ -675,8 +676,10 @@ INPUT                  = @CMAKE_SOURCE_DIR@/librepo/checksum.h \
                          @CMAKE_SOURCE_DIR@/librepo/repoutil_yum.h \
                          @CMAKE_SOURCE_DIR@/librepo/result.h \
                          @CMAKE_SOURCE_DIR@/librepo/types.h \
+                         @CMAKE_SOURCE_DIR@/librepo/url_substitution.h \
                          @CMAKE_SOURCE_DIR@/librepo/util.h \
                          @CMAKE_SOURCE_DIR@/librepo/version.h \
+                         @CMAKE_SOURCE_DIR@/librepo/xmlparser.h \
                          @CMAKE_SOURCE_DIR@/librepo/yum.h
 
 # This tag can be used to specify the character encoding of the source files

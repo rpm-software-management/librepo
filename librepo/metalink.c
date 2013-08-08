@@ -210,9 +210,9 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
         assert(!pd->metalinkhash);
         const char *type = lr_find_attr("type", attr);
         if (!type) {
+            // Type of the hash is not specifed -> skip it
             lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
-                              "hash element dowsn't have attribute \"type\"");
-            //pd->ret = LRE_MLXML; // XXX TODO
+                              "hash element doesn't have attribute \"type\"");
             break;
         }
         mh = lr_new_metalinkhash(pd->metalink);
@@ -238,8 +238,16 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
             url->type = g_strdup(val);
         if ((val = lr_find_attr("location", attr)))
             url->location = g_strdup(val);
-        if ((val = lr_find_attr("preference", attr)))
-            url->preference = atol(val);
+        if ((val = lr_find_attr("preference", attr))) {
+            long long ll_val = lr_xml_parser_strtoll(pd, val, 0);
+            if (ll_val < 0 || ll_val > 100) {
+                lr_xml_parser_warning(pd, LR_XML_WARNING_BADATTRVAL,
+                "Bad value (\"%s\") of \"preference\" attribute in url element"
+                " (should be in range 0-100)", val);
+            } else {
+                url->preference = ll_val;
+            }
+        }
         pd->metalinkurl = url;
         break;
     }
@@ -304,7 +312,11 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
     case STATE_HASH:
         assert(pd->metalink);
         assert(!pd->metalinkurl);
-        assert(pd->metalinkhash);
+
+        if (!pd->metalinkhash) {
+            // If hash has no type
+            break;
+        }
 
         pd->metalinkhash->value = g_strdup(pd->content);
         pd->metalinkhash = NULL;

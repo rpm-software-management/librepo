@@ -513,7 +513,8 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
         }
 
         g_debug("%s: Parsing repomd.xml", __func__);
-        ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
+        ret = lr_yum_repomd_parse_file(repomd, fd, lr_xml_parser_warning_logger,
+                                       "Repomd xml parser", &tmp_err);
         if (!ret) {
             g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);
             g_propagate_prefixed_error(err, tmp_err,
@@ -740,7 +741,8 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
 
         /* Parse repomd */
         g_debug("%s: Parsing repomd.xml", __func__);
-        ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
+        ret = lr_yum_repomd_parse_file(repomd, fd, lr_xml_parser_warning_logger,
+                                       "Repomd xml parser", &tmp_err);
         close(fd);
         if (!ret) {
             g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);

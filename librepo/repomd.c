@@ -433,28 +433,28 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
         assert(pd->repomd);
         assert(pd->repomdrecord);
 
-        pd->repomdrecord->timestamp = atol(pd->content);
+        pd->repomdrecord->timestamp = lr_xml_parser_strtoll(pd, pd->content, 0);
         break;
 
     case STATE_SIZE:
         assert(pd->repomd);
         assert(pd->repomdrecord);
 
-        pd->repomdrecord->size = atol(pd->content);
+        pd->repomdrecord->size = lr_xml_parser_strtoll(pd, pd->content, 0);
         break;
 
     case STATE_OPENSIZE:
         assert(pd->repomd);
         assert(pd->repomdrecord);
 
-        pd->repomdrecord->size_open = atol(pd->content);
+        pd->repomdrecord->size_open = lr_xml_parser_strtoll(pd, pd->content, 0);
         break;
 
     case STATE_DBVERSION:
         assert(pd->repomd);
         assert(pd->repomdrecord);
 
-        pd->repomdrecord->db_version = atol(pd->content);
+        pd->repomdrecord->db_version = (int) lr_xml_parser_strtoll(pd, pd->content, 0);
         break;
 
     default:

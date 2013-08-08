@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include "xmlparser.h"
+
 G_BEGIN_DECLS
 
 /** \defgroup   util    Utility functions and macros
@@ -117,6 +119,15 @@ char *lr_prepend_url_protocol(const char *path);
  */
 gchar *
 lr_string_chunk_insert(GStringChunk *chunk, const gchar *string);
+
+/** Warning callback to print warrnings via GLib logger
+ * For more info take a look at ::LrXmlParserWarningCb
+ */
+int
+lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
+                             char *msg,
+                             void *cbdata,
+                             GError **err G_GNUC_UNUSED) G_GNUC_UNUSED;
 
 /** @} */
 
