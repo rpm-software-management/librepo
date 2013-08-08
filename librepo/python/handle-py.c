@@ -241,6 +241,8 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_MAXSPEED:
     case LRO_CONNECTTIMEOUT:
     case LRO_MAXMIRRORTRIES:
+    case LRO_MAXPARALLELDOWNLOADS:
+    case LRO_MAXDOWNLOADSPERMIRROR:
     {
         long d;
 
@@ -256,6 +258,10 @@ setopt(_HandleObject *self, PyObject *args)
                 d = 0;
             else if (option == LRO_CONNECTTIMEOUT)
                 d = 300;
+            else if (option == LRO_MAXPARALLELDOWNLOADS)
+                d = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
+            else if (option == LRO_MAXDOWNLOADSPERMIRROR)
+                d = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
             else
                 assert(0);
         } else {

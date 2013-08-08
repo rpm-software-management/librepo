@@ -197,6 +197,16 @@ Constants
     *Integer or None*. If download fails, try at most the specified number
     of mirrors. 0 (None) means try all available mirrors.
 
+.. data:: LRO_MAXPARALLELDOWNLOADS
+
+    *Integer or None*. Maximum number of parallel downloads.
+    ``None`` sets default value.
+
+.. data:: LRO_MAXDOWNLOADSPERMIRROR
+
+    *Integer or None*. Maximum number of parallel downloads per mirror.
+    ``None`` sets default value.
+
 .. data:: LRO_VARSUB
 
     *[(String, String), ...] or None*. Set list of substitutions
@@ -449,63 +459,67 @@ VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 
 LibrepoException = _librepo.LibrepoException
 
-LRO_UPDATE          = _librepo.LRO_UPDATE
-LRO_URL             = _librepo.LRO_URL
-LRO_MIRRORLIST      = _librepo.LRO_MIRRORLIST
-LRO_LOCAL           = _librepo.LRO_LOCAL
-LRO_HTTPAUTH        = _librepo.LRO_HTTPAUTH
-LRO_USERPWD         = _librepo.LRO_USERPWD
-LRO_PROXY           = _librepo.LRO_PROXY
-LRO_PROXYPORT       = _librepo.LRO_PROXYPORT
-LRO_PROXYTYPE       = _librepo.LRO_PROXYTYPE
-LRO_PROXYAUTH       = _librepo.LRO_PROXYAUTH
-LRO_PROXYUSERPWD    = _librepo.LRO_PROXYUSERPWD
-LRO_PROGRESSCB      = _librepo.LRO_PROGRESSCB
-LRO_PROGRESSDATA    = _librepo.LRO_PROGRESSDATA
-LRO_MAXSPEED        = _librepo.LRO_MAXSPEED
-LRO_DESTDIR         = _librepo.LRO_DESTDIR
-LRO_REPOTYPE        = _librepo.LRO_REPOTYPE
-LRO_CONNECTTIMEOUT  = _librepo.LRO_CONNECTTIMEOUT
-LRO_IGNOREMISSING   = _librepo.LRO_IGNOREMISSING
-LRO_INTERRUPTIBLE   = _librepo.LRO_INTERRUPTIBLE
-LRO_USERAGENT       = _librepo.LRO_USERAGENT
-LRO_GPGCHECK        = _librepo.LRO_GPGCHECK
-LRO_CHECKSUM        = _librepo.LRO_CHECKSUM
-LRO_YUMDLIST        = _librepo.LRO_YUMDLIST
-LRO_YUMBLIST        = _librepo.LRO_YUMBLIST
-LRO_FETCHMIRRORS    = _librepo.LRO_FETCHMIRRORS
-LRO_MAXMIRRORTRIES  = _librepo.LRO_MAXMIRRORTRIES
-LRO_VARSUB          = _librepo.LRO_VARSUB
-LRO_SENTINEL        = _librepo.LRO_SENTINEL
+LRO_UPDATE                  = _librepo.LRO_UPDATE
+LRO_URL                     = _librepo.LRO_URL
+LRO_MIRRORLIST              = _librepo.LRO_MIRRORLIST
+LRO_LOCAL                   = _librepo.LRO_LOCAL
+LRO_HTTPAUTH                = _librepo.LRO_HTTPAUTH
+LRO_USERPWD                 = _librepo.LRO_USERPWD
+LRO_PROXY                   = _librepo.LRO_PROXY
+LRO_PROXYPORT               = _librepo.LRO_PROXYPORT
+LRO_PROXYTYPE               = _librepo.LRO_PROXYTYPE
+LRO_PROXYAUTH               = _librepo.LRO_PROXYAUTH
+LRO_PROXYUSERPWD            = _librepo.LRO_PROXYUSERPWD
+LRO_PROGRESSCB              = _librepo.LRO_PROGRESSCB
+LRO_PROGRESSDATA            = _librepo.LRO_PROGRESSDATA
+LRO_MAXSPEED                = _librepo.LRO_MAXSPEED
+LRO_DESTDIR                 = _librepo.LRO_DESTDIR
+LRO_REPOTYPE                = _librepo.LRO_REPOTYPE
+LRO_CONNECTTIMEOUT          = _librepo.LRO_CONNECTTIMEOUT
+LRO_IGNOREMISSING           = _librepo.LRO_IGNOREMISSING
+LRO_INTERRUPTIBLE           = _librepo.LRO_INTERRUPTIBLE
+LRO_USERAGENT               = _librepo.LRO_USERAGENT
+LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
+LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
+LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
+LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
+LRO_FETCHMIRRORS            = _librepo.LRO_FETCHMIRRORS
+LRO_MAXMIRRORTRIES          = _librepo.LRO_MAXMIRRORTRIES
+LRO_MAXPARALLELDOWNLOADS    = _librepo.LRO_MAXPARALLELDOWNLOADS
+LRO_MAXDOWNLOADSPERMIRROR   = _librepo.LRO_MAXDOWNLOADSPERMIRROR
+LRO_VARSUB                  = _librepo.LRO_VARSUB
+LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
-    "update":           LRO_UPDATE,
-    "url":              LRO_URL,
-    "mirrorlist":       LRO_MIRRORLIST,
-    "local" :           LRO_LOCAL,
-    "httpauth":         LRO_HTTPAUTH,
-    "userpwd":          LRO_USERPWD,
-    "proxy":            LRO_PROXY,
-    "proxyport":        LRO_PROXYPORT,
-    "proxytype":        LRO_PROXYTYPE,
-    "proxyauth":        LRO_PROXYAUTH,
-    "proxyuserpwd":     LRO_PROXYUSERPWD,
-    "progresscb":       LRO_PROGRESSCB,
-    "progressdata":     LRO_PROGRESSDATA,
-    "maxspeed":         LRO_MAXSPEED,
-    "destdir":          LRO_DESTDIR,
-    "repotype":         LRO_REPOTYPE,
-    "connecttimeout":   LRO_CONNECTTIMEOUT,
-    "ignoremissing":    LRO_IGNOREMISSING,
-    "interruptible":    LRO_INTERRUPTIBLE,
-    "useragent":        LRO_USERAGENT,
-    "gpgcheck":         LRO_GPGCHECK,
-    "checksum":         LRO_CHECKSUM,
-    "yumdlist":         LRO_YUMDLIST,
-    "yumblist":         LRO_YUMBLIST,
-    "fetchmirrors":     LRO_FETCHMIRRORS,
-    "maxmirrortries":   LRO_MAXMIRRORTRIES,
-    "varsub":           LRO_VARSUB,
+    "update":               LRO_UPDATE,
+    "url":                  LRO_URL,
+    "mirrorlist":           LRO_MIRRORLIST,
+    "local" :               LRO_LOCAL,
+    "httpauth":             LRO_HTTPAUTH,
+    "userpwd":              LRO_USERPWD,
+    "proxy":                LRO_PROXY,
+    "proxyport":            LRO_PROXYPORT,
+    "proxytype":            LRO_PROXYTYPE,
+    "proxyauth":            LRO_PROXYAUTH,
+    "proxyuserpwd":         LRO_PROXYUSERPWD,
+    "progresscb":           LRO_PROGRESSCB,
+    "progressdata":         LRO_PROGRESSDATA,
+    "maxspeed":             LRO_MAXSPEED,
+    "destdir":              LRO_DESTDIR,
+    "repotype":             LRO_REPOTYPE,
+    "connecttimeout":       LRO_CONNECTTIMEOUT,
+    "ignoremissing":        LRO_IGNOREMISSING,
+    "interruptible":        LRO_INTERRUPTIBLE,
+    "useragent":            LRO_USERAGENT,
+    "gpgcheck":             LRO_GPGCHECK,
+    "checksum":             LRO_CHECKSUM,
+    "yumdlist":             LRO_YUMDLIST,
+    "yumblist":             LRO_YUMBLIST,
+    "fetchmirrors":         LRO_FETCHMIRRORS,
+    "maxmirrortries":       LRO_MAXMIRRORTRIES,
+    "maxparalleldownloads": LRO_MAXPARALLELDOWNLOADS,
+    "maxdownloadspermirror":LRO_MAXDOWNLOADSPERMIRROR,
+    "varsub":               LRO_VARSUB,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE

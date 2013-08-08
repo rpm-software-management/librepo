@@ -165,6 +165,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_USERAGENT", LRO_USERAGENT);
     PyModule_AddIntConstant(m, "LRO_FETCHMIRRORS", LRO_FETCHMIRRORS);
     PyModule_AddIntConstant(m, "LRO_MAXMIRRORTRIES", LRO_MAXMIRRORTRIES);
+    PyModule_AddIntConstant(m, "LRO_MAXPARALLELDOWNLOADS", LRO_MAXPARALLELDOWNLOADS);
+    PyModule_AddIntConstant(m, "LRO_MAXDOWNLOADSPERMIRROR", LRO_MAXDOWNLOADSPERMIRROR);
     PyModule_AddIntConstant(m, "LRO_VARSUB", LRO_VARSUB);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
