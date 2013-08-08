@@ -47,7 +47,6 @@ struct _LrHandle {
 
     int             local;          /*!< Do not duplicate local data */
     char            *used_mirror;   /*!< Finally used mirror (if any) */
-    int             retries;        /*!< Number of maximum retries */
     char            *destdir;       /*!< Destination directory */
     char            *useragent;     /*!< User agent */
     LrRepotype      repotype;       /*!< Type of repository */

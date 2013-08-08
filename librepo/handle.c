@@ -86,7 +86,6 @@ lr_handle_init()
 
     handle = lr_malloc0(sizeof(LrHandle));
     handle->curl_handle = curl;
-    handle->retries = 1;
     handle->mirrorlist_fd = -1;
     handle->checks |= LR_CHECK_CHECKSUM;
 
@@ -222,14 +221,6 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
 
     case LRO_PROGRESSDATA:
         handle->user_data = va_arg(arg, void *);
-        break;
-
-    case LRO_RETRIES:
-        handle->retries = va_arg(arg, long);
-        if (handle->retries < 1) {
-            ret = LRE_BADOPTARG;
-            handle->retries = 1;
-        }
         break;
 
     case LRO_MAXSPEED:

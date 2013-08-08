@@ -122,12 +122,6 @@ Constants
 
     *Any object*. Set user data for the progress callback.
 
-.. data:: LRO_RETRIES
-
-    *Integer or None*. Set maximal number of retries for one mirror.
-    One try per mirror is default value. None as *va* sets the
-    default value.
-
 .. data:: LRO_MAXSPEED
 
     *Long or None*. Set maximal allowed speed per download in bytes per second.
@@ -468,7 +462,6 @@ LRO_PROXYAUTH       = _librepo.LRO_PROXYAUTH
 LRO_PROXYUSERPWD    = _librepo.LRO_PROXYUSERPWD
 LRO_PROGRESSCB      = _librepo.LRO_PROGRESSCB
 LRO_PROGRESSDATA    = _librepo.LRO_PROGRESSDATA
-LRO_RETRIES         = _librepo.LRO_RETRIES
 LRO_MAXSPEED        = _librepo.LRO_MAXSPEED
 LRO_DESTDIR         = _librepo.LRO_DESTDIR
 LRO_REPOTYPE        = _librepo.LRO_REPOTYPE
@@ -499,7 +492,6 @@ ATTR_TO_LRO = {
     "proxyuserpwd":     LRO_PROXYUSERPWD,
     "progresscb":       LRO_PROGRESSCB,
     "progressdata":     LRO_PROGRESSDATA,
-    "retries":          LRO_RETRIES,
     "maxspeed":         LRO_MAXSPEED,
     "destdir":          LRO_DESTDIR,
     "repotype":         LRO_REPOTYPE,
@@ -722,10 +714,6 @@ class Handle(_librepo.Handle):
     .. attribute:: progressdata:
 
         See: :data:`.LRO_PROGRESSDATA`
-
-    .. attribute:: retries:
-
-        See: :data:`.LRO_RETRIES`
 
     .. attribute:: maxspeed:
 

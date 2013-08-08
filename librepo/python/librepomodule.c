@@ -156,7 +156,6 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_PROXYUSERPWD", LRO_PROXYUSERPWD);
     PyModule_AddIntConstant(m, "LRO_PROGRESSCB", LRO_PROGRESSCB);
     PyModule_AddIntConstant(m, "LRO_PROGRESSDATA", LRO_PROGRESSDATA);
-    PyModule_AddIntConstant(m, "LRO_RETRIES", LRO_RETRIES);
     PyModule_AddIntConstant(m, "LRO_MAXSPEED", LRO_MAXSPEED);
     PyModule_AddIntConstant(m, "LRO_DESTDIR", LRO_DESTDIR);
     PyModule_AddIntConstant(m, "LRO_REPOTYPE", LRO_REPOTYPE);

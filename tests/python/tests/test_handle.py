@@ -217,8 +217,6 @@ class TestCaseHandle(unittest.TestCase):
         h.proxyuserpwd = None
         h.setopt(librepo.LRO_PROGRESSDATA, None)
         h.progressdata = None
-        h.setopt(librepo.LRO_RETRIES, None)         # None sets default value
-        h.retries = None
         h.setopt(librepo.LRO_MAXSPEED, None)        # None sets default value
         h.maxspeed = None
         h.setopt(librepo.LRO_CONNECTTIMEOUT, None)  # None sets default value

@@ -238,7 +238,6 @@ setopt(_HandleObject *self, PyObject *args)
      * Options with long/int/None arguments
      */
     case LRO_PROXYPORT:
-    case LRO_RETRIES:
     case LRO_MAXSPEED:
     case LRO_CONNECTTIMEOUT:
     case LRO_MAXMIRRORTRIES:
@@ -253,8 +252,6 @@ setopt(_HandleObject *self, PyObject *args)
             /* Default options */
             if (option == LRO_PROXYPORT)
                 d = 1080;
-            else if (option == LRO_RETRIES)
-                d = 1;
             else if (option == LRO_MAXSPEED || option == LRO_MAXMIRRORTRIES)
                 d = 0;
             else if (option == LRO_CONNECTTIMEOUT)

@@ -60,7 +60,6 @@ typedef enum {
                           user:password */
     LRO_PROGRESSCB,  /*!< (::LrProgressCb) Progress callback */
     LRO_PROGRESSDATA,/*!< (void *) Progress callback user data */
-    LRO_RETRIES,     /*!< (long) Number of maximum retries for each file - TODO */
     LRO_MAXSPEED,    /*!< (unsigned long long) Maximum download speed
                           in bytes per second. Default is 0 = unlimited
                           download speed. */
