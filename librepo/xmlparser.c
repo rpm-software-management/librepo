@@ -167,7 +167,7 @@ lr_xml_parser_generic(XML_Parser parser,
         len = read(fd, (void *) buf, XML_BUFFER_SIZE);
         if (len < 0) {
             ret = FALSE;
-            g_critical("%s: Error while reading xml : %s\n",
+            g_debug("%s: Error while reading xml : %s\n",
                        __func__, strerror(errno));
             g_set_error(err, LR_XML_PARSER_ERROR, LRE_IO,
                         "Error while reading xml: %s", strerror(errno));
@@ -176,8 +176,10 @@ lr_xml_parser_generic(XML_Parser parser,
 
         if (!XML_ParseBuffer(parser, len, len == 0)) {
             ret = FALSE;
-            g_critical("%s: parsing error: %s\n",
-                       __func__, XML_ErrorString(XML_GetErrorCode(parser)));
+            g_debug("%s: Parse error at line: %d (%s)",
+                        __func__,
+                        (int) XML_GetCurrentLineNumber(parser),
+                        (char *) XML_ErrorString(XML_GetErrorCode(parser)));
             g_set_error(err, LR_XML_PARSER_ERROR, LRE_XMLPARSER,
                         "Parse error at line: %d (%s)",
                         (int) XML_GetCurrentLineNumber(parser),

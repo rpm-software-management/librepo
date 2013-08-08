@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "repomd.h"
+#include "metalink.h"
 
 G_BEGIN_DECLS
 
@@ -76,6 +77,22 @@ typedef struct {
         Repomd record object for a currently parsed element */
     char *cpeid; /*!<
         cpeid value for the currently parsed distro tag */
+
+    /* Metalink related stuff */
+
+    char *filename; /*!<
+        filename we are looking for in metalink */
+    int ignore; /*!<
+        ignore all subelements of the current file element */
+    int found; /*!<
+        wanted file was already parsed */
+
+    LrMetalink *metalink; /*!<
+        metalink object */
+    LrMetalinkUrl *metalinkurl; /*!<
+        Url in progress or NULL */
+    LrMetalinkHash *metalinkhash; /*!<
+        Hash in progress or NULL */
 
 } LrParserData;
 

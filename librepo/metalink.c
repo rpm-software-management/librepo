@@ -28,6 +28,7 @@
 #include "rcodes.h"
 #include "util.h"
 #include "metalink.h"
+#include "xmlparser_internal.h"
 
 /** TODO:
  * - Better xml parsing error messages
@@ -111,13 +112,6 @@ typedef enum {
     NUMSTATES
 } LrState;
 
-typedef struct {
-    LrState from;  /*!< source state */
-    char *ename;    /*!< element name */
-    LrState to;    /*!< target state */
-    int docontent;  /*!< store the text of the element */
-} LrStatesSwitch;
-
 /* Same states in the first column must be together */
 static LrStatesSwitch stateswitches[] = {
     { STATE_START,      "metalink",         STATE_METALINK,     0 },
@@ -132,69 +126,39 @@ static LrStatesSwitch stateswitches[] = {
     { NUMSTATES,        NULL,               NUMSTATES,          0 }
 };
 
-typedef struct _ParserData {
-    int ret;            /*!< status of parsing (return code) */
-    int depth;
-    int statedepth;
-    LrState state;     /*!< current state */
-
-    int docontent;  /*!< tell if store text from the current element */
-    char *content;  /*!< text content of element */
-    int lcontent;   /*!< content lenght */
-    int acontent;   /*!< availbable bytes in the content */
-
-    XML_Parser *parser;                 /*!< parser */
-    LrStatesSwitch *swtab[NUMSTATES];  /*!< pointers to stateswitches table */
-    LrState sbtab[NUMSTATES];          /*!< stab[to_state] = from_state */
-
-    char *filename;         /*!< filename we are looking for in metalink */
-    int ignore;             /*!< ignore all subelements of the current file element */
-    int found;              /*!< wanted file was already parsed */
-
-    LrMetalink *metalink;          /*!< metalink object */
-    LrMetalinkUrl *metalinkurl;    /*!< Url in progress or NULL */
-    LrMetalinkHash *metalinkhash;  /*!< Hash in progress or NULL */
-} ParserData;
-
-static inline const char *
-lr_find_attr(const char *name, const char **attr)
-{
-    while (*attr) {
-        if (!strcmp(name, *attr))
-            return attr[1];
-        attr += 2;
-    }
-
-    return NULL;
-}
-
 static void XMLCALL
-lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
+lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
 {
-    ParserData *pd = pdata;
+    LrParserData *pd = pdata;
     LrStatesSwitch *sw;
 
-    if (pd->ret != LRE_OK)
-        return; /* There was an error -> do nothing */
+    if (pd->err)
+        return; // There was an error -> do nothing
 
     if (pd->depth != pd->statedepth) {
-        /* There probably was an unknown element */
+        // We are inside of unknown element
         pd->depth++;
         return;
     }
     pd->depth++;
 
-    if (!pd->swtab[pd->state])
-        return;  /* Current element should not have any sub elements */
+    if (!pd->swtab[pd->state]) {
+        // Current element should not have any sub elements
+        return;
+    }
 
-    /* Find current state by its name */
+    // Find current state by its name
     for (sw = pd->swtab[pd->state]; sw->from == pd->state; sw++)
-        if (!strcmp(name, sw->ename))
+        if (!strcmp(element, sw->ename))
             break;
-    if (sw->from != pd->state)
-        return;  /* There is no state for the name -> skip */
+    if (sw->from != pd->state) {
+        // No state for current element (unknown element)
+        lr_xml_parser_warning(pd, LR_XML_WARNING_UNKNOWNTAG,
+                              "Unknown element \"%s\"", element);
+        return;
+    }
 
-    /* Update parser data */
+    // Update parser data
     pd->state = sw->to;
     pd->docontent = sw->docontent;
     pd->statedepth = pd->depth;
@@ -211,10 +175,15 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         break;
 
     case STATE_FILE: {
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
         const char *name = lr_find_attr("name", attr);
         if (!name) {
-            g_debug("%s: file element doesn't have name attribute", __func__);
-            pd->ret = LRE_MLXML;
+            g_debug("%s: Missing attribute \"name\" of file element", __func__);
+            g_set_error(&pd->err, LR_METALINK_ERROR, LRE_MLXML,
+                        "Missing attribute \"name\" of file element");
             break;
         }
         if (pd->found || strcmp(name, pd->filename)) {
@@ -233,12 +202,17 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         break;
 
     case STATE_HASH: {
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
         LrMetalinkHash *mh;
         assert(!pd->metalinkhash);
         const char *type = lr_find_attr("type", attr);
         if (!type) {
-            g_debug("%s: hash element doesn't have type attribute", __func__);
-            pd->ret = LRE_MLXML;
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                              "hash element dowsn't have attribute \"type\"");
+            //pd->ret = LRE_MLXML; // XXX TODO
             break;
         }
         mh = lr_new_metalinkhash(pd->metalink);
@@ -251,6 +225,10 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
         break;
 
     case STATE_URL: {
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
         const char *val;
         assert(!pd->metalinkurl);
         LrMetalinkUrl *url = lr_new_metalinkurl(pd->metalink);
@@ -274,58 +252,31 @@ lr_metalink_start_handler(void *pdata, const char *name, const char **attr)
 }
 
 static void XMLCALL
-lr_metalink_char_handler(void *pdata, const XML_Char *s, int len)
+lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
 {
-    int l;
-    char *c;
-    ParserData *pd = pdata;
+    LrParserData *pd = pdata;
+    unsigned int state = pd->state;
 
-    if (pd->ret != LRE_OK)
-        return; /* There was an error -> do nothing */
-
-    if (!pd->docontent)
-        return; /* Do not store the content */
-
-    if (pd->ignore)
-        return; /* Ignore all content */
-
-    l = pd->lcontent + len + 1;
-    if (l > pd->acontent) {
-        pd->acontent = l + CONTENT_REALLOC_STEP;
-        pd->content = lr_realloc(pd->content, pd->acontent);
-    }
-
-    c = pd->content + pd->lcontent;
-    pd->lcontent += len;
-    while (len-- > 0)
-        *c++ = *s++;
-    *c = '\0';
-}
-
-static void XMLCALL
-lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *name)
-{
-    ParserData *pd = pdata;
-
-    if (pd->ret != LRE_OK)
-        return; /* There was an error -> do nothing */
+    if (pd->err)
+        return; // There was an error -> do nothing
 
     if (pd->depth != pd->statedepth) {
-        /* Back from the unknown state */
+        // Back from the unknown state
         pd->depth--;
         return;
     }
 
     pd->depth--;
     pd->statedepth--;
+    pd->state = pd->sbtab[pd->state];
+    pd->docontent = 0;
 
-    if (pd->ignore && pd->state != STATE_FILE) {
-        pd->state = pd->sbtab[pd->state];
-        pd->docontent = 0;
-        return; /* Ignore all subelements of the current file element */
+    if (pd->ignore && state != STATE_FILE) {
+        // Ignore all subelements of the current file element
+        return;
     }
 
-    switch (pd->state) {
+    switch (state) {
     case STATE_START:
     case STATE_METALINK:
     case STATE_FILES:
@@ -335,21 +286,35 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *name)
         break;
 
     case STATE_TIMESTAMP:
-        pd->metalink->timestamp = atol(pd->content);
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
+        pd->metalink->timestamp = lr_xml_parser_strtoll(pd, pd->content, 0);
         break;
 
     case STATE_SIZE:
-        pd->metalink->size = atol(pd->content);
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
+        pd->metalink->size = lr_xml_parser_strtoll(pd, pd->content, 0);
         break;
 
     case STATE_HASH:
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
         assert(pd->metalinkhash);
+
         pd->metalinkhash->value = g_strdup(pd->content);
         pd->metalinkhash = NULL;
         break;
 
     case STATE_URL:
+        assert(pd->metalink);
         assert(pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
         pd->metalinkurl->url = g_strdup(pd->content);
         pd->metalinkurl = NULL;
         break;
@@ -358,9 +323,6 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *name)
         break;
     };
 
-    pd->state = pd->sbtab[pd->state];
-    pd->docontent = 0;
-
     return;
 }
 
@@ -368,94 +330,59 @@ gboolean
 lr_metalink_parse_file(LrMetalink *metalink,
                        int fd,
                        const char *filename,
+                       LrXmlParserWarningCb warningcb,
+                       void *warningcb_data,
                        GError **err)
 {
     gboolean ret = TRUE;
+    LrParserData *pd;
     XML_Parser parser;
-    ParserData pd;
-    LrStatesSwitch *sw;
+    GError *tmp_err = NULL;
 
     assert(metalink);
     assert(fd >= 0);
     assert(filename);
     assert(!err || *err == NULL);
 
-    /* Parser configuration */
+    // Init
+
     parser = XML_ParserCreate(NULL);
-    XML_SetUserData(parser, (void *) &pd);
     XML_SetElementHandler(parser, lr_metalink_start_handler, lr_metalink_end_handler);
-    XML_SetCharacterDataHandler(parser, lr_metalink_char_handler);
+    XML_SetCharacterDataHandler(parser, lr_char_handler);
 
-    /* Initialization of parser data */
-    memset(&pd, 0, sizeof(pd));
-    pd.ret = LRE_OK;
-    pd.depth = 0;
-    pd.state = STATE_START;
-    pd.statedepth = 0;
-    pd.docontent = 0;
-    pd.content = lr_malloc(CONTENT_REALLOC_STEP);
-    pd.lcontent = 0;
-    pd.acontent = CONTENT_REALLOC_STEP;
-    pd.parser = &parser;
-    pd.metalink = metalink;
-    pd.filename = (char *) filename;
-    pd.ignore = 1;
-    pd.found = 0;
-    for (sw = stateswitches; sw->from != NUMSTATES; sw++) {
-        if (!pd.swtab[sw->from])
-            pd.swtab[sw->from] = sw;
-        pd.sbtab[sw->to] = sw->from;
+    pd = lr_xml_parser_data_new(NUMSTATES);
+    pd->parser = &parser;
+    pd->state = STATE_START;
+    pd->metalink = metalink;
+    pd->filename = (char *) filename;
+    pd->ignore = 1;
+    pd->found = 0;
+    pd->warningcb = warningcb;
+    pd->warningcb_data = warningcb_data;
+    for (LrStatesSwitch *sw = stateswitches; sw->from != NUMSTATES; sw++) {
+        if (!pd->swtab[sw->from])
+            pd->swtab[sw->from] = sw;
+        pd->sbtab[sw->to] = sw->from;
     }
 
-    /* Parse */
-    for (;;) {
-        char *buf;
-        int len;
+    XML_SetUserData(parser, pd);
 
-        buf = XML_GetBuffer(parser, CHUNK_SIZE);
-        if (!buf)
-            lr_out_of_memory();
+    // Parsing
 
-        len = read(fd, (void *) buf, CHUNK_SIZE);
-        if (len < 0) {
-            g_debug("%s: Cannot read for parsing : %s",
-                    __func__, strerror(errno));
-            g_set_error(err, LR_METALINK_ERROR, LRE_IO,
-                        "Cannot read metalink fd %d: %s", fd, strerror(errno));
-            ret = FALSE;
-            break;
-        }
+    ret = lr_xml_parser_generic(parser, pd, fd, &tmp_err);
+    if (tmp_err)
+        g_propagate_error(err, tmp_err);
 
-        if (!XML_ParseBuffer(parser, len, len == 0)) {
-            g_debug("%s: parsing error: %s",
-                    __func__, XML_ErrorString(XML_GetErrorCode(parser)));
-            g_set_error(err, LR_METALINK_ERROR, LRE_MLXML,
-                        "Metalink parser error: %s",
-                        XML_ErrorString(XML_GetErrorCode(parser)));
-            ret = FALSE;
-            break;
-        }
+    // Clean up
 
-        if (len == 0)
-            break;
-
-        if (pd.ret != LRE_OK) {
-            ret = FALSE;
-            g_set_error(err, LR_METALINK_ERROR, ret,
-                        "Error while parsing metalink: %s", lr_strerror(ret));
-            break;
-        }
-    }
-
-    /* Parser data cleanup */
-    lr_free(pd.content);
-    XML_ParserFree(parser);
-
-    if (!pd.found) {
+    if (!pd->found) {
         g_set_error(err, LR_METALINK_ERROR, LRE_MLBAD,
                     "file %s was not found in metalink", filename);
-        return FALSE; /* The wanted file was not found in metalink */
+        ret = FALSE; // The wanted file was not found in metalink
     }
+
+    lr_xml_parser_data_free(pd);
+    XML_ParserFree(parser);
 
     return ret;
 }

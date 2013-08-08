@@ -21,6 +21,7 @@
 #define LR_METALINK_H
 
 #include <glib.h>
+#include "xmlparser.h"
 
 G_BEGIN_DECLS
 
@@ -46,11 +47,11 @@ typedef struct {
 
 /** Metalink */
 typedef struct {
-    char *filename; /*!< Filename */
-    long timestamp; /*!< File timestamp */
-    long size;      /*!< File size */
-    GSList *hashes; /*!< List of pointers to LrMetalinkHashes (could be NULL) */
-    GSList *urls;   /*!< List of pointers to LrMetalinkUrls (could be NULL) */
+    char *filename;   /*!< Filename */
+    gint64 timestamp; /*!< File timestamp */
+    gint64 size;      /*!< File size */
+    GSList *hashes;   /*!< List of pointers to LrMetalinkHashes (could be NULL) */
+    GSList *urls;     /*!< List of pointers to LrMetalinkUrls (could be NULL) */
 } LrMetalink;
 
 /** Create new empty metalink object.
@@ -70,6 +71,8 @@ gboolean
 lr_metalink_parse_file(LrMetalink *metalink,
                        int fd,
                        const char *filename,
+                       LrXmlParserWarningCb warningcb,
+                       void *warningcb_data,
                        GError **err);
 
 /** Free metalink object and all its content.

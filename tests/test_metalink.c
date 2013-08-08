@@ -52,7 +52,7 @@ START_TEST(test_metalink_good_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(!ret);
     fail_if(tmp_err);
     close(fd);
@@ -164,7 +164,7 @@ START_TEST(test_metalink_good_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(!ret);
     fail_if(tmp_err);
     close(fd);
@@ -210,7 +210,7 @@ START_TEST(test_metalink_good_03)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(!ret);
     fail_if(tmp_err);
     close(fd);
@@ -244,7 +244,7 @@ START_TEST(test_metalink_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(!ret);
     fail_if(tmp_err);
     close(fd);
@@ -365,7 +365,7 @@ START_TEST(test_metalink_bad_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(!ret);
     fail_if(tmp_err);
     close(fd);
@@ -389,7 +389,7 @@ START_TEST(test_metalink_really_bad_01)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(ret);
     fail_if(!tmp_err);
     g_error_free(tmp_err);
@@ -413,7 +413,7 @@ START_TEST(test_metalink_really_bad_02)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(ret);
     fail_if(!tmp_err);
     g_error_free(tmp_err);
@@ -437,7 +437,7 @@ START_TEST(test_metalink_really_bad_03)
     fail_if(fd < 0);
     ml = lr_metalink_init();
     fail_if(ml == NULL);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, &tmp_err);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
     fail_if(ret);
     fail_if(!tmp_err);
     g_error_free(tmp_err);

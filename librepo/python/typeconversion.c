@@ -73,9 +73,9 @@ PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
     PyDict_SetItemString(dict, "checksum_type", PyStringOrNone_FromString(rec->checksum_type));
     PyDict_SetItemString(dict, "checksum_open", PyStringOrNone_FromString(rec->checksum_open));
     PyDict_SetItemString(dict, "checksum_open_type", PyStringOrNone_FromString(rec->checksum_open_type));
-    PyDict_SetItemString(dict, "timestamp", PyLong_FromLong(rec->timestamp));
-    PyDict_SetItemString(dict, "size", PyLong_FromLong(rec->size));
-    PyDict_SetItemString(dict, "size_open", PyLong_FromLong(rec->size_open));
+    PyDict_SetItemString(dict, "timestamp", PyLong_FromLongLong((PY_LONG_LONG) rec->timestamp));
+    PyDict_SetItemString(dict, "size", PyLong_FromLongLong((PY_LONG_LONG) rec->size));
+    PyDict_SetItemString(dict, "size_open", PyLong_FromLongLong((PY_LONG_LONG) rec->size_open));
     PyDict_SetItemString(dict, "db_version", PyLong_FromLong((long) rec->db_version));
 
     return dict;
@@ -156,8 +156,8 @@ PyObject_FromMetalink(LrMetalink *metalink)
         return NULL;
 
     PyDict_SetItemString(dict, "filename", PyStringOrNone_FromString(metalink->filename));
-    PyDict_SetItemString(dict, "timestamp", PyLong_FromLong(metalink->timestamp));
-    PyDict_SetItemString(dict, "size", PyLong_FromLong(metalink->size));
+    PyDict_SetItemString(dict, "timestamp", PyLong_FromLongLong((PY_LONG_LONG)metalink->timestamp));
+    PyDict_SetItemString(dict, "size", PyLong_FromLongLong((PY_LONG_LONG)metalink->size));
 
     // Hashes
     if ((sub_list = PyList_New(0)) == NULL) {
