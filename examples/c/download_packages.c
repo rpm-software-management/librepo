@@ -4,8 +4,10 @@
 #include <librepo/librepo.h>
 
 static void
-log_handler_cb(const gchar *log_domain, GLogLevelFlags log_level,
-               const gchar *message, gpointer user_data)
+log_handler_cb(const gchar *log_domain G_GNUC_UNUSED,
+               GLogLevelFlags log_level G_GNUC_UNUSED,
+               const gchar *message,
+               gpointer user_data G_GNUC_UNUSED)
 {
     g_print ("%s\n", message);
 }
@@ -30,8 +32,10 @@ main(void)
 
     // Prepare handle
 
+    char *urls[] = {"http://beaker-project.org/yum/client-testing/Fedora19/", NULL};
+
     h = lr_handle_init();
-    lr_handle_setopt(h, LRO_URL, "http://beaker-project.org/yum/client-testing/Fedora19/");
+    lr_handle_setopt(h, LRO_URL, urls);
     lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO);
 
     // Prepare list of targets

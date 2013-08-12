@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # Prepare handle
     h = librepo.Handle()
-    h.url = "http://beaker-project.org/yum/client-testing/Fedora19/"
+    h.url = ["http://beaker-project.org/yum/client-testing/Fedora19/"]
     h.repotype = librepo.YUMREPO
 
     # Prepare list of targets

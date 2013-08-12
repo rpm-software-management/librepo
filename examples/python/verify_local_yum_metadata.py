@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Yum metadata
     h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
     # Path to the metadata
-    h.setopt(librepo.LRO_URL, METADATA_PATH)
+    h.setopt(librepo.LRO_URL, [METADATA_PATH])
     # Do not duplicate (copy) the metadata
     h.setopt(librepo.LRO_LOCAL, True)
     # Check checksum of metadata
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     except librepo.LibrepoException as e:
         rc, msg, ext = e
         if rc == librepo.LRE_BADCHECKSUM:
-            print "Corrupted metadata!"
+            print "Corrupted metadata! (%s)" % msg
         else:
             print "Other error: %s" % msg
         sys.exit(1)
