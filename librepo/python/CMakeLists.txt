@@ -1,35 +1,18 @@
-FIND_PACKAGE (PythonLibs 2 )
-FIND_PACKAGE (PythonInterp 2 REQUIRED)
-EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "from sys import stdout; from distutils import sysconfig; stdout.write(sysconfig.get_python_lib(True))" OUTPUT_VARIABLE PYTHON_INSTALL_DIR)
-INCLUDE_DIRECTORIES (${PYTHON_INCLUDE_PATH})
-
-MESSAGE(STATUS "Python install dir is ${PYTHON_INSTALL_DIR}")
-
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-strict-aliasing")
-set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-strict-aliasing")
-
-SET (librepo_COPIES __init__.py)
-FILE(COPY ${librepo_COPIES} DESTINATION ./librepo/)
+SET(pylibrepo_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 SET (librepomodule_SRCS
-     exception-py.c
-     handle-py.c
-     librepomodule.c
-     packagetarget-py.c
-     result-py.c
-     typeconversion.c
-     yum-py.c)
+     ${pylibrepo_SRCDIR}/exception-py.c
+     ${pylibrepo_SRCDIR}/handle-py.c
+     ${pylibrepo_SRCDIR}/librepomodule.c
+     ${pylibrepo_SRCDIR}/packagetarget-py.c
+     ${pylibrepo_SRCDIR}/result-py.c
+     ${pylibrepo_SRCDIR}/typeconversion.c
+     ${pylibrepo_SRCDIR}/yum-py.c)
 
-ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
-SET_TARGET_PROPERTIES(_librepomodule PROPERTIES PREFIX "")
-SET_TARGET_PROPERTIES(_librepomodule PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
-TARGET_LINK_LIBRARIES(_librepomodule librepo)
-TARGET_LINK_LIBRARIES(_librepomodule
-                        ${EXPAT_LIBRARIES}
-                        ${CURL_LIBRARY}
-                        ${PYTHON_LIBRARY}
-                     )
-
-INSTALL(FILES __init__.py DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
-INSTALL(TARGETS _librepomodule LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
+if (${PYTHON_DESIRED} STREQUAL "2")
+    message("Building for python2")
+    add_subdirectory(python2)
+else()
+    message("Building for python3")
+    add_subdirectory(python3)
+endif()
