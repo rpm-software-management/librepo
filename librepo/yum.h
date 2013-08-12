@@ -62,6 +62,14 @@ lr_yum_repo_init();
 void
 lr_yum_repo_free(LrYumRepo *repo);
 
+/** Retruns path for the file from repository.
+ * @param repo          Yum repo object.
+ * @param type          Type of path. E.g. "primary", "filelists", ...
+ * @return              Path or NULL.
+ */
+const char *
+lr_yum_repo_path(LrYumRepo *repo, const char *type);
+
 /** @} */
 
 G_END_DECLS
