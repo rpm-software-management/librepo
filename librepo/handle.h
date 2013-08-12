@@ -61,8 +61,8 @@ typedef enum {
         Update existing repo in ::LrResult. Update means download missing
         (previously omitted) metadata file(s). */
 
-    LRO_URL,  /*!< (char *)
-        Base repo URL */
+    LRO_URL,  /*!< (char ** NULL-terminated)
+        List of base repo URLs */
 
     LRO_MIRRORLIST,  /*!< (char *)
         Mirrorlist or metalink url */
@@ -159,12 +159,12 @@ typedef enum {
 
     /* LR_YUMREPO specific options */
 
-    LRO_YUMDLIST,  /*!< (char **)
+    LRO_YUMDLIST,  /*!< (char ** NULL-terminated)
         Download only specified records from repomd (e.g. ["primary",
         "filelists", NULL]).
         Note: Last element of the list must be NULL! */
 
-    LRO_YUMBLIST,  /*!< (char **)
+    LRO_YUMBLIST,  /*!< (char ** NULL-terminated)
         Do not download this specified records from repomd (blacklist).
         Note: Last element of the list must be NULL! */
 
@@ -175,7 +175,9 @@ typedef enum {
 /** Handle options for the ::lr_handle_getinfo function. */
 typedef enum {
     LRI_UPDATE,                 /*!< (long *) */
-    LRI_URL,                    /*!< (char **) */
+    LRI_URL,                    /*!< (char ***)
+        NOTE: Returned list must be freed as well as all its items!
+        You could use g_strfreev() function. */
     LRI_MIRRORLIST,             /*!< (char **) */
     LRI_LOCAL,                  /*!< (long *) */
     LRI_PROGRESSCB,             /*!< (void *) */
@@ -246,7 +248,7 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...);
  * @return              Librepo return code ::LrRc.
  */
 int
-lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...);
+lr_handle_getinfo(LrHandle *handle, LrHandleInfoOption option, ...);
 
 /** Perform repodata download or location.
  * @param handle        Librepo handle.

@@ -19,13 +19,13 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_UPDATE,  0)
         self.assertFalse(h.getinfo(librepo.LRI_UPDATE))
 
-        self.assertEqual(h.getinfo(librepo.LRI_URL), None)
+        self.assertEqual(h.getinfo(librepo.LRI_URL), [])
         h.setopt(librepo.LRO_URL, "http://foo")
-        self.assertEqual(h.getinfo(librepo.LRI_URL), "http://foo")
+        self.assertEqual(h.getinfo(librepo.LRI_URL), ["http://foo"])
         h.setopt(librepo.LRO_URL, "")
-        self.assertEqual(h.getinfo(librepo.LRI_URL), "")
+        self.assertEqual(h.getinfo(librepo.LRI_URL), [""])
         h.setopt(librepo.LRO_URL, None)
-        self.assertEqual(h.getinfo(librepo.LRI_URL), None)
+        self.assertEqual(h.getinfo(librepo.LRI_URL), [])
 
         self.assertEqual(h.getinfo(librepo.LRI_MIRRORLIST), None)
         h.setopt(librepo.LRO_MIRRORLIST, "http://ml")
@@ -115,13 +115,13 @@ class TestCaseHandle(unittest.TestCase):
         h.update = 0
         self.assertFalse(h.update)
 
-        self.assertEqual(h.url, None)
+        self.assertEqual(h.url, [])
         h.url = "http://foo"
-        self.assertEqual(h.url, "http://foo")
+        self.assertEqual(h.url, ["http://foo"])
         h.url = ""
-        self.assertEqual(h.url, "")
+        self.assertEqual(h.url, [""])
         h.url = None
-        self.assertEqual(h.url, None)
+        self.assertEqual(h.url, [])
 
         self.assertEqual(h.mirrorlist, None)
         h.mirrorlist = "http://ml"

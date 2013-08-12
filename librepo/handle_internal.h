@@ -40,7 +40,7 @@ struct _LrHandle {
     int update; /*!<
         Just update existing repo */
 
-    char *baseurl; /*!<
+    char **baseurls; /*!<
         Base URL of repo */
 
     LrInternalMirrorlist *internal_mirrorlist; /*!<

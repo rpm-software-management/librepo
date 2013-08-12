@@ -31,7 +31,6 @@
 #include "xmlparser_internal.h"
 
 /** TODO:
- * - Better xml parsing error messages
  * - (?) Use GStringChunk
  */
 

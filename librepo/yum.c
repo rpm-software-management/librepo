@@ -268,7 +268,6 @@ lr_yum_download_repo(LrHandle *handle,
                     __func__, path, strerror(errno));
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot create/open %s: %s", path, strerror(errno));
-            // TODO: TEST THIS
             lr_free(path);
             g_slist_free_full(targets, (GDestroyNotify) lr_downloadtarget_free);
             return FALSE;
@@ -466,7 +465,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
-    baseurl = handle->baseurl;
+    baseurl = handle->baseurls[0];
 
     /* Do not duplicate repoata, just locate the local one */
     if (strncmp(baseurl, "file://", 7)) {
@@ -759,7 +758,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
         if (handle->used_mirror)
             repo->url = g_strdup(handle->used_mirror);
         else
-            repo->url = g_strdup(handle->baseurl);
+            repo->url = g_strdup(handle->baseurls[0]);
 
         g_debug("%s: Repomd revision: %s", repomd->revision, __func__);
     }
@@ -793,13 +792,13 @@ lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
         return FALSE;
     }
 
-    if (!handle->baseurl && !handle->mirrorlist) {
+    if (!handle->baseurls && !handle->mirrorlist) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
                     "No base url nor mirrorlist specified");
         return FALSE;
     }
 
-    if (handle->local && !handle->baseurl) {
+    if (handle->local && !handle->baseurls) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
                     "Localrepo specified, but no LRO_URL set");
         return FALSE;

@@ -151,7 +151,6 @@ setopt(_HandleObject *self, PyObject *args)
     /*
      * Options with string arguments (NULL is supported)
      */
-    case LRO_URL:
     case LRO_MIRRORLIST:
     case LRO_USERPWD:
     case LRO_PROXY:
@@ -278,6 +277,7 @@ setopt(_HandleObject *self, PyObject *args)
     /*
      * Options with array argument
      */
+    case LRO_URL:
     case LRO_YUMDLIST:
     case LRO_YUMBLIST: {
         Py_ssize_t len = 0;
@@ -301,17 +301,18 @@ setopt(_HandleObject *self, PyObject *args)
             }
         }
 
-        char *array[len+1];
+        GPtrArray *ptrarray = g_ptr_array_sized_new(len + 1);
         for (Py_ssize_t x = 0; x < len; x++) {
             PyObject *item = PyList_GetItem(obj, x);
             if (PyString_Check(item))
-                array[x] = PyString_AsString(item);
-            else
-                array[x] = NULL;
+                g_ptr_array_add(ptrarray, PyString_AsString(item));
         }
-        array[len] = NULL;
+        g_ptr_array_add(ptrarray, NULL);
 
-        res = lr_handle_setopt(self->handle, (LrHandleOption)option, array);
+        res = lr_handle_setopt(self->handle,
+                               (LrHandleOption)option,
+                               ptrarray->pdata);
+        g_ptr_array_free(ptrarray, TRUE);
         break;
     }
 
@@ -442,7 +443,6 @@ getinfo(_HandleObject *self, PyObject *args)
     switch (option) {
 
     /* char** options */
-    case LRI_URL:
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
     case LRI_USERAGENT:
@@ -499,6 +499,7 @@ getinfo(_HandleObject *self, PyObject *args)
     }
 
     /* char*** options */
+    case LRI_URL:
     case LRI_YUMDLIST:
     case LRI_YUMBLIST:
     case LRI_MIRRORS: {
@@ -508,7 +509,7 @@ getinfo(_HandleObject *self, PyObject *args)
         if (res != LRE_OK)
             RETURN_ERROR(NULL, res, NULL);
         if (strlist == NULL) {
-            if (option == LRI_MIRRORS) {
+            if (option == LRI_MIRRORS || option == LRI_URL) {
                 return PyList_New(0);
             } else {
                 Py_RETURN_NONE;

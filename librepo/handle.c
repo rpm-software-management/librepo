@@ -103,7 +103,7 @@ lr_handle_free(LrHandle *handle)
         curl_easy_cleanup(handle->curl_handle);
     if (handle->mirrorlist_fd != -1)
         close(handle->mirrorlist_fd);
-    lr_free(handle->baseurl);
+    lr_handle_free_list(&handle->baseurls);
     lr_free(handle->mirrorlist);
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
@@ -138,16 +138,6 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
     switch (option) {
     case LRO_UPDATE:
         handle->update = va_arg(arg, long) ? 1 : 0;
-        break;
-
-    case LRO_URL:
-        if (handle->baseurl) lr_free(handle->baseurl);
-        handle->baseurl = g_strdup(va_arg(arg, char *));
-        if (handle->internal_mirrorlist) {
-            // Clear previous mirrorlist stuff
-            lr_lrmirrorlist_free(handle->internal_mirrorlist);
-            handle->internal_mirrorlist = NULL;
-        }
         break;
 
     case LRO_MIRRORLIST:
@@ -277,25 +267,41 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
             handle->checks &= ~LR_CHECK_CHECKSUM;
         break;
 
+    case LRO_URL:
     case LRO_YUMDLIST:
     case LRO_YUMBLIST: {
         int size = 0;
         char **list = va_arg(arg, char **);
         char ***handle_list = NULL;
 
-        if (option == LRO_YUMDLIST)
+        if (option == LRO_URL) {
+            handle_list = &handle->baseurls;
+            if (handle->internal_mirrorlist) {
+                // Clear previous mirrorlist stuff
+                lr_lrmirrorlist_free(handle->internal_mirrorlist);
+                handle->internal_mirrorlist = NULL;
+            }
+        } else if (option == LRO_YUMDLIST) {
             handle_list = &handle->yumdlist;
-        else
+        } else {
             handle_list = &handle->yumblist;
+        }
 
         lr_handle_free_list(handle_list);
         if (!list)
             break;
 
-        /* Copy list */
+        // Get list length
         while (list[size])
             size++;
         size++;
+
+        if (size == 1 && option == LRO_URL) {
+            // Only NULL present in list of URLs, keep handle->baseurls = NULL
+            break;
+        }
+
+        // Copy the list
         *handle_list = lr_malloc0(size * sizeof(char *));
         for (int x = 0; x < size; x++)
             (*handle_list)[x] = g_strdup(list[x]);
@@ -388,7 +394,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
     if (handle->internal_mirrorlist)
         return TRUE;  /* Internal mirrorlist already exists */
 
-    if (!handle->baseurl && !handle->mirrorlist) {
+    if (!handle->baseurls && !handle->mirrorlist) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
                     "No usable URL (no base url nor mirrorlist url)");
         return FALSE;
@@ -403,46 +409,52 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
     handle->internal_mirrorlist = NULL;
 
     /*
-     * handle->baseurl (LRO_URL)
+     * handle->baseurls (LRO_URL)
      */
 
-    if (handle->baseurl) {
-        /* Repository URL specified by user insert it as the first element */
+    if (handle->baseurls) {
+        /* Repository URL(s) specified by user insert it as the first element */
 
-        char *url = NULL;
+        int x = 0;
+        while (handle->baseurls[x]) {
+            char *url = handle->baseurls[x];
+            char *final_url = NULL;
 
-        if (strstr(handle->baseurl, "://")) {
-            /* Base URL has specified protocol */
-            url = g_strdup(handle->baseurl);
-            if (!strncmp(handle->baseurl, "file://", 7))
-                local_path = handle->baseurl + 7;
-        } else {
-            /* No protocol specified - if local path => prepend file:// */
-            local_path = handle->baseurl;
-            if (handle->baseurl[0] == '/') {
-                /* Base URL is absolute path */
-                url = g_strconcat("file://", handle->baseurl, NULL);
+            if (strstr(url, "://")) {
+                /* Base URL has specified protocol */
+                final_url = g_strdup(url);
+                if (!strncmp(url, "file://", 7))
+                    local_path = url + 7;
             } else {
-                /* Base URL is relative path */
-                char *resolved_path = realpath(handle->baseurl, NULL);
-                if (!resolved_path) {
-                    g_debug("%s: realpath: %s", __func__, strerror(errno));
-                    g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
-                                "realpath(%s) error: %s",
-                                handle->baseurl, strerror(errno));
-                    return FALSE;
+                /* No protocol specified - if local path => prepend file:// */
+                local_path = url;
+                if (url[0] == '/') {
+                    /* Base URL is absolute path */
+                    final_url = g_strconcat("file://", url, NULL);
+                } else {
+                    /* Base URL is relative path */
+                    char *resolved_path = realpath(url, NULL);
+                    if (!resolved_path) {
+                        g_debug("%s: realpath: %s", __func__, strerror(errno));
+                        g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
+                                    "realpath(%s) error: %s",
+                                    url, strerror(errno));
+                        return FALSE;
+                    }
+                    final_url = g_strconcat("file://", resolved_path, NULL);
+                    free(resolved_path);
                 }
-                url = g_strconcat("file://", resolved_path, NULL);
-                free(resolved_path);
             }
-        }
 
-        if (url) {
-            handle->internal_mirrorlist = lr_lrmirrorlist_append_url(
-                                                handle->internal_mirrorlist,
-                                                url,
-                                                handle->urlvars);
-            lr_free(url);
+            if (final_url) {
+                handle->internal_mirrorlist = lr_lrmirrorlist_append_url(
+                                                    handle->internal_mirrorlist,
+                                                    final_url,
+                                                    handle->urlvars);
+                lr_free(final_url);
+            }
+
+            x++;
         }
     }
 
@@ -461,7 +473,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
         int mirrors_fd = -1;
         int mirror_type = 0;
 
-        if (!handle->mirrorlist && handle->baseurl && local_path) {
+        if (!handle->mirrorlist && local_path) {
             /* We have a local repository and no mirrorlist specified,
              * just try to load local mirrorlist and do not include its
              * content into the internal_mirrorlist, just fill mirrors */
@@ -676,7 +688,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         return FALSE;
     }
 
-    if (!handle->baseurl && !handle->mirrorlist) {
+    if (!handle->baseurls && !handle->mirrorlist) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
                     "No LRO_URL nor LRO_MIRRORLIST specified");
         return FALSE;
@@ -748,7 +760,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
             g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
                         "Bad repo type: %d", handle->repotype);
             break;
-        };
+        }
     }
 
     if (handle->interruptible) {
@@ -773,7 +785,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
 }
 
 int
-lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...)
+lr_handle_getinfo(LrHandle *handle, LrHandleInfoOption option, ...)
 {
     int rc = LRE_OK;
     va_list arg;
@@ -790,11 +802,6 @@ lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...)
     case LRI_UPDATE:
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->update;
-        break;
-
-    case LRI_URL:
-        str = va_arg(arg, char **);
-        *str = handle->baseurl;
         break;
 
     case LRI_MIRRORLIST:
@@ -834,47 +841,35 @@ lr_handle_getinfo(LrHandle *handle, LrHandleOption option, ...)
         *str = handle->useragent;
         break;
 
-    case LRI_YUMDLIST: {
-        int x;
-        guint length;
-        char ***strlist = va_arg(arg, char ***);
-
-        if (!handle->yumdlist) {
-            *strlist = NULL;
-            break;
-        }
-
-        x = 0;
-        length = g_strv_length(handle->yumdlist);
-        *strlist = lr_malloc((length + 1) * sizeof(char *));
-        for (char *item = handle->yumdlist[x]; item;) {
-            (*strlist)[x] = g_strdup(item);
-            x++;
-            item = handle->yumdlist[x];
-        }
-        (*strlist)[x] = NULL;
-        break;
-    }
-
+    case LRI_URL:
+    case LRI_YUMDLIST:
     case LRI_YUMBLIST: {
-        int x;
-        guint length;
+        char **source_list;
         char ***strlist = va_arg(arg, char ***);
 
-        if (!handle->yumblist) {
+        if (option == LRI_URL)
+            source_list = handle->baseurls;
+        else if (option == LRI_YUMDLIST)
+            source_list = handle->yumdlist;
+        else
+            source_list = handle->yumblist;
+
+        if (!source_list) {
             *strlist = NULL;
             break;
         }
 
-        x = 0;
-        length = g_strv_length(handle->yumblist);
-        *strlist = lr_malloc((length + 1) * sizeof(char *));
-        for (char *item = handle->yumblist[x]; item;) {
-            (*strlist)[x] = g_strdup(item);
+        guint length = g_strv_length(source_list);
+        GPtrArray *ptrarray = g_ptr_array_sized_new(length + 1);
+        int x = 0;
+        for (char *item = source_list[x]; item;) {
+            g_ptr_array_add(ptrarray, g_strdup(item));
             x++;
-            item = handle->yumblist[x];
+            item = source_list[x];
         }
-        (*strlist)[x] = NULL;
+        g_ptr_array_add(ptrarray, NULL);
+        *strlist = (char **) ptrarray->pdata;
+        g_ptr_array_free(ptrarray, FALSE);
         break;
     }
 

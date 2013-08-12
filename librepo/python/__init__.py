@@ -58,7 +58,7 @@ Constants
 
 .. data:: LRO_URL
 
-    *String or None*. Set repository url (repository url and baseurl
+    *List or None*. Set repository url(s) (repository url and baseurl
     are interchangeable terms in this context).
 
 .. data:: LRO_MIRRORLIST
@@ -786,6 +786,13 @@ class Handle(_librepo.Handle):
             # is equivalent to:
             h.url("http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
         """
+
+        if (option == LRO_URL and isinstance(val, basestring)):
+            import warnings
+            warnings.warn("Using string value for LRO_URL is deprecated, " \
+                          "use list of strings instead", DeprecationWarning)
+            val = [val]
+
         _librepo.Handle.setopt(self, option, val)
 
     def __setattr__(self, attr, val):
@@ -838,7 +845,7 @@ class Handle(_librepo.Handle):
         Example::
 
             h = librepo.Handle()
-            h.setopt(librepo.LRO_URL, "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
+            h.setopt(librepo.LRO_URL, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
             h.download("Packages/s/sl-3.03-12.fc17.i686.rpm",
                 checksum="0ec8535d0fc00b497d8aef491c3f8b3955f2d84846325ee44851d9de8a36d12c",
