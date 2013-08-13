@@ -956,29 +956,20 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 }
 
 typedef struct {
-    double downloaded; /*!<
-        Currently downloaded */
-
-    double total; /*!<
-        Total size to download */
-
-    int totalsizereporters; /*!<
-        How many transfers reported total size yet */
-
-    int transfers; /*!<
-        Number of transfers */
-
     LrProgressCb cb; /*!<
         User callback */
 
     void *cbdata; /*!<
         User callback data */
 
+    GSList *singlecbdata; /*!<
+        List of LrCallbackData */
+
 } LrSharedCallbackData;
 
 typedef struct {
-    int totalsizereported;
     double downloaded;
+    double total;
     LrSharedCallbackData *sharedcbdata;
 } LrCallbackData;
 
@@ -990,33 +981,34 @@ lr_multi_progress_func(void* ptr,
     LrCallbackData *cbdata = ptr;
     LrSharedCallbackData *shared_cbdata = cbdata->sharedcbdata;
 
-    if (total_to_download && !cbdata->totalsizereported) {
-        // Report total size to the shared callback data
-        cbdata->totalsizereported = 1;
-        shared_cbdata->total += total_to_download;
-        shared_cbdata->totalsizereporters++;
+    if (cbdata->downloaded > now_downloaded
+        || cbdata->total != total_to_download)
+    {
+        // Reset counters
+        // This is not first mirror for the transfer,
+        // we have already downloaded some data
+        cbdata->total = total_to_download;
     }
 
-    // Calculate download delta for this transfer
-    double delta = now_downloaded - cbdata->downloaded;
     cbdata->downloaded = now_downloaded;
 
-    assert(delta >= 0.0);
+    // Prepare values for the user callback
+    double totalsize = 0.0;
+    double downloaded = 0.0;
 
-    // Update currently downloaded size
-    shared_cbdata->downloaded += delta;
+    for (GSList *elem = shared_cbdata->singlecbdata; elem; elem = g_slist_next(elem)) {
+        LrCallbackData *singlecbdata = elem->data;
+        totalsize += singlecbdata->total;
+        downloaded += singlecbdata->downloaded;
+    }
 
-    // Prepare total size for a call of the user callback
-    double totalsize;
-    if (shared_cbdata->totalsizereporters == shared_cbdata->transfers)
-        totalsize = shared_cbdata->total;
-    else
-        totalsize = 0.0;  // Do not repor total size yet
+    if (downloaded > totalsize)
+        totalsize = downloaded;
 
     // Call user callback
     return shared_cbdata->cb(shared_cbdata->cbdata,
                              totalsize,
-                             shared_cbdata->downloaded);
+                             downloaded);
 }
 
 gboolean
@@ -1032,24 +1024,23 @@ lr_download_single_cb(LrHandle *lr_handle,
 
     assert(!err || *err == NULL);
 
-    shared_cbdata.downloaded         = 0.0;
-    shared_cbdata.total              = 0.0;
-    shared_cbdata.totalsizereporters = 0;
-    shared_cbdata.transfers          = g_slist_length(targets);
     shared_cbdata.cb                 = cb;
     shared_cbdata.cbdata             = cbdata;
+    shared_cbdata.singlecbdata       = NULL;
 
     // "Inject" callbacks and callback data to the targets
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrDownloadTarget *target = elem->data;
 
         LrCallbackData *cbdata = lr_malloc(sizeof(*cbdata));
-        cbdata->totalsizereported = 0;
         cbdata->downloaded        = 0.0;
         cbdata->sharedcbdata      = &shared_cbdata;
 
         target->progresscb  = (cb) ? lr_multi_progress_func : NULL;
         target->cbdata      = cbdata;
+
+        shared_cbdata.singlecbdata = g_slist_append(shared_cbdata.singlecbdata,
+                                                    cbdata);
     }
 
     ret = lr_download(lr_handle, targets, failfast, err);
