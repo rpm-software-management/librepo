@@ -26,7 +26,7 @@ PyStringOrNone_FromString(const char *str)
 {
     if (str == NULL)
         Py_RETURN_NONE;
-    return PyString_FromString(str);
+    return PyUnicode_FromString(str);
 }
 
 PyObject *

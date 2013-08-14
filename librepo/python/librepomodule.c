@@ -100,35 +100,85 @@ exit_librepo(void)
     Py_XDECREF(debug_cb_data);
 }
 
-PyMODINIT_FUNC
+struct module_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+
+static int librepo_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+        return 0;
+}
+
+static int librepo_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+        return 0;
+}
+
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_librepo",
+    "A library providing C and Python (libcURL like) API for downloading "
+    "linux repository metadata and packages",
+    sizeof(struct module_state),
+    librepo_methods,
+    NULL,
+    librepo_traverse,
+    librepo_clear,
+    NULL
+};
+
+#define INITERROR return NULL
+
+PyObject *
+PyInit__librepo(void)
+
+#else
+#define INITERROR return
+
+void
 init_librepo(void)
+#endif
 {
+#if PY_MAJOR_VERSION >= 3
+    PyObject *m = PyModule_Create(&moduledef);
+#else
     PyObject *m = Py_InitModule("_librepo", librepo_methods);
+#endif
+
     if (!m)
-        return;
+        INITERROR;
 
     // Exceptions
     if (!init_exceptions())
-        return;
+        INITERROR;
     PyModule_AddObject(m, "LibrepoException", LrErr_Exception);
 
     // Objects
 
     // _librepo.Handle
     if (PyType_Ready(&Handle_Type) < 0)
-        return;
+        INITERROR;
     Py_INCREF(&Handle_Type);
     PyModule_AddObject(m, "Handle", (PyObject *)&Handle_Type);
 
     // _librepo.Result
     if (PyType_Ready(&Result_Type) < 0)
-        return;
+        INITERROR;
     Py_INCREF(&Result_Type);
     PyModule_AddObject(m, "Result", (PyObject *)&Result_Type);
 
     // _librepo.PackageTarget
     if (PyType_Ready(&PackageTarget_Type) < 0)
-        return;
+        INITERROR;
     Py_INCREF(&PackageTarget_Type);
     PyModule_AddObject(m, "PackageTarget", (PyObject *)&PackageTarget_Type);
 
@@ -256,4 +306,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "CHECKSUM_SHA256", LR_CHECKSUM_SHA256);
     PyModule_AddIntConstant(m, "CHECKSUM_SHA384", LR_CHECKSUM_SHA384);
     PyModule_AddIntConstant(m, "CHECKSUM_SHA512", LR_CHECKSUM_SHA512);
+
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
 }

@@ -1,6 +1,6 @@
-from base import TestCaseWithFlask, MOCKURL
-from servermock.server import app
-import servermock.yum_mock.config as config
+from tests.base import TestCaseWithFlask, MOCKURL
+from tests.servermock.server import app
+import tests.servermock.yum_mock.config as config
 import os
 import os.path
 import unittest

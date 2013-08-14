@@ -3,7 +3,7 @@ import os
 import time
 import librepo
 
-from base import TestCase, TEST_DATA
+from tests.base import TestCase, TEST_DATA
 
 REPO_YUM_01_PATH = TEST_DATA+"/repo_yum_01/"
 

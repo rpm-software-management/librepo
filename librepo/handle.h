@@ -111,7 +111,7 @@ typedef enum {
         Max time in sec for connection phase. default timeout
         is 300 seconds. */
 
-    LRO_IGNOREMISSING,  /*!< (long)
+    LRO_IGNOREMISSING,  /*!< (long 1 or 0)
         If you want to localise (LRO_LOCAL is enabled) a incomplete local
         repository (eg. only primary and filelists are present) you could
         use LRO_YUMDLIST and specify only file that are present, or use this

@@ -5,7 +5,7 @@ import unittest
 import gpgme
 import librepo
 
-from base import TestCase, TEST_DATA
+from tests.base import TestCase, TEST_DATA
 
 # Repositories used in download tests
 #REPOS_YUM = "tests/python/tests/servermock/yum_mock/static/"
@@ -23,7 +23,7 @@ class TestCaseYumRepoLocating(TestCase):
         # Import public key into the temporary gpg keyring
         self._gnupghome = os.environ.get('GNUPGHOME')
         gpghome = os.path.join(self.tmpdir, "keyring")
-        os.mkdir(gpghome, 0700)
+        os.mkdir(gpghome, 0o700)
         os.environ['GNUPGHOME'] = gpghome
         self.ctx = gpgme.Context()
         self.ctx.import_(open(PUB_KEY))
@@ -57,19 +57,19 @@ class TestCaseYumRepoLocating(TestCase):
         h.perform(r)
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink,
-            {'timestamp': 1347459931L,
+            {'timestamp': 1347459931,
              'hashes': [
                  ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
                  ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
                  ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
                  ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
-             'size': 2621L,
+             'size': 2621,
              'urls': [{
                  'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
-                 'preference': 100L}],
+                 'preference': 100}],
              'filename': 'repomd.xml'})
 
     def test_read_metalink_of_local_repo(self):
@@ -102,19 +102,19 @@ class TestCaseYumRepoLocating(TestCase):
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink,
-            {'timestamp': 1347459931L,
+            {'timestamp': 1347459931,
              'hashes': [
                  ('md5', 'f76409f67a84bcd516131d5cc98e57e1'),
                  ('sha1', '75125e73304c21945257d9041a908d0d01d2ca16'),
                  ('sha256', 'bef5d33dc68f47adc7b31df448851b1e9e6bae27840f28700fff144881482a6a'),
                  ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
-             'size': 2621L,
+             'size': 2621,
              'urls': [{
                  'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
-                 'preference': 100L}],
+                 'preference': 100}],
              'filename': 'repomd.xml'}
             )
 

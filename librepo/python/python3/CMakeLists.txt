@@ -22,15 +22,15 @@ set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-strict-aliasing")
 SET (librepo_COPIES ${pylibrepo_SRCDIR}/__init__.py)
 FILE(COPY ${librepo_COPIES} DESTINATION ./librepo/)
 
-ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
-SET_TARGET_PROPERTIES(_librepomodule PROPERTIES PREFIX "")
-SET_TARGET_PROPERTIES(_librepomodule PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
-TARGET_LINK_LIBRARIES(_librepomodule librepo)
-TARGET_LINK_LIBRARIES(_librepomodule
+ADD_LIBRARY(_librepo SHARED ${librepomodule_SRCS})
+SET_TARGET_PROPERTIES(_librepo PROPERTIES PREFIX "")
+SET_TARGET_PROPERTIES(_librepo PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
+TARGET_LINK_LIBRARIES(_librepo librepo)
+TARGET_LINK_LIBRARIES(_librepo
                         ${EXPAT_LIBRARIES}
                         ${CURL_LIBRARY}
                         ${PYTHON_LIBRARY}
                      )
 
 INSTALL(FILES ${pylibrepo_SRCDIR}/__init__.py DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
-INSTALL(TARGETS _librepomodule LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
+INSTALL(TARGETS _librepo LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)

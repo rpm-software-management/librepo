@@ -171,8 +171,7 @@ PyMethodDef result_methods[] = {
 };
 
 PyTypeObject Result_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                              /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_librepo.Result",              /* tp_name */
     sizeof(_ResultObject),          /* tp_basicsize */
     0,                              /* tp_itemsize */

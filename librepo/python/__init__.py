@@ -450,7 +450,7 @@ LibRepo Result options for use in :meth:`~.Result.getinfo` method.
 
 """
 
-import _librepo
+import librepo._librepo
 
 VERSION_MAJOR = _librepo.VERSION_MAJOR
 VERSION_MINOR = _librepo.VERSION_MINOR
@@ -787,11 +787,14 @@ class Handle(_librepo.Handle):
             h.url("http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
         """
 
-        if (option == LRO_URL and isinstance(val, basestring)):
+        if (option == LRO_URL and (not isinstance(val, list) and val is not None)):
             import warnings
             warnings.warn("Using string value for LRO_URL is deprecated, " \
                           "use list of strings instead", DeprecationWarning)
             val = [val]
+
+        import sys  # XXX
+        sys.stdout.flush()  # XXX
 
         _librepo.Handle.setopt(self, option, val)
 
@@ -857,7 +860,7 @@ class Handle(_librepo.Handle):
             params are specified!
 
         """
-        if isinstance(checksum_type, basestring):
+        if isinstance(checksum_type, str):
             checksum_type = checksum_str_to_type(checksum_type)
         self.download_package(url, dest, checksum_type, checksum, base_url, resume)
 

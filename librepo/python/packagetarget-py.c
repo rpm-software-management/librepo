@@ -181,7 +181,7 @@ get_str(_PackageTargetObject *self, void *member_offset)
     char *str = *((char **) ((size_t) target + (size_t) member_offset));
     if (str == NULL)
         Py_RETURN_NONE;
-    return PyString_FromString(str);
+    return PyBytes_FromString(str);
 }
 
 static PyGetSetDef packagetarget_getsetters[] = {
@@ -201,8 +201,7 @@ static PyGetSetDef packagetarget_getsetters[] = {
 // Object definition
 
 PyTypeObject PackageTarget_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                              /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_librepo.PackageTarget",       /* tp_name */
     sizeof(_PackageTargetObject),   /* tp_basicsize */
     0,                              /* tp_itemsize */

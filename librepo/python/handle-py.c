@@ -157,16 +157,23 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXYUSERPWD:
     case LRO_DESTDIR:
     case LRO_USERAGENT: {
-        char *str = NULL;
+        char *str = NULL, *alloced = NULL;
 
-        if (PyString_Check(obj)) {
-            str = PyString_AsString(obj);
+        if (PyUnicode_Check(obj)) {
+            PyObject *bytes = PyUnicode_AsLatin1String(obj);
+            if (!bytes) return NULL;
+            str = alloced = g_strdup(PyBytes_AsString(bytes));
+            Py_XDECREF(bytes);
+        } else if (PyBytes_Check(obj)) {
+            str = PyBytes_AsString(obj);
         } else if (obj != Py_None) {
-            PyErr_SetString(PyExc_TypeError, "Only string or None is supported with this option");
+            PyErr_SetString(PyExc_TypeError,
+                        "Only string or None is supported with this option");
             return NULL;
         }
 
         res = lr_handle_setopt(self->handle, (LrHandleOption)option, str);
+        g_free(alloced);
         break;
     }
 
@@ -185,11 +192,7 @@ setopt(_HandleObject *self, PyObject *args)
     {
         long d;
 
-        if (PyInt_Check(obj))
-            d = PyInt_AS_LONG(obj);
-        else if (PyLong_Check(obj))
-            d = PyLong_AsLong(obj);
-        else if (PyObject_IsTrue(obj) == 1)
+        if (PyObject_IsTrue(obj) == 1)
             d = 1;
         else if (PyObject_IsTrue(obj) == 0)
             d = 0;
@@ -211,10 +214,12 @@ setopt(_HandleObject *self, PyObject *args)
         int badarg = 0;
         long d;
 
-        if (PyInt_Check(obj))
-            d = PyInt_AS_LONG(obj);
-        else if (PyLong_Check(obj))
+        if (PyLong_Check(obj))
             d = PyLong_AsLong(obj);
+#if PY_MAJOR_VERSION < 3
+        else if (PyInt_Check(obj))
+            d = PyInt_AS_LONG(obj);
+#endif
         else if (obj == Py_None) {
             // None stands for default value
             if (option == LRO_PROXYTYPE)
@@ -245,10 +250,12 @@ setopt(_HandleObject *self, PyObject *args)
     {
         long d;
 
-        if (PyInt_Check(obj))
-            d = PyInt_AS_LONG(obj);
-        else if (PyLong_Check(obj))
+        if (PyLong_Check(obj))
             d = PyLong_AsLong(obj);
+#if PY_MAJOR_VERSION < 3
+        else if (PyInt_Check(obj))
+            d = PyInt_AS_LONG(obj);
+#endif
         else if (obj == Py_None) {
             /* Default options */
             if (option == LRO_PROXYPORT)
@@ -295,23 +302,39 @@ setopt(_HandleObject *self, PyObject *args)
         len = PyList_Size(obj);
         for (Py_ssize_t x = 0; x < len; x++) {
             PyObject *item = PyList_GetItem(obj, x);
-            if (!PyString_Check(item) && item != Py_None) {
-                PyErr_SetString(PyExc_TypeError, "Only strings or None is supported in list");
+            if (!PyBytes_Check(item) && !PyUnicode_Check(item) && item != Py_None) {
+                PyErr_SetString(PyExc_TypeError, "Only strings or Nones are supported in list");
                 return NULL;
             }
         }
 
+        GStringChunk *chunk = g_string_chunk_new(0);
         GPtrArray *ptrarray = g_ptr_array_sized_new(len + 1);
         for (Py_ssize_t x = 0; x < len; x++) {
             PyObject *item = PyList_GetItem(obj, x);
-            if (PyString_Check(item))
-                g_ptr_array_add(ptrarray, PyString_AsString(item));
+
+            if (PyUnicode_Check(item)) {
+                PyObject *bytes = PyUnicode_AsLatin1String(item);
+                if (!bytes) {
+                    g_ptr_array_free(ptrarray, TRUE);
+                    g_string_chunk_free(chunk);
+                    return NULL;
+                }
+                char *item_str = g_string_chunk_insert(chunk,
+                                                    PyBytes_AsString(bytes));
+                Py_XDECREF(bytes);
+                g_ptr_array_add(ptrarray, item_str);
+            }
+
+            if (PyBytes_Check(item))
+                g_ptr_array_add(ptrarray, PyBytes_AsString(item));
         }
         g_ptr_array_add(ptrarray, NULL);
 
         res = lr_handle_setopt(self->handle,
                                (LrHandleOption)option,
                                ptrarray->pdata);
+        g_string_chunk_free(chunk);
         g_ptr_array_free(ptrarray, TRUE);
         break;
     }
@@ -343,28 +366,67 @@ setopt(_HandleObject *self, PyObject *args)
             }
 
             tuple_item = PyTuple_GetItem(item, 1);
-            if (!PyString_Check(PyTuple_GetItem(item, 0)) ||
-                (!PyString_Check(tuple_item) &&  tuple_item != Py_None)) {
+            if ((!PyBytes_Check(PyTuple_GetItem(item, 0))
+                && !PyUnicode_Check(PyTuple_GetItem(item, 0))) ||
+                (!PyBytes_Check(tuple_item)
+                 && !PyUnicode_Check(tuple_item)
+                 && tuple_item != Py_None))
+            {
                 PyErr_SetString(PyExc_TypeError, "Bad list format");
                 return NULL;
             }
         }
 
+        GStringChunk *chunk = g_string_chunk_new(0);
         for (Py_ssize_t x = 0; x < len; x++) {
             PyObject *item = PyList_GetItem(obj, x);
             PyObject *tuple_item;
             char *var, *val;
 
             tuple_item = PyTuple_GetItem(item, 0);
-            var = PyString_AsString(tuple_item);
+            if (PyBytes_Check(tuple_item)) {
+                // PyBytes
+                var = PyBytes_AsString(tuple_item);
+            } else {
+                // PyUnicode
+                PyObject *bytes = PyUnicode_AsLatin1String(tuple_item);
+                if (!bytes) {
+                    lr_urlvars_free(vars);
+                    g_string_chunk_free(chunk);
+                    return NULL;
+                }
+                char *item_str = g_string_chunk_insert(chunk,
+                                                    PyBytes_AsString(bytes));
+                Py_XDECREF(bytes);
+                var = item_str;
+            }
 
             tuple_item = PyTuple_GetItem(item, 1);
-            val = (tuple_item == Py_None) ? NULL : PyString_AsString(tuple_item);
+            if (tuple_item == Py_None) {
+                // Py_None
+                val = NULL;
+            } else if (PyBytes_Check(tuple_item)) {
+                // PyBytes
+                val = PyBytes_AsString(tuple_item);
+            } else {
+                // PyUnicode
+                PyObject *bytes = PyUnicode_AsLatin1String(tuple_item);
+                if (!bytes) {
+                    lr_urlvars_free(vars);
+                    g_string_chunk_free(chunk);
+                    return NULL;
+                }
+                char *item_str = g_string_chunk_insert(chunk,
+                                                    PyBytes_AsString(bytes));
+                Py_XDECREF(bytes);
+                val = item_str;
+            }
 
             vars = lr_urlvars_set(vars, var, val);
         }
 
         res = lr_handle_setopt(self->handle, (LrHandleOption)option, vars);
+        g_string_chunk_free(chunk);
         break;
     }
 
@@ -451,7 +513,7 @@ getinfo(_HandleObject *self, PyObject *args)
             RETURN_ERROR(NULL, res, NULL);
         if (str == NULL)
             Py_RETURN_NONE;
-        return PyString_FromString(str);
+        return PyUnicode_FromString(str);
 
     /* long* options */
     case LRI_UPDATE:
@@ -481,11 +543,11 @@ getinfo(_HandleObject *self, PyObject *args)
             LrVar *var = elem->data;
 
             tuple = PyTuple_New(2);
-            obj = PyString_FromString(var->var);
+            obj = PyUnicode_FromString(var->var);
             PyTuple_SetItem(tuple, 0, obj);
 
             if (var->val != NULL) {
-                obj = PyString_FromString(var->val);
+                obj = PyUnicode_FromString(var->val);
             } else {
                 Py_INCREF(Py_None);
                 obj = Py_None;
@@ -517,7 +579,7 @@ getinfo(_HandleObject *self, PyObject *args)
         }
         list = PyList_New(0);
         for (int x=0; strlist[x] != NULL; x++) {
-            PyList_Append(list, PyString_FromString(strlist[x]));
+            PyList_Append(list, PyUnicode_FromString(strlist[x]));
         }
 
         g_strfreev(strlist);
@@ -692,8 +754,7 @@ PyMethodDef handle_methods[] = {
 };
 
 PyTypeObject Handle_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                              /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_librepo.Handle",              /* tp_name */
     sizeof(_HandleObject),          /* tp_basicsize */
     0,                              /* tp_itemsize */

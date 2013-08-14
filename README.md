@@ -16,19 +16,26 @@ linux repository metadata and packages
 * libattr (http://www.bestbits.at/acl/) - in Fedora: libattr-devel
 * libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
 * openssl (http://www.openssl.org/) - in Fedora: openssl-devel
-* python (http://python.org/) - in Fedora: python2-devel
-* **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - in Fedora: pygpgme
+* python (http://python.org/) - in Fedora: python2-devel (python3-devel)
+* **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - in Fedora: pygpgme (python3-pygpgme)
 * **Test requires:** python-flask (http://flask.pocoo.org/) - in Fedora: python-flask
-* **Test requires:** python-nose (https://nose.readthedocs.org/) - in Fedora: python-nose
+* **Test requires:** python-nose (https://nose.readthedocs.org/) - in Fedora: python-nose (python3-nose)
 
-### Build from your checkout dir:
+### Build from your checkout dir (Python 2 bindings):
 
     mkdir build
     cd build/
     cmake ..
     make
 
-### Build with debug messages:
+### Build from you checkout dir (Python 3 bindings):
+
+    mkdir build
+    cd build/
+    cmake -DPYTHON_DESIRED="3" ..
+    make
+
+### Build with debug flags:
 
     mkdir build
     cd build/
@@ -48,6 +55,18 @@ linux repository metadata and packages
 ### Online python bindings documentation:
 
 http://tojaj.github.com/librepo/
+
+## Python 3 notes:
+
+Support for Python 3 is experimental.
+
+Python unittests are not fully working due to missing python3 support in
+Flask module.
+
+Flask python3 support rely on python3 support in:
+* [Werkzeug module](http://werkzeug.pocoo.org/docs/python3/) (Currently - 13.8.2013 - Highly experimental)
+* [Jinja2 module](http://jinja.pocoo.org/docs/intro/) (Done)
+* [itsdangerous module](https://github.com/mitsuhiko/itsdangerous) (Done)
 
 ## Testing
 
@@ -82,11 +101,15 @@ Supress known still_reachable memory:
 Note: .valgrindrc file is present in checkoutdir, this file contains the settings:
 `--memcheck:leak-check=full --suppressions=./valgrind.supp`
 
-### Run (from your checkout dir) - Python unittests:
+### Run (from your checkout dir) - Python 2 unittests:
 
-    PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/
+    PYTHONPATH=`readlink -f ./build/librepo/python/python2/` nosetests -s -v tests/python/tests/
 
 Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/test_yum_repo_downloading.py:TestCaseYumRepoDownloading.test_download_and_update_repo_01``
+
+### Run (from your checkout dir) - Python 3 unittests:
+
+    PYTHONPATH=`readlink -f ./build/librepo/python/python3/` nosetests-3.3 -s -v tests/python/tests/
 
 ## Links
 
