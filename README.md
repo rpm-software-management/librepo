@@ -7,19 +7,21 @@ linux repository metadata and packages
 
 ### Build requires:
 
-* check (http://check.sourceforge.net/) - in Fedora: check-devel
-* cmake (http://www.cmake.org/) - in Fedora: cmake
-* expat (http://expat.sourceforge.net/) - in Fedora: expat-devel
-* gcc (http://gcc.gnu.org/)
-* glib2 (http://developer.gnome.org/glib/) - in Fedora: glib2-devel
-* gpgme (http://www.gnupg.org/) - in Fedora: gpgme-devel
-* libattr (http://www.bestbits.at/acl/) - in Fedora: libattr-devel
-* libcurl (http://curl.haxx.se/libcurl/) - in Fedora: libcurl-devel
-* openssl (http://www.openssl.org/) - in Fedora: openssl-devel
-* python (http://python.org/) - in Fedora: python2-devel (python3-devel)
-* **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - in Fedora: pygpgme (python3-pygpgme)
-* **Test requires:** python-flask (http://flask.pocoo.org/) - in Fedora: python-flask
-* **Test requires:** python-nose (https://nose.readthedocs.org/) - in Fedora: python-nose (python3-nose)
+Fedora/Ubuntu name
+
+* check (http://check.sourceforge.net/) - check-devel/check
+* cmake (http://www.cmake.org/) - cmake/cmake
+* expat (http://expat.sourceforge.net/) - expat-devel/libexpat1-dev
+* gcc (http://gcc.gnu.org/) - gcc/gcc
+* glib2 (http://developer.gnome.org/glib/) - glib2-devel/libglib2.0-dev
+* gpgme (http://www.gnupg.org/) - gpgme-devel/libgpgme11-dev
+* libattr (http://www.bestbits.at/acl/) - libattr-devel/libattr1-dev
+* libcurl (http://curl.haxx.se/libcurl/) - libcurl-devel/libcurl4-openssl-dev
+* openssl (http://www.openssl.org/) - openssl-devel/libssl-dev
+* python (http://python.org/) - python2-devel/libpython2.7-dev (python3-devel/libpython3-dev)
+* **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - pygpgme/python-gpgme (python3-pygpgme/python3-gpgme)
+* **Test requires:** python-flask (http://flask.pocoo.org/) - python-flask/python-flask
+* **Test requires:** python-nose (https://nose.readthedocs.org/) - python-nose/python-nose (python3-nose)
 
 ### Build from your checkout dir (Python 2 bindings):
 
