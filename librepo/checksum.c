@@ -60,7 +60,7 @@ lr_checksum_type(const char *type)
         // SHA* family
         char *sha_type = type_lower + 3;
         if (!strcmp(sha_type, ""))
-            return LR_CHECKSUM_SHA;
+            return LR_CHECKSUM_SHA1;
         else if (!strcmp(sha_type, "1"))
             return LR_CHECKSUM_SHA1;
         else if (!strcmp(sha_type, "224"))
@@ -84,8 +84,6 @@ lr_checksum_type_to_str(LrChecksumType type)
         return "Unknown checksum";
     case LR_CHECKSUM_MD5:
         return "md5";
-    case LR_CHECKSUM_SHA:
-        return "sha";
     case LR_CHECKSUM_SHA1:
         return "sha1";
     case LR_CHECKSUM_SHA224:
@@ -116,7 +114,6 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
 
     switch (type) {
         case LR_CHECKSUM_MD5:       ctx_type = EVP_md5();    break;
-        case LR_CHECKSUM_SHA:       ctx_type = EVP_sha();    break;
         case LR_CHECKSUM_SHA1:      ctx_type = EVP_sha1();   break;
         case LR_CHECKSUM_SHA224:    ctx_type = EVP_sha224(); break;
         case LR_CHECKSUM_SHA256:    ctx_type = EVP_sha256(); break;

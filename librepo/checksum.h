@@ -35,7 +35,6 @@ G_BEGIN_DECLS
 typedef enum {
     LR_CHECKSUM_UNKNOWN,
     LR_CHECKSUM_MD5,        /*    The most weakest hash */
-    LR_CHECKSUM_SHA,        /*  |                       */
     LR_CHECKSUM_SHA1,       /*  |                       */
     LR_CHECKSUM_SHA224,     /*  |                       */
     LR_CHECKSUM_SHA256,     /*  |                       */
