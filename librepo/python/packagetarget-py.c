@@ -23,6 +23,7 @@
 
 #include "librepo/librepo.h"
 
+#include "handle-py.h"
 #include "packagetarget-py.h"
 #include "exception-py.h"
 
@@ -32,6 +33,8 @@ typedef struct {
     /* Callback */
     PyObject *progress_cb;
     PyObject *progress_cb_data;
+    /* Handle */
+    PyObject *handle;
 } _PackageTargetObject;
 
 LrPackageTarget *
@@ -59,7 +62,7 @@ check_PackageTargetStatus(const _PackageTargetObject *self)
 /* Callback stuff */
 
 static int
-progress_callback(void *data, double total_to_download, double now_downloaded)
+packagetarget_progress_callback(void *data, double total_to_download, double now_downloaded)
 {
     _PackageTargetObject *self;
     PyObject *user_data, *arglist, *result;
@@ -77,11 +80,26 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     if (arglist == NULL)
         return 0;
 
+    assert(self->handle);
+    PyHandle_EndAllowThreads(self->handle);
     result = PyObject_CallObject(self->progress_cb, arglist);
+    PyHandle_BeginAllowThreads(self->handle);
+
     Py_DECREF(arglist);
     Py_XDECREF(result);
     return 0;
 }
+
+void
+PackageTarget_SetHandle(PyObject *o, PyObject *handle)
+{
+    _PackageTargetObject *self = (_PackageTargetObject *) o;
+    Py_XDECREF(self->handle);
+    if (!self) return;
+    self->handle = handle;
+    Py_XINCREF(self->handle);
+}
+
 
 /* Function on the type */
 
@@ -96,6 +114,7 @@ packagetarget_new(PyTypeObject *type,
         self->target = NULL;
         self->progress_cb = NULL;
         self->progress_cb_data = NULL;
+        self->handle = NULL;
     }
     return (PyObject *)self;
 }
@@ -124,7 +143,7 @@ packagetarget_init(_PackageTargetObject *self,
     if (progresscb == Py_None) {
         c_cb = NULL;
     } else {
-        c_cb = progress_callback;
+        c_cb = packagetarget_progress_callback;
         self->progress_cb = progresscb;
         self->progress_cb_data = cbdata;
         Py_XINCREF(self->progress_cb);
@@ -151,6 +170,7 @@ packagetarget_dealloc(_PackageTargetObject *o)
         lr_packagetarget_free(o->target);
     Py_XDECREF(o->progress_cb);
     Py_XDECREF(o->progress_cb_data);
+    Py_XDECREF(o->handle);
     Py_TYPE(o)->tp_free(o);
 }
 

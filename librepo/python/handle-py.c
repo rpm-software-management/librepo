@@ -35,6 +35,9 @@ typedef struct {
     /* Callback */
     PyObject *progress_cb;
     PyObject *progress_cb_data;
+    /* GIL stuff */
+    // See: http://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code
+    PyThreadState *_save;
 } _HandleObject;
 
 LrHandle *
@@ -45,6 +48,24 @@ Handle_FromPyObject(PyObject *o)
         return NULL;
     }
     return ((_HandleObject *)o)->handle;
+}
+
+void
+PyHandle_BeginAllowThreads(PyObject *o)
+{
+    _HandleObject *self = (_HandleObject *) o;
+    if (!self) return;
+    assert(!self->_save);
+    self->_save = PyEval_SaveThread();
+}
+
+void
+PyHandle_EndAllowThreads(PyObject *o)
+{
+    _HandleObject *self = (_HandleObject *) o;
+    if (!self) return;
+    PyEval_RestoreThread(self->_save);
+    self->_save = NULL;
 }
 
 static int
@@ -80,7 +101,11 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     if (arglist == NULL)
         return 0;
 
+
+    PyHandle_EndAllowThreads(self);
     result = PyObject_CallObject(self->progress_cb, arglist);
+    PyHandle_BeginAllowThreads(self);
+
     Py_DECREF(arglist);
     Py_XDECREF(result);
     return 0;
@@ -99,6 +124,7 @@ handle_new(PyTypeObject *type,
         self->handle = NULL;
         self->progress_cb = NULL;
         self->progress_cb_data = NULL;
+        self->_save = NULL;
     }
     return (PyObject *)self;
 }
@@ -639,7 +665,10 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
+    PyHandle_BeginAllowThreads(self);
     ret = lr_handle_perform(self->handle, result, &tmp_err);
+    PyHandle_EndAllowThreads(self);
+
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (!ret && tmp_err->code == LRE_INTERRUPTED) {
@@ -673,8 +702,10 @@ download_package(_HandleObject *self, PyObject *args)
     if (check_HandleStatus(self))
         return NULL;
 
+    PyHandle_BeginAllowThreads(self);
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, base_url, resume, &tmp_err);
+    PyHandle_EndAllowThreads(self);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
@@ -715,6 +746,7 @@ download_packages(_HandleObject *self, PyObject *args)
         LrPackageTarget *target = PackageTarget_FromPyObject(py_packagetarget);
         if (!target)
             return NULL;
+        PackageTarget_SetHandle(py_packagetarget, (PyObject *) self);
         list = g_slist_append(list, target);
     }
 
@@ -723,7 +755,9 @@ download_packages(_HandleObject *self, PyObject *args)
     if (failfast)
         flags |= LR_PACKAGEDOWNLOAD_FAILFAST;
 
+    PyHandle_BeginAllowThreads(self);
     ret = lr_download_packages(self->handle, list, flags, &tmp_err);
+    PyHandle_EndAllowThreads(self);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
