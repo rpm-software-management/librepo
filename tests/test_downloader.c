@@ -60,7 +60,7 @@ START_TEST(test_downloader_single_file)
     fail_if(handle == NULL);
 
     char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, LRO_URLS, urls);
+    lr_handle_setopt(NULL, handle, LRO_URLS, urls);
     lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
     fail_if(tmp_err);
 
@@ -166,7 +166,7 @@ START_TEST(test_downloader_two_files)
     fail_if(handle == NULL);
 
     char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, LRO_URLS, urls);
+    lr_handle_setopt(NULL, handle, LRO_URLS, urls);
     lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
     fail_if(tmp_err);
 
@@ -238,7 +238,7 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(handle == NULL);
 
     char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, LRO_URLS, urls);
+    lr_handle_setopt(NULL, handle, LRO_URLS, urls);
     lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
     fail_if(tmp_err);
 

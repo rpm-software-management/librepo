@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <assert.h>
 
 #include "librepo.h"
 #include "util.h"
@@ -55,14 +56,21 @@ lr_result_free(LrResult *result)
     lr_free(result);
 }
 
-int
-lr_result_getinfo(LrResult *result, LrResultInfoOption option, ...)
+gboolean
+lr_result_getinfo(GError **err,
+                  LrResult *result,
+                  LrResultInfoOption option, ...)
 {
-    int rc = LRE_OK;
+    gboolean rc = TRUE;
     va_list arg;
 
-    if (!result)
-        return LRE_BADFUNCARG;
+    assert(!err || *err == NULL);
+
+    if (!result) {
+        g_set_error(err, LR_RESULT_ERROR, LRE_BADFUNCARG,
+                    "No result specified");
+        return FALSE;
+    }
 
     va_start(arg, option);
 
@@ -81,7 +89,9 @@ lr_result_getinfo(LrResult *result, LrResultInfoOption option, ...)
     }
 
     default:
-        rc = LRE_UNKNOWNOPT;
+        rc = FALSE;
+        g_set_error(err, LR_RESULT_ERROR, LRE_UNKNOWNOPT,
+                    "Unknown option");
         break;
     }
 

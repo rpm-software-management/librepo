@@ -108,7 +108,7 @@ static PyObject *
 getinfo(_ResultObject *self, PyObject *args)
 {
     int option;
-    int res = LRE_OK;
+    gboolean res = TRUE;
 
     if (!PyArg_ParseTuple(args, "i:getinfo", &option))
         return NULL;
@@ -127,17 +127,25 @@ getinfo(_ResultObject *self, PyObject *args)
      */
     case LRR_YUM_REPO: {
         LrYumRepo *repo;
-        res = lr_result_getinfo(self->result, (LrResultInfoOption)option, &repo);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        GError *tmp_err = NULL;
+        res = lr_result_getinfo(&tmp_err,
+                                self->result,
+                                (LrResultInfoOption)option,
+                                &repo);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
         return PyObject_FromYumRepo(repo);
     }
 
     case LRR_YUM_REPOMD: {
         LrYumRepoMd *repomd;
-        res = lr_result_getinfo(self->result, (LrResultInfoOption)option, &repomd);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        GError *tmp_err = NULL;
+        res = lr_result_getinfo(&tmp_err,
+                                self->result,
+                                (LrResultInfoOption)option,
+                                &repomd);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
         return PyObject_FromYumRepoMd(repomd);
     }
 
@@ -149,8 +157,7 @@ getinfo(_ResultObject *self, PyObject *args)
         return NULL;
     }
 
-    if (res != LRE_OK)
-        RETURN_ERROR(NULL, res, NULL);
+    assert(res);
     Py_RETURN_NONE;
 }
 

@@ -117,19 +117,24 @@ lr_handle_free(LrHandle *handle)
     lr_free(handle);
 }
 
-int
-lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
+gboolean
+lr_handle_setopt(GError **err, LrHandle *handle, LrHandleOption option, ...)
 {
-    LrRc ret = LRE_OK;
+    gboolean ret = TRUE;
     va_list arg;
     CURLcode c_rc = CURLE_OK;
     CURL *c_h;
 
+    assert(!err || *err == NULL);
+
     // Variables for values from va_arg
     long val_long;
 
-    if (!handle)
-        return LRE_BADFUNCARG;
+    if (!handle) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
+                    "No handle specified");
+        return FALSE;
+    }
 
     c_h = handle->curl_handle;
 
@@ -192,10 +197,13 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
             case LR_PROXY_SOCKS5_HOSTNAME: curl_proxy = CURLPROXY_SOCKS5_HOSTNAME; break;
             default: break;
         }
-        if (curl_proxy == -1)
-            ret = LRE_BADOPTARG;
-        else
+        if (curl_proxy == -1) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                    "Bad LRO_PROXYTYPE value");
+            ret = FALSE;
+        } else {
             c_rc = curl_easy_setopt(c_h, CURLOPT_PROXYTYPE, curl_proxy);
+        }
         break;
     }
 
@@ -229,8 +237,11 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
 
     case LRO_REPOTYPE:
         handle->repotype = va_arg(arg, LrRepotype);
-        if (handle->repotype != LR_YUMREPO)
-            ret = LRE_BADOPTARG;
+        if (handle->repotype != LR_YUMREPO) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Bad value of LRO_REPOTYPE");
+            ret = FALSE;
+        }
         break;
 
     case LRO_CONNECTTIMEOUT:
@@ -315,10 +326,14 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
     case LRO_MAXMIRRORTRIES:
         val_long = va_arg(arg, long);
 
-        if (handle->maxmirrortries < LRO_MAXMIRRORTRIES_MIN)
-            ret = LRE_BADOPTARG;
-        else
+        if (handle->maxmirrortries < LRO_MAXMIRRORTRIES_MIN) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                    "Value of LRO_MAXMIRRORTRIES is too low (use value > %d)",
+                    LRO_MAXMIRRORTRIES_MIN);
+            ret = FALSE;
+        } else {
             handle->maxmirrortries = val_long;
+        }
 
         break;
 
@@ -326,20 +341,26 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
         val_long = va_arg(arg, long);
 
         if (val_long < LRO_MAXPARALLELDOWNLOADS_MIN ||
-            val_long > LRO_MAXPARALLELDOWNLOADS_MAX)
-            ret = LRE_BADOPTARG;
-        else
+            val_long > LRO_MAXPARALLELDOWNLOADS_MAX) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Bad value of LRO_MAXPARALLELDOWNLOADS.");
+            ret = FALSE;
+        } else {
             handle->maxparalleldownloads = val_long;
+        }
 
         break;
 
     case LRO_MAXDOWNLOADSPERMIRROR:
         val_long = va_arg(arg, long);
 
-        if (val_long < LRO_MAXDOWNLOADSPERMIRROR_MIN)
-            ret = LRE_BADOPTARG;
-        else
+        if (val_long < LRO_MAXDOWNLOADSPERMIRROR_MIN) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Value of LRO_MAXDOWNLOADSPERMIRROR is too low.");
+            ret = FALSE;
+        } else {
             handle->maxdownloadspermirror = val_long;
+        }
 
         break;
 
@@ -359,18 +380,25 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
     }
 
     default:
-        ret = LRE_UNKNOWNOPT;
+        g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                    "Unknown option");
+        ret = FALSE;
         break;
     };
 
     /* Handle CURL error return code */
-    if (ret == LRE_OK && c_rc != CURLE_OK) {
+    if (ret == TRUE && c_rc != CURLE_OK) {
+        ret = FALSE;
         switch (c_rc) {
         case CURLE_FAILED_INIT:
-            ret = LRE_CURLSETOPT;
+            g_set_error(err, LR_HANDLE_ERROR, LRE_CURLSETOPT,
+                        "curl_easy_setopt error: %s",
+                        curl_easy_strerror(c_rc));
             break;
         default:
-            ret = LRE_CURL;
+            g_set_error(err, LR_HANDLE_ERROR, LRE_CURL,
+                        "curl error: %s",
+                        curl_easy_strerror(c_rc));
             break;
         };
     }
@@ -784,16 +812,21 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
     return ret;
 }
 
-int
-lr_handle_getinfo(LrHandle *handle, LrHandleInfoOption option, ...)
+gboolean
+lr_handle_getinfo(GError **err, LrHandle *handle, LrHandleInfoOption option, ...)
 {
-    int rc = LRE_OK;
+    gboolean rc = TRUE;
     va_list arg;
     char **str;
     long *lnum;
 
-    if (!handle)
-        return LRE_BADFUNCARG;
+    assert(!err || *err == NULL);
+
+    if (!handle) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
+                    "No handle specified");
+        return FALSE;
+    }
 
     va_start(arg, option);
 
@@ -918,7 +951,9 @@ lr_handle_getinfo(LrHandle *handle, LrHandleInfoOption option, ...)
     }
 
     default:
-        rc = LRE_UNKNOWNOPT;
+        rc = FALSE;
+        g_set_error(err, LR_HANDLE_ERROR, LRE_UNKNOWNOPT,
+                    "Unknown option");
         break;
     }
 

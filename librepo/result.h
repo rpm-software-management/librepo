@@ -46,25 +46,32 @@ typedef enum {
 /** Return new allocated ::LrResult object
  * @return          New allocated ::LrResult object
  */
-LrResult *lr_result_init();
+LrResult *
+lr_result_init();
 
 /** Clean result object.
  * @param result    Result object.
  */
-void lr_result_clear(LrResult *result);
+void
+lr_result_clear(LrResult *result);
 
 /** Free result object.
  * @param result    Result object.
  */
-void lr_result_free(LrResult *result);
+void
+lr_result_free(LrResult *result);
 
 /** Get information about downloaded/localised repository from result object.
+ * @param err       GError **
  * @param result    Result object.
  * @param option    Option from ::LrResultInfoOption enum.
  * @param ...       Apropriate variable for the selected option.
- * @return          Librepo return code ::LrRc.
+ * @return          TRUE if everything is ok, false if err is set.
  */
-int lr_result_getinfo(LrResult *result, LrResultInfoOption option, ...);
+gboolean
+lr_result_getinfo(GError **err,
+                  LrResult *result,
+                  LrResultInfoOption option, ...);
 
 /** @} */
 

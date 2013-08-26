@@ -19,6 +19,7 @@
 START_TEST(test_handle)
 {
     LrHandle *h = NULL;
+    GError *tmp_err = NULL;
 
     h = lr_handle_init();
     fail_if(h == NULL);
@@ -28,19 +29,25 @@ START_TEST(test_handle)
     /* This test is meant to check memory leaks. (Use valgrind) */
     h = lr_handle_init();
     char *urls[] = {"foo", NULL};
-    lr_handle_setopt(h, LRO_URLS, urls);
-    lr_handle_setopt(h, LRO_MIRRORLIST, "bar");
-    lr_handle_setopt(h, LRO_USERPWD, "user:pwd");
-    lr_handle_setopt(h, LRO_PROXY, "proxy");
-    lr_handle_setopt(h, LRO_PROXYUSERPWD, "proxyuser:pwd");
-    lr_handle_setopt(h, LRO_DESTDIR, "foodir");
-    lr_handle_setopt(h, LRO_USERAGENT, "librepo/0.0");
+    fail_if(!lr_handle_setopt(&tmp_err, h, LRO_URLS, urls));
+    fail_if(tmp_err);
+    fail_if(!lr_handle_setopt(&tmp_err, h, LRO_URLS, urls));
+    fail_if(tmp_err);
+    fail_if(!lr_handle_setopt(&tmp_err, h, LRO_MIRRORLIST, "foo"));
+    fail_if(tmp_err);
+    fail_if(!lr_handle_setopt(&tmp_err, h, LRO_MIRRORLIST, "bar"));
+    fail_if(tmp_err);
+    fail_if(!lr_handle_setopt(NULL, h, LRO_USERPWD, "user:pwd"));
+    fail_if(!lr_handle_setopt(NULL, h, LRO_PROXY, "proxy"));
+    fail_if(!lr_handle_setopt(NULL, h, LRO_PROXYUSERPWD, "proxyuser:pwd"));
+    fail_if(!lr_handle_setopt(NULL, h, LRO_DESTDIR, "foodir"));
+    fail_if(!lr_handle_setopt(NULL, h, LRO_USERAGENT, "librepo/0.0"));
     char *dlist[] = {"primary", "filelists", NULL};
-    lr_handle_setopt(h, LRO_YUMDLIST, dlist);
-    lr_handle_setopt(h, LRO_YUMBLIST, dlist);
+    fail_if(!lr_handle_setopt(NULL, h, LRO_YUMDLIST, dlist));
+    fail_if(!lr_handle_setopt(NULL, h, LRO_YUMBLIST, dlist));
     LrUrlVars *vars = NULL;
     vars = lr_urlvars_set(vars, "foo", "bar");
-    lr_handle_setopt(h, LRO_VARSUB, vars);
+    fail_if(!lr_handle_setopt(NULL, h, LRO_VARSUB, vars));
     lr_handle_free(h);
 }
 END_TEST
@@ -51,51 +58,54 @@ START_TEST(test_handle_getinfo)
     char *str;
     char **strlist;
     LrHandle *h = NULL;
+    GError *tmp_err = NULL;
 
     h = lr_handle_init();
 
     num = -1;
-    lr_handle_getinfo(h, LRI_UPDATE, &num);
+    fail_if(!lr_handle_getinfo(&tmp_err, h, LRI_UPDATE, &num));
     fail_if(num != 0);
+    fail_if(tmp_err);
 
     strlist = NULL;
-    lr_handle_getinfo(h, LRI_URLS, &strlist);
+    fail_if(!lr_handle_getinfo(&tmp_err, h, LRI_URLS, &strlist));
     fail_if(strlist != NULL);
+    fail_if(tmp_err);
 
     str = NULL;
-    lr_handle_getinfo(h, LRI_MIRRORLIST, &str);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_MIRRORLIST, &str));
     fail_if(str != NULL);
 
     num = -1;
-    lr_handle_getinfo(h, LRI_LOCAL, &num);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_LOCAL, &num));
     fail_if(num != 0);
 
     str = NULL;
-    lr_handle_getinfo(h, LRI_DESTDIR, &str);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_DESTDIR, &str));
     fail_if(str != NULL);
 
     num = -1;
-    lr_handle_getinfo(h, LRI_REPOTYPE, &num);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_REPOTYPE, &num));
     fail_if(num != 0);
 
     str = NULL;
-    lr_handle_getinfo(h, LRI_USERAGENT, &str);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_USERAGENT, &str));
     fail_if(num != 0);
 
     strlist = NULL;
-    lr_handle_getinfo(h, LRI_YUMDLIST, &strlist);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_YUMDLIST, &strlist));
     fail_if(strlist != NULL);
 
     strlist = NULL;
-    lr_handle_getinfo(h, LRI_YUMBLIST, &strlist);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_YUMBLIST, &strlist));
     fail_if(strlist != NULL);
 
     num = -1;
-    lr_handle_getinfo(h, LRI_MAXMIRRORTRIES, &num);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_MAXMIRRORTRIES, &num));
     fail_if(num != 0);
 
     LrUrlVars *vars = NULL;
-    lr_handle_getinfo(h, LRI_VARSUB, &vars);
+    fail_if(!lr_handle_getinfo(NULL, h, LRI_VARSUB, &vars));
     fail_if(strlist != NULL);
 
     lr_handle_free(h);

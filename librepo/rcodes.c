@@ -155,6 +155,12 @@ lr_repoutil_yum_error_quark(void)
 }
 
 GQuark
+lr_result_error_quark(void)
+{
+    return g_quark_from_static_string("lr_result_error");
+}
+
+GQuark
 lr_yum_error_quark(void)
 {
     return g_quark_from_static_string("lr_yum_error");

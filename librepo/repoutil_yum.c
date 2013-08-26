@@ -38,7 +38,6 @@
 gboolean
 lr_repoutil_yum_check_repo(const char *path, GError **err)
 {
-    int rc;
     gboolean ret;
     LrHandle *h;
     LrResult *result;
@@ -49,33 +48,17 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
     h = lr_handle_init();
     result = lr_result_init();
 
-    if ((rc = lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO)) != LRE_OK) {
-        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
-                    "lr_handle_setopt(, LRO_REPOTYPE, LR_YUMREPO) error: %s",
-                    lr_strerror(rc));
+    if (!lr_handle_setopt(err, h, LRO_REPOTYPE, LR_YUMREPO))
         return FALSE;
-    }
 
-    if ((rc = lr_handle_setopt(h, LRO_URLS, path)) != LRE_OK) {
-        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
-                    "lr_handle_setopt(, LRO_URLS, %s) error: %s",
-                    path, lr_strerror(rc));
+    if (!lr_handle_setopt(err, h, LRO_URLS, path))
         return FALSE;
-    }
 
-    if ((rc = lr_handle_setopt(h, LRO_CHECKSUM, 1)) != LRE_OK) {
-        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
-                    "lr_handle_setopt(, LRO_CHECKSUM, 1) error: %s",
-                    lr_strerror(rc));
+    if (!lr_handle_setopt(err, h, LRO_CHECKSUM, 1))
         return FALSE;
-    }
 
-    if ((rc = lr_handle_setopt(h, LRO_LOCAL, 1)) != LRE_OK) {
-        g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
-                    "lr_handle_setopt(, LRO_LOCAL, 1) error: %s",
-                    lr_strerror(rc));
+    if (!lr_handle_setopt(err, h, LRO_LOCAL, 1))
         return FALSE;
-    }
 
     ret = lr_handle_perform(h, result, err);
 
