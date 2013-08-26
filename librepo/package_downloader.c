@@ -41,6 +41,7 @@ lr_packagetarget_new(const char *relative_url,
                      const char *dest,
                      LrChecksumType checksum_type,
                      const char *checksum,
+                     gint64 expectedsize,
                      const char *base_url,
                      gboolean resume,
                      LrProgressCb progresscb,
@@ -65,6 +66,7 @@ lr_packagetarget_new(const char *relative_url,
     target->dest = lr_string_chunk_insert(target->chunk, dest);
     target->checksum_type = checksum_type;
     target->checksum = lr_string_chunk_insert(target->chunk, checksum);
+    target->expectedsize = expectedsize;
     target->base_url = lr_string_chunk_insert(target->chunk, base_url);
     target->resume = resume;
     target->progresscb = progresscb;
@@ -206,6 +208,7 @@ lr_download_packages(LrHandle *handle,
                                                fd,
                                                packagetarget->checksum_type,
                                                packagetarget->checksum,
+                                               packagetarget->expectedsize,
                                                packagetarget->resume,
                                                packagetarget->progresscb,
                                                packagetarget->cbdata,
@@ -254,6 +257,7 @@ lr_download_package(LrHandle *handle,
                     const char *dest,
                     LrChecksumType checksum_type,
                     const char *checksum,
+                    gint64 expectedsize,
                     const char *base_url,
                     gboolean resume,
                     GError **err)
@@ -270,8 +274,8 @@ lr_download_package(LrHandle *handle,
     // XXX: Maybe remove usage of handle callback in future
 
     target = lr_packagetarget_new(relative_url, dest, checksum_type, checksum,
-                                  base_url, resume, handle->user_cb,
-                                  handle->user_data, err);
+                                  expectedsize, base_url, resume,
+                                  handle->user_cb, handle->user_data, err);
     if (!target)
         return FALSE;
 

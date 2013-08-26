@@ -47,6 +47,9 @@ typedef struct {
     char *checksum; /*!<
         Expected checksum value or NULL */
 
+    gint64 expectedsize; /*!<
+        Excpected size of the target */
+
     gboolean resume; /*!<
         Resume:
          0  - no resume, download whole file,
@@ -91,6 +94,10 @@ typedef struct {
  *                      checksum is not used or should not be checked.
  * @param checksum      Checksum value to check or NULL. If checksumtype is
  *                      set to LR_CHECKSUM_UNKNOWN then this param is ignored.
+ * @param expectedsize  Expected size of the target. If mirror reports
+ *                      different size, then no download is performed.
+ *                      If 0 then size of downloaded target is not checked.
+ *                      TODO: Not implemented yet
  * @param resume        If FALSE, then no resume is done and whole file is
  *                      downloaded again. Otherwise offset will be
  *                      automaticaly detected from opened file descriptor by
@@ -108,6 +115,7 @@ lr_downloadtarget_new(const char *path,
                       int fd,
                       LrChecksumType checksumtype,
                       const char *checksum,
+                      gint64 expectedsize,
                       gboolean resume,
                       LrProgressCb progresscb,
                       void *cbdata,

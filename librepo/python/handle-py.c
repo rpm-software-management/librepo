@@ -160,7 +160,8 @@ setopt(_HandleObject *self, PyObject *args)
 {
     int option;
     PyObject *obj;
-    int res = LRE_OK;
+    gboolean res = TRUE;
+    GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "iO:setopt", &option, &obj))
         return NULL;
@@ -198,7 +199,10 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(self->handle, (LrHandleOption)option, str);
+        res = lr_handle_setopt(&tmp_err,
+                               self->handle,
+                               (LrHandleOption)option,
+                               str);
         g_free(alloced);
         break;
     }
@@ -227,7 +231,10 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(self->handle, (LrHandleOption)option, d);
+        res = lr_handle_setopt(&tmp_err,
+                               self->handle,
+                               (LrHandleOption)option,
+                               d);
         break;
     }
 
@@ -260,7 +267,10 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(self->handle, (LrHandleOption)option, d);
+        res = lr_handle_setopt(&tmp_err,
+                               self->handle,
+                               (LrHandleOption)option,
+                               d);
         break;
     }
 
@@ -303,14 +313,17 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(self->handle, (LrHandleOption)option, d);
+        res = lr_handle_setopt(&tmp_err,
+                               self->handle,
+                               (LrHandleOption)option,
+                               d);
         break;
     }
 
     /*
      * Options with array argument
      */
-    case LRO_URL:
+    case LRO_URLS:
     case LRO_YUMDLIST:
     case LRO_YUMBLIST: {
         Py_ssize_t len = 0;
@@ -321,7 +334,10 @@ setopt(_HandleObject *self, PyObject *args)
         }
 
         if (obj == Py_None) {
-            res = lr_handle_setopt(self->handle, (LrHandleOption)option, NULL);
+            res = lr_handle_setopt(&tmp_err,
+                                   self->handle,
+                                   (LrHandleOption)option,
+                                   NULL);
             break;
         }
 
@@ -357,7 +373,8 @@ setopt(_HandleObject *self, PyObject *args)
         }
         g_ptr_array_add(ptrarray, NULL);
 
-        res = lr_handle_setopt(self->handle,
+        res = lr_handle_setopt(&tmp_err,
+                               self->handle,
                                (LrHandleOption)option,
                                ptrarray->pdata);
         g_string_chunk_free(chunk);
@@ -375,7 +392,10 @@ setopt(_HandleObject *self, PyObject *args)
         }
 
         if (obj == Py_None) {
-            res = lr_handle_setopt(self->handle, (LrHandleOption)option, NULL);
+            res = lr_handle_setopt(&tmp_err,
+                                   self->handle,
+                                   (LrHandleOption)option,
+                                   NULL);
             break;
         }
 
@@ -451,7 +471,10 @@ setopt(_HandleObject *self, PyObject *args)
             vars = lr_urlvars_set(vars, var, val);
         }
 
-        res = lr_handle_setopt(self->handle, (LrHandleOption)option, vars);
+        res = lr_handle_setopt(&tmp_err,
+                               self->handle,
+                               (LrHandleOption)option,
+                               vars);
         g_string_chunk_free(chunk);
         break;
     }
@@ -469,17 +492,26 @@ setopt(_HandleObject *self, PyObject *args)
         if (obj == Py_None) {
             // None object
             self->progress_cb = NULL;
-            res = lr_handle_setopt(self->handle, (LrHandleOption)option, NULL);
-            if (res != LRE_OK)
-                RETURN_ERROR(NULL, res, NULL);
+            res = lr_handle_setopt(&tmp_err,
+                                   self->handle,
+                                   (LrHandleOption)option,
+                                   NULL);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
         } else {
             // New callback object
             Py_XINCREF(obj);
             self->progress_cb = obj;
-            res = lr_handle_setopt(self->handle, (LrHandleOption)option, progress_callback);
-            if (res != LRE_OK)
-                RETURN_ERROR(NULL, res, NULL);
-            res = lr_handle_setopt(self->handle, LRO_PROGRESSDATA, self);
+            res = lr_handle_setopt(&tmp_err,
+                                   self->handle,
+                                   (LrHandleOption)option,
+                                   progress_callback);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+            res = lr_handle_setopt(&tmp_err,
+                                   self->handle,
+                                   LRO_PROGRESSDATA,
+                                   self);
         }
         break;
     }
@@ -505,8 +537,8 @@ setopt(_HandleObject *self, PyObject *args)
         return NULL;
     }
 
-    if (res != LRE_OK)
-        RETURN_ERROR(NULL, res, NULL);
+    if (!res)
+        RETURN_ERROR(&tmp_err, -1, NULL);
     Py_RETURN_NONE;
 }
 
@@ -514,9 +546,10 @@ static PyObject *
 getinfo(_HandleObject *self, PyObject *args)
 {
     int option;
-    int res = LRE_OK;
+    gboolean res = TRUE;
     char *str;
     long lval;
+    GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "i:getinfo", &option))
         return NULL;
@@ -534,9 +567,12 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
     case LRI_USERAGENT:
-        res = lr_handle_getinfo(self->handle, (LrHandleInfoOption)option, &str);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        res = lr_handle_getinfo(&tmp_err,
+                                self->handle,
+                                (LrHandleInfoOption)option,
+                                &str);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
         if (str == NULL)
             Py_RETURN_NONE;
         return PyUnicode_FromString(str);
@@ -547,18 +583,24 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_REPOTYPE:
     case LRI_FETCHMIRRORS:
     case LRI_MAXMIRRORTRIES:
-        res = lr_handle_getinfo(self->handle, (LrHandleInfoOption)option, &lval);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        res = lr_handle_getinfo(&tmp_err,
+                                self->handle,
+                                (LrHandleInfoOption)option,
+                                &lval);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
         return PyLong_FromLong(lval);
 
     case LRI_VARSUB: {
         LrUrlVars *vars;
         PyObject *list;
 
-        res = lr_handle_getinfo(self->handle, (LrHandleInfoOption)option, &vars);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        res = lr_handle_getinfo(&tmp_err,
+                                self->handle,
+                                (LrHandleInfoOption)option,
+                                &vars);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
 
         if (vars == NULL)
             Py_RETURN_NONE;
@@ -587,17 +629,20 @@ getinfo(_HandleObject *self, PyObject *args)
     }
 
     /* char*** options */
-    case LRI_URL:
+    case LRI_URLS:
     case LRI_YUMDLIST:
     case LRI_YUMBLIST:
     case LRI_MIRRORS: {
         PyObject *list;
         char **strlist;
-        res = lr_handle_getinfo(self->handle, (LrHandleInfoOption)option, &strlist);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        res = lr_handle_getinfo(&tmp_err,
+                                self->handle,
+                                (LrHandleInfoOption)option,
+                                &strlist);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
         if (strlist == NULL) {
-            if (option == LRI_MIRRORS || option == LRI_URL) {
+            if (option == LRI_MIRRORS || option == LRI_URLS) {
                 return PyList_New(0);
             } else {
                 Py_RETURN_NONE;
@@ -631,9 +676,12 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_METALINK: {
         PyObject *py_metalink;
         LrMetalink *metalink;
-        res = lr_handle_getinfo(self->handle, (LrHandleInfoOption)option, &metalink);
-        if (res != LRE_OK)
-            RETURN_ERROR(NULL, res, NULL);
+        res = lr_handle_getinfo(&tmp_err,
+                                self->handle,
+                                (LrHandleInfoOption)option,
+                                &metalink);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
         if (metalink == NULL)
             Py_RETURN_NONE;
         py_metalink = PyObject_FromMetalink(metalink);
@@ -645,8 +693,7 @@ getinfo(_HandleObject *self, PyObject *args)
         return NULL;
     }
 
-    if (res != LRE_OK)
-        RETURN_ERROR(NULL, res, NULL);
+    assert(res);
     Py_RETURN_NONE;
 }
 
@@ -690,21 +737,24 @@ download_package(_HandleObject *self, PyObject *args)
     gboolean ret;
     char *relative_url, *checksum, *dest, *base_url;
     int resume, checksum_type;
+    PY_LONG_LONG expectedsize;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "szizzi:download_package", &relative_url,
-                                                           &dest,
-                                                           &checksum_type,
-                                                           &checksum,
-                                                           &base_url,
-                                                           &resume))
+    if (!PyArg_ParseTuple(args, "szizLzi:download_package", &relative_url,
+                                                            &dest,
+                                                            &checksum_type,
+                                                            &checksum,
+                                                            &expectedsize,
+                                                            &base_url,
+                                                            &resume))
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
 
     PyHandle_BeginAllowThreads(self);
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
-                              checksum, base_url, resume, &tmp_err);
+                              checksum, (gint64) expectedsize, base_url,
+                              resume, &tmp_err);
     PyHandle_EndAllowThreads(self);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));

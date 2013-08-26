@@ -126,13 +126,14 @@ packagetarget_init(_PackageTargetObject *self,
 {
     char *relative_url, *dest, *checksum, *base_url;
     int checksum_type, resume;
+    PY_LONG_LONG expectedsize;
     PyObject *progresscb, *cbdata;
     LrProgressCb c_cb;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "szizziOO:packagetarget_init",
+    if (!PyArg_ParseTuple(args, "szizLziOO:packagetarget_init",
                           &relative_url, &dest, &checksum_type, &checksum,
-                          &base_url, &resume, &progresscb, &cbdata))
+                          &expectedsize, &base_url, &resume, &progresscb, &cbdata))
         return -1;
 
     if (!PyCallable_Check(progresscb) && progresscb != Py_None) {
@@ -151,7 +152,8 @@ packagetarget_init(_PackageTargetObject *self,
     }
 
     self->target = lr_packagetarget_new(relative_url, dest, checksum_type,
-                                        checksum, base_url, resume, c_cb, self,
+                                        checksum, (gint64) expectedsize,
+                                        base_url, resume, c_cb, self,
                                         &tmp_err);
     if (self->target == NULL) {
         PyErr_Format(LrErr_Exception,

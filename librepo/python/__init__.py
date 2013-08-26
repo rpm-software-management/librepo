@@ -819,7 +819,7 @@ class Handle(_librepo.Handle):
         return _librepo.Handle.getinfo(self, option)
 
     def download(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
-                 checksum=None, base_url=None, resume=0):
+                 checksum=None, expectedsize=0, base_url=None, resume=0):
         """Download package from repository specified by
         :meth:`~librepo.Handle.url()` or :meth:`~librepo.Handle.mirrorlist()`
         method. If *base_url* is specified, url and mirrorlist in handle
@@ -835,6 +835,8 @@ class Handle(_librepo.Handle):
                      path to directory or filename.
         :param checksum_type: Type of used checksum.
         :param checksum: Checksum value.
+        :param expectedsize: Expected size of the file. If server reports
+                             different size, then no download is preformed.
         :param base_url: Instead of repositories specified in ``Handle``
                          use repository on this url.
         :param resume: ``True`` enables resume. Resume means that if local
@@ -859,7 +861,8 @@ class Handle(_librepo.Handle):
         """
         if isinstance(checksum_type, str):
             checksum_type = checksum_str_to_type(checksum_type)
-        self.download_package(url, dest, checksum_type, checksum, base_url, resume)
+        self.download_package(url, dest, checksum_type, checksum,
+                              expectedsize, base_url, resume)
 
     def perform(self, result=None):
         if result is None:
@@ -917,11 +920,11 @@ class PackageTarget(_librepo.PackageTarget):
     """
 
     def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
-                 checksum=None, base_url=None, resume=False, progresscb=None,
-                 cbdata=None):
+                 checksum=None, expectedsize=0, base_url=None, resume=False,
+                 progresscb=None, cbdata=None):
         _librepo.PackageTarget.__init__(self, relative_url, dest, checksum_type,
-                                        checksum, base_url, resume, progresscb,
-                                        cbdata)
+                                        checksum, expectedsize, base_url,
+                                        resume, progresscb, cbdata)
 
 # Functions
 

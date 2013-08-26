@@ -41,7 +41,7 @@ G_BEGIN_DECLS
  */
 #define lr_download_simple(handle, relative_url, err) \
                     lr_download_package((handle), (relative_url), NULL, 0, \
-                                        NULL, NULL, 0, (err))
+                                        NULL, 0, NULL, 0, (err))
 
 /** Download package from repository or base_url.
  * Note: If resume, checksum and checksum_type are specified and
@@ -53,6 +53,8 @@ G_BEGIN_DECLS
  *                          or NULL (current working dir is used).
  * @param checksum_type     Type of checksum.
  * @param checksum          Checksum value or NULL.
+ * @param expectedsize      Expected size of target. If >0 and server reports
+ *                          different size, then no download is performed.
  * @param base_url          If specified, mirrors from handle are ignored
  *                          and this base_url is used for downloading.
  * @param resume            If TRUE try to resume downloading if dest file
@@ -66,6 +68,7 @@ lr_download_package(LrHandle *handle,
                     const char *dest,
                     LrChecksumType checksum_type,
                     const char *checksum,
+                    gint64 expectedsize,
                     const char *base_url,
                     gboolean resume,
                     GError **err);
@@ -87,6 +90,9 @@ typedef struct {
 
     char *checksum; /*!<
         Expected checksum value */
+
+    gint64 expectedsize; /*!<
+        Expected size of the target */
 
     gboolean resume; /*!<
         Indicate if resume is enabled */
@@ -122,6 +128,8 @@ typedef struct {
  * @param checksum_type     Type of checksum or LR_CHECKSUM_UNKNOWN.
  * @param checksum          Expected checksum value or NULL.
  * @param base_url          Base URL or NULL
+ * @param expectedsize      Expected size of the target. If server reports
+ *                          different size, then no download is performed.
  * @param resume            If TRUE, then downloader try to resume download
  *                          if destination file exists. If the file doesn't
  *                          exists, it will be normally downloaded again.
@@ -135,6 +143,7 @@ lr_packagetarget_new(const char *relative_url,
                      const char *dest,
                      LrChecksumType checksum_type,
                      const char *checksum,
+                     gint64 expectedsize,
                      const char *base_url,
                      gboolean resume,
                      LrProgressCb progresscb,

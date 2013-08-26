@@ -33,6 +33,7 @@ lr_downloadtarget_new(const char *path,
                       int fd,
                       LrChecksumType checksumtype,
                       const char *checksum,
+                      gint64 expectedsize,
                       gboolean resume,
                       LrProgressCb progresscb,
                       void *cbdata,
@@ -51,6 +52,7 @@ lr_downloadtarget_new(const char *path,
     target->fd           = fd;
     target->checksumtype = checksumtype;
     target->checksum     = lr_string_chunk_insert(target->chunk, checksum);
+    target->expectedsize = expectedsize;
     target->resume       = resume;
     target->progresscb   = progresscb;
     target->cbdata       = cbdata;
