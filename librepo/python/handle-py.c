@@ -102,9 +102,9 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
         return 0;
 
 
-    PyHandle_EndAllowThreads(self);
+    PyHandle_EndAllowThreads((PyObject *) self);
     result = PyObject_CallObject(self->progress_cb, arglist);
-    PyHandle_BeginAllowThreads(self);
+    PyHandle_BeginAllowThreads((PyObject *) self);
 
     Py_DECREF(arglist);
     Py_XDECREF(result);
@@ -712,9 +712,9 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
-    PyHandle_BeginAllowThreads(self);
+    PyHandle_BeginAllowThreads((PyObject *) self);
     ret = lr_handle_perform(self->handle, result, &tmp_err);
-    PyHandle_EndAllowThreads(self);
+    PyHandle_EndAllowThreads((PyObject *) self);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
@@ -751,11 +751,11 @@ download_package(_HandleObject *self, PyObject *args)
     if (check_HandleStatus(self))
         return NULL;
 
-    PyHandle_BeginAllowThreads(self);
+    PyHandle_BeginAllowThreads((PyObject *) self);
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, (gint64) expectedsize, base_url,
                               resume, &tmp_err);
-    PyHandle_EndAllowThreads(self);
+    PyHandle_EndAllowThreads((PyObject *) self);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
@@ -805,9 +805,9 @@ download_packages(_HandleObject *self, PyObject *args)
     if (failfast)
         flags |= LR_PACKAGEDOWNLOAD_FAILFAST;
 
-    PyHandle_BeginAllowThreads(self);
+    PyHandle_BeginAllowThreads((PyObject *) self);
     ret = lr_download_packages(self->handle, list, flags, &tmp_err);
-    PyHandle_EndAllowThreads(self);
+    PyHandle_EndAllowThreads((PyObject *) self);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
