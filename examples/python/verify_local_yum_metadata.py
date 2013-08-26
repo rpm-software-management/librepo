@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Yum metadata
     h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
     # Path to the metadata
-    h.setopt(librepo.LRO_URL, [METADATA_PATH])
+    h.setopt(librepo.LRO_URLS, [METADATA_PATH])
     # Do not duplicate (copy) the metadata
     h.setopt(librepo.LRO_LOCAL, True)
     # Check checksum of metadata

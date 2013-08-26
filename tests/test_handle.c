@@ -28,7 +28,7 @@ START_TEST(test_handle)
     /* This test is meant to check memory leaks. (Use valgrind) */
     h = lr_handle_init();
     char *urls[] = {"foo", NULL};
-    lr_handle_setopt(h, LRO_URL, urls);
+    lr_handle_setopt(h, LRO_URLS, urls);
     lr_handle_setopt(h, LRO_MIRRORLIST, "bar");
     lr_handle_setopt(h, LRO_USERPWD, "user:pwd");
     lr_handle_setopt(h, LRO_PROXY, "proxy");
@@ -59,7 +59,7 @@ START_TEST(test_handle_getinfo)
     fail_if(num != 0);
 
     strlist = NULL;
-    lr_handle_getinfo(h, LRI_URL, &strlist);
+    lr_handle_getinfo(h, LRI_URLS, &strlist);
     fail_if(strlist != NULL);
 
     str = NULL;

@@ -56,9 +56,9 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
         return FALSE;
     }
 
-    if ((rc = lr_handle_setopt(h, LRO_URL, path)) != LRE_OK) {
+    if ((rc = lr_handle_setopt(h, LRO_URLS, path)) != LRE_OK) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, rc,
-                    "lr_handle_setopt(, LRO_URL, %s) error: %s",
+                    "lr_handle_setopt(, LRO_URLS, %s) error: %s",
                     path, lr_strerror(rc));
         return FALSE;
     }

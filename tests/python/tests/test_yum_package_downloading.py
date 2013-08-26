@@ -27,7 +27,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.download(config.PACKAGE_01_01)
@@ -45,7 +45,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         destination = os.path.join(self.tmpdir, "pkg.rpm")
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_CHECKSUM, True)
         h.download(config.PACKAGE_01_01,
@@ -64,7 +64,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_CHECKSUM, True)
         os.chdir(self.tmpdir)
@@ -84,7 +84,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_CHECKSUM, True)
         h.download(config.PACKAGE_01_01,
@@ -130,7 +130,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
 
         url = "%s%s" % (MOCKURL, config.BADURL)
         baseurl = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_CHECKSUM, True)
@@ -159,7 +159,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -169,7 +169,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -186,7 +186,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -208,7 +208,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -230,7 +230,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -251,7 +251,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -277,7 +277,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -304,7 +304,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -322,7 +322,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -341,7 +341,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, ".")
+        h.setopt(librepo.LRO_URLS, ["."])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -359,7 +359,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
@@ -397,7 +397,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URL, url)
+        h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         cbdata = {'called': 0}

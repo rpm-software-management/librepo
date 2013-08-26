@@ -36,10 +36,10 @@ if __name__ == "__main__":
     # --- Mandatory arguments -------------------------------------------
 
     # URL of repository or URL of metalink/mirrorlist
-    h.setopt(librepo.LRO_URL, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
+    h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
     #h.setopt(librepo.LRO_MIRRORLIST, "https://mirrors.fedoraproject.org/metalink?repo=fedora-source-17&arch=i386")
-    # Note: LRO_URL and LRO_MIRRORLIST could be set and used simultaneously
-    #       and if download from LRO_URL failed, then mirrorlist is used
+    # Note: LRO_URLS and LRO_MIRRORLIST could be set and used simultaneously
+    #       and if download from LRO_URLS failed, then mirrorlist is used
 
     # Type of repository
     h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)

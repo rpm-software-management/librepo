@@ -267,14 +267,14 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
             handle->checks &= ~LR_CHECK_CHECKSUM;
         break;
 
-    case LRO_URL:
+    case LRO_URLS:
     case LRO_YUMDLIST:
     case LRO_YUMBLIST: {
         int size = 0;
         char **list = va_arg(arg, char **);
         char ***handle_list = NULL;
 
-        if (option == LRO_URL) {
+        if (option == LRO_URLS) {
             handle_list = &handle->baseurls;
             if (handle->internal_mirrorlist) {
                 // Clear previous mirrorlist stuff
@@ -296,7 +296,7 @@ lr_handle_setopt(LrHandle *handle, LrHandleOption option, ...)
             size++;
         size++;
 
-        if (size == 1 && option == LRO_URL) {
+        if (size == 1 && option == LRO_URLS) {
             // Only NULL present in list of URLs, keep handle->baseurls = NULL
             break;
         }
@@ -409,7 +409,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
     handle->internal_mirrorlist = NULL;
 
     /*
-     * handle->baseurls (LRO_URL)
+     * handle->baseurls (LRO_URLS)
      */
 
     if (handle->baseurls) {
@@ -690,7 +690,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
 
     if (!handle->baseurls && !handle->mirrorlist) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
-                    "No LRO_URL nor LRO_MIRRORLIST specified");
+                    "No LRO_URLS nor LRO_MIRRORLIST specified");
         return FALSE;
     }
 
@@ -841,13 +841,13 @@ lr_handle_getinfo(LrHandle *handle, LrHandleInfoOption option, ...)
         *str = handle->useragent;
         break;
 
-    case LRI_URL:
+    case LRI_URLS:
     case LRI_YUMDLIST:
     case LRI_YUMBLIST: {
         char **source_list;
         char ***strlist = va_arg(arg, char ***);
 
-        if (option == LRI_URL)
+        if (option == LRI_URLS)
             source_list = handle->baseurls;
         else if (option == LRI_YUMDLIST)
             source_list = handle->yumdlist;

@@ -61,7 +61,7 @@ typedef enum {
         Update existing repo in ::LrResult. Update means download missing
         (previously omitted) metadata file(s). */
 
-    LRO_URL,  /*!< (char ** NULL-terminated)
+    LRO_URLS,  /*!< (char ** NULL-terminated)
         List of base repo URLs */
 
     LRO_MIRRORLIST,  /*!< (char *)
@@ -175,7 +175,7 @@ typedef enum {
 /** Handle options for the ::lr_handle_getinfo function. */
 typedef enum {
     LRI_UPDATE,                 /*!< (long *) */
-    LRI_URL,                    /*!< (char ***)
+    LRI_URLS,                   /*!< (char ***)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
     LRI_MIRRORLIST,             /*!< (char **) */

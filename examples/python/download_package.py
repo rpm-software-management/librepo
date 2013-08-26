@@ -42,7 +42,7 @@ if __name__ == "__main__":
     ]
 
     h = librepo.Handle()
-    h.setopt(librepo.LRO_URL, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
+    h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
     h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
     h.setopt(librepo.LRO_PROGRESSCB, callback)
     h.setopt(librepo.LRO_PROGRESSDATA, "")

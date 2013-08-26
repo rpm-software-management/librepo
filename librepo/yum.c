@@ -797,7 +797,7 @@ lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
 
     if (handle->local && !handle->baseurls) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
-                    "Localrepo specified, but no LRO_URL set");
+                    "Localrepo specified, but no LRO_URLS set");
         return FALSE;
     }
 

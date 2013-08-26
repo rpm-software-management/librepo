@@ -44,7 +44,7 @@ Constants
     Example::
 
             # The command:
-            h.setopt(librepo.LRO_URL, "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
+            h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             # is equivalent to:
             h.url = "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"
 
@@ -56,9 +56,9 @@ Constants
     repository represented by :class:`.Result` object. Update mode is
     meant to download previously omitted repository file(s).
 
-.. data:: LRO_URL
+.. data:: LRO_URLS
 
-    *List or None*. Set repository url(s) (repository url and baseurl
+    *List or None*. Set repository urls (repository url and baseurl
     are interchangeable terms in this context).
 
 .. data:: LRO_MIRRORLIST
@@ -222,7 +222,7 @@ Constants
     from :class:`.Handle` via :meth:`~.Handle.getinfo` method.
 
 .. data:: LRI_UPDATE
-.. data:: LRI_URL
+.. data:: LRI_URLS
 .. data:: LRI_MIRRORLIST
 .. data:: LRI_LOCAL
 .. data:: LRI_PROGRESSCB
@@ -460,7 +460,7 @@ VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 LibrepoException = _librepo.LibrepoException
 
 LRO_UPDATE                  = _librepo.LRO_UPDATE
-LRO_URL                     = _librepo.LRO_URL
+LRO_URLS                     = _librepo.LRO_URLS
 LRO_MIRRORLIST              = _librepo.LRO_MIRRORLIST
 LRO_LOCAL                   = _librepo.LRO_LOCAL
 LRO_HTTPAUTH                = _librepo.LRO_HTTPAUTH
@@ -492,7 +492,7 @@ LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
     "update":               LRO_UPDATE,
-    "url":                  LRO_URL,
+    "urls":                 LRO_URLS,
     "mirrorlist":           LRO_MIRRORLIST,
     "local" :               LRO_LOCAL,
     "httpauth":             LRO_HTTPAUTH,
@@ -523,7 +523,7 @@ ATTR_TO_LRO = {
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
-LRI_URL                 = _librepo.LRI_URL
+LRI_URLS                = _librepo.LRI_URLS
 LRI_MIRRORLIST          = _librepo.LRI_MIRRORLIST
 LRI_LOCAL               = _librepo.LRI_LOCAL
 LRI_PROGRESSCB          = _librepo.LRI_PROGRESSCB
@@ -541,7 +541,7 @@ LRI_METALINK            = _librepo.LRI_METALINK
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
-    "url":                  LRI_URL,
+    "urls":                 LRI_URLS,
     "mirrorlist":           LRI_MIRRORLIST,
     "local":                LRI_LOCAL,
     "progresscb":           LRI_PROGRESSCB,
@@ -678,9 +678,9 @@ class Handle(_librepo.Handle):
 
         See: :data:`.LRO_UPDATE`
 
-    .. attribute:: url:
+    .. attribute:: urls:
 
-        See: :data:`.LRO_URL`
+        See: :data:`.LRO_URLS`
 
     .. attribute:: mirrorlist:
 
@@ -779,14 +779,14 @@ class Handle(_librepo.Handle):
         Example::
 
             # The command:
-            h.setopt(librepo.LRO_URL, "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
+            h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             # is equivalent to:
             h.url("http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
         """
 
-        if (option == LRO_URL and (not isinstance(val, list) and val is not None)):
+        if (option == LRO_URLS and (not isinstance(val, list) and val is not None)):
             import warnings
-            warnings.warn("Using string value for LRO_URL is deprecated, " \
+            warnings.warn("Using string value for LRO_URLS is deprecated, " \
                           "use list of strings instead", DeprecationWarning)
             val = [val]
 
@@ -847,7 +847,7 @@ class Handle(_librepo.Handle):
         Example::
 
             h = librepo.Handle()
-            h.setopt(librepo.LRO_URL, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
+            h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
             h.download("Packages/s/sl-3.03-12.fc17.i686.rpm",
                 checksum="0ec8535d0fc00b497d8aef491c3f8b3955f2d84846325ee44851d9de8a36d12c",

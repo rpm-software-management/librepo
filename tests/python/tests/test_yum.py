@@ -11,7 +11,7 @@ class TestCaseYum(unittest.TestCase):
     def test_yum_repomd_get_age(self):
         h = librepo.Handle()
 
-        h.setopt(librepo.LRO_URL, REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
 

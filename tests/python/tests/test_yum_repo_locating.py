@@ -78,7 +78,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
@@ -94,7 +94,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, self.tmpdir)
+        h.setopt(librepo.LRO_URLS, [self.tmpdir])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
         h.setopt(librepo.LRO_FETCHMIRRORS, True)
@@ -123,7 +123,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
@@ -136,7 +136,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, self.tmpdir)
+        h.setopt(librepo.LRO_URLS, [self.tmpdir])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
         h.perform(r)
@@ -154,7 +154,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, REPO_YUM_02_PATH)
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
@@ -167,7 +167,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, self.tmpdir)
+        h.setopt(librepo.LRO_URLS, [self.tmpdir])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
         h.perform(r)
@@ -185,7 +185,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
@@ -199,7 +199,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, self.tmpdir)
+        h.setopt(librepo.LRO_URLS, [self.tmpdir])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
@@ -209,7 +209,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
@@ -223,7 +223,7 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URL, self.tmpdir)
+        h.setopt(librepo.LRO_URLS, [self.tmpdir])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
         h.setopt(librepo.LRO_IGNOREMISSING, True)
