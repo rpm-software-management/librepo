@@ -48,7 +48,7 @@ typedef struct {
         Expected checksum value or NULL */
 
     gint64 expectedsize; /*!<
-        Excpected size of the target */
+        Expected size of the target */
 
     gboolean resume; /*!<
         Resume:
