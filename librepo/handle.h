@@ -227,14 +227,17 @@ void
 lr_handle_free(LrHandle *handle);
 
 /** Set option (::LrHandleOption) of the handle.
- * @param err           GError **
  * @param handle        Handle.
+ * @param err           GError **
  * @param option        Option from ::LrHandleOption enum.
  * @param ...           Value for the option.
  * @return              TRUE if everything is ok, FALSE if err is set.
  */
 gboolean
-lr_handle_setopt(GError **err, LrHandle *handle, LrHandleOption option, ...);
+lr_handle_setopt(LrHandle *handle,
+                 GError **err,
+                 LrHandleOption option,
+                 ...);
 
 /** Get information from handle.
  * Most of returned pointers point directly to the handle internal
@@ -243,16 +246,17 @@ lr_handle_setopt(GError **err, LrHandle *handle, LrHandleOption option, ...);
  * with handle occurs.
  * NOTE: You should not free or modify the memory returned by this
  * function unless it is explicitly mentioned!
- * @param err           GError **
  * @param handle        Librepo handle.
+ * @param err           GError **
  * @param option        Option from ::LrHandleInfoOption enum.
  * @param ...           Apropriate variable fro the selected option.
  * @return              TRUE if everything is ok, FALSE if err is set.
  */
 gboolean
-lr_handle_getinfo(GError **err,
-                  LrHandle *handle,
-                  LrHandleInfoOption option, ...);
+lr_handle_getinfo(LrHandle *handle,
+                  GError **err,
+                  LrHandleInfoOption option,
+                  ...);
 
 /** Perform repodata download or location.
  * @param handle        Librepo handle.

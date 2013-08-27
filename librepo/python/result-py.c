@@ -128,8 +128,8 @@ getinfo(_ResultObject *self, PyObject *args)
     case LRR_YUM_REPO: {
         LrYumRepo *repo;
         GError *tmp_err = NULL;
-        res = lr_result_getinfo(&tmp_err,
-                                self->result,
+        res = lr_result_getinfo(self->result,
+                                &tmp_err,
                                 (LrResultInfoOption)option,
                                 &repo);
         if (!res)
@@ -140,8 +140,8 @@ getinfo(_ResultObject *self, PyObject *args)
     case LRR_YUM_REPOMD: {
         LrYumRepoMd *repomd;
         GError *tmp_err = NULL;
-        res = lr_result_getinfo(&tmp_err,
-                                self->result,
+        res = lr_result_getinfo(self->result,
+                                &tmp_err,
                                 (LrResultInfoOption)option,
                                 &repomd);
         if (!res)

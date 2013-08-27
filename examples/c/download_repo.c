@@ -18,9 +18,9 @@ main(void)
 
     char *urls[] = {"http://beaker-project.org/yum/client-testing/Fedora19/", NULL};
 
-    lr_handle_setopt(h, LRO_URL, urls);
-    lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO);
-    lr_handle_setopt(h, LRO_YUMDLIST, download_list);
+    lr_handle_setopt(h, NULL, LRO_URLS, urls);
+    lr_handle_setopt(h, NULL, LRO_REPOTYPE, LR_YUMREPO);
+    lr_handle_setopt(h, NULL, LRO_YUMDLIST, download_list);
 
     ret = lr_handle_perform(h, r, &tmp_err);
     if (!ret) {

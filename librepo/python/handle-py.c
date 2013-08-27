@@ -199,8 +199,8 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(&tmp_err,
-                               self->handle,
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
                                (LrHandleOption)option,
                                str);
         g_free(alloced);
@@ -231,8 +231,8 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(&tmp_err,
-                               self->handle,
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
                                (LrHandleOption)option,
                                d);
         break;
@@ -267,8 +267,8 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(&tmp_err,
-                               self->handle,
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
                                (LrHandleOption)option,
                                d);
         break;
@@ -313,8 +313,8 @@ setopt(_HandleObject *self, PyObject *args)
             return NULL;
         }
 
-        res = lr_handle_setopt(&tmp_err,
-                               self->handle,
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
                                (LrHandleOption)option,
                                d);
         break;
@@ -334,8 +334,8 @@ setopt(_HandleObject *self, PyObject *args)
         }
 
         if (obj == Py_None) {
-            res = lr_handle_setopt(&tmp_err,
-                                   self->handle,
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
                                    (LrHandleOption)option,
                                    NULL);
             break;
@@ -373,8 +373,8 @@ setopt(_HandleObject *self, PyObject *args)
         }
         g_ptr_array_add(ptrarray, NULL);
 
-        res = lr_handle_setopt(&tmp_err,
-                               self->handle,
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
                                (LrHandleOption)option,
                                ptrarray->pdata);
         g_string_chunk_free(chunk);
@@ -392,8 +392,8 @@ setopt(_HandleObject *self, PyObject *args)
         }
 
         if (obj == Py_None) {
-            res = lr_handle_setopt(&tmp_err,
-                                   self->handle,
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
                                    (LrHandleOption)option,
                                    NULL);
             break;
@@ -471,8 +471,8 @@ setopt(_HandleObject *self, PyObject *args)
             vars = lr_urlvars_set(vars, var, val);
         }
 
-        res = lr_handle_setopt(&tmp_err,
-                               self->handle,
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
                                (LrHandleOption)option,
                                vars);
         g_string_chunk_free(chunk);
@@ -492,8 +492,8 @@ setopt(_HandleObject *self, PyObject *args)
         if (obj == Py_None) {
             // None object
             self->progress_cb = NULL;
-            res = lr_handle_setopt(&tmp_err,
-                                   self->handle,
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
                                    (LrHandleOption)option,
                                    NULL);
             if (!res)
@@ -502,14 +502,14 @@ setopt(_HandleObject *self, PyObject *args)
             // New callback object
             Py_XINCREF(obj);
             self->progress_cb = obj;
-            res = lr_handle_setopt(&tmp_err,
-                                   self->handle,
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
                                    (LrHandleOption)option,
                                    progress_callback);
             if (!res)
                 RETURN_ERROR(&tmp_err, -1, NULL);
-            res = lr_handle_setopt(&tmp_err,
-                                   self->handle,
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
                                    LRO_PROGRESSDATA,
                                    self);
         }
@@ -567,8 +567,8 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_MIRRORLIST:
     case LRI_DESTDIR:
     case LRI_USERAGENT:
-        res = lr_handle_getinfo(&tmp_err,
-                                self->handle,
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
                                 (LrHandleInfoOption)option,
                                 &str);
         if (!res)
@@ -583,8 +583,8 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_REPOTYPE:
     case LRI_FETCHMIRRORS:
     case LRI_MAXMIRRORTRIES:
-        res = lr_handle_getinfo(&tmp_err,
-                                self->handle,
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
                                 (LrHandleInfoOption)option,
                                 &lval);
         if (!res)
@@ -595,8 +595,8 @@ getinfo(_HandleObject *self, PyObject *args)
         LrUrlVars *vars;
         PyObject *list;
 
-        res = lr_handle_getinfo(&tmp_err,
-                                self->handle,
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
                                 (LrHandleInfoOption)option,
                                 &vars);
         if (!res)
@@ -635,8 +635,8 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_MIRRORS: {
         PyObject *list;
         char **strlist;
-        res = lr_handle_getinfo(&tmp_err,
-                                self->handle,
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
                                 (LrHandleInfoOption)option,
                                 &strlist);
         if (!res)
@@ -676,8 +676,8 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_METALINK: {
         PyObject *py_metalink;
         LrMetalink *metalink;
-        res = lr_handle_getinfo(&tmp_err,
-                                self->handle,
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
                                 (LrHandleInfoOption)option,
                                 &metalink);
         if (!res)

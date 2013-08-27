@@ -118,7 +118,10 @@ lr_handle_free(LrHandle *handle)
 }
 
 gboolean
-lr_handle_setopt(GError **err, LrHandle *handle, LrHandleOption option, ...)
+lr_handle_setopt(LrHandle *handle,
+                 GError **err,
+                 LrHandleOption option,
+                 ...)
 {
     gboolean ret = TRUE;
     va_list arg;
@@ -813,7 +816,10 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
 }
 
 gboolean
-lr_handle_getinfo(GError **err, LrHandle *handle, LrHandleInfoOption option, ...)
+lr_handle_getinfo(LrHandle *handle,
+                  GError **err,
+                  LrHandleInfoOption option,
+                  ...)
 {
     gboolean rc = TRUE;
     va_list arg;

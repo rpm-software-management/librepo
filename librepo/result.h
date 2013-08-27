@@ -62,16 +62,17 @@ void
 lr_result_free(LrResult *result);
 
 /** Get information about downloaded/localised repository from result object.
- * @param err       GError **
  * @param result    Result object.
+ * @param err       GError **
  * @param option    Option from ::LrResultInfoOption enum.
  * @param ...       Apropriate variable for the selected option.
  * @return          TRUE if everything is ok, false if err is set.
  */
 gboolean
-lr_result_getinfo(GError **err,
-                  LrResult *result,
-                  LrResultInfoOption option, ...);
+lr_result_getinfo(LrResult *result,
+                  GError **err,
+                  LrResultInfoOption option,
+                  ...);
 
 /** @} */
 

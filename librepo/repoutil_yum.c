@@ -48,16 +48,16 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
     h = lr_handle_init();
     result = lr_result_init();
 
-    if (!lr_handle_setopt(err, h, LRO_REPOTYPE, LR_YUMREPO))
+    if (!lr_handle_setopt(h, err, LRO_REPOTYPE, LR_YUMREPO))
         return FALSE;
 
-    if (!lr_handle_setopt(err, h, LRO_URLS, path))
+    if (!lr_handle_setopt(h, err, LRO_URLS, path))
         return FALSE;
 
-    if (!lr_handle_setopt(err, h, LRO_CHECKSUM, 1))
+    if (!lr_handle_setopt(h, err, LRO_CHECKSUM, 1))
         return FALSE;
 
-    if (!lr_handle_setopt(err, h, LRO_LOCAL, 1))
+    if (!lr_handle_setopt(h, err, LRO_LOCAL, 1))
         return FALSE;
 
     ret = lr_handle_perform(h, result, err);

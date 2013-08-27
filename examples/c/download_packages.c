@@ -35,8 +35,8 @@ main(void)
     char *urls[] = {"http://beaker-project.org/yum/client-testing/Fedora19/", NULL};
 
     h = lr_handle_init();
-    lr_handle_setopt(h, LRO_URL, urls);
-    lr_handle_setopt(h, LRO_REPOTYPE, LR_YUMREPO);
+    lr_handle_setopt(h, NULL, LRO_URLS, urls);
+    lr_handle_setopt(h, NULL, LRO_REPOTYPE, LR_YUMREPO);
 
     // Prepare list of targets
 
@@ -49,16 +49,16 @@ main(void)
     target = lr_packagetarget_new("beaker-0.14.0-1.fc18.src.rpm",
                                   NULL, LR_CHECKSUM_SHA256,
                                   "737c974110914a073fb6c736cd7021b0d844c9e47e7d21e37d687dbc86d36538",
-                                  NULL, TRUE, NULL, NULL, &tmp_err);
+                                  0, NULL, TRUE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
 
     target = lr_packagetarget_new("beaker-client-0.14.1-1.fc18.noarch.rpm",
-                                  NULL, LR_CHECKSUM_UNKNOWN, NULL,
+                                  NULL, LR_CHECKSUM_UNKNOWN, NULL, 0,
                                   NULL, FALSE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
 
     target = lr_packagetarget_new("rhts-4.56-1.fc17.src.rpm",
-                                  NULL, LR_CHECKSUM_UNKNOWN, NULL,
+                                  NULL, LR_CHECKSUM_UNKNOWN, NULL, 0,
                                   NULL, FALSE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
 

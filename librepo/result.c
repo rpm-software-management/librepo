@@ -57,9 +57,10 @@ lr_result_free(LrResult *result)
 }
 
 gboolean
-lr_result_getinfo(GError **err,
-                  LrResult *result,
-                  LrResultInfoOption option, ...)
+lr_result_getinfo(LrResult *result,
+                  GError **err,
+                  LrResultInfoOption option,
+                  ...)
 {
     gboolean rc = TRUE;
     va_list arg;
