@@ -157,9 +157,16 @@ init_librepo(void)
     if (!m)
         INITERROR;
 
+    struct module_state *st = GETSTATE(module);
+
     // Exceptions
-    if (!init_exceptions())
+    if (!init_exceptions()) {
+        Py_DECREF(m);
         INITERROR;
+    }
+
+    st->error = LrErr_Exception;
+
     PyModule_AddObject(m, "LibrepoException", LrErr_Exception);
 
     // Objects
