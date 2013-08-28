@@ -33,7 +33,7 @@ if __name__ == "__main__":
     try:
         h.perform(r)
     except librepo.LibrepoException as e:
-        rc, msg, ext = e
+        rc, msg, general_msg = e
         if rc == librepo.LRE_BADCHECKSUM:
             print "Corrupted metadata! (%s)" % msg
         else:
@@ -41,5 +41,3 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print "Metadata are fine!"
-    sys.exit(0)
-

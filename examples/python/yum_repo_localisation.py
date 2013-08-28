@@ -28,14 +28,14 @@ if __name__ == "__main__":
     try:
         h.perform(r)
     except librepo.LibrepoException as e:
-        rc, msg, ext = e
+        rc, msg, general_msg = e
         print "Error: %s" % msg
         sys.exit(1)
 
     print "Repomd content:"
     pprint.pprint(r.getinfo(librepo.LRR_YUM_REPOMD))
 
-    print "\nPath to metadata files:"
+    print "\nPaths to metadata files:"
     for data_type, path in r.getinfo(librepo.LRR_YUM_REPO).iteritems():
         print "%15s: %s" % (data_type, path)
 

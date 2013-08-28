@@ -30,7 +30,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # Download only the mirrorlist during perform() call.
-    h.setopt(LRO_FETCHMIRRORS, True)
+    h.setopt(librepo.LRO_FETCHMIRRORS, True)
 
     h.perform(r)
 

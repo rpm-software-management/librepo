@@ -5,6 +5,8 @@ Examples
 
 Librepo usage examples.
 
+[More examples (including C examples)](https://github.com/Tojaj/librepo/tree/master/examples)
+
 
 Simple download of metadata
 ---------------------------
@@ -22,30 +24,32 @@ Simple download of metadata
     want do download complete repository metadata.
     """
 
-    import sys
     import librepo
 
-    METADATA_PATH = "downloaded_metadata"
-    URL = "https://mirrors.fedoraproject.org/metalink?repo=fedora-18&arch=x86_64"
+    # Metalink URL
+    METALINK_URL = "https://mirrors.fedoraproject.org/metalink?repo=fedora-18&arch=x86_64"
+
+    # Destination directory (note: This directory must exists!)
     DESTDIR = "downloaded_metadata"
 
     if __name__ == "__main__":
-        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
-        # Yum metadata
+        # Set type of repo to Yum
         h.repotype = librepo.LR_YUMREPO
-        # Metalink url
-        h.mirrorlist = URL
+        # Set metalink url
+        h.mirrorlist = METALINK_URL
         # Destination directory for metadata
         h.destdir = DESTDIR
 
         try:
             h.perform(r)
         except librepo.LibrepoException as e:
-            rc, msg, ext = e
+            # rc - Return code (integer value)
+            # msg - Detailed error message (string)
+            # general_msg - Error message based on rc (string)
+            rc, msg, general_msg  = e
             print "Error: %s" % msg
-        librepo.global_cleanup()
 
 Metadata localisation
 ---------------------
@@ -58,6 +62,7 @@ Metadata localisation
     Use case:
     We have a local yum repositository and want to
     paths to all its metadata files.
+    Repomd content is just a bonus.
     """
 
     import sys
@@ -67,31 +72,30 @@ Metadata localisation
     METADATA_PATH = "downloaded_metadata"
 
     if __name__ == "__main__":
-        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
         # Yum metadata
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         # Path to metadata
-        h.setopt(librepo.LRO_URL, METADATA_PATH)
+        h.setopt(librepo.LRO_URLS, [METADATA_PATH])
         # Do not duplicate (copy) metadata, just localise them
         h.setopt(librepo.LRO_LOCAL, True)
 
         try:
             h.perform(r)
         except librepo.LibrepoException as e:
-            rc, msg, ext = e
+            rc, msg, general_msg = e
             print "Error: %s" % msg
-            librepo.global_cleanup()
             sys.exit(1)
 
         print "Repomd content:"
         pprint.pprint(r.getinfo(librepo.LRR_YUM_REPOMD))
 
-        print "\nPath to metadata files:"
+        print "\nPaths to metadata files:"
         for data_type, path in r.getinfo(librepo.LRR_YUM_REPO).iteritems():
             print "%15s: %s" % (data_type, path)
-        librepo.global_cleanup()
+
+        sys.exit(0)
 
 Checksum verification
 ---------------------
@@ -120,13 +124,12 @@ Checksum verification
     METADATA_PATH = "downloaded_metadata"
 
     if __name__ == "__main__":
-        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
         # Yum metadata
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         # Path to the metadata
-        h.setopt(librepo.LRO_URL, METADATA_PATH)
+        h.setopt(librepo.LRO_URLS, [METADATA_PATH])
         # Do not duplicate (copy) the metadata
         h.setopt(librepo.LRO_LOCAL, True)
         # Check checksum of metadata
@@ -137,21 +140,23 @@ Checksum verification
         try:
             h.perform(r)
         except librepo.LibrepoException as e:
-            rc, msg, ext = e
+            rc, msg, general_msg = e
             if rc == librepo.LRE_BADCHECKSUM:
-                print "Corrupted metadata!"
+                print "Corrupted metadata! (%s)" % msg
             else:
                 print "Other error: %s" % msg
-            librepo.global_cleanup()
             sys.exit(1)
 
         print "Metadata are fine!"
-        librepo.global_cleanup()
 
 More complex download
 ---------------------
 
 ::
+
+    """
+    librepo - example of usage
+    """
 
     import os
     import sys
@@ -179,23 +184,24 @@ More complex download
             shutil.rmtree(DESTDIR)
         os.mkdir(DESTDIR)
 
-        librepo.global_init()
-
         h = librepo.Handle() # Handle represents a download configuration
         r = librepo.Result() # Result represents an existing/downloaded repository
 
         # --- Mandatory arguments -------------------------------------------
 
         # URL of repository or URL of metalink/mirrorlist
-        h.setopt(librepo.LRO_URL, "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
+        h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
         #h.setopt(librepo.LRO_MIRRORLIST, "https://mirrors.fedoraproject.org/metalink?repo=fedora-source-17&arch=i386")
-        # Note: LRO_URL and LRO_MIRRORLIST could be set and used simultaneously
-        #       and if download from LRO_URL failed, then mirrorlist is used
+        # Note: LRO_URLS and LRO_MIRRORLIST could be set and used simultaneously
+        #       and if download from LRO_URLS failed, then mirrorlist is used
 
         # Type of repository
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         # --- Optional arguments --------------------------------------------
+
+        # Make download interruptible
+        h.setopt(librepo.LRO_INTERRUPTIBLE, True)
 
         # Destination directory for metadata
         h.setopt(librepo.LRO_DESTDIR, DESTDIR)
@@ -226,12 +232,14 @@ More complex download
         h.setopt(librepo.LRO_YUMDLIST, ["primary"])
         h.perform(r)
 
+        # List of mirrors
+        # (In this case no mirrorlist is used -> list will contain only one url)
+        # Example of access info via attr insted of .getinfo() method
+        pprint (h.mirrors)
+
         # Get and show final results
         pprint (r.getinfo(librepo.LRR_YUM_REPO))
         pprint (r.getinfo(librepo.LRR_YUM_REPOMD))
-
-        librepo.global_cleanup()
-
 
 How to get urls in a local mirrorlist
 -------------------------------------
@@ -241,11 +249,11 @@ How to get urls in a local mirrorlist
     import os
     import sys
     import librepo
+    import pprint
 
     DESTDIR = "downloaded_metadata"
 
     if __name__ == "__main__":
-        librepo.global_init()
         h = librepo.Handle()
         r = librepo.Result()
 
@@ -260,12 +268,11 @@ How to get urls in a local mirrorlist
         elif os.path.isfile(os.path.join(DESTDIR, "metalink.xml")):
             h.mirrorlist = os.path.join(DESTDIR, "metalink.xml")
         else:
-            print "Mirrorlist of downloaded repodata isn't available"
-            librepo.global_cleanup()
+            print "No mirrorlist of downloaded repodata available"
             sys.exit(0)
 
         # Download only the mirrorlist during perform() call.
-        h.setopt(LRO_FETCHMIRRORS, True)
+        h.setopt(librepo.LRO_FETCHMIRRORS, True)
 
         h.perform(r)
 
@@ -273,4 +280,4 @@ How to get urls in a local mirrorlist
         print h.mirrors
         print "Metalink file content:"
         pprint.pprint(h.metalink)
-        librepo.global_cleanup()
+
