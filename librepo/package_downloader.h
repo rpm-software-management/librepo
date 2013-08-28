@@ -156,6 +156,7 @@ lr_packagetarget_new(const char *relative_url,
 void
 lr_packagetarget_free(LrPackageTarget *target);
 
+/** Available flags for package downloader */
 typedef enum {
     LR_PACKAGEDOWNLOAD_FAILFAST    = 1 << 0, /*!<
         If TRUE, then whole downloading is stoped immediately when any

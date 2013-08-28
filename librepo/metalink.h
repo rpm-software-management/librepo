@@ -25,7 +25,7 @@
 
 G_BEGIN_DECLS
 
-/** \defgoupt   metalink  Metalink parser
+/** \defgroup   metalink  Metalink parser
  *  \addtogroup metalink
  *  @{
  */
@@ -61,11 +61,13 @@ LrMetalink *
 lr_metalink_init();
 
 /** Parse metalink file.
- * @param metalink      Metalink object.
- * @param fd            File descriptor.
- * @param filename      File to look for in metalink file.
- * @param err           GError **
- * @return              TRUE if everything is ok, FALSE if err is set.
+ * @param metalink          Metalink object.
+ * @param fd                File descriptor.
+ * @param filename          File to look for in metalink file.
+ * @param warningcb         ::LrXmlParserWarningCb function or NULL
+ * @param warningcb_data    Warning callback data or NULL
+ * @param err               GError **
+ * @return                  TRUE if everything is ok, FALSE if err is set.
  */
 gboolean
 lr_metalink_parse_file(LrMetalink *metalink,

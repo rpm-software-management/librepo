@@ -32,10 +32,11 @@ G_BEGIN_DECLS
 
 /** Element of LrUrlVars list */
 typedef struct {
-    char *var;
-    char *val;
+    char *var;  /*!< Variable name (without prefixed $ symbol) */
+    char *val;  /*!< Value that will be placed instead of the variable */
 } LrVar;
 
+/** LrUrlVars list is in fact GSList */
 typedef GSList LrUrlVars;
 
 /** Set value of variable. Use variable names without '$' prefix.

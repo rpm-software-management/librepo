@@ -36,22 +36,37 @@ G_BEGIN_DECLS
  */
 typedef struct _LrHandle LrHandle;
 
+/** LRO_PROXYPORT default value */
 #define LRO_PROXYPORT_DEFAULT               1080
 
+/** LRO_PROXYTYPE default value */
 #define LRO_PROXYTYPE_DEFAULT               LR_PROXY_HTTP
 
-#define LRO_MAXSPEED_DEFAULT                0  // Unlimited speed
+/** LRO_MAXSPEED default value (0 == unlimited speed) */
+#define LRO_MAXSPEED_DEFAULT                0
 
+/** LRO_CONNECTTIMEOUT default value */
 #define LRO_CONNECTTIMEOUT_DEFAULT          300
 
+/** LRO_MAXMIRRORTRIES default value */
 #define LRO_MAXMIRRORTRIES_DEFAULT          0
+
+/** LRO_MAXMIRRORTRIES minimal allowed value */
 #define LRO_MAXMIRRORTRIES_MIN              0
 
+/** LRO_MAXPARALLELDOWNLOADS default value */
 #define LRO_MAXPARALLELDOWNLOADS_DEFAULT    3
+
+/** LRO_MAXPARALLELDOWNLOADS minimal allowed value */
 #define LRO_MAXPARALLELDOWNLOADS_MIN        1
+
+/** LRO_MAXPARALLELDOWNLOADS maximal allowed value */
 #define LRO_MAXPARALLELDOWNLOADS_MAX        20
 
+/** LRO_MAXDOWNLOADSPERMIRROR default value */
 #define LRO_MAXDOWNLOADSPERMIRROR_DEFAULT   2
+
+/** LRO_MAXDOWNLOADSPERMIRROR minimal allowed value */
 #define LRO_MAXDOWNLOADSPERMIRROR_MIN       1
 
 /** Handle options for the ::lr_handle_setopt function. */
@@ -82,7 +97,7 @@ typedef enum {
     LRO_PROXYPORT,  /*!< (long)
         Set port number for proxy separately. Default port is 1080. */
 
-    LRO_PROXYTYPE,  /*!< (::LrProxyType)
+    LRO_PROXYTYPE,  /*!< (LrProxyType)
         Type of the proxy used. */
 
     LRO_PROXYAUTH,  /*!< (long 1 or 0)
@@ -91,7 +106,7 @@ typedef enum {
     LRO_PROXYUSERPWD,  /*!< (char *)
         User and password for proxy in format user:password */
 
-    LRO_PROGRESSCB,  /*!< (::LrProgressCb)
+    LRO_PROGRESSCB,  /*!< (LrProgressCb)
         Progress callback */
 
     LRO_PROGRESSDATA,  /*!< (void *)
@@ -104,7 +119,7 @@ typedef enum {
     LRO_DESTDIR,  /*!< (char *)
         Where to save downloaded files */
 
-    LRO_REPOTYPE,  /*!< (::LrRepotype)
+    LRO_REPOTYPE,  /*!< (LrRepotype)
         Type of downloaded repo, currently only supported is LR_YUMREPO. */
 
     LRO_CONNECTTIMEOUT,  /*!< (long)

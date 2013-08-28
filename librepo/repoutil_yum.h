@@ -52,7 +52,7 @@ lr_repoutil_yum_parse_repomd(const char *path,
 
 /** Return age of the repomd.xml (based on mtime of the file
  * and the current time)
- * @param r         Result object
+ * @param result    Result object
  * @return          Age of the file (number of seconds since last modification)
  */
 double lr_yum_repomd_get_age(LrResult *result);

@@ -29,10 +29,16 @@ G_BEGIN_DECLS
  *  @{
  */
 
-#define LR_VERSION_MAJOR @LIBREPO_MAJOR@
-#define LR_VERSION_MINOR @LIBREPO_MINOR@
-#define LR_VERSION_PATCH @LIBREPO_PATCH@
+#define LR_VERSION_MAJOR @LIBREPO_MAJOR@  /*!< Major Librepo version */
+#define LR_VERSION_MINOR @LIBREPO_MINOR@  /*!< Minor Librepo version */
+#define LR_VERSION_PATCH @LIBREPO_PATCH@  /*!< Patch Librepo version */
 
+/** Macro for version check.
+ * @param major     Major version
+ * @param minor     Minor version
+ * @param patch     Patch version
+ * @return          True if current Librepo version is higher or equal
+ */
 #define LR_VERSION_CHECK(major,minor,patch)    \
     (LR_VERSION_MAJOR > (major) || \
      (LR_VERSION_MAJOR == (major) && LR_VERSION_MINOR > (minor)) || \
