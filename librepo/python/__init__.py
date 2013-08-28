@@ -8,17 +8,11 @@ Librepo module has only one own exception.
 .. class:: LibrepoException
 
 Value of this exception is tuple with three elements:
-``(return code, error message, extra information)``
+``(return code, error message, general error message)``
 
 * Return code is a value from: :ref:`error-codes-label`.
-* Error message is a string with a description of the error.
-* Extra information is `None` for most of errors, but for specific
-  errors it contain additional info about the error.
-
-    Error codes with extra information and its format:
-        * **LRE_CURL** - ``(Curl easy handle error code, Curl error string)``
-        * **LRE_CURLM** - ``(Curl multi handle error code, Curl error string)``
-        * **LRE_BADSTATUS** - ``Status code number`` (e.g.: 403, 404, 500, ...)
+* String with a descriptive description of the error.
+* General error message based on rc (feel free to ignore this message)
 
 Constants
 =========
@@ -35,18 +29,18 @@ Constants
 :class:`~.Handle` options
 -------------------------
 
-    LRO (aka LibRepo Option) constants are used to set :class:`.Handle`
-    options via :meth:`~.Handle.setopt` method.
+    LRO_ (aka LibRepo Option) prefixed constants are used to set
+    :class:`.Handle` options via :meth:`~.Handle.setopt` method.
 
     This options could be also set by :class:`.Handle` attributes
-    with same names in lowercase and without ``LRO_`` prefix.
+    with the same names but in lowercase and without ``LRO_`` prefix.
 
     Example::
 
             # The command:
             h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             # is equivalent to:
-            h.url = "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"
+            h.urls = "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"
 
     .. note:: For detailed description of this options consult :class:`.Handle` page.
 
@@ -160,6 +154,32 @@ Constants
     *String*. String for  User-Agent: header in the http request sent
     to the remote server.
 
+.. data:: LRO_FETCHMIRRORS
+
+    *Boolean*. With this option enabled, only mirrorlist download and parsing
+    will be performed during :meth:`librepo.Handle.perform`.
+
+.. data:: LRO_MAXMIRRORTRIES
+
+    *Integer or None*. If download fails, try at most the specified number
+    of mirrors. 0 (None) means try all available mirrors.
+
+.. data:: LRO_MAXPARALLELDOWNLOADS
+
+    *Integer or None*. Maximum number of parallel downloads.
+    ``None`` sets default value.
+
+.. data:: LRO_MAXDOWNLOADSPERMIRROR
+
+    *Integer or None*. Maximum number of parallel downloads per mirror.
+    ``None`` sets default value.
+
+.. data:: LRO_VARSUB
+
+    *[(String, String), ...] or None*. Set list of substitutions
+    for variables in ulrs (e.g.: "http://foo/$version/").
+    ``[("releasever", "f18"), ("basearch", "i386")]``
+
 .. data:: LRO_GPGCHECK
 
     *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
@@ -187,31 +207,6 @@ Constants
     *List of strings*. Set blacklist of yum metadata files.
     This files will not be downloaded.
 
-.. data:: LRO_FETCHMIRRORS
-
-    *Boolean*. With this option enabled, only mirrorlist download and parsing
-    will be performed during :meth:`librepo.Handle.perform`.
-
-.. data:: LRO_MAXMIRRORTRIES
-
-    *Integer or None*. If download fails, try at most the specified number
-    of mirrors. 0 (None) means try all available mirrors.
-
-.. data:: LRO_MAXPARALLELDOWNLOADS
-
-    *Integer or None*. Maximum number of parallel downloads.
-    ``None`` sets default value.
-
-.. data:: LRO_MAXDOWNLOADSPERMIRROR
-
-    *Integer or None*. Maximum number of parallel downloads per mirror.
-    ``None`` sets default value.
-
-.. data:: LRO_VARSUB
-
-    *[(String, String), ...] or None*. Set list of substitutions
-    for variables in ulrs (e.g.: "http://foo/$version/").
-    ``[("releasever", "f18"), ("basearch", "i386")]``
 
 .. _handle-info-options-label:
 
@@ -243,29 +238,29 @@ Constants
 Proxy type constants
 --------------------
 
-.. data:: LR_PROXY_HTTP
-.. data:: LR_PROXY_HTTP_1_0
-.. data:: LR_PROXY_SOCKS4
-.. data:: LR_PROXY_SOCKS5
-.. data:: LR_PROXY_SOCKS4A
-.. data:: LR_PROXY_SOCKS5_HOSTNAME
+.. data:: PROXY_HTTP (LR_PROXY_HTTP)
+.. data:: PROXY_HTTP_1_0 (LR_PROXY_HTTP_1_0)
+.. data:: PROXY_SOCKS4 (LR_PROXY_SOCKS4)
+.. data:: PROXY_SOCKS5 (LR_PROXY_SOCKS5)
+.. data:: PROXY_SOCKS4A (LR_PROXY_SOCKS4A)
+.. data:: PROXY_SOCKS5_HOSTNAME (LR_PROXY_SOCKS5_HOSTNAME)
 
 .. _repotype-constants-label:
 
 Repo type constants
 -------------------
 
-.. data:: LR_YUMREPO
+.. data:: YUMREPO (LR_YUMREPO)
 
     Classical yum repository with ``repodata/`` directory.
 
-.. data:: LR_SUSEREPO
+.. data:: SUSEREPO (LR_SUSEREPO)
 
     YaST2 repository (http://en.opensuse.org/openSUSE:Standards_YaST2_Repository_Metadata_content).
 
     .. note:: This option is not supported yet!
 
-.. data:: LR_DEBREPO
+.. data:: DEBREPO (LR_DEBREPO)
 
     Debian repository
 
@@ -276,23 +271,23 @@ Repo type constants
 Predefined yumdlist lists
 -------------------------
 
-.. data:: LR_YUM_FULL
+.. data:: YUM_FULL (LR_YUM_FULL)
 
     Download all repodata files
 
-.. data:: LR_REPOMDONLY
+.. data:: YUM_REPOMDONLY (LR_YUM_REPOMDONLY)
 
     Download only repomd.xml file
 
-.. data:: LR_BASEXML
+.. data:: YUM_BASEXML (LR_YUM_BASEXML)
 
     Download only primary.xml, filelists.xml and other.xml
 
-.. data:: LR_BASEDB
+.. data:: YUM_BASEDB (LR_YUM_BASEDB)
 
     Download only primary, filelists and other databases.
 
-.. data:: LR_BASEHAWKEY
+.. data:: YUM_HAWKEY (LR_YUM_HAWKEY)
 
     Download only files used by Hawkey (https://github.com/akozumpl/hawkey/).
     (primary, filelists, prestodelta)
@@ -306,126 +301,154 @@ LibRepo Error codes.
 
 .. data:: LRE_OK
 
-    Everything is ok.
+    (0) Everything is ok.
 
 .. data:: LRE_BADFUNCARG
 
-    Bad function argument(s).
+    (1) Bad function argument(s).
 
 .. data:: LRE_BADOPTARG
 
-    Bad argument for the option in :meth:`~.Handle.setopt`.
+    (2) Bad argument for the option in :meth:`~.Handle.setopt`.
 
 .. data:: LRE_UNKNOWNOPT
 
-    Unknown option.
+    (3) Unknown option.
 
 .. data:: LRE_CURLSETOPT
 
-    cURL doesn't know an option used by librepo. Probably
+    (4) cURL doesn't know an option used by librepo. Probably
     too old cURL version is used.
 
-.. data:: LRE_ALREDYUSEDRESULT
+.. data:: LRE_ALREADYUSEDRESULT
 
-    :class:`.Result` object is not "clean" (it has been already
-    used and filled).
+    (5) :class:`.Result` object is not "clean" (it has been already used).
 
 .. data:: LRE_INCOMPLETERESULT
 
-    :class:`.Result` object doesn't contain all what is needed.
+    (6) :class:`.Result` object doesn't contain all what is needed.
 
 .. data:: LRE_CURLDUP
 
-    Cannot duplicate cURL handle. No free memory?
+    (7) Cannot duplicate cURL handle. No free memory?
 
 .. data:: LRE_CURL
 
-    A cURL error.
+    (8) A cURL error.
 
 .. data:: LRE_CURLM
 
-    A multi cURL handle error.
+    (9) A multi cURL handle error.
 
 .. data:: LRE_BADSTATUS
 
-    An error HTTP or FTP status code.
+    (10) Error HTTP or FTP status code.
 
 .. data:: LRE_TEMPORARYERR
 
-    An error that should be temporary (e.g. HTTP status codes 500, 502-504, ..)
+    (11) An error that should be temporary (e.g. HTTP status codes 500, 502-504, ..)
 
 .. data:: LRE_NOTLOCAL
 
-    If :data:`~.LRO_UPDATE` option is ``True`` and URL is not a local path (address).
+    (12) URL is not a local address.
+    E.g. in case when :data:`~.LRO_UPDATE` option is ``True`` and URL
+    is a remote address.
 
 .. data:: LRE_CANNOTCREATEDIR
 
-    Cannot create directory for downloaded data. Bad permission?
+    (13) Cannot create directory for downloaded data. Bad permission?
 
 .. data:: LRE_IO
 
-    Input/Output error. Bad permission?
+    (14) Input/Output error.
 
 .. data:: LRE_MLBAD
 
-    Bad mirrorlist or metalink file. E.g. metalink doesn't contain
+    (15) Bad mirrorlist or metalink file. E.g. metalink doesn't contain
     reference to target file (repomd.xml), mirrorlist is empty, ..
 
 .. data:: LRE_MLXML
 
-    Cannot parse metalink xml. Non-valid metalink file?
+    (16) Cannot parse metalink xml. Non-valid metalink file?
+    E.g. (metalink doesn't contain needed
+    file, mirrorlist doesn't contain urls, ..)
 
 .. data:: LRE_BADCHECKSUM
 
-    A downloaded file has bad checksum.
+    (17) Bad checksum.
 
 .. data:: LRE_REPOMDXML
 
-    Cannot parse repomd.xml file. Non-valid repomd.xml file?
+    (18) Cannot parse repomd.xml file. Non-valid repomd.xml file?
 
 .. data:: LRE_NOURL
 
-    No usable URL found. E.g. bad links or no links in metalink.
+    (19) No usable URL found. E.g. bad links or no links in metalink.
 
 .. data:: LRE_CANNOTCREATETMP
 
-    Cannot create temporary directory.
+    (20) Cannot create temporary directory.
 
 .. data:: LRE_UNKNOWNCHECKSUM
 
-    Unknown type of checksum is needed for verification one or more files.
+    (21) Unknown type of checksum is needed for verification of one
+    or more files.
 
 .. data:: LRE_BADURL
 
-    Bad URL specified.
+    (22) Bad URL specified.
 
 .. data:: LRE_GPGNOTSUPPORTED
 
-    OpenPGP protocol is not supported.
+    (23) OpenPGP protocol is not supported.
 
 .. data:: LRE_GPGERROR
 
-    GPG error.
+    (24) GPG error.
 
 .. data:: LRE_BADGPG
 
-    Bad GPG signature.
+    (25) Bad GPG signature.
 
 .. data:: LRE_INCOMPLETEREPO
 
-    Repository metadata are not complete.
+    (26) Repository metadata are not complete.
 
 .. data:: LRE_INTERRUPTED
 
-    Download was interrupted by SIGTERM signal.
+    (27) Download was interrupted by SIGTERM signal.
 
 .. data:: LRE_SIGACTION
 
-    Cannot set own signal handler. Sigaction system call failed.
+    (28) Sigaction system call failed.
 
 .. data:: LRE_ALREADYDOWNLOADED
 
-    The file is already downloaded and its checksum matches.
+    (29) The file is already downloaded and its checksum matches.
+
+.. data:: LRE_UNFINISHED
+
+    (30) Download wasn't (or cannot be) finished.
+
+.. data:: LRE_SELECT
+
+    (31) select() call failed.
+
+.. data:: LRE_OPENSSL
+
+    (32) OpenSSL library related error.
+
+.. data:: LRE_MEMORY
+
+    (33) Cannot allocate more memory.
+
+.. data:: LRE_XMLPARSER
+
+    (34) XML parser error.
+
+.. data:: LRE_CBINTERRUPTED
+
+    (35) Interrupted by user cb.
 
 .. data:: LRE_UNKNOWNERROR
 
@@ -460,7 +483,7 @@ VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 LibrepoException = _librepo.LibrepoException
 
 LRO_UPDATE                  = _librepo.LRO_UPDATE
-LRO_URLS                     = _librepo.LRO_URLS
+LRO_URLS                    = _librepo.LRO_URLS
 LRO_MIRRORLIST              = _librepo.LRO_MIRRORLIST
 LRO_LOCAL                   = _librepo.LRO_LOCAL
 LRO_HTTPAUTH                = _librepo.LRO_HTTPAUTH
@@ -479,15 +502,15 @@ LRO_CONNECTTIMEOUT          = _librepo.LRO_CONNECTTIMEOUT
 LRO_IGNOREMISSING           = _librepo.LRO_IGNOREMISSING
 LRO_INTERRUPTIBLE           = _librepo.LRO_INTERRUPTIBLE
 LRO_USERAGENT               = _librepo.LRO_USERAGENT
-LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
-LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
-LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
-LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
 LRO_FETCHMIRRORS            = _librepo.LRO_FETCHMIRRORS
 LRO_MAXMIRRORTRIES          = _librepo.LRO_MAXMIRRORTRIES
 LRO_MAXPARALLELDOWNLOADS    = _librepo.LRO_MAXPARALLELDOWNLOADS
 LRO_MAXDOWNLOADSPERMIRROR   = _librepo.LRO_MAXDOWNLOADSPERMIRROR
 LRO_VARSUB                  = _librepo.LRO_VARSUB
+LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
+LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
+LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
+LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -511,16 +534,15 @@ ATTR_TO_LRO = {
     "ignoremissing":        LRO_IGNOREMISSING,
     "interruptible":        LRO_INTERRUPTIBLE,
     "useragent":            LRO_USERAGENT,
-    "gpgcheck":             LRO_GPGCHECK,
-    "checksum":             LRO_CHECKSUM,
-    "yumdlist":             LRO_YUMDLIST,
-    "yumblist":             LRO_YUMBLIST,
     "fetchmirrors":         LRO_FETCHMIRRORS,
     "maxmirrortries":       LRO_MAXMIRRORTRIES,
     "maxparalleldownloads": LRO_MAXPARALLELDOWNLOADS,
     "maxdownloadspermirror":LRO_MAXDOWNLOADSPERMIRROR,
     "varsub":               LRO_VARSUB,
-}
+    "gpgcheck":             LRO_GPGCHECK,
+    "checksum":             LRO_CHECKSUM,
+    "yumdlist":             LRO_YUMDLIST,
+    "yumblist":             LRO_YUMBLIST,}
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
 LRI_URLS                = _librepo.LRI_URLS
@@ -590,13 +612,13 @@ LR_YUM_FULL         = None
 LR_YUM_REPOMDONLY   = [None]
 LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
 LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
-LR_YUM_BASEHAWKEY   = ["primary", "filelists", "prestodelta", None]
+LR_YUM_HAWKEY       = ["primary", "filelists", "prestodelta", None]
 
 YUM_FULL         = LR_YUM_FULL
 YUM_REPOMDONLY   = LR_YUM_REPOMDONLY
 YUM_BASEXML      = LR_YUM_BASEXML
 YUM_BASEDB       = LR_YUM_BASEDB
-YUM_BASEHAWKEY   = LR_YUM_BASEHAWKEY
+YUM_HAWKEY       = LR_YUM_HAWKEY
 
 LRE_OK                  = _librepo.LRE_OK
 LRE_BADFUNCARG          = _librepo.LRE_BADFUNCARG
@@ -628,6 +650,12 @@ LRE_INCOMPLETEREPO      = _librepo.LRE_INCOMPLETEREPO
 LRE_INTERRUPTED         = _librepo.LRE_INTERRUPTED
 LRE_SIGACTION           = _librepo.LRE_SIGACTION
 LRE_ALREADYDOWNLOADED   = _librepo.LRE_ALREADYDOWNLOADED
+LRE_UNFINISHED          = _librepo.LRE_UNFINISHED
+LRE_SELECT              = _librepo.LRE_SELECT
+LRE_OPENSSL             = _librepo.LRE_OPENSSL
+LRE_MEMORY              = _librepo.LRE_MEMORY
+LRE_XMLPARSER           = _librepo.LRE_XMLPARSER
+LRE_CBINTERRUPTED       = _librepo.LRE_CBINTERRUPTED
 LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
 
 LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
@@ -656,6 +684,7 @@ SHA512     = _librepo.CHECKSUM_SHA512
 
 _CHECKSUM_STR_TO_VAL_MAP = {
     'md5':      CHECKSUM_MD5,
+    'sha':      CHECKSUM_SHA1,
     'sha1':     CHECKSUM_SHA1,
     'sha224':   CHECKSUM_SHA224,
     'sha256':   CHECKSUM_SHA256,
@@ -754,6 +783,26 @@ class Handle(_librepo.Handle):
 
         See: :data:`.LRO_USERAGENT`
 
+    .. attribute:: fetchmirrors:
+
+        See: :data:`.LRO_FETCHMIRRORS`
+
+    .. attribute:: maxmirrortries:
+
+        See: :data:`.LRO_MAXMIRRORTRIES`
+
+    .. attribute:: maxparalleldownloads:
+
+        See: :data:`.LRO_MAXPARALLELDOWNLOADS`
+
+    .. attribute:: maxdownloadspermirror:
+
+        See: :data:`.LRO_MAXDOWNLOADSPERMIRROR`
+
+    .. attribute:: varsub:
+
+        See: :data:`.LRO_VARSUB`
+
     .. attribute:: gpgcheck:
 
         See: :data:`.LRO_GPGCHECK`
@@ -781,7 +830,7 @@ class Handle(_librepo.Handle):
             # The command:
             h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             # is equivalent to:
-            h.url("http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/")
+            h.urls(["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
         """
 
         if (option == LRO_URLS and (not isinstance(val, list) and val is not None)):
@@ -789,9 +838,6 @@ class Handle(_librepo.Handle):
             warnings.warn("Using string value for LRO_URLS is deprecated, " \
                           "use list of strings instead", DeprecationWarning)
             val = [val]
-
-        import sys  # XXX
-        sys.stdout.flush()  # XXX
 
         _librepo.Handle.setopt(self, option, val)
 
