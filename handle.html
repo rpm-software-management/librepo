@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Handle (librepo.Handle) &mdash; librepo 0.0.1-1 documentation</title>
+    <title>Handle (librepo.Handle) &mdash; librepo 1.0.0-1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.0.1-1',
+        VERSION:     '1.0.0-1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="librepo 0.0.1-1 documentation" href="index.html" />
+    <link rel="top" title="librepo 1.0.0-1 documentation" href="index.html" />
     <link rel="up" title="The Librepo Library" href="lib.html" />
     <link rel="next" title="Result (librepo.Result)" href="result.html" />
     <link rel="prev" title="The Librepo Library" href="lib.html" /> 
@@ -46,7 +46,7 @@
         <li class="right" >
           <a href="lib.html" title="The Librepo Library"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">librepo 0.0.1-1 documentation</a> &raquo;</li>
+        <li><a href="index.html">librepo 1.0.0-1 documentation</a> &raquo;</li>
           <li><a href="lib.html" accesskey="U">The Librepo Library</a> &raquo;</li> 
       </ul>
     </div>  
@@ -73,8 +73,8 @@ downloading from the repository.</p>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">url:</tt></dt>
-<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_URL" title="librepo.LRO_URL"><tt class="xref py py-data docutils literal"><span class="pre">LRO_URL</span></tt></a></p>
+<tt class="descname">urls:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_URLS" title="librepo.LRO_URLS"><tt class="xref py py-data docutils literal"><span class="pre">LRO_URLS</span></tt></a></p>
 </dd></dl>
 
 <dl class="attribute">
@@ -145,12 +145,6 @@ downloading from the repository.</p>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">retries:</tt></dt>
-<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_RETRIES" title="librepo.LRO_RETRIES"><tt class="xref py py-data docutils literal"><span class="pre">LRO_RETRIES</span></tt></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt>
 <tt class="descname">maxspeed:</tt></dt>
 <dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_MAXSPEED" title="librepo.LRO_MAXSPEED"><tt class="xref py py-data docutils literal"><span class="pre">LRO_MAXSPEED</span></tt></a></p>
 </dd></dl>
@@ -181,6 +175,48 @@ downloading from the repository.</p>
 
 <dl class="attribute">
 <dt>
+<tt class="descname">interruptible:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_INTERRUPTIBLE" title="librepo.LRO_INTERRUPTIBLE"><tt class="xref py py-data docutils literal"><span class="pre">LRO_INTERRUPTIBLE</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">useragent:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_USERAGENT" title="librepo.LRO_USERAGENT"><tt class="xref py py-data docutils literal"><span class="pre">LRO_USERAGENT</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">fetchmirrors:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_FETCHMIRRORS" title="librepo.LRO_FETCHMIRRORS"><tt class="xref py py-data docutils literal"><span class="pre">LRO_FETCHMIRRORS</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">maxmirrortries:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_MAXMIRRORTRIES" title="librepo.LRO_MAXMIRRORTRIES"><tt class="xref py py-data docutils literal"><span class="pre">LRO_MAXMIRRORTRIES</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">maxparalleldownloads:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_MAXPARALLELDOWNLOADS" title="librepo.LRO_MAXPARALLELDOWNLOADS"><tt class="xref py py-data docutils literal"><span class="pre">LRO_MAXPARALLELDOWNLOADS</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">maxdownloadspermirror:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_MAXDOWNLOADSPERMIRROR" title="librepo.LRO_MAXDOWNLOADSPERMIRROR"><tt class="xref py py-data docutils literal"><span class="pre">LRO_MAXDOWNLOADSPERMIRROR</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">varsub:</tt></dt>
+<dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_VARSUB" title="librepo.LRO_VARSUB"><tt class="xref py py-data docutils literal"><span class="pre">LRO_VARSUB</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
 <tt class="descname">gpgcheck:</tt></dt>
 <dd><p>See: <a class="reference internal" href="lib.html#librepo.LRO_GPGCHECK" title="librepo.LRO_GPGCHECK"><tt class="xref py py-data docutils literal"><span class="pre">LRO_GPGCHECK</span></tt></a></p>
 </dd></dl>
@@ -205,11 +241,15 @@ downloading from the repository.</p>
 
 <dl class="method">
 <dt id="librepo.Handle.download">
-<tt class="descname">download</tt><big>(</big><em>url</em>, <em>dest=None</em>, <em>checksum_type=0</em>, <em>checksum=None</em>, <em>base_url=None</em>, <em>resume=0</em><big>)</big><a class="headerlink" href="#librepo.Handle.download" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">download</tt><big>(</big><em>url</em>, <em>dest=None</em>, <em>checksum_type=0</em>, <em>checksum=None</em>, <em>expectedsize=0</em>, <em>base_url=None</em>, <em>resume=0</em><big>)</big><a class="headerlink" href="#librepo.Handle.download" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download package from repository specified by
 <tt class="xref py py-meth docutils literal"><span class="pre">url()</span></tt> or <tt class="xref py py-meth docutils literal"><span class="pre">mirrorlist()</span></tt>
 method. If <em>base_url</em> is specified, url and mirrorlist in handle
 are ignored.</p>
+<p>Note: If resume is True and checksum_type and checksum are specified
+and downloaded package already exists, then checksum of the
+existing package is checked. If checksum matches, then no downloading
+is done and exception with LRE_ALREADYDOWNLOADED return code is raised.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -220,6 +260,8 @@ are ignored.</p>
 path to directory or filename.</li>
 <li><strong>checksum_type</strong> &#8211; Type of used checksum.</li>
 <li><strong>checksum</strong> &#8211; Checksum value.</li>
+<li><strong>expectedsize</strong> &#8211; Expected size of the file. If server reports
+different size, then no download is preformed.</li>
 <li><strong>base_url</strong> &#8211; Instead of repositories specified in <tt class="docutils literal"><span class="pre">Handle</span></tt>
 use repository on this url.</li>
 <li><strong>resume</strong> &#8211; <tt class="docutils literal"><span class="pre">True</span></tt> enables resume. Resume means that if local
@@ -233,7 +275,7 @@ than download whole file again.</li>
 </table>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
-<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URLS</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">])</span>
 <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
 <span class="n">h</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s">&quot;Packages/s/sl-3.03-12.fc17.i686.rpm&quot;</span><span class="p">,</span>
     <span class="n">checksum</span><span class="o">=</span><span class="s">&quot;0ec8535d0fc00b497d8aef491c3f8b3955f2d84846325ee44851d9de8a36d12c&quot;</span><span class="p">,</span>
@@ -246,6 +288,20 @@ than download whole file again.</li>
 checksum is NOT checked even if <em>checksum</em> and <em>checksum_type</em>
 params are specified!</p>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="librepo.Handle.download_packages">
+<tt class="descname">download_packages</tt><big>(</big><em>list</em>, <em>failfast=False</em><big>)</big><a class="headerlink" href="#librepo.Handle.download_packages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download list of packages. <em>list</em> is a list of PackageTarget objects.
+If the <em>failfast</em> is True, then whole downloading is stoped
+immediately when any of download fails (and exception is raised).
+If the failfast is False, then this function returns after all
+downloads finish (no matter if successfully or unsuccessfully)
+and exception is raised only if a nonrecoverable
+error related to the function itself is meet
+(Errors related to individual downloads are
+reported via corresponding PackageTarget objects)</p>
 </dd></dl>
 
 <dl class="method">
@@ -262,9 +318,9 @@ params are specified!</p>
 <p><em>option</em> could be one of: <a class="reference internal" href="lib.html#handle-options-label"><em>Handle options</em></a></p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># The command:</span>
-<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URL</span><span class="p">,</span> <span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URLS</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">])</span>
 <span class="c"># is equivalent to:</span>
-<span class="n">h</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">urls</span><span class="p">([</span><span class="s">&quot;http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -322,7 +378,7 @@ params are specified!</p>
         <li class="right" >
           <a href="lib.html" title="The Librepo Library"
              >previous</a> |</li>
-        <li><a href="index.html">librepo 0.0.1-1 documentation</a> &raquo;</li>
+        <li><a href="index.html">librepo 1.0.0-1 documentation</a> &raquo;</li>
           <li><a href="lib.html" >The Librepo Library</a> &raquo;</li> 
       </ul>
     </div>
