@@ -22,6 +22,7 @@
 
 #include <glib.h>
 
+#include "handle.h"
 #include "rcodes.h"
 #include "checksum.h"
 #include "types.h"
@@ -31,6 +32,10 @@ G_BEGIN_DECLS
 /** Single download target
  */
 typedef struct {
+
+    LrHandle *handle; /*!<
+        Handle */
+
     char *path; /*!<
         Relative path for URL (URL: "http://foo.bar/stuff",
         path: "somestuff.xml") */
@@ -87,6 +92,7 @@ typedef struct {
 } LrDownloadTarget;
 
 /** Create new empty ::LrDownloadTarget.
+ * @param handle        Handle
  * @param path          Absolute or relative URL path
  * @param baseurl       Base URL for relative path specified in path param
  * @param fd            Opened file descriptor where data will be written
@@ -110,7 +116,8 @@ typedef struct {
  * @return              New allocated target
  */
 LrDownloadTarget *
-lr_downloadtarget_new(const char *path,
+lr_downloadtarget_new(LrHandle *handle,
+                      const char *path,
                       const char *baseurl,
                       int fd,
                       LrChecksumType checksumtype,

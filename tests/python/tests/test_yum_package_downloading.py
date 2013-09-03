@@ -163,7 +163,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
         pkgs = []
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
     def test_download_packages_01(self):
         h = librepo.Handle()
@@ -174,9 +174,10 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
         for pkg in pkgs:
             self.assertTrue(pkg.err is None)
@@ -191,12 +192,14 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir))
         dest = os.path.join(self.tmpdir, "foo-haha-lol.rpm")
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=dest))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
         for pkg in pkgs:
             self.assertTrue(pkg.err is None)
@@ -213,12 +216,14 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir))
         dest = os.path.join(self.tmpdir, "foo-haha-lol.rpm")
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=dest))
 
-        h.download_packages(pkgs, failfast=True)
+        librepo.download_packages(pkgs, failfast=True)
 
         for pkg in pkgs:
             self.assertTrue(pkg.err is None)
@@ -235,11 +240,13 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir))
         pkgs.append(librepo.PackageTarget("so_bad_url_of_foo_rpm.rpm",
+                                          handle=h,
                                           dest=self.tmpdir))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
         self.assertTrue(pkgs[0].err is None)
         self.assertTrue(os.path.isfile(pkgs[0].local_path))
@@ -256,11 +263,13 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir))
         pkgs.append(librepo.PackageTarget("so_bad_url_of_foo_rpm.rpm",
+                                          handle=h,
                                           dest=self.tmpdir))
 
-        self.assertRaises(librepo.LibrepoException, h.download_packages,
+        self.assertRaises(librepo.LibrepoException, librepo.download_packages,
                 pkgs, failfast=True)
 
         # Err state is undefined, it could be error because of interruption
@@ -282,11 +291,12 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           checksum_type=librepo.SHA256,
                                           checksum=config.PACKAGE_01_01_SHA256))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
         pkg = pkgs[0]
         self.assertEqual(pkg.relative_url, config.PACKAGE_01_01)
@@ -309,11 +319,12 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           checksum_type=librepo.SHA256,
                                           checksum="badchecksum"))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
         pkg = pkgs[0]
         self.assertTrue(pkg.err)
@@ -327,11 +338,12 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           checksum_type=librepo.SHA256,
                                           checksum="badchecksum"))
 
-        self.assertRaises(librepo.LibrepoException, h.download_packages,
+        self.assertRaises(librepo.LibrepoException, librepo.download_packages,
                           pkgs, failfast=True)
 
         pkg = pkgs[0]
@@ -346,10 +358,11 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           base_url=url))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
 
         pkg = pkgs[0]
         self.assertTrue(pkg.err is None)
@@ -364,10 +377,11 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           resume=False))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
         pkg = pkgs[0]
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
@@ -377,18 +391,19 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         # then download should not be performed!
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           resume=True,
                                           checksum_type=librepo.SHA256,
                                           checksum=config.PACKAGE_01_01_SHA256))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
         pkg = pkgs[0]
         self.assertEqual(pkg.err, "Already downloaded")
         self.assertTrue(os.path.isfile(pkg.local_path))
 
         ## Failfast ignore this type of error (Already downloaded error)
-        h.download_packages(pkgs, failfast=True)
+        librepo.download_packages(pkgs, failfast=True)
         pkg = pkgs[0]
         self.assertEqual(pkg.err, "Already downloaded")
         self.assertTrue(os.path.isfile(pkg.local_path))
@@ -408,11 +423,12 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
                                           dest=self.tmpdir,
                                           progresscb=cb,
                                           cbdata=cbdata))
 
-        h.download_packages(pkgs)
+        librepo.download_packages(pkgs)
         pkg = pkgs[0]
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
@@ -420,4 +436,21 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(cbdata["downloaded"] > 0)
         self.assertTrue(cbdata["total"] > 0)
         self.assertEqual(cbdata["downloaded"], cbdata["total"])
+
+    def test_download_packages_without_handle(self):
+        complete_url = "%s%s%s" % (MOCKURL,
+                                   config.REPO_YUM_01_PATH,
+                                   config.PACKAGE_01_01)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(complete_url,
+                                          dest=self.tmpdir))
+
+        librepo.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        print pkg.err
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
 

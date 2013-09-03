@@ -17,15 +17,14 @@
  * USA.
  */
 
-#ifndef LR_HANDLE_PY_H
-#define LR_HANDLE_PY_H
+#ifndef LR_PACKAGEDOWNLOADER_PY_H
+#define LR_PACKAGEDOWNLOADER_PY_H
 
 #include "librepo/librepo.h"
 
-extern PyTypeObject Handle_Type;
+PyObject *py_download_packages(PyObject *self, PyObject *args);
 
-#define HandleObject_Check(o)   PyObject_TypeCheck(o, &Handle_Type)
-
-LrHandle *Handle_FromPyObject(PyObject *o);
+void BeginAllowThreads(PyThreadState **state);
+void EndAllowThreads(PyThreadState **state);
 
 #endif

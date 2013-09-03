@@ -27,6 +27,6 @@ extern PyTypeObject PackageTarget_Type;
 #define PackageTargetObject_Check(o)   PyObject_TypeCheck(o, &PackageTarget_Type)
 
 LrPackageTarget *PackageTarget_FromPyObject(PyObject *o);
-void PackageTarget_SetHandle(PyObject *o, PyObject *handle);
+void PackageTarget_SetThreadState(PyObject *o, PyThreadState **state);
 
 #endif

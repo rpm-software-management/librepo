@@ -15,25 +15,27 @@ if __name__ == "__main__":
 
     # Prepare handle
     h = librepo.Handle()
-    h.url = ["http://beaker-project.org/yum/client-testing/Fedora19/"]
+    h.urls = ["http://beaker-project.org/yum/client-testing/Fedora19/"]
     h.repotype = librepo.YUMREPO
 
     # Prepare list of targets
     packages = []
 
     target = librepo.PackageTarget("beaker-0.14.0-1.fc18.src.rpm",
+                                   handle=h,
                                    checksum_type=librepo.SHA256,
                                    checksum="737c974110914a073fb6c736cd7021b0d844c9e47e7d21e37d687dbc86d36538",
                                    resume=True)
     packages.append(target)
 
-    target = librepo.PackageTarget("beaker-client-0.14.1-1.fc18.noarch.rpm")
+    target = librepo.PackageTarget("beaker-client-0.14.1-1.fc18.noarch.rpm",
+                                   handle=h)
     packages.append(target)
 
-    target = librepo.PackageTarget("rhts-4.56-1.fc17.src.rpm")
+    target = librepo.PackageTarget("rhts-4.56-1.fc17.src.rpm", handle=h)
     packages.append(target)
 
-    h.download_packages(packages)
+    librepo.download_packages(packages)
 
     for target in packages:
         print "### %s: %s" % (target.local_path, target.err or "OK")

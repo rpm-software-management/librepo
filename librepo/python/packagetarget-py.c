@@ -26,15 +26,18 @@
 #include "handle-py.h"
 #include "packagetarget-py.h"
 #include "exception-py.h"
+#include "packagedownloader-py.h"
 
 typedef struct {
     PyObject_HEAD
     LrPackageTarget *target;
+    /* Handle */
+    PyObject *handle;
     /* Callback */
     PyObject *progress_cb;
     PyObject *progress_cb_data;
-    /* Handle */
-    PyObject *handle;
+    /* GIL Stuff */
+    PyThreadState **state;
 } _PackageTargetObject;
 
 LrPackageTarget *
@@ -81,9 +84,9 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
         return 0;
 
     assert(self->handle);
-    PyHandle_EndAllowThreads(self->handle);
+    EndAllowThreads(self->state);
     result = PyObject_CallObject(self->progress_cb, arglist);
-    PyHandle_BeginAllowThreads(self->handle);
+    BeginAllowThreads(self->state);
 
     Py_DECREF(arglist);
     Py_XDECREF(result);
@@ -91,13 +94,11 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
 }
 
 void
-PackageTarget_SetHandle(PyObject *o, PyObject *handle)
+PackageTarget_SetThreadState(PyObject *o, PyThreadState **state)
 {
     _PackageTargetObject *self = (_PackageTargetObject *) o;
-    Py_XDECREF(self->handle);
     if (!self) return;
-    self->handle = handle;
-    Py_XINCREF(self->handle);
+    self->state = state;
 }
 
 
@@ -112,9 +113,10 @@ packagetarget_new(PyTypeObject *type,
 
     if (self) {
         self->target = NULL;
+        self->handle = NULL;
         self->progress_cb = NULL;
         self->progress_cb_data = NULL;
-        self->handle = NULL;
+        self->state = NULL;
     }
     return (PyObject *)self;
 }
@@ -127,14 +129,24 @@ packagetarget_init(_PackageTargetObject *self,
     char *relative_url, *dest, *checksum, *base_url;
     int checksum_type, resume;
     PY_LONG_LONG expectedsize;
-    PyObject *progresscb, *cbdata;
+    PyObject *pyhandle, *progresscb, *cbdata;
     LrProgressCb c_cb;
+    LrHandle *handle = NULL;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "szizLziOO:packagetarget_init",
-                          &relative_url, &dest, &checksum_type, &checksum,
-                          &expectedsize, &base_url, &resume, &progresscb, &cbdata))
+    if (!PyArg_ParseTuple(args, "OszizLziOO:packagetarget_init",
+                          &pyhandle, &relative_url, &dest, &checksum_type,
+                          &checksum, &expectedsize, &base_url, &resume,
+                          &progresscb, &cbdata))
         return -1;
+
+    if (pyhandle != Py_None) {
+        handle = Handle_FromPyObject(pyhandle);
+        if (!handle)
+            return -1;
+        self->handle = pyhandle;
+        Py_INCREF(self->handle);
+    }
 
     if (!PyCallable_Check(progresscb) && progresscb != Py_None) {
         PyErr_SetString(PyExc_TypeError, "progresscb must be callable or None");
@@ -151,10 +163,11 @@ packagetarget_init(_PackageTargetObject *self,
         Py_XINCREF(self->progress_cb_data);
     }
 
-    self->target = lr_packagetarget_new(relative_url, dest, checksum_type,
-                                        checksum, (gint64) expectedsize,
-                                        base_url, resume, c_cb, self,
-                                        &tmp_err);
+    self->target = lr_packagetarget_new(handle, relative_url, dest,
+                                         checksum_type, checksum,
+                                         (gint64) expectedsize, base_url,
+                                         resume, c_cb, self, &tmp_err);
+
     if (self->target == NULL) {
         PyErr_Format(LrErr_Exception,
                      "PackageTarget initialization failed: %s",
@@ -207,6 +220,7 @@ get_str(_PackageTargetObject *self, void *member_offset)
 }
 
 static PyGetSetDef packagetarget_getsetters[] = {
+//  { "handle", ... }, TODO
     {"relative_url",  (getter)get_str, NULL, NULL, OFFSET(relative_url)},
     {"dest",          (getter)get_str, NULL, NULL, OFFSET(dest)},
     {"base_url",      (getter)get_str, NULL, NULL, OFFSET(base_url)},

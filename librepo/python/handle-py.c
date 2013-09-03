@@ -28,6 +28,9 @@
 #include "packagetarget-py.h"
 #include "result-py.h"
 #include "typeconversion.h"
+#include "packagedownloader-py.h"
+
+#include "globalstate-py.h"  // GIL Hack
 
 typedef struct {
     PyObject_HEAD
@@ -37,7 +40,7 @@ typedef struct {
     PyObject *progress_cb_data;
     /* GIL stuff */
     // See: http://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code
-    PyThreadState *_save;
+    PyThreadState *state;
 } _HandleObject;
 
 LrHandle *
@@ -48,24 +51,6 @@ Handle_FromPyObject(PyObject *o)
         return NULL;
     }
     return ((_HandleObject *)o)->handle;
-}
-
-void
-PyHandle_BeginAllowThreads(PyObject *o)
-{
-    _HandleObject *self = (_HandleObject *) o;
-    if (!self) return;
-    assert(!self->_save);
-    self->_save = PyEval_SaveThread();
-}
-
-void
-PyHandle_EndAllowThreads(PyObject *o)
-{
-    _HandleObject *self = (_HandleObject *) o;
-    if (!self) return;
-    PyEval_RestoreThread(self->_save);
-    self->_save = NULL;
 }
 
 static int
@@ -101,10 +86,9 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     if (arglist == NULL)
         return 0;
 
-
-    PyHandle_EndAllowThreads((PyObject *) self);
+    EndAllowThreads(&self->state);
     result = PyObject_CallObject(self->progress_cb, arglist);
-    PyHandle_BeginAllowThreads((PyObject *) self);
+    BeginAllowThreads(&self->state);
 
     Py_DECREF(arglist);
     Py_XDECREF(result);
@@ -124,7 +108,7 @@ handle_new(PyTypeObject *type,
         self->handle = NULL;
         self->progress_cb = NULL;
         self->progress_cb_data = NULL;
-        self->_save = NULL;
+        self->state = NULL;
     }
     return (PyObject *)self;
 }
@@ -712,9 +696,18 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
-    PyHandle_BeginAllowThreads((PyObject *) self);
+    // XXX: GIL Hack
+    int hack_rc = gil_logger_hack_begin(&self->state);
+    if (hack_rc == GIL_HACK_ERROR)
+        return NULL;
+
+    BeginAllowThreads(&self->state);
     ret = lr_handle_perform(self->handle, result, &tmp_err);
-    PyHandle_EndAllowThreads((PyObject *) self);
+    EndAllowThreads(&self->state);
+
+    // XXX: GIL Hack
+    if (!gil_logger_hack_end(hack_rc))
+        return NULL;
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
@@ -751,11 +744,20 @@ download_package(_HandleObject *self, PyObject *args)
     if (check_HandleStatus(self))
         return NULL;
 
-    PyHandle_BeginAllowThreads((PyObject *) self);
+    // XXX: GIL Hack
+    int hack_rc = gil_logger_hack_begin(&self->state);
+    if (hack_rc == GIL_HACK_ERROR)
+        return NULL;
+
+    BeginAllowThreads(&self->state);
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, (gint64) expectedsize, base_url,
                               resume, &tmp_err);
-    PyHandle_EndAllowThreads((PyObject *) self);
+    EndAllowThreads(&self->state);
+
+    // XXX: GIL Hack
+    if (!gil_logger_hack_end(hack_rc))
+        return NULL;
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
@@ -765,61 +767,6 @@ download_package(_HandleObject *self, PyObject *args)
         PyErr_CheckSignals();
         return NULL;
     }
-
-    if (!ret)
-        RETURN_ERROR(&tmp_err, -1, NULL);
-
-    Py_RETURN_NONE;
-}
-
-static PyObject *
-download_packages(_HandleObject *self, PyObject *args)
-{
-    gboolean ret;
-    PyObject *py_list;
-    int failfast;
-    LrPackageDownloadFlag flags = 0;
-    GError *tmp_err = NULL;
-
-    if (!PyArg_ParseTuple(args, "O!i:download_packages",
-                          &PyList_Type, &py_list, &failfast))
-        return NULL;
-
-    if (check_HandleStatus(self))
-        return NULL;
-
-    // Convert python list to GSList
-    GSList *list = NULL;
-    Py_ssize_t len = PyList_Size(py_list);
-    for (Py_ssize_t x=0; x < len; x++) {
-        PyObject *py_packagetarget = PyList_GetItem(py_list, x);
-        LrPackageTarget *target = PackageTarget_FromPyObject(py_packagetarget);
-        if (!target)
-            return NULL;
-        PackageTarget_SetHandle(py_packagetarget, (PyObject *) self);
-        list = g_slist_append(list, target);
-    }
-
-    Py_XINCREF(py_list);
-
-    if (failfast)
-        flags |= LR_PACKAGEDOWNLOAD_FAILFAST;
-
-    PyHandle_BeginAllowThreads((PyObject *) self);
-    ret = lr_download_packages(self->handle, list, flags, &tmp_err);
-    PyHandle_EndAllowThreads((PyObject *) self);
-
-    assert((ret && !tmp_err) || (!ret && tmp_err));
-
-    if (!ret && tmp_err->code == LRE_INTERRUPTED) {
-        Py_XDECREF(py_list);
-        g_error_free(tmp_err);
-        PyErr_SetInterrupt();
-        PyErr_CheckSignals();
-        return NULL;
-    }
-
-    Py_XDECREF(py_list);
 
     if (!ret)
         RETURN_ERROR(&tmp_err, -1, NULL);
@@ -833,7 +780,6 @@ PyMethodDef handle_methods[] = {
     { "getinfo", (PyCFunction)getinfo, METH_VARARGS, NULL },
     { "perform", (PyCFunction)perform, METH_VARARGS, NULL },
     { "download_package", (PyCFunction)download_package, METH_VARARGS, NULL },
-    { "download_packages", (PyCFunction)download_packages, METH_VARARGS, NULL },
     { NULL }
 };
 

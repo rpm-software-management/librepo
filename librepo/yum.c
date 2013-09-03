@@ -190,18 +190,19 @@ lr_yum_download_repomd(LrHandle *handle,
                 __func__, lr_checksum_type_to_str(checksum_type), checksum);
     }
 
-    LrDownloadTarget *target = lr_downloadtarget_new("repodata/repomd.xml",
-                                                      NULL,
-                                                      fd,
-                                                      checksum_type,
-                                                      checksum,
-                                                      0,
-                                                      0,
-                                                      NULL,
-                                                      NULL,
-                                                      NULL);
+    LrDownloadTarget *target = lr_downloadtarget_new(handle,
+                                                     "repodata/repomd.xml",
+                                                     NULL,
+                                                     fd,
+                                                     checksum_type,
+                                                     checksum,
+                                                     0,
+                                                     0,
+                                                     NULL,
+                                                     NULL,
+                                                     NULL);
 
-    ret = lr_download_target(handle, target, &tmp_err);
+    ret = lr_download_target(target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (tmp_err) {
@@ -275,7 +276,8 @@ lr_yum_download_repo(LrHandle *handle,
         else
             checksumtype = LR_CHECKSUM_UNKNOWN;
 
-        target = lr_downloadtarget_new(record->location_href,
+        target = lr_downloadtarget_new(handle,
+                                       record->location_href,
                                        NULL,
                                        fd,
                                        checksumtype,
@@ -296,8 +298,7 @@ lr_yum_download_repo(LrHandle *handle,
     if (!targets)
         return TRUE;
 
-    ret = lr_download_single_cb(handle,
-                                targets,
+    ret = lr_download_single_cb(targets,
                                 FALSE,
                                 handle->user_cb,
                                 handle->user_data,

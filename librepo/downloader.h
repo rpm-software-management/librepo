@@ -43,8 +43,6 @@ void
 lr_sigint_handler(int sig);
 
 /** Main download function.
- * @param handle    ::LrHandle with a user network configuration.
- *                  Could be NULL.
  * @param targets   GSList with one or more ::LrDownloadTarget.
  *                  Could be NULL. Then return immediately with LRE_OK
  *                  return code.
@@ -59,18 +57,17 @@ lr_sigint_handler(int sig);
  *                  status of all downloaded targets.
  */
 gboolean
-lr_download(LrHandle *handle, GSList *targets, gboolean failfast, GError **err);
+lr_download(GSList *targets, gboolean failfast, GError **err);
 
 /** Wrapper over ::lr_download that takes only single ::LrDownloadTarget.
  * Note: failfast is TRUE, so if download failed, then this function returns
  * FALSE (There is no need to check status of download itself).
- * @param handle    See ::lr_download
  * @param target    single LrDownloadTarget object or NULL.
  * @param err       GError **
  * @return          See ::lr_download
  */
 gboolean
-lr_download_target(LrHandle *handle, LrDownloadTarget *target, GError **err);
+lr_download_target(LrDownloadTarget *target, GError **err);
 
 /** Wrapper over the ::lr_download_target that takes only url and fd.
  * Note: failfast is TRUE, so if download failed, then this function returns
@@ -87,7 +84,6 @@ lr_download_url(LrHandle *handle, const char *url, int fd, GError **err);
 /** Wrapper over the ::lr_download that calculate collective statistics of
  * all downloads and repord them via callback. Note: All callbacks and
  * userdata setted in targets will be replaced and don't be used.
- * @param handle    See ::lr_download
  * @param targets   See ::lr_download
  * @param failfast  See ::lr_download
  * @param cb        Callback
@@ -96,8 +92,7 @@ lr_download_url(LrHandle *handle, const char *url, int fd, GError **err);
  * @return          See ::lr_download
  */
 gboolean
-lr_download_single_cb(LrHandle *handle,
-                      GSList *targets,
+lr_download_single_cb(GSList *targets,
                       gboolean failfast,
                       LrProgressCb cb,
                       void *cbdata,

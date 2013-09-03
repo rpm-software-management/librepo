@@ -28,7 +28,8 @@
 #include "downloadtarget_internal.h"
 
 LrDownloadTarget *
-lr_downloadtarget_new(const char *path,
+lr_downloadtarget_new(LrHandle *handle,
+                      const char *path,
                       const char *baseurl,
                       int fd,
                       LrChecksumType checksumtype,
@@ -46,6 +47,7 @@ lr_downloadtarget_new(const char *path,
 
     target = lr_malloc0(sizeof(*target));
 
+    target->handle       = handle;
     target->chunk        = g_string_chunk_new(0);
     target->path         = g_string_chunk_insert(target->chunk, path);
     target->baseurl      = lr_string_chunk_insert(target->chunk, baseurl);

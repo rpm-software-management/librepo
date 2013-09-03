@@ -23,7 +23,7 @@ START_TEST(test_downloader_no_list)
     int ret;
     GError *err = NULL;
 
-    ret = lr_download(NULL, NULL, FALSE, &err);
+    ret = lr_download(NULL, FALSE, &err);
     fail_if(!ret);
     fail_if(err);
 }
@@ -40,21 +40,7 @@ START_TEST(test_downloader_single_file)
     LrDownloadTarget *t1;
     GError *tmp_err = NULL;
 
-    // Prepare list of download targets
-
-    tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
-
-    mktemp(tmpfn1);
-    fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
-    lr_free(tmpfn1);
-    fail_if(fd1 == -1);
-
-    t1 = lr_downloadtarget_new("index.html", NULL, fd1, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
-
-    list = g_slist_append(list, t1);
-
-    // Download
+    // Prepare handle
 
     handle = lr_handle_init();
     fail_if(handle == NULL);
@@ -64,7 +50,24 @@ START_TEST(test_downloader_single_file)
     lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
     fail_if(tmp_err);
 
-    ret = lr_download(handle, list, FALSE, &err);
+
+    // Prepare list of download targets
+
+    tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
+
+    mktemp(tmpfn1);
+    fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    lr_free(tmpfn1);
+    fail_if(fd1 == -1);
+
+    t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, 0, NULL,
+                               0, 0, NULL, NULL, NULL);
+
+    list = g_slist_append(list, t1);
+
+    // Download
+
+    ret = lr_download(list, FALSE, &err);
     fail_if(!ret);
     fail_if(err);
 
@@ -102,14 +105,14 @@ START_TEST(test_downloader_single_file_2)
     lr_free(tmpfn1);
     fail_if(fd1 == -1);
 
-    t1 = lr_downloadtarget_new("http://seznam.cz/index.html", NULL, fd1,
-                               0, NULL, 0, 0, NULL, NULL, NULL);
+    t1 = lr_downloadtarget_new(NULL, "http://seznam.cz/index.html", NULL,
+                               fd1, 0, NULL, 0, 0, NULL, NULL, NULL);
 
     list = g_slist_append(list, t1);
 
     // Download
 
-    ret = lr_download(NULL, list, FALSE, &err);
+    ret = lr_download(list, FALSE, &err);
     fail_if(!ret);
     fail_if(err);
 
@@ -138,6 +141,16 @@ START_TEST(test_downloader_two_files)
     LrDownloadTarget *t1, *t2;
     GError *tmp_err = NULL;
 
+    // Prepare handle
+
+    handle = lr_handle_init();
+    fail_if(handle == NULL);
+
+    char *urls[] = {"http://www.google.com", NULL};
+    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    fail_if(tmp_err);
+
     // Prepare list of download targets
 
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_1_XXXXXX", NULL);
@@ -152,25 +165,17 @@ START_TEST(test_downloader_two_files)
     fail_if(fd1 == -1);
     fail_if(fd2 == -1);
 
-    t1 = lr_downloadtarget_new("index.html", NULL, fd1, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
-    t2 = lr_downloadtarget_new("index.html", "http://seznam.cz", fd2, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
+    t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1,
+                               0, NULL, 0, 0, NULL, NULL, NULL);
+    t2 = lr_downloadtarget_new(handle, "index.html", "http://seznam.cz", fd2,
+                               0, NULL, 0, 0, NULL, NULL, NULL);
 
     list = g_slist_append(list, t1);
     list = g_slist_append(list, t2);
 
     // Download
 
-    handle = lr_handle_init();
-    fail_if(handle == NULL);
-
-    char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
-    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
-    fail_if(tmp_err);
-
-    ret = lr_download(handle, list, FALSE, &err);
+    ret = lr_download(list, FALSE, &err);
     fail_if(!ret);
     fail_if(err);
 
@@ -201,6 +206,16 @@ START_TEST(test_downloader_three_files_with_error)
     LrDownloadTarget *t1, *t2, *t3;
     GError *tmp_err = NULL;
 
+    // Prepare handle
+
+    handle = lr_handle_init();
+    fail_if(handle == NULL);
+
+    char *urls[] = {"http://www.google.com", NULL};
+    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    fail_if(tmp_err);
+
     // Prepare list of download targets
 
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_1_XXXXXX", NULL);
@@ -220,11 +235,11 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(fd2 == -1);
     fail_if(fd3 == -1);
 
-    t1 = lr_downloadtarget_new("index.html", NULL, fd1, 0, NULL,
+    t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, 0, NULL,
                                0, 0, NULL, NULL, NULL);
-    t2 = lr_downloadtarget_new("index.html", "http://seznam.cz", fd2, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
-    t3 = lr_downloadtarget_new("i_hope_this_page_doesnt_exists.html",
+    t2 = lr_downloadtarget_new(handle, "index.html", "http://seznam.cz", fd2,
+                               0, NULL, 0, 0, NULL, NULL, NULL);
+    t3 = lr_downloadtarget_new(handle, "i_hope_this_page_doesnt_exists.html",
                                "http://google.com", fd3, 0, NULL,
                                0, 0, NULL, NULL, NULL);
 
@@ -234,15 +249,7 @@ START_TEST(test_downloader_three_files_with_error)
 
     // Download
 
-    handle = lr_handle_init();
-    fail_if(handle == NULL);
-
-    char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
-    lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
-    fail_if(tmp_err);
-
-    ret = lr_download(handle, list, FALSE, &err);
+    ret = lr_download(list, FALSE, &err);
     fail_if(!ret);
     fail_if(err);
 

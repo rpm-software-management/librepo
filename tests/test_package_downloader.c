@@ -23,7 +23,7 @@ START_TEST(test_package_downloader_new_and_free)
 
     // Init with only basic options
 
-    target = lr_packagetarget_new("url", NULL, 0, NULL, 0, NULL, FALSE,
+    target = lr_packagetarget_new(NULL, "url", NULL, 0, NULL, 0, NULL, FALSE,
                                   NULL, NULL, &err);
     fail_if(!target);
     fail_if(err);
@@ -44,8 +44,8 @@ START_TEST(test_package_downloader_new_and_free)
 
     // Init with all options
 
-    target = lr_packagetarget_new("url", "dest", LR_CHECKSUM_SHA384, "xxx",
-                                  0, "baseurl", TRUE, (LrProgressCb) 22,
+    target = lr_packagetarget_new(NULL, "url", "dest", LR_CHECKSUM_SHA384,
+                                  "xxx", 0, "baseurl", TRUE, (LrProgressCb) 22,
                                   (void *) 33, &err);
     fail_if(!target);
     fail_if(err);

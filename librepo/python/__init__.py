@@ -916,20 +916,6 @@ class Handle(_librepo.Handle):
         _librepo.Handle.perform(self, result)
         return result
 
-    def download_packages(self, list, failfast=False):
-        """
-        Download list of packages. *list* is a list of PackageTarget objects.
-        If the *failfast* is True, then whole downloading is stoped
-        immediately when any of download fails (and exception is raised).
-        If the failfast is False, then this function returns after all
-        downloads finish (no matter if successfully or unsuccessfully)
-        and exception is raised only if a nonrecoverable
-        error related to the function itself is meet
-        (Errors related to individual downloads are
-        reported via corresponding PackageTarget objects)
-        """
-        return _librepo.Handle.download_packages(self, list, failfast)
-
 class Result(_librepo.Result):
     """Librepo result class
 
@@ -967,12 +953,28 @@ class PackageTarget(_librepo.PackageTarget):
 
     def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, expectedsize=0, base_url=None, resume=False,
-                 progresscb=None, cbdata=None):
-        _librepo.PackageTarget.__init__(self, relative_url, dest, checksum_type,
-                                        checksum, expectedsize, base_url,
-                                        resume, progresscb, cbdata)
+                 progresscb=None, cbdata=None, handle=None):
+        _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
+                                        checksum_type, checksum, expectedsize,
+                                        base_url, resume, progresscb, cbdata)
 
 # Functions
 
 yum_repomd_get_age    = _librepo.yum_repomd_get_age
 set_debug_log_handler = _librepo.set_debug_log_handler
+
+def download_packages(list, failfast=False):
+    """
+    Download list of packages. *list* is a list of PackageTarget objects.
+    If the *failfast* is True, then whole downloading is stoped
+    immediately when any of download fails (and exception is raised).
+    If the failfast is False, then this function returns after all
+    downloads finish (no matter if successfully or unsuccessfully)
+    and exception is raised only if a nonrecoverable
+    error related to the function itself is meet
+    (Errors related to individual downloads are
+    reported via corresponding PackageTarget objects)
+    """
+    return _librepo.download_packages(list, failfast)
+
+

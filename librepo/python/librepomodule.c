@@ -24,9 +24,14 @@
 
 #include "exception-py.h"
 #include "handle-py.h"
+#include "packagedownloader-py.h"
 #include "packagetarget-py.h"
 #include "result-py.h"
 #include "yum-py.h"
+#include "globalstate-py.h" // GIL Hack
+
+volatile int global_logger = 0;
+volatile PyThreadState **global_state = NULL;
 
 PyObject *debug_cb = NULL;
 PyObject *debug_cb_data = NULL;
@@ -43,11 +48,21 @@ py_debug_cb(G_GNUC_UNUSED const gchar *log_domain,
     if (!debug_cb)
         return;
 
+    // XXX: GIL Hack
+    if (global_state)
+        EndAllowThreads((PyThreadState **) global_state);
+    // XXX: End of GIL Hack
+
     data = (debug_cb_data) ? debug_cb_data : Py_None;
     arglist = Py_BuildValue("(sO)", message, data);
     result = PyObject_CallObject(debug_cb, arglist);
     Py_DECREF(arglist);
     Py_XDECREF(result);
+
+    // XXX: GIL Hack
+    if (global_state)
+        BeginAllowThreads((PyThreadState **) global_state);
+    // XXX: End of GIL Hack
 }
 
 PyObject *
@@ -78,6 +93,7 @@ py_set_debug_log_handler(G_GNUC_UNUSED PyObject *self, PyObject *args)
     if (debug_cb) {
         debug_handler_id = g_log_set_handler("librepo", G_LOG_LEVEL_DEBUG,
                                              py_debug_cb, NULL);
+        global_logger = 1;
     } else if (debug_handler_id != -1) {
         g_log_remove_handler("librepo", debug_handler_id);
     }
@@ -89,6 +105,8 @@ static struct PyMethodDef librepo_methods[] = {
     { "yum_repomd_get_age",     (PyCFunction)py_yum_repomd_get_age,
       METH_VARARGS, NULL },
     { "set_debug_log_handler",  (PyCFunction)py_set_debug_log_handler,
+      METH_VARARGS, NULL },
+    { "download_packages",      (PyCFunction)py_download_packages,
       METH_VARARGS, NULL },
     { NULL }
 };

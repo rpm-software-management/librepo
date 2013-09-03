@@ -76,6 +76,9 @@ lr_download_package(LrHandle *handle,
 /** LrPackageTarget structure */
 typedef struct {
 
+    LrHandle *handle; /*!<
+        Related handle */
+
     char *relative_url; /*!<
         Relative part of URL */
 
@@ -117,6 +120,7 @@ typedef struct {
 } LrPackageTarget;
 
 /** Create new LrPackageTarget object.
+ * @param handle            Handle related to this download or NULL.
  * @param relative_url      Relative part of URL to download.
  *                          First part of URL will be picked from the LrHandle
  *                          (LRO_URL or mirror) during download proccess or
@@ -139,7 +143,8 @@ typedef struct {
  * @return                  Newly allocated LrPackageTarget or NULL on error
  */
 LrPackageTarget *
-lr_packagetarget_new(const char *relative_url,
+lr_packagetarget_new(LrHandle *handle,
+                     const char *relative_url,
                      const char *dest,
                      LrChecksumType checksum_type,
                      const char *checksum,
@@ -169,7 +174,6 @@ typedef enum {
 } LrPackageDownloadFlag;
 
 /** Download all LrPackageTargets at the targets GSList.
- * @param handle            ::LrHandle object
  * @param targets           GSList where each element is a ::LrPackageTarget
  *                          object
  * @param flags             Bitfield with flags to download
@@ -177,8 +181,7 @@ typedef enum {
  * @return                  If FALSE then err is set.
  */
 gboolean
-lr_download_packages(LrHandle *handle,
-                     GSList *targets,
+lr_download_packages(GSList *targets,
                      LrPackageDownloadFlag flags,
                      GError **err);
 

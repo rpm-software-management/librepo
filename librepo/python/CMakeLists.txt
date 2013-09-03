@@ -4,6 +4,7 @@ SET (librepomodule_SRCS
      ${pylibrepo_SRCDIR}/exception-py.c
      ${pylibrepo_SRCDIR}/handle-py.c
      ${pylibrepo_SRCDIR}/librepomodule.c
+     ${pylibrepo_SRCDIR}/packagedownloader-py.c
      ${pylibrepo_SRCDIR}/packagetarget-py.c
      ${pylibrepo_SRCDIR}/result-py.c
      ${pylibrepo_SRCDIR}/typeconversion.c

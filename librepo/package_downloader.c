@@ -37,7 +37,8 @@
 /* Do NOT use resume on successfully downloaded files - download will fail */
 
 LrPackageTarget *
-lr_packagetarget_new(const char *relative_url,
+lr_packagetarget_new(LrHandle *handle,
+                     const char *relative_url,
                      const char *dest,
                      LrChecksumType checksum_type,
                      const char *checksum,
@@ -62,6 +63,7 @@ lr_packagetarget_new(const char *relative_url,
 
     target->chunk = g_string_chunk_new(16);
 
+    target->handle = handle;
     target->relative_url = lr_string_chunk_insert(target->chunk, relative_url);
     target->dest = lr_string_chunk_insert(target->chunk, dest);
     target->checksum_type = checksum_type;
@@ -83,8 +85,7 @@ lr_packagetarget_free(LrPackageTarget *target)
 }
 
 gboolean
-lr_download_packages(LrHandle *handle,
-                     GSList *targets,
+lr_download_packages(GSList *targets,
                      LrPackageDownloadFlag flags,
                      GError **err)
 {
@@ -92,24 +93,44 @@ lr_download_packages(LrHandle *handle,
     gboolean failfast = flags & LR_PACKAGEDOWNLOAD_FAILFAST;
     struct sigaction old_sigact;
     GSList *downloadtargets = NULL;
+    gboolean interruptible = FALSE;
 
-    assert(handle);
     assert(!err || *err == NULL);
 
     if (!targets)
         return TRUE;
 
-    // Check repotype
-    if (handle->repotype != LR_YUMREPO) {
-        g_debug("%s: Bad repo type", __func__);
-        assert(0);
-        g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_BADFUNCARG,
-                    "Bad repo type");
-        return FALSE;
+    // Check targets
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        LrPackageTarget *packagetarget = elem->data;
+
+        if (!packagetarget->handle) {
+            continue;
+            /*
+            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_BADFUNCARG,
+                        "Package target %s doesn't have specified a handle",
+                        packagetarget->relative_url);
+            return FALSE;
+            */
+        }
+
+        if (packagetarget->handle->interruptible)
+            interruptible = TRUE;
+
+        // Check repotype
+        // Note: Checked because lr_handle_prepare_internal_mirrorlist
+        // support only LR_YUMREPO yet
+        if (packagetarget->handle->repotype != LR_YUMREPO) {
+            g_debug("%s: Bad repo type", __func__);
+            assert(0);
+            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_BADFUNCARG,
+                        "Bad repo type");
+            return FALSE;
+        }
     }
 
     // Setup sighandler
-    if (handle->interruptible) {
+    if (interruptible) {
         g_debug("%s: Using own SIGINT handler", __func__);
         struct sigaction sigact;
         sigact.sa_handler = lr_sigint_handler;
@@ -122,17 +143,18 @@ lr_download_packages(LrHandle *handle,
         }
     }
 
-    // Prepare internal mirrorlist
-    ret = lr_handle_prepare_internal_mirrorlist(handle, err);
-    if (!ret)
-        goto cleanup;
-
     // Prepare targets
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         int fd;
         gchar *local_path;
         LrPackageTarget *packagetarget = elem->data;
         LrDownloadTarget *downloadtarget;
+
+        if (packagetarget->handle) {
+            ret = lr_handle_prepare_internal_mirrorlist(packagetarget->handle, err);
+            if (!ret)
+                goto cleanup;
+        }
 
         // Prepare destination filename
         if (packagetarget->dest) {
@@ -203,7 +225,8 @@ lr_download_packages(LrHandle *handle,
             goto cleanup;
         }
 
-        downloadtarget = lr_downloadtarget_new(packagetarget->relative_url,
+        downloadtarget = lr_downloadtarget_new(packagetarget->handle,
+                                               packagetarget->relative_url,
                                                packagetarget->base_url,
                                                fd,
                                                packagetarget->checksum_type,
@@ -218,7 +241,7 @@ lr_download_packages(LrHandle *handle,
     }
 
     // Start downloading
-    ret = lr_download(handle, downloadtargets, failfast, err);
+    ret = lr_download(downloadtargets, failfast, err);
 
 cleanup:
 
@@ -236,7 +259,7 @@ cleanup:
     g_slist_free_full(downloadtargets, (GDestroyNotify)lr_downloadtarget_free);
 
     // Restore original signal handler
-    if (handle->interruptible) {
+    if (interruptible) {
         g_debug("%s: Restoring an old SIGINT handler", __func__);
         sigaction(SIGINT, &old_sigact, NULL);
         if (lr_interrupt) {
@@ -273,8 +296,8 @@ lr_download_package(LrHandle *handle,
 
     // XXX: Maybe remove usage of handle callback in future
 
-    target = lr_packagetarget_new(relative_url, dest, checksum_type, checksum,
-                                  expectedsize, base_url, resume,
+    target = lr_packagetarget_new(handle, relative_url, dest, checksum_type,
+                                  checksum, expectedsize, base_url, resume,
                                   handle->user_cb, handle->user_data, err);
     if (!target)
         return FALSE;
@@ -282,8 +305,7 @@ lr_download_package(LrHandle *handle,
     GSList *targets = NULL;
     targets = g_slist_append(targets, target);
 
-    gboolean ret = lr_download_packages(handle,
-                                        targets,
+    gboolean ret = lr_download_packages(targets,
                                         LR_PACKAGEDOWNLOAD_FAILFAST,
                                         err);
 
