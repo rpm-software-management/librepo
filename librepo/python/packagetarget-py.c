@@ -219,16 +219,46 @@ get_str(_PackageTargetObject *self, void *member_offset)
     return PyBytes_FromString(str);
 }
 
+static PyObject *
+get_pythonobj(_PackageTargetObject *self, void *member_offset)
+{
+    if (check_PackageTargetStatus(self))
+        return NULL;
+
+    if (member_offset == OFFSET(handle)) {
+        if (!self->handle)
+            Py_RETURN_NONE;
+        Py_XINCREF(self->handle);
+        return self->handle;
+    }
+
+    if (member_offset == OFFSET(progresscb)) {
+        if (!self->progress_cb)
+            Py_RETURN_NONE;
+        Py_XINCREF(self->progress_cb);
+        return self->progress_cb;
+    }
+
+    if (member_offset == OFFSET(cbdata)) {
+        if (!self->progress_cb_data)
+            Py_RETURN_NONE;
+        Py_XINCREF(self->progress_cb_data);
+        return self->progress_cb_data;
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyGetSetDef packagetarget_getsetters[] = {
-//  { "handle", ... }, TODO
+    {"handle",        (getter)get_pythonobj, NULL, NULL, OFFSET(handle)},
     {"relative_url",  (getter)get_str, NULL, NULL, OFFSET(relative_url)},
     {"dest",          (getter)get_str, NULL, NULL, OFFSET(dest)},
     {"base_url",      (getter)get_str, NULL, NULL, OFFSET(base_url)},
     {"checksum_type", (getter)get_int, NULL, NULL, OFFSET(checksum_type)},
     {"checksum",      (getter)get_str, NULL, NULL, OFFSET(checksum)},
     {"resume",        (getter)get_int, NULL, NULL, OFFSET(resume)},
-//  {"progresscb",    (getter)get_str, NULL, NULL, OFFSET(progresscb)},
-//  {"cbdata",        (getter)get_str, NULL, NULL, OFFSET(cbdata)},
+    {"progresscb",    (getter)get_pythonobj, NULL, NULL, OFFSET(progresscb)},
+    {"cbdata",        (getter)get_pythonobj, NULL, NULL, OFFSET(cbdata)},
     {"local_path",    (getter)get_str, NULL, NULL, OFFSET(local_path)},
     {"err",           (getter)get_str, NULL, NULL, OFFSET(err)},
     {NULL, NULL, NULL, NULL, NULL} /* sentinel */

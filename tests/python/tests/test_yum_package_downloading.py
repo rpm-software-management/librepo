@@ -431,6 +431,8 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         librepo.download_packages(pkgs)
         pkg = pkgs[0]
         self.assertTrue(pkg.err is None)
+        self.assertTrue(pkg.progresscb == cb)
+        self.assertTrue(pkg.cbdata == cbdata)
         self.assertTrue(os.path.isfile(pkg.local_path))
         self.assertTrue(cbdata["called"] > 0)
         self.assertTrue(cbdata["downloaded"] > 0)
@@ -475,8 +477,10 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         librepo.download_packages(pkgs)
         pkg = pkgs[0]
+        self.assertTrue(pkg.handle == h1)
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
         pkg = pkgs[1]
+        self.assertTrue(pkg.handle == h2)
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
