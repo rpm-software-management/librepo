@@ -453,4 +453,30 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
 
+    def test_download_packages_from_different_repos(self):
+        h1 = librepo.Handle()
+        h2 = librepo.Handle()
 
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h1.setopt(librepo.LRO_URLS, [url])
+        h1.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_03_PATH)
+        h2.setopt(librepo.LRO_URLS, [url])
+        h2.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h1,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_03_01,
+                                          handle=h2,
+                                          dest=self.tmpdir))
+
+        librepo.download_packages(pkgs)
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        pkg = pkgs[1]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
