@@ -46,18 +46,18 @@ main(void)
     // Alternatively if you used "truncate -s 1000 beaker-0.14.0-1.fc18.src.rpm"
     // and truncate the package to 1000 bytes. Then during download, no whole
     // package will be downloaded, but download will resume from the 1001st byte
-    target = lr_packagetarget_new("beaker-0.14.0-1.fc18.src.rpm",
+    target = lr_packagetarget_new(h, "beaker-0.14.0-1.fc18.src.rpm",
                                   NULL, LR_CHECKSUM_SHA256,
                                   "737c974110914a073fb6c736cd7021b0d844c9e47e7d21e37d687dbc86d36538",
                                   0, NULL, TRUE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
 
-    target = lr_packagetarget_new("beaker-client-0.14.1-1.fc18.noarch.rpm",
+    target = lr_packagetarget_new(h, "beaker-client-0.14.1-1.fc18.noarch.rpm",
                                   NULL, LR_CHECKSUM_UNKNOWN, NULL, 0,
                                   NULL, FALSE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
 
-    target = lr_packagetarget_new("rhts-4.56-1.fc17.src.rpm",
+    target = lr_packagetarget_new(h, "rhts-4.56-1.fc17.src.rpm",
                                   NULL, LR_CHECKSUM_UNKNOWN, NULL, 0,
                                   NULL, FALSE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
@@ -70,8 +70,7 @@ main(void)
     // If the failfast is disabled, then lr_download_packages doesn't returns
     // sooner then all downloads are finished (no matter if successfully
     // or unsuccessfully) or some critical error is meet.
-    ret = lr_download_packages(h,
-                               packages,
+    ret = lr_download_packages(packages,
                                LR_PACKAGEDOWNLOAD_FAILFAST,
                                &tmp_err);
     if (!ret) {
