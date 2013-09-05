@@ -198,6 +198,16 @@ PyMethodDef packagetarget_methods[] = {
 #define OFFSET(member) (void *) offsetof(LrPackageTarget, member)
 
 static PyObject *
+get_gint64(_PackageTargetObject *self, void *member_offset)
+{
+    if (check_PackageTargetStatus(self))
+        return NULL;
+    LrPackageTarget *target = self->target;
+    gint64 val = *((gint64 *) ((size_t)target + (size_t) member_offset));
+    return PyLong_FromLongLong((PY_LONG_LONG) val);
+}
+
+static PyObject *
 get_int(_PackageTargetObject *self, void *member_offset)
 {
     if (check_PackageTargetStatus(self))
@@ -251,16 +261,17 @@ get_pythonobj(_PackageTargetObject *self, void *member_offset)
 
 static PyGetSetDef packagetarget_getsetters[] = {
     {"handle",        (getter)get_pythonobj, NULL, NULL, OFFSET(handle)},
-    {"relative_url",  (getter)get_str, NULL, NULL, OFFSET(relative_url)},
-    {"dest",          (getter)get_str, NULL, NULL, OFFSET(dest)},
-    {"base_url",      (getter)get_str, NULL, NULL, OFFSET(base_url)},
-    {"checksum_type", (getter)get_int, NULL, NULL, OFFSET(checksum_type)},
-    {"checksum",      (getter)get_str, NULL, NULL, OFFSET(checksum)},
-    {"resume",        (getter)get_int, NULL, NULL, OFFSET(resume)},
+    {"relative_url",  (getter)get_str,       NULL, NULL, OFFSET(relative_url)},
+    {"dest",          (getter)get_str,       NULL, NULL, OFFSET(dest)},
+    {"base_url",      (getter)get_str,       NULL, NULL, OFFSET(base_url)},
+    {"checksum_type", (getter)get_int,       NULL, NULL, OFFSET(checksum_type)},
+    {"checksum",      (getter)get_str,       NULL, NULL, OFFSET(checksum)},
+    {"expectedsize",  (getter)get_gint64,    NULL, NULL, OFFSET(expectedsize)},
+    {"resume",        (getter)get_int,       NULL, NULL, OFFSET(resume)},
     {"progresscb",    (getter)get_pythonobj, NULL, NULL, OFFSET(progresscb)},
     {"cbdata",        (getter)get_pythonobj, NULL, NULL, OFFSET(cbdata)},
-    {"local_path",    (getter)get_str, NULL, NULL, OFFSET(local_path)},
-    {"err",           (getter)get_str, NULL, NULL, OFFSET(err)},
+    {"local_path",    (getter)get_str,       NULL, NULL, OFFSET(local_path)},
+    {"err",           (getter)get_str,       NULL, NULL, OFFSET(err)},
     {NULL, NULL, NULL, NULL, NULL} /* sentinel */
 };
 

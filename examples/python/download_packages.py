@@ -29,7 +29,8 @@ if __name__ == "__main__":
     packages.append(target)
 
     target = librepo.PackageTarget("beaker-client-0.14.1-1.fc18.noarch.rpm",
-                                   handle=h)
+                                   handle=h,
+                                   expectedsize=325144)
     packages.append(target)
 
     target = librepo.PackageTarget("rhts-4.56-1.fc17.src.rpm", handle=h)

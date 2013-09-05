@@ -54,6 +54,18 @@ typedef enum {
         The transfer is finished without success. */
 } LrDownloadState;
 
+typedef enum {
+    LR_HCS_DEFAULT, /*!<
+        Default state */
+    LR_HCS_HTTP_STATE_OK, /*!<
+        HTTP headers with OK state */
+    LR_HCS_INTERRUPTED, /*!<
+        Download was interrupted (e.g. Content-Length doesn't match
+        expected size etc.) */
+    LR_HCS_DONE, /*!<
+        All headers which we were looking for are already found*/
+} LrHeaderCbState;
+
 typedef struct {
     LrHandle *handle; /*!<
         Handle */
@@ -106,6 +118,10 @@ typedef struct {
         and is common for all targets that uses the handle. */
     LrHandle *handle; /*!<
         LrHandle associated with this target */
+    LrHeaderCbState headercb_state; /*!<
+        State of the header callback for current transfer */
+    gchar *headercb_interrupt_reason; /*!<
+        Reason why was the transfer interrupted */
 } LrTarget;
 
 typedef struct {
@@ -254,6 +270,100 @@ lr_progresscb(void *ptr,
     return target->target->progresscb(target->target->cbdata,
                                       total_to_download,
                                       now_downloaded);
+}
+
+#define STRLEN(s) (sizeof(s)/sizeof(s[0]) - 1)
+
+static size_t
+lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    assert(userdata);
+
+    size_t ret = size * nmemb;
+    LrTarget *lrtarget = userdata;
+    LrHeaderCbState state = lrtarget->headercb_state;
+
+    if (state == LR_HCS_DONE || state == LR_HCS_INTERRUPTED) {
+        // Nothing to do
+        return ret;
+    }
+
+    char *header = g_strstrip(g_strndup(ptr, size*nmemb));
+    gint64 expected = lrtarget->target->expectedsize;
+
+    if (state == LR_HCS_DEFAULT) {
+        if (lrtarget->mirror->mirror->protocol == LR_PROTOCOL_HTTP
+            && g_str_has_prefix(header, "HTTP/")) {
+            // Header of a HTTP protocol
+            if (g_strrstr(header, "200")) {
+                lrtarget->headercb_state = LR_HCS_HTTP_STATE_OK;
+            } else {
+                // Do nothing (do not change the state)
+                // in case of redirection, 200 OK still could come
+                g_debug("%s: Non OK HTTP header status: %s", __func__, header);
+            }
+        } else if (lrtarget->mirror->mirror->protocol == LR_PROTOCOL_FTP) {
+            // Headers of a FTP protocol
+            if (g_str_has_prefix(header, "213 ")) {
+                // Code 213 shoud keep the file size
+                gint64 content_length = g_ascii_strtoll(header+4, NULL, 0);
+
+                g_debug("%s: Server returned size: \"%s\" "
+                        "(converted %"G_GINT64_FORMAT"/%"G_GINT64_FORMAT
+                        " expected)",
+                        __func__, header+4, content_length, expected);
+
+                // Compare expected size and size reported by a FTP server
+                if (content_length > 0 && content_length != expected) {
+                    g_debug("%s: Size doesn't match (%"G_GINT64_FORMAT
+                            " != %"G_GINT64_FORMAT")",
+                            __func__, content_length, expected);
+                    lrtarget->headercb_state = LR_HCS_INTERRUPTED;
+                    lrtarget->headercb_interrupt_reason = g_strdup_printf(
+                        "FTP server reports size: %"G_GINT64_FORMAT" "
+                        "via 213 code, but expected size is: %"G_GINT64_FORMAT,
+                        content_length, expected);
+                    ret++;  // Return error value
+                } else {
+                    lrtarget->headercb_state = LR_HCS_DONE;
+                }
+            } else if (g_str_has_prefix(header, "150")) {
+                // Code 150 shoud keep the file size
+                // TODO: See parse150 in /usr/lib64/python2.7/ftplib.py
+            }
+        }
+    }
+
+    if (state == LR_HCS_HTTP_STATE_OK) {
+        if (g_str_has_prefix(header, "Content-Length: ")) {
+            // Content-Length header found
+            char *content_length_str = header + STRLEN("Content-Length: ");
+            gint64 content_length = g_ascii_strtoll(content_length_str,
+                                                    NULL, 0);
+            g_debug("%s: Server returned Content-Length: \"%s\" "
+                    "(converted %"G_GINT64_FORMAT"/%"G_GINT64_FORMAT" expected)",
+                    __func__, content_length_str, content_length, expected);
+
+            // Compare expected size and size reported by a HTTP server
+            if (content_length > 0 && content_length != expected) {
+                g_debug("%s: Size doesn't match (%"G_GINT64_FORMAT
+                        " != %"G_GINT64_FORMAT")",
+                        __func__, content_length, expected);
+                lrtarget->headercb_state = LR_HCS_INTERRUPTED;
+                lrtarget->headercb_interrupt_reason = g_strdup_printf(
+                    "Server reports Content-Length: %"G_GINT64_FORMAT" but "
+                    "expected size is: %"G_GINT64_FORMAT,
+                    content_length, expected);
+                ret++;  // Return error value
+            } else {
+                lrtarget->headercb_state = LR_HCS_DONE;
+            }
+        }
+    }
+
+    g_free(header);
+
+    return ret;
 }
 
 static gboolean
@@ -461,11 +571,17 @@ prepare_next_transfer(LrDownload *dd, GError **err)
         }
     }
 
-    // Prepare callback
+    // Prepare progress callback
     if (target->target->progresscb) {
         curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb);
         curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0);
         curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+    }
+
+    // Prepare header callback
+    if (target->target->expectedsize > 0) {
+        curl_easy_setopt(h, CURLOPT_HEADERFUNCTION, lr_headercb);
+        curl_easy_setopt(h, CURLOPT_HEADERDATA, target);
     }
 
     // Add the new handle to the curl multi handle
@@ -473,6 +589,11 @@ prepare_next_transfer(LrDownload *dd, GError **err)
 
     // Set the state of transfer as running
     target->state = LR_DS_RUNNING;
+
+    // Set the state of header callback for this transfer
+    target->headercb_state = LR_HCS_DEFAULT;
+    g_free(target->headercb_interrupt_reason);
+    target->headercb_interrupt_reason = NULL;
 
     // Set mirror for the target
     target->mirror = mirror;  // mirror could be NULL if baseurl is used
@@ -531,10 +652,18 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         // Check status of finished transfer
         if (msg->data.result != CURLE_OK) {
             // There was an error that is reported by CURLcode
-            g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                        "Curl error: %s for %s",
-                        curl_easy_strerror(msg->data.result),
-                        effective_url);
+
+            if (target->headercb_state == LR_HCS_INTERRUPTED) {
+                // Download was interrupted by header callback
+                g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CURL,
+                            "Interrupted by header callback: %s",
+                            target->headercb_interrupt_reason);
+            } else {
+                g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CURL,
+                            "Curl error: %s for %s",
+                            curl_easy_strerror(msg->data.result),
+                            effective_url);
+            }
         } else {
             // curl return code is CURLE_OK but we need to check status code
             long code;
@@ -578,6 +707,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                                                (gconstpointer) target);
         target->tried_mirrors = g_slist_append(target->tried_mirrors,
                                                target->mirror);
+        g_free(target->headercb_interrupt_reason);
+        target->headercb_interrupt_reason = NULL;
 
         guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
 
@@ -927,6 +1058,8 @@ lr_download_cleanup:
             target->curl_handle = NULL;
             fclose(target->f);
             target->f = NULL;
+            g_free(target->headercb_interrupt_reason);
+            target->headercb_interrupt_reason = NULL;
 
             lr_downloadtarget_set_error(target->target, LRE_UNFINISHED,
                     "Not finnished - interrupted by error: %s",

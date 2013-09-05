@@ -28,14 +28,28 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    LR_PROTOCOL_FILE,
+    LR_PROTOCOL_HTTP,
+    LR_PROTOCOL_FTP,
+    LR_PROTOCOL_OTHER,
+} LrProtocol;
+
 /** A internal representation of a mirror */
 typedef struct {
-    char *url;      /*!< URL of the mirror */
-    int preference; /*!< Integer number 1-100 - higher is better */
-    int fails;      /*!< Number of failed downloads from this mirror */
+    char *url;           /*!< URL of the mirror */
+    int preference;      /*!< Integer number 1-100 - higher is better */
+    LrProtocol protocol; /*!< Protocol of this mirror */
 } LrInternalMirror;
 
 typedef GSList LrInternalMirrorlist;
+
+/** Detect URL protocol.
+ * @param url       URL
+ * @return          Type of detected protocol
+ */
+LrProtocol
+lr_detect_protocol(const char *url);
 
  /** Append url to the mirrorlist.
  * @param list          a LrInternalMirrorlist or NULL

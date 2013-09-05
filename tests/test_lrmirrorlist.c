@@ -24,12 +24,12 @@ START_TEST(test_lrmirrorlist_append_mirrorlist)
     fail_if(!mirror);
     fail_if(strcmp(mirror->url, "http://foo"));
     fail_if(mirror->preference != 100);
-    fail_if(mirror->fails != 0);
+    fail_if(mirror->protocol != LR_PROTOCOL_HTTP);
     mirror = lr_lrmirrorlist_nth(iml, 1);
     fail_if(!mirror);
     fail_if(strcmp(mirror->url, "ftp://bar"));
     fail_if(mirror->preference != 100);
-    fail_if(mirror->fails != 0);
+    fail_if(mirror->protocol != LR_PROTOCOL_FTP);
 
     fail_if(g_slist_length(iml) != 2);
 
@@ -100,12 +100,12 @@ START_TEST(test_lrmirrorlist_append_metalink)
     mirror = lr_lrmirrorlist_nth(iml, 0);
     fail_if(strcmp(mirror->url, "http://foo"));
     fail_if(mirror->preference != 100);
-    fail_if(mirror->fails != 0);
+    fail_if(mirror->protocol != LR_PROTOCOL_HTTP);
 
     mirror = lr_lrmirrorlist_nth(iml, 1);
     fail_if(strcmp(mirror->url, "ftp://bar"));
     fail_if(mirror->preference != 95);
-    fail_if(mirror->fails != 0);
+    fail_if(mirror->protocol != LR_PROTOCOL_FTP);
 
     fail_if(g_slist_length(iml) != 2);
 
@@ -159,12 +159,12 @@ START_TEST(test_lrmirrorlist_append_lrmirrorlist)
     mirror = lr_lrmirrorlist_nth(iml, 0);
     fail_if(strcmp(mirror->url, "http://foo"));
     fail_if(mirror->preference != 100);
-    fail_if(mirror->fails != 0);
+    fail_if(mirror->protocol != LR_PROTOCOL_HTTP);
 
     mirror = lr_lrmirrorlist_nth(iml, 1);
     fail_if(strcmp(mirror->url, "ftp://bar"));
     fail_if(mirror->preference != 100);
-    fail_if(mirror->fails != 0);
+    fail_if(mirror->protocol != LR_PROTOCOL_FTP);
 
     fail_if(g_slist_length(iml) != 2);
 

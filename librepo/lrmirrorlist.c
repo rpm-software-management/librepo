@@ -5,6 +5,23 @@
 #include "util.h"
 #include "lrmirrorlist.h"
 
+LrProtocol
+lr_detect_protocol(const char *url)
+{
+    assert(url);
+
+    if (g_str_has_prefix(url, "http://") || g_str_has_prefix(url, "https://"))
+        return LR_PROTOCOL_HTTP;
+
+    if (g_str_has_prefix(url, "ftp://"))
+        return LR_PROTOCOL_FTP;
+
+    if (g_str_has_prefix(url, "file://"))
+        return LR_PROTOCOL_FILE;
+
+    return LR_PROTOCOL_OTHER;
+}
+
 static LrInternalMirror *
 lr_lrmirror_new(const char *url, LrUrlVars *urlvars)
 {
@@ -42,6 +59,7 @@ lr_lrmirrorlist_append_url(LrInternalMirrorlist *list,
 
     LrInternalMirror *mirror = lr_lrmirror_new(url, urlvars);
     mirror->preference = 100;
+    mirror->protocol = lr_detect_protocol(mirror->url);
 
     g_debug("%s: Appending URL: %s", __func__, mirror->url);
 
@@ -64,6 +82,7 @@ lr_lrmirrorlist_append_mirrorlist(LrInternalMirrorlist *list,
 
         LrInternalMirror *mirror = lr_lrmirror_new(url, urlvars);
         mirror->preference = 100;
+        mirror->protocol = lr_detect_protocol(mirror->url);
         list = g_slist_append(list, mirror);
 
         g_debug("%s: Appending URL: %s", __func__, mirror->url);
@@ -113,6 +132,7 @@ lr_lrmirrorlist_append_metalink(LrInternalMirrorlist *list,
 
         LrInternalMirror *mirror = lr_lrmirror_new(url_copy, urlvars);
         mirror->preference = metalinkurl->preference;
+        mirror->protocol = lr_detect_protocol(mirror->url);
         lr_free(url_copy);
         list = g_slist_append(list, mirror);
 
@@ -133,7 +153,7 @@ lr_lrmirrorlist_append_lrmirrorlist(LrInternalMirrorlist *list,
         LrInternalMirror *oth = elem->data;
         LrInternalMirror *mirror = lr_lrmirror_new(oth->url, NULL);
         mirror->preference = oth->preference;
-        mirror->fails      = oth->fails;
+        mirror->protocol = oth->protocol;
         list = g_slist_append(list, mirror);
         g_debug("%s: Appending URL: %s", __func__, mirror->url);
     }

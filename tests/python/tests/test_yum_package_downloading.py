@@ -451,7 +451,6 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         librepo.download_packages(pkgs)
 
         pkg = pkgs[0]
-        print pkg.err
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
 
@@ -482,5 +481,27 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(os.path.isfile(pkg.local_path))
         pkg = pkgs[1]
         self.assertTrue(pkg.handle == h2)
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
+    def test_download_packages_with_expectedsize(self):
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [url])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        expectedsize = 1057084
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir,
+                                          expectedsize=expectedsize))
+
+        librepo.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertEqual(pkg.expectedsize, expectedsize)
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))

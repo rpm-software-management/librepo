@@ -53,7 +53,7 @@ main(void)
     packages = g_slist_append(packages, target);
 
     target = lr_packagetarget_new(h, "beaker-client-0.14.1-1.fc18.noarch.rpm",
-                                  NULL, LR_CHECKSUM_UNKNOWN, NULL, 0,
+                                  NULL, LR_CHECKSUM_UNKNOWN, NULL, 325144,
                                   NULL, FALSE, NULL, NULL, &tmp_err);
     packages = g_slist_append(packages, target);
 
@@ -77,6 +77,7 @@ main(void)
         fprintf(stderr, "Error encountered: %d: %s\n",
                 tmp_err->code, tmp_err->message);
         rc = EXIT_FAILURE;
+        g_error_free(tmp_err);
     }
 
     // Check statuses
