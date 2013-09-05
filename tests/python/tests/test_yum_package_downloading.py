@@ -494,10 +494,9 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         expectedsize = 1057084
 
         pkgs = []
-        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
-                                          handle=h,
-                                          dest=self.tmpdir,
-                                          expectedsize=expectedsize))
+        pkgs.append(h.new_packagetarget(config.PACKAGE_01_01,
+                                        dest=self.tmpdir,
+                                        expectedsize=expectedsize))
 
         librepo.download_packages(pkgs)
 

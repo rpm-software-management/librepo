@@ -696,6 +696,20 @@ def checksum_str_to_type(name):
     name = name.lower()
     return _CHECKSUM_STR_TO_VAL_MAP.get(name, CHECKSUM_UNKNOWN)
 
+class PackageTarget(_librepo.PackageTarget):
+    """
+    Represent a single package that will be downloaded by
+    :meth:`~librepo.Handle.download_packages()`.
+    """
+
+    def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
+                 checksum=None, expectedsize=0, base_url=None, resume=False,
+                 progresscb=None, cbdata=None, handle=None):
+        _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
+                                        checksum_type, checksum, expectedsize,
+                                        base_url, resume, progresscb, cbdata)
+
+
 class Handle(_librepo.Handle):
     """Librepo handle class.
     Handle hold information about a repository and configuration for
@@ -916,6 +930,9 @@ class Handle(_librepo.Handle):
         _librepo.Handle.perform(self, result)
         return result
 
+    def new_packagetarget(self, relative_url, **kwargs):
+        return PackageTarget(relative_url, handle=self, **kwargs)
+
 class Result(_librepo.Result):
     """Librepo result class
 
@@ -944,19 +961,6 @@ class Result(_librepo.Result):
             raise AttributeError("'%s' object has no attribute '%s'" % \
                                  (self.__class__.__name__, attr))
         return self.getinfo(ATTR_TO_LRR[attr])
-
-class PackageTarget(_librepo.PackageTarget):
-    """
-    Represent a single package that will be downloaded by
-    :meth:`~librepo.Handle.download_packages()`.
-    """
-
-    def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
-                 checksum=None, expectedsize=0, base_url=None, resume=False,
-                 progresscb=None, cbdata=None, handle=None):
-        _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
-                                        checksum_type, checksum, expectedsize,
-                                        base_url, resume, progresscb, cbdata)
 
 # Functions
 
