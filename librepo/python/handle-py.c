@@ -152,11 +152,6 @@ setopt(_HandleObject *self, PyObject *args)
     if (check_HandleStatus(self))
         return NULL;
 
-    if (option < 0 || option >= LRO_SENTINEL) {
-        PyErr_SetString(PyExc_TypeError, "Unknown option");
-        return NULL;
-    }
-
     switch (option) {
 
     /*
@@ -539,11 +534,6 @@ getinfo(_HandleObject *self, PyObject *args)
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
-
-    if (option < 0 || option >= LRI_SENTINEL) {
-        PyErr_SetString(PyExc_TypeError, "Unknown option");
-        return NULL;
-    }
 
     switch (option) {
 

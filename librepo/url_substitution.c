@@ -53,8 +53,8 @@ lr_urlvars_set(LrUrlVars *list, const char *var, const char *value)
         for (LrUrlVars *elem = list; elem; elem = g_slist_next(elem)) {
             LrVar *var_val = elem->data;
             if (!strcmp(var, var_val->var)) {
-                lr_var_free(var_val);
                 ret = g_slist_remove(list, var_val);
+                lr_var_free(var_val);
                 return ret;
             }
         }

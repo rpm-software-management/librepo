@@ -48,8 +48,10 @@ test_checksum(const char *filename, LrChecksumType ch_type, char *expected)
     char *checksum;
     GError *tmp_err = NULL;
 
-    fail_if((fd = open(filename, O_RDONLY)) < 0);
-    fail_if((checksum = lr_checksum_fd(ch_type, fd, &tmp_err)) == NULL);
+    fd = open(filename, O_RDONLY);
+    fail_if(fd < 0);
+    checksum = lr_checksum_fd(ch_type, fd, &tmp_err);
+    fail_if(checksum == NULL);
     fail_if(tmp_err);
     fail_if(strcmp(checksum, expected),
         "Checksum is %s instead of %s", checksum, expected);
@@ -114,7 +116,8 @@ START_TEST(test_cached_checksum)
     fail_if(attr_ret != -1);  // Cached checksum should not exists
 
     // Calculate checksum
-    fail_if((fd = open(filename, O_RDONLY)) < 0);
+    fd = open(filename, O_RDONLY);
+    fail_if(fd < 0);
     checksum_ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256,
                                       fd,
                                       expected,
@@ -148,7 +151,8 @@ START_TEST(test_cached_checksum)
     }
 
     // Calculate checksum again (cached shoud be used this time)
-    fail_if((fd = open(filename, O_RDONLY)) < 0);
+    fd = open(filename, O_RDONLY);
+    fail_if(fd < 0);
     checksum_ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256,
                                       fd,
                                       expected,

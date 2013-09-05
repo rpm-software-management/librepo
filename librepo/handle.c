@@ -530,7 +530,6 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 
             if (full_path) {
                 mirrors_fd = open(full_path, O_RDONLY);
-                lr_free(full_path);
                 if (mirrors_fd < 1) {
                     ret = FALSE;
                     g_debug("%s: Cannot open: %s", __func__, full_path);
@@ -538,6 +537,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
                                 "Cannot open %s: %s",
                                 full_path, strerror(errno));
                 }
+                lr_free(full_path);
             }
         } else if (handle->mirrorlist) {
             /* Download and parse remote metalink or mirrorlist */

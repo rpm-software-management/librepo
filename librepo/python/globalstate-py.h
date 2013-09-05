@@ -88,6 +88,8 @@ gil_logger_hack_end(int hack_begin_rc)
     switch (hack_begin_rc) {
         case GIL_HACK_MUST_CLEAR:
             global_state = NULL;
+            ret = TRUE;
+            break;
         case GIL_HACK_DO_NOT_CLEAR:
             ret = TRUE;
             break;

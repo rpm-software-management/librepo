@@ -46,22 +46,29 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
     assert(!err || *err == NULL);
 
     h = lr_handle_init();
+
+    if (!lr_handle_setopt(h, err, LRO_REPOTYPE, LR_YUMREPO)) {
+        lr_handle_free(h);
+        return FALSE;
+    }
+
+    if (!lr_handle_setopt(h, err, LRO_URLS, path)) {
+        lr_handle_free(h);
+        return FALSE;
+    }
+
+    if (!lr_handle_setopt(h, err, LRO_CHECKSUM, 1)) {
+        lr_handle_free(h);
+        return FALSE;
+    }
+
+    if (!lr_handle_setopt(h, err, LRO_LOCAL, 1)) {
+        lr_handle_free(h);
+        return FALSE;
+    }
+
     result = lr_result_init();
-
-    if (!lr_handle_setopt(h, err, LRO_REPOTYPE, LR_YUMREPO))
-        return FALSE;
-
-    if (!lr_handle_setopt(h, err, LRO_URLS, path))
-        return FALSE;
-
-    if (!lr_handle_setopt(h, err, LRO_CHECKSUM, 1))
-        return FALSE;
-
-    if (!lr_handle_setopt(h, err, LRO_LOCAL, 1))
-        return FALSE;
-
     ret = lr_handle_perform(h, result, err);
-
     lr_result_free(result);
     lr_handle_free(h);
 

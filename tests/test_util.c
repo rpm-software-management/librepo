@@ -107,7 +107,7 @@ START_TEST(test_remove_dir)
     fail_if(tmp_dir == NULL);
     tmp_file = lr_pathconcat(tmp_dir, "file_a", NULL);
     fd = open(tmp_file, O_CREAT|O_TRUNC|O_RDWR, 0660);
-    fail_if(fd == -1);
+    fail_if(fd < 0);
     close(fd);
 
     rc = lr_remove_dir(tmp_dir);

@@ -115,11 +115,6 @@ getinfo(_ResultObject *self, PyObject *args)
     if (check_ResultStatus(self))
         return NULL;
 
-    if (option < 0 || option >= LRR_SENTINEL) {
-        PyErr_SetString(PyExc_TypeError, "Unknown option");
-        return NULL;
-    }
-
     switch (option) {
 
     /*

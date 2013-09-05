@@ -451,7 +451,6 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 {
     gboolean ret;
     char *path;
-    int fd;
     char *baseurl;
     LrYumRepo *repo;
     LrYumRepoMd *repomd;
@@ -500,7 +499,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
         char *sig;
 
         path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
-        fd = open(path, O_RDONLY);
+        int fd = open(path, O_RDONLY);
         if (fd < 0) {
             g_debug("%s: open(%s): %s", __func__, path, strerror(errno));
             g_set_error(err, LR_YUM_ERROR, LRE_IO,

@@ -617,7 +617,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
     int msgs_in_queue;
     CURLMsg *msg;
 
-    while (msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue)) {
+    while ((msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue))) {
         LrTarget *target = NULL;
         char *effective_url = NULL;
         GError *tmp_err = NULL;
@@ -678,7 +678,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                         g_set_error(&tmp_err,
                                     LR_DOWNLOADER_ERROR,
                                     LRE_BADSTATUS,
-                                    "Status code: %d for %s",
+                                    "Status code: %ld for %s",
                                     code, effective_url);
                     }
                 } else if (effective_url) {
@@ -687,14 +687,14 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                         g_set_error(&tmp_err,
                                     LR_DOWNLOADER_ERROR,
                                     LRE_BADSTATUS,
-                                    "Status code: %d for %s",
+                                    "Status code: %ld for %s",
                                     code, effective_url);
                     }
                 } else {
                     g_set_error(&tmp_err,
                                 LR_DOWNLOADER_ERROR,
                                 LRE_BADSTATUS,
-                                "Status code: %d", code);
+                                "Status code: %ld", code);
                 }
             }
         }
@@ -1225,15 +1225,15 @@ lr_download_single_cb(GSList *targets,
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrDownloadTarget *target = elem->data;
 
-        LrCallbackData *cbdata = lr_malloc(sizeof(*cbdata));
-        cbdata->downloaded        = 0.0;
-        cbdata->sharedcbdata      = &shared_cbdata;
+        LrCallbackData *lrcbdata = lr_malloc(sizeof(*lrcbdata));
+        lrcbdata->downloaded        = 0.0;
+        lrcbdata->sharedcbdata      = &shared_cbdata;
 
         target->progresscb  = (cb) ? lr_multi_progress_func : NULL;
-        target->cbdata      = cbdata;
+        target->cbdata      = lrcbdata;
 
         shared_cbdata.singlecbdata = g_slist_append(shared_cbdata.singlecbdata,
-                                                    cbdata);
+                                                    lrcbdata);
     }
 
     ret = lr_download(targets, failfast, err);

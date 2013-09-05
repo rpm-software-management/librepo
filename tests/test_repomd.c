@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 #include "testsys.h"
@@ -27,6 +28,8 @@ START_TEST(test_repomd_parsing)
     fail_if(fd < 0);
 
     ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
+    close(fd);
+
     fail_if(!ret);
     fail_if(tmp_err);
     fail_if(g_slist_length(repomd->records) != 12);
