@@ -26,6 +26,7 @@ main(void)
     if (!ret) {
         fprintf(stderr, "Error encountered: %d: %s\n",
                 tmp_err->code, tmp_err->message);
+        g_error_free(tmp_err);
         rc = EXIT_FAILURE;
     }
 
