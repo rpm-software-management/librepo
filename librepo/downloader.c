@@ -1146,6 +1146,8 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 
     lr_downloadtarget_free(target);
 
+    lseek(fd, 0, SEEK_SET);
+
     return ret;
 }
 

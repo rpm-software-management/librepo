@@ -70,6 +70,7 @@ gboolean
 lr_download_target(LrDownloadTarget *target, GError **err);
 
 /** Wrapper over the ::lr_download_target that takes only url and fd.
+ * After download fd is seeked to the begin of the file.
  * Note: failfast is TRUE, so if download failed, then this function returns
  * FALSE (There is no need to check status of download itself).
  * @param handle    See ::lr_download
