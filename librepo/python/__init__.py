@@ -981,4 +981,5 @@ def download_packages(list, failfast=False):
     """
     return _librepo.download_packages(list, failfast)
 
-
+def download_url(url, fd, handle=None):
+    return _librepo.download_url(handle, url, fd)

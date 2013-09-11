@@ -28,6 +28,7 @@
 #include "packagetarget-py.h"
 #include "result-py.h"
 #include "yum-py.h"
+#include "downloader-py.h"
 #include "globalstate-py.h" // GIL Hack
 
 volatile int global_logger = 0;
@@ -107,6 +108,8 @@ static struct PyMethodDef librepo_methods[] = {
     { "set_debug_log_handler",  (PyCFunction)py_set_debug_log_handler,
       METH_VARARGS, NULL },
     { "download_packages",      (PyCFunction)py_download_packages,
+      METH_VARARGS, NULL },
+    { "download_url",           (PyCFunction)py_download_url,
       METH_VARARGS, NULL },
     { NULL }
 };

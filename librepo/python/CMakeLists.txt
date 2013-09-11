@@ -1,6 +1,7 @@
 SET(pylibrepo_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 SET (librepomodule_SRCS
+     ${pylibrepo_SRCDIR}/downloader-py.c
      ${pylibrepo_SRCDIR}/exception-py.c
      ${pylibrepo_SRCDIR}/handle-py.c
      ${pylibrepo_SRCDIR}/librepomodule.c

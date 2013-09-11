@@ -27,39 +27,48 @@
 #include "handle-py.h"
 #include "packagetarget-py.h"
 #include "exception-py.h"
-#include "downloader-py.h"
 #include "globalstate-py.h" // GIL Hack
 
+void
+BeginAllowThreads(PyThreadState **state)
+{
+    assert(state);
+    assert(*state == NULL);
+    (*state) = PyEval_SaveThread();
+}
+
+void
+EndAllowThreads(PyThreadState **state)
+{
+    assert(state);
+    assert(*state);
+    PyEval_RestoreThread(*state);
+    (*state) = NULL;
+}
+
 PyObject *
-py_download_packages(G_GNUC_UNUSED PyObject *self, PyObject *args)
+py_download_url(G_GNUC_UNUSED PyObject *self, PyObject *args)
 {
     gboolean ret;
-    PyObject *py_list;
-    int failfast;
-    LrPackageDownloadFlag flags = 0;
+    PyObject *py_handle;
+    LrHandle *handle = NULL;
+    char *url;
+    int fd;
     GError *tmp_err = NULL;
     PyThreadState *state = NULL;
 
-    if (!PyArg_ParseTuple(args, "O!i:download_packages",
-                          &PyList_Type, &py_list, &failfast))
+    if (!PyArg_ParseTuple(args, "Osi:download_url",
+                          &py_handle, &url, &fd))
         return NULL;
 
-    // Convert python list to GSList
-    GSList *list = NULL;
-    Py_ssize_t len = PyList_Size(py_list);
-    for (Py_ssize_t x=0; x < len; x++) {
-        PyObject *py_packagetarget = PyList_GetItem(py_list, x);
-        LrPackageTarget *target = PackageTarget_FromPyObject(py_packagetarget);
-        if (!target)
-            return NULL;
-        PackageTarget_SetThreadState(py_packagetarget, &state);
-        list = g_slist_append(list, target);
+    Py_XINCREF(py_handle);
+
+    if (HandleObject_Check(py_handle)) {
+        handle = Handle_FromPyObject(py_handle);
+    } else if (py_handle != Py_None) {
+        PyErr_SetString(PyExc_TypeError, "Only Handle or None is supported");
+        return NULL;
     }
-
-    Py_XINCREF(py_list);
-
-    if (failfast)
-        flags |= LR_PACKAGEDOWNLOAD_FAILFAST;
 
     // XXX: GIL Hack
     int hack_rc = gil_logger_hack_begin(&state);
@@ -67,7 +76,7 @@ py_download_packages(G_GNUC_UNUSED PyObject *self, PyObject *args)
         return NULL;
 
     BeginAllowThreads(&state);
-    ret = lr_download_packages(list, flags, &tmp_err);
+    ret = lr_download_url(handle, url, fd, &tmp_err);
     EndAllowThreads(&state);
 
     // XXX: GIL Hack
@@ -77,14 +86,14 @@ py_download_packages(G_GNUC_UNUSED PyObject *self, PyObject *args)
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (!ret && tmp_err->code == LRE_INTERRUPTED) {
-        Py_XDECREF(py_list);
+        Py_XDECREF(py_handle);
         g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
     }
 
-    Py_XDECREF(py_list);
+    Py_XDECREF(py_handle);
 
     if (!ret)
         RETURN_ERROR(&tmp_err, -1, NULL);

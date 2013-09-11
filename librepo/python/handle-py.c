@@ -29,6 +29,7 @@
 #include "result-py.h"
 #include "typeconversion.h"
 #include "packagedownloader-py.h"
+#include "downloader-py.h"
 
 #include "globalstate-py.h"  // GIL Hack
 
