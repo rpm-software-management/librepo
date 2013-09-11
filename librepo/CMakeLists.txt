@@ -33,7 +33,9 @@ SET(librepo_HEADERS
     util.h
     version.h
     xmlparser.h
-    yum.h)
+    yum.h
+    downloader.h
+    downloadtarget.h)
 
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
 TARGET_LINK_LIBRARIES(librepo

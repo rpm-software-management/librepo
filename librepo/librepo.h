@@ -38,4 +38,9 @@
 #include "xmlparser.h"
 #include "yum.h"
 
+// Low level downloading interface
+
+#include "downloader.h"
+#include "downloadtarget.h"
+
 #endif
