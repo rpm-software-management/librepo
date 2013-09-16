@@ -34,7 +34,7 @@ G_BEGIN_DECLS
  */
 
 /** Initialize librepo library.
- * This is called automatically to initialize libzif.
+ * This is called automatically to initialize librepo.
  * You normally don't have to call this function manually.
  */
 void lr_global_init();
