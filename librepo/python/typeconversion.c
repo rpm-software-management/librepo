@@ -40,11 +40,18 @@ PyObject_FromYumRepo(LrYumRepo *repo)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "repomd", PyStringOrNone_FromString(repo->repomd));
-    PyDict_SetItemString(dict, "url", PyStringOrNone_FromString(repo->url));
-    PyDict_SetItemString(dict, "destdir", PyStringOrNone_FromString(repo->destdir));
-    PyDict_SetItemString(dict, "signature", PyStringOrNone_FromString(repo->signature));
-    PyDict_SetItemString(dict, "mirrorlist", PyStringOrNone_FromString(repo->mirrorlist));
+    PyDict_SetItemString(dict, "repomd",
+            PyStringOrNone_FromString(repo->repomd));
+    PyDict_SetItemString(dict, "url",
+            PyStringOrNone_FromString(repo->url));
+    PyDict_SetItemString(dict, "destdir",
+            PyStringOrNone_FromString(repo->destdir));
+    PyDict_SetItemString(dict, "signature",
+            PyStringOrNone_FromString(repo->signature));
+    PyDict_SetItemString(dict, "mirrorlist",
+            PyStringOrNone_FromString(repo->mirrorlist));
+    PyDict_SetItemString(dict, "metalink",
+            PyStringOrNone_FromString(repo->metalink));
 
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
         LrYumRepoPath *yumrepopath = elem->data;
@@ -68,15 +75,24 @@ PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "location_href", PyStringOrNone_FromString(rec->location_href));
-    PyDict_SetItemString(dict, "checksum", PyStringOrNone_FromString(rec->checksum));
-    PyDict_SetItemString(dict, "checksum_type", PyStringOrNone_FromString(rec->checksum_type));
-    PyDict_SetItemString(dict, "checksum_open", PyStringOrNone_FromString(rec->checksum_open));
-    PyDict_SetItemString(dict, "checksum_open_type", PyStringOrNone_FromString(rec->checksum_open_type));
-    PyDict_SetItemString(dict, "timestamp", PyLong_FromLongLong((PY_LONG_LONG) rec->timestamp));
-    PyDict_SetItemString(dict, "size", PyLong_FromLongLong((PY_LONG_LONG) rec->size));
-    PyDict_SetItemString(dict, "size_open", PyLong_FromLongLong((PY_LONG_LONG) rec->size_open));
-    PyDict_SetItemString(dict, "db_version", PyLong_FromLong((long) rec->db_version));
+    PyDict_SetItemString(dict, "location_href",
+            PyStringOrNone_FromString(rec->location_href));
+    PyDict_SetItemString(dict, "checksum",
+            PyStringOrNone_FromString(rec->checksum));
+    PyDict_SetItemString(dict, "checksum_type",
+            PyStringOrNone_FromString(rec->checksum_type));
+    PyDict_SetItemString(dict, "checksum_open",
+            PyStringOrNone_FromString(rec->checksum_open));
+    PyDict_SetItemString(dict, "checksum_open_type",
+            PyStringOrNone_FromString(rec->checksum_open_type));
+    PyDict_SetItemString(dict, "timestamp",
+            PyLong_FromLongLong((PY_LONG_LONG) rec->timestamp));
+    PyDict_SetItemString(dict, "size",
+            PyLong_FromLongLong((PY_LONG_LONG) rec->size));
+    PyDict_SetItemString(dict, "size_open",
+            PyLong_FromLongLong((PY_LONG_LONG) rec->size_open));
+    PyDict_SetItemString(dict, "db_version",
+            PyLong_FromLong((long) rec->db_version));
 
     return dict;
 }
@@ -155,9 +171,12 @@ PyObject_FromMetalink(LrMetalink *metalink)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "filename", PyStringOrNone_FromString(metalink->filename));
-    PyDict_SetItemString(dict, "timestamp", PyLong_FromLongLong((PY_LONG_LONG)metalink->timestamp));
-    PyDict_SetItemString(dict, "size", PyLong_FromLongLong((PY_LONG_LONG)metalink->size));
+    PyDict_SetItemString(dict, "filename",
+            PyStringOrNone_FromString(metalink->filename));
+    PyDict_SetItemString(dict, "timestamp",
+            PyLong_FromLongLong((PY_LONG_LONG)metalink->timestamp));
+    PyDict_SetItemString(dict, "size",
+            PyLong_FromLongLong((PY_LONG_LONG)metalink->size));
 
     // Hashes
     if ((sub_list = PyList_New(0)) == NULL) {
@@ -173,8 +192,10 @@ PyObject_FromMetalink(LrMetalink *metalink)
             PyDict_Clear(dict);
             return NULL;
         }
-        PyTuple_SetItem(tuple, 0, PyStringOrNone_FromString(metalinkhash->type));
-        PyTuple_SetItem(tuple, 1, PyStringOrNone_FromString(metalinkhash->value));
+        PyTuple_SetItem(tuple, 0,
+                PyStringOrNone_FromString(metalinkhash->type));
+        PyTuple_SetItem(tuple, 1,
+                PyStringOrNone_FromString(metalinkhash->value));
         PyList_Append(sub_list, tuple);
     }
 

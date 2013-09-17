@@ -87,8 +87,9 @@ class TestCaseYumRepoLocating(TestCase):
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd_downloaded = r.getinfo(librepo.LRR_YUM_REPOMD)
 
-        self.assertTrue(yum_repo_downloaded["mirrorlist"])
-        self.assertTrue(yum_repo_downloaded["mirrorlist"].endswith("metalink.xml"))
+        self.assertFalse(yum_repo_downloaded["mirrorlist"])
+        self.assertTrue(yum_repo_downloaded["metalink"])
+        self.assertTrue(yum_repo_downloaded["metalink"].endswith("metalink.xml"))
 
         # Now try to read metalink of the repository
         h = librepo.Handle()

@@ -87,6 +87,7 @@ lr_handle_init()
     handle = lr_malloc0(sizeof(LrHandle));
     handle->curl_handle = curl;
     handle->mirrorlist_fd = -1;
+    handle->metalink_fd = -1;
     handle->checks |= LR_CHECK_CHECKSUM;
     handle->maxparalleldownloads = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
     handle->maxdownloadspermirror = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
@@ -103,18 +104,68 @@ lr_handle_free(LrHandle *handle)
         curl_easy_cleanup(handle->curl_handle);
     if (handle->mirrorlist_fd != -1)
         close(handle->mirrorlist_fd);
-    lr_handle_free_list(&handle->baseurls);
+    if (handle->metalink_fd != -1)
+        close(handle->mirrorlist_fd);
+    lr_handle_free_list(&handle->urls);
     lr_free(handle->mirrorlist);
+    lr_free(handle->mirrorlisturl);
+    lr_free(handle->metalinkurl);
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
     lr_free(handle->useragent);
     lr_lrmirrorlist_free(handle->internal_mirrorlist);
-    lr_lrmirrorlist_free(handle->mirrors);
+    lr_lrmirrorlist_free(handle->urls_mirrors);
+    lr_lrmirrorlist_free(handle->mirrorlist_mirrors);
+    lr_lrmirrorlist_free(handle->metalink_mirrors);
     lr_metalink_free(handle->metalink);
     lr_handle_free_list(&handle->yumdlist);
     lr_handle_free_list(&handle->yumblist);
     lr_urlvars_free(handle->urlvars);
     lr_free(handle);
+}
+
+typedef enum {
+    LR_REMOTESOURCE_URLS,
+    LR_REMOTESOURCE_MIRRORLIST,
+    LR_REMOTESOURCE_METALINK,
+} LrChangedRemoteSource;
+
+static void
+lr_handle_remote_sources_changed(LrHandle *handle, LrChangedRemoteSource type)
+{
+    // Called when LRO_URLS, LRO_MIRRORLISTURL
+    // or LRO_METALINKURL is changed
+
+    // Internal mirrorlist is no more valid
+    lr_lrmirrorlist_free(handle->internal_mirrorlist);
+    handle->internal_mirrorlist = NULL;
+
+    // Mirrors reported via mirrors are no more valid too
+    lr_lrmirrorlist_free(handle->mirrors);
+    handle->mirrors = NULL;
+
+    if (type == LR_REMOTESOURCE_URLS) {
+        lr_lrmirrorlist_free(handle->urls_mirrors);
+        handle->urls_mirrors = NULL;
+    }
+
+    if (type == LR_REMOTESOURCE_MIRRORLIST) {
+        lr_lrmirrorlist_free(handle->mirrorlist_mirrors);
+        handle->mirrorlist_mirrors = NULL;
+        if (handle->mirrorlist_fd != -1)
+            close(handle->mirrorlist_fd);
+        handle->mirrorlist_fd = -1;
+    }
+
+    if (type == LR_REMOTESOURCE_METALINK) {
+        lr_lrmirrorlist_free(handle->metalink_mirrors);
+        handle->metalink_mirrors = NULL;
+        if (handle->metalink_fd != -1)
+            close(handle->metalink_fd);
+        handle->metalink_fd = -1;
+        lr_metalink_free(handle->metalink);
+        handle->metalink = NULL;
+    }
 }
 
 gboolean
@@ -149,20 +200,41 @@ lr_handle_setopt(LrHandle *handle,
         break;
 
     case LRO_MIRRORLIST:
+        // DEPRECATED!
+        g_debug("%s: WARNING! Deprecated LRO_MIRRORLIST used", __func__);
         if (handle->mirrorlist) lr_free(handle->mirrorlist);
         handle->mirrorlist = g_strdup(va_arg(arg, char *));
-        if (handle->internal_mirrorlist) {
-            // Clear previous mirrorlist stuff
-            lr_lrmirrorlist_free(handle->internal_mirrorlist);
-            handle->internal_mirrorlist = NULL;
-            lr_lrmirrorlist_free(handle->mirrors);
-            handle->mirrors = NULL;
-            lr_metalink_free(handle->metalink);
-            handle->metalink = NULL;
-            if (handle->mirrorlist_fd != -1)
-                close(handle->mirrorlist_fd);
-            handle->mirrorlist_fd = -1;
-        }
+
+        if (handle->mirrorlisturl)
+            lr_free(handle->mirrorlisturl);
+        handle->mirrorlisturl = NULL;
+        if (handle->metalinkurl)
+            lr_free(handle->metalinkurl);
+        handle->metalinkurl = NULL;
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_MIRRORLIST);
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_METALINK);
+
+        if (!handle->mirrorlist)
+            break;
+
+        if (strstr(handle->mirrorlist, "metalink"))
+            handle->metalinkurl = g_strdup(handle->mirrorlist);
+        else
+            handle->mirrorlisturl = g_strdup(handle->mirrorlist);
+        break;
+
+    case LRO_MIRRORLISTURL:
+        if (handle->mirrorlisturl)
+            lr_free(handle->mirrorlisturl);
+        handle->mirrorlisturl = g_strdup(va_arg(arg, char *));
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_MIRRORLIST);
+        break;
+
+    case LRO_METALINKURL:
+        if (handle->metalinkurl)
+            lr_free(handle->metalinkurl);
+        handle->metalinkurl = g_strdup(va_arg(arg, char *));
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_METALINK);
         break;
 
     case LRO_LOCAL:
@@ -289,12 +361,8 @@ lr_handle_setopt(LrHandle *handle,
         char ***handle_list = NULL;
 
         if (option == LRO_URLS) {
-            handle_list = &handle->baseurls;
-            if (handle->internal_mirrorlist) {
-                // Clear previous mirrorlist stuff
-                lr_lrmirrorlist_free(handle->internal_mirrorlist);
-                handle->internal_mirrorlist = NULL;
-            }
+            handle_list = &handle->urls;
+            lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_URLS);
         } else if (option == LRO_YUMDLIST) {
             handle_list = &handle->yumdlist;
         } else {
@@ -311,7 +379,7 @@ lr_handle_setopt(LrHandle *handle,
         size++;
 
         if (size == 1 && option == LRO_URLS) {
-            // Only NULL present in list of URLs, keep handle->baseurls = NULL
+            // Only NULL present in list of URLs, keep handle->urls = NULL
             break;
         }
 
@@ -410,298 +478,363 @@ lr_handle_setopt(LrHandle *handle,
     return ret;
 }
 
-#define TYPE_METALINK   1
-#define TYPE_MIRRORLIST 2
+/*
+ * Internal mirrorlist stuff
+ */
+
+static gboolean
+lr_handle_prepare_urls(LrHandle *handle, GError **err)
+{
+    assert(!handle->urls_mirrors);
+
+    int x = 0;
+    while (handle->urls[x]) {
+        gchar *url = handle->urls[x];
+        gchar *final_url = NULL;
+
+        if (strstr(url, "://")) {
+            // Base URL has specified protocol
+            final_url = g_strdup(url);
+        } else {
+            // No protocol specified - if local path => prepend file://
+            if (url[0] == '/') {
+                // Base URL is absolute path
+                final_url = g_strconcat("file://", url, NULL);
+            } else {
+                // Base URL is relative path
+                char *resolved_path = realpath(url, NULL);
+                if (!resolved_path) {
+                    g_debug("%s: realpath: %s", __func__, strerror(errno));
+                    g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
+                                "realpath(%s) error: %s",
+                                url, strerror(errno));
+                    return FALSE;
+                }
+                final_url = g_strconcat("file://", resolved_path, NULL);
+                free(resolved_path);
+            }
+        }
+
+        if (final_url) {
+            handle->urls_mirrors = lr_lrmirrorlist_append_url(
+                                                handle->urls_mirrors,
+                                                final_url,
+                                                handle->urlvars);
+            lr_free(final_url);
+        }
+
+        x++;
+    }
+
+    return TRUE;
+}
+
+static gboolean
+lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
+{
+    assert(handle->mirrorlist_fd == -1);
+    assert(!handle->mirrorlist_mirrors);
+
+    int fd = -1;
+
+    // Get file descriptor with content
+
+    if (!localpath && !handle->mirrorlisturl) {
+        // Nothing to do
+        return TRUE;
+    } else if (localpath && !handle->mirrorlisturl) {
+        // Just try to use mirrorlist of the local repository
+        gchar *path = lr_pathconcat(localpath, "mirrorlist", NULL);
+        if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
+            g_debug("%s: Local mirrorlist found at %s", __func__, path);
+            fd = open(path, O_RDONLY);
+            if (fd < 0) {
+                g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                            "Cannot open %s: %s",
+                            path, strerror(errno));
+                g_free(path);
+                return FALSE;
+            }
+        } else {
+            return TRUE;
+        }
+    } else if (handle->mirrorlisturl) {
+        // Download remote mirrorlist
+        fd = lr_gettmpfile();
+        if (fd < 0) {
+            g_debug("%s: Cannot create a temporary file", __func__);
+            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                        "Cannot create a temporary file");
+            return FALSE;
+        }
+
+        gchar *prefixed_url = lr_prepend_url_protocol(handle->mirrorlisturl);
+        gchar *url = lr_url_substitute(prefixed_url, handle->urlvars);
+        lr_free(prefixed_url);
+
+        gboolean ret = lr_download_url(handle, url, fd, err);
+        lr_free(url);
+
+        if (!ret) {
+            close(fd);
+            return FALSE;
+        }
+
+        if (lseek(fd, 0, SEEK_SET) != 0) {
+            g_debug("%s: Seek error: %s", __func__, strerror(errno));
+            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                        "lseek(%d, 0, SEEK_SET) error: %s",
+                        fd, strerror(errno));
+            close(fd);
+            return FALSE;
+        }
+    }
+
+    assert(fd >= 0);
+
+    // Parse the file descriptor content
+
+    g_debug("%s: Parsing mirrorlist", __func__);
+
+    LrMirrorlist *ml = lr_mirrorlist_init();
+    gboolean ret = lr_mirrorlist_parse_file(ml, fd, err);
+    if (!ret) {
+        g_debug("%s: Error while parsing mirrorlist", __func__);
+        close(fd);
+        lr_mirrorlist_free(ml);
+        return FALSE;
+    }
+
+    if (!ml->urls) {
+        g_debug("%s: No URLs in mirrorlist", __func__);
+        g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD, "No URLs in mirrorlist");
+        close(fd);
+        lr_mirrorlist_free(ml);
+        return FALSE;
+    }
+
+    // Convert mirrorlist to internal mirrorlist format
+
+    handle->mirrorlist_mirrors = lr_lrmirrorlist_append_mirrorlist(
+                                            handle->mirrorlist_mirrors,
+                                            ml,
+                                            handle->urlvars);
+    handle->mirrorlist_fd = fd;
+
+    lr_mirrorlist_free(ml);
+
+    g_debug("%s: Mirrorlist parsed", __func__);
+    return TRUE;
+}
+
+static gboolean
+lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
+{
+    assert(handle->metalink_fd == -1);
+    assert(!handle->metalink_mirrors);
+    assert(!handle->metalink);
+
+    int fd = -1;
+
+    // Get file descriptor with content
+
+    if (!localpath && !handle->metalinkurl) {
+        // Nothing to do
+        return TRUE;
+    } else if (localpath && !handle->metalinkurl) {
+        // Just try to use metalink of the local repository
+        gchar *path = lr_pathconcat(localpath, "metalink.xml", NULL);
+        if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
+            g_debug("%s: Local metalink.xml found at %s", __func__, path);
+            fd = open(path, O_RDONLY);
+            if (fd < 0) {
+                g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                            "Cannot open %s: %s",
+                            path, strerror(errno));
+                g_free(path);
+                return FALSE;
+            }
+        } else {
+            return TRUE;
+        }
+    } else if (handle->metalinkurl) {
+        // Download remote metalink
+        fd = lr_gettmpfile();
+        if (fd < 0) {
+            g_debug("%s: Cannot create a temporary file", __func__);
+            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                        "Cannot create a temporary file");
+            return FALSE;
+        }
+
+        gchar *prefixed_url = lr_prepend_url_protocol(handle->metalinkurl);
+        gchar *url = lr_url_substitute(prefixed_url, handle->urlvars);
+        lr_free(prefixed_url);
+
+        gboolean ret = lr_download_url(handle, url, fd, err);
+        lr_free(url);
+
+        if (!ret) {
+            close(fd);
+            return FALSE;
+        }
+
+        if (lseek(fd, 0, SEEK_SET) != 0) {
+            g_debug("%s: Seek error: %s", __func__, strerror(errno));
+            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                        "lseek(%d, 0, SEEK_SET) error: %s",
+                        fd, strerror(errno));
+            close(fd);
+            return FALSE;
+        }
+    }
+
+    assert(fd >= 0);
+
+    // Parse the file descriptor content
+
+    g_debug("%s: Parsing metalink.xml", __func__);
+
+    gchar *metalink_file = NULL;
+    gchar *metalink_suffix = NULL;
+    if (handle->repotype == LR_YUMREPO) {
+        metalink_file = "repomd.xml";
+        metalink_suffix = "repodata/repomd.xml";
+    }
+
+    LrMetalink *ml = lr_metalink_init();
+    gboolean ret = lr_metalink_parse_file(ml,
+                                          fd,
+                                          metalink_file,
+                                          lr_xml_parser_warning_logger,
+                                          "Metalink xml parser",
+                                          err);
+    if (!ret) {
+        g_debug("%s: Error while parsing metalink", __func__);
+        close(fd);
+        lr_metalink_free(ml);
+        return FALSE;
+    }
+
+    if (!ml->urls) {
+        g_debug("%s: No URLs in metalink", __func__);
+        g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD, "No URLs in metalink");
+        close(fd);
+        lr_metalink_free(ml);
+        return FALSE;
+    }
+
+    // Convert metalink to internal mirrorlist format
+
+    handle->metalink_mirrors = lr_lrmirrorlist_append_metalink(
+                                            handle->metalink_mirrors,
+                                            ml,
+                                            metalink_suffix,
+                                            handle->urlvars);
+    handle->metalink_fd = fd;
+    handle->metalink = ml;
+
+    g_debug("%s: Metalink parsed", __func__);
+    return TRUE;
+}
 
 gboolean
 lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 {
-    int ret = TRUE;
-    char *metalink_suffix = NULL;
-    char *local_path = NULL;
-
     assert(!err || *err == NULL);
 
     if (handle->internal_mirrorlist)
-        return TRUE;  /* Internal mirrorlist already exists */
+        return TRUE;  // Internal mirrorlist already exists
 
-    if (!handle->baseurls && !handle->mirrorlist) {
-        g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
-                    "No usable URL (no base url nor mirrorlist url)");
-        return FALSE;
-    }
+    // Create internal mirrorlist
 
     g_debug("Preparing internal mirrorlist");
 
-    if (handle->repotype == LR_YUMREPO)
-        metalink_suffix = "repodata/repomd.xml";
-
-    /* Create internal mirrorlist */
-    handle->internal_mirrorlist = NULL;
-
-    /*
-     * handle->baseurls (LRO_URLS)
-     */
-
-    if (handle->baseurls) {
-        /* Repository URL(s) specified by user insert it as the first element */
-
-        int x = 0;
-        while (handle->baseurls[x]) {
-            char *url = handle->baseurls[x];
-            char *final_url = NULL;
-
-            if (strstr(url, "://")) {
-                /* Base URL has specified protocol */
-                final_url = g_strdup(url);
-                if (!strncmp(url, "file://", 7))
-                    local_path = url + 7;
-            } else {
-                /* No protocol specified - if local path => prepend file:// */
-                local_path = url;
-                if (url[0] == '/') {
-                    /* Base URL is absolute path */
-                    final_url = g_strconcat("file://", url, NULL);
-                } else {
-                    /* Base URL is relative path */
-                    char *resolved_path = realpath(url, NULL);
-                    if (!resolved_path) {
-                        g_debug("%s: realpath: %s", __func__, strerror(errno));
-                        g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
-                                    "realpath(%s) error: %s",
-                                    url, strerror(errno));
-                        return FALSE;
-                    }
-                    final_url = g_strconcat("file://", resolved_path, NULL);
-                    free(resolved_path);
-                }
-            }
-
-            if (final_url) {
-                handle->internal_mirrorlist = lr_lrmirrorlist_append_url(
-                                                    handle->internal_mirrorlist,
-                                                    final_url,
-                                                    handle->urlvars);
-                lr_free(final_url);
-            }
-
-            x++;
+    // Get local path in case of local repository
+    gchar *local_path = NULL;
+    if (handle->urls && handle->urls[0]) {
+        // Check if the first element of urls is local path
+        gchar *url = handle->urls[0];
+        if (strstr(url, "://")) {
+            if (!strncmp(url, "file://", 7))
+                local_path = url + 7;
+        } else {
+            local_path = url;
         }
     }
 
-    /*
-     * Mirrorlist (LRO_MIRRORLIST or local repo)
-     */
+    gboolean ret;
 
-    int include_in_internal_mirrorlist = (handle->mirrorlist) ? 1 : 0;
-    LrMetalink *metalink = NULL;
-    LrMirrorlist *mirrorlist = NULL;
-
-    if (handle->mirrorlist_fd == -1) {
-        /* If handle->mirrorlist_fd != -1 then we should have a mirrorlist
-         * already parsed (and handle->mirrors filled). */
-
-        int mirrors_fd = -1;
-        int mirror_type = 0;
-
-        if (!handle->mirrorlist && local_path) {
-            /* We have a local repository and no mirrorlist specified,
-             * just try to load local mirrorlist and do not include its
-             * content into the internal_mirrorlist, just fill mirrors */
-
-            char *full_path = NULL; // Path to local metalink.xml/mirrorlist file
-            full_path = lr_pathconcat(local_path, "metalink.xml", NULL);
-            if (access(full_path, F_OK) == 0) {
-                g_debug("%s: Local metalink.xml found", __func__);
-                mirror_type = TYPE_METALINK;
-                //repo->mirrorlist = path;
-            } else {
-                lr_free(full_path);
-                full_path = lr_pathconcat(local_path, "mirrorlist", NULL);
-                if (access(full_path, F_OK) == 0) {
-                    g_debug("%s: Local mirrorlist found", __func__);
-                    mirror_type = TYPE_MIRRORLIST;
-                    //repo->mirrorlist = path;
-                } else {
-                    lr_free(full_path);
-                    full_path = NULL;
-                }
-            }
-
-            if (full_path) {
-                mirrors_fd = open(full_path, O_RDONLY);
-                if (mirrors_fd < 1) {
-                    ret = FALSE;
-                    g_debug("%s: Cannot open: %s", __func__, full_path);
-                    g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
-                                "Cannot open %s: %s",
-                                full_path, strerror(errno));
-                }
-                lr_free(full_path);
-            }
-        } else if (handle->mirrorlist) {
-            /* Download and parse remote metalink or mirrorlist */
-
-            mirrors_fd = lr_gettmpfile();
-            if (mirrors_fd < 1) {
-                ret = FALSE;
-                g_debug("%s: Cannot create a temporary file", __func__);
-                g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
-                            "Cannot create a temporary file");
-                goto mirrorlist_error;
-            }
-
-            char *prefixed_url =  lr_prepend_url_protocol(handle->mirrorlist);
-            char *mirrorlist_url = lr_url_substitute(prefixed_url,
-                                                     handle->urlvars);
-            lr_free(prefixed_url);
-            ret = lr_download_url(handle, mirrorlist_url, mirrors_fd, err);
-            lr_free(mirrorlist_url);
-
-            if (!ret)
-                goto mirrorlist_error;
-
-            if (lseek(mirrors_fd, 0, SEEK_SET) != 0) {
-                ret = FALSE;
-                g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
-                            "lseek(%d, 0, SEEK_SET) error: %s",
-                            mirrors_fd, strerror(errno));
-                goto mirrorlist_error;
-            }
-
-            // Determine mirrorlist type
-            if (strstr(handle->mirrorlist, "metalink"))
-                mirror_type = TYPE_METALINK;
-            else
-                mirror_type = TYPE_MIRRORLIST;
-        }
-
-        if (mirrors_fd > 0) {
-            /* We got fd of mirrorlist - parse it and fill handle */
-
-            g_debug("%s: Got fd", __func__);
-
-            if (mirror_type == TYPE_METALINK) {
-                /* Metalink */
-                g_debug("%s: Got metalink", __func__);
-
-                /* Parse metalink */
-                GError *tmp_err = NULL;
-                metalink = lr_metalink_init();
-                ret = lr_metalink_parse_file(metalink,
-                                             mirrors_fd,
-                                             "repomd.xml",
-                                             lr_xml_parser_warning_logger,
-                                             "Metalink xml parser",
-                                             &tmp_err);
-                if (!ret) {
-                    assert(tmp_err);
-                    g_debug("%s: Cannot parse metalink: %s",
-                            __func__, tmp_err->message);
-                    g_propagate_error(err, tmp_err);
-                    goto mirrorlist_error;
-                }
-
-                if (strcmp("repomd.xml", metalink->filename)) {
-                    ret = FALSE;
-                    g_debug("%s: No repomd.xml file in metalink", __func__);
-                    g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
-                                "No repomd.xml file in metalink (%s)",
-                                metalink->filename);
-                    goto mirrorlist_error;
-                }
-
-                if (!metalink->urls) {
-                    ret = FALSE;
-                    g_debug("%s: No URLs in metalink", __func__);
-                    g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
-                                "No URLs in metalink");
-                    goto mirrorlist_error;
-                }
-
-                g_debug("%s: Metalink parsed", __func__);
-            } else if (mirror_type == TYPE_MIRRORLIST) {
-                /* Mirrorlist */
-                g_debug("%s: Got mirrorlist", __func__);
-
-                mirrorlist = lr_mirrorlist_init();
-
-                GError *tmp_err = NULL;
-                ret = lr_mirrorlist_parse_file(mirrorlist, mirrors_fd, &tmp_err);
-                if (!ret) {
-                    assert(tmp_err);
-                    g_debug("%s: Cannot parse mirrorlist: %s",
-                            __func__, tmp_err->message);
-                    g_propagate_error(err, tmp_err);
-                    goto mirrorlist_error;
-                }
-
-                if (!mirrorlist->urls) {
-                    ret = FALSE;
-                    g_debug("%s: No URLs in mirrorlist", __func__);
-                    g_set_error(err, LR_HANDLE_ERROR, LRE_MLBAD,
-                                "No URLs in mirrorlist");
-                    goto mirrorlist_error;
-                }
-
-                g_debug("%s: Mirrorlist parsed", __func__);
-            } else {
-                assert(0); // This shoudn't happend
-            }
-
-            handle->mirrorlist_fd = mirrors_fd;
-        } // end of if (mirrors_fd > 0)
-
-        if (ret) {
-            /* Set fill mirrorlist stuff at the handle  */
-
-            assert(!err || *err == NULL);
-            assert(handle->mirrors == NULL);
-
-            if (metalink) {
-                handle->metalink = metalink;
-                handle->mirrors = lr_lrmirrorlist_append_metalink(
-                                                            handle->mirrors,
-                                                            metalink,
-                                                            metalink_suffix,
-                                                            handle->urlvars);
-            }
-
-            if (mirrorlist) {
-                handle->mirrors = lr_lrmirrorlist_append_mirrorlist(
-                                                            handle->mirrors,
-                                                            mirrorlist,
-                                                            handle->urlvars);
-            }
-        }
-
-mirrorlist_error:
-
+    // LRO_URLS
+    if (handle->urls && !handle->urls_mirrors) {
+        ret = lr_handle_prepare_urls(handle, err);
         if (!ret) {
             assert(!err || *err);
-
-            if (mirrors_fd > 0) {
-                close(mirrors_fd);
-                mirrors_fd = -1;
-            }
-            lr_metalink_free(metalink);
-            metalink = NULL;
+            g_debug("%s: LRO_URLS processing failed", __func__);
+            return FALSE;
         }
-
-        lr_mirrorlist_free(mirrorlist);
-        mirrorlist = NULL;
-    } // end of if (handle->mirrorlist_fd == -1)
-
-
-    // Append mirrorlist from handle->mirrors to the internal mirrorlist
-    if (include_in_internal_mirrorlist && handle->mirrors) {
-        g_debug("%s: Mirrorlist will be used for downloading if needed", __func__);
-        handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
-                                                handle->internal_mirrorlist,
-                                                handle->mirrors);
     }
 
-    return ret;
+    // LRO_MIRRORLISTURL
+    if (!handle->mirrorlist_mirrors && (handle->mirrorlisturl || local_path)) {
+        ret = lr_handle_prepare_mirrorlist(handle, local_path, err);
+        if (!ret) {
+            assert(!err || *err);
+            g_debug("%s: LRO_MIRRORLISTURL processing failed", __func__);
+            return FALSE;
+        }
+    }
+
+    // LRO_METALINKURL
+    if (!handle->metalink_mirrors && (handle->metalinkurl || local_path)) {
+        ret = lr_handle_prepare_metalink(handle, local_path, err);
+        if (!ret) {
+            assert(!err || *err);
+            g_debug("%s: LRO_METALINKURL processing failed", __func__);
+            return FALSE;
+        }
+    }
+
+    // Append all the mirrorlist to the single internal mirrorlist
+    // This internal mirrorlist is used for downloading
+    // Note: LRO_MIRRORLISTURL and LRO_METALINKURL lists are included
+    // to this list only if they are explicitly specified (lists
+    // implicitly loaded from a local repository are not included)
+
+    g_debug("%s: Finalizing internal mirrorlist", __func__);
+
+    // Mirrorlist from the LRO_URLS
+    handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
+                                            handle->internal_mirrorlist,
+                                            handle->urls_mirrors);
+
+    // Mirrorlist from the LRO_MIRRORLISTURL
+    if (handle->mirrorlisturl)
+        handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
+                                                handle->internal_mirrorlist,
+                                                handle->mirrorlist_mirrors);
+
+    // Mirrorlist from the LRO_METALINKURL
+    if (handle->metalinkurl)
+        handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
+                                                handle->internal_mirrorlist,
+                                                handle->metalink_mirrors);
+
+    // Prepare mirrors (the list that is reported via LRI_MIRRORS)
+    // This list contains mirrors from mirrorlist and/or metalink
+    // even if they are not explicitly specified, but are available
+    // in a local repo (that is specified at the first url of LRO_URLS)
+
+    g_debug("%s: Finalizing mirrors reported via LRI_MIRRORS", __func__);
+
+    handle->mirrors = lr_lrmirrorlist_append_lrmirrorlist(
+                                            handle->mirrors,
+                                            handle->mirrorlist_mirrors);
+    handle->mirrors = lr_lrmirrorlist_append_lrmirrorlist(
+                                            handle->mirrors,
+                                            handle->metalink_mirrors);
+
+    return TRUE;
 }
 
 gboolean
@@ -719,9 +852,9 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         return FALSE;
     }
 
-    if (!handle->baseurls && !handle->mirrorlist) {
+    if (!handle->urls && !handle->mirrorlisturl && !handle->metalinkurl) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_NOURL,
-                    "No LRO_URLS nor LRO_MIRRORLIST specified");
+                "No LRO_URLS, LRO_MIRRORLISTURL nor LRO_METALINKURL specified");
         return FALSE;
     }
 
@@ -848,6 +981,16 @@ lr_handle_getinfo(LrHandle *handle,
         *str = handle->mirrorlist;
         break;
 
+    case LRI_MIRRORLISTURL:
+        str = va_arg(arg, char **);
+        *str = handle->mirrorlisturl;
+        break;
+
+    case LRI_METALINKURL:
+        str = va_arg(arg, char **);
+        *str = handle->metalinkurl;
+        break;
+
     case LRI_LOCAL:
         lnum = va_arg(arg, long *);
         *lnum = handle->local;
@@ -887,7 +1030,7 @@ lr_handle_getinfo(LrHandle *handle,
         char ***strlist = va_arg(arg, char ***);
 
         if (option == LRI_URLS)
-            source_list = handle->baseurls;
+            source_list = handle->urls;
         else if (option == LRI_YUMDLIST)
             source_list = handle->yumdlist;
         else

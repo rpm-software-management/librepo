@@ -57,9 +57,17 @@ Constants
 
 .. data:: LRO_MIRRORLIST
 
-    *String or None*. Set mirrorlist url (url could point to a metalink
-    mirrorlist or to a simple mirrorlist where each line wihtout ``'#'``
-    is considered as mirror url).
+    *String or None*. **DEPRECATED** Set mirrorlist url (url could point
+    to a metalink mirrorlist or to a simple mirrorlist where each line wihtout
+    ``'#'`` is considered as mirror url).
+
+.. data:: LRO_MIRRORLISTURL
+
+    *String or None*. Mirrorlist URL.
+
+.. data:: LRO_METALINKURL
+
+    *String or None*. Metalink URL.
 
 .. data:: LRO_LOCAL
 
@@ -219,6 +227,8 @@ Constants
 .. data:: LRI_UPDATE
 .. data:: LRI_URLS
 .. data:: LRI_MIRRORLIST
+.. data:: LRI_MIRRORLISTURL
+.. data:: LRI_METALINKURL
 .. data:: LRI_LOCAL
 .. data:: LRI_PROGRESSCB
 .. data:: LRI_PROGRESSDATA
@@ -485,6 +495,8 @@ LibrepoException = _librepo.LibrepoException
 LRO_UPDATE                  = _librepo.LRO_UPDATE
 LRO_URLS                    = _librepo.LRO_URLS
 LRO_MIRRORLIST              = _librepo.LRO_MIRRORLIST
+LRO_MIRRORLISTURL           = _librepo.LRO_MIRRORLISTURL
+LRO_METALINKURL             = _librepo.LRO_METALINKURL
 LRO_LOCAL                   = _librepo.LRO_LOCAL
 LRO_HTTPAUTH                = _librepo.LRO_HTTPAUTH
 LRO_USERPWD                 = _librepo.LRO_USERPWD
@@ -517,6 +529,8 @@ ATTR_TO_LRO = {
     "update":               LRO_UPDATE,
     "urls":                 LRO_URLS,
     "mirrorlist":           LRO_MIRRORLIST,
+    "mirrorlisturl":        LRO_MIRRORLISTURL,
+    "metalinkurl":          LRO_METALINKURL,
     "local" :               LRO_LOCAL,
     "httpauth":             LRO_HTTPAUTH,
     "userpwd":              LRO_USERPWD,
@@ -547,6 +561,8 @@ ATTR_TO_LRO = {
 LRI_UPDATE              = _librepo.LRI_UPDATE
 LRI_URLS                = _librepo.LRI_URLS
 LRI_MIRRORLIST          = _librepo.LRI_MIRRORLIST
+LRI_MIRRORLISTURL       = _librepo.LRI_MIRRORLISTURL
+LRI_METALINKURL         = _librepo.LRI_METALINKURL
 LRI_LOCAL               = _librepo.LRI_LOCAL
 LRI_PROGRESSCB          = _librepo.LRI_PROGRESSCB
 LRI_PROGRESSDATA        = _librepo.LRI_PROGRESSDATA
@@ -565,6 +581,8 @@ ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
     "urls":                 LRI_URLS,
     "mirrorlist":           LRI_MIRRORLIST,
+    "mirrorlisturl":        LRI_MIRRORLISTURL,
+    "metalinkurl":          LRI_METALINKURL,
     "local":                LRI_LOCAL,
     "progresscb":           LRI_PROGRESSCB,
     "progressdata":         LRI_PROGRESSDATA,
@@ -728,6 +746,14 @@ class Handle(_librepo.Handle):
     .. attribute:: mirrorlist:
 
         See: :data:`.LRO_MIRRORLIST`
+
+    .. attribute:: mirrorlisturl:
+
+        See: :data:`.LRO_MIRRORLISTURL`
+
+    .. attribute:: metalinkurl:
+
+        See: :data:`.LRO_METALINKURL`
 
     .. attribute:: local:
 

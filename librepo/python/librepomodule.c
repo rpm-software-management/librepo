@@ -224,6 +224,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_UPDATE", LRO_UPDATE);
     PyModule_AddIntConstant(m, "LRO_URLS", LRO_URLS);
     PyModule_AddIntConstant(m, "LRO_MIRRORLIST", LRO_MIRRORLIST);
+    PyModule_AddIntConstant(m, "LRO_MIRRORLISTURL", LRO_MIRRORLISTURL);
+    PyModule_AddIntConstant(m, "LRO_METALINKURL", LRO_METALINKURL);
     PyModule_AddIntConstant(m, "LRO_LOCAL", LRO_LOCAL);
     PyModule_AddIntConstant(m, "LRO_HTTPAUTH", LRO_HTTPAUTH);
     PyModule_AddIntConstant(m, "LRO_USERPWD", LRO_USERPWD);
@@ -256,6 +258,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_UPDATE", LRI_UPDATE);
     PyModule_AddIntConstant(m, "LRI_URLS", LRI_URLS);
     PyModule_AddIntConstant(m, "LRI_MIRRORLIST", LRI_MIRRORLIST);
+    PyModule_AddIntConstant(m, "LRI_MIRRORLISTURL", LRI_MIRRORLISTURL);
+    PyModule_AddIntConstant(m, "LRI_METALINKURL", LRI_METALINKURL);
     PyModule_AddIntConstant(m, "LRI_LOCAL", LRI_LOCAL);
     PyModule_AddIntConstant(m, "LRI_PROGRESSCB", LRI_PROGRESSCB);
     PyModule_AddIntConstant(m, "LRI_PROGRESSDATA", LRI_PROGRESSDATA);

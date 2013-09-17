@@ -40,16 +40,40 @@ struct _LrHandle {
     int update; /*!<
         Just update existing repo */
 
-    char **baseurls; /*!<
-        Base URL of repo */
-
     LrInternalMirrorlist *internal_mirrorlist; /*!<
         Internal list of mirrors (Real used mirrorlist = baseurl + mirrors) */
+
+    char **urls; /*!<
+        URLs of repositories */
+
+    LrInternalMirrorlist *urls_mirrors; /*!<
+        Mirrors from urls */
 
     // Mirrorlist related stuff
 
     char *mirrorlist; /*!<
-        Mirrorlist or metalink URL */
+        XXX: TODO
+        List of or metalink */
+
+    char *mirrorlisturl; /*!<
+        Mirrorlist URL */
+
+    int mirrorlist_fd; /*!<
+        Raw downloaded mirrorlist file */
+
+    LrInternalMirrorlist *mirrorlist_mirrors; /*!<
+        Mirrors from mirrorlist */
+
+    // Metalink related stuff
+
+    char * metalinkurl; /*!<
+        Metalink URL */
+
+    int metalink_fd; /*!<
+        Raw downloaded metalink file */
+
+    LrInternalMirrorlist *metalink_mirrors; /*!<
+        Mirrors from metalink */
 
     LrMetalink *metalink; /*!<
         Parsed metalink for repomd.xml */
@@ -57,8 +81,8 @@ struct _LrHandle {
     LrInternalMirrorlist *mirrors;  /*!<
         Mirrors from metalink or mirrorlist */
 
-    int mirrorlist_fd;  /*!<
-        Raw downloaded file */
+//    int mirrorlist_fd;  /*!<
+//        Raw downloaded file */
 
     int local; /*!<
         Do not duplicate local data */

@@ -80,7 +80,13 @@ typedef enum {
         List of base repo URLs */
 
     LRO_MIRRORLIST,  /*!< (char *)
-        Mirrorlist or metalink url */
+        Mirrorlist or metalink url. This option is DEPRECATED */
+
+    LRO_MIRRORLISTURL, /*!< (char *)
+        Mirrorlist url */
+
+    LRO_METALINKURL, /*!< (char *)
+        Metalink url */
 
     LRO_LOCAL,  /*!< (long 1 or 0)
         Do not duplicate local metadata, just locate the old one */
@@ -194,6 +200,8 @@ typedef enum {
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
     LRI_MIRRORLIST,             /*!< (char **) */
+    LRI_MIRRORLISTURL,          /*!< (char **) */
+    LRI_METALINKURL,            /*!< (char **) */
     LRI_LOCAL,                  /*!< (long *) */
     LRI_PROGRESSCB,             /*!< (void *) */
     LRI_PROGRESSDATA,           /*!< (LrProgressCb) */

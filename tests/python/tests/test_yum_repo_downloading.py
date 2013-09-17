@@ -65,7 +65,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               #'updateinfo': None,
               'url': url,
               'signature': None,
-              'mirrorlist': None}
+              'mirrorlist': None,
+              'metalink': None}
         )
 
         self.assertEqual(yum_repomd,
@@ -181,7 +182,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              'updateinfo': self.tmpdir+'/repodata/65c4f66e2808d328890505c3c2f13bb35a96f457d1c21a6346191c4dc07e6080-updateinfo.xml.gz',
              'url': url,
              'signature': None,
-             'mirrorlist': None}
+             'mirrorlist': None,
+             'metalink': None}
         )
 
         self.assertEqual(yum_repomd,
@@ -350,7 +352,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              #'updateinfo': None,
              'url': url,
              'signature': None,
-             'mirrorlist': None}
+             'mirrorlist': None,
+             'metalink': None}
         )
 
         # Test if all mentioned files really exist
@@ -392,7 +395,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              #'updateinfo': None,
              'url': url,
              'signature': None,
-             'mirrorlist': None}
+             'mirrorlist': None,
+             'metalink': None}
         )
 
         # Test if all mentioned files really exist
@@ -434,7 +438,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               #'updateinfo': None,
               'url': url,
               'signature': None,
-              'mirrorlist': None}
+              'mirrorlist': None,
+              'metalink': None}
         )
 
         # Test if all mentioned files really exist
@@ -684,7 +689,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (MOCKURL, config.METALINK_BADCHECKSUM)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_METALINKURL, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_CHECKSUM, True)
@@ -693,10 +698,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
-        self.assertTrue(yum_repo["mirrorlist"])
+        self.assertTrue(yum_repo["metalink"])
         # All other values shoud be None, [], {} or equivalent
         for key in yum_repo.iterkeys():
-            if key == "mirrorlist":
+            if key == "metalink":
                 continue
             self.assertFalse(yum_repo[key])
         for key in yum_repomd.iterkeys():

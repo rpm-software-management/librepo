@@ -71,6 +71,7 @@ lr_yum_repo_free(LrYumRepo *repo)
     lr_free(repo->destdir);
     lr_free(repo->signature);
     lr_free(repo->mirrorlist);
+    lr_free(repo->metalink);
     lr_free(repo);
 }
 
@@ -462,7 +463,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
-    baseurl = handle->baseurls[0];
+    baseurl = handle->urls[0];
 
     /* Do not duplicate repoata, just locate the local one */
     if (strncmp(baseurl, "file://", 7)) {
@@ -480,16 +481,25 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
     if (!handle->update) {
         if (handle->mirrorlist_fd != -1) {
             // Locate mirrorlist if available.
-            if (handle->metalink)
-                path = lr_pathconcat(baseurl, "metalink.xml", NULL);
-            else
-                path = lr_pathconcat(baseurl, "mirrorlist", NULL);
-
-            if (access(path, F_OK) == 0) {
+            path = lr_pathconcat(baseurl, "mirrorlist", NULL);
+            if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
                 g_debug("%s: Found local mirrorlist: %s", __func__, path);
                 repo->mirrorlist = path;
             } else {
                 repo->mirrorlist = NULL;
+                lr_free(path);
+            }
+
+        }
+
+        if (handle->metalink_fd != -1) {
+            // Locate metalink.xml if available.
+            path = lr_pathconcat(baseurl, "metalink.xml", NULL);
+            if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
+                g_debug("%s: Found local metalink: %s", __func__, path);
+                repo->metalink = path;
+            } else {
+                repo->metalink = NULL;
                 lr_free(path);
             }
 
@@ -633,13 +643,10 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
     if (!handle->update) {
         char *path;
 
-        /* Store mirrorlist file */
+        /* Store mirrorlist file(s) */
         if (handle->mirrorlist_fd != -1) {
-            char *ml_file_path;
-            if (handle->metalink)
-                ml_file_path = lr_pathconcat(handle->destdir, "metalink.xml", NULL);
-            else
-                ml_file_path = lr_pathconcat(handle->destdir, "mirrorlist", NULL);
+            char *ml_file_path = lr_pathconcat(handle->destdir,
+                                               "mirrorlist", NULL);
             fd = open(ml_file_path, O_CREAT|O_TRUNC|O_RDWR, 0666);
             if (fd < 0) {
                 g_debug("%s: Cannot create: %s", __func__, ml_file_path);
@@ -659,6 +666,30 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                 return FALSE;
             }
             repo->mirrorlist = ml_file_path;
+        }
+
+        if (handle->metalink_fd != -1) {
+            char *ml_file_path = lr_pathconcat(handle->destdir,
+                                               "metalink.xml", NULL);
+            fd = open(ml_file_path, O_CREAT|O_TRUNC|O_RDWR, 0666);
+            if (fd < 0) {
+                g_debug("%s: Cannot create: %s", __func__, ml_file_path);
+                g_set_error(err, LR_YUM_ERROR, LRE_IO,
+                        "Cannot create %s: %s", ml_file_path, strerror(errno));
+                lr_free(ml_file_path);
+                return FALSE;
+            }
+            rc = lr_copy_content(handle->metalink_fd, fd);
+            close(fd);
+            if (rc != 0) {
+                g_debug("%s: Cannot copy content of metalink file", __func__);
+                g_set_error(err, LR_YUM_ERROR, LRE_IO,
+                        "Cannot copy content of metalink file %s: %s",
+                        ml_file_path, strerror(errno));
+                lr_free(ml_file_path);
+                return FALSE;
+            }
+            repo->metalink = ml_file_path;
         }
 
         /* Prepare repomd.xml file */
@@ -755,7 +786,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
         if (handle->used_mirror)
             repo->url = g_strdup(handle->used_mirror);
         else
-            repo->url = g_strdup(handle->baseurls[0]);
+            repo->url = g_strdup(handle->urls[0]);
 
         g_debug("%s: Repomd revision: %s", repomd->revision, __func__);
     }
@@ -789,13 +820,13 @@ lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
         return FALSE;
     }
 
-    if (!handle->baseurls && !handle->mirrorlist) {
+    if (!handle->urls && !handle->mirrorlisturl && !handle->metalinkurl) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
-                    "No base url nor mirrorlist specified");
+                "No LRO_URLS, LRO_MIRRORLISTURL nor LRO_METALINKURL specified");
         return FALSE;
     }
 
-    if (handle->local && !handle->baseurls) {
+    if (handle->local && !handle->urls && !handle->urls[0]) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
                     "Localrepo specified, but no LRO_URLS set");
         return FALSE;

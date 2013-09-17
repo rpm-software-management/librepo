@@ -107,7 +107,7 @@ Note: .valgrindrc file is present in checkoutdir, this file contains the setting
 
     PYTHONPATH=`readlink -f ./build/librepo/python/python2/` nosetests -s -v tests/python/tests/
 
-Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/test_yum_repo_downloading.py:TestCaseYumRepoDownloading.test_download_and_update_repo_01``
+Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo/python/python2/` nosetests -s -v tests/python/tests/test_yum_repo_downloading.py:TestCaseYumRepoDownloading.test_download_and_update_repo_01``
 
 ### Run (from your checkout dir) - Python 3 unittests:
 

@@ -47,7 +47,8 @@ typedef struct {
     char *signature;    /*!< Path to signature if available and
                              signature was downloaded (GPG check
                              was enabled during repo downloading) */
-    char *mirrorlist;   /*!< Mirrolist file */
+    char *mirrorlist;   /*!< Mirrolist filename */
+    char *metalink;     /*!< Metalink filename */
 } LrYumRepo;
 
 /** Allocate new yum repo object.

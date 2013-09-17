@@ -159,6 +159,8 @@ setopt(_HandleObject *self, PyObject *args)
      * Options with string arguments (NULL is supported)
      */
     case LRO_MIRRORLIST:
+    case LRO_MIRRORLISTURL:
+    case LRO_METALINKURL:
     case LRO_USERPWD:
     case LRO_PROXY:
     case LRO_PROXYUSERPWD:
@@ -540,6 +542,8 @@ getinfo(_HandleObject *self, PyObject *args)
 
     /* char** options */
     case LRI_MIRRORLIST:
+    case LRI_MIRRORLISTURL:
+    case LRI_METALINKURL:
     case LRI_DESTDIR:
     case LRI_USERAGENT:
         res = lr_handle_getinfo(self->handle,
