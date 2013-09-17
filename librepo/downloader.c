@@ -1248,6 +1248,7 @@ lr_download_single_cb(GSList *targets,
         target->cbdata = NULL;
         target->progresscb = NULL;
     }
+    g_slist_free(shared_cbdata.singlecbdata);
 
     return ret;
 }

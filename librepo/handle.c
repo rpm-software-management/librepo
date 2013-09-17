@@ -117,6 +117,7 @@ lr_handle_free(LrHandle *handle)
     lr_lrmirrorlist_free(handle->urls_mirrors);
     lr_lrmirrorlist_free(handle->mirrorlist_mirrors);
     lr_lrmirrorlist_free(handle->metalink_mirrors);
+    lr_lrmirrorlist_free(handle->mirrors);
     lr_metalink_free(handle->metalink);
     lr_handle_free_list(&handle->yumdlist);
     lr_handle_free_list(&handle->yumblist);
