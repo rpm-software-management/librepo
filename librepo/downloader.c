@@ -242,7 +242,7 @@ lr_prepare_lrmirrors(GSList *list, LrHandle *handle, LrTarget **target)
         lrmirrors = g_slist_append(lrmirrors, mirror);
     }
 
-    LrHandleMirrors *handle_mirrors = lr_malloc(sizeof(*handle_mirrors));
+    LrHandleMirrors *handle_mirrors = lr_malloc0(sizeof(*handle_mirrors));
     handle_mirrors->handle = handle;
     handle_mirrors->lrmirrors = lrmirrors;
 
@@ -1227,8 +1227,9 @@ lr_download_single_cb(GSList *targets,
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrDownloadTarget *target = elem->data;
 
-        LrCallbackData *lrcbdata = lr_malloc(sizeof(*lrcbdata));
+        LrCallbackData *lrcbdata = lr_malloc0(sizeof(*lrcbdata));
         lrcbdata->downloaded        = 0.0;
+        lrcbdata->total             = 0.0;
         lrcbdata->sharedcbdata      = &shared_cbdata;
 
         target->progresscb  = (cb) ? lr_multi_progress_func : NULL;
