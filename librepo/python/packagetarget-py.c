@@ -34,8 +34,11 @@ typedef struct {
     /* Handle */
     PyObject *handle;
     /* Callback */
+    PyObject *cb_data;
     PyObject *progress_cb;
-    PyObject *progress_cb_data;
+    PyObject *end_cb;
+    PyObject *failure_cb;
+    PyObject *mirrorfailure_cb;
     /* GIL Stuff */
     PyThreadState **state;
 } _PackageTargetObject;
@@ -74,8 +77,8 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
     if (!self->progress_cb)
         return 0;
 
-    if (self->progress_cb_data)
-        user_data = self->progress_cb_data;
+    if (self->cb_data)
+        user_data = self->cb_data;
     else
         user_data = Py_None;
 
@@ -86,6 +89,93 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
     assert(self->handle);
     EndAllowThreads(self->state);
     result = PyObject_CallObject(self->progress_cb, arglist);
+    BeginAllowThreads(self->state);
+
+    Py_DECREF(arglist);
+    Py_XDECREF(result);
+    return 0;
+}
+
+static void
+packagetarget_end_callback(void *data)
+{
+    _PackageTargetObject *self;
+    PyObject *user_data, *arglist, *result;
+
+    self = (_PackageTargetObject *)data;
+    if (!self->end_cb)
+        return;
+
+    if (self->cb_data)
+        user_data = self->cb_data;
+    else
+        user_data = Py_None;
+
+    arglist = Py_BuildValue("(O)", user_data);
+    if (arglist == NULL)
+        return;
+
+    assert(self->handle);
+    EndAllowThreads(self->state);
+    result = PyObject_CallObject(self->end_cb, arglist);
+    BeginAllowThreads(self->state);
+
+    Py_DECREF(arglist);
+    Py_XDECREF(result);
+    return;
+}
+
+static int
+packagetarget_failure_callback(void *data, const char *msg)
+{
+    _PackageTargetObject *self;
+    PyObject *user_data, *arglist, *result;
+
+    self = (_PackageTargetObject *)data;
+    if (!self->failure_cb)
+        return 0;
+
+    if (self->cb_data)
+        user_data = self->cb_data;
+    else
+        user_data = Py_None;
+
+    arglist = Py_BuildValue("(Os)", user_data, msg);
+    if (arglist == NULL)
+        return 0;
+
+    assert(self->handle);
+    EndAllowThreads(self->state);
+    result = PyObject_CallObject(self->failure_cb, arglist);
+    BeginAllowThreads(self->state);
+
+    Py_DECREF(arglist);
+    Py_XDECREF(result);
+    return 0;
+}
+
+static int
+packagetarget_mirrorfailure_callback(void *data, const char *msg)
+{
+    _PackageTargetObject *self;
+    PyObject *user_data, *arglist, *result;
+
+    self = (_PackageTargetObject *)data;
+    if (!self->mirrorfailure_cb)
+        return 0;
+
+    if (self->cb_data)
+        user_data = self->cb_data;
+    else
+        user_data = Py_None;
+
+    arglist = Py_BuildValue("(Os)", user_data, msg);
+    if (arglist == NULL)
+        return 0;
+
+    assert(self->handle);
+    EndAllowThreads(self->state);
+    result = PyObject_CallObject(self->mirrorfailure_cb, arglist);
     BeginAllowThreads(self->state);
 
     Py_DECREF(arglist);
@@ -114,8 +204,11 @@ packagetarget_new(PyTypeObject *type,
     if (self) {
         self->target = NULL;
         self->handle = NULL;
+        self->cb_data = NULL;
         self->progress_cb = NULL;
-        self->progress_cb_data = NULL;
+        self->end_cb = NULL;
+        self->failure_cb = NULL;
+        self->mirrorfailure_cb = NULL;
         self->state = NULL;
     }
     return (PyObject *)self;
@@ -129,15 +222,20 @@ packagetarget_init(_PackageTargetObject *self,
     char *relative_url, *dest, *checksum, *base_url;
     int checksum_type, resume;
     PY_LONG_LONG expectedsize;
-    PyObject *pyhandle, *progresscb, *cbdata;
-    LrProgressCb c_cb;
+    PyObject *pyhandle, *py_progresscb, *py_cbdata;
+    PyObject *py_endcb, *py_failurecb, *py_mirrorfailurecb;
+    LrProgressCb progresscb = NULL;
+    LrEndCb endcb = NULL;
+    LrFailureCb failurecb = NULL;
+    LrMirrorFailureCb mirrorfailurecb = NULL;
     LrHandle *handle = NULL;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "OszizLziOO:packagetarget_init",
+    if (!PyArg_ParseTuple(args, "OszizLziOOOOO:packagetarget_init",
                           &pyhandle, &relative_url, &dest, &checksum_type,
                           &checksum, &expectedsize, &base_url, &resume,
-                          &progresscb, &cbdata))
+                          &py_progresscb, &py_cbdata, &py_endcb,
+                          &py_failurecb, &py_mirrorfailurecb))
         return -1;
 
     if (pyhandle != Py_None) {
@@ -148,25 +246,61 @@ packagetarget_init(_PackageTargetObject *self,
         Py_INCREF(self->handle);
     }
 
-    if (!PyCallable_Check(progresscb) && progresscb != Py_None) {
+    if (!PyCallable_Check(py_progresscb) && py_progresscb != Py_None) {
         PyErr_SetString(PyExc_TypeError, "progresscb must be callable or None");
         return -1;
     }
 
-    if (progresscb == Py_None) {
-        c_cb = NULL;
-    } else {
-        c_cb = packagetarget_progress_callback;
-        self->progress_cb = progresscb;
-        self->progress_cb_data = cbdata;
-        Py_XINCREF(self->progress_cb);
-        Py_XINCREF(self->progress_cb_data);
+    if (!PyCallable_Check(py_endcb) && py_endcb != Py_None) {
+        PyErr_SetString(PyExc_TypeError, "endcb must be callable or None");
+        return -1;
     }
 
-    self->target = lr_packagetarget_new(handle, relative_url, dest,
-                                         checksum_type, checksum,
-                                         (gint64) expectedsize, base_url,
-                                         resume, c_cb, self, &tmp_err);
+    if (!PyCallable_Check(py_failurecb) && py_failurecb != Py_None) {
+        PyErr_SetString(PyExc_TypeError, "failurecb must be callable or None");
+        return -1;
+    }
+
+    if (!PyCallable_Check(py_mirrorfailurecb) && py_mirrorfailurecb != Py_None) {
+        PyErr_SetString(PyExc_TypeError, "mirrorfailurecb must be callable or None");
+        return -1;
+    }
+
+    if (py_cbdata) {
+        self->cb_data = py_cbdata;
+        Py_XINCREF(self->cb_data);
+    }
+
+    if (py_progresscb != Py_None) {
+        progresscb = packagetarget_progress_callback;
+        self->progress_cb = py_progresscb;
+        Py_XINCREF(self->progress_cb);
+    }
+
+    if (py_endcb != Py_None) {
+        endcb = packagetarget_end_callback;
+        self->end_cb = py_endcb;
+        Py_XINCREF(self->end_cb);
+    }
+
+    if (py_failurecb != Py_None) {
+        failurecb = packagetarget_failure_callback;
+        self->failure_cb = py_failurecb;
+        Py_XINCREF(self->failure_cb);
+    }
+
+    if (py_mirrorfailurecb != Py_None) {
+        mirrorfailurecb = packagetarget_mirrorfailure_callback;
+        self->mirrorfailure_cb = py_mirrorfailurecb;
+        Py_XINCREF(self->mirrorfailure_cb);
+    }
+
+    self->target = lr_packagetarget_new_v2(handle, relative_url, dest,
+                                           checksum_type, checksum,
+                                           (gint64) expectedsize, base_url,
+                                           resume, progresscb, self, endcb,
+                                           failurecb, mirrorfailurecb,
+                                           &tmp_err);
 
     if (self->target == NULL) {
         PyErr_Format(LrErr_Exception,
@@ -183,8 +317,11 @@ packagetarget_dealloc(_PackageTargetObject *o)
 {
     if (o->target)
         lr_packagetarget_free(o->target);
+    Py_XDECREF(o->cb_data);
     Py_XDECREF(o->progress_cb);
-    Py_XDECREF(o->progress_cb_data);
+    Py_XDECREF(o->end_cb);
+    Py_XDECREF(o->failure_cb);
+    Py_XDECREF(o->mirrorfailure_cb);
     Py_XDECREF(o->handle);
     Py_TYPE(o)->tp_free(o);
 }
@@ -242,6 +379,13 @@ get_pythonobj(_PackageTargetObject *self, void *member_offset)
         return self->handle;
     }
 
+    if (member_offset == OFFSET(cbdata)) {
+        if (!self->cb_data)
+            Py_RETURN_NONE;
+        Py_XINCREF(self->cb_data);
+        return self->cb_data;
+    }
+
     if (member_offset == OFFSET(progresscb)) {
         if (!self->progress_cb)
             Py_RETURN_NONE;
@@ -249,11 +393,25 @@ get_pythonobj(_PackageTargetObject *self, void *member_offset)
         return self->progress_cb;
     }
 
-    if (member_offset == OFFSET(cbdata)) {
-        if (!self->progress_cb_data)
+    if (member_offset == OFFSET(endcb)) {
+        if (!self->end_cb)
             Py_RETURN_NONE;
-        Py_XINCREF(self->progress_cb_data);
-        return self->progress_cb_data;
+        Py_XINCREF(self->end_cb);
+        return self->end_cb;
+    }
+
+    if (member_offset == OFFSET(failurecb)) {
+        if (!self->failure_cb)
+            Py_RETURN_NONE;
+        Py_XINCREF(self->failure_cb);
+        return self->failure_cb;
+    }
+
+    if (member_offset == OFFSET(mirrorfailurecb)) {
+        if (!self->mirrorfailure_cb)
+            Py_RETURN_NONE;
+        Py_XINCREF(self->mirrorfailure_cb);
+        return self->mirrorfailure_cb;
     }
 
     Py_RETURN_NONE;
@@ -268,8 +426,11 @@ static PyGetSetDef packagetarget_getsetters[] = {
     {"checksum",      (getter)get_str,       NULL, NULL, OFFSET(checksum)},
     {"expectedsize",  (getter)get_gint64,    NULL, NULL, OFFSET(expectedsize)},
     {"resume",        (getter)get_int,       NULL, NULL, OFFSET(resume)},
-    {"progresscb",    (getter)get_pythonobj, NULL, NULL, OFFSET(progresscb)},
     {"cbdata",        (getter)get_pythonobj, NULL, NULL, OFFSET(cbdata)},
+    {"progresscb",    (getter)get_pythonobj, NULL, NULL, OFFSET(progresscb)},
+    {"endcb",         (getter)get_pythonobj, NULL, NULL, OFFSET(endcb)},
+    {"failurecb",     (getter)get_pythonobj, NULL, NULL, OFFSET(failurecb)},
+    {"mirrorfailurecb",(getter)get_pythonobj,NULL, NULL, OFFSET(mirrorfailurecb)},
     {"local_path",    (getter)get_str,       NULL, NULL, OFFSET(local_path)},
     {"err",           (getter)get_str,       NULL, NULL, OFFSET(err)},
     {NULL, NULL, NULL, NULL, NULL} /* sentinel */

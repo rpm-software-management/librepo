@@ -155,6 +155,60 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
 
+    def test_packagetarget_sanity_00(self):
+        t = librepo.PackageTarget("foo")
+
+        self.assertEqual(t.relative_url, "foo")
+        self.assertEqual(t.dest, None)
+        self.assertEqual(t.checksum_type, librepo.CHECKSUM_UNKNOWN)
+        self.assertEqual(t.checksum, None)
+        self.assertEqual(t.expectedsize, 0)
+        self.assertEqual(t.base_url, None)
+        self.assertEqual(t.resume, False)
+        self.assertEqual(t.progresscb, None)
+        self.assertEqual(t.cbdata, None)
+        self.assertEqual(t.handle, None)
+        self.assertEqual(t.endcb, None)
+        self.assertEqual(t.failurecb, None)
+        self.assertEqual(t.mirrorfailurecb, None)
+
+    def test_packagetarget_sanity_01(self):
+
+        h = librepo.Handle()
+        cbdata = {"a": "b"}
+        def progresscb(a, b, c): return 0
+        def endcb(a): return
+        def failurecb(a, b): return 0
+        def mirrorfailurecb(a, b): return 0;
+
+        t = librepo.PackageTarget("foo",
+                                  dest="bar",
+                                  checksum_type=librepo.CHECKSUM_SHA512,
+                                  checksum="xxx",
+                                  expectedsize=123,
+                                  base_url="basefoo",
+                                  resume=True,
+                                  progresscb=progresscb,
+                                  cbdata=cbdata,
+                                  handle=h,
+                                  endcb=endcb,
+                                  failurecb=failurecb,
+                                  mirrorfailurecb=mirrorfailurecb)
+
+        self.assertEqual(t.relative_url, "foo")
+        self.assertEqual(t.dest, "bar")
+        self.assertEqual(t.checksum_type, librepo.CHECKSUM_SHA512)
+        self.assertEqual(t.checksum, "xxx")
+        self.assertEqual(t.expectedsize, 123)
+        self.assertEqual(t.base_url, "basefoo")
+        self.assertEqual(t.resume, True)
+        self.assertEqual(t.progresscb, progresscb)
+        self.assertEqual(t.cbdata, cbdata)
+        self.assertEqual(t.handle, h)
+        self.assertEqual(t.endcb, endcb)
+        self.assertEqual(t.failurecb, failurecb)
+        self.assertEqual(t.mirrorfailurecb, mirrorfailurecb)
+
     def test_download_packages_00(self):
         h = librepo.Handle()
 

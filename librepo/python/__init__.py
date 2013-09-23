@@ -722,10 +722,12 @@ class PackageTarget(_librepo.PackageTarget):
 
     def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, expectedsize=0, base_url=None, resume=False,
-                 progresscb=None, cbdata=None, handle=None):
+                 progresscb=None, cbdata=None, handle=None, endcb=None,
+                 failurecb=None, mirrorfailurecb=None):
         _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
                                         checksum_type, checksum, expectedsize,
-                                        base_url, resume, progresscb, cbdata)
+                                        base_url, resume, progresscb, cbdata,
+                                        endcb, failurecb, mirrorfailurecb)
 
 
 class Handle(_librepo.Handle):
