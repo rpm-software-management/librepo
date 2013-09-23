@@ -367,9 +367,9 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
 }
 
 static gboolean
-prepare_next_transfer(LrDownload *dd, GError **err)
+prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 {
-    LrTarget *target = NULL;
+    LrTarget *target;
     LrMirror *mirror = NULL;
     char *full_url = NULL;
     int complete_url_in_path = 0;
@@ -377,112 +377,126 @@ prepare_next_transfer(LrDownload *dd, GError **err)
     assert(dd);
     assert(!err || *err == NULL);
 
-    // Select a waiting target
+    *candidatefound = FALSE;
 
-    for (GSList *elem = dd->targets; elem; elem = g_slist_next(elem)) {
-        LrTarget *c_target = elem->data;
-        if (c_target->state == LR_DS_WAITING) {
-            target = c_target;
-            break;
-        }
-    }
+    GSList *elem = dd->targets;
 
-    if (!target)  // No target is waiting
-        return TRUE;
+    while (1) {
 
-    // Determine if path is a complete URL
-    complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
+        target = NULL;
 
-    if (!target->target->baseurl
-        && !target->lrmirrors
-        && !complete_url_in_path)
-    {
-        // Used relative path with empty internal mirrorlist
-        // and no basepath specified!
-        g_debug("%s: Empty mirrorlist and no basepath specified", __func__);
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
-                    "Empty mirrorlist and no basepath specified!");
-        return FALSE;
-    }
-
-    g_debug("%s: Selecting mirror for: %s", __func__, target->target->path);
-
-    // Select a base part of url (use the baseurl or some mirror)
-    if (complete_url_in_path) {
-        // In path we got a complete url, do not use mirror or basepath
-        full_url = g_strdup(target->target->path);
-    } else if (target->target->baseurl) {
-        // Use base URL
-        full_url = lr_pathconcat(target->target->baseurl,
-                                 target->target->path,
-                                 NULL);
-    } else {
-        // Try to find a suitable mirror
-
-        int at_least_one_suitable_mirror_found = 0;
-        //  ^^^ This variable is used to indentify that all possible mirrors
-        // were already tried and the transfer shoud be marked as failed.
-
-        for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
-            LrMirror *c_mirror = elem->data;
-
-            if (g_slist_find(target->tried_mirrors, c_mirror)) {
-                // This mirror was already tried for this target
-                continue;
-            }
-
-            at_least_one_suitable_mirror_found = 1;
-
-            // Number of transfers which are downloading from the mirror
-            // should always be lower or equal than maximum allowed number
-            // of connection to a single host.
-            assert(dd->max_connection_per_host == -1 ||
-                   c_mirror->running_transfers <= dd->max_connection_per_host);
-
-            if (dd->max_connection_per_host == -1 ||
-                c_mirror->running_transfers < dd->max_connection_per_host)
-            {
-                // Use this mirror
-                mirror = c_mirror;
+        // Select a waiting target
+        for (; elem; elem = g_slist_next(elem)) {
+            LrTarget *c_target = elem->data;
+            if (c_target->state == LR_DS_WAITING) {
+                target = c_target;
+                elem = g_slist_next(elem);
                 break;
             }
         }
 
-        if (mirror) {
-            // Suitable (untried and with available capacity) mirror found
-            full_url = lr_pathconcat(mirror->mirror->url,
+        if (!target)  // No target is waiting
+            return TRUE;
+
+        // Determine if path is a complete URL
+        complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
+
+        if (!target->target->baseurl
+            && !target->lrmirrors
+            && !complete_url_in_path)
+        {
+            // Used relative path with empty internal mirrorlist
+            // and no basepath specified!
+            g_debug("%s: Empty mirrorlist and no basepath specified", __func__);
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+                        "Empty mirrorlist and no basepath specified!");
+            return FALSE;
+        }
+
+        g_debug("%s: Selecting mirror for: %s", __func__, target->target->path);
+
+        // Select a base part of url (use the baseurl or some mirror)
+        if (complete_url_in_path) {
+            // In path we got a complete url, do not use mirror or basepath
+            full_url = g_strdup(target->target->path);
+        } else if (target->target->baseurl) {
+            // Use base URL
+            full_url = lr_pathconcat(target->target->baseurl,
                                      target->target->path,
                                      NULL);
-        } else if (!at_least_one_suitable_mirror_found) {
-            // No suitable mirror even exists => Set transfer as failed
-            g_debug("%s: All mirrors were tried without success", __func__);
-            target->state = LR_DS_FAILED;
+        } else {
+            // Try to find a suitable mirror
 
-            // Call failure callback
-            LrFailureCb f_cb =  target->target->failurecb;
-            if (f_cb)
-                f_cb(target->target->cbdata, "No more mirrors to try - "
-                        "All mirrors were already tried without success");
+            int at_least_one_suitable_mirror_found = 0;
+            //  ^^^ This variable is used to indentify that all possible mirrors
+            // were already tried and the transfer shoud be marked as failed.
 
-            lr_downloadtarget_set_error(target->target, LRE_NOURL,
-                        "Cannot download, all mirrors were already tried "
-                        "without success");
+            for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
+                LrMirror *c_mirror = elem->data;
 
-            if (dd->failfast) {
-                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
-                            "Cannot download %s: All mirrors were tried",
-                            target->target->path);
-                return FALSE;
+                if (g_slist_find(target->tried_mirrors, c_mirror)) {
+                    // This mirror was already tried for this target
+                    continue;
+                }
+
+                at_least_one_suitable_mirror_found = 1;
+
+                // Number of transfers which are downloading from the mirror
+                // should always be lower or equal than maximum allowed number
+                // of connection to a single host.
+                assert(dd->max_connection_per_host == -1 ||
+                       c_mirror->running_transfers <= dd->max_connection_per_host);
+
+                if (dd->max_connection_per_host == -1 ||
+                    c_mirror->running_transfers < dd->max_connection_per_host)
+                {
+                    // Use this mirror
+                    mirror = c_mirror;
+                    break;
+                }
             }
-            return TRUE;
-        }
-    }
 
-    if (!full_url) {
+            if (mirror) {
+                // Suitable (untried and with available capacity) mirror found
+                full_url = lr_pathconcat(mirror->mirror->url,
+                                         target->target->path,
+                                         NULL);
+            } else if (!at_least_one_suitable_mirror_found) {
+                // No suitable mirror even exists => Set transfer as failed
+                g_debug("%s: All mirrors were tried without success", __func__);
+                target->state = LR_DS_FAILED;
+
+                // Call failure callback
+                LrFailureCb f_cb =  target->target->failurecb;
+                if (f_cb)
+                    f_cb(target->target->cbdata, "No more mirrors to try - "
+                            "All mirrors were already tried without success");
+
+                lr_downloadtarget_set_error(target->target, LRE_NOURL,
+                            "Cannot download, all mirrors were already tried "
+                            "without success");
+
+                if (dd->failfast) {
+                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+                                "Cannot download %s: All mirrors were tried",
+                                target->target->path);
+                    return FALSE;
+                }
+            }
+        }
+
+        if (full_url) {
+            // A waiting transfer found
+            break;
+        }
+
         // No free mirror
-        g_debug("%s: No free mirror", __func__);
-        return TRUE;
-    }
+        g_debug("%s: Currently there is no free mirror for: %s",
+                __func__, target->target->path);
+
+    } // End while(1)
+
+    *candidatefound = TRUE;
 
     g_debug("%s: URL: %s", __func__, full_url);
 
@@ -611,6 +625,23 @@ prepare_next_transfer(LrDownload *dd, GError **err)
 
     // Add the transfer to the list of running transfers
     dd->running_transfers = g_slist_append(dd->running_transfers, target);
+
+    return TRUE;
+}
+
+static gboolean
+prepare_next_transfers(LrDownload *dd, GError **err)
+{
+    guint length = g_slist_length(dd->running_transfers);
+    guint free_slots = dd->max_parallel_connections - length;
+
+    gboolean candidatefound = TRUE;
+    while (free_slots > 0 && candidatefound) {
+        gboolean ret = prepare_next_transfer(dd, &candidatefound, err);
+        if (!ret)
+            return FALSE;
+        free_slots--;
+    }
 
     return TRUE;
 }
@@ -856,14 +887,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
     // At this point, after handles of finished transfers were removed
     // from the multi_handle, we could add new waiting transfers.
-
-    for (int x = 0; x < freed_transfers; x++) {
-        gboolean rc = prepare_next_transfer(dd, err);
-        if (!rc)
-            return FALSE;
-    }
-
-    return TRUE;
+    return prepare_next_transfers(dd, err);
 }
 
 static gboolean
@@ -1059,9 +1083,14 @@ lr_download(GSList *targets,
 
     // Prepare the first set of transfers
     for (int x = 0; x < dd.max_parallel_connections; x++) {
-        ret = prepare_next_transfer(&dd, &tmp_err);
+        gboolean candidatefound;
+
+        ret = prepare_next_transfer(&dd, &candidatefound, &tmp_err);
         if (!ret)
             goto lr_download_cleanup;
+
+        if (!candidatefound)
+            break;
     }
 
     // Perform!
