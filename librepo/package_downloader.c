@@ -77,6 +77,46 @@ lr_packagetarget_new(LrHandle *handle,
     return target;
 }
 
+LrPackageTarget *
+lr_packagetarget_new_v2(LrHandle *handle,
+                        const char *relative_url,
+                        const char *dest,
+                        LrChecksumType checksum_type,
+                        const char *checksum,
+                        gint64 expectedsize,
+                        const char *base_url,
+                        gboolean resume,
+                        LrProgressCb progresscb,
+                        void *cbdata,
+                        LrEndCb endcb,
+                        LrFailureCb failurecb,
+                        LrMirrorFailureCb mirrorfailurecb,
+                        GError **err)
+{
+    LrPackageTarget *target;
+
+    target = lr_packagetarget_new(handle,
+                                  relative_url,
+                                  dest,
+                                  checksum_type,
+                                  checksum,
+                                  expectedsize,
+                                  base_url,
+                                  resume,
+                                  progresscb,
+                                  cbdata,
+                                  err);
+
+    if (!target)
+        return NULL;
+
+    target->endcb = endcb;
+    target->failurecb = failurecb,
+    target->mirrorfailurecb = mirrorfailurecb;
+
+    return target;
+}
+
 void
 lr_packagetarget_free(LrPackageTarget *target)
 {
@@ -235,6 +275,9 @@ lr_download_packages(GSList *targets,
                                                packagetarget->resume,
                                                packagetarget->progresscb,
                                                packagetarget->cbdata,
+                                               packagetarget->endcb,
+                                               packagetarget->failurecb,
+                                               packagetarget->mirrorfailurecb,
                                                packagetarget);
 
         downloadtargets = g_slist_append(downloadtargets, downloadtarget);

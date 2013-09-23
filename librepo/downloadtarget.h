@@ -66,6 +66,18 @@ typedef struct {
     void *cbdata; /*!<
         Callback user data */
 
+    LrEndCb endcb; /*!<
+        Callback called when target was successfully
+        downloaded and validated */
+
+    LrFailureCb failurecb; /*!<
+        Callback called when librepo gave up (file
+        was not retrieved from any mirror, or
+        downloaded file always failed checksumming) */
+
+    LrMirrorFailureCb mirrorfailurecb; /*!<
+        Callen when download from a mirror failed. */
+
     GStringChunk *chunk; /*!<
         Chunk for strings used in this structure. */
 
@@ -85,6 +97,8 @@ typedef struct {
     char *err; /*!<
         NULL or error message */
 
+    // Other items
+
     void *userdata; /*!<
         User data - This data are not used by lr_downloader or touched
         by lr_downloadtarget_free. */
@@ -92,28 +106,35 @@ typedef struct {
 } LrDownloadTarget;
 
 /** Create new empty ::LrDownloadTarget.
- * @param handle        Handle
- * @param path          Absolute or relative URL path
- * @param baseurl       Base URL for relative path specified in path param
- * @param fd            Opened file descriptor where data will be written
- * @param checksumtype  Type of used checksum or LR_CHECKSUM_UNKNOWN if
- *                      checksum is not used or should not be checked.
- * @param checksum      Checksum value to check or NULL. If checksumtype is
- *                      set to LR_CHECKSUM_UNKNOWN then this param is ignored.
- * @param expectedsize  Expected size of the target. If mirror reports
- *                      different size, then no download is performed.
- *                      If 0 then size of downloaded target is not checked.
- *                      TODO: Not implemented yet
- * @param resume        If FALSE, then no resume is done and whole file is
- *                      downloaded again. Otherwise offset will be
- *                      automaticaly detected from opened file descriptor by
- *                      seek to the end.
- * @param progresscb    Progression callback or NULL
- * @param cbdata        Callback data or NULL
- * @param userdata      This variable could be used to store some user data.
- *                      This data are not used/touched by lr_download*
- *                      functions or by lr_downloadtarget_free().
- * @return              New allocated target
+ * @param handle            Handle
+ * @param path              Absolute or relative URL path
+ * @param baseurl           Base URL for relative path specified in path param
+ * @param fd                Opened file descriptor where data will be written
+ * @param checksumtype      Type of used checksum or LR_CHECKSUM_UNKNOWN if
+ *                          checksum is not used or should not be checked.
+ * @param checksum          Checksum value to check or NULL. If checksumtype
+ *                          is set to LR_CHECKSUM_UNKNOWN then this param
+ *                          is ignored.
+ * @param expectedsize      Expected size of the target. If mirror reports
+ *                          different size, then no download is performed.
+ *                          If 0 then size of downloaded target is not checked.
+ * @param resume            If FALSE, then no resume is done and whole file is
+ *                          downloaded again. Otherwise offset will be
+ *                          automaticaly detected from opened file descriptor
+ *                          by seek to the end.
+ * @param progresscb        Progression callback or NULL
+ * @param cbdata            Callback data or NULL
+ * @param endcb             Callback called when file was successfully
+ *                          downloaded and validated.
+ * @param failurecb         Called when librepo gave up (file was not
+ *                          retrieved from any mirror, or the downloaded
+ *                          file always failed checksumming)
+ * @param mirrorfailurecb   Called when download from a mirror failed.
+ * @param userdata          This variable could be used to store some user
+ *                          data. This data are not used/touched by
+ *                          lr_download* functions or by
+ *                          lr_downloadtarget_free().
+ * @return                  New allocated target
  */
 LrDownloadTarget *
 lr_downloadtarget_new(LrHandle *handle,
@@ -126,6 +147,9 @@ lr_downloadtarget_new(LrHandle *handle,
                       gboolean resume,
                       LrProgressCb progresscb,
                       void *cbdata,
+                      LrEndCb endcb,
+                      LrFailureCb failurecb,
+                      LrMirrorFailureCb mirrorfailurecb,
                       void *userdata);
 
 /** Free a ::LrDownloadTarget element and its content.

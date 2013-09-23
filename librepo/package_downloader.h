@@ -106,6 +106,18 @@ typedef struct {
     void *cbdata; /*!<
         Callback data */
 
+    LrEndCb endcb; /*!<
+        Callback called when target was successfully
+        downloaded and validated */
+
+    LrFailureCb failurecb; /*!<
+        Callback called when librepo gave up (file
+        was not retrieved from any mirror, or
+        downloaded file always failed checksumming) */
+
+    LrMirrorFailureCb mirrorfailurecb; /*!<
+        Callen when download from a mirror failed. */
+
     // Will be filled by ::lr_download_packages()
 
     char *local_path; /*!<
@@ -154,6 +166,53 @@ lr_packagetarget_new(LrHandle *handle,
                      LrProgressCb progresscb,
                      void *cbdata,
                      GError **err);
+
+/** Create new LrPackageTarget object.
+ * Almost same as lr_packagetarget_new() except this function
+ * could set more callbacks.
+ * @param handle            Handle related to this download or NULL.
+ * @param relative_url      Relative part of URL to download.
+ *                          First part of URL will be picked from the LrHandle
+ *                          (LRO_URL or mirror) during download proccess or
+ *                          base_url will be used if it is specified.
+ * @param dest              Destination filename or just directory (filename
+ *                          itself will be derived from the relative_url) or
+ *                          NULL (current working directory + filename derived
+ *                          from relative_url will be used).
+ * @param checksum_type     Type of checksum or LR_CHECKSUM_UNKNOWN.
+ * @param checksum          Expected checksum value or NULL.
+ * @param base_url          Base URL or NULL
+ * @param expectedsize      Expected size of the target. If server reports
+ *                          different size, then no download is performed.
+ * @param resume            If TRUE, then downloader try to resume download
+ *                          if destination file exists. If the file doesn't
+ *                          exists, it will be normally downloaded again.
+ * @param progresscb        Progress callback for this transfer.
+ * @param cbdata            User data for the callbacks
+ * @param endcb             Callback called when file was successfully
+ *                          downloaded and validated.
+ * @param failurecb         Called when librepo gave up (file was not
+ *                          retrieved from any mirror, or the downloaded
+ *                          file always failed checksumming)
+ * @param mirrorfailurecb   Called when download from a mirror failed.
+ * @param err               GError **
+ * @return                  Newly allocated LrPackageTarget or NULL on error
+ */
+LrPackageTarget *
+lr_packagetarget_new_v2(LrHandle *handle,
+                        const char *relative_url,
+                        const char *dest,
+                        LrChecksumType checksum_type,
+                        const char *checksum,
+                        gint64 expectedsize,
+                        const char *base_url,
+                        gboolean resume,
+                        LrProgressCb progresscb,
+                        void *cbdata,
+                        LrEndCb endcb,
+                        LrFailureCb failurecb,
+                        LrMirrorFailureCb mirrorfailurecb,
+                        GError **err);
 
 /** Free ::LrPackageTarget object.
  * @param target        LrPackageTarget object

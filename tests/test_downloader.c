@@ -61,7 +61,7 @@ START_TEST(test_downloader_single_file)
     fail_if(fd1 < 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
+                               0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     fail_if(!t1);
 
     list = g_slist_append(list, t1);
@@ -107,7 +107,8 @@ START_TEST(test_downloader_single_file_2)
     fail_if(fd1 < 0);
 
     t1 = lr_downloadtarget_new(NULL, "http://seznam.cz/index.html", NULL,
-                               fd1, 0, NULL, 0, 0, NULL, NULL, NULL);
+                               fd1, 0, NULL, 0, 0, NULL, NULL, NULL,
+                               NULL, NULL, NULL);
     fail_if(!t1);
 
     list = g_slist_append(list, t1);
@@ -168,10 +169,12 @@ START_TEST(test_downloader_two_files)
     fail_if(fd2 < 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1,
-                               0, NULL, 0, 0, NULL, NULL, NULL);
+                               0, NULL, 0, 0, NULL, NULL, NULL,
+                               NULL, NULL, NULL);
     fail_if(!t1);
     t2 = lr_downloadtarget_new(handle, "index.html", "http://seznam.cz", fd2,
-                               0, NULL, 0, 0, NULL, NULL, NULL);
+                               0, NULL, 0, 0, NULL, NULL, NULL,
+                               NULL, NULL, NULL);
     fail_if(!t2);
 
     list = g_slist_append(list, t1);
@@ -240,16 +243,17 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(fd3 < 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
+                               0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     fail_if(!t1);
 
     t2 = lr_downloadtarget_new(handle, "index.html", "http://seznam.cz", fd2,
-                               0, NULL, 0, 0, NULL, NULL, NULL);
+                               0, NULL, 0, 0, NULL, NULL, NULL, NULL,
+                               NULL, NULL);
     fail_if(!t2);
 
     t3 = lr_downloadtarget_new(handle, "i_hope_this_page_doesnt_exists.html",
                                "http://google.com", fd3, 0, NULL,
-                               0, 0, NULL, NULL, NULL);
+                               0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     fail_if(!t3);
 
     list = g_slist_append(list, t1);

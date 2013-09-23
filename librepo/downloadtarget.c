@@ -38,6 +38,9 @@ lr_downloadtarget_new(LrHandle *handle,
                       gboolean resume,
                       LrProgressCb progresscb,
                       void *cbdata,
+                      LrEndCb endcb,
+                      LrFailureCb failurecb,
+                      LrMirrorFailureCb mirrorfailurecb,
                       void *userdata)
 {
     LrDownloadTarget *target;
@@ -47,19 +50,22 @@ lr_downloadtarget_new(LrHandle *handle,
 
     target = lr_malloc0(sizeof(*target));
 
-    target->handle       = handle;
-    target->chunk        = g_string_chunk_new(0);
-    target->path         = g_string_chunk_insert(target->chunk, path);
-    target->baseurl      = lr_string_chunk_insert(target->chunk, baseurl);
-    target->fd           = fd;
-    target->checksumtype = checksumtype;
-    target->checksum     = lr_string_chunk_insert(target->chunk, checksum);
-    target->expectedsize = expectedsize;
-    target->resume       = resume;
-    target->progresscb   = progresscb;
-    target->cbdata       = cbdata;
-    target->rcode        = LRE_UNFINISHED;
-    target->userdata     = userdata;
+    target->handle          = handle;
+    target->chunk           = g_string_chunk_new(0);
+    target->path            = g_string_chunk_insert(target->chunk, path);
+    target->baseurl         = lr_string_chunk_insert(target->chunk, baseurl);
+    target->fd              = fd;
+    target->checksumtype    = checksumtype;
+    target->checksum        = lr_string_chunk_insert(target->chunk, checksum);
+    target->expectedsize    = expectedsize;
+    target->resume          = resume;
+    target->progresscb      = progresscb;
+    target->cbdata          = cbdata;
+    target->endcb           = endcb;
+    target->failurecb       = failurecb;
+    target->mirrorfailurecb = mirrorfailurecb;
+    target->rcode           = LRE_UNFINISHED;
+    target->userdata        = userdata;
 
     return target;
 }

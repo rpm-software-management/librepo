@@ -75,10 +75,38 @@ typedef enum {
  */
 #define LR_YUM_HAWKEY       {"primary", "filelists", "prestodelta", NULL}
 
-/** Progress callback prototype */
+/** Progress callback prototype
+ * @param clientp           Pointer to user data.
+ * @param total_to_download Total number of bytes to download
+ * @param now_downloaded    Number of bytes currently downloaded
+ * @return                  Returning a non-zero value from this callback
+ *                          will cause to abort the transfer.
+ */
 typedef int (*LrProgressCb)(void *clientp,
                             double total_to_download,
                             double now_downloaded);
+
+/** End callback prototype
+ * Called when download is finished successfully
+ * @param clientp           Pointer to user data.
+ */
+typedef void (*LrEndCb)(void *clientp);
+
+/** Failure callback prototype
+ * @param clientp           Pointer to user data.
+ * @param msg               Error message.
+ * @return                  Returning a non-zero value from this callback
+ *                          will cause to abort the transfer.
+ */
+typedef int (*LrFailureCb)(void *clientp, const char *msg);
+
+/** MirrorFailure callback prototype
+ * @param clientp           Pointer to user data.
+ * @param msg               Error message.
+ * @return                  Returning a non-zero value from this callback
+ *                          will cause to abort the transfer.
+ */
+typedef int (*LrMirrorFailureCb)(void *clientp, const char *msg);
 
 /** @} */
 
