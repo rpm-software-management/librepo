@@ -457,9 +457,17 @@ prepare_next_transfer(LrDownload *dd, GError **err)
             // No suitable mirror even exists => Set transfer as failed
             g_debug("%s: All mirrors were tried without success", __func__);
             target->state = LR_DS_FAILED;
+
+            // Call failure callback
+            LrFailureCb f_cb =  target->target->failurecb;
+            if (f_cb)
+                f_cb(target->target->cbdata, "No more mirrors to try - "
+                        "All mirrors were already tried without success");
+
             lr_downloadtarget_set_error(target->target, LRE_NOURL,
                         "Cannot download, all mirrors were already tried "
                         "without success");
+
             if (dd->failfast) {
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
                             "Cannot download %s: All mirrors were tried",
@@ -760,6 +768,13 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
             int complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
 
+            // Call mirrorfailure callback
+            LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
+            if (mf_cb) {
+                // TODO: Break download if rc != 0
+                mf_cb(target->target->cbdata, tmp_err->message);
+            }
+
             if (!complete_url_in_path
                 && !target->target->baseurl
                 && (dd->max_mirrors_to_try <= 0
@@ -774,6 +789,12 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 g_debug("%s: No more retries (tried: %d)",
                         __func__, num_of_tried_mirrors);
                 target->state = LR_DS_FAILED;
+
+                // Call failure callback
+                LrFailureCb f_cb =  target->target->failurecb;
+                if (f_cb)
+                    f_cb(target->target->cbdata, tmp_err->message);
+
                 lr_downloadtarget_set_error(target->target,
                                             tmp_err->code,
                                             "Download failed: %s",
@@ -816,6 +837,11 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                                                  target->mirror->mirror->url);
             lr_downloadtarget_set_effectiveurl(target->target,
                                                effective_url);
+
+            // Call end callback
+            LrEndCb end_cb = target->target->endcb;
+            if (end_cb)
+                end_cb(target->target->cbdata);
         }
 
         lr_free(effective_url);

@@ -241,6 +241,12 @@ lr_download_packages(GSList *targets,
                 if (ret && matches) {
                     g_debug("%s: Package %s is already downloaded (checksum matches)",
                             __func__, packagetarget->local_path);
+
+                    // Call end callback
+                    LrEndCb end_cb = packagetarget->endcb;
+                    if (end_cb)
+                        end_cb(packagetarget->cbdata);
+
                     packagetarget->err = g_string_chunk_insert(packagetarget->chunk,
                                          "Already downloaded");
                     continue;

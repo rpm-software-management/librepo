@@ -98,13 +98,11 @@ typedef void (*LrEndCb)(void *clientp);
  * @return                  Returning a non-zero value from this callback
  *                          will cause to abort the transfer.
  */
-typedef int (*LrFailureCb)(void *clientp, const char *msg);
+typedef void (*LrFailureCb)(void *clientp, const char *msg);
 
 /** MirrorFailure callback prototype
  * @param clientp           Pointer to user data.
  * @param msg               Error message.
- * @return                  Returning a non-zero value from this callback
- *                          will cause to abort the transfer.
  */
 typedef int (*LrMirrorFailureCb)(void *clientp, const char *msg);
 

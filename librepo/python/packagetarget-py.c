@@ -125,7 +125,7 @@ packagetarget_end_callback(void *data)
     return;
 }
 
-static int
+static void
 packagetarget_failure_callback(void *data, const char *msg)
 {
     _PackageTargetObject *self;
@@ -133,7 +133,7 @@ packagetarget_failure_callback(void *data, const char *msg)
 
     self = (_PackageTargetObject *)data;
     if (!self->failure_cb)
-        return 0;
+        return;
 
     if (self->cb_data)
         user_data = self->cb_data;
@@ -142,7 +142,7 @@ packagetarget_failure_callback(void *data, const char *msg)
 
     arglist = Py_BuildValue("(Os)", user_data, msg);
     if (arglist == NULL)
-        return 0;
+        return;
 
     assert(self->handle);
     EndAllowThreads(self->state);
@@ -151,7 +151,7 @@ packagetarget_failure_callback(void *data, const char *msg)
 
     Py_DECREF(arglist);
     Py_XDECREF(result);
-    return 0;
+    return;
 }
 
 static int
