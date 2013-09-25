@@ -170,6 +170,11 @@ typedef enum {
         After set the list to the handle, it has not to be freed! Handle
         itself takes care about freeing the list. */
 
+    LRO_FASTESTMIRROR, /*!< (long 1 or 0)
+        Sort the internal mirrorlist, after it is constructed, by the
+        determined connection speed.
+        Disabled by default. */
+
     /* Repo common options */
 
     LRO_GPGCHECK,   /*!< (long 1 or 0)
@@ -234,6 +239,7 @@ typedef enum {
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
     LRI_METALINK,               /*!< (LrMetalink *) */
+    LRI_FASTESTMIRROR,          /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

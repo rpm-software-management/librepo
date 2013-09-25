@@ -121,6 +121,7 @@ const char *lr_strerror(int rc);
 /** Error domains for GError */
 #define LR_CHECKSUM_ERROR           lr_checksum_error_quark()
 #define LR_DOWNLOADER_ERROR         lr_downloader_error_quark()
+#define LR_FASTESTMIRROR_ERROR      lr_fastestmirror_error_quark()
 #define LR_GPG_ERROR                lr_gpg_error_quark()
 #define LR_HANDLE_ERROR             lr_handle_error_quark()
 #define LR_METALINK_ERROR           lr_metalink_error_quark()
@@ -133,6 +134,7 @@ const char *lr_strerror(int rc);
 
 GQuark lr_checksum_error_quark(void);
 GQuark lr_downloader_error_quark(void);
+GQuark lr_fastestmirror_error_quark(void);
 GQuark lr_gpg_error_quark(void);
 GQuark lr_handle_error_quark(void);
 GQuark lr_metalink_error_quark(void);

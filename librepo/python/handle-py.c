@@ -201,6 +201,7 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_CHECKSUM:
     case LRO_INTERRUPTIBLE:
     case LRO_FETCHMIRRORS:
+    case LRO_FASTESTMIRROR:
     {
         long d;
 
@@ -562,6 +563,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_REPOTYPE:
     case LRI_FETCHMIRRORS:
     case LRI_MAXMIRRORTRIES:
+    case LRI_FASTESTMIRROR:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

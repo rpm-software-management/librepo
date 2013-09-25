@@ -49,10 +49,13 @@ struct _LrHandle {
     LrInternalMirrorlist *urls_mirrors; /*!<
         Mirrors from urls */
 
+    int fastestmirror; /*!<
+        Should be internal mirrorlist sorted by connection time */
+
     // Mirrorlist related stuff
 
     char *mirrorlist; /*!<
-        XXX: TODO
+        XXX: Deprecated!
         List of or metalink */
 
     char *mirrorlisturl; /*!<

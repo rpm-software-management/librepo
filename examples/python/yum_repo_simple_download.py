@@ -14,7 +14,7 @@ want do download complete repository metadata.
 import librepo
 
 # Metalink URL
-METALINK_URL = "https://mirrors.fedoraproject.org/metalink?repo=fedora-18&arch=x86_64"
+METALINK_URL = "https://mirrors.fedoraproject.org/metalink?repo=fedora-19&arch=x86_64"
 
 # Destination directory (note: This directory must exists!)
 DESTDIR = "downloaded_metadata"
@@ -28,6 +28,8 @@ if __name__ == "__main__":
     h.mirrorlist = METALINK_URL
     # Destination directory for metadata
     h.destdir = DESTDIR
+    # Use the fastest mirror
+    h.fastestmirror = True
 
     try:
         h.perform(r)

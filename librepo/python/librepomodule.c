@@ -248,6 +248,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_MAXPARALLELDOWNLOADS", LRO_MAXPARALLELDOWNLOADS);
     PyModule_AddIntConstant(m, "LRO_MAXDOWNLOADSPERMIRROR", LRO_MAXDOWNLOADSPERMIRROR);
     PyModule_AddIntConstant(m, "LRO_VARSUB", LRO_VARSUB);
+    PyModule_AddIntConstant(m, "LRO_FASTESTMIRROR", LRO_FASTESTMIRROR);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);
@@ -273,6 +274,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_VARSUB", LRI_VARSUB);
     PyModule_AddIntConstant(m, "LRI_MIRRORS", LRI_MIRRORS);
     PyModule_AddIntConstant(m, "LRI_METALINK", LRI_METALINK);
+    PyModule_AddIntConstant(m, "LRI_FASTESTMIRROR", LRI_FASTESTMIRROR);
 
     // Check options
     PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);

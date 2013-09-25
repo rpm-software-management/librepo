@@ -188,6 +188,11 @@ Constants
     for variables in ulrs (e.g.: "http://foo/$version/").
     ``[("releasever", "f18"), ("basearch", "i386")]``
 
+.. data:: LRO_FASTESTMIRROR
+
+    *Boolean*. If True, internal mirrorlist is sorted
+    by the determined connection speed, after it is constructed.
+
 .. data:: LRO_GPGCHECK
 
     *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
@@ -242,6 +247,7 @@ Constants
 .. data:: LRI_VARSUB
 .. data:: LRI_MIRRORS
 .. data:: LRI_METALINK
+.. data:: LRI_FASTESTMIRROR
 
 .. _proxy-type-label:
 
@@ -519,6 +525,7 @@ LRO_MAXMIRRORTRIES          = _librepo.LRO_MAXMIRRORTRIES
 LRO_MAXPARALLELDOWNLOADS    = _librepo.LRO_MAXPARALLELDOWNLOADS
 LRO_MAXDOWNLOADSPERMIRROR   = _librepo.LRO_MAXDOWNLOADSPERMIRROR
 LRO_VARSUB                  = _librepo.LRO_VARSUB
+LRO_FASTESTMIRROR           = _librepo.LRO_FASTESTMIRROR
 LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
@@ -553,6 +560,7 @@ ATTR_TO_LRO = {
     "maxparalleldownloads": LRO_MAXPARALLELDOWNLOADS,
     "maxdownloadspermirror":LRO_MAXDOWNLOADSPERMIRROR,
     "varsub":               LRO_VARSUB,
+    "fastestmirror":        LRO_FASTESTMIRROR,
     "gpgcheck":             LRO_GPGCHECK,
     "checksum":             LRO_CHECKSUM,
     "yumdlist":             LRO_YUMDLIST,
@@ -576,6 +584,7 @@ LRI_MAXMIRRORTRIES      = _librepo.LRI_MAXMIRRORTRIES
 LRI_VARSUB              = _librepo.LRI_VARSUB
 LRI_MIRRORS             = _librepo.LRI_MIRRORS
 LRI_METALINK            = _librepo.LRI_METALINK
+LRI_FASTESTMIRROR       = _librepo.LRI_FASTESTMIRROR
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
@@ -596,6 +605,7 @@ ATTR_TO_LRI = {
     "varsub":               LRI_VARSUB,
     "mirrors":              LRI_MIRRORS,
     "metalink":             LRI_METALINK,
+    "fastestmirror":        LRI_FASTESTMIRROR,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -844,6 +854,10 @@ class Handle(_librepo.Handle):
     .. attribute:: varsub:
 
         See: :data:`.LRO_VARSUB`
+
+    .. attribute:: fastestmirror:
+
+        See: :data:`.LRO_FASTESTMIRROR`
 
     .. attribute:: gpgcheck:
 

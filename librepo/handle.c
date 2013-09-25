@@ -44,6 +44,7 @@
 #include "yum_internal.h"
 #include "url_substitution.h"
 #include "downloader.h"
+#include "fastestmirror_internal.h"
 
 CURL *
 lr_get_curl_handle()
@@ -451,6 +452,10 @@ lr_handle_setopt(LrHandle *handle,
         break;
     }
 
+    case LRO_FASTESTMIRROR:
+        handle->fastestmirror = va_arg(arg, long) ? 1 : 0;
+        break;
+
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                     "Unknown option");
@@ -749,7 +754,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 
     // Create internal mirrorlist
 
-    g_debug("Preparing internal mirrorlist");
+    g_debug("%s: Preparing internal mirrorlist", __func__);
 
     // Get local path in case of local repository
     gchar *local_path = NULL;
@@ -820,6 +825,17 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
         handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
                                                 handle->internal_mirrorlist,
                                                 handle->metalink_mirrors);
+
+    // If enabled, sort internal mirrorlist by the connection
+    // speed (the LRO_FASTESTMIRROR option)
+    if (handle->fastestmirror) {
+        g_debug("%s: Sorting internal mirrorlist by connection speed",
+                __func__);
+        gboolean ret = lr_fastestmirror_sort_internalmirrorlist(
+                            handle, &(handle->internal_mirrorlist), err);
+        if (!ret)
+            return FALSE;
+    }
 
     // Prepare mirrors (the list that is reported via LRI_MIRRORS)
     // This list contains mirrors from mirrorlist and/or metalink
@@ -994,7 +1010,7 @@ lr_handle_getinfo(LrHandle *handle,
 
     case LRI_LOCAL:
         lnum = va_arg(arg, long *);
-        *lnum = handle->local;
+        *lnum = (long) handle->local;
         break;
 
     case LRI_PROGRESSCB: {
@@ -1099,6 +1115,11 @@ lr_handle_getinfo(LrHandle *handle,
         *metalink = handle->metalink;
         break;
     }
+
+    case LRI_FASTESTMIRROR:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->fastestmirror;
+        break;
 
     default:
         rc = FALSE;

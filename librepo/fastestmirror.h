@@ -1,5 +1,5 @@
 /* librepo - A library providing (libcURL like) API to downloading repository
- * Copyright (C) 2012  Tomas Mlcoch
+ * Copyright (C) 2013  Tomas Mlcoch
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,32 +17,28 @@
  * USA.
  */
 
-#ifndef LR_LIBREPO_H
-#define LR_LIBREPO_H
+#ifndef LR_FASTESTMIRROR_H
+#define LR_FASTESTMIRROR_H
 
 #include <glib.h>
 
-#include "checksum.h"
-#include "fastestmirror.h"
-#include "gpg.h"
-#include "handle.h"
-#include "metalink.h"
-#include "package_downloader.h"
-#include "rcodes.h"
-#include "repomd.h"
-#include "repoutil_yum.h"
-#include "result.h"
-#include "types.h"
 #include "url_substitution.h"
-#include "util.h"
-#include "version.h"
-#include "xmlparser.h"
-#include "yum.h"
+#include "mirrorlist.h"
+#include "metalink.h"
+#include "handle.h"
 
-// Low level downloading interface
-// (API could be changed significantly between two versions)
+G_BEGIN_DECLS
 
-#include "downloader.h"
-#include "downloadtarget.h"
+/** Sorts list or mirror URLs by its the connections times.
+ * @param handle        LrHandle or NULL
+ * @param list          Pointer to the GSList of urls (char* or gchar*)
+ *                      that will be sorted.
+ * @param err           GError **
+ * @return              TRUE if everything is ok, FALSE is err is set.
+ */
+gboolean
+lr_fastestmirror(LrHandle *handle, GSList **list, GError **err);
+
+G_END_DECLS
 
 #endif

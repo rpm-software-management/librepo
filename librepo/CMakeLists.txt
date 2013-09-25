@@ -2,6 +2,7 @@ SET (librepo_SRCS
      checksum.c
      downloader.c
      downloadtarget.c
+     fastestmirror.c
      gpg.c
      handle.c
      lrmirrorlist.c
@@ -19,6 +20,7 @@ SET (librepo_SRCS
 
 SET(librepo_HEADERS
     checksum.h
+    fastestmirror.h
     gpg.h
     handle.h
     librepo.h
