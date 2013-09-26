@@ -1116,8 +1116,17 @@ lr_download_cleanup:
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
 
+            // Call failure callback
+            LrFailureCb f_cb =  target->target->failurecb;
+            if (f_cb) {
+                gchar *msg = g_strdup_printf("Not finished - interrupted by "
+                                             "error: %s", tmp_err->message);
+                f_cb(target->target->cbdata, msg);
+                g_free(msg);
+            }
+
             lr_downloadtarget_set_error(target->target, LRE_UNFINISHED,
-                    "Not finnished - interrupted by error: %s",
+                    "Not finished - interrupted by error: %s",
                     tmp_err->message);
         }
 
