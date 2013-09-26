@@ -67,13 +67,8 @@ typedef struct {
         Callback user data */
 
     LrEndCb endcb; /*!<
-        Callback called when target was successfully
-        downloaded and validated */
-
-    LrFailureCb failurecb; /*!<
-        Callback called when librepo gave up (file
-        was not retrieved from any mirror, or
-        downloaded file always failed checksumming) */
+        Callback called when target transfer is done.
+        (Use status to check if successfully or unsuccessfully) */
 
     LrMirrorFailureCb mirrorfailurecb; /*!<
         Callen when download from a mirror failed. */
@@ -124,11 +119,9 @@ typedef struct {
  *                          by seek to the end.
  * @param progresscb        Progression callback or NULL
  * @param cbdata            Callback data or NULL
- * @param endcb             Callback called when file was successfully
- *                          downloaded and validated.
- * @param failurecb         Called when librepo gave up (file was not
- *                          retrieved from any mirror, or the downloaded
- *                          file always failed checksumming)
+ * @param endcb             Callback called when target transfer is done.
+ *                          (Use status to check if successfully
+ *                          or unsuccessfully)
  * @param mirrorfailurecb   Called when download from a mirror failed.
  * @param userdata          This variable could be used to store some user
  *                          data. This data are not used/touched by
@@ -148,7 +141,6 @@ lr_downloadtarget_new(LrHandle *handle,
                       LrProgressCb progresscb,
                       void *cbdata,
                       LrEndCb endcb,
-                      LrFailureCb failurecb,
                       LrMirrorFailureCb mirrorfailurecb,
                       void *userdata);
 

@@ -39,7 +39,6 @@ lr_downloadtarget_new(LrHandle *handle,
                       LrProgressCb progresscb,
                       void *cbdata,
                       LrEndCb endcb,
-                      LrFailureCb failurecb,
                       LrMirrorFailureCb mirrorfailurecb,
                       void *userdata)
 {
@@ -62,7 +61,6 @@ lr_downloadtarget_new(LrHandle *handle,
     target->progresscb      = progresscb;
     target->cbdata          = cbdata;
     target->endcb           = endcb;
-    target->failurecb       = failurecb;
     target->mirrorfailurecb = mirrorfailurecb;
     target->rcode           = LRE_UNFINISHED;
     target->userdata        = userdata;

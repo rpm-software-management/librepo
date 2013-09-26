@@ -169,7 +169,6 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertEqual(t.cbdata, None)
         self.assertEqual(t.handle, None)
         self.assertEqual(t.endcb, None)
-        self.assertEqual(t.failurecb, None)
         self.assertEqual(t.mirrorfailurecb, None)
 
     def test_packagetarget_sanity_01(self):
@@ -178,7 +177,6 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         cbdata = {"a": "b"}
         def progresscb(a, b, c): return 0
         def endcb(a): return
-        def failurecb(a, b): return 0
         def mirrorfailurecb(a, b): return 0;
 
         t = librepo.PackageTarget("foo",
@@ -192,7 +190,6 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
                                   cbdata=cbdata,
                                   handle=h,
                                   endcb=endcb,
-                                  failurecb=failurecb,
                                   mirrorfailurecb=mirrorfailurecb)
 
         self.assertEqual(t.relative_url, "foo")
@@ -206,7 +203,6 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertEqual(t.cbdata, cbdata)
         self.assertEqual(t.handle, h)
         self.assertEqual(t.endcb, endcb)
-        self.assertEqual(t.failurecb, failurecb)
         self.assertEqual(t.mirrorfailurecb, mirrorfailurecb)
 
     def test_download_packages_00(self):

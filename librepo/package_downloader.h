@@ -107,13 +107,8 @@ typedef struct {
         Callback data */
 
     LrEndCb endcb; /*!<
-        Callback called when target was successfully
-        downloaded and validated */
-
-    LrFailureCb failurecb; /*!<
-        Callback called when librepo gave up (file
-        was not retrieved from any mirror, or
-        downloaded file always failed checksumming) */
+        Callback called when target transfer is done.
+        (Use status to check if successfully or unsuccessfully) */
 
     LrMirrorFailureCb mirrorfailurecb; /*!<
         Callen when download from a mirror failed. */
@@ -189,11 +184,8 @@ lr_packagetarget_new(LrHandle *handle,
  *                          exists, it will be normally downloaded again.
  * @param progresscb        Progress callback for this transfer.
  * @param cbdata            User data for the callbacks
- * @param endcb             Callback called when file was successfully
- *                          downloaded and validated.
- * @param failurecb         Called when librepo gave up (file was not
- *                          retrieved from any mirror, or the downloaded
- *                          file always failed checksumming)
+ * @param endcb             Callback called when target transfer is done.
+ *                          (Use status to check if successfully
  * @param mirrorfailurecb   Called when download from a mirror failed.
  * @param err               GError **
  * @return                  Newly allocated LrPackageTarget or NULL on error
@@ -210,7 +202,6 @@ lr_packagetarget_new_v2(LrHandle *handle,
                         LrProgressCb progresscb,
                         void *cbdata,
                         LrEndCb endcb,
-                        LrFailureCb failurecb,
                         LrMirrorFailureCb mirrorfailurecb,
                         GError **err);
 

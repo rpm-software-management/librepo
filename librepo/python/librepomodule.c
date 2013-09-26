@@ -346,6 +346,11 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "CHECKSUM_SHA384", LR_CHECKSUM_SHA384);
     PyModule_AddIntConstant(m, "CHECKSUM_SHA512", LR_CHECKSUM_SHA512);
 
+    // Transfer statuses
+    PyModule_AddIntConstant(m, "TRANSFER_SUCCESSFUL", LR_TRANSFER_SUCCESSFUL);
+    PyModule_AddIntConstant(m, "TRANSFER_ALREADYEXISTS", LR_TRANSFER_ALREDYEXISTS);
+    PyModule_AddIntConstant(m, "TRANSFER_ERROR", LR_TRANSFER_ERROR);
+
 #if PY_MAJOR_VERSION >= 3
     return m;
 #endif

@@ -466,11 +466,13 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 g_debug("%s: All mirrors were tried without success", __func__);
                 target->state = LR_DS_FAILED;
 
-                // Call failure callback
-                LrFailureCb f_cb =  target->target->failurecb;
-                if (f_cb)
-                    f_cb(target->target->cbdata, "No more mirrors to try - "
-                            "All mirrors were already tried without success");
+                // Call end callback
+                LrEndCb end_cb =  target->target->endcb;
+                if (end_cb)
+                    end_cb(target->target->cbdata,
+                           LR_TRANSFER_ERROR,
+                           "No more mirrors to try - All mirrors "
+                           "were already tried without success");
 
                 lr_downloadtarget_set_error(target->target, LRE_NOURL,
                             "Cannot download, all mirrors were already tried "
@@ -495,6 +497,11 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 __func__, target->target->path);
 
     } // End while(1)
+
+    if (!full_url) {
+        // Nothing to do
+        return TRUE;
+    }
 
     *candidatefound = TRUE;
 
@@ -803,7 +810,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
             if (mf_cb) {
                 // TODO: Break download if rc != 0
-                mf_cb(target->target->cbdata, tmp_err->message);
+                mf_cb(target->target->cbdata, tmp_err->message, effective_url);
             }
 
             if (!complete_url_in_path
@@ -821,10 +828,12 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                         __func__, num_of_tried_mirrors);
                 target->state = LR_DS_FAILED;
 
-                // Call failure callback
-                LrFailureCb f_cb =  target->target->failurecb;
-                if (f_cb)
-                    f_cb(target->target->cbdata, tmp_err->message);
+                // Call end callback
+                LrEndCb end_cb =  target->target->endcb;
+                if (end_cb)
+                    end_cb(target->target->cbdata,
+                           LR_TRANSFER_ERROR,
+                           tmp_err->message);
 
                 lr_downloadtarget_set_error(target->target,
                                             tmp_err->code,
@@ -872,7 +881,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             // Call end callback
             LrEndCb end_cb = target->target->endcb;
             if (end_cb)
-                end_cb(target->target->cbdata);
+                end_cb(target->target->cbdata,
+                       LR_TRANSFER_SUCCESSFUL,
+                       NULL);
         }
 
         lr_free(effective_url);
@@ -1116,12 +1127,14 @@ lr_download_cleanup:
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
 
-            // Call failure callback
-            LrFailureCb f_cb =  target->target->failurecb;
-            if (f_cb) {
+            // Call end callback
+            LrEndCb end_cb =  target->target->endcb;
+            if (end_cb) {
                 gchar *msg = g_strdup_printf("Not finished - interrupted by "
                                              "error: %s", tmp_err->message);
-                f_cb(target->target->cbdata, msg);
+                end_cb(target->target->cbdata,
+                     LR_TRANSFER_ERROR,
+                     msg);
                 g_free(msg);
             }
 
@@ -1199,7 +1212,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
                                    url, NULL, fd,
                                    LR_CHECKSUM_UNKNOWN,
                                    NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL, NULL);
+                                   NULL, NULL, NULL);
 
     ret = lr_download_target(target, &tmp_err);
 

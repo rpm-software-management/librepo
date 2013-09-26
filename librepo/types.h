@@ -86,25 +86,33 @@ typedef int (*LrProgressCb)(void *clientp,
                             double total_to_download,
                             double now_downloaded);
 
-/** End callback prototype
- * Called when download is finished successfully
- * @param clientp           Pointer to user data.
- */
-typedef void (*LrEndCb)(void *clientp);
+/** Transfer status codes */
+typedef enum {
+    LR_TRANSFER_SUCCESSFUL,
+    LR_TRANSFER_ALREDYEXISTS,
+    LR_TRANSFER_ERROR,
+} LrTransferStatus;
 
-/** Failure callback prototype
+/** Called when a transfer is done (use transfer status to check
+ * if successful or failed).
  * @param clientp           Pointer to user data.
- * @param msg               Error message.
+ * @param status            Transfer status
+ * @param msg               Error message or NULL.
  * @return                  Returning a non-zero value from this callback
  *                          will cause to abort the transfer.
  */
-typedef void (*LrFailureCb)(void *clientp, const char *msg);
+typedef void (*LrEndCb)(void *clientp,
+                        LrTransferStatus status,
+                        const char *msg);
 
 /** MirrorFailure callback prototype
  * @param clientp           Pointer to user data.
  * @param msg               Error message.
+ * @param url               Mirror URL
  */
-typedef int (*LrMirrorFailureCb)(void *clientp, const char *msg);
+typedef int (*LrMirrorFailureCb)(void *clientp,
+                                 const char *msg,
+                                 const char *url);
 
 /** @} */
 

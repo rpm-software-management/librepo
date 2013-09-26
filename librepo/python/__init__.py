@@ -487,6 +487,13 @@ LibRepo Result options for use in :meth:`~.Result.getinfo` method.
     Return a dict representing a repomd.xml file of downloaded
     yum repository.
 
+Transfer statuses for endcb of :class:`~.PackageTarget`
+-------------------------------------------------------
+
+.. data:: TRANSFER_SUCCESSFUL
+.. data:: TRANSFER_ALREADYEXISTS
+.. data:: TRANSFER_ERROR
+
 """
 
 import librepo._librepo
@@ -720,6 +727,10 @@ _CHECKSUM_STR_TO_VAL_MAP = {
     'sha512':   CHECKSUM_SHA512,
 }
 
+TRANSFER_SUCCESSFUL     = _librepo.TRANSFER_SUCCESSFUL
+TRANSFER_ALREADYEXISTS  = _librepo.TRANSFER_ALREADYEXISTS
+TRANSFER_ERROR          = _librepo.TRANSFER_ERROR
+
 def checksum_str_to_type(name):
     name = name.lower()
     return _CHECKSUM_STR_TO_VAL_MAP.get(name, CHECKSUM_UNKNOWN)
@@ -733,11 +744,11 @@ class PackageTarget(_librepo.PackageTarget):
     def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, expectedsize=0, base_url=None, resume=False,
                  progresscb=None, cbdata=None, handle=None, endcb=None,
-                 failurecb=None, mirrorfailurecb=None):
+                 mirrorfailurecb=None):
         _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
                                         checksum_type, checksum, expectedsize,
                                         base_url, resume, progresscb, cbdata,
-                                        endcb, failurecb, mirrorfailurecb)
+                                        endcb, mirrorfailurecb)
 
 
 class Handle(_librepo.Handle):

@@ -89,7 +89,6 @@ lr_packagetarget_new_v2(LrHandle *handle,
                         LrProgressCb progresscb,
                         void *cbdata,
                         LrEndCb endcb,
-                        LrFailureCb failurecb,
                         LrMirrorFailureCb mirrorfailurecb,
                         GError **err)
 {
@@ -111,7 +110,6 @@ lr_packagetarget_new_v2(LrHandle *handle,
         return NULL;
 
     target->endcb = endcb;
-    target->failurecb = failurecb,
     target->mirrorfailurecb = mirrorfailurecb;
 
     return target;
@@ -242,13 +240,17 @@ lr_download_packages(GSList *targets,
                     g_debug("%s: Package %s is already downloaded (checksum matches)",
                             __func__, packagetarget->local_path);
 
+                    packagetarget->err = g_string_chunk_insert(
+                                                packagetarget->chunk,
+                                                "Already downloaded");
+
                     // Call end callback
                     LrEndCb end_cb = packagetarget->endcb;
                     if (end_cb)
-                        end_cb(packagetarget->cbdata);
+                        end_cb(packagetarget->cbdata,
+                               LR_TRANSFER_ALREDYEXISTS,
+                               "Already downloaded");
 
-                    packagetarget->err = g_string_chunk_insert(packagetarget->chunk,
-                                         "Already downloaded");
                     continue;
                 }
             }
@@ -282,7 +284,6 @@ lr_download_packages(GSList *targets,
                                                packagetarget->progresscb,
                                                packagetarget->cbdata,
                                                packagetarget->endcb,
-                                               packagetarget->failurecb,
                                                packagetarget->mirrorfailurecb,
                                                packagetarget);
 

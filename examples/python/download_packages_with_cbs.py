@@ -20,14 +20,19 @@ if __name__ == "__main__":
     h.repotype = librepo.YUMREPO
 
     # Callbacks
-    def endcb(data):
-        print "EndCb: Download of %s finished" % data
+    def endcb(data, status, msg):
+        print "EndCb: Download of %s finished with status:" % data,
+        if status == librepo.TRANSFER_SUCCESSFUL:
+            print "Successfully"
+        elif status == librepo.TRANSFER_ALREADYEXISTS:
+            print "Already exists"
+        else:
+            print "Error: %s" % msg
 
-    def failurecb(data, msg):
-        print "FailureCb: Download of %s failed with error: %s" % (data, msg)
 
-    def mirrorfailurecb(data, msg):
-        print "MirrorFailureCb: Download of %s from mirror failed with: %s" % (data, msg)
+    def mirrorfailurecb(data, msg, url):
+        print "MirrorFailureCb: Download of %s from %s failed with: %s" % \
+              (data, url, msg)
 
     # Prepare list of targets
     packages = []
@@ -39,7 +44,6 @@ if __name__ == "__main__":
                                    resume=True,
                                    cbdata="beaker-0.14.0-1.fc18.src.rpm",
                                    endcb=endcb,
-                                   failurecb=failurecb,
                                    mirrorfailurecb=mirrorfailurecb)
     packages.append(target)
 
@@ -49,7 +53,6 @@ if __name__ == "__main__":
                                    checksum="foobar",
                                    cbdata="beaker-0.13.2-1.fc17.noarch.rpm (bad checksum)",
                                    endcb=endcb,
-                                   failurecb=failurecb,
                                    mirrorfailurecb=mirrorfailurecb)
     packages.append(target)
 
@@ -59,7 +62,6 @@ if __name__ == "__main__":
                                    checksum="xyz",
                                    cbdata="beaker-0.13.2-1.fc17.src.rpm (bad checksum)",
                                    endcb=endcb,
-                                   failurecb=failurecb,
                                    mirrorfailurecb=mirrorfailurecb)
     packages.append(target)
 
@@ -68,7 +70,6 @@ if __name__ == "__main__":
                                    expectedsize=333333333333333,
                                    cbdata="beaker-client-0.14.1-1.fc18.noarch.rpm (bad size)",
                                    endcb=endcb,
-                                   failurecb=failurecb,
                                    mirrorfailurecb=mirrorfailurecb)
     packages.append(target)
 
@@ -76,7 +77,6 @@ if __name__ == "__main__":
                                    handle=h,
                                    cbdata="rhts-4.56-1.fc17.src.rpm_bad_filename (bad path)",
                                    endcb=endcb,
-                                   failurecb=failurecb,
                                    mirrorfailurecb=mirrorfailurecb)
     packages.append(target)
 
