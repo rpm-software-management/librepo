@@ -224,7 +224,12 @@ lr_start_handler(void *pdata, const char *element, const char **attr)
 
     switch(pd->state) {
     case STATE_START:
+        break;
+
     case STATE_REPOMD:
+        pd->repomdfound = TRUE;
+        break;
+
     case STATE_REVISION:
     case STATE_TAGS:
     case STATE_REPO:
@@ -503,6 +508,14 @@ lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
     ret = lr_xml_parser_generic(parser, pd, fd, &tmp_err);
     if (tmp_err)
         g_propagate_error(err, tmp_err);
+
+    // Check of results
+
+    if (!tmp_err && !pd->repomdfound) {
+        ret = FALSE;
+        g_set_error(err, LR_XML_PARSER_ERROR, LRE_REPOMDXML,
+                    "Element <repomd> was not found - Bad repomd file");
+    }
 
     // Clean up
 

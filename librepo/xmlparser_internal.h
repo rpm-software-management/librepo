@@ -71,6 +71,8 @@ typedef struct {
 
     /* Repomd related stuff */
 
+    gboolean repomdfound; /*!<
+        True if the <repomd> element was found */
     LrYumRepoMd *repomd; /*!<
         Repomd object */
     LrYumRepoMdRecord *repomdrecord; /*!<
