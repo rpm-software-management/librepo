@@ -227,6 +227,7 @@ cleanup:
         LrDownloadTarget *downloadtarget = elem->data;
         LrPackageTarget *packagetarget = downloadtarget->userdata;
 
+        close(downloadtarget->fd);
         if (downloadtarget->err)
             packagetarget->err = g_string_chunk_insert(packagetarget->chunk,
                                                        downloadtarget->err);
