@@ -339,6 +339,8 @@ lr_yum_download_repo(LrHandle *handle,
                                                 NULL);
                 }
             }
+
+            close(target->fd);
         }
 
         if (code != LRE_OK) {
