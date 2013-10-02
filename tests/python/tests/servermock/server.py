@@ -1,5 +1,5 @@
 from flask import Flask
-from yum_mock.yum_mock import yum_mock
+from .yum_mock.yum_mock import yum_mock
 
 app = Flask(__name__)
 #app.register_blueprint(working_repo)

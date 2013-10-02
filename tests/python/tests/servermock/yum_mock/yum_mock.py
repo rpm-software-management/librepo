@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, abort, send_file, request, Response
 from functools import wraps
 import os
-import config
-import StringIO
+from .config import AUTH_USER, AUTH_PASS
 
 yum_mock = Blueprint('yum_mock', __name__,
                         template_folder='templates',
@@ -76,7 +75,7 @@ def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username == config.AUTH_USER and password == config.AUTH_PASS
+    return username == AUTH_USER and password == AUTH_PASS
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
