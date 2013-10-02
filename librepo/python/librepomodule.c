@@ -178,7 +178,7 @@ init_librepo(void)
     if (!m)
         INITERROR;
 
-    struct module_state *st = GETSTATE(module);
+    struct module_state *st = GETSTATE(m);
 
     // Exceptions
     if (!init_exceptions()) {
