@@ -72,7 +72,7 @@ static int
 progress_callback(void *data, double total_to_download, double now_downloaded)
 {
     _HandleObject *self;
-    PyObject *user_data, *arglist, *result;
+    PyObject *user_data, *result;
 
     self = (_HandleObject *)data;
     if (!self->progress_cb)
@@ -83,16 +83,12 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     else
         user_data = Py_None;
 
-    arglist = Py_BuildValue("(Odd)", user_data, total_to_download, now_downloaded);
-    if (arglist == NULL)
-        return 0;
-
     EndAllowThreads(&self->state);
-    result = PyObject_CallObject(self->progress_cb, arglist);
+    result = PyObject_CallFunction(self->progress_cb,
+                        "(Odd)", user_data, total_to_download, now_downloaded);
+    Py_XDECREF(result);
     BeginAllowThreads(&self->state);
 
-    Py_DECREF(arglist);
-    Py_XDECREF(result);
     return 0;
 }
 

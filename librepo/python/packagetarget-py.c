@@ -26,6 +26,7 @@
 #include "handle-py.h"
 #include "packagetarget-py.h"
 #include "exception-py.h"
+#include "downloader-py.h"
 #include "packagedownloader-py.h"
 
 typedef struct {
@@ -70,9 +71,10 @@ static int
 packagetarget_progress_callback(void *data, double total_to_download, double now_downloaded)
 {
     _PackageTargetObject *self;
-    PyObject *user_data, *arglist, *result;
+    PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
+    assert(self->handle);
     if (!self->progress_cb)
         return 0;
 
@@ -81,17 +83,12 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
     else
         user_data = Py_None;
 
-    arglist = Py_BuildValue("(Odd)", user_data, total_to_download, now_downloaded);
-    if (arglist == NULL)
-        return 0;
-
-    assert(self->handle);
     EndAllowThreads(self->state);
-    result = PyObject_CallObject(self->progress_cb, arglist);
+    result = PyObject_CallFunction(self->progress_cb,
+                        "(Odd)", user_data, total_to_download, now_downloaded);
+    Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    Py_DECREF(arglist);
-    Py_XDECREF(result);
     return 0;
 }
 
@@ -101,9 +98,10 @@ packagetarget_end_callback(void *data,
                            const char *msg)
 {
     _PackageTargetObject *self;
-    PyObject *user_data, *arglist, *result;
+    PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
+    assert(self->handle);
     if (!self->end_cb)
         return;
 
@@ -112,17 +110,12 @@ packagetarget_end_callback(void *data,
     else
         user_data = Py_None;
 
-    arglist = Py_BuildValue("(Ois)", user_data, status, msg);
-    if (arglist == NULL)
-        return;
-
-    assert(self->handle);
     EndAllowThreads(self->state);
-    result = PyObject_CallObject(self->end_cb, arglist);
+    result = PyObject_CallFunction(self->end_cb,
+                                   "(Ois)", user_data, status, msg);
+    Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    Py_DECREF(arglist);
-    Py_XDECREF(result);
     return;
 }
 
@@ -132,9 +125,10 @@ packagetarget_mirrorfailure_callback(void *data,
                                      const char *url)
 {
     _PackageTargetObject *self;
-    PyObject *user_data, *arglist, *result;
+    PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
+    assert(self->handle);
     if (!self->mirrorfailure_cb)
         return 0;
 
@@ -143,17 +137,12 @@ packagetarget_mirrorfailure_callback(void *data,
     else
         user_data = Py_None;
 
-    arglist = Py_BuildValue("(Oss)", user_data, msg, url);
-    if (arglist == NULL)
-        return 0;
-
-    assert(self->handle);
     EndAllowThreads(self->state);
-    result = PyObject_CallObject(self->mirrorfailure_cb, arglist);
+    result = PyObject_CallFunction(self->mirrorfailure_cb,
+                                   "(Oss)", user_data, msg, url);
+    Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    Py_DECREF(arglist);
-    Py_XDECREF(result);
     return 0;
 }
 
