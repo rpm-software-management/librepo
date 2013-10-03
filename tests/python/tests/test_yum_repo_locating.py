@@ -26,7 +26,7 @@ class TestCaseYumRepoLocating(TestCase):
         os.mkdir(gpghome, 0o700)
         os.environ['GNUPGHOME'] = gpghome
         self.ctx = gpgme.Context()
-        self.ctx.import_(open(PUB_KEY))
+        self.ctx.import_(open(PUB_KEY, 'rb'))
 
     def tearDown(self):
         self.ctx.delete(self.ctx.get_key('22F2C4E9'))
