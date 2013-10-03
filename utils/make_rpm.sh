@@ -69,7 +69,7 @@ echo "Cleanup done"
 echo "> Moving rpms and srpm .."
 mv --verbose $RPMBUILD_DIR/SRPMS/librepo-*.src.rpm $PREFIX/.
 mv --verbose $RPMBUILD_DIR/RPMS/*/librepo-*.rpm $PREFIX/.
-mv --verbose $RPMBUILD_DIR/RPMS/*/python-librepo-*.rpm $PREFIX/.
+mv --verbose $RPMBUILD_DIR/RPMS/*/python*-librepo-*.rpm $PREFIX/.
 echo "Moving done"
 
 echo "All done!"
