@@ -549,9 +549,7 @@ getinfo(_HandleObject *self, PyObject *args)
                                 &str);
         if (!res)
             RETURN_ERROR(&tmp_err, -1, NULL);
-        if (str == NULL)
-            Py_RETURN_NONE;
-        return PyUnicode_FromString(str);
+        return PyStringOrNone_FromString(str);
 
     /* long* options */
     case LRI_UPDATE:
@@ -588,11 +586,11 @@ getinfo(_HandleObject *self, PyObject *args)
             LrVar *var = elem->data;
 
             tuple = PyTuple_New(2);
-            obj = PyUnicode_FromString(var->var);
+            obj = PyStringOrNone_FromString(var->var);
             PyTuple_SetItem(tuple, 0, obj);
 
             if (var->val != NULL) {
-                obj = PyUnicode_FromString(var->val);
+                obj = PyStringOrNone_FromString(var->val);
             } else {
                 Py_INCREF(Py_None);
                 obj = Py_None;
@@ -627,7 +625,7 @@ getinfo(_HandleObject *self, PyObject *args)
         }
         list = PyList_New(0);
         for (int x=0; strlist[x] != NULL; x++) {
-            PyList_Append(list, PyUnicode_FromString(strlist[x]));
+            PyList_Append(list, PyStringOrNone_FromString(strlist[x]));
         }
 
         g_strfreev(strlist);

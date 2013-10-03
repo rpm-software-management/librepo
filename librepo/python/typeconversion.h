@@ -24,6 +24,7 @@
 #include "librepo/yum.h"
 #include "librepo/metalink.h"
 
+PyObject *PyStringOrNone_FromString(const char *str);
 PyObject *PyObject_FromYumRepo(LrYumRepo *repo);
 PyObject *PyObject_FromYumRepoMd(LrYumRepoMd *repomd);
 PyObject *PyObject_FromMetalink(LrMetalink *metalink);

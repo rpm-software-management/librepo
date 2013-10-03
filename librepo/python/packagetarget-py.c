@@ -28,6 +28,7 @@
 #include "exception-py.h"
 #include "downloader-py.h"
 #include "packagedownloader-py.h"
+#include "typeconversion.h"
 
 typedef struct {
     PyObject_HEAD
@@ -311,7 +312,7 @@ get_str(_PackageTargetObject *self, void *member_offset)
     char *str = *((char **) ((size_t) target + (size_t) member_offset));
     if (str == NULL)
         Py_RETURN_NONE;
-    return PyBytes_FromString(str);
+    return PyStringOrNone_FromString(str);
 }
 
 static PyObject *
