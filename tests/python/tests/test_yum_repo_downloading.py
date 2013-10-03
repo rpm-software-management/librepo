@@ -145,7 +145,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -303,7 +303,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -358,7 +358,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -401,7 +401,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -444,7 +444,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -700,11 +700,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         self.assertTrue(yum_repo["metalink"])
         # All other values shoud be None, [], {} or equivalent
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if key == "metalink":
                 continue
             self.assertFalse(yum_repo[key])
-        for key in yum_repomd.iterkeys():
+        for key in yum_repomd:
             self.assertFalse(yum_repomd[key])
 
     def test_download_repo_01_via_metalink_nourls(self):
@@ -743,7 +743,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -787,7 +787,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -813,7 +813,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -965,7 +965,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -990,7 +990,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -1035,7 +1035,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
@@ -1095,7 +1095,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         # Test that only repomd.xml has a path
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
         self.assertTrue(os.path.exists(yum_repo["repomd"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("repomd", "url", "destdir", "mirrorlist")):
                 self.assertTrue(yum_repo[key] == None)
 
@@ -1111,7 +1111,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
         self.assertTrue(os.path.exists(yum_repo["repomd"]))
         self.assertTrue(os.path.exists(yum_repo["primary"]))
-        for key in yum_repo.iterkeys():
+        for key in yum_repo:
             if yum_repo[key] and (key not in ("repomd", "primary", "url", "destdir", "mirrorlist")):
                 self.assertTrue(yum_repo[key] == None)
 
