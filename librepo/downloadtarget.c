@@ -31,6 +31,7 @@ LrDownloadTarget *
 lr_downloadtarget_new(const char *path,
                       const char *baseurl,
                       int fd,
+                      const char *fn,
                       LrChecksumType checksumtype,
                       const char *checksum,
                       gint64 expectedsize,
@@ -42,7 +43,7 @@ lr_downloadtarget_new(const char *path,
     LrDownloadTarget *target;
 
     assert(path);
-    assert(fd > 0);
+    assert((fd > 0 && !fn) || (fd < 0 && fn));
 
     target = lr_malloc0(sizeof(*target));
 
@@ -50,6 +51,7 @@ lr_downloadtarget_new(const char *path,
     target->path         = g_string_chunk_insert(target->chunk, path);
     target->baseurl      = lr_string_chunk_insert(target->chunk, baseurl);
     target->fd           = fd;
+    target->fn              = lr_string_chunk_insert(target->chunk, fn);
     target->checksumtype = checksumtype;
     target->checksum     = lr_string_chunk_insert(target->chunk, checksum);
     target->expectedsize = expectedsize;
