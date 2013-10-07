@@ -183,7 +183,6 @@ lr_download_packages(GSList *targets,
 
     // Prepare targets
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        int fd;
         gchar *local_path;
         LrPackageTarget *packagetarget = elem->data;
         LrDownloadTarget *downloadtarget;
@@ -256,27 +255,11 @@ lr_download_packages(GSList *targets,
             }
         }
 
-        // Open fd
-        int open_flags = O_CREAT|O_TRUNC|O_RDWR;
-
-        if (packagetarget->resume)
-            open_flags &= ~O_TRUNC;
-
-        fd = open(packagetarget->local_path, open_flags, 0666);
-        if (fd < 0) {
-            ret = FALSE;
-            g_debug("%s: Error while opening %s: %s",
-                    __func__, packagetarget->local_path, strerror(errno));
-            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
-                        "Cannot open %s: %s",
-                        packagetarget->local_path, strerror(errno));
-            goto cleanup;
-        }
-
         downloadtarget = lr_downloadtarget_new(packagetarget->handle,
                                                packagetarget->relative_url,
                                                packagetarget->base_url,
-                                               fd,
+                                               -1,
+                                               packagetarget->local_path,
                                                packagetarget->checksum_type,
                                                packagetarget->checksum,
                                                packagetarget->expectedsize,
@@ -299,8 +282,6 @@ cleanup:
     for (GSList *elem = downloadtargets; elem; elem = g_slist_next(elem)) {
         LrDownloadTarget *downloadtarget = elem->data;
         LrPackageTarget *packagetarget = downloadtarget->userdata;
-
-        close(downloadtarget->fd);
         if (downloadtarget->err)
             packagetarget->err = g_string_chunk_insert(packagetarget->chunk,
                                                        downloadtarget->err);

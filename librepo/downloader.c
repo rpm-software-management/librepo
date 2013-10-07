@@ -25,6 +25,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <curl/curl.h>
 
 #include "downloader.h"
@@ -534,21 +537,40 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     lr_free(full_url);
 
-    // Open FILE from fd
-    int new_fd = dup(target->target->fd);
-    if (new_fd == -1) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                    "dup(%d) failed: %s",
-                    target->target->fd, strerror(errno));
-        curl_easy_cleanup(h);
-        return FALSE;
+    // Prepare FILE
+    int fd;
+
+    if (target->target->fd != -1) {
+        // Use supplied filedescriptor
+        fd = dup(target->target->fd);
+        if (fd == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "dup(%d) failed: %s",
+                        target->target->fd, strerror(errno));
+            curl_easy_cleanup(h);
+            return FALSE;
+        }
+    } else {
+        // Use supplied filename
+        int open_flags = O_CREAT|O_TRUNC|O_RDWR;
+        if (target->target->resume)
+            open_flags &= ~O_TRUNC;
+
+        fd = open(target->target->fn, open_flags, 0666);
+        if (fd < 0) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "Cannot open %s: %s",
+                        target->target->fn, strerror(errno));
+            curl_easy_cleanup(h);
+            return FALSE;
+        }
     }
 
-    FILE *f = fdopen(new_fd, "w+b");
+    FILE *f = fdopen(fd, "w+b");
     if (!f) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                     "fdopen(%d) failed: %s",
-                    new_fd, strerror(errno));
+                    fd, strerror(errno));
         curl_easy_cleanup(h);
         return FALSE;
     }
@@ -854,19 +876,30 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 // If no resume enabled, just truncate whole file
                 original_offset = 0;
 
-            int rc = ftruncate(target->target->fd, original_offset);
+            int rc;
+            if (target->target->fn)
+                rc = truncate(target->target->fn, original_offset);
+            else
+                rc = ftruncate(target->target->fd, original_offset);
+
             if (rc == -1) {
                 lr_free(effective_url);
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                             "ftruncate() failed: %s", strerror(errno));
                 return FALSE;
             }
-            off_t rc_offset = lseek(target->target->fd, original_offset, SEEK_SET);
-            if (rc_offset == -1) {
-                lr_free(effective_url);
-                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                            "lseek() failed: %s", strerror(errno));
-                return FALSE;
+
+            if (!target->target->fn) {
+                // In case fd is used, seek to the original offset
+                off_t rc_offset = lseek(target->target->fd,
+                                        original_offset,
+                                        SEEK_SET);
+                if (rc_offset == -1) {
+                    lr_free(effective_url);
+                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                                "lseek() failed: %s", strerror(errno));
+                    return FALSE;
+                }
             }
         } else {
             // No error encountered, transfer finished successfully
@@ -1069,7 +1102,7 @@ lr_download(GSList *targets,
 
         assert(dtarget);
         assert(dtarget->path);
-        assert(dtarget->fd > 0);
+        assert((dtarget->fd > 0 && !dtarget->fn) || (dtarget->fd < 0 && dtarget->fn));
         g_debug("%s: Target: %s (%s)", __func__,
                 dtarget->path,
                 (dtarget->baseurl) ? dtarget->baseurl : "-");
@@ -1209,7 +1242,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     assert(!err || *err == NULL);
 
     target = lr_downloadtarget_new(lr_handle,
-                                   url, NULL, fd,
+                                   url, NULL, fd, NULL,
                                    LR_CHECKSUM_UNKNOWN,
                                    NULL, 0, 0, NULL, NULL,
                                    NULL, NULL, NULL);

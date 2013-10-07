@@ -44,7 +44,12 @@ typedef struct {
         Base URL for this target. If used, then mirrorlist will be ignored. */
 
     int fd; /*!<
-        Opened file descriptor where data will be written */
+        Opened file descriptor where data will be written or -1.
+        Note: Only one, fd or fn, is set simultaneously. */
+
+    char *fn; /*!<
+        Filename where data will be written or NULL.
+        Note: Only one, fd or fn, is set simultaneously. */
 
     LrChecksumType checksumtype; /*!<
         Checksum type */
@@ -105,6 +110,10 @@ typedef struct {
  * @param path              Absolute or relative URL path
  * @param baseurl           Base URL for relative path specified in path param
  * @param fd                Opened file descriptor where data will be written
+ *                          or -1.
+ *                          Note: Set this or fn, no both!
+ * @param fn                Filename where data will be written or NULL.
+ *                          Note: Set this or fd, no both!
  * @param checksumtype      Type of used checksum or LR_CHECKSUM_UNKNOWN if
  *                          checksum is not used or should not be checked.
  * @param checksum          Checksum value to check or NULL. If checksumtype
@@ -134,6 +143,7 @@ lr_downloadtarget_new(LrHandle *handle,
                       const char *path,
                       const char *baseurl,
                       int fd,
+                      const char *fn,
                       LrChecksumType checksumtype,
                       const char *checksum,
                       gint64 expectedsize,
