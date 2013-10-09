@@ -25,6 +25,7 @@ SET(librepo_HEADERS
     handle.h
     librepo.h
     metalink.h
+    mirrorlist.h
     package_downloader.h
     rcodes.h
     repomd.h
