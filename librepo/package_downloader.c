@@ -187,12 +187,6 @@ lr_download_packages(GSList *targets,
         LrPackageTarget *packagetarget = elem->data;
         LrDownloadTarget *downloadtarget;
 
-        if (packagetarget->handle) {
-            ret = lr_handle_prepare_internal_mirrorlist(packagetarget->handle, err);
-            if (!ret)
-                goto cleanup;
-        }
-
         // Prepare destination filename
         if (packagetarget->dest) {
             if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
@@ -253,6 +247,12 @@ lr_download_packages(GSList *targets,
                     continue;
                 }
             }
+        }
+
+        if (packagetarget->handle) {
+            ret = lr_handle_prepare_internal_mirrorlist(packagetarget->handle, err);
+            if (!ret)
+                goto cleanup;
         }
 
         downloadtarget = lr_downloadtarget_new(packagetarget->handle,
