@@ -36,6 +36,12 @@ G_BEGIN_DECLS
  */
 typedef struct _LrHandle LrHandle;
 
+/** LRO_FASTESTMIRRORMAXAGE default value */
+#define LRO_FASTESTMIRRORMAXAGE_DEFAULT     2592000 // 30 days
+
+/** LRO_FASTESTMIRRORMAXAGE minimal allowed value */
+#define LRO_FASTESTMIRRORMAXAGE_MIN         0
+
 /** LRO_PROXYPORT default value */
 #define LRO_PROXYPORT_DEFAULT               1080
 
@@ -175,6 +181,15 @@ typedef enum {
         determined connection speed.
         Disabled by default. */
 
+    LRO_FASTESTMIRRORCACHE, /*!< (char *)
+        Path to the fastestmirror's cache file.
+        Used when LRO_FASTESTMIRROR is enabled.
+        If it doesn't exists, it will be created. */
+
+    LRO_FASTESTMIRRORMAXAGE, /*< (long)
+        Maximum age of a record in cache (seconds).
+        Default: 2592000 (30 days). */
+
     /* Repo common options */
 
     LRO_GPGCHECK,   /*!< (long 1 or 0)
@@ -240,6 +255,8 @@ typedef enum {
         You could use g_strfreev() function. */
     LRI_METALINK,               /*!< (LrMetalink *) */
     LRI_FASTESTMIRROR,          /*!< (long *) */
+    LRI_FASTESTMIRRORCACHE,     /*!< (char **) */
+    LRI_FASTESTMIRRORMAXAGE,    /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

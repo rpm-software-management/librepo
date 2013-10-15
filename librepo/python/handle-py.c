@@ -161,7 +161,9 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXY:
     case LRO_PROXYUSERPWD:
     case LRO_DESTDIR:
-    case LRO_USERAGENT: {
+    case LRO_USERAGENT:
+    case LRO_FASTESTMIRRORCACHE:
+    {
         char *str = NULL, *alloced = NULL;
 
         if (PyUnicode_Check(obj)) {
@@ -222,6 +224,7 @@ setopt(_HandleObject *self, PyObject *args)
      */
     case LRO_PROXYTYPE:
     case LRO_REPOTYPE:
+    case LRO_FASTESTMIRRORMAXAGE:
     {
         int badarg = 0;
         long d;
@@ -543,6 +546,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_METALINKURL:
     case LRI_DESTDIR:
     case LRI_USERAGENT:
+    case LRI_FASTESTMIRRORCACHE:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,
@@ -558,6 +562,7 @@ getinfo(_HandleObject *self, PyObject *args)
     case LRI_FETCHMIRRORS:
     case LRI_MAXMIRRORTRIES:
     case LRI_FASTESTMIRROR:
+    case LRI_FASTESTMIRRORMAXAGE:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

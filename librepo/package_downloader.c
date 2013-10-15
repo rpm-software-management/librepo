@@ -292,6 +292,7 @@ lr_download_packages(GSList *targets,
 
     // Do Fastest Mirror resolving for all handles in one shot
     if (fmr_handles) {
+        fmr_handles = g_slist_reverse(fmr_handles);
         ret = lr_fastestmirror_sort_internalmirrorlists(fmr_handles, err);
         g_slist_free(fmr_handles);
 

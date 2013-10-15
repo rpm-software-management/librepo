@@ -87,6 +87,7 @@ lr_handle_init()
 
     handle = lr_malloc0(sizeof(LrHandle));
     handle->curl_handle = curl;
+    handle->fastestmirrormaxage = LRO_FASTESTMIRRORMAXAGE_DEFAULT;
     handle->mirrorlist_fd = -1;
     handle->metalink_fd = -1;
     handle->checks |= LR_CHECK_CHECKSUM;
@@ -108,6 +109,7 @@ lr_handle_free(LrHandle *handle)
     if (handle->metalink_fd != -1)
         close(handle->mirrorlist_fd);
     lr_handle_free_list(&handle->urls);
+    lr_free(handle->fastestmirrorcache);
     lr_free(handle->mirrorlist);
     lr_free(handle->mirrorlisturl);
     lr_free(handle->metalinkurl);
@@ -454,6 +456,26 @@ lr_handle_setopt(LrHandle *handle,
 
     case LRO_FASTESTMIRROR:
         handle->fastestmirror = va_arg(arg, long) ? 1 : 0;
+        break;
+
+    case LRO_FASTESTMIRRORCACHE: {
+        char *fastestmirrorcache = va_arg(arg, char *);
+        if (handle->fastestmirrorcache) lr_free(handle->fastestmirrorcache);
+        handle->fastestmirrorcache = g_strdup(fastestmirrorcache);
+        break;
+    }
+
+    case LRO_FASTESTMIRRORMAXAGE:
+        val_long = va_arg(arg, long);
+
+        if (val_long < LRO_FASTESTMIRRORMAXAGE_MIN) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Value of LRO_FASTESTMIRRORMAXAGE is too low.");
+            ret = FALSE;
+        } else {
+            handle->fastestmirrormaxage = val_long;
+        }
+
         break;
 
     default:
@@ -1122,6 +1144,16 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_FASTESTMIRROR:
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->fastestmirror;
+        break;
+
+    case LRI_FASTESTMIRRORCACHE:
+        str = va_arg(arg, char **);
+        *str = handle->fastestmirrorcache;
+        break;
+
+    case LRI_FASTESTMIRRORMAXAGE:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->fastestmirrormaxage;
         break;
 
     default:

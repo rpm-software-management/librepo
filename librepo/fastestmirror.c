@@ -34,21 +34,37 @@
 #define LENGT_OF_MEASUREMENT        2.0    // Number of seconds (float point!)
 #define HALF_OF_SECOND_IN_MICROS    500000
 
+#define CACHE_GROUP_METADATA    ":_librepo_:"   // Group with metadata
+#define CACHE_KEY_TS            "ts"            // Timestamp
+#define CACHE_KEY_CONNECTTIME   "connectime"    // Time of reponse
+#define CACHE_KEY_VERSION       "version"       // Version of cache format
+
+#define CACHE_VERSION   1   // Current version of cache format
+
+#define CACHE_RECORD_MAX_AGE    (LRO_FASTESTMIRRORMAXAGE_DEFAULT * 6)
+
 typedef struct {
     gchar *url;                 // Points to string passed by the user
-    CURL *curl;
-    double plain_connect_time;
+    CURL *curl;                 // Curl handle or NULL
+    double plain_connect_time;  // Mirror connect time
+    gboolean cached;            // Was connect time load from cache?
 } LrFastestMirror;
+
+typedef struct {
+    gchar *path;
+    GKeyFile *keyfile;
+} LrFastestMirrorCache;
 
 static LrFastestMirror *
 lr_lrfastestmirror_new()
 {
     LrFastestMirror *mirror = g_new0(LrFastestMirror, 1);
     mirror->plain_connect_time = 0.0;
+    mirror->cached = FALSE;
     return mirror;
 }
 
-void
+static void
 lr_lrfastestmirror_free(LrFastestMirror *mirror)
 {
     if (!mirror)
@@ -58,12 +74,208 @@ lr_lrfastestmirror_free(LrFastestMirror *mirror)
     g_free(mirror);
 }
 
+static gboolean
+lr_fastestmirrorcache_load(LrFastestMirrorCache **cache,
+                           gchar *path,
+                           GError **err)
+{
+    assert(cache);
+    assert(!err || *err == NULL);
+
+    if (!path) {
+        // No cache file specified
+        *cache = NULL;
+        return TRUE;
+    }
+
+    GKeyFile *keyfile = g_key_file_new();
+
+    *cache = lr_malloc0(sizeof(LrFastestMirrorCache));
+    (*cache)->path = g_strdup(path);
+    (*cache)->keyfile = keyfile;
+
+    if (g_file_test(path, G_FILE_TEST_EXISTS)) {
+        // Cache exists, try to load it
+
+        gboolean something_wrong = FALSE;
+        GError *tmp_err = NULL;
+        gboolean ret = g_key_file_load_from_file(keyfile,
+                                                 path,
+                                                 G_KEY_FILE_NONE,
+                                                 &tmp_err);
+        if (!ret) {
+            // Cannot parse cache file
+            g_debug("%s: Cannot parse fastestmirror cache %s: %s",
+                      __func__, path, tmp_err->message);
+            g_error_free(tmp_err);
+            something_wrong = TRUE;
+        } else {
+            // File parsed successfully
+            if (!g_key_file_has_group(keyfile, CACHE_GROUP_METADATA)) {
+                // Not a fastestmirror cache
+                g_debug("%s: File %s is not a fastestmirror cache file",
+                          __func__, path);
+                something_wrong = TRUE;
+            } else {
+                int version = (int) g_key_file_get_integer(keyfile,
+                                                           CACHE_GROUP_METADATA,
+                                                           CACHE_KEY_VERSION,
+                                                           NULL);
+                if (version != CACHE_VERSION) {
+                    g_debug("%s: Old cache version %d vs %d",
+                            __func__, version, CACHE_VERSION);
+                    something_wrong = TRUE;
+                }
+            }
+        }
+
+        if (something_wrong) {
+            // Reinit keyfile
+            g_key_file_free(keyfile);
+            keyfile = g_key_file_new();
+            (*cache)->keyfile = keyfile;
+        } else {
+            gsize len;
+            gchar **array = g_key_file_get_groups(keyfile, &len);
+            g_debug("%s: Loaded: %"G_GSIZE_FORMAT" records", __func__, len);
+
+            // Remove really outdated records
+            gint64 current_time = g_get_real_time() / 1000000;
+            char **group, *groupname;
+            for (group=array; groupname=*group, groupname; group++) {
+                if (g_str_has_prefix(groupname, ":_"))
+                    continue;
+
+                gint64 ts = g_key_file_get_int64(keyfile,
+                                                 groupname,
+                                                 CACHE_KEY_TS,
+                                                 NULL);
+                if (ts < (current_time - CACHE_RECORD_MAX_AGE)) {
+                    // Record is too old, remove it
+                    g_debug("%s: Removing too old record from cache: %s "
+                            "(ts: %"G_GINT64_FORMAT")",
+                            __func__, groupname, ts);
+                    g_key_file_remove_group(keyfile, groupname, NULL);
+                }
+            }
+            g_strfreev(array);
+        }
+    }
+
+    // Set version of cache format
+    g_key_file_set_integer(keyfile,
+                           CACHE_GROUP_METADATA,
+                           CACHE_KEY_VERSION,
+                           CACHE_VERSION);
+
+    return TRUE;
+}
+
+static gboolean
+lr_fastestmirrorcache_lookup(LrFastestMirrorCache *cache,
+                             gchar *url,
+                             gint64 *ts,
+                             double *connecttime)
+{
+    if (!cache || !cache->keyfile || !url)
+        return FALSE;
+
+    GKeyFile *keyfile = cache->keyfile;
+
+    if (!g_key_file_has_group(keyfile, url))
+        return FALSE;
+
+    gint64 l_ts;
+    double l_connecttime;
+    GError *tmp_err = NULL;
+
+    // Get timestamp
+    l_ts = g_key_file_get_int64(keyfile, url, CACHE_KEY_TS, &tmp_err);
+    if (tmp_err) {
+        g_error_free(tmp_err);
+        return FALSE;
+    }
+
+    // Get connect time
+    l_connecttime = (double) g_key_file_get_double(keyfile,
+                                                   url,
+                                                   CACHE_KEY_CONNECTTIME,
+                                                   &tmp_err);
+    if (tmp_err) {
+        g_error_free(tmp_err);
+        return FALSE;
+    }
+
+    *ts = l_ts;
+    *connecttime = l_connecttime;
+
+    return TRUE;
+}
+
+static void
+lr_fastestmirrorcache_update(LrFastestMirrorCache *cache,
+                             gchar *url,
+                             gint64 ts,
+                             double connecttime)
+{
+    if (!cache || !cache->keyfile || !url)
+        return;
+
+    GKeyFile *keyfile = cache->keyfile;
+
+    g_key_file_set_int64(keyfile, url, CACHE_KEY_TS, ts);
+    g_key_file_set_double(keyfile, url, CACHE_KEY_CONNECTTIME, connecttime);
+}
+
+static gboolean
+lr_fastestmirrorcache_write(LrFastestMirrorCache *cache, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    if (!cache || !cache->keyfile)
+        return TRUE;
+
+    // Gen cache content
+    GError *tmp_err = NULL;
+    gchar *content = g_key_file_to_data(cache->keyfile, NULL, &tmp_err);
+    if (tmp_err) {
+        g_propagate_error(err, tmp_err);
+        return FALSE;
+    }
+
+    // Write cache
+    FILE *f = fopen(cache->path, "w");
+    if (!f) {
+        g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_IO,
+                    "Cannot open %s: %s", cache->path, strerror(errno));
+        return FALSE;
+    }
+
+    fputs(content, f);
+    fclose(f);
+    g_free(content);
+
+    return TRUE;
+}
+
+static void
+lr_fastestmirrorcache_free(LrFastestMirrorCache *cache)
+{
+    if (!cache)
+        return;
+
+    g_free(cache->path);
+    g_key_file_free(cache->keyfile);
+    g_free(cache);
+}
+
 /** Create list of LrFastestMirror based on input list of URLs.
  */
-gboolean
+static gboolean
 lr_fastestmirror_prepare(LrHandle *handle,
                          GSList *in_list,
                          GSList **out_list,
+                         LrFastestMirrorCache *cache,
                          GError **err)
 {
     gboolean ret = TRUE;
@@ -76,10 +288,33 @@ lr_fastestmirror_prepare(LrHandle *handle,
         return TRUE;
     }
 
+    gint64 maxage = (gint64) handle->fastestmirrormaxage;
+    gint64 current_time = g_get_real_time() / 1000000;
+
     for (GSList *elem = in_list; elem; elem = g_slist_next(elem)) {
         gchar *url = elem->data;
         CURLcode curlcode;
         CURL *curlh;
+
+        // TODO: For prefixed by "file://" - set plain_connect_time to zero
+
+        // Try to find item in the cache
+        gint64 ts;
+        double connecttime;
+        if (lr_fastestmirrorcache_lookup(cache, url, &ts, &connecttime)) {
+            if (ts >= (current_time - maxage)) {
+                // Use cached entry
+                g_debug("%s: Using value from fastest mirror cached for: %s (%f)",
+                        __func__, url, connecttime);
+                LrFastestMirror *mirror = lr_lrfastestmirror_new();
+                mirror->url = url;
+                mirror->curl = NULL;
+                mirror->plain_connect_time = connecttime;
+                mirror->cached = TRUE;
+                list = g_slist_append(list, mirror);
+                continue;
+            }
+        }
 
         if (handle)
             curlh = curl_easy_duphandle(handle->curl_handle);
@@ -145,9 +380,18 @@ lr_fastestmirror_perform(GSList *list, GError **err)
     }
 
     // Add curl easy handles to multi handle
+    int handles_added = 0;
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
         LrFastestMirror *mirror = elem->data;
-        curl_multi_add_handle(multihandle, mirror->curl);
+        if (mirror->curl) {
+            curl_multi_add_handle(multihandle, mirror->curl);
+            handles_added++;
+        }
+    }
+
+    if (handles_added == 0) {
+        curl_multi_cleanup(multihandle);
+        return TRUE;
     }
 
     int still_running;
@@ -228,6 +472,9 @@ lr_fastestmirror_perform(GSList *list, GError **err)
         LrFastestMirror *mirror = elem->data;
         CURL *curl = mirror->curl;
 
+        if (!curl)
+            continue;
+
         // Remove handle
         curl_multi_remove_handle(multihandle, curl);
 
@@ -265,7 +512,9 @@ lr_fastestmirror_perform(GSList *list, GError **err)
 }
 
 gboolean
-lr_fastestmirror(LrHandle *handle, GSList **list, GError **err)
+lr_fastestmirror(LrHandle *handle,
+                 GSList **list,
+                 GError **err)
 {
     assert(!err || *err == NULL);
 
@@ -274,9 +523,19 @@ lr_fastestmirror(LrHandle *handle, GSList **list, GError **err)
     if (!list || *list == NULL)
         return TRUE;
 
+    // Load cache
     gboolean ret;
+    LrFastestMirrorCache *cache = NULL;
+    ret = lr_fastestmirrorcache_load(&cache,
+                                     handle->fastestmirrorcache,
+                                     err);
+    if (!ret) {
+        return FALSE;
+    }
+
+    // Prepare list of LrFastestMirror elements
     GSList *lrfastestmirrors;
-    ret = lr_fastestmirror_prepare(handle, *list, &lrfastestmirrors, err);
+    ret = lr_fastestmirror_prepare(handle, *list, &lrfastestmirrors, cache, err);
     if (!ret) {
         g_debug("%s: Error while lr_fastestmirror_prepare()", __func__);
         return FALSE;
@@ -291,6 +550,7 @@ lr_fastestmirror(LrHandle *handle, GSList **list, GError **err)
     }
 
     // Sort the mirrors by the connection time
+    gint64 ts = g_get_real_time() / 1000000; // TimeStamp
     GSList *new_list = NULL;
     while (lrfastestmirrors) {
         LrFastestMirror *mirror = lrfastestmirrors->data;
@@ -307,12 +567,25 @@ lr_fastestmirror(LrHandle *handle, GSList **list, GError **err)
         g_debug("%s: %3.6f : %s", __func__, min_value, mirror->url);
         new_list = g_slist_append(new_list, mirror->url);
         lrfastestmirrors = g_slist_remove(lrfastestmirrors, mirror);
+
+        // Update cache
+        if (mirror->cached == FALSE) {
+            lr_fastestmirrorcache_update(cache,
+                                         mirror->url,
+                                         ts,
+                                         mirror->plain_connect_time);
+        }
+
         lr_lrfastestmirror_free(mirror);
     }
 
     assert(!lrfastestmirrors);
     g_slist_free(*list);
     *list = new_list;
+
+    lr_fastestmirrorcache_write(cache, NULL);
+
+    lr_fastestmirrorcache_free(cache);
 
     return TRUE;
 }
@@ -338,7 +611,12 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
     if (!handles)
         return TRUE;
 
+    LrHandle *main_handle = handles->data;  // Network configuration for the
+                                            // test is used from the first
+                                            // handle
+
     // Prepare list of hosts
+    gchar *fastestmirrorcache = main_handle->fastestmirrorcache;
     GHashTable *hosts_ht = g_hash_table_new_full(g_str_hash,
                                                  g_str_equal,
                                                  g_free,
@@ -352,6 +630,20 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
             gchar *host = lr_url_without_path(imirror->url);
             g_hash_table_insert(hosts_ht, host, NULL);
         }
+
+        // Cache related warning
+        if (fastestmirrorcache) {
+            if (handle->fastestmirrorcache
+                && g_strcmp0(fastestmirrorcache, handle->fastestmirrorcache))
+                g_warning("%s: Multiple fastestmirror caches are specified! "
+                          "Used one is %s (%s is ignored)", __func__,
+                          fastestmirrorcache, handle->fastestmirrorcache);
+        } else {
+            if (handle->fastestmirrorcache)
+                g_warning("%s: First handle doesn't have a fastestmirror "
+                          "cache specified but other one has: %s",
+                          __func__, handle->fastestmirrorcache);
+        }
     }
 
     GList *tmp_list_of_urls = g_hash_table_get_keys(hosts_ht);
@@ -362,10 +654,9 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
     g_list_free(tmp_list_of_urls);
 
     // Sort this list by the connection time
-    LrHandle *main_handle = handles->data;  // Network configuration for the
-                                            // test is used from the first
-                                            // handle
-    gboolean ret = lr_fastestmirror(main_handle, &list_of_urls, err);
+    gboolean ret = lr_fastestmirror(main_handle,
+                                    &list_of_urls,
+                                    err);
     if (!ret) {
         g_debug("%s: lr_fastestmirror failed", __func__);
         g_slist_free(list_of_urls);

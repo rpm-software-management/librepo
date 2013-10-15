@@ -52,6 +52,12 @@ struct _LrHandle {
     int fastestmirror; /*!<
         Should be internal mirrorlist sorted by connection time */
 
+    char *fastestmirrorcache; /*!<
+        Path to the fastestmirror's cache file. */
+
+    long fastestmirrormaxage; /*!<
+        Maximum age of a record in cache (seconds). */
+
     // Mirrorlist related stuff
 
     char *mirrorlist; /*!<

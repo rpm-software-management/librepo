@@ -840,6 +840,45 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             if yum_repo[key] and (key not in ("url", "destdir")):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
+    def test_download_repo_01_via_metalink_badfirsthost_fastestmirror_with_cache(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        cache = os.path.join(self.tmpdir, "fastestmirror.cache")
+        self.assertFalse(os.path.exists(cache))
+
+        url = "%s%s" % (MOCKURL, config.METALINK_BADFIRSTHOST)
+        h.setopt(librepo.LRO_MIRRORLIST, url)
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_FASTESTMIRROR, True)
+        h.setopt(librepo.LRO_FASTESTMIRRORCACHE, cache)
+        h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
+
+        # First host is bad, but fastestmirror is used and thus
+        # working mirror should be added to the first position
+        # and download should be successfull even if maxmirrortries
+        # is equal to 1.
+        h.perform(r)
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertTrue(os.path.exists(cache))
+
+        shutil.rmtree(os.path.join(self.tmpdir, "repodata"))
+
+        # Try again, this time, fastestmirror cache should be used
+        h.perform()
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertTrue(os.path.exists(cache))
 
     def test_download_repo_01_via_metalink_firsturlhascorruptedfiles(self):
         h = librepo.Handle()

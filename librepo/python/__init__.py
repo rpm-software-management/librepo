@@ -193,6 +193,15 @@ Constants
     *Boolean*. If True, internal mirrorlist is sorted
     by the determined connection speed, after it is constructed.
 
+.. data:: LRO_FASTESTMIRRORCACHE
+
+    *String or None*. Path to the cache file. If cache file it doesn't exists
+    it will be created.
+
+.. data:: LRO_FASTESTMIRRORMAXAGE
+
+    *Integer or None*. Max age of cache record. Older records will not be used.
+
 .. data:: LRO_GPGCHECK
 
     *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
@@ -248,6 +257,8 @@ Constants
 .. data:: LRI_MIRRORS
 .. data:: LRI_METALINK
 .. data:: LRI_FASTESTMIRROR
+.. data:: LRI_FASTESTMIRRORCACHE
+.. data:: LRI_FASTESTMIRRORMAXAGE
 
 .. _proxy-type-label:
 
@@ -533,6 +544,8 @@ LRO_MAXPARALLELDOWNLOADS    = _librepo.LRO_MAXPARALLELDOWNLOADS
 LRO_MAXDOWNLOADSPERMIRROR   = _librepo.LRO_MAXDOWNLOADSPERMIRROR
 LRO_VARSUB                  = _librepo.LRO_VARSUB
 LRO_FASTESTMIRROR           = _librepo.LRO_FASTESTMIRROR
+LRO_FASTESTMIRRORCACHE      = _librepo.LRO_FASTESTMIRRORCACHE
+LRO_FASTESTMIRRORMAXAGE     = _librepo.LRO_FASTESTMIRRORMAXAGE
 LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
@@ -568,6 +581,8 @@ ATTR_TO_LRO = {
     "maxdownloadspermirror":LRO_MAXDOWNLOADSPERMIRROR,
     "varsub":               LRO_VARSUB,
     "fastestmirror":        LRO_FASTESTMIRROR,
+    "fastestmirrorcache":   LRO_FASTESTMIRRORCACHE,
+    "fastestmirrormaxage":  LRO_FASTESTMIRRORMAXAGE,
     "gpgcheck":             LRO_GPGCHECK,
     "checksum":             LRO_CHECKSUM,
     "yumdlist":             LRO_YUMDLIST,
@@ -592,6 +607,8 @@ LRI_VARSUB              = _librepo.LRI_VARSUB
 LRI_MIRRORS             = _librepo.LRI_MIRRORS
 LRI_METALINK            = _librepo.LRI_METALINK
 LRI_FASTESTMIRROR       = _librepo.LRI_FASTESTMIRROR
+LRI_FASTESTMIRRORCACHE  = _librepo.LRI_FASTESTMIRRORCACHE
+LRI_FASTESTMIRRORMAXAGE = _librepo.LRI_FASTESTMIRRORMAXAGE
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
@@ -613,6 +630,8 @@ ATTR_TO_LRI = {
     "mirrors":              LRI_MIRRORS,
     "metalink":             LRI_METALINK,
     "fastestmirror":        LRI_FASTESTMIRROR,
+    "fastestmirrorcache":   LRI_FASTESTMIRRORCACHE,
+    "fastestmirrormaxage":  LRI_FASTESTMIRRORMAXAGE,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -869,6 +888,14 @@ class Handle(_librepo.Handle):
     .. attribute:: fastestmirror:
 
         See: :data:`.LRO_FASTESTMIRROR`
+
+    .. attribute:: fastestmirrorcache:
+
+        See: :data:`.LRO_FASTESTMIRRORCACHE`
+
+    .. attribute:: fastestmirrormaxage:
+
+        See: :data:`.LRO_FASTESTMIRRORMAXAGE`
 
     .. attribute:: gpgcheck:
 

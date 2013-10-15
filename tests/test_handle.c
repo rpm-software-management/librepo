@@ -48,6 +48,8 @@ START_TEST(test_handle)
     LrUrlVars *vars = NULL;
     vars = lr_urlvars_set(vars, "foo", "bar");
     fail_if(!lr_handle_setopt(h, NULL, LRO_VARSUB, vars));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_FASTESTMIRRORCACHE,
+                              "/var/cache/fastestmirror.librepo"));
     lr_handle_free(h);
 }
 END_TEST
@@ -90,7 +92,7 @@ START_TEST(test_handle_getinfo)
 
     str = NULL;
     fail_if(!lr_handle_getinfo(h, NULL, LRI_USERAGENT, &str));
-    fail_if(num != 0);
+    fail_if(str != NULL);
 
     strlist = NULL;
     fail_if(!lr_handle_getinfo(h, NULL, LRI_YUMDLIST, &strlist));
@@ -107,6 +109,14 @@ START_TEST(test_handle_getinfo)
     LrUrlVars *vars = NULL;
     fail_if(!lr_handle_getinfo(h, NULL, LRI_VARSUB, &vars));
     fail_if(strlist != NULL);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_FASTESTMIRRORCACHE, &str));
+    fail_if(str != NULL);
+
+    num = -1;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_FASTESTMIRRORMAXAGE, &num));
+    fail_if(num != LRO_FASTESTMIRRORMAXAGE_DEFAULT);
 
     lr_handle_free(h);
 }
