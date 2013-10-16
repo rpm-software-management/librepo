@@ -95,6 +95,8 @@ typedef struct {
         Url in progress or NULL */
     LrMetalinkHash *metalinkhash; /*!<
         Hash in progress or NULL */
+    LrMetalinkAlternate *metalinkalternate; /*!<
+        Alternate in progress or NULL */
 
 } LrParserData;
 

@@ -45,6 +45,13 @@ typedef struct {
     char *url;          /*!< URL to the target file */
 } LrMetalinkUrl;
 
+/** Alternate */
+typedef struct {
+    gint64 timestamp; /*!< File timestamp */
+    gint64 size;      /*!< File size */
+    GSList *hashes;   /*!< List of pointers to LrMetalinkHashes (could be NULL) */
+} LrMetalinkAlternate;
+
 /** Metalink */
 typedef struct {
     char *filename;   /*!< Filename */
@@ -52,6 +59,7 @@ typedef struct {
     gint64 size;      /*!< File size */
     GSList *hashes;   /*!< List of pointers to LrMetalinkHashes (could be NULL) */
     GSList *urls;     /*!< List of pointers to LrMetalinkUrls (could be NULL) */
+    GSList *alternates; /*!< List of pointers to LrMetalinkAlternates (could be NULL) */
 } LrMetalink;
 
 /** Create new empty metalink object.

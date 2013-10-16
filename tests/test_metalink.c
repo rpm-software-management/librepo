@@ -267,7 +267,7 @@ START_TEST(test_metalink_bad_01)
     fail_if(ml->size != 0);
     fail_if(g_slist_length(ml->hashes) != 4);
     fail_if(g_slist_length(ml->urls) != 4);
-
+    fail_if(g_slist_length(ml->alternates) != 0);
 
     elem = g_slist_nth(ml->hashes, 0);
     fail_if(!elem);
@@ -458,6 +458,61 @@ START_TEST(test_metalink_really_bad_03)
 }
 END_TEST
 
+START_TEST(test_metalink_with_alternates)
+{
+    int fd;
+    gboolean ret;
+    char *path;
+    LrMetalink *ml = NULL;
+    GSList *elem = NULL;
+    LrMetalinkHash *mlhash = NULL;
+    LrMetalinkAlternate *malternate = NULL;
+    GError *tmp_err = NULL;
+
+    path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
+                         "metalink_with_alternates", NULL);
+    fd = open(path, O_RDONLY);
+    lr_free(path);
+    fail_if(fd < 0);
+    ml = lr_metalink_init();
+    fail_if(ml == NULL);
+    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    fail_if(!ret);
+    fail_if(tmp_err);
+    close(fd);
+
+    fail_if(ml->filename == NULL);
+    fail_if(strcmp(ml->filename, "repomd.xml"));
+    fail_if(g_slist_length(ml->hashes) != 4);
+    fail_if(g_slist_length(ml->alternates) != 1);
+
+    elem = g_slist_nth(ml->hashes, 0);
+    fail_if(!elem);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "md5"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, "0ffcd7798421c9a6760f3e4202cc4675"));
+
+    elem = g_slist_nth(ml->alternates, 0);
+    fail_if(!elem);
+    malternate = elem->data;
+    fail_if(malternate->timestamp != 1381706941);
+    fail_if(malternate->size != 4761);
+    fail_if(g_slist_length(malternate->hashes) != 4);
+    elem = g_slist_nth(malternate->hashes, 0);
+    mlhash = elem->data;
+    fail_if(!mlhash);
+    fail_if(mlhash->type == NULL);
+    fail_if(strcmp(mlhash->type, "md5"));
+    fail_if(mlhash->value == NULL);
+    fail_if(strcmp(mlhash->value, "0c5b64d395d5364633df7c8e97a07fd6"));
+
+    lr_metalink_free(ml);
+}
+END_TEST
+
 Suite *
 metalink_suite(void)
 {
@@ -472,6 +527,7 @@ metalink_suite(void)
     tcase_add_test(tc, test_metalink_really_bad_01);
     tcase_add_test(tc, test_metalink_really_bad_02);
     tcase_add_test(tc, test_metalink_really_bad_03);
+    tcase_add_test(tc, test_metalink_with_alternates);
     suite_add_tcase(s, tc);
     return s;
 }

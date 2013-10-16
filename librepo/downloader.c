@@ -1010,11 +1010,11 @@ lr_perform(LrDownload *dd, GError **err)
         // This do-while loop is important. Because if curl_multi_perform sets
         // still_running to 0, we need to check if there are any next
         // transfers available (we need to call check_transfer_statuses).
-        // Because if there will be no available next transfers and the
+        // Because if there will be no next transfers available and the
         // curl multi handle is empty (all transfers already
-        // finished - this is what still_running == 0 is meaning),
-        // then next iteration of main downloding loop cause a 1sec waiting
-        // on the select() call.
+        // finished - this is what still_running == 0 means),
+        // then the next iteration of main downloding loop cause a 1sec
+        // waiting on the select() call.
         do {
             // Check if any handle finished and potentialy add one or more
             // waiting downloads to the multi_handle.

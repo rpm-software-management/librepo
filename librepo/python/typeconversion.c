@@ -226,5 +226,52 @@ PyObject_FromMetalink(LrMetalink *metalink)
         PyList_Append(sub_list, udict);
     }
 
+    // Alternates
+
+    if (metalink->alternates) {
+
+        if ((sub_list = PyList_New(0)) == NULL) {
+            PyDict_Clear(dict);
+            return NULL;
+        }
+        PyDict_SetItemString(dict, "alternates", sub_list);
+
+        for (GSList *elem = metalink->alternates; elem; elem = g_slist_next(elem)) {
+            LrMetalinkAlternate *ma = elem->data;
+            PyObject *udict;
+            if ((udict = PyDict_New()) == NULL) {
+                PyDict_Clear(dict);
+                return NULL;
+            }
+            PyDict_SetItemString(udict, "timestamp",
+                PyLong_FromLongLong((PY_LONG_LONG)ma->timestamp));
+            PyDict_SetItemString(udict, "size",
+                PyLong_FromLongLong((PY_LONG_LONG)ma->size));
+
+            PyObject *usub_list;
+            if ((usub_list = PyList_New(0)) == NULL) {
+                PyDict_Clear(dict);
+                return NULL;
+            }
+            PyDict_SetItemString(udict, "hashes", usub_list);
+
+            for (GSList *subelem = ma->hashes; subelem; subelem = g_slist_next(subelem)) {
+                LrMetalinkHash *metalinkhash = subelem->data;
+                PyObject *tuple;
+                if ((tuple = PyTuple_New(2)) == NULL) {
+                    PyDict_Clear(dict);
+                    return NULL;
+                }
+                PyTuple_SetItem(tuple, 0,
+                        PyStringOrNone_FromString(metalinkhash->type));
+                PyTuple_SetItem(tuple, 1,
+                        PyStringOrNone_FromString(metalinkhash->value));
+                PyList_Append(usub_list, tuple);
+            }
+
+            PyList_Append(sub_list, udict);
+        }
+    }
+
     return dict;
 }

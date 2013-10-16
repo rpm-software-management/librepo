@@ -237,5 +237,3 @@ class TestCaseYumRepoLocating(TestCase):
         yum_repo_downloaded["url"] = None
         self.assertEqual(yum_repo, yum_repo_downloaded)
         self.assertEqual(yum_repomd, yum_repomd_downloaded)
-
-

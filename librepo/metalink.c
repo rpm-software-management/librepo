@@ -48,6 +48,15 @@ lr_new_metalinkhash(LrMetalink *m)
     return hash;
 }
 
+static LrMetalinkHash *
+lr_new_metalinkalternate_hash(LrMetalinkAlternate *ma)
+{
+    assert(ma);
+    LrMetalinkHash *hash = lr_malloc0(sizeof(*hash));
+    ma->hashes = g_slist_append(ma->hashes, hash);
+    return hash;
+}
+
 static LrMetalinkUrl *
 lr_new_metalinkurl(LrMetalink *m)
 {
@@ -55,6 +64,15 @@ lr_new_metalinkurl(LrMetalink *m)
     LrMetalinkUrl *url = lr_malloc0(sizeof(*url));
     m->urls = g_slist_append(m->urls, url);
     return url;
+}
+
+static LrMetalinkAlternate *
+lr_new_metalinkalternate(LrMetalink *m)
+{
+    assert(m);
+    LrMetalinkAlternate *alternate = lr_malloc0(sizeof(*alternate));
+    m->alternates = g_slist_append(m->alternates, alternate);
+    return alternate;
 }
 
 static void
@@ -77,6 +95,15 @@ lr_free_metalinkurl(LrMetalinkUrl *metalinkurl)
     lr_free(metalinkurl);
 }
 
+static void
+lr_free_metalinkalternate(LrMetalinkAlternate *metalinkalternate)
+{
+    if (!metalinkalternate) return;
+    g_slist_free_full(metalinkalternate->hashes,
+                      (GDestroyNotify)lr_free_metalinkhash);
+    lr_free(metalinkalternate);
+}
+
 LrMetalink *
 lr_metalink_init()
 {
@@ -90,8 +117,12 @@ lr_metalink_free(LrMetalink *metalink)
         return;
 
     lr_free(metalink->filename);
-    g_slist_free_full(metalink->hashes, (GDestroyNotify)lr_free_metalinkhash);
-    g_slist_free_full(metalink->urls, (GDestroyNotify)lr_free_metalinkurl);
+    g_slist_free_full(metalink->hashes,
+                      (GDestroyNotify)lr_free_metalinkhash);
+    g_slist_free_full(metalink->urls,
+                      (GDestroyNotify)lr_free_metalinkurl);
+    g_slist_free_full(metalink->alternates,
+                      (GDestroyNotify)lr_free_metalinkalternate);
     lr_free(metalink);
 }
 
@@ -106,6 +137,12 @@ typedef enum {
     STATE_SIZE,
     STATE_VERIFICATION,
     STATE_HASH,
+    STATE_ALTERNATES,
+    STATE_ALTERNATE,
+    STATE_ALTERNATE_TIMESTAMP,
+    STATE_ALTERNATE_SIZE,
+    STATE_ALTERNATE_VERIFICATION,
+    STATE_ALTERNATE_HASH,
     STATE_RESOURCES,
     STATE_URL,
     NUMSTATES
@@ -113,16 +150,22 @@ typedef enum {
 
 /* Same states in the first column must be together */
 static LrStatesSwitch stateswitches[] = {
-    { STATE_START,      "metalink",         STATE_METALINK,     0 },
-    { STATE_METALINK,   "files",            STATE_FILES,        0 },
-    { STATE_FILES,      "file",             STATE_FILE,         0 },
-    { STATE_FILE,       "mm0:timestamp",    STATE_TIMESTAMP,    1 },
-    { STATE_FILE,       "size",             STATE_SIZE,         1 },
-    { STATE_FILE,       "verification",     STATE_VERIFICATION, 0 },
-    { STATE_FILE,       "resources",        STATE_RESOURCES,    0 },
-    { STATE_VERIFICATION, "hash",           STATE_HASH,         1 },
-    { STATE_RESOURCES,  "url",              STATE_URL,          1 },
-    { NUMSTATES,        NULL,               NUMSTATES,          0 }
+    { STATE_START,      "metalink",         STATE_METALINK,                0 },
+    { STATE_METALINK,   "files",            STATE_FILES,                   0 },
+    { STATE_FILES,      "file",             STATE_FILE,                    0 },
+    { STATE_FILE,       "mm0:timestamp",    STATE_TIMESTAMP,               1 },
+    { STATE_FILE,       "size",             STATE_SIZE,                    1 },
+    { STATE_FILE,       "verification",     STATE_VERIFICATION,            0 },
+    { STATE_FILE,       "mm0:alternates",   STATE_ALTERNATES,              0 },
+    { STATE_FILE,       "resources",        STATE_RESOURCES,               0 },
+    { STATE_VERIFICATION, "hash",           STATE_HASH,                    1 },
+    { STATE_ALTERNATES, "mm0:alternate",    STATE_ALTERNATE,               0 },
+    { STATE_ALTERNATE,  "mm0:timestamp",    STATE_ALTERNATE_TIMESTAMP,     1 },
+    { STATE_ALTERNATE,  "size",             STATE_ALTERNATE_SIZE,          1 },
+    { STATE_ALTERNATE,  "verification",     STATE_ALTERNATE_VERIFICATION,  0 },
+    { STATE_ALTERNATE_VERIFICATION, "hash", STATE_ALTERNATE_HASH,          1 },
+    { STATE_RESOURCES,  "url",              STATE_URL,                     1 },
+    { NUMSTATES,        NULL,               NUMSTATES,                     0 }
 };
 
 static void XMLCALL
@@ -198,15 +241,32 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
     case STATE_TIMESTAMP:
     case STATE_SIZE:
     case STATE_VERIFICATION:
+    case STATE_ALTERNATES:
+        break;
+
+    case STATE_ALTERNATE:
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+        assert(!pd->metalinkalternate);
+
+        LrMetalinkAlternate *ma;
+        ma = lr_new_metalinkalternate(pd->metalink);
+        pd->metalinkalternate = ma;
+        break;
+
+    case STATE_ALTERNATE_TIMESTAMP:
+    case STATE_ALTERNATE_SIZE:
+    case STATE_ALTERNATE_VERIFICATION:
         break;
 
     case STATE_HASH: {
         assert(pd->metalink);
         assert(!pd->metalinkurl);
         assert(!pd->metalinkhash);
+        assert(!pd->metalinkalternate);
 
         LrMetalinkHash *mh;
-        assert(!pd->metalinkhash);
         const char *type = lr_find_attr("type", attr);
         if (!type) {
             // Type of the hash is not specifed -> skip it
@@ -215,6 +275,26 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
             break;
         }
         mh = lr_new_metalinkhash(pd->metalink);
+        mh->type = g_strdup(type);
+        pd->metalinkhash = mh;
+        break;
+    }
+
+    case STATE_ALTERNATE_HASH: {
+        assert(pd->metalink);
+        assert(pd->metalinkalternate);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+
+        LrMetalinkHash *mh;
+        const char *type = lr_find_attr("type", attr);
+        if (!type) {
+            // Type of the hash is not specifed -> skip it
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                              "hash element doesn't have attribute \"type\"");
+            break;
+        }
+        mh = lr_new_metalinkalternate_hash(pd->metalinkalternate);
         mh->type = g_strdup(type);
         pd->metalinkhash = mh;
         break;
@@ -289,6 +369,10 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
     case STATE_FILES:
     case STATE_FILE:
     case STATE_VERIFICATION:
+    case STATE_ALTERNATES:
+    case STATE_ALTERNATE_VERIFICATION:
+        break;
+
     case STATE_RESOURCES:
         break;
 
@@ -310,6 +394,44 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
 
     case STATE_HASH:
         assert(pd->metalink);
+        assert(!pd->metalinkurl);
+
+        if (!pd->metalinkhash) {
+            // If hash has no type
+            break;
+        }
+
+        pd->metalinkhash->value = g_strdup(pd->content);
+        pd->metalinkhash = NULL;
+        break;
+
+    case STATE_ALTERNATE:
+        assert(pd->metalink);
+        assert(pd->metalinkalternate);
+        pd->metalinkalternate = NULL;
+        break;
+
+    case STATE_ALTERNATE_TIMESTAMP:
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+        assert(pd->metalinkalternate);
+
+        pd->metalinkalternate->timestamp = lr_xml_parser_strtoll(pd, pd->content, 0);
+        break;
+
+    case STATE_ALTERNATE_SIZE:
+        assert(pd->metalink);
+        assert(!pd->metalinkurl);
+        assert(!pd->metalinkhash);
+        assert(pd->metalinkalternate);
+
+        pd->metalinkalternate->size = lr_xml_parser_strtoll(pd, pd->content, 0);
+        break;
+
+    case STATE_ALTERNATE_HASH:
+        assert(pd->metalink);
+        assert(pd->metalinkalternate);
         assert(!pd->metalinkurl);
 
         if (!pd->metalinkhash) {
