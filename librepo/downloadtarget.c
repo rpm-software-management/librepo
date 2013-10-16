@@ -27,14 +27,30 @@
 #include "downloadtarget.h"
 #include "downloadtarget_internal.h"
 
+LrDownloadTargetChecksum *
+lr_downloadtargetchecksum_new(LrChecksumType type, const gchar *value)
+{
+    LrDownloadTargetChecksum *dtch = lr_malloc0(sizeof(*dtch));
+    dtch->type = type;
+    dtch->value = g_strdup(value);
+    return dtch;
+}
+
+void
+lr_downloadtargetchecksum_free(LrDownloadTargetChecksum *dtch)
+{
+    if (!dtch) return;
+    g_free(dtch->value);
+    g_free(dtch);
+}
+
 LrDownloadTarget *
 lr_downloadtarget_new(LrHandle *handle,
                       const char *path,
                       const char *baseurl,
                       int fd,
                       const char *fn,
-                      LrChecksumType checksumtype,
-                      const char *checksum,
+                      GSList *possiblechecksums,
                       gint64 expectedsize,
                       gboolean resume,
                       LrProgressCb progresscb,
@@ -56,8 +72,7 @@ lr_downloadtarget_new(LrHandle *handle,
     target->baseurl         = lr_string_chunk_insert(target->chunk, baseurl);
     target->fd              = fd;
     target->fn              = lr_string_chunk_insert(target->chunk, fn);
-    target->checksumtype    = checksumtype;
-    target->checksum        = lr_string_chunk_insert(target->chunk, checksum);
+    target->checksums       = possiblechecksums;
     target->expectedsize    = expectedsize;
     target->resume          = resume;
     target->progresscb      = progresscb;
@@ -76,6 +91,8 @@ lr_downloadtarget_free(LrDownloadTarget *target)
     if (!target)
         return;
 
+    g_slist_free_full(target->checksums,
+                      (GDestroyNotify) lr_downloadtargetchecksum_free);
     g_string_chunk_free(target->chunk);
     lr_free(target);
 }

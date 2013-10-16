@@ -255,13 +255,18 @@ lr_download_packages(GSList *targets,
                 goto cleanup;
         }
 
+        GSList *checksums = NULL;
+        LrDownloadTargetChecksum *checksum;
+        checksum = lr_downloadtargetchecksum_new(packagetarget->checksum_type,
+                                                 packagetarget->checksum);
+        checksums = g_slist_prepend(checksums, checksum);
+
         downloadtarget = lr_downloadtarget_new(packagetarget->handle,
                                                packagetarget->relative_url,
                                                packagetarget->base_url,
                                                -1,
                                                packagetarget->local_path,
-                                               packagetarget->checksum_type,
-                                               packagetarget->checksum,
+                                               checksums,
                                                packagetarget->expectedsize,
                                                packagetarget->resume,
                                                packagetarget->progresscb,

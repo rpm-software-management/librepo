@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/" type="dynamic" pubdate="Tue, 15 Oct 2013 08:48:18 GMT" generator="mirrormanager" xmlns:mm0="http://fedorahosted.org/mirrormanager">
+  <files>
+    <file name="repomd.xml">
+      <mm0:timestamp>1381706941</mm0:timestamp>
+      <size>4761</size>
+      <verification>
+        <hash type="md5">0ffcd7798421c9a6760f3e4202cc4675</hash>
+        <hash type="sha1">d28e40ca29b3b1d1e2976610e8858f976b06f02e</hash>
+        <hash type="sha256">d4f9ad66f7c6e000d8ebf9ec92ad2c4636547853708554d93dab672bdfd98ca1</hash>
+        <hash type="sha512">c076ce639b0cbac02dc24dc3e32b04fbb834ffd7de6154a23cf1b61951e3b7af1eeed541cdff08410104268f799a1cae2365d17dce4bf1f080322d9d7e66a687</hash>
+      </verification>
+      <mm0:alternates>
+        <mm0:alternate>
+            <mm0:timestamp>1381706941</mm0:timestamp>
+            <size>4761</size>
+            <verification>
+              <hash type="md5">0c5b64d395d5364633df7c8e97a07fd6</hash>
+              <hash type="sha1">522eca490cfc6728f2c8c5b80334c81f802c5fd1</hash>
+              <hash type="sha256">099ff51a491eba3f16646efb5d16319249e0bb10f1dc1476d47e23b25e0e0f94</hash>
+              <hash type="sha512">bd9d340176996eacb4b27e16557d777fa5db5b9e428c3c2edcbe3452a5164cd42a56addc3634f953fffab187684497960c1c70f4750906f1fefd33de0e28426a</hash>
+            </verification>
+        </mm0:alternate>
+      </mm0:alternates>
+      <resources maxconnections="1">
+        <url protocol="ftp" type="ftp" location="GB" preference="99" >ftp://ftp.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="GB" preference="99" >http://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="GB" preference="99" >rsync://rsync.mirrorservice.org/dl.fedoraproject.org/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="GB" preference="98" >ftp://mirror.sov.uk.goscomb.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="GB" preference="98" >http://mirror.sov.uk.goscomb.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="GB" preference="97" >rsync://mirror.bytemark.co.uk/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="GB" preference="97" >http://mirror.bytemark.co.uk/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="GB" preference="97" >ftp://mirror.bytemark.co.uk/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="GB" preference="96" >http://mirror.ox.ac.uk/sites/download.fedora.redhat.com/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="95" >http://mirror.nl.leaseweb.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DE" preference="94" >rsync://mirrors.n-ix.net/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="94" >http://mirrors.n-ix.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="94" >ftp://mirrors.n-ix.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CH" preference="93" >http://mirror.switch.ch/ftp/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="CH" preference="93" >ftp://mirror.switch.ch/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="NL" preference="92" >rsync://mirror.1000mbps.com/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="92" >http://mirror.1000mbps.com/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="92" >ftp://mirror.1000mbps.com/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FI" preference="91" >ftp://ftp.funet.fi/pub/mirrors/fedora.redhat.com/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FI" preference="91" >rsync://rsync.nic.funet.fi/ftp/pub/mirrors/fedora.redhat.com/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FI" preference="91" >http://www.nic.funet.fi/pub/mirrors/fedora.redhat.com/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="CZ" preference="90" >rsync://ftp.linux.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="CZ" preference="90" >rsync://ftp.fi.muni.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="90" >http://ftp.fi.muni.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="90" >http://ftp.linux.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="CZ" preference="90" >ftp://ftp.fi.muni.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="CZ" preference="90" >ftp://ftp.linux.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="89" >http://fedora.tu-chemnitz.de/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="89" >ftp://fedora.tu-chemnitz.de/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="88" >http://ftp-stud.hs-esslingen.de/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DE" preference="88" >rsync://ftp-stud.hs-esslingen.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="88" >ftp://ftp-stud.hs-esslingen.de/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="87" >http://mirror1.atrpms.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="TR" preference="86" >http://ftp.linux.org.tr/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="TR" preference="86" >ftp://ftp.linux.org.tr/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="TR" preference="86" >rsync://ftp.linux.org.tr/fedora-linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DE" preference="85" >rsync://ftp.halifax.rwth-aachen.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="85" >http://ftp.halifax.rwth-aachen.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="85" >ftp://ftp.halifax.rwth-aachen.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="ES" preference="84" >http://mirror.uv.es/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="ES" preference="84" >rsync://mirror.uv.es/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="ES" preference="84" >ftp://mirror.uv.es/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="83" >http://mirror2.hs-esslingen.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="IE" preference="82" >http://ftp.heanet.ie/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="IE" preference="82" >rsync://ftp.heanet.ie/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="IE" preference="82" >ftp://ftp.heanet.ie/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="SK" preference="81" >http://ftp.upjs.sk/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="SK" preference="81" >ftp://ftp.upjs.sk/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="SK" preference="81" >rsync://ftp.upjs.sk/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="SE" preference="80" >http://ftp.acc.umu.se/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="SE" preference="80" >rsync://ftp.acc.umu.se/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="79" >http://ftp.uni-kl.de/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="79" >ftp://ftp.uni-kl.de/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="LU" preference="78" >http://fedora.mirror.root.lu/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="LU" preference="78" >ftp://mirror.root.lu/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="LU" preference="78" >rsync://mirror.root.lu/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="BY" preference="77" >http://ftp.byfly.by/pub/fedoraproject.org/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="BY" preference="77" >rsync://ftp.byfly.by/fedora-linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="BY" preference="77" >ftp://ftp.byfly.by/pub/fedoraproject.org/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="RO" preference="76" >http://mirror.arlug.ro/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="RO" preference="76" >rsync://mirror.arlug.ro/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="RO" preference="76" >ftp://mirror.arlug.ro/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="RU" preference="75" >rsync://mirror.yandex.ru/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="RU" preference="75" >http://mirror.yandex.ru/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="RU" preference="75" >ftp://mirror.yandex.ru/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FR" preference="74" >http://fr2.rpmfind.net/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FR" preference="74" >rsync://fr2.rpmfind.net/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="74" >ftp://fr2.rpmfind.net/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="73" >ftp://mirror.muntinternet.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="73" >http://mirror.muntinternet.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="NL" preference="73" >rsync://mirror.muntinternet.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="72" >ftp://ftp.nluug.nl/pub/os/Linux/distr/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="NL" preference="72" >rsync://ftp.nluug.nl/Fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="72" >http://ftp.nluug.nl/pub/os/Linux/distr/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="CZ" preference="71" >rsync://mirror.slu.cz/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="71" >http://mirror.slu.cz/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="CZ" preference="71" >ftp://mirror.slu.cz/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="70" >http://ftp.tudelft.nl/download.fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="70" >ftp://ftp.tudelft.nl/pub/Linux/download.fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="69" >ftp://nl.mirror.eurid.eu/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="69" >http://nl.mirror.eurid.eu/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="RO" preference="68" >http://ftp.astral.ro/mirrors/fedora/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="RO" preference="68" >ftp://ftp.astral.ro/mirrors/fedora/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="67" >http://mirror2.atrpms.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NO" preference="66" >ftp://ftp.uninett.no/pub/linux/Fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FR" preference="65" >rsync://fedora.mirrors.ovh.net/download.fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="65" >ftp://fedora.mirrors.ovh.net/download.fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FR" preference="65" >http://fedora.mirrors.ovh.net/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="IT" preference="64" >http://fedora.mirror.garr.it/mirrors/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="NL" preference="63" >rsync://mirror.proserve.nl/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NL" preference="63" >http://mirror.proserve.nl/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="63" >ftp://mirror.proserve.nl/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="NO" preference="62" >http://fedora.uib.no/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NO" preference="62" >ftp://fedora.uib.no/pub/Linux/Distributions/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="GR" preference="61" >rsync://ftp.cc.uoc.gr/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="GR" preference="61" >http://ftp.cc.uoc.gr/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="GR" preference="61" >ftp://ftp.cc.uoc.gr/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="60" >ftp://mirror.netcologne.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="60" >http://mirror.netcologne.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DE" preference="60" >rsync://mirror.netcologne.de/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="BY" preference="59" >http://mirror.datacenter.by/pub/fedoraproject.org/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="BY" preference="59" >rsync://mirror.datacenter.by/fedora-linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="IS" preference="58" >http://ftp.rhnet.is/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="IS" preference="58" >rsync://ftp.rhnet.is/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="IS" preference="58" >ftp://ftp.rhnet.is/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="PL" preference="57" >ftp://ftp.man.poznan.pl/pub/linux/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="UA" preference="56" >ftp://fedora.ip-connect.vn.ua/mirror/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="UA" preference="56" >http://fedora.ip-connect.vn.ua/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="UA" preference="56" >rsync://fedora.ip-connect.vn.ua/fedora-enchilada/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="NL" preference="55" >ftp://alviss.et.tudelft.nl/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="54" >ftp://mirrors.ircam.fr/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FR" preference="54" >http://mirrors.ircam.fr/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FR" preference="54" >rsync://mirrors.ircam.fr/fedora-linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="CZ" preference="53" >ftp://mirror.karneval.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="CZ" preference="53" >rsync://mirror.karneval.cz/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="53" >http://mirror.karneval.cz/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="PL" preference="52" >http://ftp.pbone.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="PL" preference="52" >rsync://ftp.pbone.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="PL" preference="52" >ftp://ftp.pbone.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="51" >http://mirror.de.leaseweb.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="GR" preference="50" >ftp://ftp.ntua.gr/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="GR" preference="50" >http://ftp.ntua.gr/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="49" >ftp://vesta.informatik.rwth-aachen.de/pub/Linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="49" >http://vesta.informatik.rwth-aachen.de/ftp/pub/Linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DK" preference="48" >ftp://ftp.klid.dk/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DK" preference="48" >http://ftp.klid.dk/ftp/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="47" >ftp://ftp.free.fr/mirrors/fedora.redhat.com/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FR" preference="47" >http://ftp.free.fr/mirrors/fedora.redhat.com/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="AT" preference="46" >http://mirror.digitalnova.at/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="IS" preference="45" >http://www.fedora.is/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="IS" preference="45" >ftp://ftp.fedora.is/pub/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="IS" preference="45" >rsync://www.fedora.is/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="PL" preference="44" >rsync://ftp.icm.edu.pl/pub/Linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="PL" preference="44" >http://ftp.icm.edu.pl/pub/Linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="PL" preference="44" >ftp://ftp.icm.edu.pl/pub/Linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="43" >ftp://ftp.uni-bayreuth.de/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DE" preference="43" >rsync://rsync.uni-bayreuth.de/fedora-enchilada/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="43" >http://ftp.uni-bayreuth.de/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DK" preference="42" >rsync://mirror.easyspeedy.com/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DK" preference="42" >http://mirror.easyspeedy.com/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DK" preference="42" >ftp://mirror.easyspeedy.com/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="41" >ftp://mir01.syntis.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FR" preference="41" >http://mir01.syntis.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FR" preference="41" >rsync://mir01.syntis.net/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="CZ" preference="40" >rsync://sunsite.mff.cuni.cz/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="40" >http://sunsite.mff.cuni.cz/MIRRORS/fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="CZ" preference="40" >ftp://sunsite.mff.cuni.cz/MIRRORS/fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="40" >http://ultra.linux.cz/MIRRORS/fedora.redhat.com/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="39" >ftp://ftp.proxad.net/mirrors/fedora.redhat.com/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="RU" preference="38" >ftp://fedora-mirror01.rbc.ru/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="RU" preference="38" >rsync://fedora-mirror01.rbc.ru/fedora-enchilada/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="RU" preference="38" >http://fedora-mirror01.rbc.ru/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="PT" preference="37" >http://fedora.dcc.fc.up.pt/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="FR" preference="36" >http://ftp.lip6.fr/ftp/pub/linux/distributions/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FR" preference="36" >rsync://ftp.lip6.fr/Fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="36" >ftp://ftp.lip6.fr/pub/linux/distributions/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="UA" preference="35" >http://ftp.colocall.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="UA" preference="35" >ftp://ftp.colocall.net/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="34" >ftp://ftp.ciril.fr/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="FR" preference="34" >rsync://ftp.ciril.fr/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="33" >http://ftp.informatik.uni-frankfurt.de/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="rsync" type="rsync" location="DE" preference="33" >rsync://ftp.informatik.uni-frankfurt.de/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="33" >ftp://ftp.informatik.uni-frankfurt.de/pub/Mirrors/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="BE" preference="32" >ftp://be.mirror.eurid.eu/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="BE" preference="32" >http://be.mirror.eurid.eu/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="31" >http://fedora.intergenia.de/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="AT" preference="30" >ftp://gd.tuwien.ac.at/opsys/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="AT" preference="30" >http://gd.tuwien.ac.at/opsys/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="PL" preference="29" >http://ftp.wsisiz.edu.pl/pub/linux/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="ES" preference="28" >ftp://ftp.udl.es/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="ES" preference="28" >http://ftp.udl.es/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="AT" preference="27" >http://fedora.aau.at/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="LV" preference="26" >ftp://ftp.linux.edu.lv/mirrors/ftp.redhat.com/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="LV" preference="26" >http://mirrors.linux.edu.lv/ftp.redhat.com/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="FR" preference="25" >ftp://ftp.cru.fr/pub/linux/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="24" >http://ftp.uni-siegen.de/fedora/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="HU" preference="23" >ftp://ftp.fsn.hu/pub/linux/distributions/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="HU" preference="22" >http://ftp.freepark.org/pub/linux/distributions/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="DE" preference="21" >http://mirror.fraunhofer.de/dl.fedoraproject.org/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="DE" preference="21" >ftp://mirror.fraunhofer.de/dl.fedoraproject.org/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="EE" preference="20" >http://fedora.linux.ee/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="EE" preference="20" >ftp://fedora.linux.ee/pub/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="RS" preference="19" >http://mirror.pmf.kg.ac.rs/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+        <url protocol="ftp" type="ftp" location="RS" preference="19" >ftp://mirror.pmf.kg.ac.rs/fedora/linux/updates/19/x86_64/repodata/repomd.xml</url>
+      </resources>
+    </file>
+  </files>
+</metalink>

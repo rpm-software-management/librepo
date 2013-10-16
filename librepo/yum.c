@@ -171,24 +171,36 @@ lr_yum_download_repomd(LrHandle *handle,
 
     g_debug("%s: Downloading repomd.xml via mirrorlist", __func__);
 
+    GSList *checksums = NULL;
     if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
-        /* Select the best checksum type */
-        for (GSList *elem = metalink->hashes; elem; elem = g_slist_next(elem)) {
-            LrChecksumType mtype;
-            LrMetalinkHash *mhash = elem->data;
+        // Select best checksum
 
-            if (!mhash->type || !mhash->value)
-                continue;
+        gboolean ret;
+        LrChecksumType ch_type;
+        gchar *ch_value;
 
-            mtype = lr_checksum_type(mhash->type);
-            if (mtype != LR_CHECKSUM_UNKNOWN && mtype > checksum_type) {
-                checksum_type = mtype;
-                checksum = mhash->value;
-            }
+        // From the metalink itself
+        ret = lr_best_checksum(metalink->hashes, &ch_type, &ch_value);
+        if (ret) {
+            LrDownloadTargetChecksum *dtch;
+            dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
+            checksums = g_slist_prepend(checksums, dtch);
+            g_debug("%s: Expected checksum for repomd.xml: (%s) %s",
+                    __func__, lr_checksum_type_to_str(ch_type), ch_value);
         }
 
-        g_debug("%s: selected repomd.xml checksum to check: (%s) %s",
-                __func__, lr_checksum_type_to_str(checksum_type), checksum);
+        // From the alternates entries
+        for (GSList *elem = metalink->alternates; elem; elem = g_slist_next(elem)) {
+            LrMetalinkAlternate *alt = elem->data;
+            ret = lr_best_checksum(alt->hashes, &ch_type, &ch_value);
+            if (ret) {
+                LrDownloadTargetChecksum *dtch;
+                dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
+                checksums = g_slist_prepend(checksums, dtch);
+                g_debug("%s: Expected alternate checksum for repomd.xml: (%s) %s",
+                        __func__, lr_checksum_type_to_str(ch_type), ch_value);
+            }
+        }
     }
 
     LrDownloadTarget *target = lr_downloadtarget_new(handle,
@@ -196,8 +208,7 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      NULL,
                                                      fd,
                                                      NULL,
-                                                     checksum_type,
-                                                     checksum,
+                                                     checksums,
                                                      0,
                                                      0,
                                                      NULL,
@@ -255,7 +266,6 @@ lr_yum_download_repo(LrHandle *handle,
         char *path;
         LrDownloadTarget *target;
         LrYumRepoMdRecord *record = elem->data;
-        LrChecksumType checksumtype;
 
         assert(record);
 
@@ -274,19 +284,22 @@ lr_yum_download_repo(LrHandle *handle,
             return FALSE;
         }
 
-        if (handle->checks & LR_CHECK_CHECKSUM)
+        GSList *checksums = NULL;
+        if (handle->checks & LR_CHECK_CHECKSUM) {
             // Select proper checksum type only if checksum check is enabled
-            checksumtype = lr_checksum_type(record->checksum_type);
-        else
-            checksumtype = LR_CHECKSUM_UNKNOWN;
+            LrDownloadTargetChecksum *checksum;
+            checksum = lr_downloadtargetchecksum_new(
+                                    lr_checksum_type(record->checksum_type),
+                                    record->checksum);
+            checksums = g_slist_prepend(checksums, checksum);
+        }
 
         target = lr_downloadtarget_new(handle,
                                        record->location_href,
                                        NULL,
                                        fd,
                                        NULL,
-                                       checksumtype,
-                                       record->checksum,
+                                       checksums,
                                        0,
                                        0,
                                        NULL,

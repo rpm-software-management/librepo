@@ -33,6 +33,7 @@
 
 #include "util.h"
 #include "version.h"
+#include "metalink.h"
 
 #define DIR_SEPARATOR   "/"
 
@@ -311,4 +312,38 @@ lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
 {
     g_debug("WARNING: %s: %s", (char *) cbdata, msg);
     return LR_CB_RET_OK;
+}
+
+gboolean
+lr_best_checksum(GSList *list, LrChecksumType *type, gchar **value)
+{
+    if (!list)
+        return FALSE;
+
+    assert(type);
+    assert(value);
+
+    LrChecksumType tmp_type = LR_CHECKSUM_UNKNOWN;
+    gchar *tmp_value;
+
+    for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
+        LrMetalinkHash *hash = elem->data;
+
+        if (!hash->type || !hash->value)
+            continue;
+
+        LrChecksumType ltype = lr_checksum_type(hash->type);
+        if (ltype != LR_CHECKSUM_UNKNOWN && ltype > tmp_type) {
+            tmp_type = ltype;
+            tmp_value = hash->value;
+        }
+    }
+
+    if (tmp_type != LR_CHECKSUM_UNKNOWN) {
+        *type = tmp_type;
+        *value = tmp_value;
+        return TRUE;
+    }
+
+    return FALSE;
 }

@@ -781,30 +781,35 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
 
         // Checksum checking
-        if (!tmp_err
-            && target->target->checksum
-            && target->target->checksumtype != LR_CHECKSUM_UNKNOWN)
-        {
-            int fd;
-            gboolean ret, matches;
+        fflush(target->f);
+        int fd = fileno(target->f);
+        gboolean matches = TRUE;
 
-            fflush(target->f);
-            fd = fileno(target->f);
+        GSList *elem = target->target->checksums;
+        for (; elem; elem = g_slist_next(elem)) {
+            if (tmp_err) {
+                // There was an error, checksum checking is meaningless
+                break;
+            }
+
+            LrDownloadTargetChecksum *checksum = elem->data;
+
+            if (!checksum
+                || !checksum->value
+                || checksum->type == LR_CHECKSUM_UNKNOWN)
+            {
+                // Bad checksum
+                continue;
+            }
+
             lseek(fd, 0, SEEK_SET);
-
-            ret = lr_checksum_fd_cmp(target->target->checksumtype,
-                                     fd,
-                                     target->target->checksum,
-                                     1,
-                                     &matches,
-                                     &tmp_err);
-            if (ret && !matches) {
-                // Checksums doesn't match
-                g_set_error(&tmp_err,
-                        LR_DOWNLOADER_ERROR,
-                        LRE_BADCHECKSUM,
-                        "Downloading successfull, but checksum doesn't match");
-            } else if (ret == FALSE) {
+            gboolean ret = lr_checksum_fd_cmp(checksum->type,
+                                              fd,
+                                              checksum->value,
+                                              1,
+                                              &matches,
+                                              &tmp_err);
+            if (ret == FALSE) {
                 // Error while checksum calculation
                 g_propagate_prefixed_error(err, tmp_err, "Downloading from %s "
                         "was successfull but error encountered while "
@@ -814,6 +819,22 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 lr_free(effective_url);
                 return FALSE;
             }
+
+            if (matches) {
+                // At least one checksum matches
+                g_debug("%s: Checksum (%s) %s is OK", __func__,
+                        lr_checksum_type_to_str(checksum->type),
+                        checksum->value);
+                break;
+            }
+        }
+
+        if (!matches) {
+            // Checksums doesn't match
+            g_set_error(&tmp_err,
+                    LR_DOWNLOADER_ERROR,
+                    LRE_BADCHECKSUM,
+                    "Downloading successfull, but checksum doesn't match");
         }
 
         fclose(target->f);
@@ -1243,7 +1264,6 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
-                                   LR_CHECKSUM_UNKNOWN,
                                    NULL, 0, 0, NULL, NULL,
                                    NULL, NULL, NULL);
 

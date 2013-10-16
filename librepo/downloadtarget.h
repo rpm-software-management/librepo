@@ -29,6 +29,24 @@
 
 G_BEGIN_DECLS
 
+typedef struct {
+    LrChecksumType type;
+    gchar *value;
+} LrDownloadTargetChecksum;
+
+/** Create new LrDownloadTargetChecksum object.
+ * @param type      Checksum type
+ * @param value     Checksum value. This value will be stduped.
+ */
+LrDownloadTargetChecksum *
+lr_downloadtargetchecksum_new(LrChecksumType type, const gchar *value);
+
+/** Free LrDownloadTargetChecksum object.
+ * @param dtch      LrDownloadTargetChecksum object
+ */
+void
+lr_downloadtargetchecksum_free(LrDownloadTargetChecksum *dtch);
+
 /** Single download target
  */
 typedef struct {
@@ -51,11 +69,15 @@ typedef struct {
         Filename where data will be written or NULL.
         Note: Only one, fd or fn, is set simultaneously. */
 
-    LrChecksumType checksumtype; /*!<
-        Checksum type */
-
-    char *checksum; /*!<
-        Expected checksum value or NULL */
+    GSList *checksums; /*!<
+        NULL or GSList with pointers to LrDownloadTargetChecksum
+        structures. With possible checksums of the file.
+        Checksum check is stoped right after first match.
+        Useful in situation when the file could has one from set
+        of available checksums.
+        E.g. <mm0:alternates> element in metalink could contain alternate
+        checksums for the repomd.xml, because metalink and mirrors
+        could be out of sync for a while. */
 
     gint64 expectedsize; /*!<
         Expected size of the target */
@@ -114,11 +136,20 @@ typedef struct {
  *                          Note: Set this or fn, no both!
  * @param fn                Filename where data will be written or NULL.
  *                          Note: Set this or fd, no both!
- * @param checksumtype      Type of used checksum or LR_CHECKSUM_UNKNOWN if
- *                          checksum is not used or should not be checked.
- * @param checksum          Checksum value to check or NULL. If checksumtype
- *                          is set to LR_CHECKSUM_UNKNOWN then this param
- *                          is ignored.
+ * @param possiblechecksums NULL or GSList with pointers to
+ *                          LrDownloadTargetChecksum structures. With possible
+ *                          checksums of the file. Checksum check is stoped
+ *                          right after first match. Useful in situation when
+ *                          the file could has one from set of available
+ *                          checksums.
+ *                          E.g. <mm0:alternates> element in metalink could
+ *                          contain alternate checksums for the repomd.xml,
+ *                          because metalink and mirrors could be out of
+ *                          sync for a while.
+ *                          Note: LrDownloadTarget takes responsibility
+ *                          for destroing this list! So the list must not
+ *                          be destroyed by the user, since it is passed
+ *                          to this function.
  * @param expectedsize      Expected size of the target. If mirror reports
  *                          different size, then no download is performed.
  *                          If 0 then size of downloaded target is not checked.
@@ -144,8 +175,7 @@ lr_downloadtarget_new(LrHandle *handle,
                       const char *baseurl,
                       int fd,
                       const char *fn,
-                      LrChecksumType checksumtype,
-                      const char *checksum,
+                      GSList *possiblechecksums,
                       gint64 expectedsize,
                       gboolean resume,
                       LrProgressCb progresscb,

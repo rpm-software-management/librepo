@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include "checksum.h"
 #include "xmlparser.h"
 
 G_BEGIN_DECLS
@@ -128,6 +129,18 @@ lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
                              char *msg,
                              void *cbdata,
                              GError **err G_GNUC_UNUSED) G_GNUC_UNUSED;
+
+
+/** From the GSList of pointers to LrMetalinkHash objects, select the
+ * strognest one which librepo could calculate.
+ * @param list      List of LrMetalinkHash*
+ * @param type      Variable to store checksum type.
+ * @param value     Variable to store pointer to value (pointer to original
+ *                  value from the list, NOT A COPY).
+ * @return          TRUE if usable checksum found, FALSE otherwise
+ */
+gboolean
+lr_best_checksum(GSList *list, LrChecksumType *type, gchar **value);
 
 /** @} */
 

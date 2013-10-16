@@ -614,14 +614,20 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
              'filename': 'repomd.xml'}
             )
 
-    def test_download_only_metalink_with_alternates(self):
+    def test_download_repo_01_via_metalink_with_alternates(self):
         h = librepo.Handle()
         h.metalinkurl = "%s%s" % (MOCKURL, config.METALINK_WITH_ALTERNATES)
         h.repotype = librepo.LR_YUMREPO
         h.destdir = self.tmpdir
-        h.fetchmirrors = True
+        h.checksum = True
         r = h.perform()
 
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+
+        self.assertTrue(yum_repo)
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertTrue(yum_repomd)
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink,
             {'timestamp': 1381706941,
