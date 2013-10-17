@@ -348,7 +348,7 @@ lr_fastestmirror_sort_internalmirrorlist(LrHandle *handle,
         gchar *url = elem->data;
         for (GSList *ime = *list; ime; ime = g_slist_next(ime)) {
             LrInternalMirror *im = ime->data;
-            if (!g_strcmp0(im->url, url)) {
+            if (im->url == url) {
                 new_list = g_slist_prepend(new_list, im);
                 url = NULL;  // Just for the assert
                 break;
