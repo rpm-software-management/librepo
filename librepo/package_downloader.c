@@ -33,6 +33,7 @@
 #include "package_downloader.h"
 #include "handle_internal.h"
 #include "downloader.h"
+#include "fastestmirror_internal.h"
 
 /* Do NOT use resume on successfully downloaded files - download will fail */
 
@@ -181,6 +182,9 @@ lr_download_packages(GSList *targets,
         }
     }
 
+    // List of handles for fastest mirror resolving
+    GSList *fmr_handles = NULL;
+
     // Prepare targets
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         gchar *local_path;
@@ -250,9 +254,17 @@ lr_download_packages(GSList *targets,
         }
 
         if (packagetarget->handle) {
-            ret = lr_handle_prepare_internal_mirrorlist(packagetarget->handle, err);
+            ret = lr_handle_prepare_internal_mirrorlist(packagetarget->handle,
+                                                        FALSE,
+                                                        err);
             if (!ret)
                 goto cleanup;
+
+            if (packagetarget->handle->fastestmirror) {
+                if (!g_slist_find(fmr_handles, packagetarget->handle))
+                    fmr_handles = g_slist_prepend(fmr_handles,
+                                                  packagetarget->handle);
+            }
         }
 
         GSList *checksums = NULL;
@@ -276,6 +288,16 @@ lr_download_packages(GSList *targets,
                                                packagetarget);
 
         downloadtargets = g_slist_append(downloadtargets, downloadtarget);
+    }
+
+    // Do Fastest Mirror resolving for all handles in one shot
+    if (fmr_handles) {
+        ret = lr_fastestmirror_sort_internalmirrorlists(fmr_handles, err);
+        g_slist_free(fmr_handles);
+
+        if (!ret) {
+            return FALSE;
+        }
     }
 
     // Start downloading

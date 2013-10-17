@@ -28,8 +28,14 @@ G_BEGIN_DECLS
 
 gboolean
 lr_fastestmirror_sort_internalmirrorlist(LrHandle *handle,
-                                         GSList **list,
                                          GError **err);
+
+/**
+ * @param list      List of LrHandles
+ */
+gboolean
+lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
+                                          GError **err);
 
 G_END_DECLS
 

@@ -80,7 +80,7 @@ lr_lrmirrorlist_append_url(LrInternalMirrorlist *list,
     mirror->preference = 100;
     mirror->protocol = lr_detect_protocol(mirror->url);
 
-    g_debug("%s: Appending URL: %s", __func__, mirror->url);
+    //g_debug("%s: Appending URL: %s", __func__, mirror->url);
 
     return g_slist_append(list, mirror);
 }
@@ -104,7 +104,7 @@ lr_lrmirrorlist_append_mirrorlist(LrInternalMirrorlist *list,
         mirror->protocol = lr_detect_protocol(mirror->url);
         list = g_slist_append(list, mirror);
 
-        g_debug("%s: Appending URL: %s", __func__, mirror->url);
+        //g_debug("%s: Appending URL: %s", __func__, mirror->url);
     }
 
     return list;
@@ -155,7 +155,7 @@ lr_lrmirrorlist_append_metalink(LrInternalMirrorlist *list,
         lr_free(url_copy);
         list = g_slist_append(list, mirror);
 
-        g_debug("%s: Appending URL: %s", __func__, mirror->url);
+        //g_debug("%s: Appending URL: %s", __func__, mirror->url);
     }
 
     return list;
@@ -174,7 +174,7 @@ lr_lrmirrorlist_append_lrmirrorlist(LrInternalMirrorlist *list,
         mirror->preference = oth->preference;
         mirror->protocol = oth->protocol;
         list = g_slist_append(list, mirror);
-        g_debug("%s: Appending URL: %s", __func__, mirror->url);
+        //g_debug("%s: Appending URL: %s", __func__, mirror->url);
     }
 
     return list;

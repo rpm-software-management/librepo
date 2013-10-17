@@ -119,6 +119,69 @@ START_TEST(test_remove_dir)
 }
 END_TEST
 
+START_TEST(test_url_without_path)
+{
+    char *new_url = NULL;
+
+    new_url = lr_url_without_path(NULL);
+    fail_if(new_url != NULL);
+
+    new_url = lr_url_without_path("");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, ""));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("hostname");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "hostname"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("hostname/foo/bar/");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "hostname"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("hostname:80");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "hostname:80"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("hostname:80/foo/bar");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "hostname:80"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("http://hostname:80/");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "http://hostname:80"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("http://hostname:80/foo/bar");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "http://hostname:80"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("ftp://foo.hostname:80/foo/bar");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "ftp://foo.hostname:80"));
+    lr_free(new_url);
+    new_url = NULL;
+
+    new_url = lr_url_without_path("file:///home/foobar");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "file://"));
+    lr_free(new_url);
+    new_url = NULL;
+}
+END_TEST
+
 Suite *
 util_suite(void)
 {
@@ -131,6 +194,7 @@ util_suite(void)
     tcase_add_test(tc, test_gettmpdir);
     tcase_add_test(tc, test_pathconcat);
     tcase_add_test(tc, test_remove_dir);
+    tcase_add_test(tc, test_url_without_path);
     suite_add_tcase(s, tc);
     return s;
 }

@@ -150,11 +150,14 @@ lr_get_curl_handle();
  * Create (if do not exists) internal mirrorlist. Insert baseurl (if
  * specified) and download, parse and insert mirrors from mirrorlist url.
  * @param handle            Librepo handle.
+ * @param usefastestmirror  Sort internal mirrorlist by speed of mirrors
  * @param err               GError **
  * @return                  returns TRUE if error is not set and FALSE if it is.
  */
 gboolean
-lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err);
+lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
+                                      gboolean usefastestmirror,
+                                      GError **err);
 
 
 G_END_DECLS

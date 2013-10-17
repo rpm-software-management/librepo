@@ -319,48 +319,95 @@ lr_fastestmirror(LrHandle *handle, GSList **list, GError **err)
 
 gboolean
 lr_fastestmirror_sort_internalmirrorlist(LrHandle *handle,
-                                         GSList **list,
                                          GError **err)
 {
     assert(!err || *err == NULL);
+    GSList *list = g_slist_prepend(NULL, handle);
+    gboolean ret = lr_fastestmirror_sort_internalmirrorlists(list, err);
+    g_slist_free(list);
 
-    if (!list || *list == NULL)
+    return ret;
+}
+
+gboolean
+lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
+                                          GError **err)
+{
+    assert(!err || *err == NULL);
+
+    if (!handles)
         return TRUE;
 
-    // Prepare list of urls
-    GSList *list_of_urls = NULL;
-    for (GSList *elem = *list; elem; elem = g_slist_next(elem)) {
-        LrInternalMirror *imirror = elem->data;
-        list_of_urls = g_slist_prepend(list_of_urls, imirror->url);
+    // Prepare list of hosts
+    GHashTable *hosts_ht = g_hash_table_new_full(g_str_hash,
+                                                 g_str_equal,
+                                                 g_free,
+                                                 NULL);
+
+    for (GSList *ehandle = handles; ehandle; ehandle = g_slist_next(ehandle)) {
+        LrHandle *handle = ehandle->data;
+        GSList *mirrors = handle->internal_mirrorlist;
+        for (GSList *elem = mirrors; elem; elem = g_slist_next(elem)) {
+            LrInternalMirror *imirror = elem->data;
+            gchar *host = lr_url_without_path(imirror->url);
+            g_hash_table_insert(hosts_ht, host, NULL);
+        }
     }
-    list_of_urls = g_slist_reverse(list_of_urls);
+
+    GList *tmp_list_of_urls = g_hash_table_get_keys(hosts_ht);
+    GSList *list_of_urls = NULL;
+    for (GList *elem = tmp_list_of_urls; elem; elem = g_list_next(elem)) {
+        list_of_urls = g_slist_prepend(list_of_urls, elem->data);
+    }
+    g_list_free(tmp_list_of_urls);
 
     // Sort this list by the connection time
-    gboolean ret = lr_fastestmirror(handle, &list_of_urls, err);
+    LrHandle *main_handle = handles->data;  // Network configuration for the
+                                            // test is used from the first
+                                            // handle
+    gboolean ret = lr_fastestmirror(main_handle, &list_of_urls, err);
     if (!ret) {
         g_debug("%s: lr_fastestmirror failed", __func__);
+        g_slist_free(list_of_urls);
         return FALSE;
     }
 
-    // Apply sorted order to the source list
-    GSList *new_list = NULL;
-    for (GSList *elem = list_of_urls; elem; elem = g_slist_next(elem)) {
-        gchar *url = elem->data;
-        for (GSList *ime = *list; ime; ime = g_slist_next(ime)) {
-            LrInternalMirror *im = ime->data;
-            if (im->url == url) {
-                new_list = g_slist_prepend(new_list, im);
-                url = NULL;  // Just for the assert
-                break;
+    // Apply sorted order to each handle
+    for (GSList *ehandle = handles; ehandle; ehandle = g_slist_next(ehandle)) {
+        LrHandle *handle = ehandle->data;
+        GSList *mirrors = handle->internal_mirrorlist;
+        GSList *new_list = NULL;
+        for (GSList *elem = list_of_urls; elem; elem = g_slist_next(elem)) {
+            gchar *host = elem->data;
+            for (GSList *ime = mirrors; ime; ime = g_slist_next(ime)) {
+                LrInternalMirror *im = ime->data;
+                gchar *im_host = lr_url_without_path(im->url);
+                if (!g_strcmp0(im_host, host)) {
+                    new_list = g_slist_prepend(new_list, im);
+                    // XXX: Maybe convert GSList to GList to make
+                    // this delete more efficient
+                    mirrors = g_slist_delete_link(mirrors, ime);
+                    break;
+                }
             }
         }
-        assert(url == NULL);
+
+        // If multiple mirrors with the same lr_url_without_path(url)
+        // were present, only the first occurrence was inserted to the
+        // the new_list and removed from the mirrors list.
+        // The remaining occurences will be moved here.
+        for (GSList *elem = mirrors; elem; elem = g_slist_next(elem)) {
+            LrInternalMirror *im = elem->data;
+            new_list = g_slist_prepend(new_list, im);
+        }
+        g_slist_free(mirrors);
+
+        // Set sorted list to the handle (reversed, because the items
+        // of the new_list were prepended)
+        handle->internal_mirrorlist = g_slist_reverse(new_list);
     }
-    new_list = g_slist_reverse(new_list);
 
     g_slist_free(list_of_urls);
-    g_slist_free(*list);
-    *list = new_list;
 
     return TRUE;
 }

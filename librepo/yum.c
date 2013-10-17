@@ -163,8 +163,6 @@ lr_yum_download_repomd(LrHandle *handle,
                        GError **err)
 {
     int ret = TRUE;
-    LrChecksumType checksum_type = LR_CHECKSUM_UNKNOWN;
-    char *checksum = NULL;
     GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);

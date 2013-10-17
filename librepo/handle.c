@@ -745,7 +745,9 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
 }
 
 gboolean
-lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
+lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
+                                      gboolean usefastestmirror,
+                                      GError **err)
 {
     assert(!err || *err == NULL);
 
@@ -828,11 +830,10 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle, GError **err)
 
     // If enabled, sort internal mirrorlist by the connection
     // speed (the LRO_FASTESTMIRROR option)
-    if (handle->fastestmirror) {
+    if (usefastestmirror) {
         g_debug("%s: Sorting internal mirrorlist by connection speed",
                 __func__);
-        gboolean ret = lr_fastestmirror_sort_internalmirrorlist(
-                            handle, &(handle->internal_mirrorlist), err);
+        gboolean ret = lr_fastestmirror_sort_internalmirrorlist(handle, err);
         if (!ret)
             return FALSE;
     }
@@ -916,7 +917,9 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         }
     }
 
-    ret = lr_handle_prepare_internal_mirrorlist(handle, &tmp_err);
+    ret = lr_handle_prepare_internal_mirrorlist(handle,
+                                                handle->fastestmirror,
+                                                &tmp_err);
     if (!ret) {
         g_debug("Cannot prepare internal mirrorlist: %s", tmp_err->message);
         g_propagate_prefixed_error(err, tmp_err,

@@ -347,3 +347,28 @@ lr_best_checksum(GSList *list, LrChecksumType *type, gchar **value)
 
     return FALSE;
 }
+
+gchar *
+lr_url_without_path(const char *url)
+{
+    if (!url) return NULL;
+
+    // Skip protocol prefix (ftp://, http://, file://, etc.)
+    gchar *ptr = strstr(url, "://");
+    if (ptr)
+        ptr += 3;
+    else
+        ptr = (gchar *) url;
+
+    // Find end of the host name
+    while (*ptr != '\0' && *ptr != '/')
+        ptr++;
+
+    // Calculate length of hostname
+    size_t len = ptr - url;
+
+    gchar *host = g_strndup(url, len);
+    //g_debug("%s: %s -> %s", __func__, url, host);
+
+    return host;
+}

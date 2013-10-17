@@ -142,6 +142,13 @@ lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
 gboolean
 lr_best_checksum(GSList *list, LrChecksumType *type, gchar **value);
 
+/** Return malloced string with host part of url (protocol prefix + hostname)
+ * @param url       URL
+ * @return          Malloced url without path, just protocol and hostname
+ */
+gchar *
+lr_url_without_path(const char *url);
+
 /** @} */
 
 G_END_DECLS
