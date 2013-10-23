@@ -304,7 +304,7 @@ lr_fastestmirror_prepare(LrHandle *handle,
         if (lr_fastestmirrorcache_lookup(cache, url, &ts, &connecttime)) {
             if (ts >= (current_time - maxage)) {
                 // Use cached entry
-                g_debug("%s: Using value from fastest mirror cached for: %s (%f)",
+                g_debug("%s: Using cached connect time for: %s (%f)",
                         __func__, url, connecttime);
                 LrFastestMirror *mirror = lr_lrfastestmirror_new();
                 mirror->url = url;
@@ -313,7 +313,11 @@ lr_fastestmirror_prepare(LrHandle *handle,
                 mirror->cached = TRUE;
                 list = g_slist_append(list, mirror);
                 continue;
+            } else {
+                g_debug("%s: Cached connect time too old: %s", __func__, url);
             }
+        } else {
+            g_debug("%s: Not found in cache: %s", __func__, url);
         }
 
         if (handle)
@@ -611,6 +615,9 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
     if (!handles)
         return TRUE;
 
+    GTimer *timer = g_timer_new();
+    g_timer_start(timer);
+
     LrHandle *main_handle = handles->data;  // Network configuration for the
                                             // test is used from the first
                                             // handle
@@ -660,6 +667,7 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
     if (!ret) {
         g_debug("%s: lr_fastestmirror failed", __func__);
         g_slist_free(list_of_urls);
+        g_timer_destroy(timer);
         return FALSE;
     }
 
@@ -699,6 +707,10 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
     }
 
     g_slist_free(list_of_urls);
+
+    g_timer_stop(timer);
+    g_debug("%s: Duration: %f", __func__, g_timer_elapsed(timer, NULL));
+    g_timer_destroy(timer);
 
     return TRUE;
 }
