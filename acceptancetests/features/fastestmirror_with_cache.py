@@ -24,7 +24,6 @@ def handle_set_str(step, option, val):
 
 @step('Want to download location: (\S+)')
 def package_to_download(step, path):
-    print "xxx"
     world.filenames.append(os.path.basename(path))
     world.packages.append(path)
 
