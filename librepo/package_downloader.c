@@ -161,7 +161,6 @@ lr_download_packages(GSList *targets,
         // support only LR_YUMREPO yet
         if (packagetarget->handle->repotype != LR_YUMREPO) {
             g_debug("%s: Bad repo type", __func__);
-            assert(0);
             g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_BADFUNCARG,
                         "Bad repo type");
             return FALSE;
