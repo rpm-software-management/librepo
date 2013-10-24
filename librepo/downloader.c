@@ -689,6 +689,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         LrTarget *target = NULL;
         char *effective_url = NULL;
         GError *tmp_err = NULL;
+        gboolean fatal_error = FALSE;
 
         if (msg->msg != CURLMSG_DONE) {
             // We are only interested in messages about finished transfers
@@ -731,6 +732,28 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                             "Curl error: %s for %s",
                             curl_easy_strerror(msg->data.result),
                             effective_url);
+
+                switch (msg->data.result) {
+                case CURLE_NOT_BUILT_IN:
+                case CURLE_COULDNT_RESOLVE_PROXY:
+                case CURLE_WRITE_ERROR:
+                case CURLE_OUT_OF_MEMORY:
+                case CURLE_ABORTED_BY_CALLBACK:
+                case CURLE_BAD_FUNCTION_ARGUMENT:
+                case CURLE_INTERFACE_FAILED:
+                case CURLE_SEND_ERROR:
+                case CURLE_RECV_ERROR:
+                case CURLE_FILESIZE_EXCEEDED:
+                case CURLE_CONV_REQD:
+                case CURLE_SSL_CACERT_BADFILE:
+                case CURLE_SSL_CRL_BADFILE:
+                    g_debug("%s: Fatal error - Curl code %d: %s",
+                            __func__, msg->data.result,
+                            curl_easy_strerror(msg->data.result));
+                    fatal_error = TRUE;
+                default:
+                    break;
+                }
             }
         } else {
             // curl return code is CURLE_OK but we need to check status code
@@ -856,7 +879,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 mf_cb(target->target->cbdata, tmp_err->message, effective_url);
             }
 
-            if (!complete_url_in_path
+            if (!fatal_error &&
+                !complete_url_in_path
                 && !target->target->baseurl
                 && (dd->max_mirrors_to_try <= 0
                     || num_of_tried_mirrors < dd->max_mirrors_to_try))
