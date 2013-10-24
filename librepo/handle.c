@@ -641,6 +641,11 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         return FALSE;
     }
 
+    // List parsed mirrors
+    g_debug("%s: Mirrors from mirrorlist:", __func__);
+    for (GSList *elem = ml->urls; elem; elem = g_slist_next(elem))
+        g_debug("  %s", (gchar *) elem->data);
+
     // Convert mirrorlist to internal mirrorlist format
 
     handle->mirrorlist_mirrors = lr_lrmirrorlist_append_mirrorlist(
@@ -751,6 +756,11 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         lr_metalink_free(ml);
         return FALSE;
     }
+
+    // List parsed mirrors
+    g_debug("%s: Mirrors from metalink:", __func__);
+    for (GSList *elem = ml->urls; elem; elem = g_slist_next(elem))
+        g_debug("  %s", ((LrMetalinkUrl *) elem->data)->url);
 
     // Convert metalink to internal mirrorlist format
 
