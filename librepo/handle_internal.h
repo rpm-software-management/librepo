@@ -58,6 +58,12 @@ struct _LrHandle {
     long fastestmirrormaxage; /*!<
         Maximum age of a record in cache (seconds). */
 
+    LrFastestMirrorCb fastestmirrorcb; /*!<
+        Fastest mirror detection status callback */
+
+    void *fastestmirrordata; /*!<
+        User data for fastestmirrorcb. */
+
     // Mirrorlist related stuff
 
     char *mirrorlist; /*!<

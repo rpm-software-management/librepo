@@ -77,6 +77,8 @@ lr_lrfastestmirror_free(LrFastestMirror *mirror)
 static gboolean
 lr_fastestmirrorcache_load(LrFastestMirrorCache **cache,
                            gchar *path,
+                           LrFastestMirrorCb cb,
+                           void *cbdata,
                            GError **err)
 {
     assert(cache);
@@ -88,13 +90,19 @@ lr_fastestmirrorcache_load(LrFastestMirrorCache **cache,
         return TRUE;
     }
 
+    cb(cbdata, LR_FMSTAGE_CACHELOADING, path);
+
     GKeyFile *keyfile = g_key_file_new();
 
     *cache = lr_malloc0(sizeof(LrFastestMirrorCache));
     (*cache)->path = g_strdup(path);
     (*cache)->keyfile = keyfile;
 
-    if (g_file_test(path, G_FILE_TEST_EXISTS)) {
+    if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+        // Cache file doesn't exist
+        cb(cbdata, LR_FMSTAGE_CACHELOADINGSTATUS,
+           "Cache doesn't exist");
+    } else {
         // Cache exists, try to load it
 
         gboolean something_wrong = FALSE;
@@ -105,16 +113,21 @@ lr_fastestmirrorcache_load(LrFastestMirrorCache **cache,
                                                  &tmp_err);
         if (!ret) {
             // Cannot parse cache file
-            g_debug("%s: Cannot parse fastestmirror cache %s: %s",
-                      __func__, path, tmp_err->message);
-            g_error_free(tmp_err);
+            char *msg = g_strdup_printf("Cannot parse fastestmirror "
+                                        "cache %s: %s", path, tmp_err->message);
+            g_debug("%s: %s", __func__, msg);
+            cb(cbdata, LR_FMSTAGE_CACHELOADINGSTATUS, msg);
             something_wrong = TRUE;
+            g_free(msg);
+            g_error_free(tmp_err);
         } else {
             // File parsed successfully
             if (!g_key_file_has_group(keyfile, CACHE_GROUP_METADATA)) {
                 // Not a fastestmirror cache
                 g_debug("%s: File %s is not a fastestmirror cache file",
                           __func__, path);
+                cb(cbdata, LR_FMSTAGE_CACHELOADINGSTATUS,
+                   "File is not a fastestmirror cache");
                 something_wrong = TRUE;
             } else {
                 int version = (int) g_key_file_get_integer(keyfile,
@@ -124,6 +137,8 @@ lr_fastestmirrorcache_load(LrFastestMirrorCache **cache,
                 if (version != CACHE_VERSION) {
                     g_debug("%s: Old cache version %d vs %d",
                             __func__, version, CACHE_VERSION);
+                    cb(cbdata, LR_FMSTAGE_CACHELOADINGSTATUS,
+                       "Old version of cache format");
                     something_wrong = TRUE;
                 }
             }
@@ -159,6 +174,8 @@ lr_fastestmirrorcache_load(LrFastestMirrorCache **cache,
                 }
             }
             g_strfreev(array);
+
+            cb(cbdata, LR_FMSTAGE_CACHELOADINGSTATUS, NULL);
         }
     }
 
@@ -288,8 +305,11 @@ lr_fastestmirror_prepare(LrHandle *handle,
         return TRUE;
     }
 
-    gint64 maxage = (gint64) handle->fastestmirrormaxage;
+    gint64 maxage = LRO_FASTESTMIRRORMAXAGE_DEFAULT;
     gint64 current_time = g_get_real_time() / 1000000;
+
+    if (handle)
+        maxage = (gint64) handle->fastestmirrormaxage;
 
     for (GSList *elem = in_list; elem; elem = g_slist_next(elem)) {
         gchar *url = elem->data;
@@ -515,6 +535,12 @@ lr_fastestmirror_perform(GSList *list, GError **err)
     return TRUE;
 }
 
+static void
+null_cb(void *clientp, LrFastestMirrorStages stage, void *ptr)
+{
+    return;
+}
+
 gboolean
 lr_fastestmirror(LrHandle *handle,
                  GSList **list,
@@ -522,18 +548,35 @@ lr_fastestmirror(LrHandle *handle,
 {
     assert(!err || *err == NULL);
 
-    g_debug("%s: Fastest mirror determination in progress...", __func__);
+    char *fastestmirrorcache = NULL;
+    LrFastestMirrorCb cb = null_cb;
+    void *cbdata = NULL;
 
-    if (!list || *list == NULL)
+    if (handle) {
+        fastestmirrorcache = handle->fastestmirrorcache;
+        if (handle->fastestmirrorcb)
+            cb = handle->fastestmirrorcb;
+        handle->fastestmirrordata;
+    }
+
+    g_debug("%s: Fastest mirror determination in progress...", __func__);
+    cb(cbdata, LR_FMSTAGE_INIT, NULL);
+
+    if (!list || *list == NULL) {
+        cb(cbdata, LR_FMSTAGE_STATUS, NULL);
         return TRUE;
+    }
 
     // Load cache
     gboolean ret;
     LrFastestMirrorCache *cache = NULL;
     ret = lr_fastestmirrorcache_load(&cache,
-                                     handle->fastestmirrorcache,
+                                     fastestmirrorcache,
+                                     cb,
+                                     cbdata,
                                      err);
     if (!ret) {
+        cb(cbdata, LR_FMSTAGE_STATUS, "Cannot load cache");
         return FALSE;
     }
 
@@ -541,17 +584,22 @@ lr_fastestmirror(LrHandle *handle,
     GSList *lrfastestmirrors;
     ret = lr_fastestmirror_prepare(handle, *list, &lrfastestmirrors, cache, err);
     if (!ret) {
+        cb(cbdata, LR_FMSTAGE_STATUS, "Error while lr_fastestmirror_prepare()");
         g_debug("%s: Error while lr_fastestmirror_prepare()", __func__);
         return FALSE;
     }
 
+    cb(cbdata, LR_FMSTAGE_DETECTION, NULL);
     ret = lr_fastestmirror_perform(lrfastestmirrors, err);
     if (!ret) {
+        cb(cbdata, LR_FMSTAGE_STATUS, "Error while detection");
         g_debug("%s: Error while lr_fastestmirror_perform()", __func__);
         g_slist_free_full(lrfastestmirrors,
                           (GDestroyNotify)lr_lrfastestmirror_free);
         return FALSE;
     }
+
+    cb(cbdata, LR_FMSTAGE_FINISHING, NULL);
 
     // Sort the mirrors by the connection time
     gint64 ts = g_get_real_time() / 1000000; // TimeStamp
@@ -590,6 +638,8 @@ lr_fastestmirror(LrHandle *handle,
     lr_fastestmirrorcache_write(cache, NULL);
 
     lr_fastestmirrorcache_free(cache);
+
+    cb(cbdata, LR_FMSTAGE_STATUS, NULL);
 
     return TRUE;
 }

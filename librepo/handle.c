@@ -481,6 +481,14 @@ lr_handle_setopt(LrHandle *handle,
 
         break;
 
+    case LRO_FASTESTMIRRORCB:
+        handle->fastestmirrorcb = va_arg(arg, LrFastestMirrorCb);
+        break;
+
+    case LRO_FASTESTMIRRORDATA:
+        handle->fastestmirrordata = va_arg(arg, void *);
+        break;
+
     case LRO_LOWSPEEDTIME:
         val_long = va_arg(arg, long);
 

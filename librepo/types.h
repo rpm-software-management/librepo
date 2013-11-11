@@ -114,6 +114,44 @@ typedef int (*LrMirrorFailureCb)(void *clientp,
                                  const char *msg,
                                  const char *url);
 
+typedef enum {
+    LR_FMSTAGE_INIT, /*!<
+        Fastest mirror detection just started.
+        ptr is NULL*/
+
+    LR_FMSTAGE_CACHELOADING, /*!<
+        ptr is (char *) pointer to string with path to the cache file.
+        (Do not modify or free the string). */
+
+    LR_FMSTAGE_CACHELOADINGSTATUS, /*!<
+        if cache was loaded successfully, ptr is NULL, otherwise
+        ptr is (char *) string with error message.
+        (Do not modify or free the string) */
+
+    LR_FMSTAGE_DETECTION, /*!<
+        Detection in progress.
+        ptr is NULL */
+
+    LR_FMSTAGE_FINISHING, /*!<
+        Detection is done, sorting mirrors, updating cache, etc.
+        ptr is NULL */
+
+    LR_FMSTAGE_STATUS, /*!<
+        The very last invocation of fastest mirror callback.
+        If fastest mirror detection was successfull ptr is NULL,
+        otherwise ptr contain (char *) string with error message.
+        (Do not modify or free the string) */
+} LrFastestMirrorStages;
+
+/** Fastest mirror status callback
+ * @param clientp   Pointer to user data.
+ * @param stage     Stage of fastest mirror detection.
+ * @param ptr       Value specific for each stage of detection.
+ */
+typedef void (*LrFastestMirrorCb)(void *clientp,
+                                  LrFastestMirrorStages stage,
+                                  void *ptr);
+
 /** @} */
 
 G_END_DECLS

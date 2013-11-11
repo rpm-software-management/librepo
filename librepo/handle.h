@@ -202,6 +202,12 @@ typedef enum {
         Maximum age of a record in cache (seconds).
         Default: 2592000 (30 days). */
 
+    LRO_FASTESTMIRRORCB, /* (LrFastestMirrorCb)
+        Fastest mirror status callback */
+
+    LRO_FASTESTMIRRORDATA, /* (void *)
+        User data for LRO_FASTESTMIRRORCB */
+
     LRO_LOWSPEEDTIME, /*< (long)
         The time in seconds that the transfer should be below the
         LRO_LOWSPEEDLIMIT for the library to consider it too slow

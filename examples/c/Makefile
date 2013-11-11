@@ -9,7 +9,8 @@ all: \
      download_repo \
      download_packages \
      download_repo_with_callback \
-     fastestmirror
+     fastestmirror \
+     fastestmirror_with_callback
 
 download_repo:
 	$(CC) $(CFLAGS) download_repo.c $(LINKFLAGS) -o download_repo
@@ -23,12 +24,16 @@ download_repo_with_callback:
 fastestmirror:
 	$(CC) $(CFLAGS) fastestmirror.c $(LINKFLAGS) -o fastestmirror
 
+fastestmirror_with_callback:
+	$(CC) $(CFLAGS) fastestmirror_with_callback.c $(LINKFLAGS) -o fastestmirror_with_callback
+
 clean:
 	rm -f \
 	      download_repo \
 	      download_packages \
 	      download_repo_with_callback \
-	      fastestmirror
+	      fastestmirror \
+	      fastestmirror_with_callback
 
 run:
 	LD_LIBRARY_PATH="../../build/librepo/" ./download_repo
