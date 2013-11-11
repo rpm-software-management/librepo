@@ -556,7 +556,7 @@ lr_fastestmirror(LrHandle *handle,
         fastestmirrorcache = handle->fastestmirrorcache;
         if (handle->fastestmirrorcb)
             cb = handle->fastestmirrorcb;
-        handle->fastestmirrordata;
+        cbdata = handle->fastestmirrordata;
     }
 
     g_debug("%s: Fastest mirror determination in progress...", __func__);
