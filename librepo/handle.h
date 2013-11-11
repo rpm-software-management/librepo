@@ -52,7 +52,7 @@ typedef struct _LrHandle LrHandle;
 #define LRO_MAXSPEED_DEFAULT                0
 
 /** LRO_CONNECTTIMEOUT default value */
-#define LRO_CONNECTTIMEOUT_DEFAULT          300
+#define LRO_CONNECTTIMEOUT_DEFAULT          30
 
 /** LRO_MAXMIRRORTRIES default value */
 #define LRO_MAXMIRRORTRIES_DEFAULT          0
