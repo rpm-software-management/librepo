@@ -196,12 +196,12 @@ lr_gpg_check_signature(const char *signature_fn,
         return FALSE;
     }
 
-     ret = lr_gpg_check_signature_fd(signature_fd, data_fd, home_dir, err);
+    ret = lr_gpg_check_signature_fd(signature_fd, data_fd, home_dir, err);
 
-     close(signature_fd);
-     close(data_fd);
+    close(signature_fd);
+    close(data_fd);
 
-     return ret;
+    return ret;
 }
 
 gboolean
