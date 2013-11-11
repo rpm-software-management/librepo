@@ -75,6 +75,18 @@ typedef struct _LrHandle LrHandle;
 /** LRO_MAXDOWNLOADSPERMIRROR minimal allowed value */
 #define LRO_MAXDOWNLOADSPERMIRROR_MIN       1
 
+/** LRO_LOWSPEEDTIME minimal allowed value */
+#define LRO_LOWSPEEDTIME_MIN                0
+
+/** LRO_LOWSPEEDTIME default value */
+#define LRO_LOWSPEEDTIME_DEFAULT            10
+
+/** LRO_LOWSPEEDLIMIT minimal allowed value */
+#define LRO_LOWSPEEDLIMIT_MIN               0
+
+/** LRO_LOWSPEEDLIMIT default value */
+#define LRO_LOWSPEEDLIMIT_DEFAULT           1000
+
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
 
@@ -189,6 +201,16 @@ typedef enum {
     LRO_FASTESTMIRRORMAXAGE, /*< (long)
         Maximum age of a record in cache (seconds).
         Default: 2592000 (30 days). */
+
+    LRO_LOWSPEEDTIME, /*< (long)
+        The time in seconds that the transfer should be below the
+        LRO_LOWSPEEDLIMIT for the library to consider it too slow
+        and abort. */
+
+    LRO_LOWSPEEDLIMIT, /*< (long)
+        The transfer speed in bytes per second that the transfer
+        should be below during LRO_LOWSPEEDTIME seconds for
+        the library to consider it too slow and abort. */
 
     /* Repo common options */
 

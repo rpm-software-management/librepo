@@ -251,6 +251,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRROR", LRO_FASTESTMIRROR);
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORCACHE", LRO_FASTESTMIRRORCACHE);
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORMAXAGE", LRO_FASTESTMIRRORMAXAGE);
+    PyModule_AddIntConstant(m, "LRO_LOWSPEEDTIME", LRO_LOWSPEEDTIME);
+    PyModule_AddIntConstant(m, "LRO_LOWSPEEDLIMIT", LRO_LOWSPEEDLIMIT);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
     PyModule_AddIntConstant(m, "LRO_CHECKSUM", LRO_CHECKSUM);
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);

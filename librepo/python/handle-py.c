@@ -225,6 +225,8 @@ setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXYTYPE:
     case LRO_REPOTYPE:
     case LRO_FASTESTMIRRORMAXAGE:
+    case LRO_LOWSPEEDTIME:
+    case LRO_LOWSPEEDLIMIT:
     {
         int badarg = 0;
         long d;
@@ -237,10 +239,19 @@ setopt(_HandleObject *self, PyObject *args)
 #endif
         else if (obj == Py_None) {
             // None stands for default value
-            if (option == LRO_PROXYTYPE)
+            switch (option) {
+            case LRO_PROXYTYPE:
                 d = LRO_PROXYTYPE_DEFAULT;
-            else
+                break;
+            case LRO_LOWSPEEDTIME:
+                d = LRO_LOWSPEEDTIME_DEFAULT;
+                break;
+            case LRO_LOWSPEEDLIMIT:
+                d = LRO_LOWSPEEDLIMIT_DEFAULT;
+                break;
+            default:
                 badarg = 1;
+            }
         } else
             badarg = 1;
 

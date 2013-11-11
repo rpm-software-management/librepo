@@ -57,6 +57,8 @@ lr_get_curl_handle()
     curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6);
     curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, LRO_CONNECTTIMEOUT_DEFAULT);
+    curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, LRO_LOWSPEEDTIME_DEFAULT);
+    curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT);
     return h;
 }
 
@@ -475,6 +477,32 @@ lr_handle_setopt(LrHandle *handle,
             ret = FALSE;
         } else {
             handle->fastestmirrormaxage = val_long;
+        }
+
+        break;
+
+    case LRO_LOWSPEEDTIME:
+        val_long = va_arg(arg, long);
+
+        if (val_long < LRO_LOWSPEEDTIME_MIN) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Value of LRO_LOWSPEEDTIME is too low.");
+            ret = FALSE;
+        } else {
+            curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_TIME, val_long);
+        }
+
+        break;
+
+    case LRO_LOWSPEEDLIMIT:
+        val_long = va_arg(arg, long);
+
+        if (val_long < LRO_LOWSPEEDLIMIT_MIN) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Value of LRO_LOWSPEEDLIMIT is too low.");
+            ret = FALSE;
+        } else {
+            curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_LIMIT, val_long);
         }
 
         break;

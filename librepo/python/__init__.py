@@ -202,6 +202,18 @@ Constants
 
     *Integer or None*. Max age of cache record. Older records will not be used.
 
+.. data:: LRO_LOWSPEEDTIME
+
+    *Integer or None*. The time in seconds that the transfer should be below
+    the LRO_LOWSPEEDLIMIT for the library to consider it too slow and abort.
+    Default: 10 (sec)
+
+.. data:: LRO_LOWSPEEDLIMIT
+
+    *Integer or None*. The transfer speed in bytes per second that
+    the transfer should be below during LRO_LOWSPEEDTIME seconds for
+    the library to consider it too slow and abort. Default: 1000 (byte/s)
+
 .. data:: LRO_GPGCHECK
 
     *Boolean*. Set True to enable gpg check (if available) of downloaded repo.
@@ -546,6 +558,8 @@ LRO_VARSUB                  = _librepo.LRO_VARSUB
 LRO_FASTESTMIRROR           = _librepo.LRO_FASTESTMIRROR
 LRO_FASTESTMIRRORCACHE      = _librepo.LRO_FASTESTMIRRORCACHE
 LRO_FASTESTMIRRORMAXAGE     = _librepo.LRO_FASTESTMIRRORMAXAGE
+LRO_LOWSPEEDTIME            = _librepo.LRO_LOWSPEEDTIME
+LRO_LOWSPEEDLIMIT           = _librepo.LRO_LOWSPEEDLIMIT
 LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
@@ -583,10 +597,13 @@ ATTR_TO_LRO = {
     "fastestmirror":        LRO_FASTESTMIRROR,
     "fastestmirrorcache":   LRO_FASTESTMIRRORCACHE,
     "fastestmirrormaxage":  LRO_FASTESTMIRRORMAXAGE,
+    "lowspeedtime":         LRO_LOWSPEEDTIME,
+    "lowspeedlimit":        LRO_LOWSPEEDLIMIT,
     "gpgcheck":             LRO_GPGCHECK,
     "checksum":             LRO_CHECKSUM,
     "yumdlist":             LRO_YUMDLIST,
-    "yumblist":             LRO_YUMBLIST,}
+    "yumblist":             LRO_YUMBLIST,
+}
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
 LRI_URLS                = _librepo.LRI_URLS
@@ -896,6 +913,14 @@ class Handle(_librepo.Handle):
     .. attribute:: fastestmirrormaxage:
 
         See: :data:`.LRO_FASTESTMIRRORMAXAGE`
+
+    .. attribute:: lowspeedtime:
+
+        See: :data:`.LRO_LOWSPEEDTIME`
+
+    .. attribute:: lowspeedlimit:
+
+        See: :data:`.LRO_LOWSPEEDLIMIT`
 
     .. attribute:: gpgcheck:
 

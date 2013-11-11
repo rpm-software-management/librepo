@@ -251,6 +251,10 @@ class TestCaseHandle(unittest.TestCase):
         h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)
         h.checksum = None
+        h.setopt(librepo.LRO_LOWSPEEDTIME, None)
+        h.lowspeedtime = None
+        h.setopt(librepo.LRO_LOWSPEEDLIMIT, None)
+        h.lowspeedlimit = None
 
         def callback(data, total_to_download, downloaded):
             pass
