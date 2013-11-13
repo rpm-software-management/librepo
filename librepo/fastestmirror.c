@@ -536,7 +536,9 @@ lr_fastestmirror_perform(GSList *list, GError **err)
 }
 
 static void
-null_cb(void *clientp, LrFastestMirrorStages stage, void *ptr)
+null_cb(G_GNUC_UNUSED void *clientp,
+        G_GNUC_UNUSED LrFastestMirrorStages stage,
+        G_GNUC_UNUSED void *ptr)
 {
     return;
 }

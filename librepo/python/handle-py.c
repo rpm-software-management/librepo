@@ -36,12 +36,14 @@
 typedef struct {
     PyObject_HEAD
     LrHandle *handle;
-    /* Callback */
+    /* Callbacks */
     PyObject *progress_cb;
     PyObject *progress_cb_data;
+    PyObject *fastestmirror_cb;
+    PyObject *fastestmirror_cb_data;
     /* GIL stuff */
     // See: http://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code
-    PyThreadState *state;
+    PyThreadState **state;
 } _HandleObject;
 
 LrHandle *
@@ -52,6 +54,14 @@ Handle_FromPyObject(PyObject *o)
         return NULL;
     }
     return ((_HandleObject *)o)->handle;
+}
+
+void
+Handle_SetThreadState(PyObject *o, PyThreadState **state)
+{
+    _HandleObject *self = (_HandleObject *) o;
+    if (!self) return;
+    self->state = state;
 }
 
 static int
@@ -83,13 +93,54 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     else
         user_data = Py_None;
 
-    EndAllowThreads(&self->state);
+    EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->progress_cb,
                         "(Odd)", user_data, total_to_download, now_downloaded);
     Py_XDECREF(result);
-    BeginAllowThreads(&self->state);
+    BeginAllowThreads(self->state);
 
     return 0;
+}
+
+static void
+fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
+{
+    _HandleObject *self;
+    PyObject *user_data, *result, *pydata;
+
+    self = (_HandleObject *)data;
+    if (!self->fastestmirror_cb)
+        return;
+
+    if (self->fastestmirror_cb_data)
+        user_data = self->fastestmirror_cb_data;
+    else
+        user_data = Py_None;
+
+    if (!ptr) {
+        pydata = Py_None;
+    } else {
+        switch (stage) {
+        case LR_FMSTAGE_CACHELOADING:
+        case LR_FMSTAGE_CACHELOADINGSTATUS:
+        case LR_FMSTAGE_STATUS:
+            pydata = PyStringOrNone_FromString((char *) ptr);
+            break;
+        default:
+            pydata = Py_None;
+        }
+    }
+
+    EndAllowThreads(self->state);
+    result = PyObject_CallFunction(self->fastestmirror_cb,
+                        "(OlO)", user_data, (long) stage, pydata);
+    Py_XDECREF(result);
+    BeginAllowThreads(self->state);
+
+    if (pydata != Py_None)
+        Py_XDECREF(pydata);
+
+    return;
 }
 
 /* Function on the type */
@@ -105,6 +156,8 @@ handle_new(PyTypeObject *type,
         self->handle = NULL;
         self->progress_cb = NULL;
         self->progress_cb_data = NULL;
+        self->fastestmirror_cb = NULL;
+        self->fastestmirror_cb_data = NULL;
         self->state = NULL;
     }
     return (PyObject *)self;
@@ -123,6 +176,7 @@ handle_init(_HandleObject *self, PyObject *args, PyObject *kwds)
         PyErr_SetString(LrErr_Exception, "Handle initialization failed");
         return -1;
     }
+
     return 0;
 }
 
@@ -133,6 +187,8 @@ handle_dealloc(_HandleObject *o)
         lr_handle_free(o->handle);
     Py_XDECREF(o->progress_cb);
     Py_XDECREF(o->progress_cb_data);
+    Py_XDECREF(o->fastestmirror_cb);
+    Py_XDECREF(o->fastestmirror_cb_data);
     Py_TYPE(o)->tp_free(o);
 }
 
@@ -248,6 +304,9 @@ setopt(_HandleObject *self, PyObject *args)
                 break;
             case LRO_LOWSPEEDLIMIT:
                 d = LRO_LOWSPEEDLIMIT_DEFAULT;
+                break;
+            case LRO_FASTESTMIRRORMAXAGE:
+                d = LRO_FASTESTMIRRORMAXAGE_DEFAULT;
                 break;
             default:
                 badarg = 1;
@@ -509,6 +568,40 @@ setopt(_HandleObject *self, PyObject *args)
         break;
     }
 
+    case LRO_FASTESTMIRRORCB: {
+        if (!PyCallable_Check(obj) && obj != Py_None) {
+            PyErr_SetString(PyExc_TypeError, "Only callable argument or None is supported with this option");
+            return NULL;
+        }
+
+        Py_XDECREF(self->fastestmirror_cb);
+        if (obj == Py_None) {
+            // None object
+            self->fastestmirror_cb = NULL;
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   (LrHandleOption)option,
+                                   NULL);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+        } else {
+            // New callback object
+            Py_XINCREF(obj);
+            self->fastestmirror_cb = obj;
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   (LrHandleOption)option,
+                                   fastestmirror_callback);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   LRO_FASTESTMIRRORDATA,
+                                   self);
+        }
+        break;
+    }
+
     /*
      * Options with callback data
      */
@@ -518,6 +611,16 @@ setopt(_HandleObject *self, PyObject *args)
         } else {
             Py_XINCREF(obj);
             self->progress_cb_data = obj;
+        }
+        break;
+    }
+
+    case LRO_FASTESTMIRRORDATA: {
+        if (obj == Py_None) {
+            self->fastestmirror_cb_data = NULL;
+        } else {
+            Py_XINCREF(obj);
+            self->fastestmirror_cb_data = obj;
         }
         break;
     }
@@ -695,6 +798,7 @@ perform(_HandleObject *self, PyObject *args)
     LrResult *result;
     gboolean ret;
     GError *tmp_err = NULL;
+    PyThreadState *state = NULL;
 
     if (!PyArg_ParseTuple(args, "O:perform", &result_obj))
         return NULL;
@@ -703,14 +807,16 @@ perform(_HandleObject *self, PyObject *args)
 
     result = Result_FromPyObject(result_obj);
 
+    Handle_SetThreadState((PyObject *) self, &state);
+
     // XXX: GIL Hack
-    int hack_rc = gil_logger_hack_begin(&self->state);
+    int hack_rc = gil_logger_hack_begin(&state);
     if (hack_rc == GIL_HACK_ERROR)
         return NULL;
 
-    BeginAllowThreads(&self->state);
+    BeginAllowThreads(&state);
     ret = lr_handle_perform(self->handle, result, &tmp_err);
-    EndAllowThreads(&self->state);
+    EndAllowThreads(&state);
 
     // XXX: GIL Hack
     if (!gil_logger_hack_end(hack_rc))
@@ -739,6 +845,7 @@ download_package(_HandleObject *self, PyObject *args)
     int resume, checksum_type;
     PY_LONG_LONG expectedsize;
     GError *tmp_err = NULL;
+    PyThreadState *state = NULL;
 
     if (!PyArg_ParseTuple(args, "szizLzi:download_package", &relative_url,
                                                             &dest,
@@ -751,16 +858,18 @@ download_package(_HandleObject *self, PyObject *args)
     if (check_HandleStatus(self))
         return NULL;
 
+    Handle_SetThreadState((PyObject *) self, &state);
+
     // XXX: GIL Hack
-    int hack_rc = gil_logger_hack_begin(&self->state);
+    int hack_rc = gil_logger_hack_begin(&state);
     if (hack_rc == GIL_HACK_ERROR)
         return NULL;
 
-    BeginAllowThreads(&self->state);
+    BeginAllowThreads(&state);
     ret = lr_download_package(self->handle, relative_url, dest, checksum_type,
                               checksum, (gint64) expectedsize, base_url,
                               resume, &tmp_err);
-    EndAllowThreads(&self->state);
+    EndAllowThreads(&state);
 
     // XXX: GIL Hack
     if (!gil_logger_hack_end(hack_rc))

@@ -153,6 +153,13 @@ PackageTarget_SetThreadState(PyObject *o, PyThreadState **state)
     _PackageTargetObject *self = (_PackageTargetObject *) o;
     if (!self) return;
     self->state = state;
+
+    // XXX: Little tricky (but not so much)
+    // Set the state to the depending handle as well
+    // (Needed when fastestmirrorcb is used)
+    if (self->handle) {
+        Handle_SetThreadState(self->handle, state);
+    }
 }
 
 

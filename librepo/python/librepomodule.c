@@ -251,6 +251,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRROR", LRO_FASTESTMIRROR);
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORCACHE", LRO_FASTESTMIRRORCACHE);
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORMAXAGE", LRO_FASTESTMIRRORMAXAGE);
+    PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORCB", LRO_FASTESTMIRRORCB);
+    PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORDATA", LRO_FASTESTMIRRORDATA);
     PyModule_AddIntConstant(m, "LRO_LOWSPEEDTIME", LRO_LOWSPEEDTIME);
     PyModule_AddIntConstant(m, "LRO_LOWSPEEDLIMIT", LRO_LOWSPEEDLIMIT);
     PyModule_AddIntConstant(m, "LRO_GPGCHECK", LRO_GPGCHECK);
@@ -356,6 +358,14 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "TRANSFER_SUCCESSFUL", LR_TRANSFER_SUCCESSFUL);
     PyModule_AddIntConstant(m, "TRANSFER_ALREADYEXISTS", LR_TRANSFER_ALREDYEXISTS);
     PyModule_AddIntConstant(m, "TRANSFER_ERROR", LR_TRANSFER_ERROR);
+
+    // Fastest mirror stages
+    PyModule_AddIntConstant(m, "FMSTAGE_INIT", LR_FMSTAGE_INIT);
+    PyModule_AddIntConstant(m, "FMSTAGE_CACHELOADING", LR_FMSTAGE_CACHELOADING);
+    PyModule_AddIntConstant(m, "FMSTAGE_CACHELOADINGSTATUS", LR_FMSTAGE_CACHELOADINGSTATUS);
+    PyModule_AddIntConstant(m, "FMSTAGE_DETECTION", LR_FMSTAGE_DETECTION);
+    PyModule_AddIntConstant(m, "FMSTAGE_FINISHING", LR_FMSTAGE_FINISHING);
+    PyModule_AddIntConstant(m, "FMSTAGE_STATUS", LR_FMSTAGE_STATUS);
 
 #if PY_MAJOR_VERSION >= 3
     return m;

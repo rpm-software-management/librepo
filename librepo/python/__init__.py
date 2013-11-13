@@ -114,7 +114,7 @@ Constants
 
 .. data:: LRO_PROGRESSCB
 
-    *Function*. Set progress callback. Callback must be in format:
+    *Function or None*. Set progress callback. Callback must be in format:
     ``callback(userdata, total_to_download, downloaded)``. If
     total_to_download is 0, then total size is not known.
     Total size (total_to_download) could change (grow) among two callback
@@ -201,6 +201,19 @@ Constants
 .. data:: LRO_FASTESTMIRRORMAXAGE
 
     *Integer or None*. Max age of cache record. Older records will not be used.
+
+.. data:: LRO_FASTESTMIRRORCB
+
+    *Function or None*. Fastest mirror status callback.
+    Its prototype looks like ``callback(userdata, stage, data)``
+    Where *userdata* are data passed by user via LRO_FASTESTMIRRORDATA.
+    *stage* is value from
+    :ref:`fastestmirror-stages-constants-label`. *data* value depends
+    on *stage* value. See the list of available stages.
+
+.. data:: LRO_FASTESTMIRRORDATA
+
+    *Any object*. User data for fastest mirror status callback.
 
 .. data:: LRO_LOWSPEEDTIME
 
@@ -333,6 +346,42 @@ Predefined yumdlist lists
 
 .. _error-codes-label:
 
+
+.. _fastestmirror-stages-constants-label:
+
+Fastest mirror stages
+---------------------
+
+Values used by fastest mirror callback (:data:`~.LRO_FASTESTMIRRORCB`):
+
+.. data:: FMSTAGE_INIT
+
+    (0) Fastest mirror detection just started. *data* is None.
+
+.. data:: FMSTAGE_CACHELOADING
+
+    (1) Cache file is specified. *data* is path to the cache file.
+
+.. data:: FMSTAGE_CACHELOADINGSTATUS
+
+    (2) Cache loading finished. If successfull, *data* is None, otherwise
+        *data* is string with error message.
+
+.. data:: FMSTAGE_DETECTION
+
+    (3) Detection in progress. *data* is None.
+
+.. data:: FMSTAGE_FINISHING
+
+    (4) Detection is done, sorting mirrors, updating cache, etc.
+        *data* is None.
+
+.. data:: FMSTAGE_STATUS
+
+    (5) The very last invocation of fastest mirror callback.
+        If fastest mirror detection was successfull *data*,
+        otherwise *data* contain string with error message.
+
 Error codes
 -----------
 
@@ -357,7 +406,7 @@ LibRepo Error codes.
 .. data:: LRE_CURLSETOPT
 
     (4) cURL doesn't know an option used by librepo. Probably
-    too old cURL version is used.
+        too old cURL version is used.
 
 .. data:: LRE_ALREADYUSEDRESULT
 
@@ -390,8 +439,8 @@ LibRepo Error codes.
 .. data:: LRE_NOTLOCAL
 
     (12) URL is not a local address.
-    E.g. in case when :data:`~.LRO_UPDATE` option is ``True`` and URL
-    is a remote address.
+        E.g. in case when :data:`~.LRO_UPDATE` option is ``True`` and URL
+        is a remote address.
 
 .. data:: LRE_CANNOTCREATEDIR
 
@@ -404,13 +453,13 @@ LibRepo Error codes.
 .. data:: LRE_MLBAD
 
     (15) Bad mirrorlist or metalink file. E.g. metalink doesn't contain
-    reference to target file (repomd.xml), mirrorlist is empty, ..
+        reference to target file (repomd.xml), mirrorlist is empty, ..
 
 .. data:: LRE_MLXML
 
     (16) Cannot parse metalink xml. Non-valid metalink file?
-    E.g. (metalink doesn't contain needed
-    file, mirrorlist doesn't contain urls, ..)
+        E.g. (metalink doesn't contain needed
+        file, mirrorlist doesn't contain urls, ..)
 
 .. data:: LRE_BADCHECKSUM
 
@@ -431,7 +480,7 @@ LibRepo Error codes.
 .. data:: LRE_UNKNOWNCHECKSUM
 
     (21) Unknown type of checksum is needed for verification of one
-    or more files.
+        or more files.
 
 .. data:: LRE_BADURL
 
@@ -558,6 +607,8 @@ LRO_VARSUB                  = _librepo.LRO_VARSUB
 LRO_FASTESTMIRROR           = _librepo.LRO_FASTESTMIRROR
 LRO_FASTESTMIRRORCACHE      = _librepo.LRO_FASTESTMIRRORCACHE
 LRO_FASTESTMIRRORMAXAGE     = _librepo.LRO_FASTESTMIRRORMAXAGE
+LRO_FASTESTMIRRORCB         = _librepo.LRO_FASTESTMIRRORCB
+LRO_FASTESTMIRRORDATA       = _librepo.LRO_FASTESTMIRRORDATA
 LRO_LOWSPEEDTIME            = _librepo.LRO_LOWSPEEDTIME
 LRO_LOWSPEEDLIMIT           = _librepo.LRO_LOWSPEEDLIMIT
 LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
@@ -597,6 +648,8 @@ ATTR_TO_LRO = {
     "fastestmirror":        LRO_FASTESTMIRROR,
     "fastestmirrorcache":   LRO_FASTESTMIRRORCACHE,
     "fastestmirrormaxage":  LRO_FASTESTMIRRORMAXAGE,
+    "fastestmirrorcb":      LRO_FASTESTMIRRORCB,
+    "fastestmirrordata":    LRO_FASTESTMIRRORDATA,
     "lowspeedtime":         LRO_LOWSPEEDTIME,
     "lowspeedlimit":        LRO_LOWSPEEDLIMIT,
     "gpgcheck":             LRO_GPGCHECK,
@@ -767,6 +820,13 @@ TRANSFER_SUCCESSFUL     = _librepo.TRANSFER_SUCCESSFUL
 TRANSFER_ALREADYEXISTS  = _librepo.TRANSFER_ALREADYEXISTS
 TRANSFER_ERROR          = _librepo.TRANSFER_ERROR
 
+FMSTAGE_INIT                = _librepo.FMSTAGE_INIT
+FMSTAGE_CACHELOADING        = _librepo.FMSTAGE_CACHELOADING
+FMSTAGE_CACHELOADINGSTATUS  = _librepo.FMSTAGE_CACHELOADINGSTATUS
+FMSTAGE_DETECTION           = _librepo.FMSTAGE_DETECTION
+FMSTAGE_FINISHING           = _librepo.FMSTAGE_FINISHING
+FMSTAGE_STATUS              = _librepo.FMSTAGE_STATUS
+
 def checksum_str_to_type(name):
     name = name.lower()
     return _CHECKSUM_STR_TO_VAL_MAP.get(name, CHECKSUM_UNKNOWN)
@@ -913,6 +973,14 @@ class Handle(_librepo.Handle):
     .. attribute:: fastestmirrormaxage:
 
         See: :data:`.LRO_FASTESTMIRRORMAXAGE`
+
+    .. attribute:: fastestmirrorcb:
+
+        See: :data:`.LRO_FASTESTMIRRORCB`
+
+    .. attribute:: fastestmirrordata:
+
+        See: :data:`.LRO_FASTESTMIRRORDATA`
 
     .. attribute:: lowspeedtime:
 

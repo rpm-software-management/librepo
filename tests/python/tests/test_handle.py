@@ -247,6 +247,16 @@ class TestCaseHandle(unittest.TestCase):
         h.varsub = None
         h.setopt(librepo.LRO_FASTESTMIRROR, None)
         h.fastestmirror = None
+        h.setopt(librepo.LRO_FASTESTMIRRORCACHE, None)
+        h.fastestmirrorcache = None
+        h.setopt(librepo.LRO_FASTESTMIRRORMAXAGE, None)
+        h.fastestmirrormaxage = None
+        h.setopt(librepo.LRO_FASTESTMIRRORDATA, None)
+        h.fastestmirrordata = None
+        h.setopt(librepo.LRO_LOWSPEEDTIME, None)
+        h.lowspeedtime = None
+        h.setopt(librepo.LRO_LOWSPEEDLIMIT, None)
+        h.lowspeedlimit = None
         h.setopt(librepo.LRO_GPGCHECK, None)
         h.gpgcheck = None
         h.setopt(librepo.LRO_CHECKSUM, None)
@@ -264,4 +274,13 @@ class TestCaseHandle(unittest.TestCase):
         h.progresscb = callback
         h.setopt(librepo.LRO_PROGRESSCB, None)
         h.progresscb = None
+
+        def fmcallback(userdata, stage, data):
+            pass
+        h.setopt(librepo.LRO_FASTESTMIRRORCB, None)
+        h.fastestmirrorcb = None
+        h.setopt(librepo.LRO_FASTESTMIRRORCB, fmcallback)
+        h.fastestmirrorcb = fmcallback
+        h.setopt(librepo.LRO_FASTESTMIRRORCB, None)
+        h.fastestmirror = None
 

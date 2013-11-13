@@ -27,5 +27,6 @@ extern PyTypeObject Handle_Type;
 #define HandleObject_Check(o)   PyObject_TypeCheck(o, &Handle_Type)
 
 LrHandle *Handle_FromPyObject(PyObject *o);
+void Handle_SetThreadState(PyObject *o, PyThreadState **state);
 
 #endif
