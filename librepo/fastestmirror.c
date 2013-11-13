@@ -389,7 +389,10 @@ lr_fastestmirror_prepare(LrHandle *handle,
 }
 
 static gboolean
-lr_fastestmirror_perform(GSList *list, GError **err)
+lr_fastestmirror_perform(GSList *list,
+                         LrFastestMirrorCb cb,
+                         void *cbdata,
+                         GError **err)
 {
     assert(!err || *err == NULL);
 
@@ -404,7 +407,7 @@ lr_fastestmirror_perform(GSList *list, GError **err)
     }
 
     // Add curl easy handles to multi handle
-    int handles_added = 0;
+    long handles_added = 0;
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
         LrFastestMirror *mirror = elem->data;
         if (mirror->curl) {
@@ -417,6 +420,8 @@ lr_fastestmirror_perform(GSList *list, GError **err)
         curl_multi_cleanup(multihandle);
         return TRUE;
     }
+
+    cb(cbdata, LR_FMSTAGE_DETECTION, (void *) &handles_added);
 
     int still_running;
     gdouble elapsed_time = 0.0;
@@ -591,8 +596,7 @@ lr_fastestmirror(LrHandle *handle,
         return FALSE;
     }
 
-    cb(cbdata, LR_FMSTAGE_DETECTION, NULL);
-    ret = lr_fastestmirror_perform(lrfastestmirrors, err);
+    ret = lr_fastestmirror_perform(lrfastestmirrors, cb, cbdata, err);
     if (!ret) {
         cb(cbdata, LR_FMSTAGE_STATUS, "Error while detection");
         g_debug("%s: Error while lr_fastestmirror_perform()", __func__);

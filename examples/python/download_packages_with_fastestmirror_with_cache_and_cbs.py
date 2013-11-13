@@ -25,7 +25,7 @@ def fastestmirrorstatuscallback(userdata, stage, data):
         else:
             print "Cache loaded successfully"
     elif stage == librepo.FMSTAGE_DETECTION:
-        print "Fastest mirror detection in progress.."
+        print "Fastest mirror detection in progress.. (%s mirror(s) will be pinged)" % data
     elif stage == librepo.FMSTAGE_FINISHING:
         print "Fastest mirror detection finishing.."
     elif stage == librepo.FMSTAGE_STATUS:

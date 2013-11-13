@@ -126,6 +126,9 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
         case LR_FMSTAGE_STATUS:
             pydata = PyStringOrNone_FromString((char *) ptr);
             break;
+        case LR_FMSTAGE_DETECTION:
+            pydata = PyLong_FromLong(*((long *) ptr));
+            break;
         default:
             pydata = Py_None;
         }

@@ -29,7 +29,9 @@ cb(G_GNUC_UNUSED void *clientp, LrFastestMirrorStages stage, void *ptr)
             printf("Cache loaded successfully\n");
         break;
     case LR_FMSTAGE_DETECTION:
-        printf("Fastest mirror detection in progress..\n");
+        printf("Fastest mirror detection in progress.. "
+               "(%ld mirror(s) will be pinged)\n",
+               *((long *) ptr));
         break;
     case LR_FMSTAGE_FINISHING:
         printf("Finishing..\n");

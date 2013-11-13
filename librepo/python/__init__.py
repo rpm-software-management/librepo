@@ -369,7 +369,8 @@ Values used by fastest mirror callback (:data:`~.LRO_FASTESTMIRRORCB`):
 
 .. data:: FMSTAGE_DETECTION
 
-    (3) Detection in progress. *data* is None.
+    (3) Detection in progress. *data* is number of mirrors that will be pinged.
+    If all times were loaded from cache, this stage is skiped.
 
 .. data:: FMSTAGE_FINISHING
 
