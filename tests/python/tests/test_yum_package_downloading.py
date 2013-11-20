@@ -554,3 +554,71 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertEqual(pkg.expectedsize, expectedsize)
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
+
+    def test_download_packages_with_fastestmirror_enabled_1(self):
+        h = librepo.Handle()
+
+        cbdata = {
+            "called": False,
+        }
+        def fastestmirrorstatuscallback(userdata, stage, data):
+            cbdata["called"] = True
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [url])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.fastestmirror = True
+        h.fastestmirrorcb = fastestmirrorstatuscallback
+
+        h.download(config.PACKAGE_01_01)
+
+        pkgs = []
+        pkgs.append(h.new_packagetarget(config.PACKAGE_01_01,
+                                        dest=self.tmpdir))
+
+        librepo.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        # There is only one mirror, fastestmirror
+        # detection should be skiped
+        self.assertFalse(cbdata["called"])
+
+
+    def test_download_packages_with_fastestmirror_enabled_2(self):
+        h = librepo.Handle()
+
+        cbdata = {
+            "called": False,
+            "detection": False,
+        }
+        def fastestmirrorstatuscallback(cbdata, stage, data):
+            cbdata["called"] = True
+            if stage == librepo.FMSTAGE_DETECTION:
+                cbdata["detection"] = True
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [url, "http://foobarblabla"])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.fastestmirror = True
+        h.fastestmirrordata = cbdata
+        h.fastestmirrorcb = fastestmirrorstatuscallback
+
+        h.download(config.PACKAGE_01_01)
+
+        pkgs = []
+        pkgs.append(h.new_packagetarget(config.PACKAGE_01_01,
+                                        dest=self.tmpdir))
+
+        librepo.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        # There is only one mirror, fastestmirror
+        # detection should be skiped
+        self.assertTrue(cbdata["called"])
+        self.assertTrue(cbdata["detection"])
