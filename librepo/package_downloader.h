@@ -235,6 +235,28 @@ lr_download_packages(GSList *targets,
                      LrPackageDownloadFlag flags,
                      GError **err);
 
+typedef enum {
+    LR_PACKAGECHECK_FAILFAST    = 1 << 0, /*!<
+        If TRUE, then whole check is stoped immediately when any
+        of target doesn't exist locally or its checksum doesn't match.
+        (FALSE is returned and err is set). If the failfast
+        is FALSE, then this function returns after check of all targets
+        is finished (no matter if successfully or unsuccessfully) and
+        FALSE is returned only if a nonrecoverable error related to the
+        function itself is meet (Errors related to individual targets
+        are reported via corresponding PackageTarget objects). */
+} LrPackageCheckFlag;
+
+/** Check if targets locally exist and checksums match.
+ * If target locally exists, then its err is NULL,
+ * if it doesn't exists, or checksum is differ. Then target->err is
+ * an error message.
+ */
+gboolean
+lr_check_packages(GSList *targets,
+                  LrPackageCheckFlag flags,
+                  GError **err);
+
 /** @} */
 
 G_END_DECLS
