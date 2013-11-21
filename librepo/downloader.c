@@ -1344,7 +1344,9 @@ lr_multi_progress_func(void* ptr,
         // Call progress cb with zeroized params
         // This should tell progress cb, that the total_to_download
         // size is changed.
-        shared_cbdata->cb(shared_cbdata->cbdata, 0.0, 0.0);
+        int ret = shared_cbdata->cb(shared_cbdata->cbdata, 0.0, 0.0);
+        if (ret != 0)
+            return ret;
     }
 
     cbdata->downloaded = now_downloaded;
