@@ -372,3 +372,146 @@ lr_download_package(LrHandle *handle,
 
     return ret;
 }
+
+
+gboolean
+lr_check_packages(GSList *targets,
+                  LrPackageCheckFlag flags,
+                  GError **err)
+{
+    gboolean ret = TRUE;
+    gboolean failfast = flags & LR_PACKAGECHECK_FAILFAST;
+    struct sigaction old_sigact;
+    gboolean interruptible = FALSE;
+
+    assert(!err || *err == NULL);
+
+    if (!targets)
+        return TRUE;
+
+    // Check targets
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        LrPackageTarget *packagetarget = elem->data;
+
+        if (packagetarget->handle->interruptible)
+            interruptible = TRUE;
+
+        if (!packagetarget->checksum
+                || packagetarget->checksum_type == LR_CHECKSUM_UNKNOWN)
+        {
+            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_BADOPTARG,
+                        "Target %s doesn't have specified "
+                         "checksum value or checksum type!",
+                         packagetarget->relative_url);
+            return FALSE;
+        }
+    }
+
+    // Setup sighandler
+    if (interruptible) {
+        g_debug("%s: Using own SIGINT handler", __func__);
+        struct sigaction sigact;
+        sigact.sa_handler = lr_sigint_handler;
+        sigaddset(&sigact.sa_mask, SIGINT);
+        sigact.sa_flags = SA_RESTART;
+        if (sigaction(SIGINT, &sigact, &old_sigact) == -1) {
+            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_SIGACTION,
+                        "Cannot set Librepo SIGINT handler");
+            return FALSE;
+        }
+    }
+
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        gchar *local_path;
+        LrPackageTarget *packagetarget = elem->data;
+
+        // Prepare destination filename
+        if (packagetarget->dest) {
+            if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
+                // Dir specified
+                gchar *file_basename = g_path_get_basename(packagetarget->relative_url);
+                local_path = g_build_filename(packagetarget->dest,
+                                              file_basename,
+                                              NULL);
+                g_free(file_basename);
+            } else {
+                local_path = g_strdup(packagetarget->dest);
+            }
+        } else {
+            // No destination path specified
+            local_path = g_path_get_basename(packagetarget->relative_url);
+        }
+
+        packagetarget->local_path = g_string_chunk_insert(packagetarget->chunk,
+                                                          local_path);
+
+        if (g_access(packagetarget->local_path, R_OK) == 0) {
+            // If the file exists check its checksum
+            int fd_r = open(packagetarget->local_path, O_RDONLY);
+            if (fd_r != -1) {
+                // File was successfully opened
+                gboolean matches;
+                ret = lr_checksum_fd_cmp(packagetarget->checksum_type,
+                                         fd_r,
+                                         packagetarget->checksum,
+                                         1,
+                                         &matches,
+                                         NULL);
+                close(fd_r);
+                if (ret && matches) {
+                    // Checksum is ok
+                    packagetarget->err = NULL;
+                    g_debug("%s: Package %s is already downloaded (checksum matches)",
+                            __func__, packagetarget->local_path);
+                } else {
+                    // Checksum doesn't match or checksuming error
+                    packagetarget->err = g_string_chunk_insert(
+                                                packagetarget->chunk,
+                                                "Checksum of doesn't match");
+                    if (failfast) {
+                        ret = FALSE;
+                        g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR,
+                                    LRE_BADCHECKSUM,
+                                    "File with nonmatching checksum found");
+                        break;
+                    }
+                }
+            } else {
+                // Cannot open the file
+                packagetarget->err = g_string_chunk_insert(packagetarget->chunk,
+                                       "Cannot be opened");
+                if (failfast) {
+                    ret = FALSE;
+                    g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
+                                "Cannot open %s", packagetarget->local_path);
+                    break;
+                }
+            }
+        } else {
+            // File doesn't exists
+            packagetarget->err = g_string_chunk_insert(packagetarget->chunk,
+                                       "Doesn't exist");
+            if (failfast) {
+                ret = FALSE;
+                g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
+                            "File %s doesn't exists", packagetarget->local_path);
+                break;
+            }
+        }
+    }
+
+    // Restore original signal handler
+    if (interruptible) {
+        g_debug("%s: Restoring an old SIGINT handler", __func__);
+        sigaction(SIGINT, &old_sigact, NULL);
+        if (lr_interrupt) {
+            if (err && *err != NULL)
+                g_clear_error(err);
+            g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_INTERRUPTED,
+                        "Insterupted by a SIGINT signal");
+            return FALSE;
+        }
+    }
+
+    return ret;
+}
