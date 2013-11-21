@@ -228,7 +228,7 @@ lr_download_packages(GSList *targets,
                 ret = lr_checksum_fd_cmp(packagetarget->checksum_type,
                                          fd_r,
                                          packagetarget->checksum,
-                                         0,
+                                         1,
                                          &matches,
                                          NULL);
                 close(fd_r);
