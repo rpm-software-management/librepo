@@ -1340,6 +1340,11 @@ lr_multi_progress_func(void* ptr,
         // This is not first mirror for the transfer,
         // we have already downloaded some data
         cbdata->total = total_to_download;
+
+        // Call progress cb with zeroized params
+        // This should tell progress cb, that the total_to_download
+        // size is changed.
+        shared_cbdata->cb(shared_cbdata->cbdata, 0.0, 0.0);
     }
 
     cbdata->downloaded = now_downloaded;
