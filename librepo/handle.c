@@ -110,7 +110,7 @@ lr_handle_free(LrHandle *handle)
     if (handle->mirrorlist_fd != -1)
         close(handle->mirrorlist_fd);
     if (handle->metalink_fd != -1)
-        close(handle->mirrorlist_fd);
+        close(handle->metalink_fd);
     lr_handle_free_list(&handle->urls);
     lr_free(handle->fastestmirrorcache);
     lr_free(handle->mirrorlist);
