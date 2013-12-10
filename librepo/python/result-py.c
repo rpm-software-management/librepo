@@ -144,6 +144,18 @@ getinfo(_ResultObject *self, PyObject *args)
         return PyObject_FromYumRepoMd(repomd);
     }
 
+    case LRR_YUM_TIMESTAMP: {
+        gint64 ts;
+        GError *tmp_err = NULL;
+        res = lr_result_getinfo(self->result,
+                                &tmp_err,
+                                (LrResultInfoOption)option,
+                                &ts);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        return PyLong_FromLongLong((PY_LONG_LONG) ts);
+    }
+
     /*
      * Unknown options
      */

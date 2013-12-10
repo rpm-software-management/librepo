@@ -89,6 +89,12 @@ lr_result_getinfo(LrResult *result,
         break;
     }
 
+    case LRR_YUM_TIMESTAMP: {
+        gint64 *ts = va_arg(arg, gint64 *);
+        *ts = lr_yum_repomd_get_highest_timestamp(result->yum_repomd);
+        break;
+    }
+
     default:
         rc = FALSE;
         g_set_error(err, LR_RESULT_ERROR, LRE_UNKNOWNOPT,

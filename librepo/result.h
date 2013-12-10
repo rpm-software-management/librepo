@@ -38,8 +38,17 @@ typedef struct _LrResult LrResult;
 /** Result options for ::lr_result_getinfo.
  */
 typedef enum {
-    LRR_YUM_REPO,       /*!< (LrYumRepo *) Reference to ::LrYumRepo in result */
-    LRR_YUM_REPOMD,     /*!< (LrYumRepoMd *) Reference to ::LrYumRepoMd in result */
+    LRR_YUM_REPO,       /*!< (LrYumRepo *)
+        Reference to ::LrYumRepo in result */
+
+    LRR_YUM_REPOMD,     /*!< (LrYumRepoMd *)
+        Reference to ::LrYumRepoMd in result */
+
+    LRR_YUM_TIMESTAMP,  /*!< (gint64)
+        The highest timestamp from repomd.xml.
+        See: https://github.com/Tojaj/librepo/issues/25
+        See: http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f */
+
     LRR_SENTINEL,
 } LrResultInfoOption;
 

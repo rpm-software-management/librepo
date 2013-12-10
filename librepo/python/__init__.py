@@ -560,6 +560,11 @@ LibRepo Result options for use in :meth:`~.Result.getinfo` method.
     Return a dict representing a repomd.xml file of downloaded
     yum repository.
 
+.. data:: LRR_YUM_TIMESTAMP
+
+    Return the highest timestamp from all records in the repomd.
+    See: http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f
+
 Transfer statuses for endcb of :class:`~.PackageTarget`
 -------------------------------------------------------
 
@@ -783,13 +788,15 @@ LRE_XMLPARSER           = _librepo.LRE_XMLPARSER
 LRE_CBINTERRUPTED       = _librepo.LRE_CBINTERRUPTED
 LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
 
-LRR_YUM_REPO    = _librepo.LRR_YUM_REPO
-LRR_YUM_REPOMD  = _librepo.LRR_YUM_REPOMD
-LRR_SENTINEL    = _librepo.LRR_SENTINEL
+LRR_YUM_REPO        = _librepo.LRR_YUM_REPO
+LRR_YUM_REPOMD      = _librepo.LRR_YUM_REPOMD
+LRR_YUM_TIMESTAMP   = _librepo.LRR_YUM_TIMESTAMP
+LRR_SENTINEL        = _librepo.LRR_SENTINEL
 
 ATTR_TO_LRR = {
-    "yum_repo":     LRR_YUM_REPO,
-    "yum_repomd":   LRR_YUM_REPOMD,
+    "yum_repo":         LRR_YUM_REPO,
+    "yum_repomd":       LRR_YUM_REPOMD,
+    "yum_timestamp":    LRR_YUM_TIMESTAMP,
 }
 
 CHECKSUM_UNKNOWN    = _librepo.CHECKSUM_UNKNOWN
@@ -1121,6 +1128,10 @@ class Result(_librepo.Result):
     .. attribute:: yum_repomd
 
         See: :data:`.LRR_YUM_REPOMD`
+
+    .. attribute:: yum_timestamp
+
+        See: :data:`.LRR_YUM_TIMESTAMP`
     """
 
     def getinfo(self, option):

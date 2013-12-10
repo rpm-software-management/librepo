@@ -343,6 +343,7 @@ init_librepo(void)
     // Result option
     PyModule_AddIntConstant(m, "LRR_YUM_REPO", LRR_YUM_REPO);
     PyModule_AddIntConstant(m, "LRR_YUM_REPOMD", LRR_YUM_REPOMD);
+    PyModule_AddIntConstant(m, "LRR_YUM_TIMESTAMP", LRR_YUM_TIMESTAMP);
     PyModule_AddIntConstant(m, "LRR_SENTINEL", LRR_SENTINEL);
 
     // Checksums

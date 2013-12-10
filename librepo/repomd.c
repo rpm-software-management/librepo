@@ -135,6 +135,20 @@ lr_yum_repomd_get_record(LrYumRepoMd *repomd, const char *type)
     return NULL;
 }
 
+gint64
+lr_yum_repomd_get_highest_timestamp(LrYumRepoMd *repomd)
+{
+    assert(repomd);
+    gint64 max = -1;
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
+        LrYumRepoMdRecord *record = elem->data;
+        assert(record);
+        if (max < record->timestamp)
+            max = record->timestamp;
+    }
+    return max;
+}
+
 // repomd.xml parser
 
 typedef enum {

@@ -47,6 +47,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+        timestamp  = r.getinfo(librepo.LRR_YUM_TIMESTAMP)
 
         self.assertEqual(yum_repo,
             { #'deltainfo': None,
@@ -142,6 +143,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
                 #'updateinfo': None
                 }
         )
+
+        self.assertEqual(timestamp, 1347459931L)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
