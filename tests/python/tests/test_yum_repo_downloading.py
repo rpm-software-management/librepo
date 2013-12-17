@@ -144,7 +144,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
                 }
         )
 
-        self.assertEqual(timestamp, 1347459931L)
+        self.assertEqual(timestamp, 1347459931)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
