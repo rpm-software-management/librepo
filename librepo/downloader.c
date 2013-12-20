@@ -267,6 +267,8 @@ lr_progresscb(void *ptr,
     assert(target);
     assert(target->target);
 
+    if (target->state != LR_DS_RUNNING)
+        return 0;
     if (!target->target->progresscb)
         return 0;
 
