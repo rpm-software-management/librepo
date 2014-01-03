@@ -116,3 +116,5 @@ Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo
 ## Links
 
 * [Red Hat Bugzilla](https://bugzilla.redhat.com/buglist.cgi?query_format=advanced&bug_status=NEW&bug_status=ASSIGNED&bug_status=MODIFIED&bug_status=VERIFIED&component=librepo)
+
+* [Fedora spec file](http://pkgs.fedoraproject.org/cgit/librepo.git/tree/librepo.spec)
