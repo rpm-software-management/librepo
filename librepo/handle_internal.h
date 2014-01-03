@@ -151,6 +151,14 @@ struct _LrHandle {
 
     LrUrlVars *urlvars; /*!<
         List with url substitutions */
+
+    long lowspeedlimit; /*!<
+        The time in seconds that the transfer should be below the
+        LRO_LOWSPEEDLIMIT for the library to consider it too slow
+        and abort. */
+
+    gint64 maxspeed; /*!<
+        Max speed in bytes per sec */
 };
 
 /** Return new CURL easy handle with some default options setted.

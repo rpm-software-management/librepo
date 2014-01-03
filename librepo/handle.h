@@ -136,7 +136,7 @@ typedef enum {
     LRO_PROGRESSDATA,  /*!< (void *)
         Progress callback user data */
 
-    LRO_MAXSPEED,  /*!< (unsigned long long)
+    LRO_MAXSPEED,  /*!< (gint64)
         Maximum download speed in bytes per second. Default is 0 = unlimited
         download speed. */
 

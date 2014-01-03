@@ -96,6 +96,7 @@ lr_handle_init()
     handle->checks |= LR_CHECK_CHECKSUM;
     handle->maxparalleldownloads = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
     handle->maxdownloadspermirror = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
+    handle->lowspeedlimit = LRO_LOWSPEEDLIMIT_DEFAULT;
 
     return handle;
 }
@@ -190,6 +191,7 @@ lr_handle_setopt(LrHandle *handle,
 
     // Variables for values from va_arg
     long val_long;
+    gint64 val_gint64;
 
     if (!handle) {
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
@@ -309,7 +311,21 @@ lr_handle_setopt(LrHandle *handle,
         break;
 
     case LRO_MAXSPEED:
-        c_rc = curl_easy_setopt(c_h, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t) va_arg(arg, unsigned long long));
+        val_gint64 = va_arg(arg, gint64);
+        if (val_gint64 < 0) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Bad value of LRO_MAXSPEED");
+            ret = FALSE;
+            break;
+        } else if (val_gint64 != 0 && val_gint64 < handle->lowspeedlimit) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "LRO_MAXSPEED (%"G_GINT64_FORMAT") is lower than "
+                        "LRO_LOWSPEEDLIMIT (%ld)", val_gint64,
+                        handle->lowspeedlimit);
+            ret = FALSE;
+            break;
+        }
+        handle->maxspeed = val_gint64;
         break;
 
     case LRO_DESTDIR:
@@ -509,8 +525,15 @@ lr_handle_setopt(LrHandle *handle,
             g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                         "Value of LRO_LOWSPEEDLIMIT is too low.");
             ret = FALSE;
+        } else if (handle->maxspeed != 0 && handle->maxspeed < val_long) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                        "Value of LRO_LOWSPEEDLIMIT (%ld) is higher than "
+                        "LRO_MAXSPEED (%"G_GINT64_FORMAT")",
+                        val_long, handle->maxspeed);
+            ret = FALSE;
         } else {
             curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_LIMIT, val_long);
+            handle->lowspeedlimit = val_long;
         }
 
         break;

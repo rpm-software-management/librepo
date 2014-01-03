@@ -333,7 +333,6 @@ setopt(_HandleObject *self, PyObject *args)
      * Options with long/int/None arguments
      */
     case LRO_PROXYPORT:
-    case LRO_MAXSPEED:
     case LRO_CONNECTTIMEOUT:
     case LRO_MAXMIRRORTRIES:
     case LRO_MAXPARALLELDOWNLOADS:
@@ -361,6 +360,37 @@ setopt(_HandleObject *self, PyObject *args)
                 d = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
             else if (option == LRO_MAXDOWNLOADSPERMIRROR)
                 d = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
+            else
+                assert(0);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Only Int/Long/None is supported with this option");
+            return NULL;
+        }
+
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
+                               (LrHandleOption)option,
+                               d);
+        break;
+    }
+
+    /*
+     * Options with gint64/None arguments
+     */
+    case LRO_MAXSPEED:
+    {
+        gint64 d;
+
+        if (PyLong_Check(obj))
+            d = (gint64) PyLong_AsLongLong(obj);
+#if PY_MAJOR_VERSION < 3
+        else if (PyInt_Check(obj))
+            d = (gint64) PyInt_AS_LONG(obj);
+#endif
+        else if (obj == Py_None) {
+            /* Default options */
+            if (option == LRO_MAXSPEED)
+                d = (gint64) LRO_MAXSPEED_DEFAULT;
             else
                 assert(0);
         } else {

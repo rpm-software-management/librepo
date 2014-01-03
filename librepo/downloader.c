@@ -143,6 +143,9 @@ typedef struct {
     int max_mirrors_to_try; /*!<
         Maximal number of mirrors to try. Number <= 0 means no limit. */
 
+    gint64 max_speed; /*!<
+        Maximal speed in bytes per sec */
+
     // Data
 
     CURLM *multi_handle; /*!<
@@ -661,6 +664,39 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 }
 
 static gboolean
+set_max_speeds_to_transfers(LrDownload *dd, GError *err)
+{
+    guint length;
+    gint64 single_target_speed;
+
+    if (!dd->max_speed)  // Nothing to do
+        return TRUE;
+
+    length = g_slist_length(dd->running_transfers);
+    if (!length)  // Nothing to do
+        return TRUE;
+
+    // Calculate a max speed (rounded up) per target
+    single_target_speed = (dd->max_speed + (length - 1)) / length;
+
+    for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
+        LrTarget *ltarget = elem->data;
+        CURL *curl_handle = ltarget->curl_handle;
+        CURLcode code = curl_easy_setopt(curl_handle,
+                                         CURLOPT_MAX_RECV_SPEED_LARGE,
+                                         (curl_off_t) single_target_speed);
+        if (code != CURLE_OK) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLSETOPT,
+                        "Cannot set CURLOPT_MAX_RECV_SPEED_LARGE option: %s",
+                        curl_easy_strerror(code));
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
 prepare_next_transfers(LrDownload *dd, GError **err)
 {
     guint length = g_slist_length(dd->running_transfers);
@@ -673,6 +709,11 @@ prepare_next_transfers(LrDownload *dd, GError **err)
             return FALSE;
         free_slots--;
     }
+
+    // Set maximal speed for each target
+    if (dd->max_speed)
+        if (!set_max_speeds_to_transfers(dd, err))
+            return FALSE;
 
     return TRUE;
 }
@@ -1125,12 +1166,14 @@ lr_download(GSList *targets,
         dd.max_parallel_connections = lr_handle->maxparalleldownloads;
         dd.max_connection_per_host = lr_handle->maxdownloadspermirror;
         dd.max_mirrors_to_try = lr_handle->maxmirrortries;
+        dd.max_speed = lr_handle->maxspeed;
     } else {
         // No handle, this is allowed when a complete URL is passed
         // via relative_url param.
         dd.max_parallel_connections = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
         dd.max_connection_per_host = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
         dd.max_mirrors_to_try = LRO_MAXMIRRORTRIES_DEFAULT;
+        dd.max_speed = LRO_MAXSPEED_DEFAULT;
     }
 
     dd.multi_handle = curl_multi_init();
@@ -1173,16 +1216,8 @@ lr_download(GSList *targets,
     dd.running_transfers = NULL;
 
     // Prepare the first set of transfers
-    for (int x = 0; x < dd.max_parallel_connections; x++) {
-        gboolean candidatefound;
-
-        ret = prepare_next_transfer(&dd, &candidatefound, &tmp_err);
-        if (!ret)
-            goto lr_download_cleanup;
-
-        if (!candidatefound)
-            break;
-    }
+    if (!prepare_next_transfers(&dd, &tmp_err))
+        goto lr_download_cleanup;
 
     // Perform!
     g_debug("%s: Downloading started", __func__);
