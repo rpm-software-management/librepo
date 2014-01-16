@@ -189,6 +189,8 @@ lr_download_packages(GSList *targets,
         gchar *local_path;
         LrPackageTarget *packagetarget = elem->data;
         LrDownloadTarget *downloadtarget;
+        gint64 realsize = -1;
+        gboolean doresume = packagetarget->resume;
 
         // Prepare destination filename
         if (packagetarget->dest) {
@@ -211,8 +213,27 @@ lr_download_packages(GSList *targets,
                                                           local_path);
         g_free(local_path);
 
-        // If the file exists and checksum is passed, check if we need to
-        // download the file again
+        // Check expected size and real size if the file exists
+        if (doresume
+            && g_access(packagetarget->local_path, R_OK) == 0
+            && packagetarget->expectedsize > 0)
+        {
+            struct stat buf;
+            if (stat(packagetarget->local_path, &buf)) {
+                g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
+                        "Cannot stat %s: %s", packagetarget->local_path,
+                        strerror(errno));
+                return FALSE;
+            }
+
+            realsize = buf.st_size;
+
+            if (packagetarget->expectedsize < realsize)
+                // Existing file is bigger then the one that is expected,
+                // disable resuming
+                doresume = FALSE;
+        }
+
         if (g_access(packagetarget->local_path, R_OK) == 0
             && packagetarget->checksum
             && packagetarget->checksum_type != LR_CHECKSUM_UNKNOWN)
@@ -233,6 +254,7 @@ lr_download_packages(GSList *targets,
                                          NULL);
                 close(fd_r);
                 if (ret && matches) {
+                    // Checksum calculation was ok and checksum matches
                     g_debug("%s: Package %s is already downloaded (checksum matches)",
                             __func__, packagetarget->local_path);
 
@@ -248,8 +270,35 @@ lr_download_packages(GSList *targets,
                                "Already downloaded");
 
                     continue;
+                } else if (ret) {
+                    // Checksum calculation was ok but checksum doesn't match
+                    if (realsize != -1 && realsize == packagetarget->expectedsize)
+                        // File size is the same as the expected one
+                        // Don't try to resume
+                        doresume = FALSE;
                 }
             }
+        }
+
+        if (doresume && realsize != -1 && realsize == packagetarget->expectedsize) {
+            // File's size matches the expected one, the resume is enabled and
+            // no checksum is known => expect that the file is
+            // the one the user wants
+            g_debug("%s: Package %s is already downloaded (size matches)",
+                    __func__, packagetarget->local_path);
+
+            packagetarget->err = g_string_chunk_insert(
+                                        packagetarget->chunk,
+                                        "Already downloaded");
+
+            // Call end callback
+            LrEndCb end_cb = packagetarget->endcb;
+            if (end_cb)
+                end_cb(packagetarget->cbdata,
+                       LR_TRANSFER_ALREDYEXISTS,
+                       "Already downloaded");
+
+            continue;
         }
 
         if (packagetarget->handle) {
@@ -279,7 +328,7 @@ lr_download_packages(GSList *targets,
                                                packagetarget->local_path,
                                                checksums,
                                                packagetarget->expectedsize,
-                                               packagetarget->resume,
+                                               doresume,
                                                packagetarget->progresscb,
                                                packagetarget->cbdata,
                                                packagetarget->endcb,

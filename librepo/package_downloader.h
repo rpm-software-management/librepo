@@ -179,6 +179,7 @@ lr_packagetarget_new(LrHandle *handle,
  * @param base_url          Base URL or NULL
  * @param expectedsize      Expected size of the target. If server reports
  *                          different size, then no download is performed.
+ *                          If 0 then size check is ignored.
  * @param resume            If TRUE, then downloader try to resume download
  *                          if destination file exists. If the file doesn't
  *                          exists, it will be normally downloaded again.
