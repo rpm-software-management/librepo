@@ -664,7 +664,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 }
 
 static gboolean
-set_max_speeds_to_transfers(LrDownload *dd, GError *err)
+set_max_speeds_to_transfers(LrDownload *dd, GError **err)
 {
     guint length;
     gint64 single_target_speed;
@@ -1138,7 +1138,7 @@ lr_download(GSList *targets,
             gboolean failfast,
             GError **err)
 {
-    gboolean ret;
+    gboolean ret = FALSE;
     LrDownload dd;             // dd stands for Download Data
     GError *tmp_err = NULL;
 
