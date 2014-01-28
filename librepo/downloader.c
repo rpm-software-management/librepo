@@ -447,6 +447,13 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                     continue;
                 }
 
+                if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
+                    // Skip rsync mirrors
+                    g_debug("%s: Skipping rsync url: %s", __func__,
+                            c_mirror->mirror->url);
+                    continue;
+                }
+
                 at_least_one_suitable_mirror_found = 1;
 
                 // Number of transfers which are downloading from the mirror

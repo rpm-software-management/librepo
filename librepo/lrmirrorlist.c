@@ -38,6 +38,9 @@ lr_detect_protocol(const char *url)
     if (g_str_has_prefix(url, "file://"))
         return LR_PROTOCOL_FILE;
 
+    if (g_str_has_prefix(url, "rsync://"))
+        return LR_PROTOCOL_RSYNC;
+
     return LR_PROTOCOL_OTHER;
 }
 

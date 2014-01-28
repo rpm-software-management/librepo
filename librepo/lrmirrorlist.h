@@ -32,6 +32,7 @@ typedef enum {
     LR_PROTOCOL_FILE,
     LR_PROTOCOL_HTTP,
     LR_PROTOCOL_FTP,
+    LR_PROTOCOL_RSYNC,
     LR_PROTOCOL_OTHER,
 } LrProtocol;
 
