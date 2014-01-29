@@ -57,7 +57,9 @@ lr_downloadtarget_new(LrHandle *handle,
                       void *cbdata,
                       LrEndCb endcb,
                       LrMirrorFailureCb mirrorfailurecb,
-                      void *userdata)
+                      void *userdata,
+                      gint64 byterangestart,
+                      gint64 byterangeend)
 {
     LrDownloadTarget *target;
 
@@ -65,6 +67,12 @@ lr_downloadtarget_new(LrHandle *handle,
     assert((fd > 0 && !fn) || (fd < 0 && fn));
 
     target = lr_malloc0(sizeof(*target));
+
+    if (byterangestart && resume) {
+        g_debug("%s: Cannot specify byterangestart and set resume to TRUE "
+                "at the same time", __func__);
+        return NULL;
+    }
 
     target->handle          = handle;
     target->chunk           = g_string_chunk_new(0);
@@ -81,6 +89,8 @@ lr_downloadtarget_new(LrHandle *handle,
     target->mirrorfailurecb = mirrorfailurecb;
     target->rcode           = LRE_UNFINISHED;
     target->userdata        = userdata;
+    target->byterangestart  = byterangestart;
+    target->byterangeend    = byterangeend;
 
     return target;
 }

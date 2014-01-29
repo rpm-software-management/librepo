@@ -191,7 +191,7 @@ packagetarget_init(_PackageTargetObject *self,
 {
     char *relative_url, *dest, *checksum, *base_url;
     int checksum_type, resume;
-    PY_LONG_LONG expectedsize;
+    PY_LONG_LONG expectedsize, byterangestart, byterangeend;
     PyObject *pyhandle, *py_progresscb, *py_cbdata;
     PyObject *py_endcb, *py_mirrorfailurecb;
     LrProgressCb progresscb = NULL;
@@ -200,11 +200,12 @@ packagetarget_init(_PackageTargetObject *self,
     LrHandle *handle = NULL;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "OszizLziOOOO:packagetarget_init",
+    if (!PyArg_ParseTuple(args, "OszizLziOOOOLL:packagetarget_init",
                           &pyhandle, &relative_url, &dest, &checksum_type,
                           &checksum, &expectedsize, &base_url, &resume,
                           &py_progresscb, &py_cbdata, &py_endcb,
-                          &py_mirrorfailurecb))
+                          &py_mirrorfailurecb, &byterangestart,
+                          &byterangeend))
         return -1;
 
     if (pyhandle != Py_None) {
@@ -253,11 +254,20 @@ packagetarget_init(_PackageTargetObject *self,
         Py_XINCREF(self->mirrorfailure_cb);
     }
 
-    self->target = lr_packagetarget_new_v2(handle, relative_url, dest,
+    if (resume && byterangestart) {
+        PyErr_SetString(PyExc_TypeError, "resume cannot be used simultaneously "
+                "with the byterangestart param");
+        return -1;
+    }
+
+    self->target = lr_packagetarget_new_v3(handle, relative_url, dest,
                                            checksum_type, checksum,
                                            (gint64) expectedsize, base_url,
                                            resume, progresscb, self, endcb,
-                                           mirrorfailurecb, &tmp_err);
+                                           mirrorfailurecb,
+                                           (gint64) byterangestart,
+                                           (gint64) byterangeend,
+                                           &tmp_err);
 
     if (self->target == NULL) {
         PyErr_Format(LrErr_Exception,

@@ -103,15 +103,19 @@ typedef struct {
     GStringChunk *chunk; /*!<
         Chunk for strings used in this structure. */
 
+    gint64 byterangestart; /*!<
+        Download only specified range of bytes. */
+
+    gint64 byterangeend; /*!<
+        Download only specified range of bytes. */
+
     // Items filled by downloader
 
     char *usedmirror; /*!<
         Used mirror. Filled only if transfer was successfull. */
 
     char *effectiveurl; /*!<
-        Effective url. Could be only concatenation of used_mirror and
-        path or completely different url (if there were some
-        redirects, etc.). Filled only if transfer was successfull. */
+        Effective url. Filled only if transfer was successfull. */
 
     LrRc rcode; /*!<
         Return code */
@@ -167,6 +171,10 @@ typedef struct {
  *                          data. This data are not used/touched by
  *                          lr_download* functions or by
  *                          lr_downloadtarget_free().
+ * @param byterangestart    Download only specified byte range. 0 is default.
+ * @param byterangeend      Download only specified byte range.
+ *                          If this value is less or equal byterangestart, then
+ *                          it is ignored. 0 is default.
  * @return                  New allocated target
  */
 LrDownloadTarget *
@@ -182,7 +190,9 @@ lr_downloadtarget_new(LrHandle *handle,
                       void *cbdata,
                       LrEndCb endcb,
                       LrMirrorFailureCb mirrorfailurecb,
-                      void *userdata);
+                      void *userdata,
+                      gint64 byterangestart,
+                      gint64 byterangeend);
 
 /** Free a ::LrDownloadTarget element and its content.
  * @param target        Target to free.

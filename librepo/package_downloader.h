@@ -113,6 +113,12 @@ typedef struct {
     LrMirrorFailureCb mirrorfailurecb; /*!<
         Callen when download from a mirror failed. */
 
+    gint64 byterangestart; /*!<
+        Download only specified range of bytes. */
+
+    gint64 byterangeend; /*!<
+        Download only specified range of bytes. */
+
     // Will be filled by ::lr_download_packages()
 
     char *local_path; /*!<
@@ -204,6 +210,37 @@ lr_packagetarget_new_v2(LrHandle *handle,
                         void *cbdata,
                         LrEndCb endcb,
                         LrMirrorFailureCb mirrorfailurecb,
+                        GError **err);
+
+/** Create new LrPackageTarget object.
+ * Almost same as lr_packagetarget_new_v2() except this function
+ * could set a required byte range of the package.
+ * For params see lr_packagetarget_new_v2().
+ * @param byterangestart    Download only specified range of bytes. This param
+ *                          specifies the begin. 0 is default.
+ *                          Note: When this options is != 0 then resume must
+ *                          be disabled - resume param must be FALSE.
+ * @param byterangeend      Download only specified range of bytes. This param
+ *                          specifies the end. 0 is default.
+ *                          If this value is less or equal to byterangestart,
+ *                          then it is ignored.
+ * @return                  Newly allocated LrPackageTarget or NULL on error
+ */
+LrPackageTarget *
+lr_packagetarget_new_v3(LrHandle *handle,
+                        const char *relative_url,
+                        const char *dest,
+                        LrChecksumType checksum_type,
+                        const char *checksum,
+                        gint64 expectedsize,
+                        const char *base_url,
+                        gboolean resume,
+                        LrProgressCb progresscb,
+                        void *cbdata,
+                        LrEndCb endcb,
+                        LrMirrorFailureCb mirrorfailurecb,
+                        gint64 byterangestart,
+                        gint64 byterangeend,
                         GError **err);
 
 /** Free ::LrPackageTarget object.

@@ -7,6 +7,7 @@ LINKFLAGS= -L../../build/librepo/ -lrepo `pkg-config --libs glib-2.0`
 
 all: \
      download_repo \
+     download_low_level_api \
      download_packages \
      download_repo_with_callback \
      fastestmirror \
@@ -14,6 +15,9 @@ all: \
 
 download_repo:
 	$(CC) $(CFLAGS) download_repo.c $(LINKFLAGS) -o download_repo
+
+download_low_level_api:
+	$(CC) $(CFLAGS) download_low_level_api.c $(LINKFLAGS) -o download_low_level_api
 
 download_packages:
 	$(CC) $(CFLAGS) download_packages.c $(LINKFLAGS) -o download_packages
@@ -30,6 +34,7 @@ fastestmirror_with_callback:
 clean:
 	rm -f \
 	      download_repo \
+	      download_low_level_api \
 	      download_packages \
 	      download_repo_with_callback \
 	      fastestmirror \

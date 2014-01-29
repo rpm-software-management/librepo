@@ -213,7 +213,9 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      NULL,
                                                      NULL,
                                                      NULL,
-                                                     NULL);
+                                                     NULL,
+                                                     0,
+                                                     0);
 
     ret = lr_download_target(target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
@@ -304,7 +306,9 @@ lr_yum_download_repo(LrHandle *handle,
                                        NULL,
                                        NULL,
                                        NULL,
-                                       NULL);
+                                       NULL,
+                                       0,
+                                       0);
 
         targets = g_slist_append(targets, target);
 

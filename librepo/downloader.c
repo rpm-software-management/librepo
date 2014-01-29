@@ -113,7 +113,7 @@ typedef struct {
         List of already tried mirrors (LrMirror *).
         This mirrors won't be tried again. */
     gint64 original_offset; /*!<
-        If resume is enabled, this is the determinet offset where to resume
+        If resume is enabled, this is the specified offset where to resume
         the downloading. If resume is not enabled, then value is -1. */
     GSList *lrmirrors; /*!<
         List of all available mirors (LrMirror *).
@@ -125,6 +125,12 @@ typedef struct {
         State of the header callback for current transfer */
     gchar *headercb_interrupt_reason; /*!<
         Reason why was the transfer interrupted */
+    gint64 writecb_recieved; /*!<
+        Total number of bytes recieved by the write function
+        during the current transfer. */
+    gboolean writecb_required_range_written; /*!<
+        If a byte range was specified to download and the
+        range was downloaded, it is TRUE. Otherwise FALSE. */
 } LrTarget;
 
 typedef struct {
@@ -374,6 +380,94 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     return ret;
 }
 
+size_t
+lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    size_t cur_written_expected = nmemb;
+    size_t cur_written;
+    LrTarget *target = (LrTarget *) userdata;
+    gint64 all = size * nmemb;  // Total number of bytes from curl
+    gint64 range_start = target->target->byterangestart;
+    gint64 range_end = target->target->byterangeend;
+
+    if (range_start <= 0 && range_end <= 0) {
+        // Write everything curl give to you
+        target->writecb_recieved += all;
+        return fwrite(ptr, size, nmemb, target->f);
+    }
+
+    /* Deal with situation when user wants only specific byte range of the
+     * target file, and write only the range.
+     */
+
+    gint64 cur_range_start = target->writecb_recieved;
+    gint64 cur_range_end = cur_range_start + all;
+
+    target->writecb_recieved += all;
+
+    if (target->target->byterangestart > 0) {
+        // If byterangestart is specified, then CURLOPT_RESUME_FROM_LARGE
+        // is used by default
+        cur_range_start += target->target->byterangestart;
+        cur_range_end   += target->target->byterangestart;
+    } else if (target->original_offset > 0) {
+        cur_range_start += target->original_offset;
+        cur_range_end   += target->original_offset;
+    }
+
+    if (cur_range_end < range_start)
+        // The wanted byte range doesn't start yet
+        return nmemb;
+
+    if (range_end != 0 && cur_range_start > range_end) {
+        // The wanted byte range is over
+        // Return zero that will lead to transfer abortion
+        // with error code CURLE_WRITE_ERROR
+        target->writecb_required_range_written = TRUE;
+        return 0;
+    }
+
+    size = 1;
+    nmemb = all;
+
+    if (cur_range_start >= range_start) {
+        // Write the current curl passed range from the start
+        ;
+    } else {
+        // Find the right starting offset
+        gint64 offset = range_start - cur_range_start;
+        assert(offset > 0);
+        ptr += offset;
+        // Corret the length appropriately
+        nmemb = all - offset;
+    }
+
+    if (range_end != 0) {
+        // End range is specified
+
+        if (cur_range_end <= range_end) {
+            // Write the current curl passed range to the end
+            ;
+        } else {
+            // Find the length of the new sequence
+            gint64 offset = cur_range_end - range_end;
+            assert(offset > 0);
+            // Corret the length appropriately
+            nmemb -= (offset - 1);
+        }
+    }
+
+    assert(nmemb > 0);
+    cur_written = fwrite(ptr, size, nmemb, target->f);
+    if (cur_written != nmemb) {
+        g_debug("%s: Error while writting out file: %s",
+                __func__, strerror(errno));
+        return 0; // There was an error
+    }
+
+    return cur_written_expected;
+}
+
 static gboolean
 prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 {
@@ -588,36 +682,24 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     }
 
     target->f = f;
-
-    // Set fd to Curl handle
-    c_rc = curl_easy_setopt(h, CURLOPT_WRITEDATA, f);
-    if (c_rc != CURLE_OK) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                    "curl_easy_setopt(h, CURLOPT_WRITEDATA, f) failed: %s",
-                    curl_easy_strerror(c_rc));
-        fclose(f);
-        curl_easy_cleanup(h);
-        return FALSE;
-    }
+    target->writecb_recieved = 0;
+    target->writecb_required_range_written = FALSE;
 
     // Resume - set offset to resume incomplete download
     if (target->target->resume) {
-        gint64 used_offset;
-
-        // Determine offset
         if (target->original_offset == -1) {
+            // Determine offset
             fseek(f, 0L, SEEK_END);
-            used_offset = ftell(f);
-            if (used_offset == -1) {
+            gint64 determined_offset = ftell(f);
+            if (determined_offset == -1) {
                 // An error while determining offset =>
                 // Download the whole file again
-                used_offset = 0;
+                determined_offset = 0;
             }
-            target->original_offset = used_offset;
-        } else {
-            used_offset = target->original_offset;
+            target->original_offset = determined_offset;
         }
 
+        gint64 used_offset = target->original_offset;
         g_debug("%s: Used offset for download resume: %"G_GINT64_FORMAT,
                 __func__, used_offset);
 
@@ -634,6 +716,14 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         }
     }
 
+    if (target->target->byterangestart > 0) {
+        assert(!target->target->resume);
+        g_debug("%s: byterangestart is specified -> resume is set to %"
+                G_GINT64_FORMAT, __func__, target->target->byterangestart);
+        c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
+                                (curl_off_t) target->target->byterangestart);
+    }
+
     // Prepare progress callback
     if (target->target->progresscb) {
         curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb);
@@ -646,6 +736,10 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         curl_easy_setopt(h, CURLOPT_HEADERFUNCTION, lr_headercb);
         curl_easy_setopt(h, CURLOPT_HEADERDATA, target);
     }
+
+    // Prepare write callback
+    curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb);
+    curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
 
     // Add the new handle to the curl multi handle
     curl_multi_add_handle(dd->multi_handle, h);
@@ -772,7 +866,19 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         if (msg->data.result != CURLE_OK) {
             // There was an error that is reported by CURLcode
 
-            if (target->headercb_state == LR_HCS_INTERRUPTED) {
+            if (msg->data.result == CURLE_WRITE_ERROR &&
+                target->writecb_required_range_written)
+            {
+                // Download was interrupted by writecb because
+                // user want only specified byte range of the
+                // target and the range was already downloaded
+                g_debug("%s: Transfer was interrupted by writecb() "
+                        "because the required range "
+                        "(%"G_GINT64_FORMAT"-%"G_GINT64_FORMAT") "
+                        "was downloaded.", __func__,
+                        target->target->byterangestart,
+                        target->target->byterangeend);
+            } else if (target->headercb_state == LR_HCS_INTERRUPTED) {
                 // Download was interrupted by header callback
                 g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CURL,
                             "Interrupted by header callback: %s",
@@ -1333,7 +1439,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
                                    NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL);
+                                   NULL, NULL, NULL, 0, 0);
 
     ret = lr_download_target(target, &tmp_err);
 
