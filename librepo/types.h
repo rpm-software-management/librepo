@@ -75,12 +75,20 @@ typedef enum {
  */
 #define LR_YUM_HAWKEY       {"primary", "filelists", "prestodelta", NULL}
 
+typedef enum LrCbReturnCode_e {
+    LR_CB_OK = 0,   /*!< All fine */
+    LR_CB_ABORT,    /*!< Abort the transfer - if no failfast is set,
+                         then, it just abort the current download */
+    LR_CB_ERROR,    /*!< Error - Fatal error, abort all downloading
+                         and return from the download function (e.g.
+                         lr_download_packages, ...) */
+} LrCbReturnCode;
+
 /** Progress callback prototype
  * @param clientp           Pointer to user data.
  * @param total_to_download Total number of bytes to download
  * @param now_downloaded    Number of bytes currently downloaded
- * @return                  Returning a non-zero value from this callback
- *                          will cause to abort the transfer.
+ * @return                  See LrCbReturnCode codes
  */
 typedef int (*LrProgressCb)(void *clientp,
                             double total_to_download,
@@ -98,17 +106,17 @@ typedef enum {
  * @param clientp           Pointer to user data.
  * @param status            Transfer status
  * @param msg               Error message or NULL.
- * @return                  Returning a non-zero value from this callback
- *                          will cause to abort the transfer.
+ * @return                  See LrCbReturnCode codes
  */
-typedef void (*LrEndCb)(void *clientp,
-                        LrTransferStatus status,
-                        const char *msg);
+typedef int (*LrEndCb)(void *clientp,
+                       LrTransferStatus status,
+                       const char *msg);
 
 /** MirrorFailure callback prototype
  * @param clientp           Pointer to user data.
  * @param msg               Error message.
  * @param url               Mirror URL
+ * @return                  See LrCbReturnCode codes
  */
 typedef int (*LrMirrorFailureCb)(void *clientp,
                                  const char *msg,

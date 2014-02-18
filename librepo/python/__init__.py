@@ -572,6 +572,30 @@ Transfer statuses for endcb of :class:`~.PackageTarget`
 .. data:: TRANSFER_ALREADYEXISTS
 .. data:: TRANSFER_ERROR
 
+Callbacks return values
+-----------------------
+
+Each callback can safely return ``None`` (this is implicit return value
+when no return statement is defined).
+
+``return None`` is equivalent for ``return librepo.CB_OK``.
+
+.. data:: CB_OK
+
+    Everything is OK
+
+.. data:: CB_ABORT
+
+    Abort just the current transfer.
+    Note: If failfast option for the downloading is enabled,
+    the whole downloading will be aborted.
+
+.. data:: CB_ERROR
+
+    Abort the whole downloading (all transfers).
+    (Note: This code is automatically internally returned when
+    an exception is raised in the callback.)
+
 """
 
 import librepo._librepo
@@ -834,6 +858,10 @@ FMSTAGE_CACHELOADINGSTATUS  = _librepo.FMSTAGE_CACHELOADINGSTATUS
 FMSTAGE_DETECTION           = _librepo.FMSTAGE_DETECTION
 FMSTAGE_FINISHING           = _librepo.FMSTAGE_FINISHING
 FMSTAGE_STATUS              = _librepo.FMSTAGE_STATUS
+
+CB_OK                       = _librepo.CB_OK
+CB_ABORT                    = _librepo.CB_ABORT
+CB_ERROR                    = _librepo.CB_ERROR
 
 def checksum_str_to_type(name):
     name = name.lower()

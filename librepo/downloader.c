@@ -88,7 +88,6 @@ typedef struct {
 } LrMirror;
 
 typedef struct {
-
     LrDownloadState state; /*!<
         State of the download (transfer). */
     LrDownloadTarget *target; /*!<
@@ -131,6 +130,8 @@ typedef struct {
     gboolean writecb_required_range_written; /*!<
         If a byte range was specified to download and the
         range was downloaded, it is TRUE. Otherwise FALSE. */
+    LrCbReturnCode cb_return_code; /*!<
+        Last cb return code. */
 } LrTarget;
 
 typedef struct {
@@ -271,19 +272,24 @@ lr_progresscb(void *ptr,
               G_GNUC_UNUSED double total_to_upload,
               G_GNUC_UNUSED double now_uploaded)
 {
+    int ret = LR_CB_OK;
     LrTarget *target = ptr;
 
     assert(target);
     assert(target->target);
 
     if (target->state != LR_DS_RUNNING)
-        return 0;
+        return ret;
     if (!target->target->progresscb)
-        return 0;
+        return ret;
 
-    return target->target->progresscb(target->target->cbdata,
-                                      total_to_download,
-                                      now_downloaded);
+    ret = target->target->progresscb(target->target->cbdata,
+                                     total_to_download,
+                                     now_downloaded);
+
+    target->cb_return_code = ret;
+
+    return ret;
 }
 
 #define STRLEN(s) (sizeof(s)/sizeof(s[0]) - 1)
@@ -575,17 +581,27 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 g_debug("%s: All mirrors were tried without success", __func__);
                 target->state = LR_DS_FAILED;
 
-                // Call end callback
-                LrEndCb end_cb =  target->target->endcb;
-                if (end_cb)
-                    end_cb(target->target->cbdata,
-                           LR_TRANSFER_ERROR,
-                           "No more mirrors to try - All mirrors "
-                           "were already tried without success");
-
                 lr_downloadtarget_set_error(target->target, LRE_NOURL,
                             "Cannot download, all mirrors were already tried "
                             "without success");
+
+
+                // Call end callback
+                LrEndCb end_cb =  target->target->endcb;
+                if (end_cb) {
+                    int ret = end_cb(target->target->cbdata,
+                                     LR_TRANSFER_ERROR,
+                                     "No more mirrors to try - All mirrors "
+                                     "were already tried without success");
+                    if (ret == LR_CB_ERROR) {
+                        target->cb_return_code = LR_CB_ERROR;
+                        g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                                "from end callback", __func__);
+                        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
+                                "Interupted by LR_CB_ERROR from end callback");
+                        return FALSE;
+                    }
+                }
 
                 if (dd->failfast) {
                     g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
@@ -725,6 +741,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     }
 
     // Prepare progress callback
+    target->cb_return_code = LR_CB_OK;
     if (target->target->progresscb) {
         curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb);
         curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0);
@@ -1031,8 +1048,22 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             // Call mirrorfailure callback
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
             if (mf_cb) {
-                // TODO: Break download if rc != 0
-                mf_cb(target->target->cbdata, tmp_err->message, effective_url);
+                int ret = mf_cb(target->target->cbdata,
+                                tmp_err->message,
+                                effective_url);
+                if (ret == LR_CB_ABORT) {
+                    // User wants to abort this download, so make the error fatal
+                    fatal_error = TRUE;
+                } else if (ret == LR_CB_ERROR) {
+                    g_debug("%s: Downloading was aborted by LR_CB_ERROR from "
+                            "mirror failure callback", __func__);
+                    g_clear_error(&tmp_err);
+                    g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
+                                "Downloading was aborted by LR_CB_ERROR from "
+                                "mirror failure callback");
+                    fatal_error = TRUE;
+                    target->cb_return_code = LR_CB_ERROR;
+                }
             }
 
             if (!fatal_error &&
@@ -1053,19 +1084,34 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
                 // Call end callback
                 LrEndCb end_cb =  target->target->endcb;
-                if (end_cb)
-                    end_cb(target->target->cbdata,
-                           LR_TRANSFER_ERROR,
-                           tmp_err->message);
+                if (end_cb) {
+                    int ret = end_cb(target->target->cbdata,
+                                     LR_TRANSFER_ERROR,
+                                     tmp_err->message);
+                    if (ret == LR_CB_ERROR) {
+                        target->cb_return_code = LR_CB_ERROR;
+                        g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                                "from end callback", __func__);
+                    }
+                }
 
                 lr_downloadtarget_set_error(target->target,
                                             tmp_err->code,
                                             "Download failed: %s",
                                             tmp_err->message);
-                if (dd->failfast)
+                if (dd->failfast) {
+                    // Fail fast is enabled, fail on any error
                     g_propagate_error(&fail_fast_error, tmp_err);
-                else
+                } else if (target->cb_return_code == LR_CB_ERROR) {
+                    // Callback returned LR_CB_ERROR, abort the downloading
+                    g_debug("%s: Downloading was aborted by LR_CB_ERROR", __func__);
+                    g_propagate_error(&fail_fast_error, tmp_err);
+                } else {
+                    // Fail fast is disabled and callback don't repor serious
+                    // error, so this download is aborted, but other donwload
+                    // can continue (do not abort whole downloading)
                     g_error_free(tmp_err);
+                }
             }
 
             // Truncate file - remove downloaded garbage (error html page etc.)
@@ -1114,10 +1160,21 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
             // Call end callback
             LrEndCb end_cb = target->target->endcb;
-            if (end_cb)
-                end_cb(target->target->cbdata,
-                       LR_TRANSFER_SUCCESSFUL,
-                       NULL);
+            if (end_cb) {
+                int ret = end_cb(target->target->cbdata,
+                          LR_TRANSFER_SUCCESSFUL,
+                          NULL);
+                if (ret == LR_CB_ERROR) {
+                    target->cb_return_code = LR_CB_ERROR;
+                    g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                            "from end callback", __func__);
+                    if (!fail_fast_error) {
+                        g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
+                                LRE_CBINTERRUPTED,
+                                "Interupted by LR_CB_ERROR from end callback");
+                    }
+                }
+            }
         }
 
         lr_free(effective_url);
@@ -1360,9 +1417,9 @@ lr_download_cleanup:
             if (end_cb) {
                 gchar *msg = g_strdup_printf("Not finished - interrupted by "
                                              "error: %s", tmp_err->message);
-                end_cb(target->target->cbdata,
-                     LR_TRANSFER_ERROR,
-                     msg);
+                end_cb(target->target->cbdata, LR_TRANSFER_ERROR, msg);
+                // No need to check end_cb return value, because there
+                // already was an error
                 g_free(msg);
             }
 
@@ -1495,7 +1552,7 @@ lr_multi_progress_func(void* ptr,
         // This should tell progress cb, that the total_to_download
         // size is changed.
         int ret = shared_cbdata->cb(shared_cbdata->cbdata, 0.0, 0.0);
-        if (ret != 0)
+        if (ret != LR_CB_OK)
             return ret;
     }
 

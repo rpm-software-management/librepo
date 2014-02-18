@@ -71,13 +71,14 @@ check_PackageTargetStatus(const _PackageTargetObject *self)
 static int
 packagetarget_progress_callback(void *data, double total_to_download, double now_downloaded)
 {
+    int ret = LR_CB_OK; // Assume everything will be ok
     _PackageTargetObject *self;
     PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
     assert(self->handle);
     if (!self->progress_cb)
-        return 0;
+        return ret;
 
     if (self->cb_data)
         user_data = self->cb_data;
@@ -87,24 +88,43 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->progress_cb,
                         "(Odd)", user_data, total_to_download, now_downloaded);
+
+    if (!result) {
+        // Exception raised in callback leads to the abortion
+        // of whole downloading (it is considered fatal)
+        ret = LR_CB_ERROR;
+    } else {
+        if (result == Py_None) {
+            // Assume that None means that everything is ok
+            ret = LR_CB_OK;
+        } else if (!PyInt_Check(result)) {
+            // It's an error if result is None neither int
+            PyErr_SetString(PyExc_TypeError, "Progress callback must returns integer number");
+            ret = LR_CB_ERROR;
+        } else {
+            ret = (int) PyInt_AsLong(result);
+        }
+    }
+
     Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    return 0;
+    return ret;
 }
 
-static void
+static int
 packagetarget_end_callback(void *data,
                            LrTransferStatus status,
                            const char *msg)
 {
+    int ret = LR_CB_OK; // Assume everything will be ok
     _PackageTargetObject *self;
     PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
     assert(self->handle);
     if (!self->end_cb)
-        return;
+        return ret;
 
     if (self->cb_data)
         user_data = self->cb_data;
@@ -114,10 +134,27 @@ packagetarget_end_callback(void *data,
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->end_cb,
                                    "(Ois)", user_data, status, msg);
+    if (!result) {
+        // Exception raised in callback leads to the abortion
+        // of whole downloading (it is considered fatal)
+        ret = LR_CB_ERROR;
+    } else {
+        if (result == Py_None) {
+            // Assume that None means that everything is ok
+            ret = LR_CB_OK;
+        } else if (!PyInt_Check(result)) {
+            // It's an error if result is None neither int
+            PyErr_SetString(PyExc_TypeError, "End callback must returns integer number");
+            ret = LR_CB_ERROR;
+        } else {
+            ret = (int) PyInt_AsLong(result);
+        }
+    }
+
     Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    return;
+    return ret;
 }
 
 static int
@@ -125,13 +162,14 @@ packagetarget_mirrorfailure_callback(void *data,
                                      const char *msg,
                                      const char *url)
 {
+    int ret = LR_CB_OK; // Assume everything will be ok
     _PackageTargetObject *self;
     PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
     assert(self->handle);
     if (!self->mirrorfailure_cb)
-        return 0;
+        return ret;
 
     if (self->cb_data)
         user_data = self->cb_data;
@@ -141,10 +179,28 @@ packagetarget_mirrorfailure_callback(void *data,
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->mirrorfailure_cb,
                                    "(Oss)", user_data, msg, url);
+
+    if (!result) {
+        // Exception raised in callback leads to the abortion
+        // of whole downloading (it is considered fatal)
+        ret = LR_CB_ERROR;
+    } else {
+        if (result == Py_None) {
+            // Assume that None means that everything is ok
+            ret = LR_CB_OK;
+        } else if (!PyInt_Check(result)) {
+            // It's an error if result is None neither int
+            PyErr_SetString(PyExc_TypeError, "Mirror failure callback must returns integer number");
+            ret = LR_CB_ERROR;
+        } else {
+            ret = (int) PyInt_AsLong(result);
+        }
+    }
+
     Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    return 0;
+    return ret;
 }
 
 void

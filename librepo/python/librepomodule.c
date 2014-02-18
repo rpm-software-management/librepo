@@ -368,6 +368,11 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "FMSTAGE_FINISHING", LR_FMSTAGE_FINISHING);
     PyModule_AddIntConstant(m, "FMSTAGE_STATUS", LR_FMSTAGE_STATUS);
 
+    // Callbacks return values
+    PyModule_AddIntConstant(m, "CB_OK", LR_CB_OK);
+    PyModule_AddIntConstant(m, "CB_ABORT", LR_CB_ABORT);
+    PyModule_AddIntConstant(m, "CB_ERROR", LR_CB_ERROR);
+
 #if PY_MAJOR_VERSION >= 3
     return m;
 #endif

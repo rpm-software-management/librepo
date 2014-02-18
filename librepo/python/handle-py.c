@@ -81,6 +81,7 @@ check_HandleStatus(const _HandleObject *self)
 static int
 progress_callback(void *data, double total_to_download, double now_downloaded)
 {
+    int ret = LR_CB_OK; // Assume everything will be ok
     _HandleObject *self;
     PyObject *user_data, *result;
 
@@ -96,10 +97,28 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->progress_cb,
                         "(Odd)", user_data, total_to_download, now_downloaded);
+
+    if (!result) {
+        // Exception raised in callback leads to the abortion
+        // of whole downloading (it is considered fatal)
+        ret = LR_CB_ERROR;
+    } else {
+        if (result == Py_None) {
+            // Assume that None means that everything is ok
+            ret = LR_CB_OK;
+        } else if (!PyInt_Check(result)) {
+            // It's an error if result is None neither int
+            PyErr_SetString(PyExc_TypeError, "End callback must returns integer number");
+            ret = LR_CB_ERROR;
+        } else {
+            ret = (int) PyInt_AsLong(result);
+        }
+    }
+
     Py_XDECREF(result);
     BeginAllowThreads(self->state);
 
-    return 0;
+    return ret;
 }
 
 static void
