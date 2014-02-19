@@ -105,7 +105,7 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
             ret = (int) PyLong_AsLong(result);
         } else {
             // It's an error if result is None neither int
-            PyErr_SetString(PyExc_TypeError, "Progress callback must returns integer number");
+            PyErr_SetString(PyExc_TypeError, "Progress callback must return integer number");
             ret = LR_CB_ERROR;
         }
     }
@@ -154,7 +154,7 @@ packagetarget_end_callback(void *data,
             ret = (int) PyLong_AsLong(result);
         } else {
             // It's an error if result is None neither int
-            PyErr_SetString(PyExc_TypeError, "End callback must returns integer number");
+            PyErr_SetString(PyExc_TypeError, "End callback must return integer number");
             ret = LR_CB_ERROR;
         }
     }
@@ -204,7 +204,7 @@ packagetarget_mirrorfailure_callback(void *data,
             ret = (int) PyLong_AsLong(result);
         } else {
             // It's an error if result is None neither int
-            PyErr_SetString(PyExc_TypeError, "Mirror failure callback must returns integer number");
+            PyErr_SetString(PyExc_TypeError, "Mirror failure callback must return integer number");
             ret = LR_CB_ERROR;
         }
     }

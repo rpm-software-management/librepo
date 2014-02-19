@@ -114,7 +114,7 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
             ret = (int) PyLong_AsLong(result);
         } else {
             // It's an error if result is None neither int
-            PyErr_SetString(PyExc_TypeError, "End callback must returns integer number");
+            PyErr_SetString(PyExc_TypeError, "End callback must return integer number");
             ret = LR_CB_ERROR;
         }
     }
@@ -880,17 +880,23 @@ perform(_HandleObject *self, PyObject *args)
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
-    if (!ret && tmp_err->code == LRE_INTERRUPTED) {
+    if (ret)
+        Py_RETURN_NONE; // All fine - Return None
+
+    // Error occured
+    if (PyErr_Occurred()) {
+        // Python exception occured (in a python callback probably)
+        return NULL;
+    } else if(tmp_err->code == LRE_INTERRUPTED) {
+        // Interrupted by Ctr+C
         g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
-    }
-
-    if (!ret)
+    } else {
+        // Return exception created from GError
         RETURN_ERROR(&tmp_err, -1, NULL);
-
-    Py_RETURN_NONE;
+    }
 }
 
 static PyObject *
@@ -940,10 +946,23 @@ download_package(_HandleObject *self, PyObject *args)
         return NULL;
     }
 
-    if (!ret)
-        RETURN_ERROR(&tmp_err, -1, NULL);
+    if (ret)
+        Py_RETURN_NONE; // All fine - Return None
 
-    Py_RETURN_NONE;
+    // Error occured
+    if (PyErr_Occurred()) {
+        // Python exception occured (in a python callback probably)
+        return NULL;
+    } else if(tmp_err->code == LRE_INTERRUPTED) {
+        // Interrupted by Ctr+C
+        g_error_free(tmp_err);
+        PyErr_SetInterrupt();
+        PyErr_CheckSignals();
+        return NULL;
+    } else {
+        // Return exception created from GError
+        RETURN_ERROR(&tmp_err, -1, NULL);
+    }
 }
 
 static struct

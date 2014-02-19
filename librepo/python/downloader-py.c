@@ -85,18 +85,21 @@ py_download_url(G_GNUC_UNUSED PyObject *self, PyObject *args)
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
-    if (!ret && tmp_err->code == LRE_INTERRUPTED) {
-        Py_XDECREF(py_handle);
+    if (ret)
+        Py_RETURN_NONE; // All fine - Return None
+
+    // Error occured
+    if (PyErr_Occurred()) {
+        // Python exception occured (in a python callback probably)
+        return NULL;
+    } else if(tmp_err->code == LRE_INTERRUPTED) {
+        // Interrupted by Ctr+C
         g_error_free(tmp_err);
         PyErr_SetInterrupt();
         PyErr_CheckSignals();
         return NULL;
-    }
-
-    Py_XDECREF(py_handle);
-
-    if (!ret)
+    } else {
+        // Return exception created from GError
         RETURN_ERROR(&tmp_err, -1, NULL);
-
-    Py_RETURN_NONE;
+    }
 }
