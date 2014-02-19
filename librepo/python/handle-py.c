@@ -106,12 +106,16 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
         if (result == Py_None) {
             // Assume that None means that everything is ok
             ret = LR_CB_OK;
-        } else if (!PyInt_Check(result)) {
+#if PY_MAJOR_VERSION < 3
+        } else if (PyInt_Check(obj))
+            ret = PyInt_AS_LONG(obj);
+#endif
+        } else if (!PyLong_Check(result)) {
+            ret = (int) PyLong_AsLong(result);
+        } else {
             // It's an error if result is None neither int
             PyErr_SetString(PyExc_TypeError, "End callback must returns integer number");
             ret = LR_CB_ERROR;
-        } else {
-            ret = (int) PyInt_AsLong(result);
         }
     }
 
