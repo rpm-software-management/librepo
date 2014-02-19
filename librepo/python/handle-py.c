@@ -87,7 +87,7 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
 
     self = (_HandleObject *)data;
     if (!self->progress_cb)
-        return 0;
+        return LR_CB_OK;
 
     if (self->progress_cb_data)
         user_data = self->progress_cb_data;
@@ -110,7 +110,7 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
         } else if (PyInt_Check(result)) {
             ret = PyInt_AS_LONG(result);
 #endif
-        } else if (!PyLong_Check(result)) {
+        } else if (PyLong_Check(result)) {
             ret = (int) PyLong_AsLong(result);
         } else {
             // It's an error if result is None neither int
