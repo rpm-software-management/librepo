@@ -1212,6 +1212,13 @@ lr_perform(LrDownload *dd, GError **err)
         return FALSE;
     }
 
+    if (lr_interrupt) {
+        // Check interrupt after each call of curl_multi_perform
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
+                    "Interrupted by signal");
+        return FALSE;
+    }
+
     while (dd->running_transfers) {
         int rc;
         int maxfd = -1;
@@ -1289,6 +1296,12 @@ lr_perform(LrDownload *dd, GError **err)
             // Do curl_multi_perform()
             do { // Before version 7.20.0 CURLM_CALL_MULTI_PERFORM can appear
                 cm_rc = curl_multi_perform(dd->multi_handle, &still_running);
+                if (lr_interrupt) {
+                    // Check interrupt after each call of curl_multi_perform
+                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
+                                "Interrupted by signal");
+                    return FALSE;
+                }
             } while (cm_rc == CURLM_CALL_MULTI_PERFORM);
 
             if (cm_rc != CURLM_OK) {
