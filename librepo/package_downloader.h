@@ -146,10 +146,10 @@ typedef struct {
  * @param checksum          Expected checksum value or NULL.
  * @param base_url          Base URL or NULL
  * @param expectedsize      Expected size of the target. If server reports
- *                          different size, then no download is performed.
- * @param resume            If TRUE, then downloader try to resume download
- *                          if destination file exists. If the file doesn't
- *                          exists, it will be normally downloaded again.
+ *                          different size, then download won't be performed.
+ * @param resume            If TRUE, then downloader will try to resume download
+ *                          if the destination file exists. If the file doesn't
+ *                          exist it will be downloaded.
  * @param progresscb        Progress callback for this transfer.
  * @param cbdata            User data for the callback
  * @param err               GError **
