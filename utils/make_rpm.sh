@@ -3,7 +3,6 @@
 RPMBUILD_DIR="${HOME}/rpmbuild/"
 BUILD_DIR="$RPMBUILD_DIR/BUILD"
 GITREV=`git rev-parse --short HEAD`
-TIMESTAMP=`date +%Y%m%d`
 PREFIX=""   # Root project dir
 MY_DIR=`dirname $0`
 MY_DIR="$MY_DIR/"
@@ -22,6 +21,8 @@ if [ ! -d "$RPMBUILD_DIR" ]; then
     echo "(Hint: Package group @development-tools and package fedora-packager)"
     exit 1
 fi
+
+echo "Generating rpm for $GITREV"
 
 echo "Cleaning $BUILD_DIR"
 rm -rf $BUILD_DIR
@@ -43,15 +44,13 @@ if [ ! $? == "0" ]; then
     exit 1
 fi
 
-#cp $PREFIX/librepo.spec $RPMBUILD_DIR/SPECS/
 # Copy via sed
+sed -i "s/%global gitrev .*/%global gitrev $GITREV/g" $PREFIX/librepo.spec
 sed "s/%global gitrev .*/%global gitrev $GITREV/g" $PREFIX/librepo.spec > $RPMBUILD_DIR/SPECS/librepo.spec
 if [ ! $? == "0" ]; then
     echo "Error while: cp $PREFIX/librepo.spec $RPMBUILD_DIR/SPECS/"
     exit 1
 fi
-sed --in-place "s/%global timestamp .*/%global timestamp $TIMESTAMP/g" $RPMBUILD_DIR/SPECS/librepo.spec
-
 echo "Copying done"
 
 echo "> Starting rpmbuild librepo.."
