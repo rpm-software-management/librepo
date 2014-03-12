@@ -674,18 +674,7 @@ VERSION_MINOR = _librepo.VERSION_MINOR
 VERSION_PATCH = _librepo.VERSION_PATCH
 VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 
-class LibrepoException(_librepo.LibrepoException):
-    """
-    Librepo exception.
-
-    Value of this exception is tuple with three elements:
-    ``(return code, error message, general error message)``
-
-    * Return code is a value from: :ref:`error-codes-label`.
-    * String with a descriptive description of the error.
-    * General error message based on rc (feel free to ignore this message)
-    """
-    pass
+LibrepoException = _librepo.LibrepoException
 
 LRO_UPDATE                  = _librepo.LRO_UPDATE
 LRO_URLS                    = _librepo.LRO_URLS
@@ -988,7 +977,7 @@ class PackageTarget(_librepo.PackageTarget):
             *Note: If the byterangeend is less or equal to byterangestart,
             then it is ignored!*
         """
-        _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
+        _librepo.PackageTarget.__init__(self, handle, url, dest,
                                         checksum_type, checksum, expectedsize,
                                         base_url, resume, progresscb, cbdata,
                                         endcb, mirrorfailurecb, byterangestart,

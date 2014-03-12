@@ -19,7 +19,15 @@ Exceptions
 
 Librepo module has only one own exception.
 
-.. autoclass:: librepo.LibrepoException
+.. class:: LibrepoException
+
+Value of this exception is tuple with three elements:
+``(return code, error message, general error message)``
+
+* Return code is a value from: :ref:`error-codes-label`.
+* String with a descriptive description of the error.
+* General error message based on rc (feel free to ignore this message)
+
 
 Constants
 ----------
