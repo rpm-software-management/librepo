@@ -1,21 +1,6 @@
 """
-
-Exceptions
-==========
-
-Librepo module has only one own exception.
-
-.. class:: LibrepoException
-
-Value of this exception is tuple with three elements:
-``(return code, error message, general error message)``
-
-* Return code is a value from: :ref:`error-codes-label`.
-* String with a descriptive description of the error.
-* General error message based on rc (feel free to ignore this message)
-
-Constants
-=========
+Version contants
+----------------
 
 .. data:: VERSION_MAJOR
           VERSION_MINOR
@@ -29,7 +14,7 @@ Constants
 :class:`~.Handle` options
 -------------------------
 
-    LRO_ (aka LibRepo Option) prefixed constants are used to set
+    **LRO_** (aka LibRepo Option) prefixed constants are used to set
     :class:`.Handle` options via :meth:`~.Handle.setopt` method.
 
     This options could be also set by :class:`.Handle` attributes
@@ -344,9 +329,6 @@ Predefined yumdlist lists
     Download only files used by Hawkey (https://github.com/akozumpl/hawkey/).
     (primary, filelists, prestodelta)
 
-.. _error-codes-label:
-
-
 .. _fastestmirror-stages-constants-label:
 
 Fastest mirror stages
@@ -382,6 +364,8 @@ Values used by fastest mirror callback (:data:`~.LRO_FASTESTMIRRORCB`):
     (5) The very last invocation of fastest mirror callback.
         If fastest mirror detection was successfull *data*,
         otherwise *data* contain string with error message.
+
+.. _error-codes-label:
 
 Error codes
 -----------
@@ -565,12 +549,85 @@ LibRepo Result options for use in :meth:`~.Result.getinfo` method.
     Return the highest timestamp from all records in the repomd.
     See: http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f
 
+.. _endcb-statuses-label:
+
 Transfer statuses for endcb of :class:`~.PackageTarget`
 -------------------------------------------------------
 
 .. data:: TRANSFER_SUCCESSFUL
 .. data:: TRANSFER_ALREADYEXISTS
 .. data:: TRANSFER_ERROR
+
+Callbacks prototypes
+--------------------
+
+Some librepo's functions and classes can take a callbacks in their arguments.
+This section contain the callbacks prototypes and explanation of their
+arguments.
+
+By default all callbacks should return *None* (this is default behaviour
+of python function if it doesn't have a specified return statement -
+it returns None).
+
+But there are some callbacks that can return a specific values defined
+in :ref:`callbacks-return-values`.
+
+.. _callback-progresscb-label:
+
+Progress callback - progresscb
+------------------------------
+
+``progresscb(userdata, totalsize, downloaded)``
+
+Callback frequently called during a download.
+
+:userdata: User specified data or *None*
+:totalsize: Total size (in bytes) of the target (float).
+:downloaded: Currently downloaded size (in bytes).
+:returns: This callback can return values from :ref:`callbacks-return-values`
+
+.. _callback-endcb-label:
+
+End callback - endcb
+--------------------
+
+``endcb(userdata, status, msg)``
+
+Callback called when a transfer is done either successfully or unsuccessfully.
+
+:userdata: User specified data or *None*
+:status: :ref:`endcb-statuses-label`
+:msg: String with error message or *None*
+:returns: This callback can return values from :ref:`callbacks-return-values`
+
+.. _callback-mirrorfailurecb-label:
+
+Mirror Failure Callback - mirrorfailurecb
+-----------------------------------------
+
+``mirrorfailurecb(userdata, msg, url)``
+
+Callback called when a transfer failed.
+
+:userdata: User specified data or *None*
+:msg: String with error message
+:url: String with mirror URL
+:returns: This callback can return values from :ref:`callbacks-return-values`
+
+.. _callback-fastestmirrorcb-label:
+
+Fastestmirror callback - fastestmirrorcb
+----------------------------------------
+
+``fastestmirrorcb(userdata, stage, data)``
+
+:userdata: User specified data or *None*
+:stage: :ref:`fastestmirror-stages-constants-label`
+:data: Content of *data* is different for different stages.
+       See :ref:`fastestmirror-stages-constants-label`
+:returns: This callback must return *None* each other value will be ignored.
+
+.. _callbacks-return-values:
 
 Callbacks return values
 -----------------------
@@ -596,6 +653,18 @@ when no return statement is defined).
     (Note: This code is automatically internally returned when
     an exception is raised in the callback.)
 
+.. _checksum-constants-label:
+
+Checksum (hash) type constants
+------------------------------
+
+.. data:: MD5 (CHECKSUM_MD5)
+.. data:: SHA1 (CHECKSUM_SHA1)
+.. data:: SHA224 (CHECKSUM_SHA224)
+.. data:: SHA256 (CHECKSUM_SHA256)
+.. data:: SHA384 (CHECKSUM_SHA384)
+.. data:: SHA512 (CHECKSUM_SHA512)
+
 """
 
 import librepo._librepo
@@ -605,7 +674,18 @@ VERSION_MINOR = _librepo.VERSION_MINOR
 VERSION_PATCH = _librepo.VERSION_PATCH
 VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 
-LibrepoException = _librepo.LibrepoException
+class LibrepoException(_librepo.LibrepoException):
+    """
+    Librepo exception.
+
+    Value of this exception is tuple with three elements:
+    ``(return code, error message, general error message)``
+
+    * Return code is a value from: :ref:`error-codes-label`.
+    * String with a descriptive description of the error.
+    * General error message based on rc (feel free to ignore this message)
+    """
+    pass
 
 LRO_UPDATE                  = _librepo.LRO_UPDATE
 LRO_URLS                    = _librepo.LRO_URLS
@@ -864,19 +944,50 @@ CB_ABORT                    = _librepo.CB_ABORT
 CB_ERROR                    = _librepo.CB_ERROR
 
 def checksum_str_to_type(name):
+    """
+    Convert string with name of hash function to numeric value
+    that represents the hash in createrepo_c.
+
+    :param name: Checksum name (e.g. "sha256", "sha512", ...)
+    :returns: Integer value (from :ref:`checksum-constants-label`)
+    """
     name = name.lower()
     return _CHECKSUM_STR_TO_VAL_MAP.get(name, CHECKSUM_UNKNOWN)
 
 class PackageTarget(_librepo.PackageTarget):
     """
     Represent a single package that will be downloaded by
-    :meth:`~librepo.Handle.download_packages()`.
+    :func:`~librepo.download_packages`.
     """
 
-    def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
+    def __init__(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, expectedsize=0, base_url=None, resume=False,
                  progresscb=None, cbdata=None, handle=None, endcb=None,
                  mirrorfailurecb=None, byterangestart=0, byterangeend=0):
+        """
+        :param url: Target URL. If *handle* or *base_url* specified, the *url*
+            can be (and logically should be) only a relative part of path.
+        :param dest: Destination filename or directory (file basename will
+            be derived from the relative_url). If *None* current
+            working directory will be used.
+        :param checksum_type: :ref:`checksum-constants-label`
+        :param checksum: Expected checksum value.
+        :param expectedsize: Expected size of the target. If server reports
+            different size, then download won't be performed.
+        :param base_url: Base part of URL
+        :param resume: If True then downloader will try to resume download
+            if the destination file already exists. If the file doesn't exist
+            yet, it will be downloaded.
+        :param progresscb: :ref:`callback-progresscb-label`
+        :param cbdata: User data for the callback.
+        :param handle: :class:`~librepo.Handle`
+        :param endcb: :ref:`callback-endcb-label`
+        :param mirrorfailurecb: See :ref:`callback-mirrorfailurecb-label`
+        :param byterangestart: Start downloading from the specified byte.
+        :param byterangeend: Stop downloading at the specified byte.
+            *Note: If the byterangeend is less or equal to byterangestart,
+            then it is ignored!*
+        """
         _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
                                         checksum_type, checksum, expectedsize,
                                         base_url, resume, progresscb, cbdata,
@@ -1047,7 +1158,8 @@ class Handle(_librepo.Handle):
     def setopt(self, option, val):
         """Set option to :class:`.Handle` directly.
 
-        *option* could be one of: :ref:`handle-options-label`
+        :param option: One of: :ref:`handle-options-label`
+        :returns: *None*
 
         Example::
 
@@ -1084,16 +1196,21 @@ class Handle(_librepo.Handle):
     def getinfo(self, option):
         """Get information from :class:`.Handle`.
 
-        *option* could be one of :ref:`handle-info-options-label`
+        :param option: One of :ref:`handle-info-options-label`
+        :returns: Value for the specified option or
+                  *None* if the option is not set.
         """
         return _librepo.Handle.getinfo(self, option)
 
     def download(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, expectedsize=0, base_url=None, resume=0):
-        """Download package from repository specified by
-        :meth:`~librepo.Handle.url()` or :meth:`~librepo.Handle.mirrorlist()`
-        method. If *base_url* is specified, url and mirrorlist in handle
-        are ignored.
+        """
+        **This method is deprecated** - Use :func:`~librepo.download_packages`
+        instead.
+
+        Download package from the repository specified in the
+        :Class:`~librepo.Handle`. If *base_url* is specified,
+        urls and mirrors specified in the Handle are ignored.
 
         Note: If resume is True and checksum_type and checksum are specified
         and downloaded package already exists, then checksum of the
@@ -1103,7 +1220,7 @@ class Handle(_librepo.Handle):
         :param url: Relative path to the package in the repository.
         :param dest: Destination for package. Could be absolute/relative
                      path to directory or filename.
-        :param checksum_type: Type of used checksum.
+        :param checksum_type: :ref:`checksum-constants-label`.
         :param checksum: Checksum value.
         :param expectedsize: Expected size of the file. If server reports
                              different size, then no download is preformed.
@@ -1135,12 +1252,28 @@ class Handle(_librepo.Handle):
                               expectedsize, base_url, resume)
 
     def perform(self, result=None):
+        """
+        Perform the specified action - download/locate a repository.
+
+        :param result: :Class:`~librepo.Result` object or *None*
+        :returns: :Class:`~librepo.Result` object that was passed by
+                  *result* parameter or the new one if the parameter was not
+                  specified or was *None*.
+        """
         if result is None:
             result = Result()
         _librepo.Handle.perform(self, result)
         return result
 
     def new_packagetarget(self, relative_url, **kwargs):
+        """
+        Shortcut for creating a new :Class:`~librepo.PackageTarget` objects.
+        Targets created by this way have automatically setted handle to the
+        current :Class:`~librepo.Handle` object.
+
+        :param relative_url: Relative par of target (package) URL
+        :returns: New :Class:`~librepo.PackageTarget`
+        """
         return PackageTarget(relative_url, handle=self, **kwargs)
 
 class Result(_librepo.Result):
@@ -1178,12 +1311,10 @@ class Result(_librepo.Result):
 
 # Functions
 
-yum_repomd_get_age    = _librepo.yum_repomd_get_age
-set_debug_log_handler = _librepo.set_debug_log_handler
-
 def download_packages(list, failfast=False):
     """
-    Download list of packages. *list* is a list of PackageTarget objects.
+    Download list of packages. *list* is a list of
+    :class:`~librepo.PackageTarget` objects.
     If the *failfast* is True, then whole downloading is stoped
     immediately when any of download fails (and exception is raised).
     If the failfast is False, then this function returns after all
@@ -1192,8 +1323,51 @@ def download_packages(list, failfast=False):
     error related to the function itself is meet
     (Errors related to individual downloads are
     reported via corresponding PackageTarget objects)
+
+    :param list: List of :class:`~.librepo.PackageTarget` objects.
+    :param failfast: If *True*, stop whole downloading immediately when any
+                     of downloads fails. If *False*, ignore failed download(s)
+                     and continue with other downloads.
+    :returns: *None*
     """
     return _librepo.download_packages(list, failfast)
 
 def download_url(url, fd, handle=None):
+    """
+    Download specified URL and write it content to opened file descriptor.
+
+    :param url: Target URL
+    :param fd: Opened file descriptor (To get a file descriptor
+               use for example **os.open()**.
+    :param handle: :Class:`~librepo.Handle` object or *None*
+    :returns: *None*
+    """
     return _librepo.download_url(handle, url, fd)
+
+def yum_repomd_get_age(result_object):
+    """
+    Get the highest timestamp of the repo's repomd.xml.
+
+    :param result_object: Used (filled) :Class:`~librepo.Result`
+    :returns: The highest timestamp from repomd (Float) or *0.0* on error.
+    """
+    return _librepo.yum_repomd_get_age(result_object)
+
+def set_debug_log_handler(log_function, user_data=None):
+    """
+    When python debug log handler is used, the librepo is **THREAD-UNSAFE**!
+
+    :param log_function: Function that will handle the debug messages.
+    :param user_data: An data you want to be passed to the log_function
+                      during call.
+    :returns: *None*
+
+    Example::
+
+        def debug_function(msg, _):
+            print msg
+        librepo.set_debug_log_handler(debug_function)
+
+    """
+    return _librepo.set_debug_log_handler(log_function, user_data)
+

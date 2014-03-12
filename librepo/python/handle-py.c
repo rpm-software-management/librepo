@@ -219,14 +219,14 @@ handle_dealloc(_HandleObject *o)
 }
 
 static PyObject *
-setopt(_HandleObject *self, PyObject *args)
+py_setopt(_HandleObject *self, PyObject *args)
 {
     int option;
     PyObject *obj;
     gboolean res = TRUE;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "iO:setopt", &option, &obj))
+    if (!PyArg_ParseTuple(args, "iO:py_setopt", &option, &obj))
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
@@ -695,7 +695,7 @@ setopt(_HandleObject *self, PyObject *args)
 }
 
 static PyObject *
-getinfo(_HandleObject *self, PyObject *args)
+py_getinfo(_HandleObject *self, PyObject *args)
 {
     int option;
     gboolean res = TRUE;
@@ -703,7 +703,7 @@ getinfo(_HandleObject *self, PyObject *args)
     long lval;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "i:getinfo", &option))
+    if (!PyArg_ParseTuple(args, "i:py_getinfo", &option))
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
@@ -848,7 +848,7 @@ getinfo(_HandleObject *self, PyObject *args)
 }
 
 static PyObject *
-perform(_HandleObject *self, PyObject *args)
+py_perform(_HandleObject *self, PyObject *args)
 {
     PyObject *result_obj;
     LrResult *result;
@@ -856,7 +856,7 @@ perform(_HandleObject *self, PyObject *args)
     GError *tmp_err = NULL;
     PyThreadState *state = NULL;
 
-    if (!PyArg_ParseTuple(args, "O:perform", &result_obj))
+    if (!PyArg_ParseTuple(args, "O:py_perform", &result_obj))
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
@@ -900,7 +900,7 @@ perform(_HandleObject *self, PyObject *args)
 }
 
 static PyObject *
-download_package(_HandleObject *self, PyObject *args)
+py_download_package(_HandleObject *self, PyObject *args)
 {
     gboolean ret;
     char *relative_url, *checksum, *dest, *base_url;
@@ -909,13 +909,13 @@ download_package(_HandleObject *self, PyObject *args)
     GError *tmp_err = NULL;
     PyThreadState *state = NULL;
 
-    if (!PyArg_ParseTuple(args, "szizLzi:download_package", &relative_url,
-                                                            &dest,
-                                                            &checksum_type,
-                                                            &checksum,
-                                                            &expectedsize,
-                                                            &base_url,
-                                                            &resume))
+    if (!PyArg_ParseTuple(args, "szizLzi:py_download_package", &relative_url,
+                                                               &dest,
+                                                               &checksum_type,
+                                                               &checksum,
+                                                               &expectedsize,
+                                                               &base_url,
+                                                               &resume))
         return NULL;
     if (check_HandleStatus(self))
         return NULL;
@@ -967,10 +967,10 @@ download_package(_HandleObject *self, PyObject *args)
 
 static struct
 PyMethodDef handle_methods[] = {
-    { "setopt", (PyCFunction)setopt, METH_VARARGS, NULL },
-    { "getinfo", (PyCFunction)getinfo, METH_VARARGS, NULL },
-    { "perform", (PyCFunction)perform, METH_VARARGS, NULL },
-    { "download_package", (PyCFunction)download_package, METH_VARARGS, NULL },
+    { "setopt", (PyCFunction)py_setopt, METH_VARARGS, NULL },
+    { "getinfo", (PyCFunction)py_getinfo, METH_VARARGS, NULL },
+    { "perform", (PyCFunction)py_perform, METH_VARARGS, NULL },
+    { "download_package", (PyCFunction)py_download_package, METH_VARARGS, NULL },
     { NULL }
 };
 
