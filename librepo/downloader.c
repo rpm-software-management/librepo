@@ -1027,10 +1027,36 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
         if (!matches) {
             // Checksums doesn't match
+
+            // Prepare pretty messages with list of expected checksums
+            gchar *expected = g_strdup("");
+            GSList *elem = target->target->checksums;
+            for (; elem; elem = g_slist_next(elem)) {
+                gchar *tmp = NULL;
+                LrDownloadTargetChecksum *checksum = elem->data;
+                if (!checksum
+                    || !checksum->value
+                    || checksum->type == LR_CHECKSUM_UNKNOWN)
+                {
+                    // Bad checksum
+                    continue;
+                }
+
+                const gchar *chtype_str = lr_checksum_type_to_str(checksum->type);
+                tmp = g_strconcat(expected, checksum->value, "(",
+                                  chtype_str ? chtype_str : "UNKNOWN",
+                                  ") ", NULL);
+                free(expected);
+                expected = tmp;
+            }
+
+            // Set error message
             g_set_error(&tmp_err,
                     LR_DOWNLOADER_ERROR,
                     LRE_BADCHECKSUM,
-                    "Downloading successfull, but checksum doesn't match");
+                    "Downloading successfull, but checksum doesn't match. "
+                    "Expected: %s", expected);
+            g_free(expected);
         }
 
         fclose(target->f);
