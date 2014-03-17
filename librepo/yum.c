@@ -245,6 +245,40 @@ lr_yum_download_repomd(LrHandle *handle,
     return ret;
 }
 
+/** Mirror Failure Callback Data
+ */
+typedef struct MFCbData_s {
+    void *userdata;             /*!< User data */
+    LrHandleMirrorFailureCb cb; /*!< Callback */
+    char *metadata;             /*!< "primary", "filelists", ... */
+} MFCbData;
+
+static MFCbData * mfcbdata_new(void *userdata,
+                               LrHandleMirrorFailureCb cb,
+                               const char *metadata)
+{
+    MFCbData *data = calloc(1, sizeof(*data));
+    data->userdata = userdata;
+    data->cb = cb;
+    data->metadata = g_strdup(metadata);
+    return data;
+}
+
+static void
+mfcbdata_free(MFCbData *data)
+{
+    if (!data) return;
+    free(data->metadata);
+    free(data);
+}
+
+static int
+hmfcb(void *clientp, const char *msg, const char *url)
+{
+    MFCbData *data = clientp;
+    return data->cb(data->userdata, msg, url, data->metadata);
+}
+
 static gboolean
 lr_yum_download_repo(LrHandle *handle,
                      LrYumRepo *repo,
