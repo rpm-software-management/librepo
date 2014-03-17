@@ -415,11 +415,11 @@ This files will not be downloaded.</p>
 <dt id="librepo.LRO_HMFCB">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_HMFCB</tt><a class="headerlink" href="#librepo.LRO_HMFCB" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Function or None</em> (See: <a class="reference internal" href="#callback-handlemirrorfailurecb-label"><em>Handle Mirror Failure Callback - hmfcb</em></a>)
-Handle Mirror Failure Callback is called
-when a metadata download fails. It is designed to give
-a detailed information about what failed to the user.
-Call of this callback doesn&#8217;t mean that downloading failed.
-If available, the other mirror will be tried.</p>
+The Handle Mirror Failure Callback is called
+when a metadata download fails. It provides
+a detailed information about what exactly failed.
+Call of this callback doesn&#8217;t mean that whole downloading failed.
+If there are other mirrors on the list, these mirrors will be tried.</p>
 </dd></dl>
 
 </div>
@@ -1132,8 +1132,8 @@ See <a class="reference internal" href="#fastestmirror-stages-constants-label"><
 <div class="section" id="handle-mirror-failure-callback-hmfcb">
 <span id="callback-handlemirrorfailurecb-label"></span><h3>Handle Mirror Failure Callback - hmfcb<a class="headerlink" href="#handle-mirror-failure-callback-hmfcb" title="Permalink to this headline">¶</a></h3>
 <p><tt class="docutils literal"><span class="pre">hmfcb(userdata,</span> <span class="pre">msg,</span> <span class="pre">url,</span> <span class="pre">metadata)</span></tt></p>
-<p>Callback called when a transfer of metadata during
-<a class="reference internal" href="handle.html#librepo.Handle.perform" title="librepo.Handle.perform"><tt class="xref py py-meth docutils literal"><span class="pre">perform()</span></tt></a> failed.</p>
+<p>Callback called when a download of a metadata during
+<a class="reference internal" href="handle.html#librepo.Handle.perform" title="librepo.Handle.perform"><tt class="xref py py-meth docutils literal"><span class="pre">perform()</span></tt></a> fails.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
