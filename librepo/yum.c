@@ -247,25 +247,28 @@ lr_yum_download_repomd(LrHandle *handle,
 
 /** Mirror Failure Callback Data
  */
-typedef struct MFCbData_s {
-    void *userdata;             /*!< User data */
-    LrHandleMirrorFailureCb cb; /*!< Callback */
-    char *metadata;             /*!< "primary", "filelists", ... */
-} MFCbData;
+typedef struct CbData_s {
+    void *userdata;                 /*!< User data */
+    LrProgressCb progresscb;        /*!< Progress callback */
+    LrHandleMirrorFailureCb hmfcb;  /*!< Handle mirror failure callback */
+    char *metadata;                 /*!< "primary", "filelists", ... */
+} CbData;
 
-static MFCbData * mfcbdata_new(void *userdata,
-                               LrHandleMirrorFailureCb cb,
-                               const char *metadata)
+static CbData *cbdata_new(void *userdata,
+                          LrProgressCb progresscb,
+                          LrHandleMirrorFailureCb hmfcb,
+                          const char *metadata)
 {
-    MFCbData *data = calloc(1, sizeof(*data));
+    CbData *data = calloc(1, sizeof(*data));
     data->userdata = userdata;
-    data->cb = cb;
+    data->progresscb = progresscb;
+    data->hmfcb = hmfcb;
     data->metadata = g_strdup(metadata);
     return data;
 }
 
 static void
-mfcbdata_free(MFCbData *data)
+cbdata_free(CbData *data)
 {
     if (!data) return;
     free(data->metadata);
@@ -273,10 +276,17 @@ mfcbdata_free(MFCbData *data)
 }
 
 static int
+progresscb(void *clientp, double total_to_download, double downloaded)
+{
+    CbData *data = clientp;
+    return data->progresscb(data->userdata, total_to_download, downloaded);
+}
+
+static int
 hmfcb(void *clientp, const char *msg, const char *url)
 {
-    MFCbData *data = clientp;
-    return data->cb(data->userdata, msg, url, data->metadata);
+    CbData *data = clientp;
+    return data->hmfcb(data->userdata, msg, url, data->metadata);
 }
 
 static gboolean
@@ -288,6 +298,7 @@ lr_yum_download_repo(LrHandle *handle,
     gboolean ret = TRUE;
     char *destdir;  /* Destination dir */
     GSList *targets = NULL;
+    GSList *cbdata_list = NULL;
     GError *tmp_err = NULL;
 
     destdir = handle->destdir;
@@ -300,6 +311,7 @@ lr_yum_download_repo(LrHandle *handle,
         char *path;
         LrDownloadTarget *target;
         LrYumRepoMdRecord *record = elem->data;
+        CbData *cbdata = NULL;
 
         assert(record);
 
@@ -328,6 +340,14 @@ lr_yum_download_repo(LrHandle *handle,
             checksums = g_slist_prepend(checksums, checksum);
         }
 
+        if (handle->user_cb || handle->hmfcb) {
+            cbdata = cbdata_new(handle->user_data,
+                                handle->user_cb,
+                                handle->hmfcb,
+                                record->type);
+            cbdata_list = g_slist_append(cbdata_list, cbdata);
+        }
+
         target = lr_downloadtarget_new(handle,
                                        record->location_href,
                                        NULL,
@@ -337,7 +357,7 @@ lr_yum_download_repo(LrHandle *handle,
                                        0,
                                        0,
                                        NULL,
-                                       handle->user_data,
+                                       cbdata,
                                        NULL,
                                        NULL,
                                        NULL,
@@ -356,8 +376,8 @@ lr_yum_download_repo(LrHandle *handle,
 
     ret = lr_download_single_cb(targets,
                                 FALSE,
-                                handle->user_cb,
-                                NULL,
+                                (cbdata_list) ? progresscb : NULL,
+                                (cbdata_list) ? hmfcb : NULL,
                                 &tmp_err);
 
     // Error handling
@@ -403,6 +423,7 @@ lr_yum_download_repo(LrHandle *handle,
         }
     }
 
+    g_slist_free_full(cbdata_list, (GDestroyNotify)cbdata_free);
     g_slist_free_full(targets, (GDestroyNotify)lr_downloadtarget_free);
 
     return ret;
