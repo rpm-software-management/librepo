@@ -239,6 +239,13 @@ Version contants
     *List of strings*. Set blacklist of yum metadata files.
     This files will not be downloaded.
 
+.. data:: LRO_HMFCB
+
+    *Function or None* Handle Mirror Failure Callback is called
+    when a metadata download fails. It is designed to give
+    a detailed information about what failed to the user.
+    Call of this callback doesn't mean that downloading failed.
+    If available, the other mirror will be tried.
 
 .. _handle-info-options-label:
 
@@ -269,6 +276,7 @@ Version contants
 .. data:: LRI_FASTESTMIRROR
 .. data:: LRI_FASTESTMIRRORCACHE
 .. data:: LRI_FASTESTMIRRORMAXAGE
+.. data:: LRI_HMFCB
 
 .. _proxy-type-label:
 
@@ -714,6 +722,7 @@ LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
 LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
 LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
+LRO_HMFCB                   = _librepo.LRO_HMFCB
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -755,6 +764,7 @@ ATTR_TO_LRO = {
     "checksum":             LRO_CHECKSUM,
     "yumdlist":             LRO_YUMDLIST,
     "yumblist":             LRO_YUMBLIST,
+    "hmfcb":                LRO_HMFCB,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -778,6 +788,7 @@ LRI_METALINK            = _librepo.LRI_METALINK
 LRI_FASTESTMIRROR       = _librepo.LRI_FASTESTMIRROR
 LRI_FASTESTMIRRORCACHE  = _librepo.LRI_FASTESTMIRRORCACHE
 LRI_FASTESTMIRRORMAXAGE = _librepo.LRI_FASTESTMIRRORMAXAGE
+LRI_HMFCB               = _librepo.LRI_HMFCB
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
@@ -801,6 +812,7 @@ ATTR_TO_LRI = {
     "fastestmirror":        LRI_FASTESTMIRROR,
     "fastestmirrorcache":   LRI_FASTESTMIRRORCACHE,
     "fastestmirrormaxage":  LRI_FASTESTMIRRORMAXAGE,
+    "hmfcb":                LRI_HMFCB,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1142,6 +1154,11 @@ class Handle(_librepo.Handle):
     .. attribute:: yumblist:
 
         See: :data:`.LRO_YUMBLIST`
+
+    .. attribute:: hmfcb:
+
+        See: :data:`.LRO_HMFCB`
+
     """
 
     def setopt(self, option, val):

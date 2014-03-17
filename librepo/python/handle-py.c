@@ -41,6 +41,7 @@ typedef struct {
     PyObject *progress_cb_data;
     PyObject *fastestmirror_cb;
     PyObject *fastestmirror_cb_data;
+    PyObject *hmf_cb;
     /* GIL stuff */
     // See: http://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code
     PyThreadState **state;
@@ -114,7 +115,7 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
             ret = (int) PyLong_AsLong(result);
         } else {
             // It's an error if result is None neither int
-            PyErr_SetString(PyExc_TypeError, "End callback must return integer number");
+            PyErr_SetString(PyExc_TypeError, "Progress callback must return integer number");
             ret = LR_CB_ERROR;
         }
     }
@@ -169,6 +170,53 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
     return;
 }
 
+static int
+hmf_callback(void *data, const char *msg, const char *url, const char *metadata)
+{
+    int ret = LR_CB_OK; // Assume everything will be ok
+    _HandleObject *self;
+    PyObject *user_data, *result;
+
+    self = (_HandleObject *)data;
+    if (!self->hmf_cb)
+        return LR_CB_OK;
+
+    if (self->progress_cb_data)
+        user_data = self->progress_cb_data;
+    else
+        user_data = Py_None;
+
+    EndAllowThreads(self->state);
+    result = PyObject_CallFunction(self->hmf_cb,
+                        "(Osss)", user_data, msg, url, metadata);
+
+    if (!result) {
+        // Exception raised in callback leads to the abortion
+        // of whole downloading (it is considered fatal)
+        ret = LR_CB_ERROR;
+    } else {
+        if (result == Py_None) {
+            // Assume that None means that everything is ok
+            ret = LR_CB_OK;
+#if PY_MAJOR_VERSION < 3
+        } else if (PyInt_Check(result)) {
+            ret = PyInt_AS_LONG(result);
+#endif
+        } else if (PyLong_Check(result)) {
+            ret = (int) PyLong_AsLong(result);
+        } else {
+            // It's an error if result is None neither int
+            PyErr_SetString(PyExc_TypeError, "HandleMirrorFailure callback must return integer number");
+            ret = LR_CB_ERROR;
+        }
+    }
+
+    Py_XDECREF(result);
+    BeginAllowThreads(self->state);
+
+    return ret;
+}
+
 /* Function on the type */
 
 static PyObject *
@@ -184,6 +232,7 @@ handle_new(PyTypeObject *type,
         self->progress_cb_data = NULL;
         self->fastestmirror_cb = NULL;
         self->fastestmirror_cb_data = NULL;
+        self->hmf_cb = NULL;
         self->state = NULL;
     }
     return (PyObject *)self;
@@ -215,6 +264,7 @@ handle_dealloc(_HandleObject *o)
     Py_XDECREF(o->progress_cb_data);
     Py_XDECREF(o->fastestmirror_cb);
     Py_XDECREF(o->fastestmirror_cb_data);
+    Py_XDECREF(o->hmf_cb);
     Py_TYPE(o)->tp_free(o);
 }
 
@@ -658,6 +708,41 @@ py_setopt(_HandleObject *self, PyObject *args)
         break;
     }
 
+    case LRO_HMFCB: {
+        if (!PyCallable_Check(obj) && obj != Py_None) {
+            PyErr_SetString(PyExc_TypeError, "Only callable argument or None is supported with this option");
+            return NULL;
+        }
+
+        Py_XDECREF(self->hmf_cb);
+        if (obj == Py_None) {
+            // None object
+            self->hmf_cb = NULL;
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   (LrHandleOption)option,
+                                   NULL);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+        } else {
+            // New callback object
+            Py_XINCREF(obj);
+            self->hmf_cb = obj;
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   (LrHandleOption)option,
+                                   hmf_callback);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   LRO_PROGRESSDATA,
+                                   self);
+        }
+        break;
+    }
+
+
     /*
      * Options with callback data
      */
@@ -821,6 +906,12 @@ py_getinfo(_HandleObject *self, PyObject *args)
             Py_RETURN_NONE;
         Py_INCREF(self->progress_cb_data);
         return self->progress_cb_data;
+
+    case LRI_HMFCB:
+        if (self->hmf_cb == NULL)
+            Py_RETURN_NONE;
+        Py_INCREF(self->hmf_cb);
+        return self->hmf_cb;
 
     /* metalink */
     case LRI_METALINK: {

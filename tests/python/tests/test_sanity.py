@@ -20,6 +20,7 @@ class TestCaseSanity(unittest.TestCase):
         self.assertEqual(h.varsub, None)
         self.assertEqual(h.mirrors, [])
         self.assertEqual(h.metalink, None)
+        self.assertEqual(h.hmfcb, None)
 
     def test_raw_result_sanity(self):
         r = librepo.Result()

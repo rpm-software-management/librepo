@@ -4,6 +4,9 @@ import librepo
 def foo_cb(data, total_to_download, downloaded):
     pass
 
+def foo_hmfcb(data, msg, url, metadata):
+    pass
+
 class TestCaseHandle(unittest.TestCase):
     def test_handle_setopt_getinfo(self):
         """No exception should be raised."""
@@ -107,6 +110,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_FASTESTMIRROR, False)
         self.assertEqual(h.getinfo(librepo.LRI_FASTESTMIRROR), False)
 
+        self.assertFalse(h.getinfo(librepo.LRI_HMFCB))
+        h.setopt(librepo.LRO_HMFCB, foo_hmfcb)
+        self.assertEqual(h.getinfo(librepo.LRI_HMFCB), foo_hmfcb)
+        h.setopt(librepo.LRO_HMFCB, None)
+        self.assertFalse(h.getinfo(librepo.LRI_HMFCB))
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -207,6 +216,12 @@ class TestCaseHandle(unittest.TestCase):
         h.fastestmirror = False
         self.assertEqual(h.fastestmirror, False)
 
+        self.assertFalse(h.hmfcb)
+        h.hmfcb = foo_hmfcb
+        self.assertEqual(h.hmfcb, foo_hmfcb)
+        h.hmfcb = None
+        self.assertFalse(h.hmfcb)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -266,12 +281,10 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_LOWSPEEDLIMIT, None)
         h.lowspeedlimit = None
 
-        def callback(data, total_to_download, downloaded):
-            pass
         h.setopt(librepo.LRO_PROGRESSCB, None)
         h.progresscb = None
-        h.setopt(librepo.LRO_PROGRESSCB, callback)
-        h.progresscb = callback
+        h.setopt(librepo.LRO_PROGRESSCB, foo_cb)
+        h.progresscb = foo_cb
         h.setopt(librepo.LRO_PROGRESSCB, None)
         h.progresscb = None
 
@@ -283,4 +296,11 @@ class TestCaseHandle(unittest.TestCase):
         h.fastestmirrorcb = fmcallback
         h.setopt(librepo.LRO_FASTESTMIRRORCB, None)
         h.fastestmirror = None
+
+        h.setopt(librepo.LRO_HMFCB, None)
+        h.hmfcb = None
+        h.setopt(librepo.LRO_HMFCB, foo_hmfcb)
+        h.hmfcb = foo_hmfcb
+        h.setopt(librepo.LRO_HMFCB, None)
+        h.hmfcb = None
 
