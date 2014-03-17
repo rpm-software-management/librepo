@@ -99,7 +99,8 @@ Version contants
 
 .. data:: LRO_PROGRESSCB
 
-    *Function or None*. Set progress callback. Callback must be in format:
+    *Function or None*. (See: :ref:`callback-progresscb-label`)
+    Set progress callback. Callback must be in format:
     ``callback(userdata, total_to_download, downloaded)``. If
     total_to_download is 0, then total size is not known.
     Total size (total_to_download) could change (grow) among two callback
@@ -189,7 +190,8 @@ Version contants
 
 .. data:: LRO_FASTESTMIRRORCB
 
-    *Function or None*. Fastest mirror status callback.
+    *Function or None*. (See: :ref:`callback-fastestmirrorcb-label`)
+    Fastest mirror status callback.
     Its prototype looks like ``callback(userdata, stage, data)``
     Where *userdata* are data passed by user via LRO_FASTESTMIRRORDATA.
     *stage* is value from
@@ -241,7 +243,8 @@ Version contants
 
 .. data:: LRO_HMFCB
 
-    *Function or None* Handle Mirror Failure Callback is called
+    *Function or None* (See: :ref:`callback-handlemirrorfailurecb-label`)
+    Handle Mirror Failure Callback is called
     when a metadata download fails. It is designed to give
     a detailed information about what failed to the user.
     Call of this callback doesn't mean that downloading failed.
@@ -634,6 +637,23 @@ Fastestmirror callback - fastestmirrorcb
 :data: Content of *data* is different for different stages.
        See :ref:`fastestmirror-stages-constants-label`
 :returns: This callback must return *None* each other value will be ignored.
+
+
+.. _callback-handlemirrorfailurecb-label:
+
+Handle Mirror Failure Callback - hmfcb
+--------------------------------------
+
+``hmfcb(userdata, msg, url, metadata)``
+
+Callback called when a transfer of metadata during
+:meth:`~.Handle.perform()` failed.
+
+:userdata: User specified data or *None*
+:msg: String with error message
+:url: String with mirror URL
+:metadata: String with metadata name ("primary", "filelists", ...)
+:returns: This callback can return values from :ref:`callbacks-return-values`
 
 .. _callbacks-return-values:
 
