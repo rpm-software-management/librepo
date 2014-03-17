@@ -1,0 +1,160 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PackageTarget (librepo.PackageTarget) &mdash; librepo 1.6.0-1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.6.0-1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="librepo 1.6.0-1 documentation" href="index.html" />
+    <link rel="up" title="The Librepo Library" href="lib.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Result (librepo.Result)" href="result.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="result.html" title="Result (librepo.Result)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">librepo 1.6.0-1 documentation</a> &raquo;</li>
+          <li><a href="lib.html" accesskey="U">The Librepo Library</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="packagetarget-librepo-packagetarget">
+<span id="packagetarget"></span><h1>PackageTarget (librepo.PackageTarget)<a class="headerlink" href="#packagetarget-librepo-packagetarget" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="librepo.PackageTarget">
+<em class="property">class </em><tt class="descclassname">librepo.</tt><tt class="descname">PackageTarget</tt><big>(</big><em>url</em>, <em>dest=None</em>, <em>checksum_type=0</em>, <em>checksum=None</em>, <em>expectedsize=0</em>, <em>base_url=None</em>, <em>resume=False</em>, <em>progresscb=None</em>, <em>cbdata=None</em>, <em>handle=None</em>, <em>endcb=None</em>, <em>mirrorfailurecb=None</em>, <em>byterangestart=0</em>, <em>byterangeend=0</em><big>)</big><a class="headerlink" href="#librepo.PackageTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent a single package that will be downloaded by
+<a class="reference internal" href="lib.html#librepo.download_packages" title="librepo.download_packages"><tt class="xref py py-func docutils literal"><span class="pre">download_packages()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> &#8211; Target URL. If <em>handle</em> or <em>base_url</em> specified, the <em>url</em>
+can be (and logically should be) only a relative part of path.</li>
+<li><strong>dest</strong> &#8211; Destination filename or directory (file basename will
+be derived from the relative_url). If <em>None</em> current
+working directory will be used.</li>
+<li><strong>checksum_type</strong> &#8211; <a class="reference internal" href="lib.html#checksum-constants-label"><em>Checksum (hash) type constants</em></a></li>
+<li><strong>checksum</strong> &#8211; Expected checksum value.</li>
+<li><strong>expectedsize</strong> &#8211; Expected size of the target. If server reports
+different size, then download won&#8217;t be performed.</li>
+<li><strong>base_url</strong> &#8211; Base part of URL</li>
+<li><strong>resume</strong> &#8211; If True then downloader will try to resume download
+if the destination file already exists. If the file doesn&#8217;t exist
+yet, it will be downloaded.</li>
+<li><strong>progresscb</strong> &#8211; <a class="reference internal" href="lib.html#callback-progresscb-label"><em>Progress callback - progresscb</em></a></li>
+<li><strong>cbdata</strong> &#8211; User data for the callback.</li>
+<li><strong>handle</strong> &#8211; <a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a></li>
+<li><strong>endcb</strong> &#8211; <a class="reference internal" href="lib.html#callback-endcb-label"><em>End callback - endcb</em></a></li>
+<li><strong>mirrorfailurecb</strong> &#8211; See <a class="reference internal" href="lib.html#callback-mirrorfailurecb-label"><em>Mirror Failure Callback - mirrorfailurecb</em></a></li>
+<li><strong>byterangestart</strong> &#8211; Start downloading from the specified byte.</li>
+<li><strong>byterangeend</strong> &#8211; Stop downloading at the specified byte.
+<em>Note: If the byterangeend is less or equal to byterangestart,
+then it is ignored!</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="result.html"
+                        title="previous chapter">Result (librepo.Result)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="next chapter">Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/packagetarget.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="result.html" title="Result (librepo.Result)"
+             >previous</a> |</li>
+        <li><a href="index.html">librepo 1.6.0-1 documentation</a> &raquo;</li>
+          <li><a href="lib.html" >The Librepo Library</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Red Hat.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
