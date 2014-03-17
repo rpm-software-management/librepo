@@ -122,6 +122,18 @@ typedef int (*LrMirrorFailureCb)(void *clientp,
                                  const char *msg,
                                  const char *url);
 
+/** MirrorFailure callback
+ * @param clientp           Pointer to user data.
+ * @param msg               Error message.
+ * @param url               Mirror URL
+ * @param metadata          Metadata type "primary", etc.
+ * @return                  See LrCbReturnCode codes
+ */
+typedef int (*LrHandleMirrorFailureCb)(void *clientp,
+                                       const char *msg,
+                                       const char *url,
+                                       const char *metadata);
+
 typedef enum {
     LR_FMSTAGE_INIT, /*!<
         Fastest mirror detection just started.
