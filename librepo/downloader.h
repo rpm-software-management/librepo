@@ -88,7 +88,6 @@ lr_download_url(LrHandle *handle, const char *url, int fd, GError **err);
  * @param targets   See ::lr_download
  * @param failfast  See ::lr_download
  * @param cb        Callback
- * @param cbdata    Callback data
  * @param err       GError **
  * @return          See ::lr_download
  */
@@ -96,7 +95,6 @@ gboolean
 lr_download_single_cb(GSList *targets,
                       gboolean failfast,
                       LrProgressCb cb,
-                      void *cbdata,
                       GError **err);
 
 /** @} */

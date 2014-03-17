@@ -1531,18 +1531,16 @@ typedef struct {
     LrProgressCb cb; /*!<
         User callback */
 
-    void *cbdata; /*!<
-        User callback data */
-
     GSList *singlecbdata; /*!<
         List of LrCallbackData */
 
 } LrSharedCallbackData;
 
 typedef struct {
-    double downloaded;
-    double total;
-    LrSharedCallbackData *sharedcbdata;
+    double downloaded;  /*!< Currently downloaded bytes of target */
+    double total;       /*!< Total size of the target */
+    void *userdata;     /*!< User data related to the target */
+    LrSharedCallbackData *sharedcbdata; /*!< Shared cb data */
 } LrCallbackData;
 
 int
@@ -1564,7 +1562,7 @@ lr_multi_progress_func(void* ptr,
         // Call progress cb with zeroized params
         // This should tell progress cb, that the total_to_download
         // size is changed.
-        int ret = shared_cbdata->cb(shared_cbdata->cbdata, 0.0, 0.0);
+        int ret = shared_cbdata->cb(cbdata->userdata, 0.0, 0.0);
         if (ret != LR_CB_OK)
             return ret;
     }
@@ -1585,7 +1583,7 @@ lr_multi_progress_func(void* ptr,
         totalsize = downloaded;
 
     // Call user callback
-    return shared_cbdata->cb(shared_cbdata->cbdata,
+    return shared_cbdata->cb(cbdata->userdata,
                              totalsize,
                              downloaded);
 }
@@ -1594,7 +1592,6 @@ gboolean
 lr_download_single_cb(GSList *targets,
                       gboolean failfast,
                       LrProgressCb cb,
-                      void *cbdata,
                       GError **err)
 {
     gboolean ret;
@@ -1603,7 +1600,6 @@ lr_download_single_cb(GSList *targets,
     assert(!err || *err == NULL);
 
     shared_cbdata.cb                 = cb;
-    shared_cbdata.cbdata             = cbdata;
     shared_cbdata.singlecbdata       = NULL;
 
     // "Inject" callbacks and callback data to the targets
@@ -1613,6 +1609,7 @@ lr_download_single_cb(GSList *targets,
         LrCallbackData *lrcbdata = lr_malloc0(sizeof(*lrcbdata));
         lrcbdata->downloaded        = 0.0;
         lrcbdata->total             = 0.0;
+        lrcbdata->userdata          = target->cbdata;
         lrcbdata->sharedcbdata      = &shared_cbdata;
 
         target->progresscb  = (cb) ? lr_multi_progress_func : NULL;
@@ -1627,9 +1624,10 @@ lr_download_single_cb(GSList *targets,
     // Remove callbacks and callback data
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrDownloadTarget *target = elem->data;
-        lr_free(target->cbdata);
-        target->cbdata = NULL;
+        LrCallbackData *cbdata = target->cbdata;
+        target->cbdata = cbdata->userdata;
         target->progresscb = NULL;
+        lr_free(cbdata);
     }
     g_slist_free(shared_cbdata.singlecbdata);
 

@@ -337,7 +337,7 @@ lr_yum_download_repo(LrHandle *handle,
                                        0,
                                        0,
                                        NULL,
-                                       NULL,
+                                       handle->user_data,
                                        NULL,
                                        NULL,
                                        NULL,
@@ -357,7 +357,6 @@ lr_yum_download_repo(LrHandle *handle,
     ret = lr_download_single_cb(targets,
                                 FALSE,
                                 handle->user_cb,
-                                handle->user_data,
                                 &tmp_err);
 
     // Error handling
