@@ -538,6 +538,10 @@ lr_handle_setopt(LrHandle *handle,
 
         break;
 
+    case LRO_HMFCB:
+        handle->hmfcb = va_arg(arg, LrHandleMirrorFailureCb);
+        break;
+
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                     "Unknown option");
@@ -1225,6 +1229,12 @@ lr_handle_getinfo(LrHandle *handle,
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->fastestmirrormaxage;
         break;
+
+    case LRI_HMFCB: {
+        LrHandleMirrorFailureCb *cb= va_arg(arg, LrHandleMirrorFailureCb *);
+        *cb = handle->hmfcb;
+        break;
+    }
 
     default:
         rc = FALSE;

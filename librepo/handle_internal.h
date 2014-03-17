@@ -157,6 +157,9 @@ struct _LrHandle {
         LRO_LOWSPEEDLIMIT for the library to consider it too slow
         and abort. */
 
+    LrHandleMirrorFailureCb hmfcb; /*!<
+        Callaback called when a repodata download from a mirror fails. */
+
     gint64 maxspeed; /*!<
         Max speed in bytes per sec */
 };

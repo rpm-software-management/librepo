@@ -237,6 +237,11 @@ typedef enum {
         Do not download this specified records from repomd (blacklist).
         Note: Last element of the list must be NULL! */
 
+    LRO_HMFCB, /* (LrHandleMirrorFailureCb)
+        Handle specific mirror failure callaback.
+        Callback called when a repodata download from a mirror fails.
+        This callback gets the user data setted by LRO_PROGRESSDATA */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -285,6 +290,7 @@ typedef enum {
     LRI_FASTESTMIRROR,          /*!< (long *) */
     LRI_FASTESTMIRRORCACHE,     /*!< (char **) */
     LRI_FASTESTMIRRORMAXAGE,    /*!< (long *) */
+    LRI_HMFCB,                  /*!< (LrHandleMirrorFailureCb) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 
