@@ -949,13 +949,13 @@ class PackageTarget(_librepo.PackageTarget):
     :func:`~librepo.download_packages`.
     """
 
-    def __init__(self, url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
+    def __init__(self, relative_url, dest=None, checksum_type=CHECKSUM_UNKNOWN,
                  checksum=None, expectedsize=0, base_url=None, resume=False,
                  progresscb=None, cbdata=None, handle=None, endcb=None,
                  mirrorfailurecb=None, byterangestart=0, byterangeend=0):
         """
-        :param url: Target URL. If *handle* or *base_url* specified, the *url*
-            can be (and logically should be) only a relative part of path.
+        :param relative_url: Target URL. If *handle* or *base_url* specified,
+            the *url* can be (and logically should be) only a relative part of path.
         :param dest: Destination filename or directory (file basename will
             be derived from the relative_url). If *None* current
             working directory will be used.
@@ -977,7 +977,7 @@ class PackageTarget(_librepo.PackageTarget):
             *Note: If the byterangeend is less or equal to byterangestart,
             then it is ignored!*
         """
-        _librepo.PackageTarget.__init__(self, handle, url, dest,
+        _librepo.PackageTarget.__init__(self, handle, relative_url, dest,
                                         checksum_type, checksum, expectedsize,
                                         base_url, resume, progresscb, cbdata,
                                         endcb, mirrorfailurecb, byterangestart,
