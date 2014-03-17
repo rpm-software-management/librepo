@@ -1531,6 +1531,9 @@ typedef struct {
     LrProgressCb cb; /*!<
         User callback */
 
+    LrMirrorFailureCb mfcb; /*!<
+        Mirror failure callback */
+
     GSList *singlecbdata; /*!<
         List of LrCallbackData */
 
@@ -1588,10 +1591,19 @@ lr_multi_progress_func(void* ptr,
                              downloaded);
 }
 
+int
+lr_multi_mf_func(void *ptr, const char *msg, const char *url)
+{
+    LrCallbackData *cbdata = ptr;
+    LrSharedCallbackData *shared_cbdata = cbdata->sharedcbdata;
+    return shared_cbdata->mfcb(cbdata->userdata, msg, url);
+}
+
 gboolean
 lr_download_single_cb(GSList *targets,
                       gboolean failfast,
                       LrProgressCb cb,
+                      LrMirrorFailureCb mfcb,
                       GError **err)
 {
     gboolean ret;
@@ -1600,6 +1612,7 @@ lr_download_single_cb(GSList *targets,
     assert(!err || *err == NULL);
 
     shared_cbdata.cb                 = cb;
+    shared_cbdata.mfcb               = mfcb;
     shared_cbdata.singlecbdata       = NULL;
 
     // "Inject" callbacks and callback data to the targets
@@ -1612,8 +1625,9 @@ lr_download_single_cb(GSList *targets,
         lrcbdata->userdata          = target->cbdata;
         lrcbdata->sharedcbdata      = &shared_cbdata;
 
-        target->progresscb  = (cb) ? lr_multi_progress_func : NULL;
-        target->cbdata      = lrcbdata;
+        target->progresscb      = (cb) ? lr_multi_progress_func : NULL;
+        target->mirrorfailurecb = (mfcb) ? lr_multi_mf_func : NULL;
+        target->cbdata          = lrcbdata;
 
         shared_cbdata.singlecbdata = g_slist_append(shared_cbdata.singlecbdata,
                                                     lrcbdata);
@@ -1627,6 +1641,7 @@ lr_download_single_cb(GSList *targets,
         LrCallbackData *cbdata = target->cbdata;
         target->cbdata = cbdata->userdata;
         target->progresscb = NULL;
+        target->mirrorfailurecb = NULL;
         lr_free(cbdata);
     }
     g_slist_free(shared_cbdata.singlecbdata);
