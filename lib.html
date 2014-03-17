@@ -216,7 +216,8 @@ authentication in format &#8216;username:password&#8217;.</p>
 <dl class="data">
 <dt id="librepo.LRO_PROGRESSCB">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROGRESSCB</tt><a class="headerlink" href="#librepo.LRO_PROGRESSCB" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Function or None</em>. Set progress callback. Callback must be in format:
+<dd><p><em>Function or None</em>. (See: <a class="reference internal" href="#callback-progresscb-label"><em>Progress callback - progresscb</em></a>)
+Set progress callback. Callback must be in format:
 <tt class="docutils literal"><span class="pre">callback(userdata,</span> <span class="pre">total_to_download,</span> <span class="pre">downloaded)</span></tt>. If
 total_to_download is 0, then total size is not known.
 Total size (total_to_download) could change (grow) among two callback
@@ -340,7 +341,8 @@ it will be created.</p>
 <dl class="data">
 <dt id="librepo.LRO_FASTESTMIRRORCB">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_FASTESTMIRRORCB</tt><a class="headerlink" href="#librepo.LRO_FASTESTMIRRORCB" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Function or None</em>. Fastest mirror status callback.
+<dd><p><em>Function or None</em>. (See: <a class="reference internal" href="#callback-fastestmirrorcb-label"><em>Fastestmirror callback - fastestmirrorcb</em></a>)
+Fastest mirror status callback.
 Its prototype looks like <tt class="docutils literal"><span class="pre">callback(userdata,</span> <span class="pre">stage,</span> <span class="pre">data)</span></tt>
 Where <em>userdata</em> are data passed by user via LRO_FASTESTMIRRORDATA.
 <em>stage</em> is value from
@@ -407,6 +409,17 @@ only <tt class="docutils literal"><span class="pre">repomd.xml</span></tt> will 
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_YUMBLIST</tt><a class="headerlink" href="#librepo.LRO_YUMBLIST" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>List of strings</em>. Set blacklist of yum metadata files.
 This files will not be downloaded.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_HMFCB">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_HMFCB</tt><a class="headerlink" href="#librepo.LRO_HMFCB" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Function or None</em> (See: <a class="reference internal" href="#callback-handlemirrorfailurecb-label"><em>Handle Mirror Failure Callback - hmfcb</em></a>)
+Handle Mirror Failure Callback is called
+when a metadata download fails. It is designed to give
+a detailed information about what failed to the user.
+Call of this callback doesn&#8217;t mean that downloading failed.
+If available, the other mirror will be tried.</p>
 </dd></dl>
 
 </div>
@@ -518,6 +531,11 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dl class="data">
 <dt id="librepo.LRI_FASTESTMIRRORMAXAGE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_FASTESTMIRRORMAXAGE</tt><a class="headerlink" href="#librepo.LRI_FASTESTMIRRORMAXAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_HMFCB">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_HMFCB</tt><a class="headerlink" href="#librepo.LRI_HMFCB" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -1111,6 +1129,28 @@ See <a class="reference internal" href="#fastestmirror-stages-constants-label"><
 </tbody>
 </table>
 </div>
+<div class="section" id="handle-mirror-failure-callback-hmfcb">
+<span id="callback-handlemirrorfailurecb-label"></span><h3>Handle Mirror Failure Callback - hmfcb<a class="headerlink" href="#handle-mirror-failure-callback-hmfcb" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">hmfcb(userdata,</span> <span class="pre">msg,</span> <span class="pre">url,</span> <span class="pre">metadata)</span></tt></p>
+<p>Callback called when a transfer of metadata during
+<a class="reference internal" href="handle.html#librepo.Handle.perform" title="librepo.Handle.perform"><tt class="xref py py-meth docutils literal"><span class="pre">perform()</span></tt></a> failed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">userdata:</th><td class="field-body">User specified data or <em>None</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">msg:</th><td class="field-body">String with error message</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">url:</th><td class="field-body">String with mirror URL</td>
+</tr>
+<tr class="field-even field"><th class="field-name">metadata:</th><td class="field-body">String with metadata name (&#8220;primary&#8221;, &#8220;filelists&#8221;, ...)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">returns:</th><td class="field-body">This callback can return values from <a class="reference internal" href="#callbacks-return-values"><em>Callbacks return values</em></a></td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="callbacks-return-values">
 <span id="id1"></span><h3>Callbacks return values<a class="headerlink" href="#callbacks-return-values" title="Permalink to this headline">¶</a></h3>
 <p>Each callback can safely return <tt class="docutils literal"><span class="pre">None</span></tt> (this is implicit return value
@@ -1328,6 +1368,7 @@ during call.</li>
 <li><a class="reference internal" href="#end-callback-endcb">End callback - endcb</a></li>
 <li><a class="reference internal" href="#mirror-failure-callback-mirrorfailurecb">Mirror Failure Callback - mirrorfailurecb</a></li>
 <li><a class="reference internal" href="#fastestmirror-callback-fastestmirrorcb">Fastestmirror callback - fastestmirrorcb</a></li>
+<li><a class="reference internal" href="#handle-mirror-failure-callback-hmfcb">Handle Mirror Failure Callback - hmfcb</a></li>
 <li><a class="reference internal" href="#callbacks-return-values">Callbacks return values</a></li>
 <li><a class="reference internal" href="#checksum-hash-type-constants">Checksum (hash) type constants</a></li>
 </ul>

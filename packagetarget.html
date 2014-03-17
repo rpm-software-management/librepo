@@ -60,7 +60,7 @@
 <span id="packagetarget"></span><h1>PackageTarget (librepo.PackageTarget)<a class="headerlink" href="#packagetarget-librepo-packagetarget" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="librepo.PackageTarget">
-<em class="property">class </em><tt class="descclassname">librepo.</tt><tt class="descname">PackageTarget</tt><big>(</big><em>url</em>, <em>dest=None</em>, <em>checksum_type=0</em>, <em>checksum=None</em>, <em>expectedsize=0</em>, <em>base_url=None</em>, <em>resume=False</em>, <em>progresscb=None</em>, <em>cbdata=None</em>, <em>handle=None</em>, <em>endcb=None</em>, <em>mirrorfailurecb=None</em>, <em>byterangestart=0</em>, <em>byterangeend=0</em><big>)</big><a class="headerlink" href="#librepo.PackageTarget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">librepo.</tt><tt class="descname">PackageTarget</tt><big>(</big><em>relative_url</em>, <em>dest=None</em>, <em>checksum_type=0</em>, <em>checksum=None</em>, <em>expectedsize=0</em>, <em>base_url=None</em>, <em>resume=False</em>, <em>progresscb=None</em>, <em>cbdata=None</em>, <em>handle=None</em>, <em>endcb=None</em>, <em>mirrorfailurecb=None</em>, <em>byterangestart=0</em>, <em>byterangeend=0</em><big>)</big><a class="headerlink" href="#librepo.PackageTarget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Represent a single package that will be downloaded by
 <a class="reference internal" href="lib.html#librepo.download_packages" title="librepo.download_packages"><tt class="xref py py-func docutils literal"><span class="pre">download_packages()</span></tt></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -68,8 +68,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>url</strong> &#8211; Target URL. If <em>handle</em> or <em>base_url</em> specified, the <em>url</em>
-can be (and logically should be) only a relative part of path.</li>
+<li><strong>relative_url</strong> &#8211; Target URL. If <em>handle</em> or <em>base_url</em> specified,
+the <em>url</em> can be (and logically should be) only a relative part of path.</li>
 <li><strong>dest</strong> &#8211; Destination filename or directory (file basename will
 be derived from the relative_url). If <em>None</em> current
 working directory will be used.</li>
