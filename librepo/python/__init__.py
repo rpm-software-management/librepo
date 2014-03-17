@@ -244,11 +244,11 @@ Version contants
 .. data:: LRO_HMFCB
 
     *Function or None* (See: :ref:`callback-handlemirrorfailurecb-label`)
-    Handle Mirror Failure Callback is called
-    when a metadata download fails. It is designed to give
-    a detailed information about what failed to the user.
-    Call of this callback doesn't mean that downloading failed.
-    If available, the other mirror will be tried.
+    The Handle Mirror Failure Callback is called
+    when a metadata download fails. It provides
+    a detailed information about what exactly failed.
+    Call of this callback doesn't mean that whole downloading failed.
+    If there are other mirrors on the list, these mirrors will be tried.
 
 .. _handle-info-options-label:
 
@@ -646,8 +646,8 @@ Handle Mirror Failure Callback - hmfcb
 
 ``hmfcb(userdata, msg, url, metadata)``
 
-Callback called when a transfer of metadata during
-:meth:`~.Handle.perform()` failed.
+Callback called when a download of a metadata during
+:meth:`~.Handle.perform()` fails.
 
 :userdata: User specified data or *None*
 :msg: String with error message
