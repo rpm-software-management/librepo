@@ -350,7 +350,7 @@ lr_yum_download_repo(LrHandle *handle,
 
         target = lr_downloadtarget_new(handle,
                                        record->location_href,
-                                       NULL,
+                                       record->location_base,
                                        fd,
                                        NULL,
                                        checksums,
