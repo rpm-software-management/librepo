@@ -279,14 +279,18 @@ static int
 progresscb(void *clientp, double total_to_download, double downloaded)
 {
     CbData *data = clientp;
-    return data->progresscb(data->userdata, total_to_download, downloaded);
+    if (data->progresscb)
+        return data->progresscb(data->userdata, total_to_download, downloaded);
+    return LR_CB_OK;
 }
 
 static int
 hmfcb(void *clientp, const char *msg, const char *url)
 {
     CbData *data = clientp;
-    return data->hmfcb(data->userdata, msg, url, data->metadata);
+    if (data->hmfcb)
+        return data->hmfcb(data->userdata, msg, url, data->metadata);
+    return LR_CB_OK;
 }
 
 static gboolean
