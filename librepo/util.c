@@ -20,6 +20,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 500
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <curl/curl.h>
 #include <assert.h>
 #include <errno.h>
@@ -36,6 +37,26 @@
 #include "metalink.h"
 
 #define DIR_SEPARATOR   "/"
+#define ENV_DEBUG       "LIBREPO_DEBUG"
+
+static void
+lr_log_handler(G_GNUC_UNUSED const gchar *log_domain,
+               GLogLevelFlags log_level,
+               const gchar *message,
+               G_GNUC_UNUSED gpointer user_data)
+{
+    g_fprintf(stderr, "%s\n", message);
+}
+
+static void
+lr_init_debugging(void)
+{
+    if (!g_getenv(ENV_DEBUG))
+        return;
+
+    g_log_set_handler("librepo", G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL
+                                 | G_LOG_FLAG_RECURSION, lr_log_handler, NULL);
+}
 
 static gpointer
 lr_init_once_cb(gpointer user_data G_GNUC_UNUSED)
@@ -48,6 +69,7 @@ lr_init_once_cb(gpointer user_data G_GNUC_UNUSED)
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
 
+    lr_init_debugging();
     g_debug("Librepo version: %d.%d.%d%s (%s)", LR_VERSION_MAJOR,
                                                 LR_VERSION_MINOR,
                                                 LR_VERSION_PATCH,
