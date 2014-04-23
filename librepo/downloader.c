@@ -103,6 +103,8 @@ typedef struct {
         successfully performed.
         If state is LR_DS_FAILED then mirror from which last try
         was done. */
+    LrProtocol protocol; /*!<
+        Current protocol */
     CURL *curl_handle; /*!<
         Used curl handle or NULL */
     FILE *f; /*!<
@@ -312,7 +314,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     gint64 expected = lrtarget->target->expectedsize;
 
     if (state == LR_HCS_DEFAULT) {
-        if (lrtarget->mirror->mirror->protocol == LR_PROTOCOL_HTTP
+        if (lrtarget->protocol == LR_PROTOCOL_HTTP
             && g_str_has_prefix(header, "HTTP/")) {
             // Header of a HTTP protocol
             if (g_strrstr(header, "200")) {
@@ -322,7 +324,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
                 // in case of redirection, 200 OK still could come
                 g_debug("%s: Non OK HTTP header status: %s", __func__, header);
             }
-        } else if (lrtarget->mirror->mirror->protocol == LR_PROTOCOL_FTP) {
+        } else if (lrtarget->protocol == LR_PROTOCOL_FTP) {
             // Headers of a FTP protocol
             if (g_str_has_prefix(header, "213 ")) {
                 // Code 213 shoud keep the file size
@@ -481,6 +483,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     LrMirror *mirror = NULL;
     char *full_url = NULL;
     int complete_url_in_path = 0;
+    LrProtocol protocol = LR_PROTOCOL_OTHER;
 
     assert(dd);
     assert(!err || *err == NULL);
@@ -632,6 +635,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     g_debug("%s: URL: %s", __func__, full_url);
 
+    protocol = lr_detect_protocol(full_url);
+
     // Prepare CURL easy handle
     CURLcode c_rc;
     CURL *h;
@@ -771,6 +776,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Set mirror for the target
     target->mirror = mirror;  // mirror could be NULL if baseurl is used
+
+    // Set protocol of the target
+    target->protocol = protocol;
 
     // Save curl handle for the current transfer
     target->curl_handle = h;

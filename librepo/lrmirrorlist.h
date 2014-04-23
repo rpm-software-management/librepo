@@ -29,11 +29,11 @@
 G_BEGIN_DECLS
 
 typedef enum {
+    LR_PROTOCOL_OTHER,
     LR_PROTOCOL_FILE,
     LR_PROTOCOL_HTTP,
     LR_PROTOCOL_FTP,
     LR_PROTOCOL_RSYNC,
-    LR_PROTOCOL_OTHER,
 } LrProtocol;
 
 /** A internal representation of a mirror */
