@@ -614,6 +614,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
         g_debug("%s: Parsing repomd.xml", __func__);
         ret = lr_yum_repomd_parse_file(repomd, fd, lr_xml_parser_warning_logger,
                                        "Repomd xml parser", &tmp_err);
+        close(fd);
         if (!ret) {
             g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);
             g_propagate_prefixed_error(err, tmp_err,
@@ -621,8 +622,6 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
             lr_free(path);
             return FALSE;
         }
-
-        close(fd);
 
         /* Fill result object */
         result->destdir = g_strdup(baseurl);
@@ -919,7 +918,7 @@ lr_yum_perform(LrHandle *handle, LrResult *result, GError **err)
         return FALSE;
     }
 
-    if (handle->local && !handle->urls && !handle->urls[0]) {
+    if (handle->local && (!handle->urls || !handle->urls[0])) {
         g_set_error(err, LR_YUM_ERROR, LRE_NOURL,
                     "Localrepo specified, but no LRO_URLS set");
         return FALSE;

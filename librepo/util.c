@@ -288,7 +288,8 @@ lr_copy_content(int source, int dest)
     lseek(dest, 0, SEEK_SET);
 
     while ((size = read(source, buf, bufsize)) > 0)
-        write(dest, buf, size);
+        if (write(dest, buf, size) == -1)
+            return -1;
 
     return (size < 0) ? -1 : 0;
 }

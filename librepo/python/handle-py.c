@@ -431,8 +431,6 @@ py_setopt(_HandleObject *self, PyObject *args)
             /* Default options */
             if (option == LRO_PROXYPORT)
                 d = LRO_PROXYPORT_DEFAULT;
-            else if (option == LRO_MAXSPEED)
-                d = LRO_MAXSPEED_DEFAULT;
             else if (option == LRO_MAXMIRRORTRIES)
                 d = LRO_MAXMIRRORTRIES_DEFAULT;
             else if (option == LRO_CONNECTTIMEOUT)

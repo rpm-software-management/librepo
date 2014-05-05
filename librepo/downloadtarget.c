@@ -71,6 +71,7 @@ lr_downloadtarget_new(LrHandle *handle,
     if (byterangestart && resume) {
         g_debug("%s: Cannot specify byterangestart and set resume to TRUE "
                 "at the same time", __func__);
+        free(target);
         return NULL;
     }
 

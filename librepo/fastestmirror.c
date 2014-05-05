@@ -593,6 +593,7 @@ lr_fastestmirror(LrHandle *handle,
     if (!ret) {
         cb(cbdata, LR_FMSTAGE_STATUS, "Error while lr_fastestmirror_prepare()");
         g_debug("%s: Error while lr_fastestmirror_prepare()", __func__);
+        lr_fastestmirrorcache_free(cache);
         return FALSE;
     }
 
@@ -602,6 +603,7 @@ lr_fastestmirror(LrHandle *handle,
         g_debug("%s: Error while lr_fastestmirror_perform()", __func__);
         g_slist_free_full(lrfastestmirrors,
                           (GDestroyNotify)lr_lrfastestmirror_free);
+        lr_fastestmirrorcache_free(cache);
         return FALSE;
     }
 

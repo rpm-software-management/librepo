@@ -186,7 +186,7 @@ lr_gpg_check_signature(const char *signature_fn,
     }
 
     data_fd = open(data_fn, O_RDONLY);
-    if (signature_fd == -1) {
+    if (data_fd == -1) {
         g_debug("%s: Opening data %s: %s",
                 __func__, data_fn, strerror(errno));
         g_set_error(err, LR_GPG_ERROR, LRE_IO,
