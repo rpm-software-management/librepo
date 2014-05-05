@@ -59,6 +59,8 @@ lr_get_curl_handle()
     curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, LRO_CONNECTTIMEOUT_DEFAULT);
     curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, LRO_LOWSPEEDTIME_DEFAULT);
     curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT);
+    curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2);
+    curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1);
     return h;
 }
 
@@ -97,6 +99,8 @@ lr_handle_init()
     handle->maxparalleldownloads = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
     handle->maxdownloadspermirror = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
     handle->lowspeedlimit = LRO_LOWSPEEDLIMIT_DEFAULT;
+    handle->sslverifypeer = 1;
+    handle->sslverifyhost = 2;
 
     return handle;
 }
@@ -540,6 +544,16 @@ lr_handle_setopt(LrHandle *handle,
 
     case LRO_HMFCB:
         handle->hmfcb = va_arg(arg, LrHandleMirrorFailureCb);
+        break;
+
+    case LRO_SSLVERIFYPEER:
+        handle->sslverifypeer = va_arg(arg, long) ? 1 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifypeer);
+        break;
+
+    case LRO_SSLVERIFYHOST:
+        handle->sslverifyhost = va_arg(arg, long) ? 2 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifyhost);
         break;
 
     default:
@@ -1235,6 +1249,17 @@ lr_handle_getinfo(LrHandle *handle,
         *cb = handle->hmfcb;
         break;
     }
+
+    case LRI_SSLVERIFYPEER:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->sslverifypeer;
+        break;
+
+    case LRI_SSLVERIFYHOST:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) (handle->sslverifyhost ? 1 : 0);
+        break;
+
 
     default:
         rc = FALSE;

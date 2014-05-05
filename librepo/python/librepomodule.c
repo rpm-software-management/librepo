@@ -260,6 +260,8 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_YUMDLIST", LRO_YUMDLIST);
     PyModule_AddIntConstant(m, "LRO_YUMBLIST", LRO_YUMBLIST);
     PyModule_AddIntConstant(m, "LRO_HMFCB", LRO_HMFCB);
+    PyModule_AddIntConstant(m, "LRO_SSLVERIFYPEER", LRO_SSLVERIFYPEER);
+    PyModule_AddIntConstant(m, "LRO_SSLVERIFYHOST", LRO_SSLVERIFYHOST);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
     // Handle info options
@@ -285,6 +287,9 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_FASTESTMIRRORCACHE", LRI_FASTESTMIRRORCACHE);
     PyModule_AddIntConstant(m, "LRI_FASTESTMIRRORMAXAGE", LRI_FASTESTMIRRORMAXAGE);
     PyModule_AddIntConstant(m, "LRI_HMFCB", LRI_HMFCB);
+    PyModule_AddIntConstant(m, "LRI_SSLVERIFYPEER", LRI_SSLVERIFYPEER);
+    PyModule_AddIntConstant(m, "LRI_SSLVERIFYHOST", LRI_SSLVERIFYHOST);
+    PyModule_AddIntConstant(m, "LRI_SENTINEL", LRI_SENTINEL);
 
     // Check options
     PyModule_AddIntConstant(m, "LR_CHECK_GPG", LR_CHECK_GPG);

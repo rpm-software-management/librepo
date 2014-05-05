@@ -116,6 +116,18 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_HMFCB, None)
         self.assertFalse(h.getinfo(librepo.LRI_HMFCB))
 
+        self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYPEER))
+        h.setopt(librepo.LRO_SSLVERIFYPEER, 0)
+        self.assertEqual(h.getinfo(librepo.LRI_SSLVERIFYPEER), False)
+        h.setopt(librepo.LRO_SSLVERIFYPEER, None)
+        self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYPEER))
+
+        self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYHOST))
+        h.setopt(librepo.LRO_SSLVERIFYHOST, 0)
+        self.assertEqual(h.getinfo(librepo.LRI_SSLVERIFYHOST), False)
+        h.setopt(librepo.LRO_SSLVERIFYHOST, None)
+        self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYHOST))
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -222,6 +234,18 @@ class TestCaseHandle(unittest.TestCase):
         h.hmfcb = None
         self.assertFalse(h.hmfcb)
 
+        self.assertTrue(h.sslverifypeer)
+        h.sslverifypeer = False
+        self.assertEqual(h.sslverifypeer, False)
+        h.sslverifypeer = None
+        self.assertTrue(h.sslverifypeer)
+
+        self.assertTrue(h.sslverifyhost)
+        h.sslverifyhost = False
+        self.assertEqual(h.sslverifyhost, False)
+        h.sslverifyhost = None
+        self.assertTrue(h.sslverifyhost)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -304,3 +328,7 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_HMFCB, None)
         h.hmfcb = None
 
+        h.setopt(librepo.LRO_SSLVERIFYPEER, None)
+        h.sslverifypeer = None
+        h.setopt(librepo.LRO_SSLVERIFYHOST, None)
+        h.sslverifyhost = None

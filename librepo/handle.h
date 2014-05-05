@@ -237,10 +237,20 @@ typedef enum {
         Do not download this specified records from repomd (blacklist).
         Note: Last element of the list must be NULL! */
 
-    LRO_HMFCB, /* (LrHandleMirrorFailureCb)
+    LRO_HMFCB, /*!< (LrHandleMirrorFailureCb)
         Handle specific mirror failure callaback.
         Callback called when a repodata download from a mirror fails.
         This callback gets the user data setted by LRO_PROGRESSDATA */
+
+    LRO_SSLVERIFYPEER, /*!< (long 1 or 0)
+        This option determines whether librepo verifies the authenticity
+        of the peer's certificate.
+        This trust is based on a chain of digital signatures,
+        rooted in certification authority (CA) certificates. */
+
+    LRO_SSLVERIFYHOST, /*!< (long 1 or 0)
+        This option determines whether librepo verifies that
+        the server cert is for the server it is known as. */
 
     LRO_SENTINEL,    /*!< Sentinel */
 
@@ -291,6 +301,8 @@ typedef enum {
     LRI_FASTESTMIRRORCACHE,     /*!< (char **) */
     LRI_FASTESTMIRRORMAXAGE,    /*!< (long *) */
     LRI_HMFCB,                  /*!< (LrHandleMirrorFailureCb) */
+    LRI_SSLVERIFYPEER,          /*!< (long *) */
+    LRI_SSLVERIFYHOST,          /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

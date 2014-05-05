@@ -250,6 +250,18 @@ Version contants
     Call of this callback doesn't mean that whole downloading failed.
     If there are other mirrors on the list, these mirrors will be tried.
 
+.. data:: LRO_SSLVERIFYPEER
+
+    *Boolean*. This option determines whether librepo verifies the
+    authenticity of the peer's certificate. This trust is based on a chain
+    of digital signatures, rooted in certification authority
+    (CA) certificates.
+
+.. data:: LRO_SSLVERIFYHOST
+
+    *Boolean*. This option determines whether librepo verifies that
+    the server cert is for the server it is known as.
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -280,6 +292,8 @@ Version contants
 .. data:: LRI_FASTESTMIRRORCACHE
 .. data:: LRI_FASTESTMIRRORMAXAGE
 .. data:: LRI_HMFCB
+.. data:: LRI_SSLVERIFYPEER
+.. data:: LRI_SSLVERIFYHOST
 
 .. _proxy-type-label:
 
@@ -743,6 +757,8 @@ LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
 LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
 LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
 LRO_HMFCB                   = _librepo.LRO_HMFCB
+LRO_SSLVERIFYPEER           = _librepo.LRO_SSLVERIFYPEER
+LRO_SSLVERIFYHOST           = _librepo.LRO_SSLVERIFYHOST
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -785,6 +801,8 @@ ATTR_TO_LRO = {
     "yumdlist":             LRO_YUMDLIST,
     "yumblist":             LRO_YUMBLIST,
     "hmfcb":                LRO_HMFCB,
+    "sslverifypeer":        LRO_SSLVERIFYPEER,
+    "sslverifyhost":        LRO_SSLVERIFYHOST,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -809,6 +827,9 @@ LRI_FASTESTMIRROR       = _librepo.LRI_FASTESTMIRROR
 LRI_FASTESTMIRRORCACHE  = _librepo.LRI_FASTESTMIRRORCACHE
 LRI_FASTESTMIRRORMAXAGE = _librepo.LRI_FASTESTMIRRORMAXAGE
 LRI_HMFCB               = _librepo.LRI_HMFCB
+LRI_SSLVERIFYPEER       = _librepo.LRI_SSLVERIFYPEER
+LRI_SSLVERIFYHOST       = _librepo.LRI_SSLVERIFYHOST
+LRI_SENTINEL            = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
@@ -833,6 +854,8 @@ ATTR_TO_LRI = {
     "fastestmirrorcache":   LRI_FASTESTMIRRORCACHE,
     "fastestmirrormaxage":  LRI_FASTESTMIRRORMAXAGE,
     "hmfcb":                LRI_HMFCB,
+    "sslverifypeer":        LRI_SSLVERIFYPEER,
+    "sslverifyhost":        LRI_SSLVERIFYHOST,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1178,6 +1201,14 @@ class Handle(_librepo.Handle):
     .. attribute:: hmfcb:
 
         See: :data:`.LRO_HMFCB`
+
+    .. attribute:: sslverifypeer:
+
+        See :data:`.LRO_SSLVERIFYPEER`
+
+    .. attribute:: sslverifyhost:
+
+        See :data:`.LRO_SSLVERIFYHOST`
 
     """
 

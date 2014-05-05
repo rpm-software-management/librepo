@@ -96,9 +96,6 @@ struct _LrHandle {
     LrInternalMirrorlist *mirrors;  /*!<
         Mirrors from metalink or mirrorlist */
 
-//    int mirrorlist_fd;  /*!<
-//        Raw downloaded file */
-
     int local; /*!<
         Do not duplicate local data */
 
@@ -162,6 +159,13 @@ struct _LrHandle {
 
     gint64 maxspeed; /*!<
         Max speed in bytes per sec */
+
+    long sslverifypeer; /*!<
+        Determines whether verify the autenticity of the peer's certificate */
+
+    long sslverifyhost; /*!<
+        Determines whether the server name should be checked agains the name
+        in the certificate */
 };
 
 /** Return new CURL easy handle with some default options setted.

@@ -332,10 +332,18 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_INTERRUPTIBLE:
     case LRO_FETCHMIRRORS:
     case LRO_FASTESTMIRROR:
+    case LRO_SSLVERIFYPEER:
+    case LRO_SSLVERIFYHOST:
     {
         long d;
 
-        if (PyObject_IsTrue(obj) == 1)
+        // Default values for None attribute
+        if (obj == Py_None && (option == LRO_SSLVERIFYPEER ||
+                               option == LRO_SSLVERIFYHOST))
+        {
+            d = 1;
+        // end of default attributes
+        } else if (PyObject_IsTrue(obj) == 1)
             d = 1;
         else if (PyObject_IsTrue(obj) == 0)
             d = 0;
@@ -818,6 +826,8 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_MAXMIRRORTRIES:
     case LRI_FASTESTMIRROR:
     case LRI_FASTESTMIRRORMAXAGE:
+    case LRI_SSLVERIFYPEER:
+    case LRI_SSLVERIFYHOST:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,
