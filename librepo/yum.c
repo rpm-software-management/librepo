@@ -156,95 +156,6 @@ lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
     return TRUE;
 }
 
-static gboolean
-lr_yum_download_repomd(LrHandle *handle,
-                       LrMetalink *metalink,
-                       int fd,
-                       GError **err)
-{
-    int ret = TRUE;
-    GError *tmp_err = NULL;
-
-    assert(!err || *err == NULL);
-
-    g_debug("%s: Downloading repomd.xml via mirrorlist", __func__);
-
-    GSList *checksums = NULL;
-    if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
-        // Select best checksum
-
-        gboolean ret;
-        LrChecksumType ch_type;
-        gchar *ch_value;
-
-        // From the metalink itself
-        ret = lr_best_checksum(metalink->hashes, &ch_type, &ch_value);
-        if (ret) {
-            LrDownloadTargetChecksum *dtch;
-            dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
-            checksums = g_slist_prepend(checksums, dtch);
-            g_debug("%s: Expected checksum for repomd.xml: (%s) %s",
-                    __func__, lr_checksum_type_to_str(ch_type), ch_value);
-        }
-
-        // From the alternates entries
-        for (GSList *elem = metalink->alternates; elem; elem = g_slist_next(elem)) {
-            LrMetalinkAlternate *alt = elem->data;
-            ret = lr_best_checksum(alt->hashes, &ch_type, &ch_value);
-            if (ret) {
-                LrDownloadTargetChecksum *dtch;
-                dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
-                checksums = g_slist_prepend(checksums, dtch);
-                g_debug("%s: Expected alternate checksum for repomd.xml: (%s) %s",
-                        __func__, lr_checksum_type_to_str(ch_type), ch_value);
-            }
-        }
-    }
-
-    LrDownloadTarget *target = lr_downloadtarget_new(handle,
-                                                     "repodata/repomd.xml",
-                                                     NULL,
-                                                     fd,
-                                                     NULL,
-                                                     checksums,
-                                                     0,
-                                                     0,
-                                                     NULL,
-                                                     NULL,
-                                                     NULL,
-                                                     NULL,
-                                                     NULL,
-                                                     0,
-                                                     0);
-
-    ret = lr_download_target(target, &tmp_err);
-    assert((ret && !tmp_err) || (!ret && tmp_err));
-
-    if (tmp_err) {
-        g_propagate_prefixed_error(err, tmp_err,
-                                   "Cannot download repomd.xml: ");
-    } else if (target->err) {
-        assert(0); // This shoud not happend since failfast sould be TRUE
-        ret = FALSE;
-        g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode,
-                    "Cannot download repomd.xml: %s",target->err);
-    } else {
-        // Set mirror used for download a repomd.xml to the handle
-        // TODO: Get rid of use_mirror attr
-        lr_free(handle->used_mirror);
-        handle->used_mirror = g_strdup(target->usedmirror);
-    }
-
-    lr_downloadtarget_free(target);
-
-    if (!ret) {
-        /* Download of repomd.xml was not successful */
-        g_debug("%s: repomd.xml download was unsuccessful", __func__);
-    }
-
-    return ret;
-}
-
 /** Mirror Failure Callback Data
  */
 typedef struct CbData_s {
@@ -291,6 +202,106 @@ hmfcb(void *clientp, const char *msg, const char *url)
     if (data->hmfcb)
         return data->hmfcb(data->userdata, msg, url, data->metadata);
     return LR_CB_OK;
+}
+
+static gboolean
+lr_yum_download_repomd(LrHandle *handle,
+                       LrMetalink *metalink,
+                       int fd,
+                       GError **err)
+{
+    int ret = TRUE;
+    GError *tmp_err = NULL;
+
+    assert(!err || *err == NULL);
+
+    g_debug("%s: Downloading repomd.xml via mirrorlist", __func__);
+
+    GSList *checksums = NULL;
+    if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
+        // Select best checksum
+
+        gboolean ret;
+        LrChecksumType ch_type;
+        gchar *ch_value;
+
+        // From the metalink itself
+        ret = lr_best_checksum(metalink->hashes, &ch_type, &ch_value);
+        if (ret) {
+            LrDownloadTargetChecksum *dtch;
+            dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
+            checksums = g_slist_prepend(checksums, dtch);
+            g_debug("%s: Expected checksum for repomd.xml: (%s) %s",
+                    __func__, lr_checksum_type_to_str(ch_type), ch_value);
+        }
+
+        // From the alternates entries
+        for (GSList *elem = metalink->alternates; elem; elem = g_slist_next(elem)) {
+            LrMetalinkAlternate *alt = elem->data;
+            ret = lr_best_checksum(alt->hashes, &ch_type, &ch_value);
+            if (ret) {
+                LrDownloadTargetChecksum *dtch;
+                dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
+                checksums = g_slist_prepend(checksums, dtch);
+                g_debug("%s: Expected alternate checksum for repomd.xml: (%s) %s",
+                        __func__, lr_checksum_type_to_str(ch_type), ch_value);
+            }
+        }
+    }
+
+    CbData *cbdata = NULL;
+    if (handle->hmfcb) {
+        cbdata = cbdata_new(handle->user_data,
+                            NULL,
+                            handle->hmfcb,
+                            "repomd.xml");
+    }
+
+    LrDownloadTarget *target = lr_downloadtarget_new(handle,
+                                                     "repodata/repomd.xml",
+                                                     NULL,
+                                                     fd,
+                                                     NULL,
+                                                     checksums,
+                                                     0,
+                                                     0,
+                                                     NULL,
+                                                     cbdata,
+                                                     NULL,
+                                                     (cbdata) ? hmfcb : NULL,
+                                                     NULL,
+                                                     0,
+                                                     0);
+
+    ret = lr_download_target(target, &tmp_err);
+    assert((ret && !tmp_err) || (!ret && tmp_err));
+
+    if (cbdata)
+        cbdata_free(cbdata);
+
+    if (tmp_err) {
+        g_propagate_prefixed_error(err, tmp_err,
+                                   "Cannot download repomd.xml: ");
+    } else if (target->err) {
+        assert(0); // This shoud not happend since failfast sould be TRUE
+        ret = FALSE;
+        g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode,
+                    "Cannot download repomd.xml: %s",target->err);
+    } else {
+        // Set mirror used for download a repomd.xml to the handle
+        // TODO: Get rid of use_mirror attr
+        lr_free(handle->used_mirror);
+        handle->used_mirror = g_strdup(target->usedmirror);
+    }
+
+    lr_downloadtarget_free(target);
+
+    if (!ret) {
+        /* Download of repomd.xml was not successful */
+        g_debug("%s: repomd.xml download was unsuccessful", __func__);
+    }
+
+    return ret;
 }
 
 static gboolean
