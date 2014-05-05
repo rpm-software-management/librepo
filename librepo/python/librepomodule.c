@@ -71,7 +71,7 @@ py_set_debug_log_handler(G_GNUC_UNUSED PyObject *self, PyObject *args)
 {
     PyObject *cb, *cb_data = NULL;
 
-    if (!PyArg_ParseTuple(args, "O|O:py_set_debug_log_handler", &cb, cb_data))
+    if (!PyArg_ParseTuple(args, "O|O:py_set_debug_log_handler", &cb, &cb_data))
         return NULL;
 
     if (cb == Py_None)
