@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Librepo Library &mdash; librepo 1.6.0-1 documentation</title>
+    <title>The Librepo Library &mdash; librepo 1.7.3-1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.6.0-1',
+        VERSION:     '1.7.3-1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="librepo 1.6.0-1 documentation" href="index.html" />
+    <link rel="top" title="librepo 1.7.3-1 documentation" href="index.html" />
     <link rel="next" title="Handle (librepo.Handle)" href="handle.html" />
     <link rel="prev" title="librepo" href="index.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="index.html" title="librepo"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">librepo 1.6.0-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.3-1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -422,6 +422,22 @@ Call of this callback doesn&#8217;t mean that whole downloading failed.
 If there are other mirrors on the list, these mirrors will be tried.</p>
 </dd></dl>
 
+<dl class="data">
+<dt id="librepo.LRO_SSLVERIFYPEER">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_SSLVERIFYPEER</tt><a class="headerlink" href="#librepo.LRO_SSLVERIFYPEER" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Boolean</em>. This option determines whether librepo verifies the
+authenticity of the peer&#8217;s certificate. This trust is based on a chain
+of digital signatures, rooted in certification authority
+(CA) certificates.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_SSLVERIFYHOST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_SSLVERIFYHOST</tt><a class="headerlink" href="#librepo.LRO_SSLVERIFYHOST" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Boolean</em>. This option determines whether librepo verifies that
+the server cert is for the server it is known as.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="handle-info-options">
 <span id="handle-info-options-label"></span><h3><a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> info options<a class="headerlink" href="#handle-info-options" title="Permalink to this headline">¶</a></h3>
@@ -536,6 +552,16 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dl class="data">
 <dt id="librepo.LRI_HMFCB">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_HMFCB</tt><a class="headerlink" href="#librepo.LRI_HMFCB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_SSLVERIFYPEER">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_SSLVERIFYPEER</tt><a class="headerlink" href="#librepo.LRI_SSLVERIFYPEER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_SSLVERIFYHOST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_SSLVERIFYHOST</tt><a class="headerlink" href="#librepo.LRI_SSLVERIFYHOST" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -1422,7 +1448,7 @@ during call.</li>
         <li class="right" >
           <a href="index.html" title="librepo"
              >previous</a> |</li>
-        <li><a href="index.html">librepo 1.6.0-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.3-1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
