@@ -7,6 +7,7 @@ import tempfile
 import shutil
 import gpgme
 import librepo
+import sys
 
 PUB_KEY = TEST_DATA+"/key.pub"
 
@@ -321,7 +322,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        self.assertRaises(librepo.LibrepoException, h.perform, (r))
+        with self.assertRaises(librepo.LibrepoException) as ctx:
+            h.perform(r)
+        unicode_type = unicode if sys.version_info.major < 3 else str
+        self.assertTrue(isinstance(ctx.exception.args[1], unicode_type))
         self.assertFalse(h.mirrors)
         self.assertFalse(h.metalink)
 
