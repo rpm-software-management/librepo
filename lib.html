@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Librepo Library &mdash; librepo 1.7.3-1 documentation</title>
+    <title>The Librepo Library &mdash; librepo 1.7.4-1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.7.3-1',
+        VERSION:     '1.7.4-1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="librepo 1.7.3-1 documentation" href="index.html" />
+    <link rel="top" title="librepo 1.7.4-1 documentation" href="index.html" />
     <link rel="next" title="Handle (librepo.Handle)" href="handle.html" />
     <link rel="prev" title="librepo" href="index.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="index.html" title="librepo"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.3-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.4-1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -196,7 +196,7 @@ value 1080.</p>
 <dl class="data">
 <dt id="librepo.LRO_PROXYTYPE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYTYPE</tt><a class="headerlink" href="#librepo.LRO_PROXYTYPE" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Boolean</em>. Set type of proxy - could be one of <a class="reference internal" href="#proxy-type-label"><em>Proxy type constants</em></a></p>
+<dd><p><em>Long</em>. Set type of proxy - could be one of <a class="reference internal" href="#proxy-type-label"><em>Proxy type constants</em></a></p>
 </dd></dl>
 
 <dl class="data">
@@ -438,6 +438,13 @@ of digital signatures, rooted in certification authority
 the server cert is for the server it is known as.</p>
 </dd></dl>
 
+<dl class="data">
+<dt id="librepo.LRO_IPRESOLVE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_IPRESOLVE</tt><a class="headerlink" href="#librepo.LRO_IPRESOLVE" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Integer or None</em> Sets kind of IP addresses to use when resolving host
+names. Could be one of: <a class="reference internal" href="#ipresolve-type-label"><em>Supported IP resolving</em></a></p>
+</dd></dl>
+
 </div>
 <div class="section" id="handle-info-options">
 <span id="handle-info-options-label"></span><h3><a class="reference internal" href="handle.html#librepo.Handle" title="librepo.Handle"><tt class="xref py py-class docutils literal"><span class="pre">Handle</span></tt></a> info options<a class="headerlink" href="#handle-info-options" title="Permalink to this headline">¶</a></h3>
@@ -564,6 +571,11 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_SSLVERIFYHOST</tt><a class="headerlink" href="#librepo.LRI_SSLVERIFYHOST" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="data">
+<dt id="librepo.LRI_IPRESOLVE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_IPRESOLVE</tt><a class="headerlink" href="#librepo.LRI_IPRESOLVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="proxy-type-constants">
 <span id="proxy-type-label"></span><h3>Proxy type constants<a class="headerlink" href="#proxy-type-constants" title="Permalink to this headline">¶</a></h3>
@@ -596,6 +608,28 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dt id="librepo.PROXY_SOCKS5_HOSTNAME">
 <tt class="descclassname">librepo.</tt><tt class="descname">PROXY_SOCKS5_HOSTNAME</tt><big>(</big><em>LR_PROXY_SOCKS5_HOSTNAME</em><big>)</big><a class="headerlink" href="#librepo.PROXY_SOCKS5_HOSTNAME" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="supported-ip-resolving">
+<span id="ipresolve-type-label"></span><h3>Supported IP resolving<a class="headerlink" href="#supported-ip-resolving" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="librepo.IPRESOLVE_WHATEVER">
+<tt class="descclassname">librepo.</tt><tt class="descname">IPRESOLVE_WHATEVER</tt><a class="headerlink" href="#librepo.IPRESOLVE_WHATEVER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default value, resolves addresses to all IP versions that
+your system allows.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.IPRESOLVE_V4">
+<tt class="descclassname">librepo.</tt><tt class="descname">IPRESOLVE_V4</tt><a class="headerlink" href="#librepo.IPRESOLVE_V4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve to IPv4 addresses.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.IPRESOLVE_V6">
+<tt class="descclassname">librepo.</tt><tt class="descname">IPRESOLVE_V6</tt><a class="headerlink" href="#librepo.IPRESOLVE_V6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve to IPv6 addresses.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="repo-type-constants">
@@ -1383,6 +1417,7 @@ during call.</li>
 <li><a class="reference internal" href="#handle-options"><tt class="docutils literal"><span class="pre">Handle</span></tt> options</a></li>
 <li><a class="reference internal" href="#handle-info-options"><tt class="docutils literal"><span class="pre">Handle</span></tt> info options</a></li>
 <li><a class="reference internal" href="#proxy-type-constants">Proxy type constants</a></li>
+<li><a class="reference internal" href="#supported-ip-resolving">Supported IP resolving</a></li>
 <li><a class="reference internal" href="#repo-type-constants">Repo type constants</a></li>
 <li><a class="reference internal" href="#predefined-yumdlist-lists">Predefined yumdlist lists</a></li>
 <li><a class="reference internal" href="#fastest-mirror-stages">Fastest mirror stages</a></li>
@@ -1448,7 +1483,7 @@ during call.</li>
         <li class="right" >
           <a href="index.html" title="librepo"
              >previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.3-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.4-1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
