@@ -105,7 +105,7 @@ Version contants
 
 .. data:: LRO_PROXYTYPE
 
-    *Boolean*. Set type of proxy - could be one of :ref:`proxy-type-label`
+    *Long*. Set type of proxy - could be one of :ref:`proxy-type-label`
 
 .. data:: LRO_PROXYAUTH
 
@@ -282,6 +282,11 @@ Version contants
     *Boolean*. This option determines whether librepo verifies that
     the server cert is for the server it is known as.
 
+.. data:: LRO_IPRESOLVE
+
+    *Integer or None* Sets kind of IP addresses to use when resolving host
+    names. Could be one of: :ref:`ipresolve-type-label`
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -314,6 +319,7 @@ Version contants
 .. data:: LRI_HMFCB
 .. data:: LRI_SSLVERIFYPEER
 .. data:: LRI_SSLVERIFYHOST
+.. data:: LRI_IPRESOLVE
 
 .. _proxy-type-label:
 
@@ -326,6 +332,24 @@ Proxy type constants
 .. data:: PROXY_SOCKS5 (LR_PROXY_SOCKS5)
 .. data:: PROXY_SOCKS4A (LR_PROXY_SOCKS4A)
 .. data:: PROXY_SOCKS5_HOSTNAME (LR_PROXY_SOCKS5_HOSTNAME)
+
+.. _ipresolve-type-label:
+
+Supported IP resolving
+----------------------
+
+.. data:: IPRESOLVE_WHATEVER
+
+    Default value, resolves addresses to all IP versions that
+    your system allows.
+
+.. data:: IPRESOLVE_V4
+
+    Resolve to IPv4 addresses.
+
+.. data:: IPRESOLVE_V6
+
+    Resolve to IPv6 addresses.
 
 .. _repotype-constants-label:
 
@@ -779,6 +803,7 @@ LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
 LRO_HMFCB                   = _librepo.LRO_HMFCB
 LRO_SSLVERIFYPEER           = _librepo.LRO_SSLVERIFYPEER
 LRO_SSLVERIFYHOST           = _librepo.LRO_SSLVERIFYHOST
+LRO_IPRESOLVE               = _librepo.LRO_IPRESOLVE
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -823,6 +848,7 @@ ATTR_TO_LRO = {
     "hmfcb":                LRO_HMFCB,
     "sslverifypeer":        LRO_SSLVERIFYPEER,
     "sslverifyhost":        LRO_SSLVERIFYHOST,
+    "ipresolve":            LRO_IPRESOLVE,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -849,6 +875,7 @@ LRI_FASTESTMIRRORMAXAGE = _librepo.LRI_FASTESTMIRRORMAXAGE
 LRI_HMFCB               = _librepo.LRI_HMFCB
 LRI_SSLVERIFYPEER       = _librepo.LRI_SSLVERIFYPEER
 LRI_SSLVERIFYHOST       = _librepo.LRI_SSLVERIFYHOST
+LRI_IPRESOLVE           = _librepo.LRI_IPRESOLVE
 LRI_SENTINEL            = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
@@ -876,6 +903,7 @@ ATTR_TO_LRI = {
     "hmfcb":                LRI_HMFCB,
     "sslverifypeer":        LRI_SSLVERIFYPEER,
     "sslverifyhost":        LRI_SSLVERIFYHOST,
+    "ipresolve":            LRI_IPRESOLVE,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -905,6 +933,14 @@ PROXY_SOCKS4             = _librepo.LR_PROXY_SOCKS4
 PROXY_SOCKS5             = _librepo.LR_PROXY_SOCKS5
 PROXY_SOCKS4A            = _librepo.LR_PROXY_SOCKS4A
 PROXY_SOCKS5_HOSTNAME    = _librepo.LR_PROXY_SOCKS5_HOSTNAME
+
+LR_IPRESOLVE_WHATEVER   = _librepo.LR_IPRESOLVE_WHATEVER
+LR_IPRESOLVE_V4         = _librepo.LR_IPRESOLVE_V4
+LR_IPRESOLVE_V6         = _librepo.LR_IPRESOLVE_V6
+
+IPRESOLVE_WHATEVER   = _librepo.LR_IPRESOLVE_WHATEVER
+IPRESOLVE_V4         = _librepo.LR_IPRESOLVE_V4
+IPRESOLVE_V6         = _librepo.LR_IPRESOLVE_V6
 
 LR_YUM_FULL         = None
 LR_YUM_REPOMDONLY   = [None]
@@ -1229,6 +1265,10 @@ class Handle(_librepo.Handle):
     .. attribute:: sslverifyhost:
 
         See :data:`.LRO_SSLVERIFYHOST`
+
+    .. attribute:: ipresolve:
+
+        See :data:`.LRO_IPRESOLVE`
 
     """
 

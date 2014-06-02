@@ -102,6 +102,7 @@ lr_handle_init()
     handle->lowspeedlimit = LRO_LOWSPEEDLIMIT_DEFAULT;
     handle->sslverifypeer = 1;
     handle->sslverifyhost = 2;
+    handle->ipresolve = LRO_IPRESOLVE_DEFAULT;
 
     return handle;
 }
@@ -556,6 +557,26 @@ lr_handle_setopt(LrHandle *handle,
         handle->sslverifyhost = va_arg(arg, long) ? 2 : 0;
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifyhost);
         break;
+
+    case LRO_IPRESOLVE: {
+        long type = -1;
+        long lr_type = va_arg(arg, LrIpResolveType);
+        switch (lr_type) {
+            case LR_IPRESOLVE_WHATEVER: type = CURL_IPRESOLVE_WHATEVER; break;
+            case LR_IPRESOLVE_V4:       type = CURL_IPRESOLVE_V4;       break;
+            case LR_IPRESOLVE_V6:       type = CURL_IPRESOLVE_V6;       break;
+            default: break;
+        }
+        if (type == -1) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                    "Bad LRO_IPRESOLVE value");
+            ret = FALSE;
+        } else {
+            handle->ipresolve = lr_type;
+            c_rc = curl_easy_setopt(c_h, CURLOPT_IPRESOLVE, type);
+        }
+        break;
+    }
 
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
@@ -1261,6 +1282,11 @@ lr_handle_getinfo(LrHandle *handle,
         *lnum = (long) (handle->sslverifyhost ? 1 : 0);
         break;
 
+    case LRI_IPRESOLVE: {
+        LrIpResolveType *type = va_arg(arg, LrIpResolveType *);
+        *type = (LrIpResolveType) (handle->ipresolve);
+        break;
+    }
 
     default:
         rc = FALSE;

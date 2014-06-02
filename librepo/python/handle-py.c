@@ -368,6 +368,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_FASTESTMIRRORMAXAGE:
     case LRO_LOWSPEEDTIME:
     case LRO_LOWSPEEDLIMIT:
+    case LRO_IPRESOLVE:
     {
         int badarg = 0;
         long d;
@@ -392,6 +393,9 @@ py_setopt(_HandleObject *self, PyObject *args)
                 break;
             case LRO_FASTESTMIRRORMAXAGE:
                 d = LRO_FASTESTMIRRORMAXAGE_DEFAULT;
+                break;
+            case LRO_IPRESOLVE:
+                d = LRO_IPRESOLVE_DEFAULT;
                 break;
             default:
                 badarg = 1;
@@ -835,6 +839,19 @@ py_getinfo(_HandleObject *self, PyObject *args)
             RETURN_ERROR(&tmp_err, -1, NULL);
         return PyLong_FromLong(lval);
 
+    /* LrIpResolveType* option  */
+    case LRI_IPRESOLVE: {
+        LrIpResolveType type;
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
+                                (LrHandleInfoOption)option,
+                                &type);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        return PyLong_FromLong((long) type);
+    }
+
+    /* List option */
     case LRI_VARSUB: {
         LrUrlVars *vars;
         PyObject *list;

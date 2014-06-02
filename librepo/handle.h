@@ -88,6 +88,9 @@ typedef struct _LrHandle LrHandle;
 /** LRO_LOWSPEEDLIMIT default value */
 #define LRO_LOWSPEEDLIMIT_DEFAULT           1000
 
+/** LRO_IPRESOLVE default value */
+#define LRO_IPRESOLVE_DEFAULT               LR_IPRESOLVE_WHATEVER
+
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
 
@@ -253,6 +256,9 @@ typedef enum {
         This option determines whether librepo verifies that
         the server cert is for the server it is known as. */
 
+    LRO_IPRESOLVE, /*!< (LrIpResolveType)
+        Sets what kind of IP addresses to use when resolving host names. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -304,6 +310,7 @@ typedef enum {
     LRI_HMFCB,                  /*!< (LrHandleMirrorFailureCb) */
     LRI_SSLVERIFYPEER,          /*!< (long *) */
     LRI_SSLVERIFYHOST,          /*!< (long *) */
+    LRI_IPRESOLVE,              /*!< (LrIpResolveType *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

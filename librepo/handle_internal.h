@@ -167,6 +167,9 @@ struct _LrHandle {
     long sslverifyhost; /*!<
         Determines whether the server name should be checked agains the name
         in the certificate */
+
+    LrIpResolveType ipresolve; /*!<
+        What kind of IP addresses to use when resolving host names. */
 };
 
 /** Return new CURL easy handle with some default options setted.

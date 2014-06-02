@@ -57,6 +57,13 @@ typedef enum {
     LR_PROXY_SOCKS5_HOSTNAME,   /*!< SOCKS5 proxy */
 } LrProxyType;
 
+/** IpResolve types */
+typedef enum {
+    LR_IPRESOLVE_WHATEVER,  /*!< Default - resolves addresses to all IP versions */
+    LR_IPRESOLVE_V4,        /*!< Resolve to IPv4 addresses */
+    LR_IPRESOLVE_V6,        /*!< Resolve to IPv6 addresses */
+} LrIpResolveType;
+
 /* Some common used arrays for LRO_YUMDLIST */
 
 /** Predefined value for LRO_YUMDLIST option - Download whole repo. */

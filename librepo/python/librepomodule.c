@@ -264,6 +264,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_HMFCB", LRO_HMFCB);
     PyModule_AddIntConstant(m, "LRO_SSLVERIFYPEER", LRO_SSLVERIFYPEER);
     PyModule_AddIntConstant(m, "LRO_SSLVERIFYHOST", LRO_SSLVERIFYHOST);
+    PyModule_AddIntConstant(m, "LRO_IPRESOLVE", LRO_IPRESOLVE);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
     // Handle info options
@@ -291,6 +292,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_HMFCB", LRI_HMFCB);
     PyModule_AddIntConstant(m, "LRI_SSLVERIFYPEER", LRI_SSLVERIFYPEER);
     PyModule_AddIntConstant(m, "LRI_SSLVERIFYHOST", LRI_SSLVERIFYHOST);
+    PyModule_AddIntConstant(m, "LRI_IPRESOLVE", LRI_IPRESOLVE);
     PyModule_AddIntConstant(m, "LRI_SENTINEL", LRI_SENTINEL);
 
     // Check options
@@ -309,6 +311,11 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LR_PROXY_SOCKS5", LR_PROXY_SOCKS5);
     PyModule_AddIntConstant(m, "LR_PROXY_SOCKS4A", LR_PROXY_SOCKS4A);
     PyModule_AddIntConstant(m, "LR_PROXY_SOCKS5_HOSTNAME", LR_PROXY_SOCKS5_HOSTNAME);
+
+    // IpResolve type
+    PyModule_AddIntConstant(m, "LR_IPRESOLVE_WHATEVER", LR_IPRESOLVE_WHATEVER);
+    PyModule_AddIntConstant(m, "LR_IPRESOLVE_V4", LR_IPRESOLVE_V4);
+    PyModule_AddIntConstant(m, "LR_IPRESOLVE_V6", LR_IPRESOLVE_V6);
 
     // Return codes
     PyModule_AddIntConstant(m, "LRE_OK", LRE_OK);
