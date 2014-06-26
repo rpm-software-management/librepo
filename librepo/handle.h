@@ -80,7 +80,7 @@ typedef struct _LrHandle LrHandle;
 #define LRO_LOWSPEEDTIME_MIN                0
 
 /** LRO_LOWSPEEDTIME default value */
-#define LRO_LOWSPEEDTIME_DEFAULT            10
+#define LRO_LOWSPEEDTIME_DEFAULT            30
 
 /** LRO_LOWSPEEDLIMIT minimal allowed value */
 #define LRO_LOWSPEEDLIMIT_MIN               0

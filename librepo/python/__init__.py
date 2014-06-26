@@ -226,7 +226,7 @@ Version contants
 
     *Integer or None*. The time in seconds that the transfer should be below
     the LRO_LOWSPEEDLIMIT for the library to consider it too slow and abort.
-    Default: 10 (sec)
+    Default: 30 (sec)
 
 .. data:: LRO_LOWSPEEDLIMIT
 
