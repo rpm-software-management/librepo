@@ -29,5 +29,6 @@ PyObject *PyStringOrNone_FromString(const char *str);
 PyObject *PyObject_FromYumRepo(LrYumRepo *repo);
 PyObject *PyObject_FromYumRepoMd(LrYumRepoMd *repomd);
 PyObject *PyObject_FromMetalink(LrMetalink *metalink);
+char *PyAnyStr_AsString(PyObject *str, PyObject **tmp_py_str);
 
 #endif
