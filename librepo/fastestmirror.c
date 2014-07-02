@@ -45,13 +45,6 @@
 #define CACHE_RECORD_MAX_AGE    (LRO_FASTESTMIRRORMAXAGE_DEFAULT * 6)
 
 typedef struct {
-    gchar *url;                 // Points to string passed by the user
-    CURL *curl;                 // Curl handle or NULL
-    double plain_connect_time;  // Mirror connect time
-    gboolean cached;            // Was connect time load from cache?
-} LrFastestMirror;
-
-typedef struct {
     gchar *path;
     GKeyFile *keyfile;
 } LrFastestMirrorCache;
@@ -65,7 +58,7 @@ lr_lrfastestmirror_new()
     return mirror;
 }
 
-static void
+void
 lr_lrfastestmirror_free(LrFastestMirror *mirror)
 {
     if (!mirror)
@@ -549,10 +542,28 @@ null_cb(G_GNUC_UNUSED void *clientp,
     return;
 }
 
+
+static gint
+cmp_fastestmirrors(gconstpointer a,
+                   gconstpointer b)
+{
+    const LrFastestMirror *a_mirror = a;
+    const LrFastestMirror *b_mirror = b;
+
+    if (a_mirror->plain_connect_time < b_mirror->plain_connect_time)
+        return -1;
+    else if (a_mirror->plain_connect_time == b_mirror->plain_connect_time)
+        return 0;
+    else
+        return 1;
+}
+
+
 gboolean
-lr_fastestmirror(LrHandle *handle,
-                 GSList **list,
-                 GError **err)
+lr_fastestmirror_detailed(LrHandle *handle,
+                          GSList *inlist,
+                          GSList **outlist,
+                          GError **err)
 {
     assert(!err || *err == NULL);
 
@@ -570,7 +581,7 @@ lr_fastestmirror(LrHandle *handle,
     g_debug("%s: Fastest mirror determination in progress...", __func__);
     cb(cbdata, LR_FMSTAGE_INIT, NULL);
 
-    if (!list || *list == NULL) {
+    if (!inlist) {
         cb(cbdata, LR_FMSTAGE_STATUS, NULL);
         return TRUE;
     }
@@ -590,7 +601,7 @@ lr_fastestmirror(LrHandle *handle,
 
     // Prepare list of LrFastestMirror elements
     GSList *lrfastestmirrors;
-    ret = lr_fastestmirror_prepare(handle, *list, &lrfastestmirrors, cache, err);
+    ret = lr_fastestmirror_prepare(handle, inlist, &lrfastestmirrors, cache, err);
     if (!ret) {
         cb(cbdata, LR_FMSTAGE_STATUS, "Error while lr_fastestmirror_prepare()");
         g_debug("%s: Error while lr_fastestmirror_prepare()", __func__);
@@ -611,44 +622,59 @@ lr_fastestmirror(LrHandle *handle,
     cb(cbdata, LR_FMSTAGE_FINISHING, NULL);
 
     // Sort the mirrors by the connection time
+    lrfastestmirrors = g_slist_sort(lrfastestmirrors, cmp_fastestmirrors);
+
+    // Update cache
     gint64 ts = g_get_real_time() / 1000000; // TimeStamp
-    GSList *new_list = NULL;
-    while (lrfastestmirrors) {
-        LrFastestMirror *mirror = lrfastestmirrors->data;
-        double min_value = mirror->plain_connect_time;
-
-        for (GSList *m=g_slist_next(lrfastestmirrors); m; m=g_slist_next(m)) {
-            LrFastestMirror *current_mirror = m->data;
-            if (current_mirror->plain_connect_time < min_value) {
-                min_value = current_mirror->plain_connect_time;
-                mirror = current_mirror;
-            }
-        }
-
-        g_debug("%s: %3.6f : %s", __func__, min_value, mirror->url);
-        new_list = g_slist_append(new_list, mirror->url);
-        lrfastestmirrors = g_slist_remove(lrfastestmirrors, mirror);
-
-        // Update cache
+    for (GSList *elem = lrfastestmirrors; elem; elem = g_slist_next(elem)) {
+        LrFastestMirror *mirror = elem->data;
         if (mirror->cached == FALSE) {
             lr_fastestmirrorcache_update(cache,
                                          mirror->url,
                                          ts,
                                          mirror->plain_connect_time);
         }
-
-        lr_lrfastestmirror_free(mirror);
     }
 
-    assert(!lrfastestmirrors);
-    g_slist_free(*list);
-    *list = new_list;
-
     lr_fastestmirrorcache_write(cache, NULL);
-
     lr_fastestmirrorcache_free(cache);
 
+    *outlist = lrfastestmirrors;
+
     cb(cbdata, LR_FMSTAGE_STATUS, NULL);
+
+    return TRUE;
+}
+
+
+gboolean
+lr_fastestmirror(LrHandle *handle,
+                 GSList **list,
+                 GError **err)
+{
+    GSList *lrfastestmirrors = NULL;
+    GSList *new_list = NULL;
+
+    assert(!err || *err == NULL);
+
+    // Prepare list of LrFastestMirror elements
+    gboolean ret = lr_fastestmirror_detailed(handle, *list, &lrfastestmirrors, err);
+    if (!ret) {
+        g_slist_free_full(lrfastestmirrors,
+                          (GDestroyNotify)lr_lrfastestmirror_free);
+        return FALSE;
+    }
+
+    // Sort the mirrors by the connection time
+    for (GSList *elem = lrfastestmirrors; elem; elem = g_slist_next(elem)) {
+        LrFastestMirror *mirror = elem->data;
+        g_debug("%s: %3.6f : %s", __func__, mirror->plain_connect_time, mirror->url);
+        new_list = g_slist_append(new_list, mirror->url);
+    }
+
+    g_slist_free_full(lrfastestmirrors, (GDestroyNotify)lr_lrfastestmirror_free);
+    g_slist_free(*list);
+    *list = new_list;
 
     return TRUE;
 }

@@ -22,6 +22,7 @@
 #define LR_FASTESTMIRROR_H
 
 #include <glib.h>
+#include <curl/curl.h>
 
 #include "url_substitution.h"
 #include "mirrorlist.h"
@@ -30,15 +31,46 @@
 
 G_BEGIN_DECLS
 
-/** Sorts list or mirror URLs by its the connections times.
+typedef struct {
+    gchar *url;                 // Points to string passed by the user
+    CURL *curl;                 // Curl handle or NULL
+    double plain_connect_time;  // Mirror connect time
+    gboolean cached;            // Was connect time load from cache?
+} LrFastestMirror;
+
+
+/** Free LrFastestMirror
+ */
+void
+lr_lrfastestmirror_free(LrFastestMirror *mirror);
+
+
+/** Sorts list or mirror URLs by their connections times.
  * @param handle        LrHandle or NULL
  * @param list          Pointer to the GSList of urls (char* or gchar*)
  *                      that will be sorted.
  * @param err           GError **
- * @return              TRUE if everything is ok, FALSE is err is set.
+ * @return              TRUE if everything is ok, FALSE if the err is set.
  */
 gboolean
 lr_fastestmirror(LrHandle *handle, GSList **list, GError **err);
+
+
+/** For list of URLs create a sorted list of LrFastestMirrors
+ * Note: url strings in outlist poins to the strings from inlist!
+ * @param handle        LrHandle or NULL
+ * @param inlist        GSList of urls (char* or gchar*), this list
+ *                      stays unchanged
+ * @param outlist       GSList of LrFastestMirror*
+ * @param err           GError **
+ * @return              TRUE if everything is ok, FLASE if the err is set
+ */
+gboolean
+lr_fastestmirror_detailed(LrHandle *handle,
+                          GSList *inlist,
+                          GSList **outlist,
+                          GError **err);
+
 
 G_END_DECLS
 
