@@ -515,15 +515,18 @@ lr_fastestmirror_perform(GSList *list,
             // Get connect time
             double namelookup_time;
             double connect_time;
+            double plain_connect_time;
             curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME, &namelookup_time);
             curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &connect_time);
 
             if (connect_time == 0.0) {
                 // Zero connect time is most likely an error
-                connect_time = DBL_MAX;
+                plain_connect_time = DBL_MAX;
+            } else {
+                plain_connect_time = connect_time - namelookup_time;
             }
 
-            mirror->plain_connect_time = connect_time;
+            mirror->plain_connect_time = plain_connect_time;
             //g_debug("%s: name_lookup: %3.6f connect_time:  %3.6f (%3.6f) | %s",
             //        __func__, namelookup_time, connect_time,
             //        mirror->plain_connect_time, mirror->url);
