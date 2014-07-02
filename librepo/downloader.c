@@ -241,21 +241,22 @@ lr_prepare_lrmirrors(GSList *list, LrHandle *handle, LrTarget **target)
 
     GSList *lrmirrors = NULL;
 
-    g_debug("%s: Preparing list for handle id: %p", __func__, handle);
+    if (handle && handle->internal_mirrorlist) {
+        g_debug("%s: Preparing internal mirror list for handle id: %p", __func__, handle);
+        for (GSList *elem = handle->internal_mirrorlist;
+             elem;
+             elem = g_slist_next(elem))
+        {
+            LrInternalMirror *imirror = elem->data;
 
-    for (GSList *elem = (handle) ? handle->internal_mirrorlist: NULL;
-         elem;
-         elem = g_slist_next(elem))
-    {
-        LrInternalMirror *imirror = elem->data;
+            assert(imirror);
+            assert(imirror->url);
+            g_debug("%s: Mirror: %s", __func__, imirror->url);
 
-        assert(imirror);
-        assert(imirror->url);
-        g_debug("%s: Mirror: %s", __func__, imirror->url);
-
-        LrMirror *mirror = lr_malloc0(sizeof(*mirror));
-        mirror->mirror = imirror;
-        lrmirrors = g_slist_append(lrmirrors, mirror);
+            LrMirror *mirror = lr_malloc0(sizeof(*mirror));
+            mirror->mirror = imirror;
+            lrmirrors = g_slist_append(lrmirrors, mirror);
+        }
     }
 
     LrHandleMirrors *handle_mirrors = lr_malloc0(sizeof(*handle_mirrors));
