@@ -268,14 +268,18 @@ packagetarget_init(_PackageTargetObject *self,
     LrMirrorFailureCb mirrorfailurecb = NULL;
     LrHandle *handle = NULL;
     GError *tmp_err = NULL;
+    PyObject *py_dest = NULL;
+    PyObject *tmp_py_str = NULL;
 
-    if (!PyArg_ParseTuple(args, "OszizLziOOOOLL:packagetarget_init",
-                          &pyhandle, &relative_url, &dest, &checksum_type,
+    if (!PyArg_ParseTuple(args, "OsOizLziOOOOLL:packagetarget_init",
+                          &pyhandle, &relative_url, &py_dest, &checksum_type,
                           &checksum, &expectedsize, &base_url, &resume,
                           &py_progresscb, &py_cbdata, &py_endcb,
                           &py_mirrorfailurecb, &byterangestart,
                           &byterangeend))
         return -1;
+
+    dest = PyAnyStr_AsString(py_dest, &tmp_py_str);
 
     if (pyhandle != Py_None) {
         handle = Handle_FromPyObject(pyhandle);
@@ -337,6 +341,7 @@ packagetarget_init(_PackageTargetObject *self,
                                            (gint64) byterangestart,
                                            (gint64) byterangeend,
                                            &tmp_err);
+    Py_XDECREF(tmp_py_str);
 
     if (self->target == NULL) {
         PyErr_Format(LrErr_Exception,

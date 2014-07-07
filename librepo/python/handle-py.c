@@ -300,7 +300,7 @@ py_setopt(_HandleObject *self, PyObject *args)
         char *str = NULL, *alloced = NULL;
 
         if (PyUnicode_Check(obj)) {
-            PyObject *bytes = PyUnicode_AsLatin1String(obj);
+            PyObject *bytes = PyUnicode_AsUTF8String(obj);
             if (!bytes) return NULL;
             str = alloced = g_strdup(PyBytes_AsString(bytes));
             Py_XDECREF(bytes);
@@ -525,7 +525,7 @@ py_setopt(_HandleObject *self, PyObject *args)
             PyObject *item = PyList_GetItem(obj, x);
 
             if (PyUnicode_Check(item)) {
-                PyObject *bytes = PyUnicode_AsLatin1String(item);
+                PyObject *bytes = PyUnicode_AsUTF8String(item);
                 if (!bytes) {
                     g_ptr_array_free(ptrarray, TRUE);
                     g_string_chunk_free(chunk);
@@ -604,7 +604,7 @@ py_setopt(_HandleObject *self, PyObject *args)
                 var = PyBytes_AsString(tuple_item);
             } else {
                 // PyUnicode
-                PyObject *bytes = PyUnicode_AsLatin1String(tuple_item);
+                PyObject *bytes = PyUnicode_AsUTF8String(tuple_item);
                 if (!bytes) {
                     lr_urlvars_free(vars);
                     g_string_chunk_free(chunk);
@@ -625,7 +625,7 @@ py_setopt(_HandleObject *self, PyObject *args)
                 val = PyBytes_AsString(tuple_item);
             } else {
                 // PyUnicode
-                PyObject *bytes = PyUnicode_AsLatin1String(tuple_item);
+                PyObject *bytes = PyUnicode_AsUTF8String(tuple_item);
                 if (!bytes) {
                     lr_urlvars_free(vars);
                     g_string_chunk_free(chunk);
