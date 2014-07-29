@@ -191,20 +191,20 @@ typedef struct {
  *                                   |                         |
  *   /------------------------------/                          |
  *  |                                                          |
- *  |   /------------------------------------------------------/
- *  |  |
- *  |  |       +---------------------------+
- *  |  |       |         LrMirror          |
- *  |  |     +---------------------------+-|
- *  |  |     |         LrMirror          | |
- *  |  |   +---------------------------+-| |
- *  |   \->|         LrMirror          | | |
+ *  |                         /--------------------------------/
+ *  |                        \/
+ *  |          +---------------------------+
+ *  |          |         LrMirror          |
+ *  |        +---------------------------+-|
+ *  |        |         LrMirror          | |
+ *  |      +---------------------------+-| |
+ *  |      |         LrMirror          | | |
  *  |      +---------------------------+ | |    +---------------------+
  *  |      | LrInternalMirror *mirror --------->|   LrInternalMirror  |
- *  |      | int running_transfers     | |   /->+---------------------+
- *  |      | int successfull_transfers |-+   |  | char *url           |
- *  |      | int failed_transfers      |     |  | int preference      |
- *  |      +---------------------------+     |  | int fails           |
+ *  |      | int running_transfers     | |      +---------------------+
+ *  |      | int successfull_transfers |-+      | char *url           |
+ *  |      | int failed_transfers      |<---\   | int preference      |
+ *  |      +---------------------------+     |  | LrProtocol protocol |
  *  |                                        |  +---------------------+
  *  |                                        |
  *  |        +----------------------------+  |
@@ -227,6 +227,14 @@ typedef struct {
  *      Points to list of LrMirrors <---/          +--------------------------+
  */
 
+
+/** Create GSList of LrMirrors (if it doesn't exist) for a handle.
+ * If the list already exists (if more targets use the same handle)
+ * then just set the list to the current target.
+ * If the list doesn't exist yet, create it then create a mapping between
+ * the list and the handle (LrHandleMirrors) and set the list to
+ * the current target.
+ */
 static GSList *
 lr_prepare_lrmirrors(GSList *list, LrHandle *handle, LrTarget **target)
 {
@@ -269,6 +277,10 @@ lr_prepare_lrmirrors(GSList *list, LrHandle *handle, LrTarget **target)
     return list;
 }
 
+
+/** Progress callback for CURL handles.
+ * progress callback set by the user of librepo.
+ */
 static int
 lr_progresscb(void *ptr,
               double total_to_download,
@@ -298,6 +310,13 @@ lr_progresscb(void *ptr,
 
 #define STRLEN(s) (sizeof(s)/sizeof(s[0]) - 1)
 
+
+/** Header callback for CURL handles.
+ * It parses HTTP and FTP headers and try to find length of the content
+ * (file size of the target). If the size is different then the expected
+ * size, then the transfer is interrupted.
+ * This callback is used only if the expected size is specified.
+ */
 static size_t
 lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -390,6 +409,11 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     return ret;
 }
 
+
+/** Write callback for CURL handles.
+ * This callback handles situation when an user wants only specified
+ * byte range of the target file.
+ */
 size_t
 lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -478,6 +502,9 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     return cur_written_expected;
 }
 
+
+/** Prepares next transfer
+ */
 static gboolean
 prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 {
