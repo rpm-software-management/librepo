@@ -518,6 +518,7 @@ select_suitable_mirror(LrDownload *dd,
 
     *selected_mirror = NULL;
 
+    // Iterate over mirror for the target
     for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
         LrMirror *c_mirror = elem->data;
 
@@ -600,11 +601,6 @@ select_next_target(LrDownload *dd,
                    char **selected_full_url,
                    GError **err)
 {
-    LrTarget *target;
-    char *full_url = NULL;
-    GSList *elem = dd->targets;
-    int complete_url_in_path = 0;
-
     assert(dd);
     assert(selected_target);
     assert(selected_full_url);
@@ -613,25 +609,20 @@ select_next_target(LrDownload *dd,
     *selected_target = NULL;
     *selected_full_url = NULL;
 
-    while (1) {
+    for (GSList *elem = dd->targets; elem; elem = g_slist_next(elem)) {
+        LrTarget *target = elem->data;
+        LrMirror *mirror = NULL;
+        char *full_url = NULL;
+        int complete_url_in_path = 0;
 
-        target = NULL;
-
-        // Select a waiting target
-        for (; elem; elem = g_slist_next(elem)) {
-            LrTarget *c_target = elem->data;
-            if (c_target->state == LR_DS_WAITING) {
-                target = c_target;
-                elem = g_slist_next(elem);
-                break;
-            }
-        }
-
-        if (!target)  // No target is waiting
-            return TRUE;
+        if (target->state != LR_DS_WAITING)  // Pick only waiting targets
+            continue;
 
         // Determine if path is a complete URL
+
         complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
+
+        // Sanity check
 
         if (!target->target->baseurl
             && !target->lrmirrors
@@ -647,25 +638,18 @@ select_next_target(LrDownload *dd,
 
         g_debug("%s: Selecting mirror for: %s", __func__, target->target->path);
 
-        // Prepare target URL
+        // Prepare full target URL
+
         if (complete_url_in_path) {
-            //
             // Path is a complete URL (do not use mirror nor base URL)
-            //
             full_url = g_strdup(target->target->path);
         } else if (target->target->baseurl) {
-            //
             // Base URL is specified
-            //
             full_url = lr_pathconcat(target->target->baseurl,
                                      target->target->path,
                                      NULL);
         } else {
-            //
             // Find a suitable mirror
-            //
-            LrMirror *mirror = NULL;
-
             if (!select_suitable_mirror(dd, target, &mirror , err))
                 return FALSE;
 
@@ -674,31 +658,24 @@ select_next_target(LrDownload *dd,
                 full_url = lr_pathconcat(mirror->mirror->url,
                                          target->target->path,
                                          NULL);
-
-                // Set mirror for the target
-                target->mirror = mirror;  // Note: mirror is NULL if baseurl is used
+            } else {
+                // No free mirror
+                g_debug("%s: Currently there is no free mirror for: %s",
+                        __func__, target->target->path);
             }
         }
 
-        if (full_url) {
-            // A waiting transfer found
-            break;
+        if (full_url) {  // A waiting target found
+            target->mirror = mirror;  // Note: mirror is NULL if baseurl is used
+
+            *selected_target = target;
+            *selected_full_url = full_url;
+
+            return TRUE;
         }
+    }
 
-        // No free mirror
-        g_debug("%s: Currently there is no free mirror for: %s",
-                __func__, target->target->path);
-
-    } // End while(1)
-
-    if (!full_url)  // Nothing to do
-        return TRUE;
-
-
-    // Return values
-    *selected_target = target;
-    *selected_full_url = full_url;
-
+    // No suitable target found
     return TRUE;
 }
 
