@@ -503,6 +503,95 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 }
 
 
+/** Select a suitable mirror
+ */
+static gboolean
+select_suitable_mirror(LrDownload *dd,
+                       LrTarget *target,
+                       LrMirror **selected_mirror,
+                       GError **err)
+{
+    LrMirror *mirror = NULL;
+    int at_least_one_suitable_mirror_found = 0;
+    //  ^^^ This variable is used to indentify that all possible mirrors
+    // were already tried and the transfer shoud be marked as failed.
+
+    *selected_mirror = NULL;
+
+    for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
+        LrMirror *c_mirror = elem->data;
+
+        if (g_slist_find(target->tried_mirrors, c_mirror)) {
+            // This mirror was already tried for this target
+            continue;
+        }
+
+        if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
+            // Skip rsync mirrors
+            g_debug("%s: Skipping rsync url: %s", __func__,
+                    c_mirror->mirror->url);
+            continue;
+        }
+
+        at_least_one_suitable_mirror_found = 1;
+
+        // Number of transfers which are downloading from the mirror
+        // should always be lower or equal than maximum allowed number
+        // of connection to a single host.
+        assert(dd->max_connection_per_host == -1 ||
+               c_mirror->running_transfers <= dd->max_connection_per_host);
+
+        if (dd->max_connection_per_host == -1 ||
+            c_mirror->running_transfers < dd->max_connection_per_host)
+        {
+            // Use this mirror
+            mirror = c_mirror;
+            break;
+        }
+    }
+
+    if (mirror) {
+        // Suitable (untried and with available capacity) mirror found
+        *selected_mirror = mirror;
+    } else if (!at_least_one_suitable_mirror_found) {
+        // No suitable mirror even exists => Set transfer as failed
+        g_debug("%s: All mirrors were tried without success", __func__);
+        target->state = LR_DS_FAILED;
+
+        lr_downloadtarget_set_error(target->target, LRE_NOURL,
+                    "Cannot download, all mirrors were already tried "
+                    "without success");
+
+
+        // Call end callback
+        LrEndCb end_cb =  target->target->endcb;
+        if (end_cb) {
+            int ret = end_cb(target->target->cbdata,
+                             LR_TRANSFER_ERROR,
+                             "No more mirrors to try - All mirrors "
+                             "were already tried without success");
+            if (ret == LR_CB_ERROR) {
+                target->cb_return_code = LR_CB_ERROR;
+                g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                        "from end callback", __func__);
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
+                        "Interupted by LR_CB_ERROR from end callback");
+                return FALSE;
+            }
+        }
+
+        if (dd->failfast) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+                        "Cannot download %s: All mirrors were tried",
+                        target->target->path);
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+
 /** Select next target
  */
 static gboolean
@@ -512,7 +601,6 @@ select_next_target(LrDownload *dd,
                    GError **err)
 {
     LrTarget *target;
-    LrMirror *mirror = NULL;
     char *full_url = NULL;
     GSList *elem = dd->targets;
     int complete_url_in_path = 0;
@@ -576,81 +664,19 @@ select_next_target(LrDownload *dd,
             //
             // Find a suitable mirror
             //
+            LrMirror *mirror = NULL;
 
-            int at_least_one_suitable_mirror_found = 0;
-            //  ^^^ This variable is used to indentify that all possible mirrors
-            // were already tried and the transfer shoud be marked as failed.
-
-            for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
-                LrMirror *c_mirror = elem->data;
-
-                if (g_slist_find(target->tried_mirrors, c_mirror)) {
-                    // This mirror was already tried for this target
-                    continue;
-                }
-
-                if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
-                    // Skip rsync mirrors
-                    g_debug("%s: Skipping rsync url: %s", __func__,
-                            c_mirror->mirror->url);
-                    continue;
-                }
-
-                at_least_one_suitable_mirror_found = 1;
-
-                // Number of transfers which are downloading from the mirror
-                // should always be lower or equal than maximum allowed number
-                // of connection to a single host.
-                assert(dd->max_connection_per_host == -1 ||
-                       c_mirror->running_transfers <= dd->max_connection_per_host);
-
-                if (dd->max_connection_per_host == -1 ||
-                    c_mirror->running_transfers < dd->max_connection_per_host)
-                {
-                    // Use this mirror
-                    mirror = c_mirror;
-                    break;
-                }
-            }
+            if (!select_suitable_mirror(dd, target, &mirror , err))
+                return FALSE;
 
             if (mirror) {
-                // Suitable (untried and with available capacity) mirror found
+                // A mirror was found
                 full_url = lr_pathconcat(mirror->mirror->url,
                                          target->target->path,
                                          NULL);
-            } else if (!at_least_one_suitable_mirror_found) {
-                // No suitable mirror even exists => Set transfer as failed
-                g_debug("%s: All mirrors were tried without success", __func__);
-                target->state = LR_DS_FAILED;
 
-                lr_downloadtarget_set_error(target->target, LRE_NOURL,
-                            "Cannot download, all mirrors were already tried "
-                            "without success");
-
-
-                // Call end callback
-                LrEndCb end_cb =  target->target->endcb;
-                if (end_cb) {
-                    int ret = end_cb(target->target->cbdata,
-                                     LR_TRANSFER_ERROR,
-                                     "No more mirrors to try - All mirrors "
-                                     "were already tried without success");
-                    if (ret == LR_CB_ERROR) {
-                        target->cb_return_code = LR_CB_ERROR;
-                        g_debug("%s: Downloading was aborted by LR_CB_ERROR "
-                                "from end callback", __func__);
-                        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
-                                "Interupted by LR_CB_ERROR from end callback");
-                        return FALSE;
-                    }
-                }
-
-                if (dd->failfast) {
-                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
-                                "Cannot download %s: All mirrors were tried",
-                                target->target->path);
-                    return FALSE;
-                }
+                // Set mirror for the target
+                target->mirror = mirror;  // Note: mirror is NULL if baseurl is used
             }
         }
 
@@ -668,8 +694,6 @@ select_next_target(LrDownload *dd,
     if (!full_url)  // Nothing to do
         return TRUE;
 
-    // Set mirror for the target
-    target->mirror = mirror;  // mirror could be NULL if baseurl is used
 
     // Return values
     *selected_target = target;
