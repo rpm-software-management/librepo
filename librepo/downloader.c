@@ -545,16 +545,13 @@ select_suitable_mirror(LrDownload *dd,
         if (dd->max_connection_per_host == -1 ||
             c_mirror->running_transfers < dd->max_connection_per_host)
         {
-            // Use this mirror
+            // Suitable (untried and with available capacity) mirror found
             mirror = c_mirror;
             break;
         }
     }
 
-    if (mirror) {
-        // Suitable (untried and with available capacity) mirror found
-        *selected_mirror = mirror;
-    } else if (!at_least_one_suitable_mirror_found) {
+    if (!at_least_one_suitable_mirror_found) {
         // No suitable mirror even exists => Set transfer as failed
         g_debug("%s: All mirrors were tried without success", __func__);
         target->state = LR_DS_FAILED;
@@ -589,6 +586,7 @@ select_suitable_mirror(LrDownload *dd,
         }
     }
 
+    *selected_mirror = mirror;
     return TRUE;
 }
 
