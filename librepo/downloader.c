@@ -516,6 +516,11 @@ select_suitable_mirror(LrDownload *dd,
     //  ^^^ This variable is used to indentify that all possible mirrors
     // were already tried and the transfer shoud be marked as failed.
 
+    assert(dd);
+    assert(target);
+    assert(selected_mirror);
+    assert(!err || *err == NULL);
+
     *selected_mirror = NULL;
 
     // Iterate over mirror for the target
@@ -861,6 +866,8 @@ set_max_speeds_to_transfers(LrDownload *dd, GError **err)
     guint length;
     gint64 single_target_speed;
 
+    assert(!err || *err == NULL);
+
     if (!dd->max_speed)  // Nothing to do
         return TRUE;
 
@@ -894,6 +901,8 @@ prepare_next_transfers(LrDownload *dd, GError **err)
     guint length = g_slist_length(dd->running_transfers);
     guint free_slots = dd->max_parallel_connections - length;
 
+    assert(!err || *err == NULL);
+
     gboolean candidatefound = TRUE;
     while (free_slots > 0 && candidatefound) {
         gboolean ret = prepare_next_transfer(dd, &candidatefound, err);
@@ -906,6 +915,118 @@ prepare_next_transfers(LrDownload *dd, GError **err)
     if (dd->max_speed)
         if (!set_max_speeds_to_transfers(dd, err))
             return FALSE;
+
+    return TRUE;
+}
+
+
+/** Check the finished transfer
+ * Evaluate CURL return code and status code of protocol if needed.
+ */
+static gboolean
+check_finished_transfer(CURLMsg *msg,
+                        LrTarget *target,
+                        gboolean *fatal_error,
+                        GError **transfer_err,
+                        GError **err)
+{
+    long code = 0;
+    char *effective_url = NULL;
+
+    assert(msg);
+    assert(target);
+    assert(!transfer_err || *transfer_err == NULL);
+    assert(!err || *err == NULL);
+
+    *fatal_error = FALSE;
+
+    curl_easy_getinfo(msg->easy_handle,
+                      CURLINFO_EFFECTIVE_URL,
+                      &effective_url);
+
+    if (msg->data.result != CURLE_OK) {
+        // There was an error that is reported by CURLcode
+
+        if (msg->data.result == CURLE_WRITE_ERROR &&
+            target->writecb_required_range_written)
+        {
+            // Download was interrupted by writecb because
+            // user want only specified byte range of the
+            // target and the range was already downloaded
+            g_debug("%s: Transfer was interrupted by writecb() "
+                    "because the required range "
+                    "(%"G_GINT64_FORMAT"-%"G_GINT64_FORMAT") "
+                    "was downloaded.", __func__,
+                    target->target->byterangestart,
+                    target->target->byterangeend);
+        } else if (target->headercb_state == LR_HCS_INTERRUPTED) {
+            // Download was interrupted by header callback
+            g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
+                        "Interrupted by header callback: %s",
+                        target->headercb_interrupt_reason);
+        } else {
+            // There was a CURL error
+            g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
+                        "Curl error: %s for %s",
+                        curl_easy_strerror(msg->data.result),
+                        effective_url);
+
+            switch (msg->data.result) {
+            case CURLE_NOT_BUILT_IN:
+            case CURLE_COULDNT_RESOLVE_PROXY:
+            case CURLE_WRITE_ERROR:
+            case CURLE_OUT_OF_MEMORY:
+            case CURLE_ABORTED_BY_CALLBACK:
+            case CURLE_BAD_FUNCTION_ARGUMENT:
+            case CURLE_INTERFACE_FAILED:
+            case CURLE_SEND_ERROR:
+            case CURLE_RECV_ERROR:
+            case CURLE_FILESIZE_EXCEEDED:
+            case CURLE_CONV_REQD:
+            case CURLE_SSL_CACERT_BADFILE:
+            case CURLE_SSL_CRL_BADFILE:
+                // Fatal error
+                g_debug("%s: Fatal error - Curl code %d: %s",
+                        __func__, msg->data.result,
+                        curl_easy_strerror(msg->data.result));
+                *fatal_error = TRUE;
+            default:
+                // Other error are not considered fatal
+                break;
+            }
+        }
+
+        return TRUE;
+    }
+
+    // curl return code is CURLE_OK but we need to check status code
+    curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
+    if (code) {
+        // Check status codes for some protocols
+        if (effective_url && g_str_has_prefix(effective_url, "http")) {
+            // Check HTTP(S) code
+            if (code/100 != 2) {
+                g_set_error(transfer_err,
+                            LR_DOWNLOADER_ERROR,
+                            LRE_BADSTATUS,
+                            "Status code: %ld for %s", code, effective_url);
+            }
+        } else if (effective_url) {
+            // Check FTP
+            if (code/100 != 2) {
+                g_set_error(transfer_err,
+                            LR_DOWNLOADER_ERROR,
+                            LRE_BADSTATUS,
+                            "Status code: %ld for %s", code, effective_url);
+            }
+        } else {
+            // Other protocols
+            g_set_error(transfer_err,
+                        LR_DOWNLOADER_ERROR,
+                        LRE_BADSTATUS,
+                        "Status code: %ld for %s", code, effective_url);
+        }
+    }
 
     return TRUE;
 }
@@ -924,6 +1045,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         LrTarget *target = NULL;
         char *effective_url = NULL;
         GError *tmp_err = NULL;
+        gboolean ret;
         gboolean fatal_error = FALSE;
 
         if (msg->msg != CURLMSG_DONE) {
@@ -954,88 +1076,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 __func__, target->target->path, effective_url);
 
         // Check status of finished transfer
-        if (msg->data.result != CURLE_OK) {
-            // There was an error that is reported by CURLcode
-
-            if (msg->data.result == CURLE_WRITE_ERROR &&
-                target->writecb_required_range_written)
-            {
-                // Download was interrupted by writecb because
-                // user want only specified byte range of the
-                // target and the range was already downloaded
-                g_debug("%s: Transfer was interrupted by writecb() "
-                        "because the required range "
-                        "(%"G_GINT64_FORMAT"-%"G_GINT64_FORMAT") "
-                        "was downloaded.", __func__,
-                        target->target->byterangestart,
-                        target->target->byterangeend);
-            } else if (target->headercb_state == LR_HCS_INTERRUPTED) {
-                // Download was interrupted by header callback
-                g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                            "Interrupted by header callback: %s",
-                            target->headercb_interrupt_reason);
-            } else {
-                g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                            "Curl error: %s for %s",
-                            curl_easy_strerror(msg->data.result),
-                            effective_url);
-
-                switch (msg->data.result) {
-                case CURLE_NOT_BUILT_IN:
-                case CURLE_COULDNT_RESOLVE_PROXY:
-                case CURLE_WRITE_ERROR:
-                case CURLE_OUT_OF_MEMORY:
-                case CURLE_ABORTED_BY_CALLBACK:
-                case CURLE_BAD_FUNCTION_ARGUMENT:
-                case CURLE_INTERFACE_FAILED:
-                case CURLE_SEND_ERROR:
-                case CURLE_RECV_ERROR:
-                case CURLE_FILESIZE_EXCEEDED:
-                case CURLE_CONV_REQD:
-                case CURLE_SSL_CACERT_BADFILE:
-                case CURLE_SSL_CRL_BADFILE:
-                    g_debug("%s: Fatal error - Curl code %d: %s",
-                            __func__, msg->data.result,
-                            curl_easy_strerror(msg->data.result));
-                    fatal_error = TRUE;
-                default:
-                    break;
-                }
-            }
-        } else {
-            // curl return code is CURLE_OK but we need to check status code
-            long code;
-            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
-
-            // If no code, assume success
-
-            if (code) {
-                if (effective_url && g_str_has_prefix(effective_url, "http")) {
-                    // Check HTTP(S) code
-                    if (code/100 != 2) {
-                        g_set_error(&tmp_err,
-                                    LR_DOWNLOADER_ERROR,
-                                    LRE_BADSTATUS,
-                                    "Status code: %ld for %s",
-                                    code, effective_url);
-                    }
-                } else if (effective_url) {
-                    // Check FTP
-                    if (code/100 != 2) {
-                        g_set_error(&tmp_err,
-                                    LR_DOWNLOADER_ERROR,
-                                    LRE_BADSTATUS,
-                                    "Status code: %ld for %s",
-                                    code, effective_url);
-                    }
-                } else {
-                    g_set_error(&tmp_err,
-                                LR_DOWNLOADER_ERROR,
-                                LRE_BADSTATUS,
-                                "Status code: %ld", code);
-                }
-            }
-        }
+        ret = check_finished_transfer(msg, target, &fatal_error, &tmp_err, err);
+        if (!ret)
+            return FALSE;
 
         // Clean stuff after the current handle
         curl_multi_remove_handle(dd->multi_handle, target->curl_handle);
