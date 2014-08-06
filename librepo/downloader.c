@@ -503,23 +503,27 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 }
 
 
-/** Prepares next transfer
+/** Select next target
  */
 static gboolean
-prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
+select_next_target(LrDownload *dd,
+                   LrTarget **selected_target,
+                   char **selected_full_url,
+                   GError **err)
 {
     LrTarget *target;
     LrMirror *mirror = NULL;
     char *full_url = NULL;
+    GSList *elem = dd->targets;
     int complete_url_in_path = 0;
-    LrProtocol protocol = LR_PROTOCOL_OTHER;
 
     assert(dd);
+    assert(selected_target);
+    assert(selected_full_url);
     assert(!err || *err == NULL);
 
-    *candidatefound = FALSE;
-
-    GSList *elem = dd->targets;
+    *selected_target = NULL;
+    *selected_full_url = NULL;
 
     while (1) {
 
@@ -555,17 +559,23 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
         g_debug("%s: Selecting mirror for: %s", __func__, target->target->path);
 
-        // Select a base part of url (use the baseurl or some mirror)
+        // Prepare target URL
         if (complete_url_in_path) {
-            // In path we got a complete url, do not use mirror or basepath
+            //
+            // Path is a complete URL (do not use mirror nor base URL)
+            //
             full_url = g_strdup(target->target->path);
         } else if (target->target->baseurl) {
-            // Use base URL
+            //
+            // Base URL is specified
+            //
             full_url = lr_pathconcat(target->target->baseurl,
                                      target->target->path,
                                      NULL);
         } else {
-            // Try to find a suitable mirror
+            //
+            // Find a suitable mirror
+            //
 
             int at_least_one_suitable_mirror_found = 0;
             //  ^^^ This variable is used to indentify that all possible mirrors
@@ -655,10 +665,41 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     } // End while(1)
 
-    if (!full_url) {
-        // Nothing to do
+    if (!full_url)  // Nothing to do
         return TRUE;
-    }
+
+    // Set mirror for the target
+    target->mirror = mirror;  // mirror could be NULL if baseurl is used
+
+    // Return values
+    *selected_target = target;
+    *selected_full_url = full_url;
+
+    return TRUE;
+}
+
+
+/** Prepares next transfer
+ */
+static gboolean
+prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
+{
+    LrTarget *target;
+    char *full_url = NULL;
+    LrProtocol protocol = LR_PROTOCOL_OTHER;
+    gboolean ret;
+
+    assert(dd);
+    assert(!err || *err == NULL);
+
+    *candidatefound = FALSE;
+
+    ret = select_next_target(dd, &target, &full_url, err);
+    if (!ret)  // Error
+        return FALSE;
+
+    if (!target)  // Nothing to do
+        return TRUE;
 
     *candidatefound = TRUE;
 
@@ -802,9 +843,6 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     target->headercb_state = LR_HCS_DEFAULT;
     g_free(target->headercb_interrupt_reason);
     target->headercb_interrupt_reason = NULL;
-
-    // Set mirror for the target
-    target->mirror = mirror;  // mirror could be NULL if baseurl is used
 
     // Set protocol of the target
     target->protocol = protocol;
