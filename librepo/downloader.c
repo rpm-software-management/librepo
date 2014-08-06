@@ -910,13 +910,13 @@ prepare_next_transfers(LrDownload *dd, GError **err)
     return TRUE;
 }
 
+
 static gboolean
 check_transfer_statuses(LrDownload *dd, GError **err)
 {
     assert(dd);
     assert(!err || *err == NULL);
 
-    int freed_transfers = 0;
     int msgs_in_queue;
     CURLMsg *msg;
 
@@ -1278,7 +1278,6 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         }
 
         lr_free(effective_url);
-        freed_transfers++;
 
         if (fail_fast_error) {
             // A single download failed - interrupt whole downloading
