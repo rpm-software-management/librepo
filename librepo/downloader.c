@@ -924,11 +924,11 @@ prepare_next_transfers(LrDownload *dd, GError **err)
  * Evaluate CURL return code and status code of protocol if needed.
  */
 static gboolean
-check_finished_transfer(CURLMsg *msg,
-                        LrTarget *target,
-                        gboolean *fatal_error,
-                        GError **transfer_err,
-                        GError **err)
+check_finished_transfer_status(CURLMsg *msg,
+                               LrTarget *target,
+                               gboolean *fatal_error,
+                               GError **transfer_err,
+                               GError **err)
 {
     long code = 0;
     char *effective_url = NULL;
@@ -1033,6 +1033,73 @@ check_finished_transfer(CURLMsg *msg,
 
 
 static gboolean
+check_finished_trasfer_checksum(int fd,
+                                GSList *checksums,
+                                gboolean *checksum_matches,
+                                GError **transfer_err,
+                                GError **err)
+{
+    gboolean matches = TRUE;
+
+    for (GSList *elem = checksums; elem; elem = g_slist_next(elem)) {
+        LrDownloadTargetChecksum *chksum = elem->data;
+        if (!chksum || !chksum->value || chksum->type == LR_CHECKSUM_UNKNOWN)
+            continue;  // Bad checksum
+
+        lseek(fd, 0, SEEK_SET);
+        gboolean ret = lr_checksum_fd_cmp(chksum->type,
+                                          fd,
+                                          chksum->value,
+                                          1,
+                                          &matches,
+                                          err);
+        if (!ret)
+            return FALSE;
+
+        if (matches) {
+            // At least one checksum matches
+            g_debug("%s: Checksum (%s) %s is OK", __func__,
+                    lr_checksum_type_to_str(chksum->type),
+                    chksum->value);
+            break;
+        }
+    }
+
+    *checksum_matches = matches;
+
+    if (!matches) {
+        // Checksums doesn't match
+        gchar *expected = g_strdup("");
+
+        // Prepare pretty messages with list of expected checksums
+        for (GSList *elem = checksums; elem; elem = g_slist_next(elem)) {
+            gchar *tmp = NULL;
+            LrDownloadTargetChecksum *chksum = elem->data;
+            if (!chksum || !chksum->value || chksum->type == LR_CHECKSUM_UNKNOWN)
+                continue;  // Bad checksum
+
+            const gchar *chtype_str = lr_checksum_type_to_str(chksum->type);
+            tmp = g_strconcat(expected, chksum->value, "(",
+                              chtype_str ? chtype_str : "UNKNOWN",
+                              ") ", NULL);
+            free(expected);
+            expected = tmp;
+        }
+
+        // Set error message
+        g_set_error(transfer_err,
+                LR_DOWNLOADER_ERROR,
+                LRE_BADCHECKSUM,
+                "Downloading successfull, but checksum doesn't match. "
+                "Expected: %s", expected);
+        g_free(expected);
+    }
+
+    return TRUE;
+}
+
+
+static gboolean
 check_transfer_statuses(LrDownload *dd, GError **err)
 {
     assert(dd);
@@ -1044,7 +1111,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
     while ((msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue))) {
         LrTarget *target = NULL;
         char *effective_url = NULL;
-        GError *tmp_err = NULL;
+        GError *tmp_err = NULL;   // TODO: Rename to transfer_err
+        GError *tmp_err_2 = NULL; // TODO: Rename to tmp_err
         gboolean ret;
         gboolean fatal_error = FALSE;
 
@@ -1076,9 +1144,14 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 __func__, target->target->path, effective_url);
 
         // Check status of finished transfer
-        ret = check_finished_transfer(msg, target, &fatal_error, &tmp_err, err);
-        if (!ret)
+        ret = check_finished_transfer_status(msg, target, &fatal_error,
+                                             &tmp_err, &tmp_err_2);
+        if (!ret) {
+            g_propagate_prefixed_error(err, tmp_err_2, "Downloading from %s"
+                    "was successfull but error encountered while "
+                    "checksuming: ", effective_url);
             return FALSE;
+        }
 
         // Clean stuff after the current handle
         curl_multi_remove_handle(dd->multi_handle, target->curl_handle);
@@ -1093,87 +1166,20 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
         guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
 
-        // Checksum checking
         fflush(target->f);
-        int fd = fileno(target->f);
-        gboolean matches = TRUE;
 
-        GSList *elem = target->target->checksums;
-        for (; elem; elem = g_slist_next(elem)) {
-            if (tmp_err) {
-                // There was an error, checksum checking is meaningless
-                break;
-            }
+        if (!tmp_err) {
+            // Checksum checking
+            int fd = fileno(target->f);
+            gboolean matches = TRUE;
 
-            LrDownloadTargetChecksum *checksum = elem->data;
-
-            if (!checksum
-                || !checksum->value
-                || checksum->type == LR_CHECKSUM_UNKNOWN)
-            {
-                // Bad checksum
-                continue;
-            }
-
-            lseek(fd, 0, SEEK_SET);
-            gboolean ret = lr_checksum_fd_cmp(checksum->type,
-                                              fd,
-                                              checksum->value,
-                                              1,
-                                              &matches,
-                                              &tmp_err);
-            if (ret == FALSE) {
-                // Error while checksum calculation
-                g_propagate_prefixed_error(err, tmp_err, "Downloading from %s "
-                        "was successfull but error encountered while "
-                        "checksuming: ", effective_url);
-                fclose(target->f);
-                target->f = NULL;
-                lr_free(effective_url);
+            ret = check_finished_trasfer_checksum(fd,
+                                                  target->target->checksums,
+                                                  &matches,
+                                                  &tmp_err,
+                                                  err);
+            if (!ret)
                 return FALSE;
-            }
-
-            if (matches) {
-                // At least one checksum matches
-                g_debug("%s: Checksum (%s) %s is OK", __func__,
-                        lr_checksum_type_to_str(checksum->type),
-                        checksum->value);
-                break;
-            }
-        }
-
-        if (!matches) {
-            // Checksums doesn't match
-
-            // Prepare pretty messages with list of expected checksums
-            gchar *expected = g_strdup("");
-            GSList *elem = target->target->checksums;
-            for (; elem; elem = g_slist_next(elem)) {
-                gchar *tmp = NULL;
-                LrDownloadTargetChecksum *checksum = elem->data;
-                if (!checksum
-                    || !checksum->value
-                    || checksum->type == LR_CHECKSUM_UNKNOWN)
-                {
-                    // Bad checksum
-                    continue;
-                }
-
-                const gchar *chtype_str = lr_checksum_type_to_str(checksum->type);
-                tmp = g_strconcat(expected, checksum->value, "(",
-                                  chtype_str ? chtype_str : "UNKNOWN",
-                                  ") ", NULL);
-                free(expected);
-                expected = tmp;
-            }
-
-            // Set error message
-            g_set_error(&tmp_err,
-                    LR_DOWNLOADER_ERROR,
-                    LRE_BADCHECKSUM,
-                    "Downloading successfull, but checksum doesn't match. "
-                    "Expected: %s", expected);
-            g_free(expected);
         }
 
         fclose(target->f);
