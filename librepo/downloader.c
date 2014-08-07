@@ -156,6 +156,9 @@ typedef struct {
     gint64 max_speed; /*!<
         Maximal speed in bytes per sec */
 
+    long allowed_mirror_failures; /*!<
+        See LRO_ALLOWEDMIRRORFAILURES */
+
     // Data
 
     CURLM *multi_handle; /*!<
@@ -511,6 +514,7 @@ select_suitable_mirror(LrDownload *dd,
                        LrMirror **selected_mirror,
                        GError **err)
 {
+
     LrMirror *mirror = NULL;
     int at_least_one_suitable_mirror_found = 0;
     //  ^^^ This variable is used to indentify that all possible mirrors
@@ -526,6 +530,7 @@ select_suitable_mirror(LrDownload *dd,
     // Iterate over mirror for the target
     for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
         LrMirror *c_mirror = elem->data;
+        gchar *mirrorurl = c_mirror->mirror->url; // shortcut
 
         if (g_slist_find(target->tried_mirrors, c_mirror)) {
             // This mirror was already tried for this target
@@ -534,8 +539,17 @@ select_suitable_mirror(LrDownload *dd,
 
         if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
             // Skip rsync mirrors
-            g_debug("%s: Skipping rsync url: %s", __func__,
-                    c_mirror->mirror->url);
+            g_debug("%s: Skipping rsync url: %s", __func__, mirrorurl);
+            continue;
+        }
+
+        if (c_mirror->successfull_transfers == 0 &&
+            dd->allowed_mirror_failures > 0 &&
+            c_mirror->failed_transfers >= dd->allowed_mirror_failures)
+        {
+            // Skip bad mirrors
+            g_debug("%s: Skipping bad mirror (%d failures and no success): %s",
+                    __func__, c_mirror->failed_transfers, mirrorurl);
             continue;
         }
 
@@ -547,13 +561,20 @@ select_suitable_mirror(LrDownload *dd,
         assert(dd->max_connection_per_host == -1 ||
                c_mirror->running_transfers <= dd->max_connection_per_host);
 
-        if (dd->max_connection_per_host == -1 ||
-            c_mirror->running_transfers < dd->max_connection_per_host)
+        //
+        // Check the mirror
+        //
+
+        // Check number of connections to the mirror
+        if (dd->max_connection_per_host != -1 &&
+            c_mirror->running_transfers >= dd->max_connection_per_host)
         {
-            // Suitable (untried and with available capacity) mirror found
-            mirror = c_mirror;
-            break;
+            continue;
         }
+
+        // This mirror looks suitable - use it
+        mirror = c_mirror;
+        break;
     }
 
     if (!at_least_one_suitable_mirror_found) {
@@ -1243,6 +1264,10 @@ transfer_error:
 
             g_debug("%s: Error during transfer: %s", __func__, transfer_err->message);
 
+            // Update mirror statistics
+            if (target->mirror)
+                target->mirror->failed_transfers++;
+
             // Call mirrorfailure callback
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
             if (mf_cb) {
@@ -1344,6 +1369,10 @@ transfer_error:
                                 "Interupted by LR_CB_ERROR from end callback");
                 }
             }
+
+            // Update mirror statistics
+            if (target->mirror)
+                target->mirror->successfull_transfers++;
         }
 
         lr_free(effective_url);
@@ -1520,6 +1549,7 @@ lr_download(GSList *targets,
         dd.max_connection_per_host = lr_handle->maxdownloadspermirror;
         dd.max_mirrors_to_try = lr_handle->maxmirrortries;
         dd.max_speed = lr_handle->maxspeed;
+        dd.allowed_mirror_failures = lr_handle->allowed_mirror_failures;
     } else {
         // No handle, this is allowed when a complete URL is passed
         // via relative_url param.
@@ -1527,6 +1557,7 @@ lr_download(GSList *targets,
         dd.max_connection_per_host = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
         dd.max_mirrors_to_try = LRO_MAXMIRRORTRIES_DEFAULT;
         dd.max_speed = LRO_MAXSPEED_DEFAULT;
+        dd.allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
     }
 
     dd.multi_handle = curl_multi_init();

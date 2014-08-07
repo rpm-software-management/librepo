@@ -103,6 +103,7 @@ lr_handle_init()
     handle->sslverifypeer = 1;
     handle->sslverifyhost = 2;
     handle->ipresolve = LRO_IPRESOLVE_DEFAULT;
+    handle->allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
 
     return handle;
 }
@@ -577,6 +578,10 @@ lr_handle_setopt(LrHandle *handle,
         }
         break;
     }
+
+    case LRO_ALLOWEDMIRRORFAILURES:
+        handle->allowed_mirror_failures = va_arg(arg, long);
+        break;
 
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
@@ -1287,6 +1292,11 @@ lr_handle_getinfo(LrHandle *handle,
         *type = (LrIpResolveType) (handle->ipresolve);
         break;
     }
+
+    case LRI_ALLOWEDMIRRORFAILURES:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) (handle->allowed_mirror_failures);
+        break;
 
     default:
         rc = FALSE;

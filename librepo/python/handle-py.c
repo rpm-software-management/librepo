@@ -369,6 +369,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_LOWSPEEDTIME:
     case LRO_LOWSPEEDLIMIT:
     case LRO_IPRESOLVE:
+    case LRO_ALLOWEDMIRRORFAILURES:
     {
         int badarg = 0;
         long d;
@@ -396,6 +397,9 @@ py_setopt(_HandleObject *self, PyObject *args)
                 break;
             case LRO_IPRESOLVE:
                 d = LRO_IPRESOLVE_DEFAULT;
+                break;
+            case LRO_ALLOWEDMIRRORFAILURES:
+                d = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
                 break;
             default:
                 badarg = 1;
@@ -831,6 +835,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_FASTESTMIRRORMAXAGE:
     case LRI_SSLVERIFYPEER:
     case LRI_SSLVERIFYHOST:
+    case LRI_ALLOWEDMIRRORFAILURES:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

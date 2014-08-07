@@ -287,6 +287,21 @@ Version contants
     *Integer or None* Sets kind of IP addresses to use when resolving host
     names. Could be one of: :ref:`ipresolve-type-label`
 
+.. data:: LRO_ALLOWEDMIRRORFAILURES
+
+    *Integer or None* If all transfers from a mirror failed (no successfull transfer
+    from the mirror exists) and the number
+    of failed downloads is higher or equal to this value
+    the mirror will be skipped (ignored) for all next downloads.
+
+    **Note:** Number of failed transfers for a single mirror can
+    outreach this number! For example, if you set this value to 1
+    but you allow 3 parallel downloads it is possible that all
+    three downloads start from the mirror,
+    before any of them can fail. Then, if all three transfers
+    fail, the number of failures for the mirror
+    will be 3, even if this option was set to 1.
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -320,6 +335,7 @@ Version contants
 .. data:: LRI_SSLVERIFYPEER
 .. data:: LRI_SSLVERIFYHOST
 .. data:: LRI_IPRESOLVE
+.. data:: LRI_ALLOWEDMIRRORFAILURES
 
 .. _proxy-type-label:
 
@@ -804,6 +820,7 @@ LRO_HMFCB                   = _librepo.LRO_HMFCB
 LRO_SSLVERIFYPEER           = _librepo.LRO_SSLVERIFYPEER
 LRO_SSLVERIFYHOST           = _librepo.LRO_SSLVERIFYHOST
 LRO_IPRESOLVE               = _librepo.LRO_IPRESOLVE
+LRO_ALLOWEDMIRRORFAILURES   = _librepo.LRO_ALLOWEDMIRRORFAILURES
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -849,6 +866,7 @@ ATTR_TO_LRO = {
     "sslverifypeer":        LRO_SSLVERIFYPEER,
     "sslverifyhost":        LRO_SSLVERIFYHOST,
     "ipresolve":            LRO_IPRESOLVE,
+    "allowedmirrorfailures":LRO_ALLOWEDMIRRORFAILURES,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -876,6 +894,7 @@ LRI_HMFCB               = _librepo.LRI_HMFCB
 LRI_SSLVERIFYPEER       = _librepo.LRI_SSLVERIFYPEER
 LRI_SSLVERIFYHOST       = _librepo.LRI_SSLVERIFYHOST
 LRI_IPRESOLVE           = _librepo.LRI_IPRESOLVE
+LRI_ALLOWEDMIRRORFAILURES=_librepo.LRI_ALLOWEDMIRRORFAILURES
 LRI_SENTINEL            = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
@@ -904,6 +923,7 @@ ATTR_TO_LRI = {
     "sslverifypeer":        LRI_SSLVERIFYPEER,
     "sslverifyhost":        LRI_SSLVERIFYHOST,
     "ipresolve":            LRI_IPRESOLVE,
+    "allowedmirrorfailures":LRI_ALLOWEDMIRRORFAILURES,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1269,6 +1289,10 @@ class Handle(_librepo.Handle):
     .. attribute:: ipresolve:
 
         See :data:`.LRO_IPRESOLVE`
+
+    .. attribute:: allowedmirrorfailures:
+
+        See :data:`.LRO_ALLOWEDMIRRORFAILURES`
 
     """
 

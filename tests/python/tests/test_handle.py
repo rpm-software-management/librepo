@@ -8,6 +8,7 @@ def foo_hmfcb(data, msg, url, metadata):
     pass
 
 class TestCaseHandle(unittest.TestCase):
+
     def test_handle_setopt_getinfo(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -134,6 +135,11 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_IPRESOLVE, None)
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_WHATEVER)
 
+        self.assertEqual(h.getinfo(librepo.LRI_ALLOWEDMIRRORFAILURES), 4)
+        h.setopt(librepo.LRO_ALLOWEDMIRRORFAILURES, 1)
+        self.assertEqual(h.getinfo(librepo.LRI_ALLOWEDMIRRORFAILURES), 1)
+        h.setopt(librepo.LRO_ALLOWEDMIRRORFAILURES, None)
+        self.assertEqual(h.getinfo(librepo.LRI_ALLOWEDMIRRORFAILURES), 4)
 
     def test_handle_setget_attr(self):
         """No exception should be raised."""
@@ -259,6 +265,12 @@ class TestCaseHandle(unittest.TestCase):
         h.ipresolve = None
         self.assertEqual(h.ipresolve, librepo.IPRESOLVE_WHATEVER)
 
+        self.assertEqual(h.allowedmirrorfailures, 4)
+        h.allowedmirrorfailures = 1
+        self.assertEqual(h.allowedmirrorfailures, 1)
+        h.allowedmirrorfailures = None
+        self.assertEqual(h.allowedmirrorfailures, 4)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -348,3 +360,5 @@ class TestCaseHandle(unittest.TestCase):
 
         h.setopt(librepo.LRO_IPRESOLVE, None)
         h.ipresolve = None
+        h.setopt(librepo.LRO_ALLOWEDMIRRORFAILURES, None)
+        h.allowedmirrorfailures = None

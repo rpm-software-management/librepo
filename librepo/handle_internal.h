@@ -170,6 +170,10 @@ struct _LrHandle {
 
     LrIpResolveType ipresolve; /*!<
         What kind of IP addresses to use when resolving host names. */
+
+    long allowed_mirror_failures; /*!<
+        Number of allowed failed transfers, when there are no
+        successfull ones, before a mirror gets ignored. */
 };
 
 /** Return new CURL easy handle with some default options setted.

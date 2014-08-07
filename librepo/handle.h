@@ -91,6 +91,9 @@ typedef struct _LrHandle LrHandle;
 /** LRO_IPRESOLVE default value */
 #define LRO_IPRESOLVE_DEFAULT               LR_IPRESOLVE_WHATEVER
 
+/** LRO_ALLOWEDMIRRORFAILURES default value */
+#define LRO_ALLOWEDMIRRORFAILURES_DEFAULT   4
+
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
 
@@ -259,6 +262,19 @@ typedef enum {
     LRO_IPRESOLVE, /*!< (LrIpResolveType)
         Sets what kind of IP addresses to use when resolving host names. */
 
+    LRO_ALLOWEDMIRRORFAILURES, /*!< (long)
+        If all transfers from a mirror failed (no successfull transfer
+        from the mirror exists) and the number
+        of failed downloads is higher or equal to this value
+        the mirror will be skipped (ignored) for all next downloads.
+        Note: Number of failed transfers for a single mirror can
+        outreach this number! For example, if you set this value to 1
+        but you allow 3 parallel downloads it is possible that all
+        three downloads start from the mirror,
+        before any of them can fail. Then, if all three transfers
+        fail, the number of failures for the mirror
+        will be 3, even if this option was set to 1. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -311,6 +327,7 @@ typedef enum {
     LRI_SSLVERIFYPEER,          /*!< (long *) */
     LRI_SSLVERIFYHOST,          /*!< (long *) */
     LRI_IPRESOLVE,              /*!< (LrIpResolveType *) */
+    LRI_ALLOWEDMIRRORFAILURES,  /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

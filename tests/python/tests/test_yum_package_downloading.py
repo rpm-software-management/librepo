@@ -594,6 +594,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
             "called": False,
             "detection": False,
         }
+
         def fastestmirrorstatuscallback(cbdata, stage, data):
             cbdata["called"] = True
             if stage == librepo.FMSTAGE_DETECTION:
@@ -622,3 +623,33 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         # detection should be skiped
         self.assertTrue(cbdata["called"])
         self.assertTrue(cbdata["detection"])
+
+    def test_download_packages_with_bad_first_mirror_1(self):
+        h = librepo.Handle()
+
+        url1 = "%s%s" % (MOCKURL, config.REPO_YUM_02_PATH)
+        url2 = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url3 = "%s%s" % (MOCKURL, config.REPO_YUM_03_PATH)
+        h.setopt(librepo.LRO_URLS, [url1, url2, url3])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.maxparalleldownloads = 1
+        h.allowedmirrorfailures = 1
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_03_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+
+        # Should raise an error, because, the first two mirror
+        # should be disabled during download of the first package
+        # and when is the time to download the second package,
+        # the repo that contains the package is disabled yet.
+        self.assertRaises(librepo.LibrepoException, librepo.download_packages,
+                pkgs, failfast=True)
+
+        self.assertTrue(pkgs[0].err is None)
+        self.assertTrue(os.path.isfile(pkgs[0].local_path))
+        self.assertTrue(pkgs[1].err is not None)
