@@ -1149,8 +1149,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
     while ((msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue))) {
         LrTarget *target = NULL;
         char *effective_url = NULL;
-        GError *tmp_err = NULL;   // TODO: Rename to transfer_err
-        GError *tmp_err_2 = NULL; // TODO: Rename to tmp_err
+        GError *transfer_err = NULL;
+        GError *tmp_err = NULL;
         gboolean ret;
         gboolean fatal_error = FALSE;
         GError *fail_fast_error = NULL;
@@ -1184,9 +1184,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
         // Check status of finished transfer
         ret = check_finished_transfer_status(msg, target, &fatal_error,
-                                             &tmp_err, &tmp_err_2);
+                                             &transfer_err, &tmp_err);
         if (!ret) {
-            g_propagate_prefixed_error(err, tmp_err_2, "Downloading from %s"
+            g_propagate_prefixed_error(err, tmp_err, "Downloading from %s"
                     "was successfull but error encountered while "
                     "checksuming: ", effective_url);
             return FALSE;
@@ -1206,7 +1206,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
 
 
-        if (!tmp_err) {
+        if (!transfer_err) {
             // Checksum checking
             int fd;
             gboolean matches = TRUE;
@@ -1216,7 +1216,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             ret = check_finished_trasfer_checksum(fd,
                                                   target->target->checksums,
                                                   &matches,
-                                                  &tmp_err,
+                                                  &transfer_err,
                                                   err);
             if (!ret)
                 return FALSE;
@@ -1225,10 +1225,10 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         fclose(target->f);
         target->f = NULL;
 
-        if (tmp_err) {
+        if (transfer_err) {
             // There was an error during transfer
 
-            g_debug("%s: Error during transfer: %s", __func__, tmp_err->message);
+            g_debug("%s: Error during transfer: %s", __func__, transfer_err->message);
 
             int complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
 
@@ -1236,7 +1236,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
             if (mf_cb) {
                 int ret = mf_cb(target->target->cbdata,
-                                tmp_err->message,
+                                transfer_err->message,
                                 effective_url);
                 if (ret == LR_CB_ABORT) {
                     // User wants to abort this download, so make the error fatal
@@ -1244,8 +1244,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 } else if (ret == LR_CB_ERROR) {
                     g_debug("%s: Downloading was aborted by LR_CB_ERROR from "
                             "mirror failure callback", __func__);
-                    g_clear_error(&tmp_err);
-                    g_set_error(&tmp_err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
+                    g_clear_error(&transfer_err);
+                    g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
                                 "Downloading was aborted by LR_CB_ERROR from "
                                 "mirror failure callback");
                     fatal_error = TRUE;
@@ -1262,7 +1262,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 // Try another mirror
                 g_debug("%s: Ignore error - Try another mirror", __func__);
                 target->state = LR_DS_WAITING;
-                g_error_free(tmp_err);  // Ignore the error
+                g_error_free(transfer_err);  // Ignore the error
             } else {
                 // No more retry (or baseurl used) => set target as failed
                 g_debug("%s: No more retries (tried: %d)",
@@ -1274,7 +1274,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 if (end_cb) {
                     int ret = end_cb(target->target->cbdata,
                                      LR_TRANSFER_ERROR,
-                                     tmp_err->message);
+                                     transfer_err->message);
                     if (ret == LR_CB_ERROR) {
                         target->cb_return_code = LR_CB_ERROR;
                         g_debug("%s: Downloading was aborted by LR_CB_ERROR "
@@ -1283,21 +1283,21 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 }
 
                 lr_downloadtarget_set_error(target->target,
-                                            tmp_err->code,
+                                            transfer_err->code,
                                             "Download failed: %s",
-                                            tmp_err->message);
+                                            transfer_err->message);
                 if (dd->failfast) {
                     // Fail fast is enabled, fail on any error
-                    g_propagate_error(&fail_fast_error, tmp_err);
+                    g_propagate_error(&fail_fast_error, transfer_err);
                 } else if (target->cb_return_code == LR_CB_ERROR) {
                     // Callback returned LR_CB_ERROR, abort the downloading
                     g_debug("%s: Downloading was aborted by LR_CB_ERROR", __func__);
-                    g_propagate_error(&fail_fast_error, tmp_err);
+                    g_propagate_error(&fail_fast_error, transfer_err);
                 } else {
                     // Fail fast is disabled and callback doesn't repor serious
                     // error, so this download is aborted, but other download
                     // can continue (do not abort whole downloading)
-                    g_error_free(tmp_err);
+                    g_error_free(transfer_err);
                 }
             }
 
