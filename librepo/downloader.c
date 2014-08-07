@@ -1099,6 +1099,44 @@ check_finished_trasfer_checksum(int fd,
 }
 
 
+/** Truncate file - Used to remove downloaded garbage (error html pages, etc.)
+ */
+static gboolean
+truncate_transfer_file(LrTarget *target, GError **err)
+{
+    off_t original_offset = 0;  // Truncate whole file by default
+    int rc;
+
+    assert(!err || *err == NULL);
+
+    if (target->original_offset > -1)
+        // If resume is enabled -> truncate file to its original position
+        original_offset = target->original_offset;
+
+    if (target->target->fn)  // Truncate by filename
+        rc = truncate(target->target->fn, original_offset);
+    else  // Truncate by file descriptor number
+        rc = ftruncate(target->target->fd, original_offset);
+
+    if (rc == -1) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                    "ftruncate() failed: %s", strerror(errno));
+        return FALSE;
+    }
+
+    if (!target->target->fn) {
+        // In case fd is used, seek to the original offset
+        if (lseek(target->target->fd, original_offset, SEEK_SET) == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "lseek() failed: %s", strerror(errno));
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+
 static gboolean
 check_transfer_statuses(LrDownload *dd, GError **err)
 {
@@ -1115,6 +1153,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         GError *tmp_err_2 = NULL; // TODO: Rename to tmp_err
         gboolean ret;
         gboolean fatal_error = FALSE;
+        GError *fail_fast_error = NULL;
 
         if (msg->msg != CURLMSG_DONE) {
             // We are only interested in messages about finished transfers
@@ -1166,13 +1205,14 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
         guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
 
-        fflush(target->f);
 
         if (!tmp_err) {
             // Checksum checking
-            int fd = fileno(target->f);
+            int fd;
             gboolean matches = TRUE;
 
+            fflush(target->f);
+            fd = fileno(target->f);
             ret = check_finished_trasfer_checksum(fd,
                                                   target->target->checksums,
                                                   &matches,
@@ -1184,8 +1224,6 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
         fclose(target->f);
         target->f = NULL;
-
-        GError *fail_fast_error = NULL;
 
         if (tmp_err) {
             // There was an error during transfer
@@ -1216,10 +1254,10 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             }
 
             if (!fatal_error &&
-                !complete_url_in_path
-                && !target->target->baseurl
-                && (dd->max_mirrors_to_try <= 0
-                    || num_of_tried_mirrors < dd->max_mirrors_to_try))
+                !complete_url_in_path &&
+                !target->target->baseurl &&
+                (dd->max_mirrors_to_try <= 0 ||
+                 num_of_tried_mirrors < dd->max_mirrors_to_try))
             {
                 // Try another mirror
                 g_debug("%s: Ignore error - Try another mirror", __func__);
@@ -1256,47 +1294,16 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                     g_debug("%s: Downloading was aborted by LR_CB_ERROR", __func__);
                     g_propagate_error(&fail_fast_error, tmp_err);
                 } else {
-                    // Fail fast is disabled and callback don't repor serious
-                    // error, so this download is aborted, but other donwload
+                    // Fail fast is disabled and callback doesn't repor serious
+                    // error, so this download is aborted, but other download
                     // can continue (do not abort whole downloading)
                     g_error_free(tmp_err);
                 }
             }
 
             // Truncate file - remove downloaded garbage (error html page etc.)
-            off_t original_offset;
-            if (target->original_offset > -1)
-                // If resume enabled, truncate file to its original position
-                original_offset = target->original_offset;
-            else
-                // If no resume enabled, just truncate whole file
-                original_offset = 0;
-
-            int rc;
-            if (target->target->fn)
-                rc = truncate(target->target->fn, original_offset);
-            else
-                rc = ftruncate(target->target->fd, original_offset);
-
-            if (rc == -1) {
-                lr_free(effective_url);
-                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                            "ftruncate() failed: %s", strerror(errno));
+            if (!truncate_transfer_file(target, err))
                 return FALSE;
-            }
-
-            if (!target->target->fn) {
-                // In case fd is used, seek to the original offset
-                off_t rc_offset = lseek(target->target->fd,
-                                        original_offset,
-                                        SEEK_SET);
-                if (rc_offset == -1) {
-                    lr_free(effective_url);
-                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                                "lseek() failed: %s", strerror(errno));
-                    return FALSE;
-                }
-            }
         } else {
             // No error encountered, transfer finished successfully
             target->state = LR_DS_FINISHED;
@@ -1317,11 +1324,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                     target->cb_return_code = LR_CB_ERROR;
                     g_debug("%s: Downloading was aborted by LR_CB_ERROR "
                             "from end callback", __func__);
-                    if (!fail_fast_error) {
-                        g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
+                    g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
                                 LRE_CBINTERRUPTED,
                                 "Interupted by LR_CB_ERROR from end callback");
-                    }
                 }
             }
         }
