@@ -1303,6 +1303,10 @@ transfer_error:
                 g_debug("%s: Ignore error - Try another mirror", __func__);
                 target->state = LR_DS_WAITING;
                 g_error_free(transfer_err);  // Ignore the error
+
+                // Truncate file - remove downloaded garbage (error html page etc.)
+                if (!truncate_transfer_file(target, err))
+                    return FALSE;
             } else {
                 // No more mirrors to try or baseurl used or fatal error
                 g_debug("%s: No more retries (tried: %d)",
@@ -1341,9 +1345,6 @@ transfer_error:
                 }
             }
 
-            // Truncate file - remove downloaded garbage (error html page etc.)
-            if (!truncate_transfer_file(target, err))
-                return FALSE;
         } else {
             // No error encountered, transfer finished successfully
             target->state = LR_DS_FINISHED;
@@ -1537,7 +1538,7 @@ lr_download(GSList *targets,
         return TRUE;
     }
 
-    // XXX: Donwloader configuration (max parallel connections etc.)
+    // XXX: Downloader configuration (max parallel connections etc.)
     // is taken from the handle of the first target.
     LrHandle *lr_handle = ((LrDownloadTarget *) targets->data)->handle;
 
@@ -1664,10 +1665,29 @@ lr_download_cleanup:
     }
     g_slist_free(dd.handle_mirrors);
 
+    // Clean up targets
     for (GSList *elem = dd.targets; elem; elem = g_slist_next(elem)) {
         LrTarget *target = elem->data;
         assert(target->curl_handle == NULL);
         assert(target->f == NULL);
+
+        // Remove file created for the target if download was
+        // unsuccessfull and the file doesn't exists before or
+        // its original content was overwritten
+        if (target->state != LR_DS_FINISHED) {
+            if (!target->target->resume || target->original_offset == 0) {
+                // Remove target file if the file doesn't
+                // exist before or was empty or was overwritten
+                if (target->target->fn) {
+                    // We can remove only files that were specified by fn
+                    if (unlink(target->target->fn) != 0) {
+                        g_debug("%s: Error while removing: %s",
+                                __func__, strerror(errno));
+                    }
+                }
+            }
+        }
+
         g_slist_free(target->tried_mirrors);
         lr_free(target);
     }

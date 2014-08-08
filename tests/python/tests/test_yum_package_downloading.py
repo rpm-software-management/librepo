@@ -1,12 +1,16 @@
-from tests.base import TestCaseWithFlask, MOCKURL
-from tests.servermock.server import app
-import tests.servermock.yum_mock.config as config
 import os
+import shutil
 import os.path
+import librepo
+import hashlib
 import unittest
 import tempfile
-import shutil
-import librepo
+
+import tests.servermock.yum_mock.config as config
+
+from tests.base import TestCaseWithFlask, MOCKURL
+from tests.servermock.server import app
+
 
 class TestCaseYumPackageDownloading(TestCaseWithFlask):
     application = app
@@ -302,7 +306,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(os.path.isfile(pkgs[0].local_path))
 
         self.assertTrue(pkgs[1].err is not None)
-        self.assertTrue(os.path.isfile(pkgs[1].local_path))
+        self.assertFalse(os.path.isfile(pkgs[1].local_path))
 
     def test_download_packages_one_url_is_bad_with_failfast(self):
         h = librepo.Handle()
@@ -322,15 +326,17 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertRaises(librepo.LibrepoException, librepo.download_packages,
                 pkgs, failfast=True)
 
-        # Err state is undefined, it could be error because of interruption
-        # of could bo None because it was downloaded at one shot before
-        # second download fails.
+        # Err state of first download is undefined,
+        # it could be error because of interruption
+        # of could bo None (when the download was successfull)
+        # in case that it was downloaded at one shot before
+        # the second download fails.
 
         #self.assertTrue(pkgs[0].err is not None)
         self.assertTrue(os.path.isfile(pkgs[0].local_path))
 
         self.assertTrue(pkgs[1].err is not None)
-        self.assertTrue(os.path.isfile(pkgs[1].local_path))
+        self.assertFalse(os.path.isfile(pkgs[1].local_path))
 
     def test_download_packages_with_checksum_check(self):
         h = librepo.Handle()
@@ -653,3 +659,52 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(pkgs[0].err is None)
         self.assertTrue(os.path.isfile(pkgs[0].local_path))
         self.assertTrue(pkgs[1].err is not None)
+        self.assertFalse(os.path.isfile(pkgs[1].local_path))
+
+    def test_download_packages_with_resume_02(self):
+        # If download that should be resumed fails,
+        # the original file should not be modified or deleted
+        h = librepo.Handle()
+
+        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [url])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+
+        fn = os.path.join(self.tmpdir, "package.rpm")
+
+        # Download first 10 bytes of the package
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=fn,
+                                          resume=False,
+                                          byterangeend=9))
+
+        librepo.download_packages(pkgs)
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        self.assertEqual(os.path.getsize(pkg.local_path), 10)
+        fchksum = hashlib.md5(open(pkg.local_path).read()).hexdigest()
+
+        # Now try to resume from bad URL
+        pkgs = []
+        pkgs.append(librepo.PackageTarget("bad_path.rpm",
+                                          handle=h,
+                                          dest=fn,
+                                          resume=True,
+                                          checksum_type=librepo.SHA256,
+                                          checksum=config.PACKAGE_01_01_SHA256))
+
+        # Download should fail
+        self.assertRaises(librepo.LibrepoException, librepo.download_packages,
+                pkgs, failfast=True)
+
+        # The package should exists (should not be removed or changed)
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+        self.assertEqual(os.path.getsize(pkg.local_path), 10)
+        fchksum_new = hashlib.md5(open(pkg.local_path).read()).hexdigest()
+        self.assertEqual(fchksum, fchksum_new)
+
