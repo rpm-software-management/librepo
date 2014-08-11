@@ -1158,6 +1158,98 @@ truncate_transfer_file(LrTarget *target, GError **err)
 }
 
 
+/** Return mirror rank or -1.0 if the rank cannot be determined
+ * (e.g. when is too early)
+ * Rank is currently just success rate for the mirror
+ */
+static gdouble
+mirror_rank(LrMirror *mirror)
+{
+    gdouble rank = -1.0;
+
+    int successfull = mirror->successfull_transfers;
+    int failed = mirror->failed_transfers;
+    int finished_transfers = successfull + failed;
+
+    if (finished_transfers < 3)
+        return rank; // Do not judge too early
+
+    rank = successfull / (double) finished_transfers;
+
+    return rank;
+}
+
+
+/** Sort mirrors. Penalize the error ones.
+ * In fact only move the current finished mirror forward or backward
+ * by one position.
+ * @param mirrors   GSList of mirrors (order of list elements won't be changed,
+ *                  only data pointers)
+ * @param mirror    Mirror of just finished transfer
+ * @param success   Was download from the mirror successfull
+ */
+static gboolean
+sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success)
+{
+    GSList *elem = mirrors;
+    GSList *prev = NULL;
+    GSList *next = NULL;
+    gdouble rank_cur;
+
+    assert(mirrors);
+    assert(mirror);
+
+    for (; elem && elem->data != mirror; elem = g_slist_next(elem))
+        prev = elem;
+
+    assert(elem);  // Mirror should always exists in the list of mirrors
+
+    next = elem->next;
+
+    if (!success && !next)
+        goto exit; // Penalization not needed - Mirror is already the last one
+    if (success && !prev)
+        goto exit; // Bonus not needed - Mirror is already the first one
+
+    // Calculate ranks
+    rank_cur  = mirror_rank(mirror);
+    if (rank_cur < 0.0)
+        goto exit; // Too early to judge
+
+
+    if (!success) {
+        // Penalize
+        gdouble rank_next = mirror_rank(next->data);
+        if (rank_next < 0.0 || rank_next > rank_cur) {
+            elem->data = next->data;
+            next->data = (gpointer) mirror;
+            g_debug("%s: Mirror %s was penalized", __func__, mirror->mirror->url);
+        }
+    } else {
+        // Bonus
+        gdouble rank_prev = mirror_rank(prev->data);
+        if (rank_prev < rank_cur) {
+            elem->data = prev->data;
+            prev->data = mirror;
+            g_debug("%s: Mirror %s was awarded", __func__, mirror->mirror->url);
+        }
+    }
+
+exit:
+    if (g_getenv("LIBREPO_DEBUG_ADAPTIVEMIRRORSORTING")) {
+        // Debug
+        g_debug("%s: Updated order of mirrors (for %p):", __func__, mirrors);
+        for (GSList *elem = mirrors; elem; elem = g_slist_next(elem)) {
+            LrMirror *m = elem->data;
+            g_debug(" %s (s: %d f: %d)", m->mirror->url,
+                   m->successfull_transfers, m->failed_transfers);
+        }
+    }
+
+    return TRUE;
+}
+
+
 static gboolean
 check_transfer_statuses(LrDownload *dd, GError **err)
 {
@@ -1265,8 +1357,10 @@ transfer_error:
             g_debug("%s: Error during transfer: %s", __func__, transfer_err->message);
 
             // Update mirror statistics
-            if (target->mirror)
+            if (target->mirror) {
                 target->mirror->failed_transfers++;
+                sort_mirrors(target->lrmirrors, target->mirror, FALSE);
+            }
 
             // Call mirrorfailure callback
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
@@ -1372,8 +1466,10 @@ transfer_error:
             }
 
             // Update mirror statistics
-            if (target->mirror)
+            if (target->mirror) {
                 target->mirror->successfull_transfers++;
+                sort_mirrors(target->lrmirrors, target->mirror, TRUE);
+            }
         }
 
         lr_free(effective_url);

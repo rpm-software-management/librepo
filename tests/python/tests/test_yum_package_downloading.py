@@ -696,7 +696,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
                                           checksum_type=librepo.SHA256,
                                           checksum=config.PACKAGE_01_01_SHA256))
 
-        # Download should fail
+        # Download should fail (path is bad, the file doesn't exist)
         self.assertRaises(librepo.LibrepoException, librepo.download_packages,
                 pkgs, failfast=True)
 
@@ -707,4 +707,54 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertEqual(os.path.getsize(pkg.local_path), 10)
         fchksum_new = hashlib.md5(open(pkg.local_path).read()).hexdigest()
         self.assertEqual(fchksum, fchksum_new)
+
+    def test_download_packages_mirror_penalization_01(self):
+
+        # This test is useful for mirror penalization testing
+        # with debug output on:
+        # LIBREPO_DEBUG_ADAPTIVEMIRRORSORTING="1"
+        #
+        # You can use it to check adaptive mirror sorting behavior
+        #
+        # E.g. from librepo checkout dir:
+        # LIBREPO_DEBUG_ADAPTIVEMIRRORSORTING="1" LIBREPO_DEBUG="1" PYTHONPATH=`readlink -f ./build/librepo/python/python2/` nosetests -s -v tests/python/tests/test_yum_package_downloading.py:TestCaseYumPackagesDownloading.test_download_packages_mirror_penalization_01
+
+        h = librepo.Handle()
+
+        url1 = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url2 = "%s%s" % (MOCKURL, config.REPO_YUM_03_PATH)
+        url3 = "%s%s" % (MOCKURL, config.REPO_YUM_04_PATH)
+        h.setopt(librepo.LRO_URLS, [url1, url2, url3])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.maxparalleldownloads = 1
+        h.allowedmirrorfailures = -1
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_03_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_03_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_04_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+
+        librepo.download_packages(pkgs, failfast=False)
+
+        for pkg in pkgs:
+            self.assertTrue(pkg.err is None)
+            self.assertTrue(os.path.isfile(pkg.local_path))
 

@@ -273,7 +273,8 @@ typedef enum {
         three downloads start from the mirror,
         before any of them can fail. Then, if all three transfers
         fail, the number of failures for the mirror
-        will be 3, even if this option was set to 1. */
+        will be 3, even if this option was set to 1.
+        Set -1 or 0 to disable this option */
 
     LRO_SENTINEL,    /*!< Sentinel */
 
