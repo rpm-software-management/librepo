@@ -94,6 +94,9 @@ typedef struct _LrHandle LrHandle;
 /** LRO_ALLOWEDMIRRORFAILURES default value */
 #define LRO_ALLOWEDMIRRORFAILURES_DEFAULT   4
 
+/** LRO_ADAPTIVEMIRRORSORTING */
+#define LRO_ADAPTIVEMIRRORSORTING_DEFAULT   1
+
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
 
@@ -276,6 +279,12 @@ typedef enum {
         will be 3, even if this option was set to 1.
         Set -1 or 0 to disable this option */
 
+    LRO_ADAPTIVEMIRRORSORTING, /*!< (long 1 or 0)
+        If enabled, internal list of mirrors for each handle is
+        re-sorted after each finished transfer.
+        The the sorting is based on mirror
+        error rate etc. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -329,6 +338,7 @@ typedef enum {
     LRI_SSLVERIFYHOST,          /*!< (long *) */
     LRI_IPRESOLVE,              /*!< (LrIpResolveType *) */
     LRI_ALLOWEDMIRRORFAILURES,  /*!< (long *) */
+    LRI_ADAPTIVEMIRRORSORTING,  /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

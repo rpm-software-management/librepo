@@ -728,6 +728,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.maxparalleldownloads = 1
         h.allowedmirrorfailures = -1
+        h.adaptivemirrorsorting = True
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_03_01,

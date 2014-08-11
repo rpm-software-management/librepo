@@ -302,6 +302,12 @@ Version contants
     fail, the number of failures for the mirror
     will be 3, even if this option was set to 1.
 
+.. data:: LRO_ADAPTIVEMIRRORSORTING
+
+    *Integer or None* If enabled, internal list of mirrors for each
+    handle is re-sorted after each finished transfer.
+    The the sorting is based on mirror error rate etc.
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -336,6 +342,7 @@ Version contants
 .. data:: LRI_SSLVERIFYHOST
 .. data:: LRI_IPRESOLVE
 .. data:: LRI_ALLOWEDMIRRORFAILURES
+.. data:: LRI_ADAPTIVEMIRRORSORTING
 
 .. _proxy-type-label:
 
@@ -821,6 +828,7 @@ LRO_SSLVERIFYPEER           = _librepo.LRO_SSLVERIFYPEER
 LRO_SSLVERIFYHOST           = _librepo.LRO_SSLVERIFYHOST
 LRO_IPRESOLVE               = _librepo.LRO_IPRESOLVE
 LRO_ALLOWEDMIRRORFAILURES   = _librepo.LRO_ALLOWEDMIRRORFAILURES
+LRO_ADAPTIVEMIRRORSORTING   = _librepo.LRO_ADAPTIVEMIRRORSORTING
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -867,6 +875,7 @@ ATTR_TO_LRO = {
     "sslverifyhost":        LRO_SSLVERIFYHOST,
     "ipresolve":            LRO_IPRESOLVE,
     "allowedmirrorfailures":LRO_ALLOWEDMIRRORFAILURES,
+    "adaptivemirrorsorting":LRO_ADAPTIVEMIRRORSORTING,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -895,6 +904,7 @@ LRI_SSLVERIFYPEER       = _librepo.LRI_SSLVERIFYPEER
 LRI_SSLVERIFYHOST       = _librepo.LRI_SSLVERIFYHOST
 LRI_IPRESOLVE           = _librepo.LRI_IPRESOLVE
 LRI_ALLOWEDMIRRORFAILURES=_librepo.LRI_ALLOWEDMIRRORFAILURES
+LRI_ADAPTIVEMIRRORSORTING=_librepo.LRI_ADAPTIVEMIRRORSORTING
 LRI_SENTINEL            = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
@@ -924,6 +934,7 @@ ATTR_TO_LRI = {
     "sslverifyhost":        LRI_SSLVERIFYHOST,
     "ipresolve":            LRI_IPRESOLVE,
     "allowedmirrorfailures":LRI_ALLOWEDMIRRORFAILURES,
+    "adaptivemirrorsorting":LRI_ADAPTIVEMIRRORSORTING,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1293,6 +1304,10 @@ class Handle(_librepo.Handle):
     .. attribute:: allowedmirrorfailures:
 
         See :data:`.LRO_ALLOWEDMIRRORFAILURES`
+
+    .. attribute:: adaptivemirrorsorting:
+
+        See :data:`.LRO_ADAPTIVEMIRRORSORTING`
 
     """
 

@@ -335,6 +335,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_FASTESTMIRROR:
     case LRO_SSLVERIFYPEER:
     case LRO_SSLVERIFYHOST:
+    case LRO_ADAPTIVEMIRRORSORTING:
     {
         long d;
 
@@ -343,6 +344,8 @@ py_setopt(_HandleObject *self, PyObject *args)
                                option == LRO_SSLVERIFYHOST))
         {
             d = 1;
+        } else if (obj == Py_None && option == LRO_ADAPTIVEMIRRORSORTING) {
+            d = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
         // end of default attributes
         } else if (PyObject_IsTrue(obj) == 1)
             d = 1;
@@ -400,6 +403,9 @@ py_setopt(_HandleObject *self, PyObject *args)
                 break;
             case LRO_ALLOWEDMIRRORFAILURES:
                 d = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
+                break;
+            case LRO_ADAPTIVEMIRRORSORTING:
+                d = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
                 break;
             default:
                 badarg = 1;
@@ -836,6 +842,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_SSLVERIFYPEER:
     case LRI_SSLVERIFYHOST:
     case LRI_ALLOWEDMIRRORFAILURES:
+    case LRI_ADAPTIVEMIRRORSORTING:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

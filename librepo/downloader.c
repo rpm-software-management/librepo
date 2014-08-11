@@ -159,6 +159,9 @@ typedef struct {
     long allowed_mirror_failures; /*!<
         See LRO_ALLOWEDMIRRORFAILURES */
 
+    long adaptivemirrorsorting; /*!<
+        See LRO_ADAPTIVEMIRRORSORTING */
+
     // Data
 
     CURLM *multi_handle; /*!<
@@ -1359,7 +1362,8 @@ transfer_error:
             // Update mirror statistics
             if (target->mirror) {
                 target->mirror->failed_transfers++;
-                sort_mirrors(target->lrmirrors, target->mirror, FALSE);
+                if (dd->adaptivemirrorsorting)
+                    sort_mirrors(target->lrmirrors, target->mirror, FALSE);
             }
 
             // Call mirrorfailure callback
@@ -1468,7 +1472,8 @@ transfer_error:
             // Update mirror statistics
             if (target->mirror) {
                 target->mirror->successfull_transfers++;
-                sort_mirrors(target->lrmirrors, target->mirror, TRUE);
+                if (dd->adaptivemirrorsorting)
+                    sort_mirrors(target->lrmirrors, target->mirror, TRUE);
             }
         }
 
@@ -1647,6 +1652,7 @@ lr_download(GSList *targets,
         dd.max_mirrors_to_try = lr_handle->maxmirrortries;
         dd.max_speed = lr_handle->maxspeed;
         dd.allowed_mirror_failures = lr_handle->allowed_mirror_failures;
+        dd.adaptivemirrorsorting = lr_handle->adaptivemirrorsorting;
     } else {
         // No handle, this is allowed when a complete URL is passed
         // via relative_url param.
@@ -1655,6 +1661,7 @@ lr_download(GSList *targets,
         dd.max_mirrors_to_try = LRO_MAXMIRRORTRIES_DEFAULT;
         dd.max_speed = LRO_MAXSPEED_DEFAULT;
         dd.allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
+        dd.adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
     }
 
     dd.multi_handle = curl_multi_init();

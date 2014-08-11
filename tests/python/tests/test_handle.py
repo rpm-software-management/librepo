@@ -139,7 +139,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_ALLOWEDMIRRORFAILURES, 1)
         self.assertEqual(h.getinfo(librepo.LRI_ALLOWEDMIRRORFAILURES), 1)
         h.setopt(librepo.LRO_ALLOWEDMIRRORFAILURES, None)
-        self.assertEqual(h.getinfo(librepo.LRI_ALLOWEDMIRRORFAILURES), 4)
+
+        self.assertEqual(h.getinfo(librepo.LRI_ADAPTIVEMIRRORSORTING), 1)
+        h.setopt(librepo.LRO_ADAPTIVEMIRRORSORTING, 0)
+        self.assertEqual(h.getinfo(librepo.LRI_ADAPTIVEMIRRORSORTING), 0)
+        h.setopt(librepo.LRO_ADAPTIVEMIRRORSORTING, None)
+        self.assertEqual(h.getinfo(librepo.LRI_ADAPTIVEMIRRORSORTING), 1)
 
     def test_handle_setget_attr(self):
         """No exception should be raised."""
@@ -271,6 +276,12 @@ class TestCaseHandle(unittest.TestCase):
         h.allowedmirrorfailures = None
         self.assertEqual(h.allowedmirrorfailures, 4)
 
+        self.assertEqual(h.adaptivemirrorsorting, 1)
+        h.adaptivemirrorsorting = 0
+        self.assertEqual(h.adaptivemirrorsorting, 0)
+        h.adaptivemirrorsorting = None
+        self.assertEqual(h.adaptivemirrorsorting, 1)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -362,3 +373,5 @@ class TestCaseHandle(unittest.TestCase):
         h.ipresolve = None
         h.setopt(librepo.LRO_ALLOWEDMIRRORFAILURES, None)
         h.allowedmirrorfailures = None
+        h.setopt(librepo.LRO_ADAPTIVEMIRRORSORTING, None)
+        h.adaptivemirrorsorting = None

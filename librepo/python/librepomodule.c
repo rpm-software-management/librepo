@@ -266,6 +266,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_SSLVERIFYHOST", LRO_SSLVERIFYHOST);
     PyModule_AddIntConstant(m, "LRO_IPRESOLVE", LRO_IPRESOLVE);
     PyModule_AddIntConstant(m, "LRO_ALLOWEDMIRRORFAILURES", LRO_ALLOWEDMIRRORFAILURES);
+    PyModule_AddIntConstant(m, "LRO_ADAPTIVEMIRRORSORTING", LRO_ADAPTIVEMIRRORSORTING);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
     // Handle info options
@@ -295,6 +296,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_SSLVERIFYHOST", LRI_SSLVERIFYHOST);
     PyModule_AddIntConstant(m, "LRI_IPRESOLVE", LRI_IPRESOLVE);
     PyModule_AddIntConstant(m, "LRI_ALLOWEDMIRRORFAILURES", LRI_ALLOWEDMIRRORFAILURES);
+    PyModule_AddIntConstant(m, "LRI_ADAPTIVEMIRRORSORTING", LRI_ADAPTIVEMIRRORSORTING);
     PyModule_AddIntConstant(m, "LRI_SENTINEL", LRI_SENTINEL);
 
     // Check options

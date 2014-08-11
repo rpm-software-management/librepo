@@ -104,6 +104,7 @@ lr_handle_init()
     handle->sslverifyhost = 2;
     handle->ipresolve = LRO_IPRESOLVE_DEFAULT;
     handle->allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
+    handle->adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
 
     return handle;
 }
@@ -581,6 +582,10 @@ lr_handle_setopt(LrHandle *handle,
 
     case LRO_ALLOWEDMIRRORFAILURES:
         handle->allowed_mirror_failures = va_arg(arg, long);
+        break;
+
+    case LRO_ADAPTIVEMIRRORSORTING:
+        handle->adaptivemirrorsorting = va_arg(arg, long);
         break;
 
     default:
@@ -1296,6 +1301,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_ALLOWEDMIRRORFAILURES:
         lnum = va_arg(arg, long *);
         *lnum = (long) (handle->allowed_mirror_failures);
+        break;
+
+    case LRI_ADAPTIVEMIRRORSORTING:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) (handle->adaptivemirrorsorting);
         break;
 
     default:
