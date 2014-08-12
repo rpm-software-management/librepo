@@ -685,7 +685,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
         self.assertEqual(os.path.getsize(pkg.local_path), 10)
-        fchksum = hashlib.md5(open(pkg.local_path).read()).hexdigest()
+        fchksum = hashlib.md5(open(pkg.local_path, "rb").read()).hexdigest()
 
         # Now try to resume from bad URL
         pkgs = []
@@ -705,7 +705,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(pkg.err)
         self.assertTrue(os.path.isfile(pkg.local_path))
         self.assertEqual(os.path.getsize(pkg.local_path), 10)
-        fchksum_new = hashlib.md5(open(pkg.local_path).read()).hexdigest()
+        fchksum_new = hashlib.md5(open(pkg.local_path, "rb").read()).hexdigest()
         self.assertEqual(fchksum, fchksum_new)
 
     def test_download_packages_mirror_penalization_01(self):
