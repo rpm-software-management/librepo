@@ -212,8 +212,11 @@ lr_download_packages(GSList *targets,
 
     // Setup sighandler
     if (interruptible) {
-        g_debug("%s: Using own SIGINT handler", __func__);
         struct sigaction sigact;
+        g_debug("%s: Using own SIGINT handler", __func__);
+        memset(&sigact, 0, sizeof(old_sigact));
+        memset(&sigact, 0, sizeof(sigact));
+        sigemptyset(&sigact.sa_mask);
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
         sigact.sa_flags = SA_RESTART;

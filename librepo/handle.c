@@ -1047,8 +1047,11 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
     struct sigaction old_sigact;
     if (handle->interruptible) {
         /* Setup sighandler */
-        g_debug("%s: Using own SIGINT handler", __func__);
         struct sigaction sigact;
+        g_debug("%s: Using own SIGINT handler", __func__);
+        memset(&sigact, 0, sizeof(old_sigact));
+        memset(&sigact, 0, sizeof(sigact));
+        sigemptyset(&sigact.sa_mask);
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
         sigact.sa_flags = 0;
