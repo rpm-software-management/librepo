@@ -42,6 +42,7 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
     gboolean ret;
     LrHandle *h;
     LrResult *result;
+    const char *urls[] = { path, NULL };
 
     assert(path);
     assert(!err || *err == NULL);
@@ -53,7 +54,7 @@ lr_repoutil_yum_check_repo(const char *path, GError **err)
         return FALSE;
     }
 
-    if (!lr_handle_setopt(h, err, LRO_URLS, path)) {
+    if (!lr_handle_setopt(h, err, LRO_URLS, urls)) {
         lr_handle_free(h);
         return FALSE;
     }
