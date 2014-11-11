@@ -111,6 +111,8 @@ typedef struct {
     FILE *f; /*!<
         fdopened file descriptor from LrDownloadTarget and used
         in curl_handle. */
+    char errorbuffer[CURL_ERROR_SIZE]; /*!<
+        Error buffer used in curl handle */
     GSList *tried_mirrors; /*!<
         List of already tried mirrors (LrMirror *).
         This mirrors won't be tried again. */
@@ -762,6 +764,17 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     lr_free(full_url);
 
+    // Set error buffer
+    c_rc = curl_easy_setopt(h, CURLOPT_ERRORBUFFER, target->errorbuffer);
+    if (c_rc != CURLE_OK) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
+                    "curl_easy_setopt(h, CURLOPT_ERRORBUFFER, %s) failed: %s",
+                    full_url, curl_easy_strerror(c_rc));
+        lr_free(full_url);
+        curl_easy_cleanup(h);
+        return FALSE;
+    }
+
     // Prepare FILE
     int fd;
 
@@ -991,9 +1004,10 @@ check_finished_transfer_status(CURLMsg *msg,
         } else {
             // There was a CURL error
             g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                        "Curl error: %s for %s",
+                        "Curl error: %s for %s [%s]",
                         curl_easy_strerror(msg->data.result),
-                        effective_url);
+                        effective_url,
+                        target->errorbuffer);
 
             switch (msg->data.result) {
             case CURLE_NOT_BUILT_IN:
