@@ -765,6 +765,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     lr_free(full_url);
 
     // Set error buffer
+    target->errorbuffer[0] = '\0';
     c_rc = curl_easy_setopt(h, CURLOPT_ERRORBUFFER, target->errorbuffer);
     if (c_rc != CURLE_OK) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
