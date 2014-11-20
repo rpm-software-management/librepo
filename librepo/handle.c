@@ -693,7 +693,10 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
                 g_free(path);
                 return FALSE;
             }
+            g_free(path);
         } else {
+            // No local mirrorlist
+            g_free(path);
             return TRUE;
         }
     } else if (handle->mirrorlisturl) {
@@ -797,7 +800,10 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
                 g_free(path);
                 return FALSE;
             }
+            g_free(path);
         } else {
+            // No local metalink
+            g_free(path);
             return TRUE;
         }
     } else if (handle->metalinkurl) {
