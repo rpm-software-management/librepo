@@ -56,7 +56,7 @@ typedef struct {
 /** Metalink */
 typedef struct {
     char *filename;   /*!< Filename */
-    gint64 timestamp; /*!< File timestamp */
+    gint64 timestamp; /*!< Repo timestamp (the highest ts in the repomd.xml) */
     gint64 size;      /*!< File size */
     GSList *hashes;   /*!< List of pointers to LrMetalinkHashes (could be NULL) */
     GSList *urls;     /*!< List of pointers to LrMetalinkUrls (could be NULL) */
