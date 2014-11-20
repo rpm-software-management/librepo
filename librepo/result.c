@@ -92,7 +92,11 @@ lr_result_getinfo(LrResult *result,
 
     case LRR_YUM_TIMESTAMP: {
         gint64 *ts = va_arg(arg, gint64 *);
-        *ts = lr_yum_repomd_get_highest_timestamp(result->yum_repomd);
+        if (result->yum_repomd) {
+            *ts = lr_yum_repomd_get_highest_timestamp(result->yum_repomd);
+        } else {
+            *ts = -1;
+        }
         break;
     }
 
