@@ -404,9 +404,6 @@ py_setopt(_HandleObject *self, PyObject *args)
             case LRO_ALLOWEDMIRRORFAILURES:
                 d = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
                 break;
-            case LRO_ADAPTIVEMIRRORSORTING:
-                d = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
-                break;
             default:
                 badarg = 1;
             }
