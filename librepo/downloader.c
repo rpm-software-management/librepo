@@ -762,8 +762,6 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         return FALSE;
     }
 
-    lr_free(full_url);
-
     // Set error buffer
     target->errorbuffer[0] = '\0';
     c_rc = curl_easy_setopt(h, CURLOPT_ERRORBUFFER, target->errorbuffer);
@@ -775,6 +773,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         curl_easy_cleanup(h);
         return FALSE;
     }
+
+    lr_free(full_url);
 
     // Prepare FILE
     int fd;
