@@ -109,11 +109,12 @@ lr_yum_repomd_get_record(LrYumRepoMd *repomd,
 
 /** Get the highest timestamp from repomd records.
  * @param repomd        Repomd record.
+ * @param err           GError **
  * @return              The highest timestamp from repomd records
  *                      or -1 if no records available.
  */
 gint64
-lr_yum_repomd_get_highest_timestamp(LrYumRepoMd *repomd);
+lr_yum_repomd_get_highest_timestamp(LrYumRepoMd *repomd, GError **err);
 
 /** @} */
 

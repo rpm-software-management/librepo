@@ -96,6 +96,8 @@ lr_strerror(int rc)
         return "XML parser error";
     case LRE_CBINTERRUPTED:
         return "Interrupted by user cb";
+    case LRE_REPOMD:
+        return "Error in repomd.xml";
     }
 
     return "Unknown error";
@@ -153,6 +155,12 @@ GQuark
 lr_xml_parser_error_quark(void)
 {
     return g_quark_from_static_string("lr_xml_parser_error");
+}
+
+GQuark
+lr_repomd_error_quark(void)
+{
+    return g_quark_from_static_string("lr_repomd_error");
 }
 
 GQuark

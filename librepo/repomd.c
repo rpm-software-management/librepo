@@ -137,16 +137,26 @@ lr_yum_repomd_get_record(LrYumRepoMd *repomd, const char *type)
 }
 
 gint64
-lr_yum_repomd_get_highest_timestamp(LrYumRepoMd *repomd)
+lr_yum_repomd_get_highest_timestamp(LrYumRepoMd *repomd, GError **err)
 {
+    gint64 max = 0;
+
     assert(repomd);
-    gint64 max = -1;
+    assert(!err || *err == NULL);
+
+    if (!repomd->records) {
+        g_set_error(err, LR_REPOMD_ERROR, LRE_REPOMD,
+                    "repomd.xml has no records");
+        return max;
+    }
+
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         LrYumRepoMdRecord *record = elem->data;
         assert(record);
         if (max < record->timestamp)
             max = record->timestamp;
     }
+
     return max;
 }
 

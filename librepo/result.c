@@ -65,6 +65,7 @@ lr_result_getinfo(LrResult *result,
 {
     gboolean rc = TRUE;
     va_list arg;
+    GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
 
@@ -93,9 +94,16 @@ lr_result_getinfo(LrResult *result,
     case LRR_YUM_TIMESTAMP: {
         gint64 *ts = va_arg(arg, gint64 *);
         if (result->yum_repomd) {
-            *ts = lr_yum_repomd_get_highest_timestamp(result->yum_repomd);
+            *ts = lr_yum_repomd_get_highest_timestamp(result->yum_repomd, &tmp_err);
+            if (tmp_err) {
+                rc = FALSE;
+                g_propagate_error(err, tmp_err);
+            }
         } else {
-            *ts = -1;
+            *ts = 0;
+            rc = FALSE;
+            g_set_error(err, LR_RESULT_ERROR, LRE_REPOMD,
+                        "No repomd data available");
         }
         break;
     }
