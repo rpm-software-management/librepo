@@ -244,13 +244,15 @@ typedef struct {
  * the current target.
  */
 static GSList *
-lr_prepare_lrmirrors(GSList *list, LrHandle *handle, LrTarget **target)
+lr_prepare_lrmirrors(GSList *list, LrTarget *target)
 {
+    LrHandle *handle = target->handle;
+
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
         LrHandleMirrors *handle_mirrors = elem->data;
         if (handle_mirrors->handle == handle) {
             // List of LrMirrors for this handle is already created
-            (*target)->lrmirrors = handle_mirrors->lrmirrors;
+            target->lrmirrors = handle_mirrors->lrmirrors;
             return list;
         }
     }
@@ -279,7 +281,7 @@ lr_prepare_lrmirrors(GSList *list, LrHandle *handle, LrTarget **target)
     handle_mirrors->handle = handle;
     handle_mirrors->lrmirrors = lrmirrors;
 
-    (*target)->lrmirrors = lrmirrors;
+    target->lrmirrors = lrmirrors;
     list = g_slist_append(list, handle_mirrors);
 
     return list;
@@ -1706,9 +1708,7 @@ lr_download(GSList *targets,
         // Add list of handle internal mirrors to dd.handle_mirrors
         // if doesn't exists yet and set the list reference
         // to the target.
-        dd.handle_mirrors = lr_prepare_lrmirrors(dd.handle_mirrors,
-                                                 dtarget->handle,
-                                                 &target);
+        dd.handle_mirrors = lr_prepare_lrmirrors(dd.handle_mirrors, target);
     }
 
     dd.running_transfers = NULL;
