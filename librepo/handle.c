@@ -844,7 +844,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
 
     g_debug("%s: Parsing metalink.xml", __func__);
 
-    gchar *metalink_file = NULL;
+    gchar *metalink_file = "";
     gchar *metalink_suffix = NULL;
     if (handle->repotype == LR_YUMREPO) {
         metalink_file = "repomd.xml";

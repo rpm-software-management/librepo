@@ -192,7 +192,7 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
 
     // Find current state by its name
     for (sw = pd->swtab[pd->state]; sw->from == pd->state; sw++)
-        if (!strcmp(element, sw->ename))
+        if (!g_strcmp0(element, sw->ename))
             break;
     if (sw->from != pd->state) {
         // No state for current element (unknown element)
@@ -229,7 +229,7 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
                         "Missing attribute \"name\" of file element");
             break;
         }
-        if (pd->found || strcmp(name, pd->filename)) {
+        if (pd->found || g_strcmp0(name, pd->filename)) {
             pd->ignore = 1;
             break;
         } else {
@@ -511,7 +511,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
 
     if (!pd->found) {
         g_set_error(err, LR_METALINK_ERROR, LRE_MLBAD,
-                    "file %s was not found in metalink", filename);
+                    "file \"%s\" was not found in metalink", filename);
         ret = FALSE; // The wanted file was not found in metalink
     }
 

@@ -730,7 +730,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         self.assertRaisesRegexp(librepo.LibrepoException,
-                                "repomd.xml was not found in metalink",
+                                "\"repomd.xml\" was not found in metalink",
                                 h.perform,
                                 (r))
 
