@@ -2,6 +2,48 @@
 #include "test_lrmirrorlist.h"
 #include "librepo/lrmirrorlist.h"
 
+START_TEST(test_lrmirrorlist_append_url)
+{
+    LrInternalMirrorlist *iml = NULL;
+    LrInternalMirror *mirror = NULL;
+    LrUrlVars *vars = NULL;
+
+    gchar *url1 = g_strdup("ftp://bar");
+    gchar *url2 = g_strdup("http://foo");
+    gchar *url3 = g_strdup("http://xyz/$arch/");
+    gchar *var = g_strdup("arch");
+    gchar *val = g_strdup("i386");
+
+    vars = lr_urlvars_set(vars, var, val);
+
+    g_free(var);
+    g_free(val);
+
+    iml = lr_lrmirrorlist_append_url(iml, url1, NULL);
+    iml = lr_lrmirrorlist_append_url(iml, url2, NULL);
+    iml = lr_lrmirrorlist_append_url(iml, url3, vars);
+
+    g_free(url1);
+    g_free(url2);
+    g_free(url3);
+    lr_urlvars_free(vars);
+
+    mirror = lr_lrmirrorlist_nth(iml, 0);
+    fail_if(!mirror);
+    fail_if(strcmp(mirror->url, "ftp://bar"));
+
+    mirror = lr_lrmirrorlist_nth(iml, 1);
+    fail_if(!mirror);
+    fail_if(strcmp(mirror->url, "http://foo"));
+
+    mirror = lr_lrmirrorlist_nth(iml, 2);
+    fail_if(!mirror);
+    fail_if(strcmp(mirror->url, "http://xyz/i386/"));
+
+    lr_lrmirrorlist_free(iml);
+}
+END_TEST
+
 START_TEST(test_lrmirrorlist_append_mirrorlist)
 {
     LrInternalMirrorlist *iml = NULL;
@@ -199,6 +241,7 @@ lrmirrorlist_suite(void)
 {
     Suite *s = suite_create("internal_mirrorlist");
     TCase *tc = tcase_create("Main");
+    tcase_add_test(tc, test_lrmirrorlist_append_url);
     tcase_add_test(tc, test_lrmirrorlist_append_mirrorlist);
     tcase_add_test(tc, test_lrmirrorlist_append_metalink);
     tcase_add_test(tc, test_lrmirrorlist_append_lrmirrorlist);
