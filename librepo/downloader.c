@@ -520,8 +520,7 @@ select_suitable_mirror(LrDownload *dd,
                        GError **err)
 {
 
-    LrMirror *mirror = NULL;
-    int at_least_one_suitable_mirror_found = 0;
+    gboolean at_least_one_suitable_mirror_found = FALSE;
     //  ^^^ This variable is used to indentify that all possible mirrors
     // were already tried and the transfer shoud be marked as failed.
 
@@ -558,17 +557,13 @@ select_suitable_mirror(LrDownload *dd,
             continue;
         }
 
-        at_least_one_suitable_mirror_found = 1;
+        at_least_one_suitable_mirror_found = TRUE;
 
         // Number of transfers which are downloading from the mirror
         // should always be lower or equal than maximum allowed number
         // of connection to a single host.
         assert(dd->max_connection_per_host == -1 ||
                c_mirror->running_transfers <= dd->max_connection_per_host);
-
-        //
-        // Check the mirror
-        //
 
         // Check number of connections to the mirror
         if (dd->max_connection_per_host != -1 &&
@@ -578,8 +573,8 @@ select_suitable_mirror(LrDownload *dd,
         }
 
         // This mirror looks suitable - use it
-        mirror = c_mirror;
-        break;
+        *selected_mirror = c_mirror;
+        return TRUE;
     }
 
     if (!at_least_one_suitable_mirror_found) {
@@ -610,6 +605,7 @@ select_suitable_mirror(LrDownload *dd,
         }
 
         if (dd->failfast) {
+            // Fail immediately
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
                         "Cannot download %s: All mirrors were tried",
                         target->target->path);
@@ -617,7 +613,6 @@ select_suitable_mirror(LrDownload *dd,
         }
     }
 
-    *selected_mirror = mirror;
     return TRUE;
 }
 
