@@ -174,6 +174,8 @@ lr_lrmirrorlist_append_lrmirrorlist(LrInternalMirrorlist *list,
 
     for (LrInternalMirrorlist *elem = other; elem; elem = g_slist_next(elem)) {
         LrInternalMirror *oth = elem->data;
+        if (!oth->url || !strlen(oth->url))
+            continue;
         LrInternalMirror *mirror = lr_lrmirror_new(oth->url, NULL);
         mirror->preference = oth->preference;
         mirror->protocol = oth->protocol;

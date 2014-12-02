@@ -72,9 +72,10 @@ typedef enum {
 
 typedef struct {
     LrHandle *handle; /*!<
-        Handle */
+        Handle (could be NULL) */
     GSList *lrmirrors; /*!<
-        List of LrMirrors created from the handle internal mirrorlist */
+        List of LrMirrors created from the handle internal mirrorlist
+        (could be NULL) */
 } LrHandleMirrors;
 
 typedef struct {
@@ -269,6 +270,10 @@ lr_prepare_lrmirrors(GSList *list, LrTarget *target)
 
             assert(imirror);
             assert(imirror->url);
+
+            if (!imirror || !imirror->url || !strlen(imiror->url))
+                continue;
+
             g_debug("%s: Mirror: %s", __func__, imirror->url);
 
             LrMirror *mirror = lr_malloc0(sizeof(*mirror));
