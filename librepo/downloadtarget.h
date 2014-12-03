@@ -133,7 +133,7 @@ typedef struct {
 } LrDownloadTarget;
 
 /** Create new empty ::LrDownloadTarget.
- * @param handle            Handle
+ * @param handle            Handle or NULL
  * @param path              Absolute or relative URL path
  * @param baseurl           Base URL for relative path specified in path param
  * @param fd                Opened file descriptor where data will be written

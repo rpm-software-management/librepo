@@ -762,7 +762,7 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
     // Convert mirrorlist to internal mirrorlist format
 
     handle->mirrorlist_mirrors = lr_lrmirrorlist_append_mirrorlist(
-                                            handle->mirrorlist_mirrors,
+                                            NULL,
                                             ml,
                                             handle->urlvars);
     handle->mirrorlist_fd = fd;
@@ -881,7 +881,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
     // Convert metalink to internal mirrorlist format
 
     handle->metalink_mirrors = lr_lrmirrorlist_append_metalink(
-                                            handle->metalink_mirrors,
+                                            NULL,
                                             ml,
                                             metalink_suffix,
                                             handle->urlvars);
@@ -922,7 +922,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
     gboolean ret;
 
     // LRO_URLS
-    if (handle->urls && !handle->urls_mirrors) {
+    if (!handle->urls_mirrors && handle->urls) {
         ret = lr_handle_prepare_urls(handle, err);
         if (!ret) {
             assert(!err || *err);
