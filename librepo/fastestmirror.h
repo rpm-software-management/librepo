@@ -34,7 +34,7 @@ G_BEGIN_DECLS
 typedef struct {
     gchar *url;                 // Points to string passed by the user
     CURL *curl;                 // Curl handle or NULL
-    double plain_connect_time;  // Mirror connect time
+    double plain_connect_time;  // Mirror connect time (<0.0 if connection was unsuccessfull)
     gboolean cached;            // Was connect time load from cache?
 } LrFastestMirror;
 

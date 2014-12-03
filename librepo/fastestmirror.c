@@ -507,7 +507,7 @@ lr_fastestmirror_perform(GSList *list,
 
         if (!effective_url) {
             // No effective url is most likely an error
-            mirror->plain_connect_time = DBL_MAX;
+            mirror->plain_connect_time = -1.0;
         } else if (g_str_has_prefix(effective_url, "file://")) {
             // Local directories are considered to be the best mirrors
             mirror->plain_connect_time = 0.0;
@@ -521,7 +521,7 @@ lr_fastestmirror_perform(GSList *list,
 
             if (connect_time == 0.0) {
                 // Zero connect time is most likely an error
-                plain_connect_time = DBL_MAX;
+                plain_connect_time = -1.0;
             } else {
                 plain_connect_time = connect_time - namelookup_time;
             }
@@ -552,10 +552,19 @@ cmp_fastestmirrors(gconstpointer a,
 {
     const LrFastestMirror *a_mirror = a;
     const LrFastestMirror *b_mirror = b;
+    double a_ct = a_mirror->plain_connect_time;
+    double b_ct = b_mirror->plain_connect_time;
 
-    if (a_mirror->plain_connect_time < b_mirror->plain_connect_time)
+    if (a_ct < 0.0 && b_ct < 0.0)
+        return 0;
+    if (a_ct < 0.0)
+        return 1;
+    if (b_ct < 0.0)
         return -1;
-    else if (a_mirror->plain_connect_time == b_mirror->plain_connect_time)
+
+    if (a_ct < b_ct)
+        return -1;
+    else if (a_ct == b_ct)
         return 0;
     else
         return 1;
