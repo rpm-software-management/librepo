@@ -271,7 +271,7 @@ lr_prepare_lrmirrors(GSList *list, LrTarget *target)
             assert(imirror);
             assert(imirror->url);
 
-            if (!imirror || !imirror->url || !strlen(imiror->url))
+            if (!imirror || !imirror->url || !strlen(imirror->url))
                 continue;
 
             g_debug("%s: Mirror: %s", __func__, imirror->url);
