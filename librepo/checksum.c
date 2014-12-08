@@ -29,6 +29,7 @@
 #include <attr/xattr.h>
 #include <openssl/evp.h>
 
+#include "cleanup.h"
 #include "checksum.h"
 #include "rcodes.h"
 #include "util.h"
@@ -187,7 +188,7 @@ lr_checksum_fd_cmp(LrChecksumType type,
                    gboolean *matches,
                    GError **err)
 {
-    char *checksum;
+    _cleanup_free_ gchar *checksum = NULL;
 
     assert(fd >= 0);
     assert(!err || *err == NULL);
@@ -205,7 +206,7 @@ lr_checksum_fd_cmp(LrChecksumType type,
         struct stat st;
         if (fstat(fd, &st) == 0) {
             ssize_t attr_ret;
-            char *key;
+            _cleanup_free_ gchar *key;
             char buf[256];
 
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
@@ -215,11 +216,9 @@ lr_checksum_fd_cmp(LrChecksumType type,
                 // Cached checksum found
                 g_debug("%s: Using checksum cached in xattr: [%s] %s",
                         __func__, key, buf);
-                lr_free(key);
                 *matches = strcmp(expected, buf) ? FALSE : TRUE;
                 return TRUE;
             }
-            lr_free(key);
         }
     }
 
@@ -233,15 +232,12 @@ lr_checksum_fd_cmp(LrChecksumType type,
         // Store checksum as extended file attribute if caching is enabled
         struct stat st;
         if (fstat(fd, &st) == 0) {
-            char *key;
+            _cleanup_free_ gchar *key = NULL;
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                                   (unsigned long long) st.st_mtime);
             fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
-            lr_free(key);
         }
     }
-
-    lr_free(checksum);
 
     return TRUE;
 }
