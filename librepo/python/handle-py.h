@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_HANDLE_PY_H
-#define LR_HANDLE_PY_H
+#ifndef __LR_HANDLE_PY_H__
+#define __LR_HANDLE_PY_H__
 
 #include "librepo/librepo.h"
 

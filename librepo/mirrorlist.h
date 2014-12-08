@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_MIRRORLIST_H
-#define LR_MIRRORLIST_H
+#ifndef __LR_MIRRORLIST_H__
+#define __LR_MIRRORLIST_H__
 
 #include <glib.h>
 

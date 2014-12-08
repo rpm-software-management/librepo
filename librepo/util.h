@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_UTIL_H
-#define LR_UTIL_H
+#ifndef __LR_UTIL_H__
+#define __LR_UTIL_H__
 
 #include <glib.h>
 #include <stdlib.h>

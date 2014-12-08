@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_TYPECONVERSION_PY_H
-#define LR_TYPECONVERSION_PY_H
+#ifndef __LR_TYPECONVERSION_PY_H__
+#define __LR_TYPECONVERSION_PY_H__
 
 #include "librepo/repomd.h"
 #include "librepo/yum.h"

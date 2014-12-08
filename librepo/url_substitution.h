@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_URL_SUBSTITUTION_H
-#define LR_URL_SUBSTITUTION_H
+#ifndef __LR_URL_SUBSTITUTION_H__
+#define __LR_URL_SUBSTITUTION_H__
 
 #include <glib.h>
 #include <stdlib.h>

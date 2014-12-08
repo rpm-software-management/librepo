@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_REPOUTIL_YUM_H
-#define LR_REPOUTIL_YUM_H
+#ifndef __LR_REPOUTIL_YUM_H__
+#define __LR_REPOUTIL_YUM_H__
 
 #include <glib.h>
 

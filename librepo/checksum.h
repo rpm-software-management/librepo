@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_CHECKSUM_H
-#define LR_CHECKSUM_H
+#ifndef __LR_CHECKSUM_H__
+#define __LR_CHECKSUM_H__
 
 #include <glib.h>
 

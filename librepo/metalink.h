@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_METALINK_H
-#define LR_METALINK_H
+#ifndef __LR_METALINK_H__
+#define __LR_METALINK_H__
 
 #include <glib.h>
 #include "xmlparser.h"

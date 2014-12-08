@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_DOWNLOADER_H
-#define LR_DOWNLOADER_H
+#ifndef __LR_DOWNLOADER_H__
+#define __LR_DOWNLOADER_H__
 
 #include <glib.h>
 

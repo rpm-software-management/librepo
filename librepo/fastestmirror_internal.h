@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef LR_FASTESTMIRROR_INTERNAL_H
-#define LR_FASTESTMIRROR_INTERNAL_H
+#ifndef __LR_FASTESTMIRROR_INTERNAL_H__
+#define __LR_FASTESTMIRROR_INTERNAL_H__
 
 #include <glib.h>
 
