@@ -42,7 +42,7 @@
 
 static void
 lr_log_handler(G_GNUC_UNUSED const gchar *log_domain,
-               GLogLevelFlags log_level,
+               G_GNUC_UNUSED GLogLevelFlags log_level,
                const gchar *message,
                G_GNUC_UNUSED gpointer user_data)
 {
