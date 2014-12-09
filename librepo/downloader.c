@@ -1013,19 +1013,21 @@ check_finished_transfer_status(CURLMsg *msg,
                         target->errorbuffer);
 
             switch (msg->data.result) {
-            case CURLE_NOT_BUILT_IN:
-            case CURLE_COULDNT_RESOLVE_PROXY:
-            case CURLE_WRITE_ERROR:
-            case CURLE_OUT_OF_MEMORY:
             case CURLE_ABORTED_BY_CALLBACK:
             case CURLE_BAD_FUNCTION_ARGUMENT:
-            case CURLE_INTERFACE_FAILED:
-            case CURLE_SEND_ERROR:
-            case CURLE_RECV_ERROR:
-            case CURLE_FILESIZE_EXCEEDED:
             case CURLE_CONV_REQD:
+            case CURLE_COULDNT_RESOLVE_PROXY:
+            case CURLE_FILESIZE_EXCEEDED:
+            case CURLE_INTERFACE_FAILED:
+#if LR_CURL_VERSION_CHECK(7, 21, 5)
+            case CURLE_NOT_BUILT_IN:
+#endif
+            case CURLE_OUT_OF_MEMORY:
+            case CURLE_RECV_ERROR:
+            case CURLE_SEND_ERROR:
             case CURLE_SSL_CACERT_BADFILE:
             case CURLE_SSL_CRL_BADFILE:
+            case CURLE_WRITE_ERROR:
                 // Fatal error
                 g_debug("%s: Fatal error - Curl code %d: %s",
                         __func__, msg->data.result,

@@ -24,6 +24,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <curl/curl.h>
 
 #include "checksum.h"
 #include "xmlparser.h"
@@ -34,6 +35,18 @@ G_BEGIN_DECLS
  *  \addtogroup util
  *  @{
  */
+
+/** Macro for curl version check.
+ * @param major     Major version
+ * @param minor     Minor version
+ * @param patch     Patch version
+ * @return          True if current curl version is higher or equal
+ */
+#define LR_CURL_VERSION_CHECK(major,minor,patch)    \
+    (LIBCURL_VERSION_MAJOR > (major) || \
+     (LIBCURL_VERSION_MAJOR == (major) && LIBCURL_VERSION_MINOR > (minor)) || \
+     (LIBCURL_VERSION_MAJOR == (major) && LIBCURL_VERSION_MINOR == (minor) && \
+      LIBCURL_VERSION_PATCH >= (patch)))
 
 /** Initialize librepo library.
  * This is called automatically to initialize librepo.

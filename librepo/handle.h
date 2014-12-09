@@ -30,7 +30,7 @@ G_BEGIN_DECLS
 /** \defgroup   handle    Librepo Handle
  *  \addtogroup handle
  *  @{
- i*/
+ */
 
 /** Handle object containing configration for repository metadata and
  * package downloading.
