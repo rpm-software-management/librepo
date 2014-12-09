@@ -51,18 +51,15 @@ G_BEGIN_DECLS
   }
 
 LR_DEFINE_CLEANUP_FUNCTION0(GArray*, lr_local_array_unref, g_array_unref)
-LR_DEFINE_CLEANUP_FUNCTION0(GBytes*, lr_local_bytes_unref, g_bytes_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GChecksum*, lr_local_checksum_free, g_checksum_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GDir*, lr_local_dir_close, g_dir_close)
 LR_DEFINE_CLEANUP_FUNCTION0(GError*, lr_local_free_error, g_error_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GHashTable*, lr_local_hashtable_unref, g_hash_table_unref)
+#if GLIB_CHECK_VERSION(2, 32, 0)
 LR_DEFINE_CLEANUP_FUNCTION0(GKeyFile*, lr_local_keyfile_unref, g_key_file_unref)
-LR_DEFINE_CLEANUP_FUNCTION0(GMarkupParseContext*, lr_local_markup_parse_context_unref, g_markup_parse_context_unref)
+#endif
 LR_DEFINE_CLEANUP_FUNCTION0(GPtrArray*, lr_local_ptrarray_unref, g_ptr_array_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GTimer*, lr_local_destroy_timer, g_timer_destroy)
-LR_DEFINE_CLEANUP_FUNCTION0(GVariantBuilder*, lr_local_variant_builder_unref, g_variant_builder_unref)
-LR_DEFINE_CLEANUP_FUNCTION0(GVariant*, lr_local_variant_unref, g_variant_unref)
-LR_DEFINE_CLEANUP_FUNCTION0(GVariantIter*, lr_local_variant_iter_free, g_variant_iter_free)
 
 LR_DEFINE_CLEANUP_FUNCTIONt(GString*, lr_local_free_string, g_string_free)
 
@@ -78,14 +75,10 @@ LR_DEFINE_CLEANUP_FUNCTION(void*, lr_local_free, g_free)
 #define _cleanup_list_free_ __attribute__ ((cleanup(lr_local_free_list)))
 #define _cleanup_string_free_ __attribute__ ((cleanup(lr_local_free_string)))
 #define _cleanup_strv_free_ __attribute__ ((cleanup(lr_local_strfreev)))
-#define _cleanup_variant_iter_free_ __attribute__ ((cleanup(lr_local_variant_iter_free)))
 #define _cleanup_array_unref_ __attribute__ ((cleanup(lr_local_array_unref)))
-#define _cleanup_bytes_unref_ __attribute__ ((cleanup(lr_local_bytes_unref)))
 #define _cleanup_hashtable_unref_ __attribute__ ((cleanup(lr_local_hashtable_unref)))
 #define _cleanup_keyfile_unref_ __attribute__ ((cleanup(lr_local_keyfile_unref)))
-#define _cleanup_markup_parse_context_unref_ __attribute__ ((cleanup(lr_local_markup_parse_context_unref)))
 #define _cleanup_ptrarray_unref_ __attribute__ ((cleanup(lr_local_ptrarray_unref)))
-#define _cleanup_variant_unref_ __attribute__ ((cleanup(lr_local_variant_unref)))
 
 G_END_DECLS
 
