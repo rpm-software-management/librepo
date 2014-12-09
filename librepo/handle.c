@@ -105,6 +105,7 @@ lr_handle_init()
     handle->ipresolve = LRO_IPRESOLVE_DEFAULT;
     handle->allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
     handle->adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
+    handle->gnupghomedir = g_strdup(LRO_GNUPGHOMEDIR_DEFAULT);
 
     return handle;
 }
@@ -137,6 +138,7 @@ lr_handle_free(LrHandle *handle)
     lr_handle_free_list(&handle->yumdlist);
     lr_handle_free_list(&handle->yumblist);
     lr_urlvars_free(handle->urlvars);
+    lr_free(handle->gnupghomedir);
     lr_free(handle);
 }
 
@@ -587,6 +589,13 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_ADAPTIVEMIRRORSORTING:
         handle->adaptivemirrorsorting = va_arg(arg, long);
         break;
+
+    case LRO_GNUPGHOMEDIR: {
+        char *gnupghomedir = va_arg(arg, char *);
+        lr_free(handle->gnupghomedir);
+        handle->gnupghomedir = g_strdup(gnupghomedir);
+        break;
+    }
 
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
@@ -1315,6 +1324,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_ADAPTIVEMIRRORSORTING:
         lnum = va_arg(arg, long *);
         *lnum = (long) (handle->adaptivemirrorsorting);
+        break;
+
+    case LRI_GNUPGHOMEDIR:
+        str = va_arg(arg, char **);
+        *str = handle->gnupghomedir;
         break;
 
     default:

@@ -296,6 +296,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_DESTDIR:
     case LRO_USERAGENT:
     case LRO_FASTESTMIRRORCACHE:
+    case LRO_GNUPGHOMEDIR:
     {
         char *str = NULL, *alloced = NULL;
 
@@ -820,6 +821,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_DESTDIR:
     case LRI_USERAGENT:
     case LRI_FASTESTMIRRORCACHE:
+    case LRI_GNUPGHOMEDIR:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

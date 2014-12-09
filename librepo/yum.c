@@ -639,9 +639,9 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
         /* Signature checking */
         if (handle->checks & LR_CHECK_GPG && repo->signature) {
             ret = lr_gpg_check_signature(repo->signature,
-                                        repo->repomd,
-                                        NULL,
-                                        &tmp_err);
+                                         repo->repomd,
+                                         handle->gnupghomedir,
+                                         &tmp_err);
             if (!ret) {
                 g_debug("%s: repomd.xml GPG signature verification failed: %s",
                         __func__, tmp_err->message);
@@ -842,7 +842,10 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             } else {
                 // Signature downloaded
                 repo->signature = g_strdup(signature);
-                ret = lr_gpg_check_signature(signature, path, NULL, &tmp_err);
+                ret = lr_gpg_check_signature(signature,
+                                             path,
+                                             handle->gnupghomedir,
+                                             &tmp_err);
                 if (!ret) {
                     g_debug("%s: GPG signature verification failed: %s",
                             __func__, tmp_err->message);

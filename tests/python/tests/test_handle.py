@@ -146,6 +146,14 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_ADAPTIVEMIRRORSORTING, None)
         self.assertEqual(h.getinfo(librepo.LRI_ADAPTIVEMIRRORSORTING), 1)
 
+        self.assertEqual(h.getinfo(librepo.LRI_GNUPGHOMEDIR), None)
+        h.setopt(librepo.LRO_GNUPGHOMEDIR,  "/tmp/keyring/")
+        self.assertEqual(h.getinfo(librepo.LRI_GNUPGHOMEDIR), "/tmp/keyring/")
+        h.setopt(librepo.LRO_GNUPGHOMEDIR,  None)
+        self.assertEqual(h.getinfo(librepo.LRI_GNUPGHOMEDIR), None)
+        h.setopt(librepo.LRO_GNUPGHOMEDIR,  "")
+        self.assertEqual(h.getinfo(librepo.LRI_GNUPGHOMEDIR), "")
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -282,6 +290,14 @@ class TestCaseHandle(unittest.TestCase):
         h.adaptivemirrorsorting = None
         self.assertEqual(h.adaptivemirrorsorting, 1)
 
+        self.assertEqual(h.gnupghomedir, None)
+        h.gnupghomedir =  "/tmp/keyring"
+        self.assertEqual(h.gnupghomedir, "/tmp/keyring")
+        h.gnupghomedir =  None
+        self.assertEqual(h.gnupghomedir, None)
+        h.gnupghomedir =  ""
+        self.assertEqual(h.gnupghomedir, "")
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -375,3 +391,6 @@ class TestCaseHandle(unittest.TestCase):
         h.allowedmirrorfailures = None
         h.setopt(librepo.LRO_ADAPTIVEMIRRORSORTING, None)
         h.adaptivemirrorsorting = None
+
+        h.setopt(librepo.LRO_GNUPGHOMEDIR, None)
+        h.gnupghomedir = None

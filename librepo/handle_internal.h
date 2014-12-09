@@ -177,6 +177,9 @@ struct _LrHandle {
 
     long adaptivemirrorsorting; /*!<
         See: LRO_ADAPTIVEMIRRORSORTING */
+
+    gchar *gnupghomedir; /*!<
+        GNUPG home dir. */
 };
 
 /** Return new CURL easy handle with some default options setted.

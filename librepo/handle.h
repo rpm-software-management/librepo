@@ -30,7 +30,7 @@ G_BEGIN_DECLS
 /** \defgroup   handle    Librepo Handle
  *  \addtogroup handle
  *  @{
- */
+ i*/
 
 /** Handle object containing configration for repository metadata and
  * package downloading.
@@ -96,6 +96,10 @@ typedef struct _LrHandle LrHandle;
 
 /** LRO_ADAPTIVEMIRRORSORTING */
 #define LRO_ADAPTIVEMIRRORSORTING_DEFAULT   1
+
+/** LRO_GNUPGHOMEDIR */
+#define LRO_GNUPGHOMEDIR_DEFAULT            NULL
+
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
@@ -285,6 +289,9 @@ typedef enum {
         The the sorting is based on mirror
         error rate etc. */
 
+    LRO_GNUPGHOMEDIR, /*!< (char *)
+        Configuration directory for GNUPG (a directory with keyring) */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -339,6 +346,7 @@ typedef enum {
     LRI_IPRESOLVE,              /*!< (LrIpResolveType *) */
     LRI_ALLOWEDMIRRORFAILURES,  /*!< (long *) */
     LRI_ADAPTIVEMIRRORSORTING,  /*!< (long *) */
+    LRI_GNUPGHOMEDIR,           /*!< (char **) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

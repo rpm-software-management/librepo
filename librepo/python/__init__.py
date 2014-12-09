@@ -308,6 +308,10 @@ Version contants
     handle is re-sorted after each finished transfer.
     The the sorting is based on mirror error rate etc.
 
+.. data:: LRO_GNUPGHOMEDIR
+
+    *String or None* set own GNUPG configuration directory (a dir with keyring).
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -343,6 +347,7 @@ Version contants
 .. data:: LRI_IPRESOLVE
 .. data:: LRI_ALLOWEDMIRRORFAILURES
 .. data:: LRI_ADAPTIVEMIRRORSORTING
+.. data:: LRI_GNUPGHOMEDIR
 
 .. _proxy-type-label:
 
@@ -829,6 +834,7 @@ LRO_SSLVERIFYHOST           = _librepo.LRO_SSLVERIFYHOST
 LRO_IPRESOLVE               = _librepo.LRO_IPRESOLVE
 LRO_ALLOWEDMIRRORFAILURES   = _librepo.LRO_ALLOWEDMIRRORFAILURES
 LRO_ADAPTIVEMIRRORSORTING   = _librepo.LRO_ADAPTIVEMIRRORSORTING
+LRO_GNUPGHOMEDIR            = _librepo.LRO_GNUPGHOMEDIR
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -876,6 +882,7 @@ ATTR_TO_LRO = {
     "ipresolve":            LRO_IPRESOLVE,
     "allowedmirrorfailures":LRO_ALLOWEDMIRRORFAILURES,
     "adaptivemirrorsorting":LRO_ADAPTIVEMIRRORSORTING,
+    "gnupghomedir":         LRO_GNUPGHOMEDIR,
 }
 
 LRI_UPDATE              = _librepo.LRI_UPDATE
@@ -905,6 +912,7 @@ LRI_SSLVERIFYHOST       = _librepo.LRI_SSLVERIFYHOST
 LRI_IPRESOLVE           = _librepo.LRI_IPRESOLVE
 LRI_ALLOWEDMIRRORFAILURES=_librepo.LRI_ALLOWEDMIRRORFAILURES
 LRI_ADAPTIVEMIRRORSORTING=_librepo.LRI_ADAPTIVEMIRRORSORTING
+LRI_GNUPGHOMEDIR        =_librepo.LRI_GNUPGHOMEDIR
 LRI_SENTINEL            = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
@@ -935,6 +943,7 @@ ATTR_TO_LRI = {
     "ipresolve":            LRI_IPRESOLVE,
     "allowedmirrorfailures":LRI_ALLOWEDMIRRORFAILURES,
     "adaptivemirrorsorting":LRI_ADAPTIVEMIRRORSORTING,
+    "gnupghomedir":         LRI_GNUPGHOMEDIR,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1308,6 +1317,10 @@ class Handle(_librepo.Handle):
     .. attribute:: adaptivemirrorsorting:
 
         See :data:`.LRO_ADAPTIVEMIRRORSORTING`
+
+    .. attribute:: gnupghomedir:
+
+        See :data:`.LRO_GNUPGHOMEDIR`
 
     """
 
