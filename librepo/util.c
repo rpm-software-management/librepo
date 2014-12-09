@@ -348,7 +348,7 @@ lr_best_checksum(GSList *list, LrChecksumType *type, gchar **value)
     assert(value);
 
     LrChecksumType tmp_type = LR_CHECKSUM_UNKNOWN;
-    gchar *tmp_value;
+    gchar *tmp_value = NULL;
 
     for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
         LrMetalinkHash *hash = elem->data;

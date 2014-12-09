@@ -206,7 +206,7 @@ lr_checksum_fd_cmp(LrChecksumType type,
         struct stat st;
         if (fstat(fd, &st) == 0) {
             ssize_t attr_ret;
-            _cleanup_free_ gchar *key;
+            _cleanup_free_ gchar *key = NULL;
             char buf[256];
 
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
