@@ -322,12 +322,18 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        with self.assertRaises(librepo.LibrepoException) as ctx:
+
+        raised = False
+        try:
             h.perform(r)
-        unicode_type = unicode if sys.version_info.major < 3 else str
-        self.assertTrue(isinstance(ctx.exception.args[1], unicode_type))
-        self.assertFalse(h.mirrors)
-        self.assertFalse(h.metalink)
+        except librepo.LibrepoException as err:
+            raised = True
+            unicode_type = unicode if sys.version_info.major < 3 else str
+            self.assertTrue(isinstance(err.args[1], unicode_type))
+            self.assertFalse(h.mirrors)
+            self.assertFalse(h.metalink)
+        finally:
+            self.assertTrue(raised)
 
     def test_partial_download_repo_01(self):
         h = librepo.Handle()
@@ -729,10 +735,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        self.assertRaisesRegexp(librepo.LibrepoException,
-                                "\"repomd.xml\" was not found in metalink",
-                                h.perform,
-                                (r))
+        self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
@@ -771,8 +774,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        self.assertRaisesRegexp(librepo.LibrepoException,
-                                ".* No URLs in metalink", h.perform, (r))
+        self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
