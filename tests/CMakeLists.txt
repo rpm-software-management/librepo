@@ -24,7 +24,8 @@ TARGET_LINK_LIBRARIES(test_main
     librepo
     ${CHECK_LIBRARY}
     )
-ADD_TEST(test_main test_main "${CMAKE_CURRENT_SOURCE_DIR}/test_data/")
+CONFIGURE_FILE("run_tests.sh.in"  "${CMAKE_BINARY_DIR}/tests/run_tests.sh")
+ADD_TEST(test_main run_tests.sh)
 
 # Detect nosetest version suffix
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import sys; sys.stdout.write('%s.%s' % (sys.version_info[0], sys.version_info[1]))" OUTPUT_VARIABLE PYTHON_MAJOR_DOT_MINOR_VERSION)
