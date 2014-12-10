@@ -328,7 +328,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             h.perform(r)
         except librepo.LibrepoException as err:
             raised = True
-            unicode_type = unicode if sys.version_info.major < 3 else str
+            unicode_type = unicode if sys.version_info[0] < 3 else str
             self.assertTrue(isinstance(err.args[1], unicode_type))
             self.assertFalse(h.mirrors)
             self.assertFalse(h.metalink)
