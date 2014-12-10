@@ -54,7 +54,7 @@ extern volatile PyThreadState **global_state;  // Thread state
 #define GIL_HACK_MUST_CLEAR     1
 #define GIL_HACK_DO_NOT_CLEAR   2
 
-G_LOCK_DEFINE(gil_hack_lock);
+G_LOCK_EXTERN(gil_hack_lock);
 
 static int
 gil_logger_hack_begin(PyThreadState **state)

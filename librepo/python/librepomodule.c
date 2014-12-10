@@ -39,6 +39,8 @@ PyObject *debug_cb = NULL;
 PyObject *debug_cb_data = NULL;
 gint      debug_handler_id = -1;
 
+G_LOCK_DEFINE(gil_hack_lock);
+
 void
 py_debug_cb(G_GNUC_UNUSED const gchar *log_domain,
             G_GNUC_UNUSED GLogLevelFlags log_level,
