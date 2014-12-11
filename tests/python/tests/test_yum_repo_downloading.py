@@ -1,13 +1,16 @@
+import sys
+import time
+import gpgme
+import shutil
+import os.path
+import tempfile
+import unittest
+
+import librepo
+
 from tests.base import TestCaseWithFlask, MOCKURL, TEST_DATA
 from tests.servermock.server import app
 import tests.servermock.yum_mock.config as config
-import os.path
-import unittest
-import tempfile
-import shutil
-import gpgme
-import librepo
-import sys
 
 PUB_KEY = TEST_DATA+"/key.pub"
 
@@ -820,6 +823,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
     def test_download_repo_01_via_metalink_badfirsthost_fastestmirror(self):
+        time.sleep(0.5)
         h = librepo.Handle()
         r = librepo.Result()
 
@@ -850,6 +854,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
                 self.assertTrue(os.path.isfile(yum_repo[key]))
 
     def test_download_repo_01_via_metalink_badfirsthost_fastestmirror_with_cache(self):
+        time.sleep(0.5)
         h = librepo.Handle()
         r = librepo.Result()
 
