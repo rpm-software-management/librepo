@@ -158,7 +158,7 @@ class TestCaseYumRepoLocating(TestCase):
         h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.setopt(librepo.LRO_GPGCHECK, False)
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -237,3 +237,14 @@ class TestCaseYumRepoLocating(TestCase):
         yum_repo_downloaded["url"] = None
         self.assertEqual(yum_repo, yum_repo_downloaded)
         self.assertEqual(yum_repomd, yum_repomd_downloaded)
+
+    def test_locate_with_gpgcheck_enabled_but_without_signature(self):
+        # At first, download whole repository
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_GPGCHECK, True)
+        self.assertRaises(librepo.LibrepoException, h.perform, (r))

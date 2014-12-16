@@ -836,9 +836,13 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                 // Signature doesn't exist
                 g_debug("%s: GPG signature doesn't exists: %s",
                         __func__, tmp_err->message);
+                g_set_error(err, LR_YUM_ERROR, LRE_BADGPG,
+                            "GPG verification is enabled, but GPG signature "
+                            "repomd.xml.asc is not available: %s", tmp_err->message);
                 g_clear_error(&tmp_err);
                 unlink(signature);
                 lr_free(signature);
+                return FALSE;
             } else {
                 // Signature downloaded
                 repo->signature = g_strdup(signature);
