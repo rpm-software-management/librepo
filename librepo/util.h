@@ -163,6 +163,15 @@ lr_best_checksum(GSList *list, LrChecksumType *type, gchar **value);
 gchar *
 lr_url_without_path(const char *url);
 
+/** Create a copy of NULL-terminated array of strings.
+ * All strings in the copy are malloced - returned array
+ * must be freed by g_strfreev()
+ * @param array     NULL-terminated array of strings or NULL
+ * @return          Copy of input array or NULL if input was NULL
+ */
+gchar **
+lr_strv_dup(gchar **array);
+
 /** @} */
 
 G_END_DECLS

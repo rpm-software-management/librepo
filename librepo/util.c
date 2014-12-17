@@ -396,3 +396,23 @@ lr_url_without_path(const char *url)
 
     return host;
 }
+
+gchar **
+lr_strv_dup(gchar **array)
+{
+    guint length;
+    gchar **copy = NULL;
+    GPtrArray *ptrarray = NULL;
+
+    if (!array)
+        return array;
+
+    length = g_strv_length(array);
+    ptrarray = g_ptr_array_sized_new(length + 1);
+    for (guint x=0; x < length; x++)
+        g_ptr_array_add(ptrarray, g_strdup(array[x]));
+    g_ptr_array_add(ptrarray, NULL);
+    copy = (gchar **) ptrarray->pdata;
+    g_ptr_array_free(ptrarray, FALSE);
+    return copy;
+}

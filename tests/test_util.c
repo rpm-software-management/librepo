@@ -182,6 +182,33 @@ START_TEST(test_url_without_path)
 }
 END_TEST
 
+
+START_TEST(test_strv_dup)
+{
+    gchar **in0 = NULL;
+    gchar *in1[] = {NULL};
+    gchar *in2[] = {"foo", NULL};
+    gchar **copy = NULL;
+
+    copy = lr_strv_dup(in0);
+    fail_if(copy != NULL);
+
+    copy = lr_strv_dup(in1);
+    fail_if(!copy);
+    fail_if(copy == in1);
+    fail_if(copy[0] != NULL);
+    g_strfreev(copy);
+
+    copy = lr_strv_dup(in2);
+    fail_if(!copy);
+    fail_if(copy == in2);
+    fail_if(g_strcmp0(copy[0], "foo"));
+    fail_if(copy[0] == in2[0]);
+    fail_if(copy[1] != NULL);
+    g_strfreev(copy);
+}
+END_TEST
+
 Suite *
 util_suite(void)
 {
@@ -195,6 +222,7 @@ util_suite(void)
     tcase_add_test(tc, test_pathconcat);
     tcase_add_test(tc, test_remove_dir);
     tcase_add_test(tc, test_url_without_path);
+    tcase_add_test(tc, test_strv_dup);
     suite_add_tcase(s, tc);
     return s;
 }
