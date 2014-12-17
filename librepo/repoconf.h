@@ -37,32 +37,32 @@ G_BEGIN_DECLS
 #define LR_YUMREPOCONF_COST_DEFAULT             1000
 #define LR_YUMREPOCONF_PRIORITY_DEFAULT         99
 
-/** Yum repos */
+/** List of yum repo configurations */
 typedef struct _LrYumRepoConfs LrYumRepoConfs;
 
 /** Yum repo config */
 typedef struct {
-    gchar          *_source;         // path
+    gchar          *_source;        /*!< Local path to .repo file */
 
-    gchar          *id;             // id
-    gchar          *name;
-    gboolean        enabled;        // bool
-    gchar          **baseurl;       // url list
-    gchar          *mirrorlist;     // url
-    gchar          *metalink;       // url
+    gchar          *id;             /*!< ID (short name) of the repo */
+    gchar          *name;           /*!< Pretty name of the repo */
+    gboolean        enabled;        /*!< Is repo enabled? */
+    gchar          **baseurl;       /*!< List of base URLs */
+    gchar          *mirrorlist;     /*!< Mirrorlist URL */
+    gchar          *metalink;       /*!< Metalink URL */
 
-    gchar          *mediaid;
-    gchar          **gpgkey;         // url list
-    gchar          **gpgcakey;       // url list
-    gchar          **exclude;        // list
-    gchar          **include;        // list
+    gchar          *mediaid;        /*!< Media ID */
+    gchar          **gpgkey;        /*!< URL of GPG key */
+    gchar          **gpgcakey;      /*!< GPG CA key */
+    gchar          **exclude;       /*!< List of exluded packages */
+    gchar          **include;       /*!< List of included packages */
 
     gboolean        fastestmirror;  /*!< Fastest mirror determination */
-    gchar          *proxy;          // url
-    gchar          *proxy_username;
-    gchar          *proxy_password;
-    gchar          *username;
-    gchar          *password;
+    gchar          *proxy;          /*!< Proxy addres */
+    gchar          *proxy_username; /*!< Proxy username */
+    gchar          *proxy_password; /*!< Proxy password */
+    gchar          *username;       /*!< Username */
+    gchar          *password;       /*!< Password */
 
     gboolean        gpgcheck;       /*!< GPG check for packages */
     gboolean        repo_gpgcheck;  /*!< GPG check for repodata */
@@ -70,39 +70,63 @@ typedef struct {
 
     guint64         bandwidth;      /*!< Bandwidth - Number of bytes */
     gchar          *throttle;       /*!< Throttle string */
-    LrIpResolveType ip_resolve;     // caselessselection
+    LrIpResolveType ip_resolve;     /*!< Ip resolve type */
 
-    gint64          metadata_expire;// seconds
-    gint            cost;           // int
-    gint            priority;       // int
+    gint64          metadata_expire;/*!< Interval in secs for metadata expiration */
+    gint            cost;           /*!< Repo cost */
+    gint            priority;       /*!< Repo priority */
 
-    gchar          *sslcacert;
-    gboolean        sslverify;      // bool
-    gchar          *sslclientcert;
-    gchar          *sslclientkey;
+    gchar          *sslcacert;      /*!< SSL Certification authority cert */
+    gboolean        sslverify;      /*!< SSL verification */
+    gchar          *sslclientcert;  /*!< SSL Client certificate */
+    gchar          *sslclientkey;   /*!< SSL Client key */
 
-    gchar          **deltarepobaseurl; // url list
+    gchar          **deltarepobaseurl;/*!< Deltarepo mirror URLs */
 } LrYumRepoConf;
 
+/** Return new empty LrYumRepoConfs
+ * @return          Newly allocated LrYumRepoConfs
+ */
 LrYumRepoConfs *
 lr_yum_repoconfs_init(void);
 
+/** Frees LrYumRepoConfs
+ * @param confs     NULL or LrYumRepoConfs
+ */
 void
-lr_yum_repoconfs_free(LrYumRepoConfs *repos);
+lr_yum_repoconfs_free(LrYumRepoConfs *confs);
 
+/** Get GSList of LrYumRepoConf from a LrYumRepoConfs.
+ * @param confs     LrYumRepoConfs (not NULL!)
+ * @return          Pointer to internal GSList in LrYumRepoConfs
+ */
 GSList *
-lr_yum_repoconfs_get_list(LrYumRepoConfs *repos, GError **err);
+lr_yum_repoconfs_get_list(LrYumRepoConfs *confs, GError **err);
 
+/** Parse a *.repo file
+ * @param confs     LrYumRepoConfs
+ * @param filename  Path to *.repo file
+ * @return          TRUE if everything is ok, FALSE if err is set.
+ */
 gboolean
-lr_yum_repoconfs_parse(LrYumRepoConfs *repos,
+lr_yum_repoconfs_parse(LrYumRepoConfs *confs,
                        const char *filename,
                        GError **err);
 
+/** Load a directory with *.repo files (e.g. /etc/yum.repos.d/)
+ * @param confs     LrYumRepoConfs
+ * @param path      Path to a directory with *.repo files
+ * @return          TRUE if everything is ok, FALSE if err is set.
+ */
 gboolean
-lr_yum_repoconfs_load_dir(LrYumRepoConfs *repos,
+lr_yum_repoconfs_load_dir(LrYumRepoConfs *confs,
                           const char *path,
                           GError **err);
 
+/** Create a copy of LrYumRepoConf.
+ * @param repoconf  LrYumRepoConf
+ * @return          Deep copy of input LrYumRepoConf
+ */
 LrYumRepoConf *
 lr_yum_repoconf_copy(LrYumRepoConf *repoconf);
 
