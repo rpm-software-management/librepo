@@ -1,0 +1,32 @@
+[big-repo]
+name=Maxi repo - $basearch
+enabled=1
+baseurl=http://foo1.org/pub/linux/$releasever/$basearch/os/
+  ftp://ftp.foo2/pub/linux/$releasever/$basearch/os/ https://foo3.org/pub/linux/
+mirrorlist=http://foo1.org/mirrorlist
+metalink=https://foo1.org/metalink?repo=linux-$releasever&arch=$basearch
+mediaid=0
+gpgkey=https://foo1.org/linux/foo_signing_key.pub https://foo2.org/linux/foo_signing_key.pub
+gpgcakey=https://foo1.org/linux/ca_key.pub
+exclude=package_1 package_2
+include=package_a package_b
+fastestmirror=1
+proxy=socks5://127.0.0.1:5000
+proxy_username=proxyuser
+proxy_password=proxypass
+username=user
+password=pass
+gpgcheck=1
+repo_gpgcheck=1
+enablegroups=1
+bandwidth=1M
+throttle=50%
+ip_resolve=ipv6
+metadata_expire=5d
+cost=500
+priority=10
+sslcacert=file:///etc/ssl.cert
+sslverify=TRUE
+sslclientcert=file:///etc/client.cert
+sslclientkey=file:///etc/client.key
+deltarepobaseurl=http://deltarepomirror.org/ http://deltarepomirror2.org

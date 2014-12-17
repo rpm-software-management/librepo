@@ -9,6 +9,7 @@ SET (librepotest_SRCS
      test_metalink.c
      test_mirrorlist.c
      test_package_downloader.c
+     test_repoconf.c
      test_repomd.c
      testsys.c
      test_url_substitution.c

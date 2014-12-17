@@ -1,0 +1,7 @@
+[minimal-repo-1]
+name=Minimal repo 1 - $basearch
+baseurl=http://m1.com/linux/$basearch
+
+[minimal-repo-2]
+name=Minimal repo 2 - $basearch
+baseurl=http://m2.com/linux/$basearch

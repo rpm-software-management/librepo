@@ -18,6 +18,7 @@
 #include "test_metalink.h"
 #include "test_mirrorlist.h"
 #include "test_package_downloader.h"
+#include "test_repoconf.h"
 #include "test_repomd.h"
 #include "test_url_substitution.h"
 #include "test_util.h"
@@ -112,6 +113,7 @@ main(int argc, char **argv)
     srunner_add_suite(sr, metalink_suite());
     srunner_add_suite(sr, mirrorlist_suite());
     srunner_add_suite(sr, package_downloader_suite());
+    srunner_add_suite(sr, repoconf_suite());
     srunner_add_suite(sr, repomd_suite());
     srunner_add_suite(sr, url_substitution_suite());
     srunner_add_suite(sr, util_suite());
