@@ -1221,17 +1221,7 @@ lr_handle_getinfo(LrHandle *handle,
             break;
         }
 
-        guint length = g_strv_length(source_list);
-        GPtrArray *ptrarray = g_ptr_array_sized_new(length + 1);
-        int x = 0;
-        for (char *item = source_list[x]; item;) {
-            g_ptr_array_add(ptrarray, g_strdup(item));
-            x++;
-            item = source_list[x];
-        }
-        g_ptr_array_add(ptrarray, NULL);
-        *strlist = (char **) ptrarray->pdata;
-        g_ptr_array_free(ptrarray, FALSE);
+        *strlist = lr_strv_dup(source_list);
         break;
     }
 
