@@ -637,7 +637,16 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
             lr_free(sig);
 
         /* Signature checking */
-        if (handle->checks & LR_CHECK_GPG && repo->signature) {
+        if (handle->checks & LR_CHECK_GPG) {
+            if (!repo->signature) {
+                // Signature doesn't exist
+                g_debug("%s: GPG signature doesn't exists", __func__);
+                g_set_error(err, LR_YUM_ERROR, LRE_BADGPG,
+                            "GPG verification is enabled, but GPG signature "
+                            "repomd.xml.asc is not available");
+                return FALSE;
+            }
+
             ret = lr_gpg_check_signature(repo->signature,
                                          repo->repomd,
                                          handle->gnupghomedir,

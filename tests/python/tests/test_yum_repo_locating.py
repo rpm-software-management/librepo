@@ -245,6 +245,6 @@ class TestCaseYumRepoLocating(TestCase):
 
         h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
+        h.setopt(librepo.LRO_LOCAL, True)
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
