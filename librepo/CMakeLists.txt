@@ -10,6 +10,7 @@ SET (librepo_SRCS
      mirrorlist.c
      package_downloader.c
      rcodes.c
+     repoconf.c
      repomd.c
      repoutil_yum.c
      result.c
@@ -28,6 +29,7 @@ SET(librepo_HEADERS
     mirrorlist.h
     package_downloader.h
     rcodes.h
+    repoconf.h
     repomd.h
     repoutil_yum.h
     result.h
