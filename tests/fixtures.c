@@ -36,3 +36,16 @@ test_log_handler_cb(G_GNUC_UNUSED const gchar *log_domain,
     strftime(buffer, 254, "%H:%M:%S", localtime(&rawtime));
     g_printerr("%s: %s %s\n", buffer, level, message);
 }
+
+void
+lr_assert_strv_eq(const gchar * const *strv, ...)
+{
+    va_list args;
+    ck_assert_msg(strv, "NULL isn't strv");
+    va_start (args, strv);
+    for (gint i = 0; strv[i]; i++) {
+        gchar *s = va_arg (args, gchar*);
+        ck_assert_str_eq(strv[i], s);
+    }
+    va_end (args);
+}
