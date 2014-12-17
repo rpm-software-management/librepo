@@ -58,6 +58,7 @@ LR_DEFINE_CLEANUP_FUNCTION0(GHashTable*, lr_local_hashtable_unref, g_hash_table_
 #if GLIB_CHECK_VERSION(2, 32, 0)
 LR_DEFINE_CLEANUP_FUNCTION0(GKeyFile*, lr_local_keyfile_unref, g_key_file_unref)
 #endif
+LR_DEFINE_CLEANUP_FUNCTION0(GKeyFile*, lr_local_keyfile_free, g_key_file_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GPtrArray*, lr_local_ptrarray_unref, g_ptr_array_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GTimer*, lr_local_destroy_timer, g_timer_destroy)
 
@@ -78,6 +79,7 @@ LR_DEFINE_CLEANUP_FUNCTION(void*, lr_local_free, g_free)
 #define _cleanup_array_unref_ __attribute__ ((cleanup(lr_local_array_unref)))
 #define _cleanup_hashtable_unref_ __attribute__ ((cleanup(lr_local_hashtable_unref)))
 #define _cleanup_keyfile_unref_ __attribute__ ((cleanup(lr_local_keyfile_unref)))
+#define _cleanup_keyfile_free_ __attribute__ ((cleanup(lr_local_keyfile_free)))
 #define _cleanup_ptrarray_unref_ __attribute__ ((cleanup(lr_local_ptrarray_unref)))
 
 G_END_DECLS
