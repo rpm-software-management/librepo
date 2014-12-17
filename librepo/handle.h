@@ -50,7 +50,7 @@ typedef struct _LrHandle LrHandle;
 #define LRO_PROXYTYPE_DEFAULT               LR_PROXY_HTTP
 
 /** LRO_MAXSPEED default value (0 == unlimited speed) */
-#define LRO_MAXSPEED_DEFAULT                0
+#define LRO_MAXSPEED_DEFAULT                G_GINT64_CONSTANT(0)
 
 /** LRO_CONNECTTIMEOUT default value */
 #define LRO_CONNECTTIMEOUT_DEFAULT          120
