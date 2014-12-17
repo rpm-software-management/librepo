@@ -111,6 +111,9 @@ typedef enum {
         (35) Interrupted by user cb */
     LRE_REPOMD, /*!<
         (36) Error with repomd (bad content, missing expected values, ...) */
+    LRE_VALUE, /*!<
+        (37) Bad value (e.g. we are expecting bandwidth defined like '1024',
+        '1k', etc., but we got something like 'asdf', '1024S', etc.) */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
 } LrRc; /*!< Return codes */
@@ -130,6 +133,7 @@ const char *lr_strerror(int rc);
 #define LR_METALINK_ERROR           lr_metalink_error_quark()
 #define LR_MIRRORLIST_ERROR         lr_mirrorlist_error_quark()
 #define LR_PACKAGE_DOWNLOADER_ERROR lr_package_downloader_error_quark()
+#define LR_REPOCONF_ERROR           lr_repoconf_error_quark()
 #define LR_REPOMD_ERROR             lr_repomd_error_quark()
 #define LR_REPOUTIL_YUM_ERROR       lr_repoutil_yum_error_quark()
 #define LR_RESULT_ERROR             lr_result_error_quark()
@@ -144,6 +148,7 @@ GQuark lr_handle_error_quark(void);
 GQuark lr_metalink_error_quark(void);
 GQuark lr_mirrorlist_error_quark(void);
 GQuark lr_package_downloader_error_quark(void);
+GQuark lr_repoconf_error_quark(void);
 GQuark lr_repomd_error_quark(void);
 GQuark lr_repoutil_yum_error_quark(void);
 GQuark lr_result_error_quark(void);

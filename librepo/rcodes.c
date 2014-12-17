@@ -98,6 +98,8 @@ lr_strerror(int rc)
         return "Interrupted by user cb";
     case LRE_REPOMD:
         return "Error in repomd.xml";
+    case LRE_VALUE:
+        return "Bad value (no value, unknown unit, etc.)";
     }
 
     return "Unknown error";
@@ -155,6 +157,12 @@ GQuark
 lr_xml_parser_error_quark(void)
 {
     return g_quark_from_static_string("lr_xml_parser_error");
+}
+
+GQuark
+lr_repoconf_error_quark(void)
+{
+    return g_quark_from_static_string("lr_repoconf_error");
 }
 
 GQuark
