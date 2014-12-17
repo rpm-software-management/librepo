@@ -46,6 +46,7 @@
 #include "url_substitution.h"
 #include "downloader.h"
 #include "fastestmirror_internal.h"
+#include "cleanup.h"
 
 CURL *
 lr_get_curl_handle()
@@ -710,6 +711,8 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
     } else if (handle->mirrorlisturl) {
         // Download remote mirrorlist
+        _cleanup_free_ gchar *url = NULL;
+
         fd = lr_gettmpfile();
         if (fd < 0) {
             g_debug("%s: Cannot create a temporary file", __func__);
@@ -718,14 +721,8 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
             return FALSE;
         }
 
-        gchar *prefixed_url = lr_prepend_url_protocol(handle->mirrorlisturl);
-        gchar *url = lr_url_substitute(prefixed_url, handle->urlvars);
-        lr_free(prefixed_url);
-
-        gboolean ret = lr_download_url(handle, url, fd, err);
-        lr_free(url);
-
-        if (!ret) {
+        url = lr_prepend_url_protocol(handle->mirrorlisturl);
+        if (!lr_download_url(handle, url, fd, err)) {
             close(fd);
             return FALSE;
         }
@@ -817,6 +814,8 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
     } else if (handle->metalinkurl) {
         // Download remote metalink
+        _cleanup_free_ gchar *url = NULL;
+
         fd = lr_gettmpfile();
         if (fd < 0) {
             g_debug("%s: Cannot create a temporary file", __func__);
@@ -825,14 +824,8 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
             return FALSE;
         }
 
-        gchar *prefixed_url = lr_prepend_url_protocol(handle->metalinkurl);
-        gchar *url = lr_url_substitute(prefixed_url, handle->urlvars);
-        lr_free(prefixed_url);
-
-        gboolean ret = lr_download_url(handle, url, fd, err);
-        lr_free(url);
-
-        if (!ret) {
+        url = lr_prepend_url_protocol(handle->metalinkurl);
+        if (!lr_download_url(handle, url, fd, err)) {
             close(fd);
             return FALSE;
         }

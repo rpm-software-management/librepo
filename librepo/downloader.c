@@ -38,6 +38,8 @@
 #include "downloadtarget_internal.h"
 #include "handle.h"
 #include "handle_internal.h"
+#include "cleanup.h"
+#include "url_substitution.h"
 
 volatile sig_atomic_t lr_interrupt = 0;
 
@@ -1847,19 +1849,20 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     assert(url);
     assert(!err || *err == NULL);
 
+    // Prepare target
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
                                    NULL, 0, 0, NULL, NULL,
                                    NULL, NULL, NULL, 0, 0);
 
+    // Download the target
     ret = lr_download_target(target, &tmp_err);
 
     assert(ret || tmp_err);
     assert(!(target->err) || !ret);
 
-    if (!ret) {
+    if (!ret)
         g_propagate_error(err, tmp_err);
-    }
 
     lr_downloadtarget_free(target);
 

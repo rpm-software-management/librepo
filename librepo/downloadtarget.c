@@ -27,6 +27,8 @@
 #include "util.h"
 #include "downloadtarget.h"
 #include "downloadtarget_internal.h"
+#include "cleanup.h"
+#include "handle_internal.h"
 
 LrDownloadTargetChecksum *
 lr_downloadtargetchecksum_new(LrChecksumType type, const gchar *value)
@@ -63,23 +65,34 @@ lr_downloadtarget_new(LrHandle *handle,
                       gint64 byterangeend)
 {
     LrDownloadTarget *target;
+    _cleanup_free_ gchar *final_path = NULL;
+    _cleanup_free_ gchar *final_baseurl = NULL;
 
     assert(path);
     assert((fd > 0 && !fn) || (fd < 0 && fn));
 
-    target = lr_malloc0(sizeof(*target));
-
     if (byterangestart && resume) {
         g_debug("%s: Cannot specify byterangestart and set resume to TRUE "
                 "at the same time", __func__);
-        free(target);
         return NULL;
     }
 
+    // Substitute variables in URLs
+    if (handle && handle->urlvars) {
+        final_path      = lr_url_substitute(path, handle->urlvars);
+        final_baseurl   = lr_url_substitute(baseurl, handle->urlvars);
+    } else {
+        final_path      = g_strdup(path);
+        final_baseurl   = g_strdup(baseurl);
+    }
+
+
+    target = lr_malloc0(sizeof(*target));
+
     target->handle          = handle;
     target->chunk           = g_string_chunk_new(0);
-    target->path            = g_string_chunk_insert(target->chunk, path);
-    target->baseurl         = lr_string_chunk_insert(target->chunk, baseurl);
+    target->path            = g_string_chunk_insert(target->chunk, final_path);
+    target->baseurl         = lr_string_chunk_insert(target->chunk, final_baseurl);
     target->fd              = fd;
     target->fn              = lr_string_chunk_insert(target->chunk, fn);
     target->checksums       = possiblechecksums;
