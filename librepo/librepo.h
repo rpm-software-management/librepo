@@ -30,7 +30,6 @@
 #include "metalink.h"
 #include "package_downloader.h"
 #include "rcodes.h"
-#include "repoconf.h"
 #include "repomd.h"
 #include "repoutil_yum.h"
 #include "result.h"

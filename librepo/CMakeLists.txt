@@ -29,7 +29,6 @@ SET(librepo_HEADERS
     mirrorlist.h
     package_downloader.h
     rcodes.h
-    repoconf.h
     repomd.h
     repoutil_yum.h
     result.h
