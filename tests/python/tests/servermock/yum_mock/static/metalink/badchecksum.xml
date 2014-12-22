@@ -8,7 +8,7 @@
         <hash type="sha1">xxxxxxxxxx4c21945257d9041a908d0d01d2ca16</hash>
       </verification>
       <resources maxconnections="1">
-        <url>http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml</url>
+        <url>http://127.0.0.1:{PORT_PLACEHOLDER}/yum/static/01/repodata/repomd.xml</url>
       </resources>
     </file>
   </files>
