@@ -39,7 +39,9 @@ Python tests with Flask
 Some python tests use **Flask** python framework (http://flask.pocoo.org/)
 to simulate web server. The server is started automatically during that tests.
 
-*TestCases with Flask inherit from TestCaseWithFlask class.*
+*TestCases with Flask inherit from TestCaseWithApp class.*
+
+The Flask is then set as the app to the test case by 'application' class attribute.
 
 If you want to start server manually::
 

@@ -13,7 +13,7 @@ TEST_DATA = os.path.normpath(os.path.join(__file__, "../../../test_data"))
 class TestCase(unittest.TestCase):
     pass
 
-class TestCaseWithFlask(TestCase):
+class TestCaseWithApp(TestCase):
     application = NotImplemented
 
     @classmethod

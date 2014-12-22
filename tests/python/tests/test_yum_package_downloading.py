@@ -8,11 +8,11 @@ import tempfile
 
 import tests.servermock.yum_mock.config as config
 
-from tests.base import TestCaseWithFlask, MOCKURL
+from tests.base import TestCaseWithApp, MOCKURL
 from tests.servermock.server import app
 
 
-class TestCaseYumPackageDownloading(TestCaseWithFlask):
+class TestCaseYumPackageDownloading(TestCaseWithApp):
     application = app
 
 #    @classmethod
@@ -146,7 +146,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         pkg = os.path.join(self.tmpdir, config.PACKAGE_01_01)
         self.assertTrue(os.path.isfile(pkg))
 
-class TestCaseYumPackagesDownloading(TestCaseWithFlask):
+class TestCaseYumPackagesDownloading(TestCaseWithApp):
     application = app
 
 #    @classmethod

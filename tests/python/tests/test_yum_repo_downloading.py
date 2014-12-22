@@ -8,13 +8,13 @@ import unittest
 
 import librepo
 
-from tests.base import TestCaseWithFlask, MOCKURL, TEST_DATA
+from tests.base import TestCaseWithApp, MOCKURL, TEST_DATA
 from tests.servermock.server import app
 import tests.servermock.yum_mock.config as config
 
 PUB_KEY = TEST_DATA+"/key.pub"
 
-class TestCaseYumRepoDownloading(TestCaseWithFlask):
+class TestCaseYumRepoDownloading(TestCaseWithApp):
     application = app
 
 #    @classmethod
