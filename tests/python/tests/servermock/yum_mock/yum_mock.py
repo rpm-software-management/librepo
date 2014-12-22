@@ -14,6 +14,7 @@ def serve_mirrorlists_with_right_port(path):
     try:
         with yum_mock.open_resource('static/mirrorlist/'+path) as f:
             data = f.read()
+            data = data.decode('utf-8')
             data = data.replace(":{PORT_PLACEHOLDER}", ":%d" % current_app._librepo_port)
             return data
     except IOError:
@@ -25,6 +26,7 @@ def serve_metalinks_with_right_port(path):
     try:
         with yum_mock.open_resource('static/metalink/'+path) as f:
             data = f.read()
+            data = data.decode('utf-8')
             data = data.replace(":{PORT_PLACEHOLDER}", ":%d" % current_app._librepo_port)
             return data
     except IOError:
