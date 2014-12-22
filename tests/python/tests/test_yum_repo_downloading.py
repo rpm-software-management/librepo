@@ -8,18 +8,13 @@ import unittest
 
 import librepo
 
-from tests.base import TestCaseWithApp, MOCKURL, TEST_DATA
+from tests.base import TestCaseWithFlask, TEST_DATA
 from tests.servermock.server import app
 import tests.servermock.yum_mock.config as config
 
 PUB_KEY = TEST_DATA+"/key.pub"
 
-class TestCaseYumRepoDownloading(TestCaseWithApp):
-    application = app
-
-#    @classmethod
-#    def setUpClass(cls):
-#        super(TestCaseYumRepoDownloading, cls).setUpClass()
+class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
@@ -43,7 +38,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -163,7 +158,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_02_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_02_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -321,7 +316,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.BADURL)
+        url = "%s%s" % (self.MOCKURL, config.BADURL)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -342,7 +337,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -385,7 +380,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -428,7 +423,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -470,7 +465,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
     def test_download_repo_01_without_result_object(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -487,7 +482,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -504,7 +499,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s%s" % (MOCKURL, config.HARMCHECKSUM % "primary.xml", config.REPO_YUM_01_PATH)
+        url = "%s%s%s" % (self.MOCKURL, config.HARMCHECKSUM % "primary.xml", config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -521,7 +516,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -541,7 +536,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s%s" % (MOCKURL, config.BADGPG, config.REPO_YUM_01_PATH)
+        url = "%s%s%s" % (self.MOCKURL, config.BADGPG, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -559,7 +554,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s%s" % (MOCKURL, config.MISSINGFILE % "primary.xml", config.REPO_YUM_01_PATH)
+        url = "%s%s%s" % (self.MOCKURL, config.MISSINGFILE % "primary.xml", config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -576,7 +571,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s%s" % (MOCKURL, config.MISSINGFILE % "primary.xml", config.REPO_YUM_01_PATH)
+        url = "%s%s%s" % (self.MOCKURL, config.MISSINGFILE % "primary.xml", config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -593,7 +588,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.BADURL)
+        url = "%s%s" % (self.MOCKURL, config.BADURL)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -605,13 +600,13 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_FETCHMIRRORS, True)
         h.perform(r)
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
 
         self.assertEqual(h.metalink,
             {'timestamp': 1347459931,
@@ -622,7 +617,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
                  ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
              'size': 2621,
              'urls': [{
-                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'url': 'http://127.0.0.1:%d/yum/static/01/repodata/repomd.xml' % self.PORT,
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
@@ -632,7 +627,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
 
     def test_download_repo_01_via_metalink_with_alternates(self):
         h = librepo.Handle()
-        h.metalinkurl = "%s%s" % (MOCKURL, config.METALINK_WITH_ALTERNATES)
+        h.metalinkurl = "%s%s" % (self.MOCKURL, config.METALINK_WITH_ALTERNATES)
         h.repotype = librepo.LR_YUMREPO
         h.destdir = self.tmpdir
         h.checksum = True
@@ -642,9 +637,9 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
         self.assertTrue(yum_repo)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
         self.assertTrue(yum_repomd)
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink,
             {'timestamp': 1381706941,
              'hashes': [
@@ -654,7 +649,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
                  ('sha512', 'bad')],
              'size': 4761,
              'urls': [{
-                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'url': 'http://127.0.0.1:%d/yum/static/01/repodata/repomd.xml' % self.PORT,
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
@@ -682,7 +677,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -693,10 +688,10 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
         self.assertTrue(yum_repo)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
         self.assertTrue(yum_repomd)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink,
             {'timestamp': 1347459931,
              'hashes': [
@@ -706,7 +701,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
                  ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
              'size': 2621,
              'urls': [{
-                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'url': 'http://127.0.0.1:%d/yum/static/01/repodata/repomd.xml' % self.PORT,
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
@@ -718,7 +713,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_02)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_02)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -734,7 +729,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_BADFILENAME)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_BADFILENAME)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -750,7 +745,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_BADCHECKSUM)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_BADCHECKSUM)
         h.setopt(librepo.LRO_METALINKURL, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -773,7 +768,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_NOURLS)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_NOURLS)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -789,7 +784,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_BADFIRSTURL)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTURL)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -800,7 +795,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
 
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -812,7 +807,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_BADFIRSTHOST)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTHOST)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -827,7 +822,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_BADFIRSTHOST)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTHOST)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -845,7 +840,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
 
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -861,7 +856,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         cache = os.path.join(self.tmpdir, "fastestmirror.cache")
         self.assertFalse(os.path.exists(cache))
 
-        url = "%s%s" % (MOCKURL, config.METALINK_BADFIRSTHOST)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTHOST)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -879,7 +874,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
         self.assertTrue(os.path.exists(cache))
 
         shutil.rmtree(os.path.join(self.tmpdir, "repodata"))
@@ -891,14 +886,14 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
         self.assertTrue(os.path.exists(cache))
 
     def test_download_repo_01_via_metalink_firsturlhascorruptedfiles(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_FIRSTURLHASCORRUPTEDFILES)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_FIRSTURLHASCORRUPTEDFILES)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -911,7 +906,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
         self.assertEqual(yum_repo["url"],
-            "http://127.0.0.1:5000/yum/harm_checksum/primary.xml/static/01/")
+            "http://127.0.0.1:%d/yum/harm_checksum/primary.xml/static/01/" % self.PORT)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -923,16 +918,16 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
-        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_FETCHMIRRORS, True)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink,
             {'timestamp': 1347459931,
              'hashes': [
@@ -942,7 +937,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
                  ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
              'size': 2621,
              'urls': [{
-                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'url': 'http://127.0.0.1:%d/yum/static/01/repodata/repomd.xml' % self.PORT,
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
@@ -954,16 +949,16 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
-        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.fastestmirror = True # XXX
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink,
             {'timestamp': 1347459931,
              'hashes': [
@@ -973,7 +968,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
                  ('sha512', 'e40060c747895562e945a68967a04d1279e4bd8507413681f83c322479aa564027fdf3962c2d875089bfcb9317d3a623465f390dc1f4acef294711168b807af0')],
              'size': 2621,
              'urls': [{
-                 'url': 'http://127.0.0.1:5000/yum/static/01/repodata/repomd.xml',
+                 'url': 'http://127.0.0.1:%d/yum/static/01/repodata/repomd.xml' % self.PORT,
                  'type': 'http',
                  'protocol': 'http',
                  'location': 'CZ',
@@ -987,21 +982,21 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_FETCHMIRRORS, True)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink, None)
 
     def test_download_repo_01_via_mirrorlist_01(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1012,14 +1007,14 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
         self.assertTrue(yum_repo)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
         self.assertTrue(yum_repomd)
 
     def test_download_repo_01_via_mirrorlist_02(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_02)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_02)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1030,14 +1025,14 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
 
         self.assertTrue(yum_repo)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
         self.assertTrue(yum_repomd)
 
     def test_download_repo_01_via_mirrorlist_nourls(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_NOURLS)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_NOURLS)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1053,7 +1048,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_BADFIRSTURL)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_BADFIRSTURL)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1064,7 +1059,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
 
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
-        self.assertEqual(yum_repo["url"], "http://127.0.0.1:5000/yum/static/01/")
+        self.assertEqual(yum_repo["url"], "http://127.0.0.1:%d/yum/static/01/" % self.PORT)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -1076,7 +1071,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1089,7 +1084,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
         self.assertEqual(yum_repo["url"],
-            "http://127.0.0.1:5000/yum/harm_checksum/primary.xml/static/01/")
+            "http://127.0.0.1:%d/yum/harm_checksum/primary.xml/static/01/" % self.PORT)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -1104,7 +1099,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1120,7 +1115,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1134,7 +1129,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
         self.assertEqual(yum_repo["url"],
-            "http://127.0.0.1:5000/yum/harm_checksum/primary.xml/static/01/")
+            "http://127.0.0.1:%d/yum/harm_checksum/primary.xml/static/01/" % self.PORT)
 
         # Test if all mentioned files really exist
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -1146,31 +1141,33 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_FETCHMIRRORS, True)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors,
+                         ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink, None)
 
     def test_download_repo_01_with_baseurl_and_mirrorlist_specified(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors,
+                         ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink, None)
 
 # Update test
@@ -1179,7 +1176,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1193,7 +1190,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
         self.assertEqual(yum_repo["url"],
-            "http://127.0.0.1:5000/yum/harm_checksum/primary.xml/static/01/")
+            "http://127.0.0.1:%d/yum/harm_checksum/primary.xml/static/01/" % self.PORT)
 
         # Test that only repomd.xml has a path
         self.assertTrue(os.path.isdir(yum_repo["destdir"]))
@@ -1224,7 +1221,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s%s" % (MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
+        url = "%s%s%s" % (self.MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1235,7 +1232,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s%s" % (MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
+        url = "%s%s%s" % (self.MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1262,7 +1259,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1285,7 +1282,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH_VAR)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH_VAR)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1304,7 +1301,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_VARED)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_VARED)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1312,14 +1309,14 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h.setopt(librepo.LRO_VARSUB, config.MIRRORLIST_VARED_LIST)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink, None)
 
     def test_download_repo_01_mirrorlist_with_url_substitution(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_VARSUB)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_VARSUB)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1327,14 +1324,14 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h.setopt(librepo.LRO_VARSUB, config.MIRRORLIST_VARSUB_LIST)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink, None)
 
     def test_download_repo_01_metalink_with_url_substitution(self):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_VARSUB)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_VARSUB)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -1342,10 +1339,10 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h.setopt(librepo.LRO_VARSUB, config.METALINK_VARSUB_LIST)
         h.perform(r)
 
-        self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
+        self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
         self.assertEqual(h.metalink["urls"],
             [{
-                'url': 'http://127.0.0.1:5000/yum/static/$version/repodata/repomd.xml',
+                'url': 'http://127.0.0.1:%d/yum/static/$version/repodata/repomd.xml' % self.PORT,
                 'type': 'http',
                 'protocol': 'http',
                 'location': 'CZ',
@@ -1357,7 +1354,7 @@ class TestCaseYumRepoDownloading(TestCaseWithApp):
         h = librepo.Handle()
         r = librepo.Result()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_02_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_02_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)

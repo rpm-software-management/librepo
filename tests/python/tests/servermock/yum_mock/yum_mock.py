@@ -1,11 +1,35 @@
-from flask import Blueprint, render_template, abort, send_file, request, Response
-from functools import wraps
 import os
+from flask import Blueprint, render_template, abort, send_file, request, Response
+from flask import current_app
+from functools import wraps
+
 from .config import AUTH_USER, AUTH_PASS
 
 yum_mock = Blueprint('yum_mock', __name__,
                         template_folder='templates',
                         static_folder='static')
+
+@yum_mock.route('/static/mirrorlist/<path:path>')
+def serve_mirrorlists_with_right_port(path):
+    try:
+        with yum_mock.open_resource('static/mirrorlist/'+path) as f:
+            data = f.read()
+            data = data.replace(":{PORT_PLACEHOLDER}", ":%d" % current_app._librepo_port)
+            return data
+    except IOError:
+        # File probably doesn't exist or we can't read it
+        abort(404)
+
+@yum_mock.route('/static/metalink/<path:path>')
+def serve_metalinks_with_right_port(path):
+    try:
+        with yum_mock.open_resource('static/metalink/'+path) as f:
+            data = f.read()
+            data = data.replace(":{PORT_PLACEHOLDER}", ":%d" % current_app._librepo_port)
+            return data
+    except IOError:
+        # File probably doesn't exist or we can't read it
+        abort(404)
 
 @yum_mock.route('/harm_checksum/<keyword>/<path:path>')
 def harm_checksum(keyword, path):

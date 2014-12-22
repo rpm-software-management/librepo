@@ -8,16 +8,11 @@ import tempfile
 
 import tests.servermock.yum_mock.config as config
 
-from tests.base import TestCaseWithApp, MOCKURL
+from tests.base import TestCaseWithFlask
 from tests.servermock.server import app
 
 
-class TestCaseYumPackageDownloading(TestCaseWithApp):
-    application = app
-
-#    @classmethod
-#    def setUpClass(cls):
-#        super(TestCaseYumPackageDownloading, cls).setUpClass()
+class TestCaseYumPackageDownloading(TestCaseWithFlask):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
@@ -30,7 +25,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
         Destination dir is specified by LRO_DESTDIR in handle"""
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -48,7 +43,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
 
         destination = os.path.join(self.tmpdir, "pkg.rpm")
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_CHECKSUM, True)
@@ -67,7 +62,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
 
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_CHECKSUM, True)
@@ -87,7 +82,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
 
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_CHECKSUM, True)
@@ -102,7 +97,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
     def test_download_package_via_metalink(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.METALINK_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -117,7 +112,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
     def test_download_package_via_mirrorlist(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.MIRRORLIST_GOOD_01)
+        url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
         h.setopt(librepo.LRO_MIRRORLIST, url)
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -132,8 +127,8 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
     def test_download_package_with_baseurl(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.BADURL)
-        baseurl = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.BADURL)
+        baseurl = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -146,7 +141,7 @@ class TestCaseYumPackageDownloading(TestCaseWithApp):
         pkg = os.path.join(self.tmpdir, config.PACKAGE_01_01)
         self.assertTrue(os.path.isfile(pkg))
 
-class TestCaseYumPackagesDownloading(TestCaseWithApp):
+class TestCaseYumPackagesDownloading(TestCaseWithFlask):
     application = app
 
 #    @classmethod
@@ -212,7 +207,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_00(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -222,7 +217,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_01(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -240,7 +235,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_02(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -264,7 +259,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_02_with_failfast(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -288,7 +283,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_one_url_is_bad_01(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -311,7 +306,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_one_url_is_bad_with_failfast(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -341,7 +336,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_checksum_check(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -369,7 +364,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_bad_checksum(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -388,7 +383,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_bad_checksum_with_failfast(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -408,7 +403,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_baseurl(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, ["."])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -427,7 +422,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_resume(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -467,7 +462,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_callback(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -496,7 +491,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
         self.assertEqual(cbdata["downloaded"], cbdata["total"])
 
     def test_download_packages_without_handle(self):
-        complete_url = "%s%s%s" % (MOCKURL,
+        complete_url = "%s%s%s" % (self.MOCKURL,
                                    config.REPO_YUM_01_PATH,
                                    config.PACKAGE_01_01)
 
@@ -514,11 +509,11 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
         h1 = librepo.Handle()
         h2 = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h1.setopt(librepo.LRO_URLS, [url])
         h1.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_03_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_03_PATH)
         h2.setopt(librepo.LRO_URLS, [url])
         h2.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -543,7 +538,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_expectedsize(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -570,7 +565,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
         def fastestmirrorstatuscallback(userdata, stage, data):
             cbdata["called"] = True
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -606,7 +601,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
             if stage == librepo.FMSTAGE_DETECTION:
                 cbdata["detection"] = True
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url, "http://foobarblabla"])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
@@ -633,9 +628,9 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
     def test_download_packages_with_bad_first_mirror_1(self):
         h = librepo.Handle()
 
-        url1 = "%s%s" % (MOCKURL, config.REPO_YUM_02_PATH)
-        url2 = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        url3 = "%s%s" % (MOCKURL, config.REPO_YUM_03_PATH)
+        url1 = "%s%s" % (self.MOCKURL, config.REPO_YUM_02_PATH)
+        url2 = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        url3 = "%s%s" % (self.MOCKURL, config.REPO_YUM_03_PATH)
         h.setopt(librepo.LRO_URLS, [url1, url2, url3])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.maxparalleldownloads = 1
@@ -666,7 +661,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
         # the original file should not be modified or deleted
         h = librepo.Handle()
 
-        url = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
 
@@ -721,9 +716,9 @@ class TestCaseYumPackagesDownloading(TestCaseWithApp):
 
         h = librepo.Handle()
 
-        url1 = "%s%s" % (MOCKURL, config.REPO_YUM_01_PATH)
-        url2 = "%s%s" % (MOCKURL, config.REPO_YUM_03_PATH)
-        url3 = "%s%s" % (MOCKURL, config.REPO_YUM_04_PATH)
+        url1 = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        url2 = "%s%s" % (self.MOCKURL, config.REPO_YUM_03_PATH)
+        url3 = "%s%s" % (self.MOCKURL, config.REPO_YUM_04_PATH)
         h.setopt(librepo.LRO_URLS, [url1, url2, url3])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.maxparalleldownloads = 1
