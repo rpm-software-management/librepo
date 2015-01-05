@@ -85,7 +85,7 @@ typedef struct {
         Mirror */
     int running_transfers; /*!<
         How many transfers from this mirror are currently in progres. */
-    int successfull_transfers; /*!<
+    int successful_transfers; /*!<
         How many transfers was finished successfully from the mirror. */
     int failed_transfers; /*!<
         How many transfers failed. */
@@ -213,7 +213,7 @@ typedef struct {
  *  |      +---------------------------+ | |    +---------------------+
  *  |      | LrInternalMirror *mirror --------->|   LrInternalMirror  |
  *  |      | int running_transfers     | |      +---------------------+
- *  |      | int successfull_transfers |-+      | char *url           |
+ *  |      | int successful_transfers  |-+      | char *url           |
  *  |      | int failed_transfers      |<---\   | int preference      |
  *  |      +---------------------------+     |  | LrProtocol protocol |
  *  |                                        |  +---------------------+
@@ -556,7 +556,7 @@ select_suitable_mirror(LrDownload *dd,
             continue;
         }
 
-        if (c_mirror->successfull_transfers == 0 &&
+        if (c_mirror->successful_transfers == 0 &&
             dd->allowed_mirror_failures > 0 &&
             c_mirror->failed_transfers >= dd->allowed_mirror_failures)
         {
@@ -1135,7 +1135,7 @@ check_finished_trasfer_checksum(int fd,
         g_set_error(transfer_err,
                 LR_DOWNLOADER_ERROR,
                 LRE_BADCHECKSUM,
-                "Downloading successfull, but checksum doesn't match. "
+                "Downloading successful, but checksum doesn't match. "
                 "Expected: %s", expected);
         g_free(expected);
     }
@@ -1191,14 +1191,14 @@ mirror_rank(LrMirror *mirror)
 {
     gdouble rank = -1.0;
 
-    int successfull = mirror->successfull_transfers;
+    int successful = mirror->successful_transfers;
     int failed = mirror->failed_transfers;
-    int finished_transfers = successfull + failed;
+    int finished_transfers = successful + failed;
 
     if (finished_transfers < 3)
         return rank; // Do not judge too early
 
-    rank = successfull / (double) finished_transfers;
+    rank = successful / (double) finished_transfers;
 
     return rank;
 }
@@ -1210,7 +1210,7 @@ mirror_rank(LrMirror *mirror)
  * @param mirrors   GSList of mirrors (order of list elements won't be changed,
  *                  only data pointers)
  * @param mirror    Mirror of just finished transfer
- * @param success   Was download from the mirror successfull
+ * @param success   Was download from the mirror successful
  */
 static gboolean
 sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success)
@@ -1266,7 +1266,7 @@ exit:
         for (GSList *elem = mirrors; elem; elem = g_slist_next(elem)) {
             LrMirror *m = elem->data;
             g_debug(" %s (s: %d f: %d)", m->mirror->url,
-                   m->successfull_transfers, m->failed_transfers);
+                   m->successful_transfers, m->failed_transfers);
         }
     }
 
@@ -1329,7 +1329,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         if (!ret)  // Error
             return FALSE;
 
-        if (transfer_err)  // Transfer was unsuccessfull
+        if (transfer_err)  // Transfer was unsuccessful
             goto transfer_error;
 
         //
@@ -1344,7 +1344,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                                               &tmp_err);
         if (!ret) { // Error
             g_propagate_prefixed_error(err, tmp_err, "Downloading from %s"
-                    "was successfull but error encountered while "
+                    "was successful but error encountered while "
                     "checksuming: ", effective_url);
             return FALSE;
         }
@@ -1492,7 +1492,7 @@ transfer_error:
 
             // Update mirror statistics
             if (target->mirror) {
-                target->mirror->successfull_transfers++;
+                target->mirror->successful_transfers++;
                 if (dd->adaptivemirrorsorting)
                     sort_mirrors(target->lrmirrors, target->mirror, TRUE);
             }
@@ -1794,7 +1794,7 @@ lr_download_cleanup:
         assert(target->f == NULL);
 
         // Remove file created for the target if download was
-        // unsuccessfull and the file doesn't exists before or
+        // unsuccessful and the file doesn't exists before or
         // its original content was overwritten
         if (target->state != LR_DS_FINISHED) {
             if (!target->target->resume || target->original_offset == 0) {
