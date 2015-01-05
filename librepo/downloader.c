@@ -1063,7 +1063,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             g_set_error(&tmp_err,
                     LR_DOWNLOADER_ERROR,
                     LRE_BADCHECKSUM,
-                    "Downloading successfull, but checksum doesn't match. "
+                    "Downloading successful, but checksum doesn't match. "
                     "Expected: %s", expected);
             g_free(expected);
         }
