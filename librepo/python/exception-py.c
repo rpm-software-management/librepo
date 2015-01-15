@@ -22,6 +22,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include "exception-py.h"
+#include "typeconversion.h"
 
 PyObject *LrErr_Exception = NULL;
 
@@ -99,7 +100,7 @@ return_error(GError **err, int rc, const char *format, ...)
             exception_type = LrErr_Exception;
     }
 
-    PyObject *py_msg = PyUnicode_FromString(message);
+    PyObject *py_msg = PyStringOrNone_FromString(message);
     // Set exception
     if (exception_type == PyExc_IOError) {
         // Because of IOError exception has a special formating
