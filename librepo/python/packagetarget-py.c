@@ -124,7 +124,7 @@ packagetarget_end_callback(void *data,
 {
     int ret = LR_CB_OK; // Assume everything will be ok
     _PackageTargetObject *self;
-    PyObject *user_data, *result;
+    PyObject *user_data, *result, *py_msg;
 
     self = (_PackageTargetObject *)data;
     assert(self->handle);
@@ -136,9 +136,12 @@ packagetarget_end_callback(void *data,
     else
         user_data = Py_None;
 
+    py_msg = PyStringOrNone_FromString(msg);
+
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->end_cb,
-                                   "(Ois)", user_data, status, msg);
+                                   "(OiO)", user_data, status, py_msg);
+    Py_DECREF(py_msg);
     if (!result) {
         // Exception raised in callback leads to the abortion
         // of whole downloading (it is considered fatal)
