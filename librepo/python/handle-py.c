@@ -150,6 +150,7 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
         case LR_FMSTAGE_CACHELOADINGSTATUS:
         case LR_FMSTAGE_STATUS:
             pydata = PyStringOrNone_FromString((char *) ptr);
+            pydata = PyUnicode_FromString((char *) ptr);
             break;
         case LR_FMSTAGE_DETECTION:
             pydata = PyLong_FromLong(*((long *) ptr));
@@ -176,7 +177,7 @@ hmf_callback(void *data, const char *msg, const char *url, const char *metadata)
 {
     int ret = LR_CB_OK; // Assume everything will be ok
     _HandleObject *self;
-    PyObject *user_data, *result;
+    PyObject *user_data, *result, *py_msg, *py_url, *py_metadata;
 
     self = (_HandleObject *)data;
     if (!self->hmf_cb)
@@ -187,9 +188,17 @@ hmf_callback(void *data, const char *msg, const char *url, const char *metadata)
     else
         user_data = Py_None;
 
+    py_msg = PyStringOrNone_FromString(msg);
+    py_url = PyStringOrNone_FromString(url);
+    py_metadata = PyStringOrNone_FromString(metadata);
+
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->hmf_cb,
-                        "(Osss)", user_data, msg, url, metadata);
+                        "(OOOO)", user_data, py_msg, py_url, py_metadata);
+
+    Py_DECREF(py_msg);
+    Py_DECREF(py_url);
+    Py_DECREF(py_metadata);
 
     if (!result) {
         // Exception raised in callback leads to the abortion
