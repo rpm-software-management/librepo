@@ -176,7 +176,7 @@ packagetarget_mirrorfailure_callback(void *data,
 {
     int ret = LR_CB_OK; // Assume everything will be ok
     _PackageTargetObject *self;
-    PyObject *user_data, *result;
+    PyObject *user_data, *result, *py_msg, *py_url;
 
     self = (_PackageTargetObject *)data;
     assert(self->handle);
@@ -188,9 +188,15 @@ packagetarget_mirrorfailure_callback(void *data,
     else
         user_data = Py_None;
 
+    py_msg = PyStringOrNone_FromString(msg);
+    py_url = PyStringOrNone_FromString(url);
+
     EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->mirrorfailure_cb,
-                                   "(Oss)", user_data, msg, url);
+                                   "(OOO)", user_data, py_msg, py_url);
+
+    Py_DECREF(py_msg);
+    Py_DECREF(py_url);
 
     if (!result) {
         // Exception raised in callback leads to the abortion
