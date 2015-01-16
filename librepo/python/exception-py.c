@@ -101,23 +101,29 @@ return_error(GError **err, int rc, const char *format, ...)
     }
 
     PyObject *py_msg = PyStringOrNone_FromString(message);
+    PyObject *py_strerror = PyStringOrNone_FromString(lr_strerror(code));
+
     // Set exception
     if (exception_type == PyExc_IOError) {
         // Because of IOError exception has a special formating
         // It Looks like:
         // [Errno unknown] Cannot create output directory: 'Cannot create output directory'
-        exception_val = Py_BuildValue("(sOs)",
-                                      "unknown",
+        PyObject *py_unknown = PyStringOrNone_FromString("unknown");
+        exception_val = Py_BuildValue("(OOO)",
+                                      py_unknown,
                                       py_msg,
-                                      lr_strerror(code));
+                                      py_strerror);
+        Py_DECREF(py_unknown);
     } else {
-        exception_val = Py_BuildValue("(iOs)",
+        exception_val = Py_BuildValue("(iOO)",
                                       (int) code,
                                       py_msg,
-                                      lr_strerror(code));
+                                      py_strerror);
     }
 
     Py_DECREF(py_msg);
+    Py_DECREF(py_strerror);
+
     PyErr_SetObject(exception_type, exception_val);
 
     g_free(message);
