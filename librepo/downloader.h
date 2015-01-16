@@ -33,6 +33,8 @@ G_BEGIN_DECLS
  *  @{
  */
 
+#define LR_DOWNLOADER_MAXIMAL_RESUME_COUNT      1
+
 /** Global variable signalizing if SIGINT was catched.
  */
 extern volatile sig_atomic_t lr_interrupt;

@@ -127,6 +127,8 @@ typedef struct {
     gint64 original_offset; /*!<
         If resume is enabled, this is the specified offset where to resume
         the downloading. If resume is not enabled, then value is -1. */
+    gint resume_count; /*!<
+        How many resumes were done */
     GSList *lrmirrors; /*!<
         List of all available mirors (LrMirror *).
         This list is generated from LrHandle related to this target
@@ -724,12 +726,19 @@ select_next_target(LrDownload *dd,
  * the file is being/was downloaded by Librepo
  */
 static void
-add_librepo_xattr(int fd)
+add_librepo_xattr(int fd, const gchar *fn)
 {
+    _cleanup_free_ gchar *dst = NULL;
+
+    if (!fn)
+        dst = g_strdup_printf("fd: %d", fd);
+    else
+        dst = g_strdup(fn);
+
     int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "", 1, 0);
     if (attr_ret == -1) {
-        g_debug("%s: SET: Cannot set xattr %s: %s",
-                __func__, XATTR_LIBREPO, strerror(errno));
+        g_debug("%s: Cannot set xattr %s (%s): %s",
+                __func__, XATTR_LIBREPO, dst, strerror(errno));
     }
 }
 
@@ -880,8 +889,16 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         }
     }
 
+    if (target->resume && target->resume_count >= LR_DOWNLOADER_MAXIMAL_RESUME_COUNT) {
+        target->resume = FALSE;
+        g_debug("%s: Download resume ignored, maximal number of attemtps (%d)"
+                " has been reached", __func__, LR_DOWNLOADER_MAXIMAL_RESUME_COUNT);
+    }
+
     // Resume - set offset to resume incomplete download
     if (target->resume) {
+        target->resume_count++;
+
         if (target->original_offset == -1) {
             // Determine offset
             fseek(f, 0L, SEEK_END);
@@ -917,7 +934,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // If librepo tries to resume a download, it checks if the xattr is present.
     // If it isn't the download is not resumed, but whole file is
     // downloaded again.
-    add_librepo_xattr(fd);
+    add_librepo_xattr(fd, target->target->fn);
 
     if (target->target->byterangestart > 0) {
         assert(!target->target->resume);
