@@ -5,6 +5,7 @@ import librepo
 import hashlib
 import unittest
 import tempfile
+import xattr
 
 import tests.servermock.yum_mock.config as config
 
@@ -15,7 +16,7 @@ from tests.servermock.server import app
 class TestCaseYumPackageDownloading(TestCaseWithFlask):
 
     def setUp(self):
-        self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
+        self.tmpdir = tempfile.mkdtemp(prefix="librepotest-", dir="./")
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
@@ -149,7 +150,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 #        super(TestCaseYumPackageDownloading, cls).setUpClass()
 
     def setUp(self):
-        self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")
+        self.tmpdir = tempfile.mkdtemp(prefix="librepotest-", dir="./")
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
@@ -681,6 +682,10 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(os.path.isfile(pkg.local_path))
         self.assertEqual(os.path.getsize(pkg.local_path), 10)
         fchksum = hashlib.md5(open(pkg.local_path, "rb").read()).hexdigest()
+
+        # Mark the file as it was downloaded by Librepo
+        # Otherwise librepo refuse to resume
+        xattr.setxattr(pkg.local_path, "user.Librepo.DownloadInProgress", "")
 
         # Now try to resume from bad URL
         pkgs = []

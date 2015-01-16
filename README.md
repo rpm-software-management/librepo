@@ -22,6 +22,7 @@ Fedora/Ubuntu name
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - pygpgme/python-gpgme (python3-pygpgme/python3-gpgme)
 * **Test requires:** python-flask (http://flask.pocoo.org/) - python-flask/python-flask
 * **Test requires:** python-nose (https://nose.readthedocs.org/) - python-nose/python-nose (python3-nose)
+* **Test requires:** pyxattr (https://github.com/xattr/xattr) - /pyxattr (python3-pyxattr)
 
 ### Build from your checkout dir (Python 2 bindings):
 
