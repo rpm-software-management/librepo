@@ -47,7 +47,7 @@ py_debug_cb(G_GNUC_UNUSED const gchar *log_domain,
             const gchar *message,
             G_GNUC_UNUSED gpointer user_data)
 {
-    PyObject *arglist, *data, *result;
+    PyObject *arglist, *data, *result, *py_message;
 
     if (!debug_cb)
         return;
@@ -57,11 +57,13 @@ py_debug_cb(G_GNUC_UNUSED const gchar *log_domain,
         EndAllowThreads((PyThreadState **) global_state);
     // XXX: End of GIL Hack
 
+    py_message = PyStringOrNone_FromString(message);
     data = (debug_cb_data) ? debug_cb_data : Py_None;
-    arglist = Py_BuildValue("(sO)", message, data);
+    arglist = Py_BuildValue("(OO)", py_message, data);
     result = PyObject_CallObject(debug_cb, arglist);
     Py_DECREF(arglist);
     Py_XDECREF(result);
+    Py_DECREF(py_message);
 
     // XXX: GIL Hack
     if (global_state)
