@@ -120,6 +120,10 @@ typedef struct {
     GSList *tried_mirrors; /*!<
         List of already tried mirrors (LrMirror *).
         This mirrors won't be tried again. */
+    gboolean resume; /*!<
+        Is resume enabled? Download target may state that resume is True
+        but Librepo can decide that resuming won't be done.
+        This variable states if the resume is enabled or not. */
     gint64 original_offset; /*!<
         If resume is enabled, this is the specified offset where to resume
         the downloading. If resume is not enabled, then value is -1. */
@@ -837,7 +841,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     } else {
         // Use supplied filename
         int open_flags = O_CREAT|O_TRUNC|O_RDWR;
-        if (target->target->resume)
+        if (target->resume)
             open_flags &= ~O_TRUNC;
 
         fd = open(target->target->fn, open_flags, 0666);
@@ -865,7 +869,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Allow resume only for files that were originaly being
     // downloaded by librepo
-    if (!has_librepo_xattr(fd)) {
+    if (target->resume && !has_librepo_xattr(fd)) {
+        target->resume = FALSE;
         g_debug("%s: Resume ignored, existing file was not originaly "
                 "being downloaded by Librepo", __func__);
         if (ftruncate(fd, 0) == -1) {
@@ -876,7 +881,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     }
 
     // Resume - set offset to resume incomplete download
-    if (target->target->resume) {
+    if (target->resume) {
         if (target->original_offset == -1) {
             // Determine offset
             fseek(f, 0L, SEEK_END);
@@ -1806,6 +1811,7 @@ lr_download(GSList *targets,
         target->state           = LR_DS_WAITING;
         target->target          = dtarget;
         target->original_offset = -1;
+        target->resume          = dtarget->resume;
         target->target->rcode   = LRE_UNFINISHED;
         target->target->err     = "Not finished";
         target->handle          = dtarget->handle;
@@ -1893,7 +1899,7 @@ lr_download_cleanup:
         // unsuccessful and the file doesn't exists before or
         // its original content was overwritten
         if (target->state != LR_DS_FINISHED) {
-            if (!target->target->resume || target->original_offset == 0) {
+            if (!target->resume || target->original_offset == 0) {
                 // Remove target file if the file doesn't
                 // exist before or was empty or was overwritten
                 if (target->target->fn) {
