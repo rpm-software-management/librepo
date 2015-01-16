@@ -181,12 +181,13 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
 }
 
 gboolean
-lr_checksum_fd_cmp(LrChecksumType type,
-                   int fd,
-                   const char *expected,
-                   gboolean caching,
-                   gboolean *matches,
-                   GError **err)
+lr_checksum_fd_compare(LrChecksumType type,
+                       int fd,
+                       const char *expected,
+                       gboolean caching,
+                       gboolean *matches,
+                       gchar **calculated,
+                       GError **err)
 {
     _cleanup_free_ gchar *checksum = NULL;
 
@@ -238,6 +239,9 @@ lr_checksum_fd_cmp(LrChecksumType type,
             fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
         }
     }
+
+    if (calculated)
+        *calculated = g_strdup(checksum);
 
     return TRUE;
 }

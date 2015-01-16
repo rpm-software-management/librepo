@@ -78,13 +78,30 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err);
  * @param err       GError **
  * @return          returns TRUE if error is not set and FALSE if it is
  */
+#define lr_checksum_fd_cmp(type, fd, expected, caching, matches, err) \
+            lr_checksum_fd_compare((type), (fd), (expected), (caching), \
+                                   (matches), NULL, (err))
+
+/** Calculate checksum for data pointed by file descriptor and
+ * compare it to the expected checksum value.
+ * @param type          Checksum type
+ * @param fd            File descriptor
+ * @param expected      String with expected checksum value
+ * @param caching       Cache/Use cached checksum value as extended file attr.
+ * @param matches       Set pointed variable to TRUE if checksum matches.
+ * @param calculated    If not NULL, the calculated checksum will be pointed
+ *                      here, the pointed string must be freed by caller.
+ * @param err           GError **
+ * @return              returns TRUE if error is not set and FALSE if it is
+ */
 gboolean
-lr_checksum_fd_cmp(LrChecksumType type,
-                   int fd,
-                   const char *expected,
-                   gboolean caching,
-                   gboolean *matches,
-                   GError **err);
+lr_checksum_fd_compare(LrChecksumType type,
+                       int fd,
+                       const char *expected,
+                       gboolean caching,
+                       gboolean *matches,
+                       gchar **calculated,
+                       GError **err);
 
 /** @} */
 
