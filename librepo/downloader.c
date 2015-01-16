@@ -1077,6 +1077,33 @@ check_finished_transfer_status(CURLMsg *msg,
 }
 
 
+static gchar *
+list_of_checksums_to_str(GSList *checksums)
+{
+    if (!checksums)
+        return NULL;
+
+    gchar *expected = g_strdup("");
+
+    // Prepare pretty messages with list of expected checksums
+    for (GSList *elem = checksums; elem; elem = g_slist_next(elem)) {
+        gchar *tmp = NULL;
+        LrDownloadTargetChecksum *chksum = elem->data;
+        if (!chksum || !chksum->value || chksum->type == LR_CHECKSUM_UNKNOWN)
+            continue;  // Bad checksum
+
+        const gchar *chtype_str = lr_checksum_type_to_str(chksum->type);
+        tmp = g_strconcat(expected, chksum->value, "(",
+                          chtype_str ? chtype_str : "UNKNOWN",
+                          ") ", NULL);
+        free(expected);
+        expected = tmp;
+    }
+
+    return expected;
+}
+
+
 static gboolean
 check_finished_trasfer_checksum(int fd,
                                 GSList *checksums,
@@ -1085,21 +1112,33 @@ check_finished_trasfer_checksum(int fd,
                                 GError **err)
 {
     gboolean matches = TRUE;
+    GSList *calculated_chksums = NULL;
 
     for (GSList *elem = checksums; elem; elem = g_slist_next(elem)) {
         LrDownloadTargetChecksum *chksum = elem->data;
+        LrDownloadTargetChecksum *calculated_chksum = NULL;
+        gchar *calculated = NULL;
+
         if (!chksum || !chksum->value || chksum->type == LR_CHECKSUM_UNKNOWN)
             continue;  // Bad checksum
 
         lseek(fd, 0, SEEK_SET);
-        gboolean ret = lr_checksum_fd_cmp(chksum->type,
-                                          fd,
-                                          chksum->value,
-                                          1,
-                                          &matches,
-                                          err);
+        gboolean ret = lr_checksum_fd_compare(chksum->type,
+                                              fd,
+                                              chksum->value,
+                                              1,
+                                              &matches,
+                                              &calculated,
+                                              err);
         if (!ret)
             return FALSE;
+
+        // Store calculated checksum
+        calculated_chksum = lr_downloadtargetchecksum_new(chksum->type,
+                                                          calculated);
+        g_free(calculated);
+        calculated_chksums = g_slist_append(calculated_chksums,
+                                            calculated_chksum);
 
         if (matches) {
             // At least one checksum matches
@@ -1114,31 +1153,22 @@ check_finished_trasfer_checksum(int fd,
 
     if (!matches) {
         // Checksums doesn't match
-        gchar *expected = g_strdup("");
+        _cleanup_free_ gchar *calculated;
+        _cleanup_free_ gchar *expected;
 
-        // Prepare pretty messages with list of expected checksums
-        for (GSList *elem = checksums; elem; elem = g_slist_next(elem)) {
-            gchar *tmp = NULL;
-            LrDownloadTargetChecksum *chksum = elem->data;
-            if (!chksum || !chksum->value || chksum->type == LR_CHECKSUM_UNKNOWN)
-                continue;  // Bad checksum
-
-            const gchar *chtype_str = lr_checksum_type_to_str(chksum->type);
-            tmp = g_strconcat(expected, chksum->value, "(",
-                              chtype_str ? chtype_str : "UNKNOWN",
-                              ") ", NULL);
-            free(expected);
-            expected = tmp;
-        }
+        calculated = list_of_checksums_to_str(calculated_chksums);
+        expected = list_of_checksums_to_str(checksums);
 
         // Set error message
         g_set_error(transfer_err,
                 LR_DOWNLOADER_ERROR,
                 LRE_BADCHECKSUM,
                 "Downloading successful, but checksum doesn't match. "
-                "Expected: %s", expected);
-        g_free(expected);
+                "Calculated: %s Expected: %s", calculated, expected);
     }
+
+    g_slist_free_full(calculated_chksums,
+                      (GDestroyNotify) lr_downloadtargetchecksum_free);
 
     return TRUE;
 }
