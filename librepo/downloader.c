@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <curl/curl.h>
+#include <attr/xattr.h>
 
 #include "downloader.h"
 #include "rcodes.h"
@@ -713,6 +714,46 @@ select_next_target(LrDownload *dd,
 }
 
 
+#define XATTR_LIBREPO   "user.Librepo.DownloadInProgress"
+
+/** Add an extendend attribute that indiciates that
+ * the file is being/was downloaded by Librepo
+ */
+static void
+add_librepo_xattr(int fd)
+{
+    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "", 1, 0);
+    if (attr_ret == -1) {
+        g_debug("%s: SET: Cannot set xattr %s: %s",
+                __func__, XATTR_LIBREPO, strerror(errno));
+    }
+}
+
+
+/** Check if the file was downloaded by Librepo
+ */
+static gboolean
+has_librepo_xattr(int fd)
+{
+    ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0);
+    if (attr_ret == -1) {
+        //g_debug("%s: Cannot get xattr %s: %s",
+        //        __func__, XATTR_LIBREPO, strerror(errno));
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+/** Remove Librepo extended attribute
+ */
+static void
+remove_librepo_xattr(int fd)
+{
+    fremovexattr(fd, XATTR_LIBREPO);
+}
+
+
 /** Prepares next transfer
  */
 static gboolean
@@ -822,6 +863,18 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
 
+    // Allow resume only for files that were originaly being
+    // downloaded by librepo
+    if (!has_librepo_xattr(fd)) {
+        g_debug("%s: Resume ignored, existing file was not originaly "
+                "being downloaded by Librepo", __func__);
+        if (ftruncate(fd, 0) == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "ftruncate() failed: %s", strerror(errno));
+            return FALSE;
+        }
+    }
+
     // Resume - set offset to resume incomplete download
     if (target->target->resume) {
         if (target->original_offset == -1) {
@@ -852,6 +905,14 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
             return FALSE;
         }
     }
+
+    // Add librepo extended attribute to the file
+    // This xattr states that file is being downloaded by librepo
+    // This xattr is removed once the file is completly downloaded
+    // If librepo tries to resume a download, it checks if the xattr is present.
+    // If it isn't the download is not resumed, but whole file is
+    // downloaded again.
+    add_librepo_xattr(fd);
 
     if (target->target->byterangestart > 0) {
         assert(!target->target->resume);
@@ -1503,6 +1564,11 @@ transfer_error:
                                                  target->mirror->mirror->url);
             lr_downloadtarget_set_effectiveurl(target->target,
                                                effective_url);
+
+            // Remove xattr that states that the file is being downloaded
+            // by librepo, because the file is now completly downloaded
+            // and the xattr is not needed (is is useful only for resuming)
+            remove_librepo_xattr(target->target->fd);
 
             // Call end callback
             LrEndCb end_cb = target->target->endcb;
