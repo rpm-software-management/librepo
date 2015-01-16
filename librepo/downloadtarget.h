@@ -113,10 +113,10 @@ typedef struct {
     // Items filled by downloader
 
     char *usedmirror; /*!<
-        Used mirror. Filled only if transfer was successfull. */
+        Used mirror. Filled only if transfer was successful. */
 
     char *effectiveurl; /*!<
-        Effective url. Filled only if transfer was successfull. */
+        Effective url. Filled only if transfer was successful. */
 
     LrRc rcode; /*!<
         Return code */

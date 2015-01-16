@@ -270,7 +270,7 @@ typedef enum {
         Sets what kind of IP addresses to use when resolving host names. */
 
     LRO_ALLOWEDMIRRORFAILURES, /*!< (long)
-        If all transfers from a mirror failed (no successfull transfer
+        If all transfers from a mirror failed (no successful transfer
         from the mirror exists) and the number
         of failed downloads is higher or equal to this value
         the mirror will be skipped (ignored) for all next downloads.

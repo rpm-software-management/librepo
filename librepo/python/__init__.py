@@ -289,7 +289,7 @@ Version contants
 
 .. data:: LRO_ALLOWEDMIRRORFAILURES
 
-    *Integer or None* If all transfers from a mirror failed (no successfull transfer
+    *Integer or None* If all transfers from a mirror failed (no successful transfer
     from the mirror exists) and the number
     of failed downloads is higher or equal to this value
     the mirror will be skipped (ignored) for all next downloads.
@@ -443,7 +443,7 @@ Values used by fastest mirror callback (:data:`~.LRO_FASTESTMIRRORCB`):
 
 .. data:: FMSTAGE_CACHELOADINGSTATUS
 
-    (2) Cache loading finished. If successfull, *data* is None, otherwise
+    (2) Cache loading finished. If successful, *data* is None, otherwise
         *data* is string with error message.
 
 .. data:: FMSTAGE_DETECTION
@@ -459,7 +459,7 @@ Values used by fastest mirror callback (:data:`~.LRO_FASTESTMIRRORCB`):
 .. data:: FMSTAGE_STATUS
 
     (5) The very last invocation of fastest mirror callback.
-        If fastest mirror detection was successfull *data*,
+        If fastest mirror detection was successful *data*,
         otherwise *data* contain string with error message.
 
 .. _error-codes-label:

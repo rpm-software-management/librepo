@@ -168,7 +168,7 @@ typedef enum {
 
     LR_FMSTAGE_STATUS, /*!<
         The very last invocation of fastest mirror callback.
-        If fastest mirror detection was successfull ptr is NULL,
+        If fastest mirror detection was successful ptr is NULL,
         otherwise ptr contain (char *) string with error message.
         (Do not modify or free the string) */
 } LrFastestMirrorStages;

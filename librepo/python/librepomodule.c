@@ -31,6 +31,7 @@
 #include "yum-py.h"
 #include "downloader-py.h"
 #include "globalstate-py.h" // GIL Hack
+#include "typeconversion.h"
 
 volatile int global_logger = 0;
 volatile PyThreadState **global_state = NULL;
