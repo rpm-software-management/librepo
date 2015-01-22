@@ -248,3 +248,18 @@ class TestCaseYumRepoLocating(TestCase):
         h.setopt(librepo.LRO_GPGCHECK, True)
         h.setopt(librepo.LRO_LOCAL, True)
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
+
+    def test_locate_with_metalink_and_mirrorlist_urls_set(self):
+        # See: https://github.com/Tojaj/librepo/issues/41
+        # At first, download whole repository
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
+        # These bad URLs should not raise any error because
+        # librepo shoudn't try to download them
+        h.setopt(librepo.LRO_METALINKURL, "xyz://really-bad-url-sf987243kj.com")
+        h.setopt(librepo.LRO_MIRRORLISTURL, "xyz://really-bad-url-mi-qcwmi.com")
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_LOCAL, True)
+        h.perform(r)
