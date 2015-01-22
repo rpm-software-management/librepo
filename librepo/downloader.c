@@ -1047,10 +1047,20 @@ prepare_next_transfers(LrDownload *dd, GError **err)
 
 /** Check the finished transfer
  * Evaluate CURL return code and status code of protocol if needed.
+ * @param serious_error     Serious error is an error that isn't fatal,
+ *                          but mirror that generate it should be penalized.
+ *                          E.g.: Connection timeout - a mirror we are unable
+ *                          to connect at is pretty useless for us, but
+ *                          this could be only temporary state.
+ *                          No fatal but also no good.
+ * @param fatal_error       An error that cannot be recovered - e.g.
+ *                          we cannot write to a socket, we cannot write
+ *                          data to disk, bad function argument, ...
  */
 static gboolean
 check_finished_transfer_status(CURLMsg *msg,
                                LrTarget *target,
+                               gboolean *serious_error,
                                gboolean *fatal_error,
                                GError **transfer_err,
                                GError **err)
@@ -1092,7 +1102,8 @@ check_finished_transfer_status(CURLMsg *msg,
         } else {
             // There was a CURL error
             g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                        "Curl error: %s for %s [%s]",
+                        "Curl error (%d): %s for %s [%s]",
+                        msg->data.result,
                         curl_easy_strerror(msg->data.result),
                         effective_url,
                         target->errorbuffer);
@@ -1114,10 +1125,22 @@ check_finished_transfer_status(CURLMsg *msg,
             case CURLE_SSL_CRL_BADFILE:
             case CURLE_WRITE_ERROR:
                 // Fatal error
-                g_debug("%s: Fatal error - Curl code %d: %s",
+                g_debug("%s: Fatal error - Curl code (%d): %s for %s [%s]",
                         __func__, msg->data.result,
-                        curl_easy_strerror(msg->data.result));
+                        curl_easy_strerror(msg->data.result),
+                        effective_url,
+                        target->errorbuffer);
                 *fatal_error = TRUE;
+                break;
+            case CURLE_OPERATION_TIMEDOUT:
+                // Serious error
+                g_debug("%s: Serious error - Curl code (%d): %s for %s [%s]",
+                        __func__, msg->data.result,
+                        curl_easy_strerror(msg->data.result),
+                        effective_url,
+                        target->errorbuffer);
+                *serious_error = TRUE;
+                break;
             default:
                 // Other error are not considered fatal
                 break;
@@ -1320,13 +1343,16 @@ mirror_rank(LrMirror *mirror)
 /** Sort mirrors. Penalize the error ones.
  * In fact only move the current finished mirror forward or backward
  * by one position.
- * @param mirrors   GSList of mirrors (order of list elements won't be changed,
- *                  only data pointers)
+ * @param mirrors   GSList of mirrors (order of list elements won't be
+ *                  changed, only data pointers)
  * @param mirror    Mirror of just finished transfer
  * @param success   Was download from the mirror successful
+ * @param serious   If success is FALSE, serious mean that error was serious
+ *                  (like connection timeout), and the mirror should be
+ *                  penalized more that usual.
  */
 static gboolean
-sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success)
+sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success, gboolean serious)
 {
     GSList *elem = mirrors;
     GSList *prev = NULL;
@@ -1341,12 +1367,24 @@ sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success)
 
     assert(elem);  // Mirror should always exists in the list of mirrors
 
-    next = elem->next;
+    next = g_slist_next(elem);
 
     if (!success && !next)
         goto exit; // Penalization not needed - Mirror is already the last one
     if (success && !prev)
         goto exit; // Bonus not needed - Mirror is already the first one
+
+    // Serious errors
+    if (serious && mirror->successful_transfers == 0) {
+        // Mirror that encounter a serious error and has no successfull
+        // transfers should be moved at the end of the list
+        // (such mirror is probably down/broken/buggy)
+        GSList *last = g_slist_last(elem);
+        elem->data = last->data;
+        last->data = (gpointer) mirror;
+        g_debug("%s: Mirror %s was moved at the end", __func__, mirror->mirror->url);
+        goto exit; // No more hadling needed
+    }
 
     // Calculate ranks
     rank_cur  = mirror_rank(mirror);
@@ -1404,6 +1442,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         GError *transfer_err = NULL;
         GError *tmp_err = NULL;
         gboolean ret;
+        gboolean serious_error = FALSE;
         gboolean fatal_error = FALSE;
         GError *fail_fast_error = NULL;
 
@@ -1437,8 +1476,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         // Check status of finished transfer
         //
-        ret = check_finished_transfer_status(msg, target, &fatal_error,
-                                             &transfer_err, err);
+        ret = check_finished_transfer_status(msg, target, &serious_error,
+                                             &fatal_error, &transfer_err, err);
         if (!ret)  // Error
             return FALSE;
 
@@ -1497,7 +1536,7 @@ transfer_error:
             if (target->mirror) {
                 target->mirror->failed_transfers++;
                 if (dd->adaptivemirrorsorting)
-                    sort_mirrors(target->lrmirrors, target->mirror, FALSE);
+                    sort_mirrors(target->lrmirrors, target->mirror, FALSE, serious_error);
             }
 
             // Call mirrorfailure callback
@@ -1612,7 +1651,7 @@ transfer_error:
             if (target->mirror) {
                 target->mirror->successful_transfers++;
                 if (dd->adaptivemirrorsorting)
-                    sort_mirrors(target->lrmirrors, target->mirror, TRUE);
+                    sort_mirrors(target->lrmirrors, target->mirror, TRUE, serious_error);
             }
         }
 
