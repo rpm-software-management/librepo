@@ -32,7 +32,7 @@
 #include "fastestmirror.h"
 #include "fastestmirror_internal.h"
 
-#define LENGT_OF_MEASUREMENT        2.0    // Number of seconds (float point!)
+#define LENGTH_OF_MEASUREMENT        2.0    // Number of seconds (float point!)
 #define HALF_OF_SECOND_IN_MICROS    500000
 
 #define CACHE_GROUP_METADATA    ":_librepo_:"   // Group with metadata
@@ -384,6 +384,7 @@ lr_fastestmirror_prepare(LrHandle *handle,
 
 static gboolean
 lr_fastestmirror_perform(GSList *list,
+                         gdouble length_of_measurement,
                          LrFastestMirrorCb cb,
                          void *cbdata,
                          GError **err)
@@ -485,7 +486,7 @@ lr_fastestmirror_perform(GSList *list,
         // Break loop after some reasonable amount of time
         elapsed_time = g_timer_elapsed(timer, NULL);
 
-    } while(still_running && elapsed_time < LENGT_OF_MEASUREMENT);
+    } while(still_running && elapsed_time < length_of_measurement);
 
     g_timer_destroy(timer);
 
@@ -580,6 +581,7 @@ lr_fastestmirror_detailed(LrHandle *handle,
     assert(!err || *err == NULL);
 
     char *fastestmirrorcache = NULL;
+    gdouble length_of_measurement = LENGTH_OF_MEASUREMENT;
     LrFastestMirrorCb cb = null_cb;
     void *cbdata = NULL;
 
@@ -621,7 +623,11 @@ lr_fastestmirror_detailed(LrHandle *handle,
         return FALSE;
     }
 
-    ret = lr_fastestmirror_perform(lrfastestmirrors, cb, cbdata, err);
+    ret = lr_fastestmirror_perform(lrfastestmirrors,
+                                   length_of_measurement,
+                                   cb,
+                                   cbdata,
+                                   err);
     if (!ret) {
         cb(cbdata, LR_FMSTAGE_STATUS, "Error while detection");
         g_debug("%s: Error while lr_fastestmirror_perform()", __func__);
