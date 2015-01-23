@@ -180,6 +180,20 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
     return checksum;
 }
 
+
+gboolean
+lr_checksum_fd_cmp(LrChecksumType type,
+                   int fd,
+                   const char *expected,
+                   gboolean caching,
+                   gboolean *matches,
+                   GError **err)
+{
+    return lr_checksum_fd_compare(type, fd, expected, caching,
+                                  matches, NULL, err);
+}
+
+
 gboolean
 lr_checksum_fd_compare(LrChecksumType type,
                        int fd,
