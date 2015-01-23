@@ -827,6 +827,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_FASTESTMIRROR, True)
+        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT, 5.0)
         h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
 
         # First host is bad, but fastestmirror is used and thus
@@ -861,6 +862,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_FASTESTMIRROR, True)
+        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT, 5.0)
         h.setopt(librepo.LRO_FASTESTMIRRORCACHE, cache)
         h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
 
