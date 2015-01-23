@@ -180,6 +180,9 @@ struct _LrHandle {
 
     gchar *gnupghomedir; /*!<
         GNUPG home dir. */
+
+    gdouble fastestmirrortimeout; /*!<
+        Max length of fastest mirror measurement in seconds. */
 };
 
 /** Return new CURL easy handle with some default options setted.

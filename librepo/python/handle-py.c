@@ -331,6 +331,41 @@ py_setopt(_HandleObject *self, PyObject *args)
     }
 
     /*
+     * Options with double arguments
+     */
+    case LRO_FASTESTMIRRORTIMEOUT:
+    {
+        double d;
+        int badarg = 0;
+
+        if (PyFloat_Check(obj))
+            d = PyFloat_AS_DOUBLE(obj);
+        else if (obj == Py_None) {
+            // None stands for default value
+            switch (option) {
+            case LRO_FASTESTMIRRORTIMEOUT:
+                d = LRO_FASTESTMIRRORTIMEOUT_DEFAULT;
+                break;
+            default:
+                badarg = 1;
+            }
+        } else {
+            badarg = 1;
+        }
+
+        if (badarg) {
+            PyErr_SetString(PyExc_TypeError, "Only float or None is supported with this option");
+            return NULL;
+        }
+
+        res = lr_handle_setopt(self->handle,
+                               &tmp_err,
+                               (LrHandleOption)option,
+                               d);
+        break;
+    }
+
+    /*
      * Options with long/int (boolean) arguments
      */
     case LRO_UPDATE:
@@ -814,6 +849,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     gboolean res = TRUE;
     char *str;
     long lval;
+    double dval;
     GError *tmp_err = NULL;
 
     if (!PyArg_ParseTuple(args, "i:py_getinfo", &option))
@@ -838,6 +874,16 @@ py_getinfo(_HandleObject *self, PyObject *args)
         if (!res)
             RETURN_ERROR(&tmp_err, -1, NULL);
         return PyStringOrNone_FromString(str);
+
+    /* double* options */
+    case LRI_FASTESTMIRRORTIMEOUT:
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
+                                (LrHandleInfoOption)option,
+                                &dval);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        return PyFloat_FromDouble(dval);
 
     /* long* options */
     case LRI_UPDATE:

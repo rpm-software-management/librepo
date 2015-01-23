@@ -100,6 +100,9 @@ typedef struct _LrHandle LrHandle;
 /** LRO_GNUPGHOMEDIR */
 #define LRO_GNUPGHOMEDIR_DEFAULT            NULL
 
+/** LRO_FASTESTMIRRORTIMEOUT */
+#define LRO_FASTESTMIRRORTIMEOUT_DEFAULT    2.0
+
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
@@ -292,6 +295,10 @@ typedef enum {
     LRO_GNUPGHOMEDIR, /*!< (char *)
         Configuration directory for GNUPG (a directory with keyring) */
 
+    LRO_FASTESTMIRRORTIMEOUT, /*!< (double)
+        Max length of fastest mirror measurement in seconds.
+        Default value is 2sec */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -347,6 +354,7 @@ typedef enum {
     LRI_ALLOWEDMIRRORFAILURES,  /*!< (long *) */
     LRI_ADAPTIVEMIRRORSORTING,  /*!< (long *) */
     LRI_GNUPGHOMEDIR,           /*!< (char **) */
+    LRI_FASTESTMIRRORTIMEOUT,   /*!< (double *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

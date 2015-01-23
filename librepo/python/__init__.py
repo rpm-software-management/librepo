@@ -312,6 +312,12 @@ Version contants
 
     *String or None* set own GNUPG configuration directory (a dir with keyring).
 
+.. data:: LRO_FASTESTMIRRORTIMEOUT
+
+    *Float of None* Max length of fastest mirror measurement in seconds.
+    Default value is 2sec.
+
+
 .. _handle-info-options-label:
 
 :class:`~.Handle` info options
@@ -348,6 +354,7 @@ Version contants
 .. data:: LRI_ALLOWEDMIRRORFAILURES
 .. data:: LRI_ADAPTIVEMIRRORSORTING
 .. data:: LRI_GNUPGHOMEDIR
+.. data:: LRI_FASTESTMIRRORTIMEOUT
 
 .. _proxy-type-label:
 
@@ -835,6 +842,7 @@ LRO_IPRESOLVE               = _librepo.LRO_IPRESOLVE
 LRO_ALLOWEDMIRRORFAILURES   = _librepo.LRO_ALLOWEDMIRRORFAILURES
 LRO_ADAPTIVEMIRRORSORTING   = _librepo.LRO_ADAPTIVEMIRRORSORTING
 LRO_GNUPGHOMEDIR            = _librepo.LRO_GNUPGHOMEDIR
+LRO_FASTESTMIRRORTIMEOUT    = _librepo.LRO_FASTESTMIRRORTIMEOUT
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -883,37 +891,39 @@ ATTR_TO_LRO = {
     "allowedmirrorfailures":LRO_ALLOWEDMIRRORFAILURES,
     "adaptivemirrorsorting":LRO_ADAPTIVEMIRRORSORTING,
     "gnupghomedir":         LRO_GNUPGHOMEDIR,
+    "fastestmirrortimeout": LRO_FASTESTMIRRORTIMEOUT,
 }
 
-LRI_UPDATE              = _librepo.LRI_UPDATE
-LRI_URLS                = _librepo.LRI_URLS
-LRI_MIRRORLIST          = _librepo.LRI_MIRRORLIST
-LRI_MIRRORLISTURL       = _librepo.LRI_MIRRORLISTURL
-LRI_METALINKURL         = _librepo.LRI_METALINKURL
-LRI_LOCAL               = _librepo.LRI_LOCAL
-LRI_PROGRESSCB          = _librepo.LRI_PROGRESSCB
-LRI_PROGRESSDATA        = _librepo.LRI_PROGRESSDATA
-LRI_DESTDIR             = _librepo.LRI_DESTDIR
-LRI_REPOTYPE            = _librepo.LRI_REPOTYPE
-LRI_USERAGENT           = _librepo.LRI_USERAGENT
-LRI_YUMDLIST            = _librepo.LRI_YUMDLIST
-LRI_YUMBLIST            = _librepo.LRI_YUMBLIST
-LRI_FETCHMIRRORS        = _librepo.LRI_FETCHMIRRORS
-LRI_MAXMIRRORTRIES      = _librepo.LRI_MAXMIRRORTRIES
-LRI_VARSUB              = _librepo.LRI_VARSUB
-LRI_MIRRORS             = _librepo.LRI_MIRRORS
-LRI_METALINK            = _librepo.LRI_METALINK
-LRI_FASTESTMIRROR       = _librepo.LRI_FASTESTMIRROR
-LRI_FASTESTMIRRORCACHE  = _librepo.LRI_FASTESTMIRRORCACHE
-LRI_FASTESTMIRRORMAXAGE = _librepo.LRI_FASTESTMIRRORMAXAGE
-LRI_HMFCB               = _librepo.LRI_HMFCB
-LRI_SSLVERIFYPEER       = _librepo.LRI_SSLVERIFYPEER
-LRI_SSLVERIFYHOST       = _librepo.LRI_SSLVERIFYHOST
-LRI_IPRESOLVE           = _librepo.LRI_IPRESOLVE
-LRI_ALLOWEDMIRRORFAILURES=_librepo.LRI_ALLOWEDMIRRORFAILURES
-LRI_ADAPTIVEMIRRORSORTING=_librepo.LRI_ADAPTIVEMIRRORSORTING
-LRI_GNUPGHOMEDIR        =_librepo.LRI_GNUPGHOMEDIR
-LRI_SENTINEL            = _librepo.LRI_SENTINEL
+LRI_UPDATE                  = _librepo.LRI_UPDATE
+LRI_URLS                    = _librepo.LRI_URLS
+LRI_MIRRORLIST              = _librepo.LRI_MIRRORLIST
+LRI_MIRRORLISTURL           = _librepo.LRI_MIRRORLISTURL
+LRI_METALINKURL             = _librepo.LRI_METALINKURL
+LRI_LOCAL                   = _librepo.LRI_LOCAL
+LRI_PROGRESSCB              = _librepo.LRI_PROGRESSCB
+LRI_PROGRESSDATA            = _librepo.LRI_PROGRESSDATA
+LRI_DESTDIR                 = _librepo.LRI_DESTDIR
+LRI_REPOTYPE                = _librepo.LRI_REPOTYPE
+LRI_USERAGENT               = _librepo.LRI_USERAGENT
+LRI_YUMDLIST                = _librepo.LRI_YUMDLIST
+LRI_YUMBLIST                = _librepo.LRI_YUMBLIST
+LRI_FETCHMIRRORS            = _librepo.LRI_FETCHMIRRORS
+LRI_MAXMIRRORTRIES          = _librepo.LRI_MAXMIRRORTRIES
+LRI_VARSUB                  = _librepo.LRI_VARSUB
+LRI_MIRRORS                 = _librepo.LRI_MIRRORS
+LRI_METALINK                = _librepo.LRI_METALINK
+LRI_FASTESTMIRROR           = _librepo.LRI_FASTESTMIRROR
+LRI_FASTESTMIRRORCACHE      = _librepo.LRI_FASTESTMIRRORCACHE
+LRI_FASTESTMIRRORMAXAGE     = _librepo.LRI_FASTESTMIRRORMAXAGE
+LRI_HMFCB                   = _librepo.LRI_HMFCB
+LRI_SSLVERIFYPEER           = _librepo.LRI_SSLVERIFYPEER
+LRI_SSLVERIFYHOST           = _librepo.LRI_SSLVERIFYHOST
+LRI_IPRESOLVE               = _librepo.LRI_IPRESOLVE
+LRI_ALLOWEDMIRRORFAILURES   = _librepo.LRI_ALLOWEDMIRRORFAILURES
+LRI_ADAPTIVEMIRRORSORTING   = _librepo.LRI_ADAPTIVEMIRRORSORTING
+LRI_GNUPGHOMEDIR            = _librepo.LRI_GNUPGHOMEDIR
+LRI_FASTESTMIRRORTIMEOUT    = _librepo.LRI_FASTESTMIRRORTIMEOUT
+LRI_SENTINEL                = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
     "update":               LRI_UPDATE,
@@ -944,6 +954,7 @@ ATTR_TO_LRI = {
     "allowedmirrorfailures":LRI_ALLOWEDMIRRORFAILURES,
     "adaptivemirrorsorting":LRI_ADAPTIVEMIRRORSORTING,
     "gnupghomedir":         LRI_GNUPGHOMEDIR,
+    "fastestmirrortimeout": LRI_FASTESTMIRRORTIMEOUT,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1321,6 +1332,10 @@ class Handle(_librepo.Handle):
     .. attribute:: gnupghomedir:
 
         See :data:`.LRO_GNUPGHOMEDIR`
+
+    .. attribute:: fastestmirrortimeout:
+
+        See :data:`.LRO_FASTESTMIRRORTIMEOUT`
 
     """
 

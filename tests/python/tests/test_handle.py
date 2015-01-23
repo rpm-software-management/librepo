@@ -154,6 +154,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_GNUPGHOMEDIR,  "")
         self.assertEqual(h.getinfo(librepo.LRI_GNUPGHOMEDIR), "")
 
+        self.assertEqual(h.getinfo(librepo.LRI_FASTESTMIRRORTIMEOUT), 2.0)
+        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT,  32.256)
+        self.assertEqual(h.getinfo(librepo.LRI_FASTESTMIRRORTIMEOUT), 32.256)
+        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT,  None)
+        self.assertEqual(h.getinfo(librepo.LRI_FASTESTMIRRORTIMEOUT), 2.0)
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -298,6 +304,12 @@ class TestCaseHandle(unittest.TestCase):
         h.gnupghomedir =  ""
         self.assertEqual(h.gnupghomedir, "")
 
+        self.assertEqual(h.fastestmirrortimeout, 2.0)
+        h.fastestmirrortimeout = 3.14
+        self.assertEqual(h.fastestmirrortimeout, 3.14)
+        h.fastestmirrortimeout = None
+        self.assertEqual(h.fastestmirrortimeout, 2.0)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -394,3 +406,5 @@ class TestCaseHandle(unittest.TestCase):
 
         h.setopt(librepo.LRO_GNUPGHOMEDIR, None)
         h.gnupghomedir = None
+        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT, None)
+        h.fastestmirrortimeout = None

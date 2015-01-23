@@ -107,6 +107,7 @@ lr_handle_init()
     handle->allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
     handle->adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
     handle->gnupghomedir = g_strdup(LRO_GNUPGHOMEDIR_DEFAULT);
+    handle->fastestmirrortimeout = LRO_FASTESTMIRRORTIMEOUT_DEFAULT;
 
     return handle;
 }
@@ -597,6 +598,10 @@ lr_handle_setopt(LrHandle *handle,
         handle->gnupghomedir = g_strdup(gnupghomedir);
         break;
     }
+
+    case LRO_FASTESTMIRRORTIMEOUT:
+        handle->fastestmirrortimeout = va_arg(arg, double);
+        break;
 
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
@@ -1137,6 +1142,7 @@ lr_handle_getinfo(LrHandle *handle,
     va_list arg;
     char **str;
     long *lnum;
+    double *dnum;
 
     assert(!err || *err == NULL);
 
@@ -1318,6 +1324,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_GNUPGHOMEDIR:
         str = va_arg(arg, char **);
         *str = handle->gnupghomedir;
+        break;
+
+    case LRI_FASTESTMIRRORTIMEOUT:
+        dnum = va_arg(arg, double *);
+        *dnum = (double) handle->fastestmirrortimeout;
         break;
 
     default:
