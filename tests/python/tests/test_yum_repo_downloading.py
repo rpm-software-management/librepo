@@ -1362,3 +1362,13 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
         h.setopt(librepo.LRO_GPGCHECK, True)
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
+
+    def test_download_with_custom_http_headers(self):
+        h = librepo.Handle()
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h.setopt(librepo.LRO_URLS, [url])
+        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
+        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.setopt(librepo.LRO_HTTPHEADER, ["Accept: audio/mpeg"])
+        # An error should be raised
+        self.assertRaises(librepo.LibrepoException, h.perform)
