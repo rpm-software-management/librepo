@@ -546,7 +546,9 @@ py_setopt(_HandleObject *self, PyObject *args)
      */
     case LRO_URLS:
     case LRO_YUMDLIST:
-    case LRO_YUMBLIST: {
+    case LRO_YUMBLIST:
+    case LRO_HTTPHEADER:
+    {
         Py_ssize_t len = 0;
 
         if (!PyList_Check(obj) && obj != Py_None) {
@@ -959,7 +961,9 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_URLS:
     case LRI_YUMDLIST:
     case LRI_YUMBLIST:
-    case LRI_MIRRORS: {
+    case LRI_MIRRORS:
+    case LRI_HTTPHEADER:
+    {
         PyObject *list;
         char **strlist;
         res = lr_handle_getinfo(self->handle,

@@ -317,6 +317,13 @@ Version contants
     *Float of None* Max length of fastest mirror measurement in seconds.
     Default value is 2sec.
 
+.. data:: LRO_HTTPHEADER
+
+    *List of strings or None* List of strings that represent http headers.
+    Each header has format "header_name: content". A header with no content
+    should look like "Accept:".
+    Note: Headers must not be CRLF-terminated!
+
 
 .. _handle-info-options-label:
 
@@ -355,6 +362,7 @@ Version contants
 .. data:: LRI_ADAPTIVEMIRRORSORTING
 .. data:: LRI_GNUPGHOMEDIR
 .. data:: LRI_FASTESTMIRRORTIMEOUT
+.. data:: LRI_HTTPHEADER
 
 .. _proxy-type-label:
 
@@ -843,6 +851,7 @@ LRO_ALLOWEDMIRRORFAILURES   = _librepo.LRO_ALLOWEDMIRRORFAILURES
 LRO_ADAPTIVEMIRRORSORTING   = _librepo.LRO_ADAPTIVEMIRRORSORTING
 LRO_GNUPGHOMEDIR            = _librepo.LRO_GNUPGHOMEDIR
 LRO_FASTESTMIRRORTIMEOUT    = _librepo.LRO_FASTESTMIRRORTIMEOUT
+LRO_HTTPHEADER              = _librepo.LRO_HTTPHEADER
 LRO_SENTINEL                = _librepo.LRO_SENTINEL
 
 ATTR_TO_LRO = {
@@ -892,6 +901,7 @@ ATTR_TO_LRO = {
     "adaptivemirrorsorting":LRO_ADAPTIVEMIRRORSORTING,
     "gnupghomedir":         LRO_GNUPGHOMEDIR,
     "fastestmirrortimeout": LRO_FASTESTMIRRORTIMEOUT,
+    "httpheader":           LRO_HTTPHEADER,
 }
 
 LRI_UPDATE                  = _librepo.LRI_UPDATE
@@ -923,6 +933,7 @@ LRI_ALLOWEDMIRRORFAILURES   = _librepo.LRI_ALLOWEDMIRRORFAILURES
 LRI_ADAPTIVEMIRRORSORTING   = _librepo.LRI_ADAPTIVEMIRRORSORTING
 LRI_GNUPGHOMEDIR            = _librepo.LRI_GNUPGHOMEDIR
 LRI_FASTESTMIRRORTIMEOUT    = _librepo.LRI_FASTESTMIRRORTIMEOUT
+LRI_HTTPHEADER              = _librepo.LRI_HTTPHEADER
 LRI_SENTINEL                = _librepo.LRI_SENTINEL
 
 ATTR_TO_LRI = {
@@ -955,6 +966,7 @@ ATTR_TO_LRI = {
     "adaptivemirrorsorting":LRI_ADAPTIVEMIRRORSORTING,
     "gnupghomedir":         LRI_GNUPGHOMEDIR,
     "fastestmirrortimeout": LRI_FASTESTMIRRORTIMEOUT,
+    "httpheader":           LRI_HTTPHEADER,
 }
 
 LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
@@ -1336,6 +1348,10 @@ class Handle(_librepo.Handle):
     .. attribute:: fastestmirrortimeout:
 
         See :data:`.LRO_FASTESTMIRRORTIMEOUT`
+
+    .. attribute:: httpheader:
+
+        See :data:`.LRO_HTTPHEADER`
 
     """
 

@@ -274,6 +274,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRO_ADAPTIVEMIRRORSORTING", LRO_ADAPTIVEMIRRORSORTING);
     PyModule_AddIntConstant(m, "LRO_GNUPGHOMEDIR", LRO_GNUPGHOMEDIR);
     PyModule_AddIntConstant(m, "LRO_FASTESTMIRRORTIMEOUT", LRO_FASTESTMIRRORTIMEOUT);
+    PyModule_AddIntConstant(m, "LRO_HTTPHEADER", LRO_HTTPHEADER);
     PyModule_AddIntConstant(m, "LRO_SENTINEL", LRO_SENTINEL);
 
     // Handle info options
@@ -306,6 +307,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRI_ADAPTIVEMIRRORSORTING", LRI_ADAPTIVEMIRRORSORTING);
     PyModule_AddIntConstant(m, "LRI_GNUPGHOMEDIR", LRI_GNUPGHOMEDIR);
     PyModule_AddIntConstant(m, "LRI_FASTESTMIRRORTIMEOUT", LRI_FASTESTMIRRORTIMEOUT);
+    PyModule_AddIntConstant(m, "LRI_HTTPHEADER", LRI_HTTPHEADER);
     PyModule_AddIntConstant(m, "LRI_SENTINEL", LRI_SENTINEL);
 
     // Check options

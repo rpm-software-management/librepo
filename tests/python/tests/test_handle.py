@@ -160,6 +160,13 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT,  None)
         self.assertEqual(h.getinfo(librepo.LRI_FASTESTMIRRORTIMEOUT), 2.0)
 
+        self.assertEqual(h.getinfo(librepo.LRI_HTTPHEADER), None)
+        h.setopt(librepo.LRO_HTTPHEADER, ["Accept: text/xml", "charsets: utf-8"])
+        self.assertEqual(h.getinfo(librepo.LRI_HTTPHEADER),
+                         ["Accept: text/xml", "charsets: utf-8"])
+        h.setopt(librepo.LRO_HTTPHEADER, None)
+        self.assertEqual(h.getinfo(librepo.LRI_HTTPHEADER), None)
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -310,6 +317,12 @@ class TestCaseHandle(unittest.TestCase):
         h.fastestmirrortimeout = None
         self.assertEqual(h.fastestmirrortimeout, 2.0)
 
+        self.assertEqual(h.httpheader, None)
+        h.httpheader = ["Accept: text/xml", "charsets: utf-8"]
+        self.assertEqual(h.httpheader, ["Accept: text/xml", "charsets: utf-8"])
+        h.httpheader = None
+        self.assertEqual(h.httpheader, None)
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -408,3 +421,5 @@ class TestCaseHandle(unittest.TestCase):
         h.gnupghomedir = None
         h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT, None)
         h.fastestmirrortimeout = None
+        h.setopt(librepo.LRO_HTTPHEADER, None)
+        h.httpheader = None
