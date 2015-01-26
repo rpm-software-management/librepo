@@ -962,6 +962,10 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb);
     curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
 
+    // Set http headers if handle is available and headers are specified
+    if (target->handle)
+        curl_easy_setopt(h, CURLOPT_HTTPHEADER, target->handle->curl_httpheader);
+
     // Add the new handle to the curl multi handle
     curl_multi_add_handle(dd->multi_handle, h);
 
