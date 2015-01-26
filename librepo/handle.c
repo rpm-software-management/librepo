@@ -439,7 +439,6 @@ lr_handle_setopt(LrHandle *handle,
 
         handle->curl_httpheader = headers;
         curl_easy_setopt(c_h, CURLOPT_HEADER, headers);
-
         break;
     }
 
