@@ -183,6 +183,12 @@ struct _LrHandle {
 
     gdouble fastestmirrortimeout; /*!<
         Max length of fastest mirror measurement in seconds. */
+
+    gchar **httpheader; /*!<
+        List of HTTP headers */
+
+    struct curl_slist *curl_httpheader; /*!<
+        Curl repr. of list of HTTP headers*/
 };
 
 /** Return new CURL easy handle with some default options setted.

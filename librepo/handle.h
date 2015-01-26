@@ -299,6 +299,10 @@ typedef enum {
         Max length of fastest mirror measurement in seconds.
         Default value is 2sec */
 
+    LRO_HTTPHEADER, /*!< (char ** NULL-terminated)
+        List of HTTP header to pass to the server and/or proxy in
+        Librepo's HTTP requests. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -306,7 +310,7 @@ typedef enum {
 /** Handle options for the ::lr_handle_getinfo function. */
 typedef enum {
     LRI_UPDATE,                 /*!< (long *) */
-    LRI_URLS,                   /*!< (char ***)
+    LRI_URLS,                   /*!< (char *** Malloced)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
     LRI_MIRRORLIST,             /*!< (char **) */
@@ -318,16 +322,16 @@ typedef enum {
     LRI_DESTDIR,                /*!< (char **) */
     LRI_REPOTYPE,               /*!< (long *) */
     LRI_USERAGENT,              /*!< (char **) */
-    LRI_YUMDLIST,               /*!< (char ***)
+    LRI_YUMDLIST,               /*!< (char *** Malloced)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
-    LRI_YUMBLIST,               /*!< (char ***)
+    LRI_YUMBLIST,               /*!< (char *** Malloced)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
     LRI_FETCHMIRRORS,           /*!< (long *) */
     LRI_MAXMIRRORTRIES,         /*!< (long *) */
     LRI_VARSUB,                 /*!< (LrUrlVars **) */
-    LRI_MIRRORS,                /*!< (char ***)
+    LRI_MIRRORS,                /*!< (char *** Malloced)
         Mirrorlist associated with the repository.
 
         If LRO_MIRRORLIST was specified, then content of this list is
@@ -355,6 +359,9 @@ typedef enum {
     LRI_ADAPTIVEMIRRORSORTING,  /*!< (long *) */
     LRI_GNUPGHOMEDIR,           /*!< (char **) */
     LRI_FASTESTMIRRORTIMEOUT,   /*!< (double *) */
+    LRI_HTTPHEADER,             /*!< (char *** Malloced)
+        NOTE: Returned list must be freed as well as all its items!
+        You could use g_strfreev() function. */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

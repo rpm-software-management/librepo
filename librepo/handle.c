@@ -141,6 +141,8 @@ lr_handle_free(LrHandle *handle)
     lr_handle_free_list(&handle->yumblist);
     lr_urlvars_free(handle->urlvars);
     lr_free(handle->gnupghomedir);
+    lr_handle_free_list(&handle->httpheader);
+    curl_slist_free_all(handle->curl_httpheader);
     lr_free(handle);
 }
 
@@ -390,7 +392,8 @@ lr_handle_setopt(LrHandle *handle,
 
     case LRO_URLS:
     case LRO_YUMDLIST:
-    case LRO_YUMBLIST: {
+    case LRO_YUMBLIST:
+    {
         int size = 0;
         char **list = va_arg(arg, char **);
         char ***handle_list = NULL;
@@ -400,7 +403,7 @@ lr_handle_setopt(LrHandle *handle,
             lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_URLS);
         } else if (option == LRO_YUMDLIST) {
             handle_list = &handle->yumdlist;
-        } else {
+        } else if (option == LRO_YUMBLIST) {
             handle_list = &handle->yumblist;
         }
 
@@ -419,9 +422,24 @@ lr_handle_setopt(LrHandle *handle,
         }
 
         // Copy the list
-        *handle_list = lr_malloc0(size * sizeof(char *));
-        for (int x = 0; x < size; x++)
-            (*handle_list)[x] = g_strdup(list[x]);
+        *handle_list = lr_strv_dup(list);
+        break;
+    }
+
+    case LRO_HTTPHEADER:
+    {
+        char **list = va_arg(arg, char **);
+        lr_handle_free_list(&handle->httpheader);
+        curl_slist_free_all(handle->curl_httpheader);
+        handle->httpheader = lr_strv_dup(list);
+
+        struct curl_slist *headers = NULL;
+        for (int x=0; list && list[x]; x++)
+            headers = curl_slist_append(headers, list[x]);
+
+        handle->curl_httpheader = headers;
+        curl_easy_setopt(c_h, CURLOPT_HEADER, headers);
+
         break;
     }
 
@@ -1210,16 +1228,19 @@ lr_handle_getinfo(LrHandle *handle,
 
     case LRI_URLS:
     case LRI_YUMDLIST:
-    case LRI_YUMBLIST: {
-        char **source_list;
+    case LRI_YUMBLIST:
+    case LRI_HTTPHEADER: {
+        char **source_list = NULL;
         char ***strlist = va_arg(arg, char ***);
 
         if (option == LRI_URLS)
             source_list = handle->urls;
         else if (option == LRI_YUMDLIST)
             source_list = handle->yumdlist;
-        else
+        else if (option == LRI_YUMBLIST)
             source_list = handle->yumblist;
+        else if (option == LRI_HTTPHEADER)
+            source_list = handle->httpheader;
 
         if (!source_list) {
             *strlist = NULL;
