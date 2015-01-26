@@ -320,8 +320,12 @@ Version contants
 .. data:: LRO_HTTPHEADER
 
     *List of strings or None* List of strings that represent http headers.
-    Each header has format "header_name: content". A header with no content
-    should look like "Accept:".
+    Each header has format "header_name: content". If you add a header
+    with no content as in 'Accept:' (no data on the right side of the colon),
+    the internally used header will get disabled. With this option you can
+    add new headers, replace internal headers and remove internal headers.
+    To add a header with no content (nothing to the right side of the colon),
+    use the form 'MyHeader;' (note the ending semicolon).
     Note: Headers must not be CRLF-terminated!
 
 
