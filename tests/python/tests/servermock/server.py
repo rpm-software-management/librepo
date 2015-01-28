@@ -1,6 +1,9 @@
 from flask import Flask
 from optparse import OptionParser
-from yum_mock.yum_mock import yum_mock
+try:
+    from yum_mock.yum_mock import yum_mock
+except (ValueError, ImportError):
+    from .yum_mock.yum_mock import yum_mock
 
 app = Flask(__name__)
 #app.register_blueprint(working_repo)
