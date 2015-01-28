@@ -1263,8 +1263,8 @@ check_finished_trasfer_checksum(int fd,
 
     if (!matches) {
         // Checksums doesn't match
-        _cleanup_free_ gchar *calculated;
-        _cleanup_free_ gchar *expected;
+        _cleanup_free_ gchar *calculated = NULL;
+        _cleanup_free_ gchar *expected = NULL;
 
         calculated = list_of_checksums_to_str(calculated_chksums);
         expected = list_of_checksums_to_str(checksums);
