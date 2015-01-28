@@ -114,6 +114,15 @@ typedef enum {
     LRE_VALUE, /*!<
         (37) Bad value (e.g. we are expecting bandwidth defined like '1024',
         '1k', etc., but we got something like 'asdf', '1024S', etc.) */
+    LRE_NOTSET, /*!<
+        (38) Requested option/value is not set. Used for example in
+        lr_yumrepoconf_getinfo() */
+    LRE_FILE, /*!<
+        (39) File operation error (operation not permited, filename too long,
+        no memory available, bad file descriptor, ...) */
+    LRE_KEYFILE, /*!<
+        (40) Key file error (unknown encoding, ill-formed, file not found,
+        key/group not found, ...) */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
 } LrRc; /*!< Return codes */

@@ -14,6 +14,117 @@
 #include "librepo/cleanup.h"
 
 
+static void
+repoconf_assert_true(LrYumRepoConf *repoconf,
+                     LrYumRepoConfOption option)
+{
+    void *ptr = NULL;
+    GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    fail_if(tmp_err);
+    ck_assert_msg(ptr, "Not a True value (Option %d)", option);
+}
+
+#define conf_assert_true(option) \
+            repoconf_assert_true(conf, (option))
+
+static void
+repoconf_assert_false(LrYumRepoConf *repoconf,
+                      LrYumRepoConfOption option)
+{
+    void *ptr = NULL;
+    GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    fail_if(tmp_err);
+    ck_assert_msg(!ptr, "Not a NULL/0 value (Option %d)", option);
+}
+
+#define conf_assert_false(option) \
+            repoconf_assert_false(conf, (option))
+
+static void
+repoconf_assert_na(LrYumRepoConf *repoconf,
+                   LrYumRepoConfOption option)
+{
+    void *ptr = NULL;
+    GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    ck_assert_msg(!ret, "Getinfo succeed for %d", option);
+    fail_if(!tmp_err);
+    ck_assert_int_eq(tmp_err->code, LRE_NOTSET);
+    //ck_assert_msg(!ptr, "Not a NULL/0 value (Option %d)", option);
+}
+
+#define conf_assert_na(option) \
+            repoconf_assert_na(conf, (option))
+
+static void
+repoconf_assert_str_eq(LrYumRepoConf *repoconf,
+                       LrYumRepoConfOption option,
+                       gchar *expected)
+{
+    gchar *str = NULL;
+    GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &str);
+    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    fail_if(tmp_err);
+    ck_assert_str_eq(str, expected);
+    g_free(str);
+}
+
+#define conf_assert_str_eq(option, expected) \
+            repoconf_assert_str_eq(conf, (option), (expected))
+
+static void
+repoconf_assert_int_eq(LrYumRepoConf *repoconf,
+                       LrYumRepoConfOption option,
+                       intmax_t expected)
+{
+    long val;
+    GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &val);
+    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    fail_if(tmp_err);
+    ck_assert_int_eq(val, expected);
+}
+
+#define conf_assert_int_eq(option, expected) \
+            repoconf_assert_int_eq(conf, (option), (expected))
+
+static void
+repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
+                           LrYumRepoConfOption option,
+                           ...)
+{
+    va_list args;
+    GError *tmp_err = NULL;
+    char **strv = NULL;
+
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &strv);
+    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    fail_if(tmp_err);
+
+    ck_assert_msg(strv, "NULL isn't strv");
+
+    va_start (args, option);
+    gchar **strv_p = strv;
+    for (; *strv_p; strv_p++) {
+        gchar *s = va_arg (args, gchar*);
+        ck_assert_str_eq(*strv_p, s);
+    }
+
+    ck_assert_msg((*strv_p == va_arg(args, gchar*)),
+                  "Lengths of lists are not the same");
+
+    va_end (args);
+    g_strfreev(strv);
+}
+
+#define conf_assert_strv_eq(option, ...) \
+            repoconf_assert_strv_eq(conf, (option), __VA_ARGS__)
+
 START_TEST(test_repoconf_minimal)
 {
     gboolean ret;
@@ -40,89 +151,88 @@ START_TEST(test_repoconf_minimal)
     conf = list->data;
     fail_if(!conf);
 
-    ck_assert_str_eq(conf->id,      "minimal-repo-1");
-    ck_assert_str_eq(conf->name,    "Minimal repo 1 - $basearch");
-    ck_assert(conf->enabled);
-    lr_assert_strv_eq(conf->baseurl, "http://m1.com/linux/$basearch", NULL);
-    ck_assert(!conf->mirrorlist);
-    ck_assert(!conf->metalink);
+    conf_assert_str_eq(LR_YRC_ID, "minimal-repo-1");
+    conf_assert_str_eq(LR_YRC_NAME, "Minimal repo 1 - $basearch");
+    conf_assert_na(LR_YRC_ENABLED);
+    conf_assert_strv_eq(LR_YRC_BASEURL, "http://m1.com/linux/$basearch", NULL);
+    conf_assert_na(LR_YRC_MIRRORLIST);
+    conf_assert_na(LR_YRC_METALINK);
 
-    ck_assert(!conf->mediaid);
-    ck_assert(!conf->gpgkey);
-    ck_assert(!conf->gpgcakey);
-    ck_assert(!conf->exclude);
-    ck_assert(!conf->include);
+    conf_assert_na(LR_YRC_MEDIAID);
+    conf_assert_na(LR_YRC_GPGKEY);
+    conf_assert_na(LR_YRC_GPGCAKEY);
+    conf_assert_na(LR_YRC_EXCLUDE);
+    conf_assert_na(LR_YRC_INCLUDE);
 
-    ck_assert(!conf->fastestmirror);
-    ck_assert(!conf->proxy);
-    ck_assert(!conf->proxy_username);
-    ck_assert(!conf->proxy_password);
-    ck_assert(!conf->username);
-    ck_assert(!conf->password);
+    conf_assert_na(LR_YRC_FASTESTMIRROR);
+    conf_assert_na(LR_YRC_PROXY);
+    conf_assert_na(LR_YRC_PROXY_USERNAME);
+    conf_assert_na(LR_YRC_PROXY_PASSWORD);
+    conf_assert_na(LR_YRC_USERNAME);
+    conf_assert_na(LR_YRC_PASSWORD);
 
-    ck_assert(!conf->gpgcheck);
-    ck_assert(!conf->repo_gpgcheck);
-    ck_assert(conf->enablegroups);
+    conf_assert_na(LR_YRC_GPGCHECK);
+    conf_assert_na(LR_YRC_REPO_GPGCHECK);
+    conf_assert_na(LR_YRC_ENABLEGROUPS);
 
-    ck_assert_int_eq(conf->bandwidth, LR_YUMREPOCONF_BANDWIDTH_DEFAULT);
-    ck_assert(!conf->throttle);
-    ck_assert_int_eq(conf->ip_resolve, LR_YUMREPOCONF_IP_RESOLVE_DEFAULT);
+    conf_assert_na(LR_YRC_BANDWIDTH);
+    conf_assert_na(LR_YRC_THROTTLE);
+    conf_assert_na(LR_YRC_IP_RESOLVE);
 
-    ck_assert_int_eq(conf->metadata_expire, LR_YUMREPOCONF_METADATA_EXPIRE_DEFAULT);
-    ck_assert_int_eq(conf->cost,            LR_YUMREPOCONF_COST_DEFAULT);
-    ck_assert_int_eq(conf->priority,        LR_YUMREPOCONF_PRIORITY_DEFAULT);
+    conf_assert_na(LR_YRC_METADATA_EXPIRE);
+    conf_assert_na(LR_YRC_COST);
+    conf_assert_na(LR_YRC_PRIORITY);
 
-    ck_assert(!conf->sslcacert);
-    ck_assert(conf->sslverify);
-    ck_assert(!conf->sslclientcert);
-    ck_assert(!conf->sslclientkey);
+    conf_assert_na(LR_YRC_SSLCACERT);
+    conf_assert_na(LR_YRC_SSLVERIFY);
+    conf_assert_na(LR_YRC_SSLCLIENTCERT);
+    conf_assert_na(LR_YRC_SSLCLIENTKEY);
 
-    ck_assert(!conf->deltarepobaseurl);
+    conf_assert_na(LR_YRC_DELTAREPOBASEURL);
 
     // Test content of second repo config
 
     conf = list->next->data;
     fail_if(!conf);
 
-    ck_assert_str_eq(conf->id,      "minimal-repo-2");
-    ck_assert_str_eq(conf->name,    "Minimal repo 2 - $basearch");
-    ck_assert(conf->enabled);
-    lr_assert_strv_eq(conf->baseurl, "http://m2.com/linux/$basearch", NULL);
-    ck_assert(!conf->mirrorlist);
-    ck_assert(!conf->metalink);
+    conf_assert_str_eq(LR_YRC_ID, "minimal-repo-2");
+    conf_assert_str_eq(LR_YRC_NAME, "Minimal repo 2 - $basearch");
+    conf_assert_na(LR_YRC_ENABLED);
+    conf_assert_strv_eq(LR_YRC_BASEURL, "http://m2.com/linux/$basearch", NULL);
+    conf_assert_na(LR_YRC_MIRRORLIST);
+    conf_assert_na(LR_YRC_METALINK);
 
-    ck_assert(!conf->mediaid);
-    ck_assert(!conf->gpgkey);
-    ck_assert(!conf->gpgcakey);
-    ck_assert(!conf->exclude);
-    ck_assert(!conf->include);
+    conf_assert_na(LR_YRC_MEDIAID);
+    conf_assert_na(LR_YRC_GPGKEY);
+    conf_assert_na(LR_YRC_GPGCAKEY);
+    conf_assert_na(LR_YRC_EXCLUDE);
+    conf_assert_na(LR_YRC_INCLUDE);
 
-    ck_assert(!conf->fastestmirror);
-    ck_assert(!conf->proxy);
-    ck_assert(!conf->proxy_username);
-    ck_assert(!conf->proxy_password);
-    ck_assert(!conf->username);
-    ck_assert(!conf->password);
+    conf_assert_na(LR_YRC_FASTESTMIRROR);
+    conf_assert_na(LR_YRC_PROXY);
+    conf_assert_na(LR_YRC_PROXY_USERNAME);
+    conf_assert_na(LR_YRC_PROXY_PASSWORD);
+    conf_assert_na(LR_YRC_USERNAME);
+    conf_assert_na(LR_YRC_PASSWORD);
 
-    ck_assert(!conf->gpgcheck);
-    ck_assert(!conf->repo_gpgcheck);
-    ck_assert(conf->enablegroups);
+    conf_assert_na(LR_YRC_GPGCHECK);
+    conf_assert_na(LR_YRC_REPO_GPGCHECK);
+    conf_assert_na(LR_YRC_ENABLEGROUPS);
 
-    ck_assert_int_eq(conf->bandwidth, LR_YUMREPOCONF_BANDWIDTH_DEFAULT);
-    ck_assert(!conf->throttle);
-    ck_assert_int_eq(conf->ip_resolve, LR_YUMREPOCONF_IP_RESOLVE_DEFAULT);
+    conf_assert_na(LR_YRC_BANDWIDTH);
+    conf_assert_na(LR_YRC_THROTTLE);
+    conf_assert_na(LR_YRC_IP_RESOLVE);
 
-    ck_assert_int_eq(conf->metadata_expire, LR_YUMREPOCONF_METADATA_EXPIRE_DEFAULT);
-    ck_assert_int_eq(conf->cost,            LR_YUMREPOCONF_COST_DEFAULT);
-    ck_assert_int_eq(conf->priority,        LR_YUMREPOCONF_PRIORITY_DEFAULT);
+    conf_assert_na(LR_YRC_METADATA_EXPIRE);
+    conf_assert_na(LR_YRC_COST);
+    conf_assert_na(LR_YRC_PRIORITY);
 
-    ck_assert(!conf->sslcacert);
-    ck_assert(conf->sslverify);
-    ck_assert(!conf->sslclientcert);
-    ck_assert(!conf->sslclientkey);
+    conf_assert_na(LR_YRC_SSLCACERT);
+    conf_assert_na(LR_YRC_SSLVERIFY);
+    conf_assert_na(LR_YRC_SSLCLIENTCERT);
+    conf_assert_na(LR_YRC_SSLCLIENTKEY);
 
-    ck_assert(!conf->deltarepobaseurl);
-
+    conf_assert_na(LR_YRC_DELTAREPOBASEURL);
 
     lr_yum_repoconfs_free(confs);
 }
@@ -152,51 +262,51 @@ START_TEST(test_repoconf_big)
     conf = list->data;
     fail_if(!conf);
 
-    ck_assert_str_eq(conf->id,      "big-repo");
-    ck_assert_str_eq(conf->name,    "Maxi repo - $basearch");
-    ck_assert(conf->enabled);
-    lr_assert_strv_eq(conf->baseurl,
+    conf_assert_str_eq(LR_YRC_ID, "big-repo");
+    conf_assert_str_eq(LR_YRC_NAME, "Maxi repo - $basearch");
+    conf_assert_true(LR_YRC_ENABLED);
+    conf_assert_strv_eq(LR_YRC_BASEURL,
                       "http://foo1.org/pub/linux/$releasever/$basearch/os/",
                       "ftp://ftp.foo2/pub/linux/$releasever/$basearch/os/",
                       "https://foo3.org/pub/linux/",
                       NULL);
-    ck_assert_str_eq(conf->mirrorlist,"http://foo1.org/mirrorlist");
-    ck_assert_str_eq(conf->metalink,  "https://foo1.org/metalink?repo=linux-$releasever&arch=$basearch");
+    conf_assert_str_eq(LR_YRC_MIRRORLIST,"http://foo1.org/mirrorlist");
+    conf_assert_str_eq(LR_YRC_METALINK, "https://foo1.org/metalink?repo=linux-$releasever&arch=$basearch");
 
-    ck_assert_str_eq(conf->mediaid,     "0");
-    lr_assert_strv_eq(conf->gpgkey,
+    conf_assert_str_eq(LR_YRC_MEDIAID,     "0");
+    conf_assert_strv_eq(LR_YRC_GPGKEY,
                       "https://foo1.org/linux/foo_signing_key.pub",
                       "https://foo2.org/linux/foo_signing_key.pub",
                       NULL);
-    lr_assert_strv_eq(conf->gpgcakey,   "https://foo1.org/linux/ca_key.pub", NULL);
-    lr_assert_strv_eq(conf->exclude,    "package_1", "package_2", NULL);
-    lr_assert_strv_eq(conf->include,    "package_a", "package_b", NULL);
+    conf_assert_strv_eq(LR_YRC_GPGCAKEY, "https://foo1.org/linux/ca_key.pub", NULL);
+    conf_assert_strv_eq(LR_YRC_EXCLUDE, "package_1", "package_2", NULL);
+    conf_assert_strv_eq(LR_YRC_INCLUDE, "package_a", "package_b", NULL);
 
-    ck_assert(conf->fastestmirror);
-    ck_assert_str_eq(conf->proxy,           "socks5://127.0.0.1:5000");
-    ck_assert_str_eq(conf->proxy_username,  "proxyuser");
-    ck_assert_str_eq(conf->proxy_password,  "proxypass");
-    ck_assert_str_eq(conf->username,        "user");
-    ck_assert_str_eq(conf->password,        "pass");
+    conf_assert_true(LR_YRC_FASTESTMIRROR);
+    conf_assert_str_eq(LR_YRC_PROXY, "socks5://127.0.0.1:5000");
+    conf_assert_str_eq(LR_YRC_PROXY_USERNAME, "proxyuser");
+    conf_assert_str_eq(LR_YRC_PROXY_PASSWORD, "proxypass");
+    conf_assert_str_eq(LR_YRC_USERNAME, "user");
+    conf_assert_str_eq(LR_YRC_PASSWORD, "pass");
 
-    ck_assert(conf->gpgcheck);
-    ck_assert(conf->repo_gpgcheck);
-    ck_assert(conf->enablegroups);
+    conf_assert_true(LR_YRC_GPGCHECK);
+    conf_assert_true(LR_YRC_REPO_GPGCHECK);
+    conf_assert_true(LR_YRC_ENABLEGROUPS);
 
-    ck_assert_int_eq(conf->bandwidth,   1024*1024);
-    ck_assert_str_eq(conf->throttle,    "50%");
-    ck_assert_int_eq(conf->ip_resolve,  LR_IPRESOLVE_V6);
+    conf_assert_int_eq(LR_YRC_BANDWIDTH, 1024*1024);
+    conf_assert_str_eq(LR_YRC_THROTTLE, "50%");
+    conf_assert_int_eq(LR_YRC_IP_RESOLVE, LR_IPRESOLVE_V6);
 
-    ck_assert_int_eq(conf->metadata_expire, 60*60*24*5);
-    ck_assert_int_eq(conf->cost,            500);
-    ck_assert_int_eq(conf->priority,        10);
+    conf_assert_int_eq(LR_YRC_METADATA_EXPIRE, 60*60*24*5);
+    conf_assert_int_eq(LR_YRC_COST, 500);
+    conf_assert_int_eq(LR_YRC_PRIORITY, 10);
 
-    ck_assert_str_eq(conf->sslcacert,       "file:///etc/ssl.cert");
-    ck_assert(conf->sslverify);
-    ck_assert_str_eq(conf->sslclientcert,   "file:///etc/client.cert");
-    ck_assert_str_eq(conf->sslclientkey,    "file:///etc/client.key");
+    conf_assert_str_eq(LR_YRC_SSLCACERT, "file:///etc/ssl.cert");
+    conf_assert_true(LR_YRC_SSLVERIFY);
+    conf_assert_str_eq(LR_YRC_SSLCLIENTCERT, "file:///etc/client.cert");
+    conf_assert_str_eq(LR_YRC_SSLCLIENTKEY, "file:///etc/client.key");
 
-    lr_assert_strv_eq(conf->deltarepobaseurl,
+    conf_assert_strv_eq(LR_YRC_DELTAREPOBASEURL,
                       "http://deltarepomirror.org/",
                       "http://deltarepomirror2.org",
                       NULL);

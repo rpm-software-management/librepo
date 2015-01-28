@@ -37,52 +37,52 @@ G_BEGIN_DECLS
 #define LR_YUMREPOCONF_COST_DEFAULT             1000
 #define LR_YUMREPOCONF_PRIORITY_DEFAULT         99
 
+/** Configuration for a single repo */
+typedef struct _LrYumRepoConf LrYumRepoConf;
+
 /** List of yum repo configurations */
 typedef struct _LrYumRepoConfs LrYumRepoConfs;
 
-/** Yum repo config */
-typedef struct {
-    gchar          *_source;        /*!< Local path to .repo file */
+typedef enum {
+    LR_YRC_ID,              /*!<  0 (char *) ID (short name) of the repo */
+    LR_YRC_NAME,            /*!<  1 (char *) Pretty name of the repo */
+    LR_YRC_ENABLED,         /*!<  2 (long 1 or 0) Is repo enabled? */
+    LR_YRC_BASEURL,         /*!<  3 (char **) List of base URLs */
+    LR_YRC_MIRRORLIST,      /*!<  4 (char *) Mirrorlist URL */
+    LR_YRC_METALINK,        /*!<  5 (char *) Metalink URL */
 
-    gchar          *id;             /*!< ID (short name) of the repo */
-    gchar          *name;           /*!< Pretty name of the repo */
-    gboolean        enabled;        /*!< Is repo enabled? */
-    gchar          **baseurl;       /*!< List of base URLs */
-    gchar          *mirrorlist;     /*!< Mirrorlist URL */
-    gchar          *metalink;       /*!< Metalink URL */
+    LR_YRC_MEDIAID,         /*!<  6 (char *) Media ID */
+    LR_YRC_GPGKEY,          /*!<  7 (char **) URL of GPG key */
+    LR_YRC_GPGCAKEY,        /*!<  8 (char **) GPG CA key */
+    LR_YRC_EXCLUDE,         /*!<  9 (char **) List of exluded packages */
+    LR_YRC_INCLUDE,         /*!< 10 (char **) List of included packages */
 
-    gchar          *mediaid;        /*!< Media ID */
-    gchar          **gpgkey;        /*!< URL of GPG key */
-    gchar          **gpgcakey;      /*!< GPG CA key */
-    gchar          **exclude;       /*!< List of exluded packages */
-    gchar          **include;       /*!< List of included packages */
+    LR_YRC_FASTESTMIRROR,   /*!< 11 (long 1 or 0) Fastest mirror determination */
+    LR_YRC_PROXY,           /*!< 12 (char *) Proxy addres */
+    LR_YRC_PROXY_USERNAME,  /*!< 13 (char *) Proxy username */
+    LR_YRC_PROXY_PASSWORD,  /*!< 14 (char *) Proxy password */
+    LR_YRC_USERNAME,        /*!< 15 (char *) Username */
+    LR_YRC_PASSWORD,        /*!< 16 (char *) Password */
 
-    gboolean        fastestmirror;  /*!< Fastest mirror determination */
-    gchar          *proxy;          /*!< Proxy addres */
-    gchar          *proxy_username; /*!< Proxy username */
-    gchar          *proxy_password; /*!< Proxy password */
-    gchar          *username;       /*!< Username */
-    gchar          *password;       /*!< Password */
+    LR_YRC_GPGCHECK,        /*!< 17 (long 1 or 0) GPG check for packages */
+    LR_YRC_REPO_GPGCHECK,   /*!< 18 (long 1 or 0) GPG check for repodata */
+    LR_YRC_ENABLEGROUPS,    /*!< 19 (long 1 or 0) Use groups */
 
-    gboolean        gpgcheck;       /*!< GPG check for packages */
-    gboolean        repo_gpgcheck;  /*!< GPG check for repodata */
-    gboolean        enablegroups;   /*!< Use groups */
+    LR_YRC_BANDWIDTH,       /*!< 20 (guint64) Bandwidth - Number of bytes */
+    LR_YRC_THROTTLE,        /*!< 21 (char *) Throttle string */
+    LR_YRC_IP_RESOLVE,      /*!< 22 (LrIpResolveType) Ip resolve type */
 
-    guint64         bandwidth;      /*!< Bandwidth - Number of bytes */
-    gchar          *throttle;       /*!< Throttle string */
-    LrIpResolveType ip_resolve;     /*!< Ip resolve type */
+    LR_YRC_METADATA_EXPIRE, /*!< 23 (gint64) Interval in secs for metadata expiration */
+    LR_YRC_COST,            /*!< 24 (gint) Repo cost */
+    LR_YRC_PRIORITY,        /*!< 25 (gint) Repo priority */
 
-    gint64          metadata_expire;/*!< Interval in secs for metadata expiration */
-    gint            cost;           /*!< Repo cost */
-    gint            priority;       /*!< Repo priority */
+    LR_YRC_SSLCACERT,       /*!< 26 (gchar *) SSL Certification authority cert */
+    LR_YRC_SSLVERIFY,       /*!< 27 (long 1 or 0) SSL verification */
+    LR_YRC_SSLCLIENTCERT,   /*!< 28 (gchar *) SSL Client certificate */
+    LR_YRC_SSLCLIENTKEY,    /*!< 29 (gchar *) SSL Client key */
 
-    gchar          *sslcacert;      /*!< SSL Certification authority cert */
-    gboolean        sslverify;      /*!< SSL verification */
-    gchar          *sslclientcert;  /*!< SSL Client certificate */
-    gchar          *sslclientkey;   /*!< SSL Client key */
-
-    gchar          **deltarepobaseurl;/*!< Deltarepo mirror URLs */
-} LrYumRepoConf;
+    LR_YRC_DELTAREPOBASEURL,/*!< (char **) Deltarepo mirror URLs */
+} LrYumRepoConfOption;
 
 /** Return new empty LrYumRepoConfs
  * @return          Newly allocated LrYumRepoConfs
@@ -123,12 +123,22 @@ lr_yum_repoconfs_load_dir(LrYumRepoConfs *confs,
                           const char *path,
                           GError **err);
 
-/** Create a copy of LrYumRepoConf.
- * @param repoconf  LrYumRepoConf
- * @return          Deep copy of input LrYumRepoConf
+/**
+ * Note: All returned values are malloced and must be freed.
  */
-LrYumRepoConf *
-lr_yum_repoconf_copy(LrYumRepoConf *repoconf);
+gboolean
+lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
+                       GError **err,
+                       LrYumRepoConfOption option,
+                       ...);
+
+/* TODO
+gboolean
+lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
+                      GError **err,
+                      LrYumRepoConfOption option,
+                      ...);
+*/
 
 /** @} */
 

@@ -25,24 +25,40 @@
 #include <errno.h>
 #include "librepo.h"
 #include "repoconf.h"
+#include "repoconf_internal.h"
 #include "cleanup.h"
 
-struct _LrYumRepoConfs {
-    GSList *repos;
-};
+static LrYumRepoFile *
+lr_yum_repofile_init(const gchar *path, GKeyFile *keyfile)
+{
+    LrYumRepoFile *repofile = lr_malloc0(sizeof(*repofile));
+    repofile->path = g_strdup(path);
+    repofile->keyfile = keyfile;
+    return repofile;
+}
+
+static void
+lr_yum_repofile_free(LrYumRepoFile *repofile)
+{
+    if (!repofile)
+        return;
+    g_free(repofile->path);
+    g_key_file_unref(repofile->keyfile);
+    g_free(repofile);
+}
+
+static GKeyFile *
+repofile_keyfile(LrYumRepoFile * repofile)
+{
+    return repofile->keyfile;
+}
 
 static LrYumRepoConf *
-lr_yum_repoconf_init(void)
+lr_yum_repoconf_init(LrYumRepoFile *repofile, const gchar *id)
 {
     LrYumRepoConf *repoconf = lr_malloc0(sizeof(*repoconf));
-
-    // Set default values
-    repoconf->bandwidth         = LR_YUMREPOCONF_BANDWIDTH_DEFAULT;
-    repoconf->ip_resolve        = LR_YUMREPOCONF_IP_RESOLVE_DEFAULT;
-    repoconf->metadata_expire   = LR_YUMREPOCONF_METADATA_EXPIRE_DEFAULT;
-    repoconf->cost              = LR_YUMREPOCONF_COST_DEFAULT;
-    repoconf->priority          = LR_YUMREPOCONF_PRIORITY_DEFAULT;
-
+    repoconf->file = repofile;
+    repoconf->id = g_strdup(id);
     return repoconf;
 }
 
@@ -51,90 +67,20 @@ lr_yum_repoconf_free(LrYumRepoConf *repoconf)
 {
     if (!repoconf)
         return;
-
-    g_free(repoconf->_source);
-
     g_free(repoconf->id);
-    g_free(repoconf->name);
-    g_strfreev(repoconf->baseurl);
-    g_free(repoconf->mirrorlist);
-    g_free(repoconf->metalink);
-
-    g_free(repoconf->mediaid);
-    g_strfreev(repoconf->gpgkey);
-    g_strfreev(repoconf->gpgcakey);
-    g_strfreev(repoconf->exclude);
-    g_strfreev(repoconf->include);
-
-    g_free(repoconf->proxy);
-    g_free(repoconf->proxy_username);
-    g_free(repoconf->proxy_password);
-    g_free(repoconf->username);
-    g_free(repoconf->password);
-
-    g_free(repoconf->throttle);
-
-    g_free(repoconf->sslcacert);
-    g_free(repoconf->sslclientcert);
-    g_free(repoconf->sslclientkey);
-
-    g_strfreev(repoconf->deltarepobaseurl);
-
     g_free(repoconf);
 }
 
-LrYumRepoConf *
-lr_yum_repoconf_copy(LrYumRepoConf *oth)
+static GKeyFile *
+repoconf_keyfile(LrYumRepoConf *repoconf)
 {
-    LrYumRepoConf *repoconf = NULL;
+    return repofile_keyfile(repoconf->file);
+}
 
-    if (!oth)
-        return NULL;
-
-    repoconf = lr_yum_repoconf_init();
-
-    repoconf->_source       = g_strdup(oth->_source);
-
-    repoconf->id                = g_strdup(oth->id);
-    repoconf->name              = g_strdup(oth->name);
-    repoconf->enabled           = oth->enabled;
-    repoconf->baseurl           = lr_strv_dup(oth->baseurl);
-    repoconf->mirrorlist        = g_strdup(oth->mirrorlist);
-    repoconf->metalink          = g_strdup(oth->metalink);
-
-    repoconf->mediaid           = g_strdup(oth->mediaid);
-    repoconf->gpgkey            = lr_strv_dup(oth->gpgkey);
-    repoconf->gpgcakey          = lr_strv_dup(oth->gpgcakey);
-    repoconf->exclude           = lr_strv_dup(oth->exclude);
-    repoconf->include           = lr_strv_dup(oth->include);
-
-    repoconf->fastestmirror     = oth->fastestmirror;
-    repoconf->proxy             = g_strdup(oth->proxy);
-    repoconf->proxy_username    = g_strdup(oth->proxy_username);
-    repoconf->proxy_password    = g_strdup(oth->proxy_password);
-    repoconf->username          = g_strdup(oth->username);
-    repoconf->password          = g_strdup(oth->password);
-
-    repoconf->gpgcheck          = oth->gpgcheck;
-    repoconf->repo_gpgcheck     = oth->repo_gpgcheck;
-    repoconf->enablegroups      = oth->enablegroups;
-
-    repoconf->bandwidth         = oth->bandwidth;
-    repoconf->throttle          = g_strdup(oth->throttle);
-    repoconf->ip_resolve        = oth->ip_resolve;
-
-    repoconf->metadata_expire   = oth->metadata_expire;
-    repoconf->cost              = oth->cost;
-    repoconf->priority          = oth->priority;
-
-    repoconf->sslcacert         = g_strdup(oth->sslcacert);
-    repoconf->sslverify         = oth->sslverify;
-    repoconf->sslclientcert     = g_strdup(oth->sslclientcert);
-    repoconf->sslclientkey      = g_strdup(oth->sslclientkey);
-
-    repoconf->deltarepobaseurl  = lr_strv_dup(oth->deltarepobaseurl);
-
-    return repoconf;
+gchar *
+repoconf_id(LrYumRepoConf *repoconf)
+{
+    return repoconf->id;
 }
 
 LrYumRepoConfs *
@@ -168,13 +114,18 @@ lr_load_multiline_key_file(const char *filename,
     gboolean ret;
     gsize len;
     guint i;
+    _cleanup_error_free_ GError *tmp_err = NULL;
     _cleanup_free_ gchar *data = NULL;
     _cleanup_string_free_ GString *string = NULL;
     _cleanup_strv_free_ gchar **lines = NULL;
 
     // load file
-    if (!g_file_get_contents (filename, &data, &len, err))
+    if (!g_file_get_contents (filename, &data, &len, &tmp_err)) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_FILE,
+                    "Cannot load content of %s: %s",
+                    filename, tmp_err->message);
         return NULL;
+    }
 
     // split into lines
     string = g_string_new ("");
@@ -215,9 +166,11 @@ lr_load_multiline_key_file(const char *filename,
                                      string->str,
                                      -1,
                                      G_KEY_FILE_KEEP_COMMENTS,
-                                     err);
+                                     &tmp_err);
     if (!ret) {
         g_key_file_free (file);
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_KEYFILE,
+                    "Cannot parse key file %s: %s", filename, tmp_err->message);
         return NULL;
     }
     return file;
@@ -232,9 +185,9 @@ lr_key_file_get_boolean(GKeyFile *keyfile,
 {
     _cleanup_free_ gchar *string = NULL;
     _cleanup_free_ gchar *string_lower = NULL;
-    if (!g_key_file_has_key (keyfile, groupname, key, NULL))
-        return default_value;
     string = g_key_file_get_string(keyfile, groupname, key, err);
+    if (!string)
+        return FALSE;
     string_lower = g_ascii_strdown (string, -1);
     if (!g_strcmp0(string_lower, "1") ||
         !g_strcmp0(string_lower, "yes") ||
@@ -243,17 +196,31 @@ lr_key_file_get_boolean(GKeyFile *keyfile,
     return FALSE;
 }
 
+static long
+lr_key_file_get_boolean_long(GKeyFile *keyfile,
+                             const gchar *groupname,
+                             const gchar *key,
+                             gboolean default_value,
+                             GError **err)
+{
+    if (lr_key_file_get_boolean(keyfile, groupname, key, default_value, err))
+        return 1;
+    return 0;
+}
+
+/*
 static gint
 lr_key_file_get_integer(GKeyFile *keyfile,
                         const gchar *groupname,
                         const gchar *key,
                         gint default_value,
-                        G_GNUC_UNUSED GError **err)
+                        GError **err)
 {
     if (g_key_file_has_key (keyfile, groupname, key, NULL))
-        return g_key_file_get_integer(keyfile, groupname, key, NULL);
+        return g_key_file_get_integer(keyfile, groupname, key, err);
     return default_value;
 }
+*/
 
 static gchar **
 lr_key_file_get_string_list(GKeyFile *keyfile,
@@ -281,9 +248,9 @@ lr_key_file_get_ip_resolve(GKeyFile *keyfile,
 {
     _cleanup_free_ gchar *string = NULL;
     _cleanup_free_ gchar *string_lower = NULL;
-    if (!g_key_file_has_key (keyfile, groupname, key, NULL))
-        return default_value;
     string = g_key_file_get_string(keyfile, groupname, key, err);
+    if (!string)
+        return default_value;
     string_lower = g_ascii_strdown(string, -1);
     if (!g_strcmp0(string_lower, "ipv4"))
         return LR_IPRESOLVE_V4;
@@ -371,9 +338,9 @@ lr_key_file_get_metadata_expire(GKeyFile *keyfile,
 {
     gint64 res = -1;
     _cleanup_free_ gchar *string = NULL;
-    if (!g_key_file_has_key (keyfile, groupname, key, NULL))
-        return default_value;
     string = g_key_file_get_string(keyfile, groupname, key, err);
+    if (!string)
+        return default_value;
     if (!lr_convert_interval_to_seconds(string, &(res), err))
         return -1;
     return res;
@@ -456,14 +423,15 @@ lr_key_file_get_bandwidth(GKeyFile *keyfile,
 {
     guint64 res = 0;
     _cleanup_free_ gchar *string = NULL;
-    if (!g_key_file_has_key (keyfile, groupname, key, NULL))
-        return default_value;
     string = g_key_file_get_string(keyfile, groupname, key, err);
+    if (!string)
+        return default_value;
     if (!lr_convert_bandwidth_to_bytes(string, &(res), err))
         return 0;
     return res;
 }
 
+/**
 static gboolean
 lr_yum_repoconf_parse_id(LrYumRepoConf **yumconf,
                          const gchar *id,
@@ -580,34 +548,37 @@ err:
     *yumconf = NULL;
     return FALSE;
 }
+*/
 
 gboolean
 lr_yum_repoconfs_parse(LrYumRepoConfs *repos,
                        const char *filename,
                        GError **err)
 {
-    gboolean ret = TRUE;
     _cleanup_strv_free_ gchar **groups = NULL;
-    _cleanup_keyfile_free_ GKeyFile *keyfile = NULL;
+    LrYumRepoFile *repofile = NULL;
+    GKeyFile *keyfile = NULL;
 
+    // Load key file content
     keyfile = lr_load_multiline_key_file(filename, err);
     if (!keyfile)
         return FALSE;
 
+    // Create LrYumRepoFile object
+    repofile = lr_yum_repofile_init(filename, keyfile);
+    repos->files = g_slist_append(repos->files, repofile);
+
+    // Create LrYumRepoConf objects
     groups = g_key_file_get_groups (keyfile, NULL);
     for (guint i = 0; groups[i]; i++) {
         LrYumRepoConf *repoconf = NULL;
-        ret = lr_yum_repoconf_parse_id(&repoconf,
-                                       groups[i],
-                                       filename,
-                                       keyfile,
-                                       err);
-        if (!ret)
+        repoconf = lr_yum_repoconf_init(repofile, groups[i]);
+        if (!repoconf)
             return FALSE;
         repos->repos = g_slist_append(repos->repos, repoconf);
     }
 
-    return ret;
+    return TRUE;
 }
 
 gboolean
@@ -616,12 +587,16 @@ lr_yum_repoconfs_load_dir(LrYumRepoConfs *repos,
                           GError **err)
 {
     const gchar *file;
+    _cleanup_error_free_ GError *tmp_err = NULL;
     _cleanup_dir_close_ GDir *dir = NULL;
 
     // Open dir
-    dir = g_dir_open(path, 0, err);
-    if (!dir)
+    dir = g_dir_open(path, 0, &tmp_err);
+    if (!dir) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_KEYFILE,
+                    "Cannot open dir %s: %s", path, tmp_err->message);
         return FALSE;
+    }
 
     // Find all the .repo files
     while ((file = g_dir_read_name(dir))) {
@@ -631,6 +606,227 @@ lr_yum_repoconfs_load_dir(LrYumRepoConfs *repos,
         path_tmp = g_build_filename(path, file, NULL);
         if (!lr_yum_repoconfs_parse(repos, path_tmp, err))
             return FALSE;
+    }
+
+    return TRUE;
+}
+
+gboolean
+lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
+                       GError **err,
+                       LrYumRepoConfOption option,
+                       ...)
+{
+    GError *tmp_err = NULL;
+    va_list arg;
+
+    char **str;
+    char ***strv;
+    long *lnum;
+
+    assert(!err || *err == NULL);
+
+    if (!repoconf) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_BADFUNCARG,
+                    "No config specified");
+        return FALSE;
+    }
+
+    // Shortcuts
+    GKeyFile *keyfile = repoconf_keyfile(repoconf);
+    gchar *id = repoconf_id(repoconf);
+
+    // Basic sanity checks
+    if (!keyfile) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_BADFUNCARG,
+                    "No keyfile available in yumrepoconf");
+        return FALSE;
+    }
+
+    va_start(arg, option);
+
+    switch (option) {
+
+    case LR_YRC_ID:              /*!< (char *) ID (short name) of the repo */
+        str = va_arg(arg, char **);
+        *str = g_strdup(id);
+        break;
+
+    case LR_YRC_NAME:            /*!< (char *) Pretty name of the repo */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "name", &tmp_err);
+        break;
+
+    case LR_YRC_ENABLED:         /*!< (long 1 or 0) Is repo enabled? */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "enabled", TRUE, &tmp_err);
+        break;
+
+    case LR_YRC_BASEURL:         /*!< (char **) List of base URLs */
+        strv = va_arg(arg, char ***);
+        *strv = lr_key_file_get_string_list(keyfile, id, "baseurl", &tmp_err);
+        break;
+
+    case LR_YRC_MIRRORLIST:      /*!< (char *) Mirrorlist URL */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "mirrorlist", &tmp_err);
+        break;
+
+    case LR_YRC_METALINK:        /*!< (char *) Metalink URL */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "metalink", &tmp_err);
+        break;
+
+    case LR_YRC_MEDIAID:         /*!< (char *) Media ID */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "mediaid", &tmp_err);
+        break;
+
+    case LR_YRC_GPGKEY:          /*!< (char **) URL of GPG key */
+        strv = va_arg(arg, char ***);
+        *strv = lr_key_file_get_string_list(keyfile, id, "gpgkey", &tmp_err);
+        break;
+
+    case LR_YRC_GPGCAKEY:        /*!< (char **) GPG CA key */
+        strv = va_arg(arg, char ***);
+        *strv = lr_key_file_get_string_list(keyfile, id, "gpgcakey", &tmp_err);
+        break;
+
+    case LR_YRC_EXCLUDE:         /*!< (char **) List of exluded packages */
+        strv = va_arg(arg, char ***);
+        *strv = lr_key_file_get_string_list(keyfile, id, "exclude", &tmp_err);
+        break;
+
+    case LR_YRC_INCLUDE:         /*!< (char **) List of included packages */
+        strv = va_arg(arg, char ***);
+        *strv = lr_key_file_get_string_list(keyfile, id, "include", &tmp_err);
+        break;
+
+    case LR_YRC_FASTESTMIRROR:  /*!< (long 1 or 0) Fastest mirror determination */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "fastestmirror", TRUE, &tmp_err);
+        break;
+
+    case LR_YRC_PROXY:          /*!< (char *) Proxy addres */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "proxy", &tmp_err);
+        break;
+
+    case LR_YRC_PROXY_USERNAME: /*!< (char *) Proxy username */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "proxy_username", &tmp_err);
+        break;
+
+    case LR_YRC_PROXY_PASSWORD: /*!< (char *) Proxy password */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "proxy_password", &tmp_err);
+        break;
+
+    case LR_YRC_USERNAME:       /*!< (char *) Username */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "username", &tmp_err);
+        break;
+
+    case LR_YRC_PASSWORD:       /*!< (char *) Password */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "password", &tmp_err);
+        break;
+
+    case LR_YRC_GPGCHECK:       /*!< (long 1 or 0) GPG check for packages */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "gpgcheck", TRUE, &tmp_err);
+        break;
+
+    case LR_YRC_REPO_GPGCHECK:  /*!< (long 1 or 0) GPG check for repodata */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "repo_gpgcheck", TRUE, &tmp_err);
+        break;
+
+    case LR_YRC_ENABLEGROUPS:   /*!< (long 1 or 0) Use groups */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "enablegroups", TRUE, &tmp_err);
+        break;
+
+    case LR_YRC_BANDWIDTH:      /*!< (guint64) Bandwidth - Number of bytes */
+    {
+        guint64 *num = va_arg(arg, guint64 *);
+        *num = lr_key_file_get_bandwidth(keyfile, id, "bandwidth", TRUE, &tmp_err);
+        break;
+    }
+
+    case LR_YRC_THROTTLE:       /*!< (char *) Throttle string */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "throttle", &tmp_err);
+        break;
+
+    case LR_YRC_IP_RESOLVE:     /*!< (LrIpResolveType) Ip resolve type */
+    {
+        LrIpResolveType *val = va_arg(arg, LrIpResolveType *);
+        *val = lr_key_file_get_ip_resolve(keyfile, id, "ip_resolve", LR_YUMREPOCONF_IP_RESOLVE_DEFAULT, &tmp_err);
+        break;
+    }
+
+    case LR_YRC_METADATA_EXPIRE:/*!< (gint64) Interval in secs for metadata expiration */
+    {
+        gint64 *num = va_arg(arg, gint64 *);
+        *num = lr_key_file_get_metadata_expire(keyfile, id, "metadata_expire", LR_YUMREPOCONF_METADATA_EXPIRE_DEFAULT, &tmp_err);
+        break;
+    }
+
+    case LR_YRC_COST:           /*!< (gint) Repo cost */
+    {
+        gint *num = va_arg(arg, gint *);
+        *num = g_key_file_get_integer(keyfile, id, "cost", &tmp_err);
+        break;
+    }
+
+    case LR_YRC_PRIORITY:       /*!< (gint) Repo priority */
+    {
+        gint *num = va_arg(arg, gint *);
+        *num = g_key_file_get_integer(keyfile, id, "priority", &tmp_err);
+        break;
+    }
+
+    case LR_YRC_SSLCACERT:      /*!< (gchar *) SSL Certification authority cert */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "sslcacert", &tmp_err);
+        break;
+
+    case LR_YRC_SSLVERIFY:      /*!< (long 1 or 0) SSL verification */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "sslverify", TRUE, &tmp_err);
+        break;
+
+    case LR_YRC_SSLCLIENTCERT:  /*!< (gchar *) SSL Client certificate */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "sslclientcert", &tmp_err);
+        break;
+
+    case LR_YRC_SSLCLIENTKEY:   /*!< (gchar *) SSL Client key */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "sslclientkey", &tmp_err);
+        break;
+
+    case LR_YRC_DELTAREPOBASEURL:/*!< (char **) Deltarepo mirror URLs */
+        strv = va_arg(arg, char ***);
+        *strv = lr_key_file_get_string_list(keyfile, id, "deltarepobaseurl", &tmp_err);
+        break;
+
+    }
+
+    va_end(arg);
+
+    if (tmp_err) {
+        if (tmp_err->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND)
+            g_set_error(err, LR_REPOCONF_ERROR, LRE_NOTSET,
+                        "Value of option %d is not set",
+                        option);
+        else
+            g_set_error(err, LR_REPOCONF_ERROR, LRE_KEYFILE,
+                        "Cannot get value of option %d: %s",
+                        option, tmp_err->message);
+
+        return FALSE;
     }
 
     return TRUE;

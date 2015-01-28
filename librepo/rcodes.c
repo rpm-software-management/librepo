@@ -100,6 +100,12 @@ lr_strerror(int rc)
         return "Error in repomd.xml";
     case LRE_VALUE:
         return "Bad value (no value, unknown unit, etc.)";
+    case LRE_NOTSET:
+        return "Requested option/value is not set";
+    case LRE_FILE:
+        return "File operation error";
+    case LRE_KEYFILE:
+        return "Key file parsing error";
     }
 
     return "Unknown error";
