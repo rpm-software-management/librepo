@@ -123,8 +123,18 @@ lr_yum_repoconfs_load_dir(LrYumRepoConfs *confs,
                           const char *path,
                           GError **err);
 
-/**
- * Note: All returned values are malloced and must be freed.
+/** Get a value from repo config file *.repo
+ * If specified option is not specified in the repo config file,
+ * FALSE is returned and error with code LRE_VALUE is set.
+ * Note: All returned values are malloced and must be freed by caller.
+ * @param repoconf      A repository configuration
+ * @param err           GError **
+ * @param option        An option
+ * @param ...           Appropriate variable for the selected option.
+ * @return              TRUE if everithing is ok, FALSE if err is set.
+ *                      Note value of the target variable passed as vararg
+ *                      can be changed and it's state is undefined when
+ *                      a FALSE is returned!
  */
 gboolean
 lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
@@ -132,13 +142,20 @@ lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
                        LrYumRepoConfOption option,
                        ...);
 
-/* TODO
+/** Set an option in the config file.
+ * Note: This function copies all passed values and
+ * caller don't have to keep them around.
+ * @param repoconf      A repo configuration
+ * @param err           GError **
+ * @param option        An option
+ * @param ...           A value for an option as an appropriate variable type.
+ * @return              TRUE if everything is OK, FALSE if err is set.
+ */
 gboolean
 lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
                       GError **err,
                       LrYumRepoConfOption option,
                       ...);
-*/
 
 /** @} */
 
