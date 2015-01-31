@@ -400,7 +400,7 @@ lr_handle_setopt(LrHandle *handle,
  * @param handle        Librepo handle.
  * @param err           GError **
  * @param option        Option from ::LrHandleInfoOption enum.
- * @param ...           Apropriate variable fro the selected option.
+ * @param ...           Apropriate variable for the selected option.
  * @return              TRUE if everything is ok, FALSE if err is set.
  */
 gboolean
