@@ -283,8 +283,16 @@ lr_key_file_get_string_list(GKeyFile *keyfile,
     if (!string)
         return list;
     list = g_strsplit_set(string, " ,;", 0);
-    for (gint i=0; list && list[i]; i++)
+    gint i=0;
+    for (; list && list[i]; i++)
         g_strstrip(list[i]);
+
+    if (((i-1) > 0) && !g_strcmp0(list[i-1], "")) {
+        // If the last element of the list is an empty string remove it
+        // If could be cause when a list is defined like: option = val1; val2;
+        g_free(list[i-1]);
+        list[i-1] = NULL;
+    }
     return list;
 }
 
@@ -361,7 +369,7 @@ lr_convert_interval_to_seconds(const char *str,
     }
 
     // Process multiplier (if supplied)
-    if (endptr) {
+    if (endptr && *endptr) {
         if (strlen(endptr) != 1) {
             g_set_error(err, LR_REPOCONF_ERROR, LRE_VALUE,
                         "Unknown time interval unit '%s'", endptr);
@@ -443,7 +451,7 @@ lr_convert_bandwidth_to_bytes(const char *str,
     }
 
     // Process multiplier (if supplied)
-    if (endptr) {
+    if (endptr && *endptr) {
         if (strlen(endptr) != 1) {
             g_set_error(err, LR_REPOCONF_ERROR, LRE_VALUE,
                         "Unknown unit '%s'", endptr);
@@ -988,7 +996,8 @@ lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
     va_end(arg);
 
     if (tmp_err) {
-        if (tmp_err->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND)
+        if (tmp_err->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND
+                || tmp_err->code == G_KEY_FILE_ERROR_GROUP_NOT_FOUND)
             g_set_error(err, LR_REPOCONF_ERROR, LRE_NOTSET,
                         "Value of option %d is not set",
                         option);
@@ -997,6 +1006,7 @@ lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
                         "Cannot get value of option %d: %s",
                         option, tmp_err->message);
 
+        g_error_free(tmp_err);
         return FALSE;
     }
 
@@ -1096,8 +1106,8 @@ lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
         break;
 
     case LR_YRC_FASTESTMIRROR:   /*!< 11 (long 1 or 0) Fastest mirror determination */
-        strv = va_arg(arg, char **);
-        lr_key_file_set_string_list(keyfile, id, "fastestmirror", (const gchar **) strv);
+        lnum = va_arg(arg, long);
+        g_key_file_set_boolean(keyfile, id, "fastestmirror", lnum);
         break;
 
     case LR_YRC_PROXY:           /*!< 12 (char *) Proxy addres */
