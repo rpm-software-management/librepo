@@ -38,49 +38,6 @@ typedef struct _LrYumRepoFile LrYumRepoFile;
 
 /** Yum repo config */
 struct _LrYumRepoConf {
-/*    gchar          *_source;        [>!< Local path to .repo file <]*/
-
-    //gchar          *id;             [>!< ID (short name) of the repo <]
-    //gchar          *name;           [>!< Pretty name of the repo <]
-    //gboolean        enabled;        [>!< Is repo enabled? <]
-    //gchar          **baseurl;       [>!< List of base URLs <]
-    //gchar          *mirrorlist;     [>!< Mirrorlist URL <]
-    //gchar          *metalink;       [>!< Metalink URL <]
-
-    //gchar          *mediaid;        [>!< Media ID <]
-    //gchar          **gpgkey;        [>!< URL of GPG key <]
-    //gchar          **gpgcakey;      [>!< GPG CA key <]
-    //gchar          **exclude;       [>!< List of exluded packages <]
-    //gchar          **include;       [>!< List of included packages <]
-
-    //gboolean        fastestmirror;  [>!< Fastest mirror determination <]
-    //gchar          *proxy;          [>!< Proxy addres <]
-    //gchar          *proxy_username; [>!< Proxy username <]
-    //gchar          *proxy_password; [>!< Proxy password <]
-    //gchar          *username;       [>!< Username <]
-    //gchar          *password;       [>!< Password <]
-
-    //gboolean        gpgcheck;       [>!< GPG check for packages <]
-    //gboolean        repo_gpgcheck;  [>!< GPG check for repodata <]
-    //gboolean        enablegroups;   [>!< Use groups <]
-
-    //guint64         bandwidth;      [>!< Bandwidth - Number of bytes <]
-    //gchar          *throttle;       [>!< Throttle string <]
-    //LrIpResolveType ip_resolve;     [>!< Ip resolve type <]
-
-    //gint64          metadata_expire;[>!< Interval in secs for metadata expiration <]
-    //gint            cost;           [>!< Repo cost <]
-    //gint            priority;       [>!< Repo priority <]
-
-    //gchar          *sslcacert;      [>!< SSL Certification authority cert <]
-    //gboolean        sslverify;      [>!< SSL verification <]
-    //gchar          *sslclientcert;  [>!< SSL Client certificate <]
-    //gchar          *sslclientkey;   [>!< SSL Client key <]
-
-    //gchar          **deltarepobaseurl;[>!< Deltarepo mirror URLs <]
-
-    // -------------------------------------------------------
-
     LrYumRepoFile  *file;           /*!< Config file */
     gchar          *id;             /*!< Repo ID (group name in key file) */
 };
