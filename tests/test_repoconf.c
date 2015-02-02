@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -19,9 +20,9 @@ repoconf_assert_true(LrYumRepoConf *repoconf,
                      LrYumRepoConfOption option)
 {
     void *ptr = NULL;
-    GError *tmp_err = NULL;
+    _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
-    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_msg(ptr, "Not a True value (Option %d)", option);
 }
@@ -34,9 +35,9 @@ repoconf_assert_false(LrYumRepoConf *repoconf,
                       LrYumRepoConfOption option)
 {
     void *ptr = NULL;
-    GError *tmp_err = NULL;
+    _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
-    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_msg(!ptr, "Not a NULL/0 value (Option %d)", option);
 }
@@ -49,12 +50,11 @@ repoconf_assert_na(LrYumRepoConf *repoconf,
                    LrYumRepoConfOption option)
 {
     void *ptr = NULL;
-    GError *tmp_err = NULL;
+    _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
-    ck_assert_msg(!ret, "Getinfo succeed for %d", option);
+    ck_assert_msg(!ret, "Getinfo should fail for %d: %s", option, tmp_err->message);
     fail_if(!tmp_err);
     ck_assert_int_eq(tmp_err->code, LRE_NOTSET);
-    //ck_assert_msg(!ptr, "Not a NULL/0 value (Option %d)", option);
 }
 
 #define conf_assert_na(option) \
@@ -65,27 +65,42 @@ repoconf_assert_str_eq(LrYumRepoConf *repoconf,
                        LrYumRepoConfOption option,
                        gchar *expected)
 {
-    gchar *str = NULL;
-    GError *tmp_err = NULL;
+    _cleanup_free_ gchar *str = NULL;
+    _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &str);
-    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_str_eq(str, expected);
-    g_free(str);
 }
 
 #define conf_assert_str_eq(option, expected) \
             repoconf_assert_str_eq(conf, (option), (expected))
 
 static void
+repoconf_assert_uint_eq(LrYumRepoConf *repoconf,
+                       LrYumRepoConfOption option,
+                       uintmax_t expected)
+{
+    long val = (expected - 1);
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &val);
+    ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
+    fail_if(tmp_err);
+    ck_assert_uint_eq(val, expected);
+}
+
+#define conf_assert_uint_eq(option, expected) \
+            repoconf_assert_uint_eq(conf, (option), (expected))
+
+static void
 repoconf_assert_int_eq(LrYumRepoConf *repoconf,
                        LrYumRepoConfOption option,
                        intmax_t expected)
 {
-    long val;
-    GError *tmp_err = NULL;
+    long val = (expected - 1);
+    _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &val);
-    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_int_eq(val, expected);
 }
@@ -99,11 +114,11 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
                            ...)
 {
     va_list args;
-    GError *tmp_err = NULL;
-    char **strv = NULL;
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    _cleanup_strv_free_ char **strv = NULL;
 
     gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &strv);
-    ck_assert_msg(ret, "Getinfo failed for %d", option);
+    ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
 
     ck_assert_msg(strv, "NULL isn't strv");
@@ -112,6 +127,7 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
     gchar **strv_p = strv;
     for (; *strv_p; strv_p++) {
         gchar *s = va_arg (args, gchar*);
+        ck_assert_msg(s, "Lengths of lists are not the same");
         ck_assert_str_eq(*strv_p, s);
     }
 
@@ -119,13 +135,98 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
                   "Lengths of lists are not the same");
 
     va_end (args);
-    g_strfreev(strv);
 }
 
 #define conf_assert_strv_eq(option, ...) \
             repoconf_assert_strv_eq(conf, (option), __VA_ARGS__)
 
-START_TEST(test_repoconf_minimal)
+static void
+repoconf_assert_set_boolean(LrYumRepoConf *repoconf,
+                            LrYumRepoConfOption option,
+                            gboolean val)
+{
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    ck_assert_msg(ret, "setopt for option %d failed: %s",
+                  option, tmp_err->message);
+    fail_if(tmp_err);
+}
+
+#define conf_assert_set_boolean(option, val) \
+            repoconf_assert_set_boolean(conf, (option), (val))
+
+static void
+repoconf_assert_set_str(LrYumRepoConf *repoconf,
+                        LrYumRepoConfOption option,
+                        gchar *val)
+{
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    ck_assert_msg(ret, "setopt for option %d failed: %s",
+                  option, tmp_err->message);
+    fail_if(tmp_err);
+}
+
+#define conf_assert_set_str(option, val) \
+            repoconf_assert_set_str(conf, (option), (val))
+
+static void
+repoconf_assert_set_strv(LrYumRepoConf *repoconf,
+                         LrYumRepoConfOption option,
+                         ...)
+{
+    va_list args;
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    _cleanup_ptrarray_unref_ GPtrArray *array = g_ptr_array_new();
+
+    // Build strv from VA args
+    va_start (args, option);
+    for (gchar *s=va_arg(args, gchar*); s; s=va_arg(args, gchar*))
+        g_ptr_array_add(array, s);
+    g_ptr_array_add(array, NULL);
+    va_end (args);
+
+    // Set the option
+    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, array->pdata);
+    ck_assert_msg(ret, "setopt for option %d failed: %s",
+                  option, tmp_err->message);
+    fail_if(tmp_err);
+}
+
+#define conf_assert_set_strv(option, ...) \
+            repoconf_assert_set_strv(conf, (option), __VA_ARGS__)
+
+static void
+repoconf_assert_set_int(LrYumRepoConf *repoconf,
+                        LrYumRepoConfOption option,
+                        intmax_t val)
+{
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    ck_assert_msg(ret, "setopt for option %d failed: %s",
+                  option, tmp_err->message);
+    fail_if(tmp_err);
+}
+
+#define conf_assert_set_int(option, val) \
+            repoconf_assert_set_int(conf, (option), (val))
+
+static void
+repoconf_assert_set_uint(LrYumRepoConf *repoconf,
+                         LrYumRepoConfOption option,
+                         uintmax_t val)
+{
+    _cleanup_error_free_ GError *tmp_err = NULL;
+    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    ck_assert_msg(ret, "setopt for option %d failed: %s",
+                  option, tmp_err->message);
+    fail_if(tmp_err);
+}
+
+#define conf_assert_set_uint(option, val) \
+            repoconf_assert_set_uint(conf, (option), (val))
+
+START_TEST(test_parse_repoconf_minimal)
 {
     gboolean ret;
     LrYumRepoConf *conf = NULL;
@@ -148,7 +249,7 @@ START_TEST(test_repoconf_minimal)
 
     // Test content of first repo config
 
-    conf = list->data;
+    conf = g_slist_nth_data(list, 0);
     fail_if(!conf);
 
     conf_assert_str_eq(LR_YRC_ID, "minimal-repo-1");
@@ -192,7 +293,7 @@ START_TEST(test_repoconf_minimal)
 
     // Test content of second repo config
 
-    conf = list->next->data;
+    conf = g_slist_nth_data(list, 1);
     fail_if(!conf);
 
     conf_assert_str_eq(LR_YRC_ID, "minimal-repo-2");
@@ -238,7 +339,7 @@ START_TEST(test_repoconf_minimal)
 }
 END_TEST
 
-START_TEST(test_repoconf_big)
+START_TEST(test_parse_repoconf_big)
 {
     gboolean ret;
     LrYumRepoConf *conf = NULL;
@@ -259,7 +360,7 @@ START_TEST(test_repoconf_big)
     fail_if(!list);
     fail_if(g_slist_length(list) != 1);
 
-    conf = list->data;
+    conf = g_slist_nth_data(list, 0);
     fail_if(!conf);
 
     conf_assert_str_eq(LR_YRC_ID, "big-repo");
@@ -293,7 +394,7 @@ START_TEST(test_repoconf_big)
     conf_assert_true(LR_YRC_REPO_GPGCHECK);
     conf_assert_true(LR_YRC_ENABLEGROUPS);
 
-    conf_assert_int_eq(LR_YRC_BANDWIDTH, 1024*1024);
+    conf_assert_uint_eq(LR_YRC_BANDWIDTH, 1024*1024);
     conf_assert_str_eq(LR_YRC_THROTTLE, "50%");
     conf_assert_int_eq(LR_YRC_IP_RESOLVE, LR_IPRESOLVE_V6);
 
@@ -315,13 +416,182 @@ START_TEST(test_repoconf_big)
 }
 END_TEST
 
+START_TEST(test_write_repoconf)
+{
+    _cleanup_file_close_ int rc;
+    gboolean ret;
+    LrYumRepoConfs *confs;
+    LrYumRepoConf * conf;
+    char tmpfn[] = "/tmp/librepo_repoconf_test_XXXXXX";
+    const char *ids[] = {"test_id", NULL};
+    GSList *repos = NULL;
+    _cleanup_error_free_ GError *tmp_err = NULL;
+
+    // Create a temporary file
+    rc = mkstemp(tmpfn);
+    fail_if(rc == -1);
+
+    // Create reconfs with one repoconf with one id (one section)
+    confs = lr_yum_repoconfs_init();
+    ret = lr_yum_repoconfs_add_empty_conf(confs, tmpfn, ids, &tmp_err);
+    fail_if(!ret);
+    ck_assert_msg(!tmp_err, tmp_err->message);
+
+    // Check if the repoconf with the section was created
+    repos = lr_yum_repoconfs_get_list(confs, &tmp_err);
+    ck_assert_msg(!tmp_err, tmp_err->message);
+    ck_assert_msg(repos, "No repo has been created");
+    conf = g_slist_nth_data(repos, 0);
+
+    // Ty to set and get options
+    conf_assert_str_eq(LR_YRC_ID, "test_id");
+
+    conf_assert_na(LR_YRC_NAME);
+    conf_assert_set_str(LR_YRC_NAME, "test_name");
+    conf_assert_str_eq(LR_YRC_NAME, "test_name");
+
+    conf_assert_na(LR_YRC_ENABLED);
+    conf_assert_set_boolean(LR_YRC_ENABLED, TRUE);
+    conf_assert_true(LR_YRC_ENABLED);
+
+    conf_assert_na(LR_YRC_BASEURL);
+    conf_assert_set_strv(LR_YRC_BASEURL, "test_baseurl1", "test_baseurl2", NULL);
+    conf_assert_strv_eq(LR_YRC_BASEURL, "test_baseurl1", "test_baseurl2", NULL);
+
+    conf_assert_na(LR_YRC_MIRRORLIST);
+    conf_assert_set_str(LR_YRC_MIRRORLIST, "test_mirrorlist");
+    conf_assert_str_eq(LR_YRC_MIRRORLIST, "test_mirrorlist");
+
+    conf_assert_na(LR_YRC_METALINK);
+    conf_assert_set_str(LR_YRC_METALINK, "test_metalink");
+    conf_assert_str_eq(LR_YRC_METALINK, "test_metalink");
+
+
+    conf_assert_na(LR_YRC_MEDIAID);
+    conf_assert_set_str(LR_YRC_MEDIAID, "test_mediaid");
+    conf_assert_str_eq(LR_YRC_MEDIAID, "test_mediaid");
+
+    conf_assert_na(LR_YRC_GPGKEY);
+    conf_assert_set_strv(LR_YRC_GPGKEY, "test_gpgkey", NULL);
+    conf_assert_strv_eq(LR_YRC_GPGKEY, "test_gpgkey", NULL);
+
+    conf_assert_na(LR_YRC_GPGCAKEY);
+    conf_assert_set_strv(LR_YRC_GPGCAKEY, "test_gpgcakey", NULL);
+    conf_assert_strv_eq(LR_YRC_GPGCAKEY, "test_gpgcakey", NULL);
+
+    conf_assert_na(LR_YRC_EXCLUDE);
+    conf_assert_set_strv(LR_YRC_EXCLUDE, "test_exclude", NULL);
+    conf_assert_strv_eq(LR_YRC_EXCLUDE, "test_exclude", NULL);
+
+    conf_assert_na(LR_YRC_INCLUDE);
+    conf_assert_set_strv(LR_YRC_INCLUDE, "test_include", NULL);
+    conf_assert_strv_eq(LR_YRC_INCLUDE, "test_include", NULL);
+
+
+    conf_assert_na(LR_YRC_FASTESTMIRROR);
+    conf_assert_set_boolean(LR_YRC_FASTESTMIRROR, TRUE);
+    conf_assert_true(LR_YRC_FASTESTMIRROR);
+
+    conf_assert_na(LR_YRC_PROXY);
+    conf_assert_set_str(LR_YRC_PROXY, "test_proxy");
+    conf_assert_str_eq(LR_YRC_PROXY, "test_proxy");
+
+    conf_assert_na(LR_YRC_PROXY_USERNAME);
+    conf_assert_set_str(LR_YRC_PROXY_USERNAME, "test_proxy_username");
+    conf_assert_str_eq(LR_YRC_PROXY_USERNAME, "test_proxy_username");
+
+    conf_assert_na(LR_YRC_PROXY_PASSWORD);
+    conf_assert_set_str(LR_YRC_PROXY_PASSWORD, "test_proxy_password");
+    conf_assert_str_eq(LR_YRC_PROXY_PASSWORD, "test_proxy_password");
+
+    conf_assert_na(LR_YRC_USERNAME);
+    conf_assert_set_str(LR_YRC_USERNAME, "test_username");
+    conf_assert_str_eq(LR_YRC_USERNAME, "test_username");
+
+    conf_assert_na(LR_YRC_PASSWORD);
+    conf_assert_set_str(LR_YRC_PASSWORD, "test_password");
+    conf_assert_str_eq(LR_YRC_PASSWORD, "test_password");
+
+
+    conf_assert_na(LR_YRC_GPGCHECK);
+    conf_assert_set_boolean(LR_YRC_GPGCHECK, TRUE);
+    conf_assert_true(LR_YRC_GPGCHECK);
+
+    conf_assert_na(LR_YRC_REPO_GPGCHECK);
+    conf_assert_set_boolean(LR_YRC_REPO_GPGCHECK, TRUE);
+    conf_assert_true(LR_YRC_REPO_GPGCHECK);
+
+    conf_assert_na(LR_YRC_ENABLEGROUPS);
+    conf_assert_set_boolean(LR_YRC_ENABLEGROUPS, TRUE);
+    conf_assert_true(LR_YRC_ENABLEGROUPS);
+
+
+    conf_assert_na(LR_YRC_BANDWIDTH);
+    conf_assert_set_uint(LR_YRC_BANDWIDTH, 55);
+    conf_assert_uint_eq(LR_YRC_BANDWIDTH, 55);
+
+    conf_assert_na(LR_YRC_THROTTLE);
+    conf_assert_set_str(LR_YRC_THROTTLE, "test_throttle");
+    conf_assert_str_eq(LR_YRC_THROTTLE, "test_throttle");
+
+    conf_assert_na(LR_YRC_IP_RESOLVE);
+    conf_assert_set_int(LR_YRC_IP_RESOLVE, LR_IPRESOLVE_V6);
+    conf_assert_int_eq(LR_YRC_IP_RESOLVE, LR_IPRESOLVE_V6);
+
+
+    conf_assert_na(LR_YRC_METADATA_EXPIRE);
+    conf_assert_set_int(LR_YRC_METADATA_EXPIRE, 123);
+    conf_assert_int_eq(LR_YRC_METADATA_EXPIRE, 123);
+
+    conf_assert_na(LR_YRC_COST);
+    conf_assert_set_int(LR_YRC_COST, 456);
+    conf_assert_int_eq(LR_YRC_COST, 456);
+
+    conf_assert_na(LR_YRC_PRIORITY);
+    conf_assert_set_int(LR_YRC_PRIORITY, 789);
+    conf_assert_int_eq(LR_YRC_PRIORITY, 789);
+
+
+    conf_assert_na(LR_YRC_SSLCACERT);
+    conf_assert_set_str(LR_YRC_SSLCACERT, "test_sslcacert");
+    conf_assert_str_eq(LR_YRC_SSLCACERT, "test_sslcacert");
+
+    conf_assert_na(LR_YRC_SSLVERIFY);
+    conf_assert_set_boolean(LR_YRC_SSLVERIFY, TRUE);
+    conf_assert_true(LR_YRC_SSLVERIFY);
+
+    conf_assert_na(LR_YRC_SSLCLIENTCERT);
+    conf_assert_set_str(LR_YRC_SSLCLIENTCERT, "test_sslclientcert");
+    conf_assert_str_eq(LR_YRC_SSLCLIENTCERT, "test_sslclientcert");
+
+    conf_assert_na(LR_YRC_SSLCLIENTKEY);
+    conf_assert_set_str(LR_YRC_SSLCLIENTKEY, "test_sslclientkey");
+    conf_assert_str_eq(LR_YRC_SSLCLIENTKEY, "test_sslclientkey");
+
+
+    conf_assert_na(LR_YRC_DELTAREPOBASEURL);
+    conf_assert_set_strv(LR_YRC_DELTAREPOBASEURL, "test_deltarepobaseurl", NULL);
+    conf_assert_strv_eq(LR_YRC_DELTAREPOBASEURL, "test_deltarepobaseurl", NULL);
+
+    // Write out modified config
+    ret = lr_yum_repoconfs_save(confs, &tmp_err);
+    ck_assert_msg(!tmp_err, tmp_err->message);
+    fail_if(!ret);
+
+    // Cleanup resources
+    lr_yum_repoconfs_free(confs);
+    unlink(tmpfn);
+}
+END_TEST
+
 Suite *
 repoconf_suite(void)
 {
     Suite *s = suite_create("repoconf");
     TCase *tc = tcase_create("Main");
-    tcase_add_test(tc, test_repoconf_minimal);
-    tcase_add_test(tc, test_repoconf_big);
+    tcase_add_test(tc, test_parse_repoconf_minimal);
+    tcase_add_test(tc, test_parse_repoconf_big);
+    tcase_add_test(tc, test_write_repoconf);
     suite_add_tcase(s, tc);
     return s;
 }
