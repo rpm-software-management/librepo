@@ -27,6 +27,7 @@
 #define __LR_CLEANUP_H__
 
 #include <glib.h>
+#include <unistd.h>
 
 G_BEGIN_DECLS
 
@@ -53,6 +54,7 @@ G_BEGIN_DECLS
 LR_DEFINE_CLEANUP_FUNCTION0(GArray*, lr_local_array_unref, g_array_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GChecksum*, lr_local_checksum_free, g_checksum_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GDir*, lr_local_dir_close, g_dir_close)
+LR_DEFINE_CLEANUP_FUNCTION0(int, lr_local_file_close, close)
 LR_DEFINE_CLEANUP_FUNCTION0(GError*, lr_local_free_error, g_error_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GHashTable*, lr_local_hashtable_unref, g_hash_table_unref)
 #if GLIB_CHECK_VERSION(2, 32, 0)
@@ -69,6 +71,7 @@ LR_DEFINE_CLEANUP_FUNCTION(GList*, lr_local_free_list, g_list_free)
 LR_DEFINE_CLEANUP_FUNCTION(void*, lr_local_free, g_free)
 
 #define _cleanup_dir_close_ __attribute__ ((cleanup(lr_local_dir_close)))
+#define _cleanup_file_close_ __attribute__ ((cleanup(lr_local_file_close)))
 #define _cleanup_timer_destroy_ __attribute__ ((cleanup(lr_local_destroy_timer)))
 #define _cleanup_free_ __attribute__ ((cleanup(lr_local_free)))
 #define _cleanup_checksum_free_ __attribute__ ((cleanup(lr_local_checksum_free)))
