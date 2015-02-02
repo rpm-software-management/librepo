@@ -48,9 +48,51 @@ lr_yum_repofile_free(LrYumRepoFile *repofile)
 }
 
 static GKeyFile *
-repofile_keyfile(LrYumRepoFile * repofile)
+repofile_keyfile(LrYumRepoFile *repofile)
 {
     return repofile->keyfile;
+}
+
+static void
+repofile_set_modified(LrYumRepoFile *repofile,
+                      gboolean val)
+{
+    repofile->modified = val;
+}
+
+static gboolean
+repofile_modified(LrYumRepoFile *repofile)
+{
+    return repofile->modified;
+}
+
+static gboolean
+repofile_save_keyfile(LrYumRepoFile *repofile,
+                      GError **err)
+{
+    assert(!err || *err == NULL);
+
+    gboolean ret;
+    GError *tmp_err = NULL;
+
+    if (!repofile_modified(repofile))
+        // File hasn't been modified
+        return TRUE;
+
+    // Write the contents of the keyfile
+    ret = g_key_file_save_to_file(repofile->keyfile,
+                                  repofile->path,
+                                  &tmp_err);
+
+    // Act upon the return status
+    if (ret)
+        repofile_set_modified(repofile, FALSE);
+    else
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_KEYFILE,
+                    "Cannot save conf to %s: %s",
+                    repofile->path, tmp_err->message);
+
+    return ret;
 }
 
 static LrYumRepoConf *
@@ -71,13 +113,19 @@ lr_yum_repoconf_free(LrYumRepoConf *repoconf)
     g_free(repoconf);
 }
 
+static LrYumRepoFile *
+repoconf_repofile(LrYumRepoConf *repoconf)
+{
+    return repoconf->file;
+}
+
 static GKeyFile *
 repoconf_keyfile(LrYumRepoConf *repoconf)
 {
-    return repofile_keyfile(repoconf->file);
+    return repofile_keyfile(repoconf_repofile(repoconf));
 }
 
-gchar *
+static gchar *
 repoconf_id(LrYumRepoConf *repoconf)
 {
     return repoconf->id;
@@ -94,6 +142,7 @@ void
 lr_yum_repoconfs_free(LrYumRepoConfs *repos)
 {
     g_slist_free_full(repos->repos, (GDestroyNotify) lr_yum_repoconf_free);
+    g_slist_free_full(repos->files, (GDestroyNotify) lr_yum_repofile_free);
     g_free(repos);
 }
 
@@ -659,6 +708,43 @@ lr_yum_repoconfs_load_dir(LrYumRepoConfs *repos,
 }
 
 gboolean
+lr_yum_repoconfs_save(LrYumRepoConfs *confs,
+                      GError **err)
+{
+    assert(!err || *err == NULL);
+
+    if (!confs) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_BADFUNCARG,
+                    "No yumrepoconfs arg specified");
+        return FALSE;
+    }
+
+    for (GSList *elem = confs->repos; elem; elem = g_slist_next(elem)) {
+        LrYumRepoConf *repoconf = elem->data;
+        if (!lr_yum_repoconf_save(repoconf, err))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+gboolean
+lr_yum_repoconf_save(LrYumRepoConf *repoconf,
+                     GError **err)
+{
+    assert(!err || *err == NULL);
+
+    if (!repoconf) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_BADFUNCARG,
+                    "No config specified");
+        return FALSE;
+    }
+
+    LrYumRepoFile *repofile = repoconf_repofile(repoconf);
+    return repofile_save_keyfile(repofile, err);
+}
+
+gboolean
 lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
                        GError **err,
                        LrYumRepoConfOption option,
@@ -901,6 +987,7 @@ lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
     }
 
     // Shortcuts
+    LrYumRepoFile *repofile = repoconf_repofile(repoconf);
     GKeyFile *keyfile = repoconf_keyfile(repoconf);
     gchar *id = repoconf_id(repoconf);
 
@@ -1088,6 +1175,8 @@ lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
         g_propagate_error(err, tmp_err);
         return FALSE;
     }
+
+    repofile_set_modified(repofile, TRUE);
 
     return TRUE;
 }

@@ -123,6 +123,24 @@ lr_yum_repoconfs_load_dir(LrYumRepoConfs *confs,
                           const char *path,
                           GError **err);
 
+/** Save all repoconfs loaded in LrYumRepoConfs
+ * @param confs         LrYumRepoConfs
+ * @param err           GError **
+ * @return              TRUE if everything is ok, FALSE if err is set.
+ */
+gboolean
+lr_yum_repoconfs_save(LrYumRepoConfs *confs,
+                      GError **err);
+
+/** Save current repoconf (and also all repoconfs loaded from the same file).
+ * @param repoconf      LrYumRepoConf
+ * @param err           GError **
+ * @return              TRUE if everything is ok, FALSE if err is set.
+ */
+gboolean
+lr_yum_repoconf_save(LrYumRepoConf *repoconf,
+                     GError **err);
+
 /** Get a value from repo config file *.repo
  * If specified option is not specified in the repo config file,
  * FALSE is returned and error with code LRE_VALUE is set.
