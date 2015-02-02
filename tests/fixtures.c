@@ -46,6 +46,7 @@ lr_assert_strv_eq(const gchar * const *strv, ...)
     gchar **strv_p = strv;
     for (; *strv_p; strv_p++) {
         gchar *s = va_arg (args, gchar*);
+        ck_assert_msg(s, "Lengths of lists are not the same");
         ck_assert_str_eq(*strv_p, s);
     }
 
