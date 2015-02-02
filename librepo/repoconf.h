@@ -103,6 +103,20 @@ lr_yum_repoconfs_free(LrYumRepoConfs *confs);
 GSList *
 lr_yum_repoconfs_get_list(LrYumRepoConfs *confs, GError **err);
 
+/** Add an empty LrYumRepoConf.
+ * A file specified by filename don't have to exists - it will be created.
+ * @param confs     LrYumRepoConfs
+ * @param filename  Path to *.repo file (the file doesn't have to exist)
+ * @param ids       IDs of repositories confs there (NULL-terminated list)
+ * @param err       GError **
+ * @return          TRUE if everything is ok, FALSE if err is set.
+ */
+gboolean
+lr_yum_repoconfs_add_empty_conf(LrYumRepoConfs *confs,
+                                const char *filename,
+                                const char **ids,
+                                GError **err);
+
 /** Parse a *.repo file
  * @param confs     LrYumRepoConfs
  * @param filename  Path to *.repo file

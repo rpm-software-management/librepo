@@ -647,6 +647,44 @@ err:
 */
 
 gboolean
+lr_yum_repoconfs_add_empty_conf(LrYumRepoConfs *repos,
+                                const char *filename,
+                                const char **ids,
+                                GError **err)
+{
+    GKeyFile *keyfile;
+    LrYumRepoFile *repofile;
+
+    assert(!err || *err == NULL);
+
+    if (!repos) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_BADFUNCARG,
+                    "No yumrepoconfs arg specified");
+        return FALSE;
+    }
+
+    if (!filename) {
+        g_set_error(err, LR_REPOCONF_ERROR, LRE_BADFUNCARG,
+                    "No filename specified");
+        return FALSE;
+    }
+
+    keyfile = g_key_file_new();
+    repofile = lr_yum_repofile_init(filename, keyfile);
+    repos->files = g_slist_append(repos->files, repofile);
+
+    for (guint i = 0; ids[i]; i++) {
+        LrYumRepoConf *repoconf = NULL;
+        repoconf = lr_yum_repoconf_init(repofile, ids[i]);
+        if (!repoconf)
+            return FALSE;
+        repos->repos = g_slist_append(repos->repos, repoconf);
+    }
+
+    return TRUE;
+}
+
+gboolean
 lr_yum_repoconfs_parse(LrYumRepoConfs *repos,
                        const char *filename,
                        GError **err)
