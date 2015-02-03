@@ -800,315 +800,52 @@ Checksum (hash) type constants
 
 """
 
+import sys
 import librepo._librepo
-
-VERSION_MAJOR = _librepo.VERSION_MAJOR
-VERSION_MINOR = _librepo.VERSION_MINOR
-VERSION_PATCH = _librepo.VERSION_PATCH
-VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+current_module = sys.modules[__name__]
 
 LibrepoException = _librepo.LibrepoException
 
-LRO_UPDATE                  = _librepo.LRO_UPDATE
-LRO_URLS                    = _librepo.LRO_URLS
-LRO_MIRRORLIST              = _librepo.LRO_MIRRORLIST
-LRO_MIRRORLISTURL           = _librepo.LRO_MIRRORLISTURL
-LRO_METALINKURL             = _librepo.LRO_METALINKURL
-LRO_LOCAL                   = _librepo.LRO_LOCAL
-LRO_HTTPAUTH                = _librepo.LRO_HTTPAUTH
-LRO_USERPWD                 = _librepo.LRO_USERPWD
-LRO_PROXY                   = _librepo.LRO_PROXY
-LRO_PROXYPORT               = _librepo.LRO_PROXYPORT
-LRO_PROXYTYPE               = _librepo.LRO_PROXYTYPE
-LRO_PROXYAUTH               = _librepo.LRO_PROXYAUTH
-LRO_PROXYUSERPWD            = _librepo.LRO_PROXYUSERPWD
-LRO_PROGRESSCB              = _librepo.LRO_PROGRESSCB
-LRO_PROGRESSDATA            = _librepo.LRO_PROGRESSDATA
-LRO_MAXSPEED                = _librepo.LRO_MAXSPEED
-LRO_DESTDIR                 = _librepo.LRO_DESTDIR
-LRO_REPOTYPE                = _librepo.LRO_REPOTYPE
-LRO_CONNECTTIMEOUT          = _librepo.LRO_CONNECTTIMEOUT
-LRO_IGNOREMISSING           = _librepo.LRO_IGNOREMISSING
-LRO_INTERRUPTIBLE           = _librepo.LRO_INTERRUPTIBLE
-LRO_USERAGENT               = _librepo.LRO_USERAGENT
-LRO_FETCHMIRRORS            = _librepo.LRO_FETCHMIRRORS
-LRO_MAXMIRRORTRIES          = _librepo.LRO_MAXMIRRORTRIES
-LRO_MAXPARALLELDOWNLOADS    = _librepo.LRO_MAXPARALLELDOWNLOADS
-LRO_MAXDOWNLOADSPERMIRROR   = _librepo.LRO_MAXDOWNLOADSPERMIRROR
-LRO_VARSUB                  = _librepo.LRO_VARSUB
-LRO_FASTESTMIRROR           = _librepo.LRO_FASTESTMIRROR
-LRO_FASTESTMIRRORCACHE      = _librepo.LRO_FASTESTMIRRORCACHE
-LRO_FASTESTMIRRORMAXAGE     = _librepo.LRO_FASTESTMIRRORMAXAGE
-LRO_FASTESTMIRRORCB         = _librepo.LRO_FASTESTMIRRORCB
-LRO_FASTESTMIRRORDATA       = _librepo.LRO_FASTESTMIRRORDATA
-LRO_LOWSPEEDTIME            = _librepo.LRO_LOWSPEEDTIME
-LRO_LOWSPEEDLIMIT           = _librepo.LRO_LOWSPEEDLIMIT
-LRO_GPGCHECK                = _librepo.LRO_GPGCHECK
-LRO_CHECKSUM                = _librepo.LRO_CHECKSUM
-LRO_YUMDLIST                = _librepo.LRO_YUMDLIST
-LRO_YUMBLIST                = _librepo.LRO_YUMBLIST
-LRO_HMFCB                   = _librepo.LRO_HMFCB
-LRO_SSLVERIFYPEER           = _librepo.LRO_SSLVERIFYPEER
-LRO_SSLVERIFYHOST           = _librepo.LRO_SSLVERIFYHOST
-LRO_IPRESOLVE               = _librepo.LRO_IPRESOLVE
-LRO_ALLOWEDMIRRORFAILURES   = _librepo.LRO_ALLOWEDMIRRORFAILURES
-LRO_ADAPTIVEMIRRORSORTING   = _librepo.LRO_ADAPTIVEMIRRORSORTING
-LRO_GNUPGHOMEDIR            = _librepo.LRO_GNUPGHOMEDIR
-LRO_FASTESTMIRRORTIMEOUT    = _librepo.LRO_FASTESTMIRRORTIMEOUT
-LRO_HTTPHEADER              = _librepo.LRO_HTTPHEADER
-LRO_SENTINEL                = _librepo.LRO_SENTINEL
+ATTR_TO_LRO = {}
+ATTR_TO_LRI = {}
+ATTR_TO_LRR = {}
+_CHECKSUM_STR_TO_VAL_MAP = {}
 
-ATTR_TO_LRO = {
-    "update":               LRO_UPDATE,
-    "urls":                 LRO_URLS,
-    "mirrorlist":           LRO_MIRRORLIST,
-    "mirrorlisturl":        LRO_MIRRORLISTURL,
-    "metalinkurl":          LRO_METALINKURL,
-    "local" :               LRO_LOCAL,
-    "httpauth":             LRO_HTTPAUTH,
-    "userpwd":              LRO_USERPWD,
-    "proxy":                LRO_PROXY,
-    "proxyport":            LRO_PROXYPORT,
-    "proxytype":            LRO_PROXYTYPE,
-    "proxyauth":            LRO_PROXYAUTH,
-    "proxyuserpwd":         LRO_PROXYUSERPWD,
-    "progresscb":           LRO_PROGRESSCB,
-    "progressdata":         LRO_PROGRESSDATA,
-    "maxspeed":             LRO_MAXSPEED,
-    "destdir":              LRO_DESTDIR,
-    "repotype":             LRO_REPOTYPE,
-    "connecttimeout":       LRO_CONNECTTIMEOUT,
-    "ignoremissing":        LRO_IGNOREMISSING,
-    "interruptible":        LRO_INTERRUPTIBLE,
-    "useragent":            LRO_USERAGENT,
-    "fetchmirrors":         LRO_FETCHMIRRORS,
-    "maxmirrortries":       LRO_MAXMIRRORTRIES,
-    "maxparalleldownloads": LRO_MAXPARALLELDOWNLOADS,
-    "maxdownloadspermirror":LRO_MAXDOWNLOADSPERMIRROR,
-    "varsub":               LRO_VARSUB,
-    "fastestmirror":        LRO_FASTESTMIRROR,
-    "fastestmirrorcache":   LRO_FASTESTMIRRORCACHE,
-    "fastestmirrormaxage":  LRO_FASTESTMIRRORMAXAGE,
-    "fastestmirrorcb":      LRO_FASTESTMIRRORCB,
-    "fastestmirrordata":    LRO_FASTESTMIRRORDATA,
-    "lowspeedtime":         LRO_LOWSPEEDTIME,
-    "lowspeedlimit":        LRO_LOWSPEEDLIMIT,
-    "gpgcheck":             LRO_GPGCHECK,
-    "checksum":             LRO_CHECKSUM,
-    "yumdlist":             LRO_YUMDLIST,
-    "yumblist":             LRO_YUMBLIST,
-    "hmfcb":                LRO_HMFCB,
-    "sslverifypeer":        LRO_SSLVERIFYPEER,
-    "sslverifyhost":        LRO_SSLVERIFYHOST,
-    "ipresolve":            LRO_IPRESOLVE,
-    "allowedmirrorfailures":LRO_ALLOWEDMIRRORFAILURES,
-    "adaptivemirrorsorting":LRO_ADAPTIVEMIRRORSORTING,
-    "gnupghomedir":         LRO_GNUPGHOMEDIR,
-    "fastestmirrortimeout": LRO_FASTESTMIRRORTIMEOUT,
-    "httpheader":           LRO_HTTPHEADER,
-}
+# Create local aliases for contants from _librepo C module
+for attr in dir(_librepo):
+    if not attr.isupper():
+        # Only constants should be imported automatically
+        continue
 
-LRI_UPDATE                  = _librepo.LRI_UPDATE
-LRI_URLS                    = _librepo.LRI_URLS
-LRI_MIRRORLIST              = _librepo.LRI_MIRRORLIST
-LRI_MIRRORLISTURL           = _librepo.LRI_MIRRORLISTURL
-LRI_METALINKURL             = _librepo.LRI_METALINKURL
-LRI_LOCAL                   = _librepo.LRI_LOCAL
-LRI_PROGRESSCB              = _librepo.LRI_PROGRESSCB
-LRI_PROGRESSDATA            = _librepo.LRI_PROGRESSDATA
-LRI_DESTDIR                 = _librepo.LRI_DESTDIR
-LRI_REPOTYPE                = _librepo.LRI_REPOTYPE
-LRI_USERAGENT               = _librepo.LRI_USERAGENT
-LRI_YUMDLIST                = _librepo.LRI_YUMDLIST
-LRI_YUMBLIST                = _librepo.LRI_YUMBLIST
-LRI_FETCHMIRRORS            = _librepo.LRI_FETCHMIRRORS
-LRI_MAXMIRRORTRIES          = _librepo.LRI_MAXMIRRORTRIES
-LRI_VARSUB                  = _librepo.LRI_VARSUB
-LRI_MIRRORS                 = _librepo.LRI_MIRRORS
-LRI_METALINK                = _librepo.LRI_METALINK
-LRI_FASTESTMIRROR           = _librepo.LRI_FASTESTMIRROR
-LRI_FASTESTMIRRORCACHE      = _librepo.LRI_FASTESTMIRRORCACHE
-LRI_FASTESTMIRRORMAXAGE     = _librepo.LRI_FASTESTMIRRORMAXAGE
-LRI_HMFCB                   = _librepo.LRI_HMFCB
-LRI_SSLVERIFYPEER           = _librepo.LRI_SSLVERIFYPEER
-LRI_SSLVERIFYHOST           = _librepo.LRI_SSLVERIFYHOST
-LRI_IPRESOLVE               = _librepo.LRI_IPRESOLVE
-LRI_ALLOWEDMIRRORFAILURES   = _librepo.LRI_ALLOWEDMIRRORFAILURES
-LRI_ADAPTIVEMIRRORSORTING   = _librepo.LRI_ADAPTIVEMIRRORSORTING
-LRI_GNUPGHOMEDIR            = _librepo.LRI_GNUPGHOMEDIR
-LRI_FASTESTMIRRORTIMEOUT    = _librepo.LRI_FASTESTMIRRORTIMEOUT
-LRI_HTTPHEADER              = _librepo.LRI_HTTPHEADER
-LRI_SENTINEL                = _librepo.LRI_SENTINEL
+    # Create local alias
+    val = getattr(_librepo, attr)
+    setattr(current_module, attr, val)
 
-ATTR_TO_LRI = {
-    "update":               LRI_UPDATE,
-    "urls":                 LRI_URLS,
-    "mirrorlist":           LRI_MIRRORLIST,
-    "mirrorlisturl":        LRI_MIRRORLISTURL,
-    "metalinkurl":          LRI_METALINKURL,
-    "local":                LRI_LOCAL,
-    "progresscb":           LRI_PROGRESSCB,
-    "progressdata":         LRI_PROGRESSDATA,
-    "destdir":              LRI_DESTDIR,
-    "repotype":             LRI_REPOTYPE,
-    "useragent":            LRI_USERAGENT,
-    "yumdlist":             LRI_YUMDLIST,
-    "yumblist":             LRI_YUMBLIST,
-    "fetchmirrors":         LRI_FETCHMIRRORS,
-    "maxmirrortries":       LRI_MAXMIRRORTRIES,
-    "varsub":               LRI_VARSUB,
-    "mirrors":              LRI_MIRRORS,
-    "metalink":             LRI_METALINK,
-    "fastestmirror":        LRI_FASTESTMIRROR,
-    "fastestmirrorcache":   LRI_FASTESTMIRRORCACHE,
-    "fastestmirrormaxage":  LRI_FASTESTMIRRORMAXAGE,
-    "hmfcb":                LRI_HMFCB,
-    "sslverifypeer":        LRI_SSLVERIFYPEER,
-    "sslverifyhost":        LRI_SSLVERIFYHOST,
-    "ipresolve":            LRI_IPRESOLVE,
-    "allowedmirrorfailures":LRI_ALLOWEDMIRRORFAILURES,
-    "adaptivemirrorsorting":LRI_ADAPTIVEMIRRORSORTING,
-    "gnupghomedir":         LRI_GNUPGHOMEDIR,
-    "fastestmirrortimeout": LRI_FASTESTMIRRORTIMEOUT,
-    "httpheader":           LRI_HTTPHEADER,
-}
+    if attr.endswith("_SENTINEL"):
+        # Do not any additional magic for sentinel values
+        continue
 
-LR_CHECK_GPG        = _librepo.LR_CHECK_GPG
-LR_CHECK_CHECKSUM   = _librepo.LR_CHECK_CHECKSUM
+    if attr.startswith("LRO_"):
+        ATTR_TO_LRO[attr.lower()[4:]] = val
+    elif attr.startswith("LRI_"):
+        ATTR_TO_LRI[attr.lower()[4:]] = val
+    elif attr.startswith("LR_"):
+        setattr(current_module, attr[3:], val)
+    elif attr.startswith("LRR_"):
+        ATTR_TO_LRR[attr.lower()[4:]] = val
+    elif attr.startswith("CHECKSUM_"):
+        setattr(current_module, attr[9:], val)
+        _CHECKSUM_STR_TO_VAL_MAP[attr[9:].lower()] = val
 
-CHECK_GPG        = LR_CHECK_GPG
-CHECK_CHECKSUM   = LR_CHECK_CHECKSUM
 
-LR_YUMREPO  = _librepo.LR_YUMREPO
-LR_SUSEREPO = _librepo.LR_SUSEREPO
-LR_DEBREPO  = _librepo.LR_DEBREPO
+VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 
-YUMREPO  = LR_YUMREPO
-SUSEREPO = LR_SUSEREPO
-DEBREPO  = LR_DEBREPO
+YUM_FULL        = LR_YUM_FULL         = None
+YUM_REPOMDONLY  = LR_YUM_REPOMDONLY   = [None]
+YUM_BASEXML     = LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
+YUM_BASEDB      = LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
+YUM_HAWKEY      = LR_YUM_HAWKEY       = ["primary", "filelists", "prestodelta", None]
 
-LR_PROXY_HTTP               = _librepo.LR_PROXY_HTTP
-LR_PROXY_HTTP_1_0           = _librepo.LR_PROXY_HTTP_1_0
-LR_PROXY_SOCKS4             = _librepo.LR_PROXY_SOCKS4
-LR_PROXY_SOCKS5             = _librepo.LR_PROXY_SOCKS5
-LR_PROXY_SOCKS4A            = _librepo.LR_PROXY_SOCKS4A
-LR_PROXY_SOCKS5_HOSTNAME    = _librepo.LR_PROXY_SOCKS5_HOSTNAME
-
-PROXY_HTTP               = _librepo.LR_PROXY_HTTP
-PROXY_HTTP_1_0           = _librepo.LR_PROXY_HTTP_1_0
-PROXY_SOCKS4             = _librepo.LR_PROXY_SOCKS4
-PROXY_SOCKS5             = _librepo.LR_PROXY_SOCKS5
-PROXY_SOCKS4A            = _librepo.LR_PROXY_SOCKS4A
-PROXY_SOCKS5_HOSTNAME    = _librepo.LR_PROXY_SOCKS5_HOSTNAME
-
-LR_IPRESOLVE_WHATEVER   = _librepo.LR_IPRESOLVE_WHATEVER
-LR_IPRESOLVE_V4         = _librepo.LR_IPRESOLVE_V4
-LR_IPRESOLVE_V6         = _librepo.LR_IPRESOLVE_V6
-
-IPRESOLVE_WHATEVER   = _librepo.LR_IPRESOLVE_WHATEVER
-IPRESOLVE_V4         = _librepo.LR_IPRESOLVE_V4
-IPRESOLVE_V6         = _librepo.LR_IPRESOLVE_V6
-
-LR_YUM_FULL         = None
-LR_YUM_REPOMDONLY   = [None]
-LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
-LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
-LR_YUM_HAWKEY       = ["primary", "filelists", "prestodelta", None]
-
-YUM_FULL         = LR_YUM_FULL
-YUM_REPOMDONLY   = LR_YUM_REPOMDONLY
-YUM_BASEXML      = LR_YUM_BASEXML
-YUM_BASEDB       = LR_YUM_BASEDB
-YUM_HAWKEY       = LR_YUM_HAWKEY
-
-LRE_OK                  = _librepo.LRE_OK
-LRE_BADFUNCARG          = _librepo.LRE_BADFUNCARG
-LRE_BADOPTARG           = _librepo.LRE_BADOPTARG
-LRE_UNKNOWNOPT          = _librepo.LRE_UNKNOWNOPT
-LRE_CURLSETOPT          = _librepo.LRE_CURLSETOPT
-LRE_ALREADYUSEDRESULT   = _librepo.LRE_ALREADYUSEDRESULT
-LRE_INCOMPLETERESULT    = _librepo.LRE_INCOMPLETERESULT
-LRE_CURLDUP             = _librepo.LRE_CURLDUP
-LRE_CURL                = _librepo.LRE_CURL
-LRE_CURLM               = _librepo.LRE_CURLM
-LRE_BADSTATUS           = _librepo.LRE_BADSTATUS
-LRE_TEMPORARYERR        = _librepo.LRE_TEMPORARYERR
-LRE_NOTLOCAL            = _librepo.LRE_NOTLOCAL
-LRE_CANNOTCREATEDIR     = _librepo.LRE_CANNOTCREATEDIR
-LRE_IO                  = _librepo.LRE_IO
-LRE_MLBAD               = _librepo.LRE_MLBAD
-LRE_MLXML               = _librepo.LRE_MLXML
-LRE_BADCHECKSUM         = _librepo.LRE_BADCHECKSUM
-LRE_REPOMDXML           = _librepo.LRE_REPOMDXML
-LRE_NOURL               = _librepo.LRE_NOURL
-LRE_CANNOTCREATETMP     = _librepo.LRE_CANNOTCREATETMP
-LRE_UNKNOWNCHECKSUM     = _librepo.LRE_UNKNOWNCHECKSUM
-LRE_BADURL              = _librepo.LRE_BADURL
-LRE_GPGNOTSUPPORTED     = _librepo.LRE_GPGNOTSUPPORTED
-LRE_GPGERROR            = _librepo.LRE_GPGERROR
-LRE_BADGPG              = _librepo.LRE_BADGPG
-LRE_INCOMPLETEREPO      = _librepo.LRE_INCOMPLETEREPO
-LRE_INTERRUPTED         = _librepo.LRE_INTERRUPTED
-LRE_SIGACTION           = _librepo.LRE_SIGACTION
-LRE_ALREADYDOWNLOADED   = _librepo.LRE_ALREADYDOWNLOADED
-LRE_UNFINISHED          = _librepo.LRE_UNFINISHED
-LRE_SELECT              = _librepo.LRE_SELECT
-LRE_OPENSSL             = _librepo.LRE_OPENSSL
-LRE_MEMORY              = _librepo.LRE_MEMORY
-LRE_XMLPARSER           = _librepo.LRE_XMLPARSER
-LRE_CBINTERRUPTED       = _librepo.LRE_CBINTERRUPTED
-LRE_UNKNOWNERROR        = _librepo.LRE_UNKNOWNERROR
-
-LRR_YUM_REPO        = _librepo.LRR_YUM_REPO
-LRR_YUM_REPOMD      = _librepo.LRR_YUM_REPOMD
-LRR_YUM_TIMESTAMP   = _librepo.LRR_YUM_TIMESTAMP
-LRR_SENTINEL        = _librepo.LRR_SENTINEL
-
-ATTR_TO_LRR = {
-    "yum_repo":         LRR_YUM_REPO,
-    "yum_repomd":       LRR_YUM_REPOMD,
-    "yum_timestamp":    LRR_YUM_TIMESTAMP,
-}
-
-CHECKSUM_UNKNOWN    = _librepo.CHECKSUM_UNKNOWN
-CHECKSUM_MD5        = _librepo.CHECKSUM_MD5
-CHECKSUM_SHA1       = _librepo.CHECKSUM_SHA1
-CHECKSUM_SHA224     = _librepo.CHECKSUM_SHA224
-CHECKSUM_SHA256     = _librepo.CHECKSUM_SHA256
-CHECKSUM_SHA384     = _librepo.CHECKSUM_SHA384
-CHECKSUM_SHA512     = _librepo.CHECKSUM_SHA512
-
-MD5        = _librepo.CHECKSUM_MD5
-SHA1       = _librepo.CHECKSUM_SHA1
-SHA224     = _librepo.CHECKSUM_SHA224
-SHA256     = _librepo.CHECKSUM_SHA256
-SHA384     = _librepo.CHECKSUM_SHA384
-SHA512     = _librepo.CHECKSUM_SHA512
-
-_CHECKSUM_STR_TO_VAL_MAP = {
-    'md5':      CHECKSUM_MD5,
-    'sha':      CHECKSUM_SHA1,
-    'sha1':     CHECKSUM_SHA1,
-    'sha224':   CHECKSUM_SHA224,
-    'sha256':   CHECKSUM_SHA256,
-    'sha384':   CHECKSUM_SHA384,
-    'sha512':   CHECKSUM_SHA512,
-}
-
-TRANSFER_SUCCESSFUL     = _librepo.TRANSFER_SUCCESSFUL
-TRANSFER_ALREADYEXISTS  = _librepo.TRANSFER_ALREADYEXISTS
-TRANSFER_ERROR          = _librepo.TRANSFER_ERROR
-
-FMSTAGE_INIT                = _librepo.FMSTAGE_INIT
-FMSTAGE_CACHELOADING        = _librepo.FMSTAGE_CACHELOADING
-FMSTAGE_CACHELOADINGSTATUS  = _librepo.FMSTAGE_CACHELOADINGSTATUS
-FMSTAGE_DETECTION           = _librepo.FMSTAGE_DETECTION
-FMSTAGE_FINISHING           = _librepo.FMSTAGE_FINISHING
-FMSTAGE_STATUS              = _librepo.FMSTAGE_STATUS
-
-CB_OK                       = _librepo.CB_OK
-CB_ABORT                    = _librepo.CB_ABORT
-CB_ERROR                    = _librepo.CB_ERROR
 
 def checksum_str_to_type(name):
     """
