@@ -69,16 +69,10 @@ lr_get_curl_handle()
 void
 lr_handle_free_list(char ***list)
 {
-    int x;
     if (!list || *list == NULL)
         return;
-
-    x = 0;
-    while ((*list)[x]) {
+    for (int x=0; (*list)[x]; x++)
         lr_free((*list)[x]);
-        x++;
-    }
-
     lr_free(*list);
     *list = NULL;
 }
