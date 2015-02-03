@@ -209,6 +209,22 @@ START_TEST(test_strv_dup)
 }
 END_TEST
 
+START_TEST(test_is_local_path)
+{
+    fail_if(!lr_is_local_path("/tmp"));
+    fail_if(!lr_is_local_path("foo/bar"));
+    fail_if(!lr_is_local_path("bar"));
+    fail_if(!lr_is_local_path("/"));
+
+    fail_if(lr_is_local_path(NULL));
+    fail_if(lr_is_local_path(""));
+    fail_if(lr_is_local_path("http://foo.bar"));
+    fail_if(lr_is_local_path("https://foo.bar/x"));
+    fail_if(lr_is_local_path("ftp://foo.bar/foobar"));
+    fail_if(lr_is_local_path("rsync://xyz"));
+}
+END_TEST
+
 Suite *
 util_suite(void)
 {
@@ -223,6 +239,7 @@ util_suite(void)
     tcase_add_test(tc, test_remove_dir);
     tcase_add_test(tc, test_url_without_path);
     tcase_add_test(tc, test_strv_dup);
+    tcase_add_test(tc, test_is_local_path);
     suite_add_tcase(s, tc);
     return s;
 }

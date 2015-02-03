@@ -172,6 +172,17 @@ lr_url_without_path(const char *url);
 gchar **
 lr_strv_dup(gchar **array);
 
+
+/** Check if string looks like a local path.
+ * (This function doesn't do realpath resolving and existency checking)
+ * If a path is empty, NULL or has protocol other then file:// specified
+ * then the path is considered as remote, otherwise TRUE is returned.
+ * @param path      A string path
+ * @return          TRUE if path string looks like a local path
+ */
+gboolean
+lr_is_local_path(const gchar *path);
+
 /** @} */
 
 G_END_DECLS
