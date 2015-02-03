@@ -416,3 +416,17 @@ lr_strv_dup(gchar **array)
     g_ptr_array_free(ptrarray, FALSE);
     return copy;
 }
+
+gboolean
+lr_is_local_path(const gchar *path)
+{
+    char resolved_path[PATH_MAX];
+
+    if (!path || !*path)
+        return FALSE;
+
+    if (strstr(path, "://") && !g_str_has_prefix(path, "file://"))
+        return FALSE;
+
+    return TRUE;
+}
