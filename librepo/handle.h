@@ -334,16 +334,12 @@ typedef enum {
     LRI_MIRRORS,                /*!< (char *** Malloced)
         Mirrorlist associated with the repository.
 
-        If LRO_MIRRORLIST was specified, then content of this list is
-        created from the specified mirrorlist.
-        If no LRO_MIRRORLIST was specified and repository is on a local
-        filesystem and contains a mirrorlist then the mirrorlist is
-        automatically loaded.
+        Mirrors on this list are mirrors parsed from
+        mirrorlist/metalink specified by LRO_MIRRORLIST or
+        from mirrorlist specified by LRO_MIRROSLISTURL and
+        metalink specified by LRO_METALINKURL.
 
-        Mirrors from this list are used for downloading only if the
-        mirrorlist was specified by LRO_MIRRORLIST option! Automatically
-        loaded mirrorlist from a local repository is not implicitly
-        used for downloading!
+        No URLs specified by LRO_URLS are included in this list.
 
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
