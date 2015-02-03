@@ -148,6 +148,7 @@ typedef enum {
     LR_REMOTESOURCE_URLS,
     LR_REMOTESOURCE_MIRRORLIST,
     LR_REMOTESOURCE_METALINK,
+    LR_REMOTESOURCE_OTHER,
 } LrChangedRemoteSource;
 
 static void
@@ -259,6 +260,7 @@ lr_handle_setopt(LrHandle *handle,
         break;
 
     case LRO_LOCAL:
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_OTHER);
         handle->local = va_arg(arg, long) ? 1 : 0;
         break;
 
