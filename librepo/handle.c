@@ -430,8 +430,8 @@ lr_handle_setopt(LrHandle *handle,
         handle->httpheader = lr_strv_dup(list);
 
         struct curl_slist *headers = NULL;
-        for (int x=0; list && list[x]; x++)
-            headers = curl_slist_append(headers, list[x]);
+        for (int x=0; list && handle->httpheader[x]; x++)
+            headers = curl_slist_append(headers, handle->httpheader[x]);
 
         handle->curl_httpheader = headers;
         curl_easy_setopt(c_h, CURLOPT_HEADER, headers);

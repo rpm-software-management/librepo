@@ -185,10 +185,13 @@ struct _LrHandle {
         Max length of fastest mirror measurement in seconds. */
 
     gchar **httpheader; /*!<
-        List of HTTP headers */
+        List of HTTP headers.
+        Curl doesn't copy HTTP header values from curl_slist.
+        We need to keep them around. */
 
     struct curl_slist *curl_httpheader; /*!<
-        Curl repr. of list of HTTP headers*/
+        Curl's list of HTTP headers - items in the list
+        refers into the httpheader list (defined above) */
 };
 
 /** Return new CURL easy handle with some default options setted.

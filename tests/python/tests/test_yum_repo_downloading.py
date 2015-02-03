@@ -1369,7 +1369,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_URLS, [url])
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_HTTPHEADER, ["Accept: audio/mpeg"])
+        headers = ["Accept: audio/mpeg"]
+        h.setopt(librepo.LRO_HTTPHEADER, headers)
+        del headers
         # An error should be raised
         self.assertRaises(librepo.LibrepoException, h.perform)
 
