@@ -714,7 +714,10 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
             g_free(path);
             return TRUE;
         }
-    } else if (handle->local) {
+    } else if (!handle->mirrorlisturl) {
+        // Nothing to do
+        return TRUE;
+    } else if (handle->local && !lr_is_local_path(handle->mirrorlisturl)) {
         // We should work only locally, do not try to download anything
         g_debug("%s: LRO_LOCAL used - do not try to download: %s",
                 __func__, handle->metalinkurl);
@@ -822,7 +825,10 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
             g_free(path);
             return TRUE;
         }
-    } else if (handle->local) {
+    } else if (!handle->metalinkurl) {
+        // Nothing to do
+        return TRUE;
+    } else if (handle->local && !lr_is_local_path(handle->metalinkurl)) {
         // We should work only locally, do not try to download anything
         g_debug("%s: LRO_LOCAL used - do not try to download: %s",
                 __func__, handle->metalinkurl);
