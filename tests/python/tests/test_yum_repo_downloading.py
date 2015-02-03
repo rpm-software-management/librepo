@@ -1372,3 +1372,35 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h.setopt(librepo.LRO_HTTPHEADER, ["Accept: audio/mpeg"])
         # An error should be raised
         self.assertRaises(librepo.LibrepoException, h.perform)
+
+    def test_download_with_local_enabled(self):
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+
+        # Make local cache
+        h_l = librepo.Handle()
+        h_l.repotype = librepo.YUMREPO
+        h_l.urls = [url]
+        h_l.destdir = self.tmpdir
+        h_l.perform()
+
+        self.assertFalse(h_l.mirrors)  # No mirrors should be listed
+
+        # Create a handle for the local cache
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.urls = [self.tmpdir]
+        h.metalinkurl = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
+        h.local = True
+        h.perform()
+
+        self.assertFalse(h.mirrors)  # Remote metalik is specified
+                                     # No mirrors should be listed
+
+        # Disable local
+        h.local = False
+
+        # Try to download something (don't care that it doesn't exist)
+        librepo.download_packages([librepo.PackageTarget("Foo", handle=h)])
+
+        self.assertTrue(h.mirrors)  # List of mirrors should be re-initialized
+                                    # and should contain mirrors from the metalink
