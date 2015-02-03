@@ -733,6 +733,8 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
     } else if (handle->local) {
         // We should work only locally, do not try to download anything
+        g_debug("%s: LRO_LOCAL used - do not try to download: %s",
+                __func__, handle->metalinkurl);
         return TRUE;
     } else if (handle->mirrorlisturl) {
         // Download remote mirrorlist
@@ -839,6 +841,8 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
     } else if (handle->local) {
         // We should work only locally, do not try to download anything
+        g_debug("%s: LRO_LOCAL used - do not try to download: %s",
+                __func__, handle->metalinkurl);
         return TRUE;
     } else if (handle->metalinkurl) {
         // Download remote metalink
