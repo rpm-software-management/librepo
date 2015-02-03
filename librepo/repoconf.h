@@ -169,10 +169,10 @@ lr_yum_repoconf_save(LrYumRepoConf *repoconf,
  *                      a FALSE is returned!
  */
 gboolean
-lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
-                       GError **err,
-                       LrYumRepoConfOption option,
-                       ...);
+lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
+                        GError **err,
+                        LrYumRepoConfOption option,
+                        ...);
 
 /** Set an option in the config file.
  * Note: This function copies all passed values and
@@ -184,10 +184,10 @@ lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
  * @return              TRUE if everything is OK, FALSE if err is set.
  */
 gboolean
-lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
-                      GError **err,
-                      LrYumRepoConfOption option,
-                      ...);
+lr_yum_repoconf_setopt(LrYumRepoConf *repoconf,
+                       GError **err,
+                       LrYumRepoConfOption option,
+                       ...);
 
 /** @} */
 

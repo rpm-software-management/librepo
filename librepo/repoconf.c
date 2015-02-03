@@ -658,10 +658,10 @@ lr_yum_repoconf_save(LrYumRepoConf *repoconf,
 }
 
 gboolean
-lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
-                       GError **err,
-                       LrYumRepoConfOption option,
-                       ...)
+lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
+                        GError **err,
+                        LrYumRepoConfOption option,
+                        ...)
 {
     GError *tmp_err = NULL;
     va_list arg;
@@ -881,10 +881,10 @@ lr_yumrepoconf_getinfo(LrYumRepoConf *repoconf,
 }
 
 gboolean
-lr_yumrepoconf_setopt(LrYumRepoConf *repoconf,
-                      GError **err,
-                      LrYumRepoConfOption option,
-                      ...)
+lr_yum_repoconf_setopt(LrYumRepoConf *repoconf,
+                       GError **err,
+                       LrYumRepoConfOption option,
+                       ...)
 {
     GError *tmp_err = NULL;
     va_list arg;

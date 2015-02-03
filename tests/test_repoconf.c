@@ -21,7 +21,7 @@ repoconf_assert_true(LrYumRepoConf *repoconf,
 {
     void *ptr = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_msg(ptr, "Not a True value (Option %d)", option);
@@ -36,7 +36,7 @@ repoconf_assert_false(LrYumRepoConf *repoconf,
 {
     void *ptr = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_msg(!ptr, "Not a NULL/0 value (Option %d)", option);
@@ -51,7 +51,7 @@ repoconf_assert_na(LrYumRepoConf *repoconf,
 {
     void *ptr = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
     ck_assert_msg(!ret, "Getinfo should fail for %d: %s", option, tmp_err->message);
     fail_if(!tmp_err);
     ck_assert_int_eq(tmp_err->code, LRE_NOTSET);
@@ -67,7 +67,7 @@ repoconf_assert_str_eq(LrYumRepoConf *repoconf,
 {
     _cleanup_free_ gchar *str = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &str);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &str);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_str_eq(str, expected);
@@ -83,7 +83,7 @@ repoconf_assert_uint_eq(LrYumRepoConf *repoconf,
 {
     long val = (expected - 1);
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &val);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_uint_eq(val, expected);
@@ -99,7 +99,7 @@ repoconf_assert_int_eq(LrYumRepoConf *repoconf,
 {
     long val = (expected - 1);
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &val);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
     ck_assert_int_eq(val, expected);
@@ -117,7 +117,7 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
     _cleanup_error_free_ GError *tmp_err = NULL;
     _cleanup_strv_free_ char **strv = NULL;
 
-    gboolean ret = lr_yumrepoconf_getinfo(repoconf, &tmp_err, option, &strv);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &strv);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
 
@@ -146,7 +146,7 @@ repoconf_assert_set_boolean(LrYumRepoConf *repoconf,
                             gboolean val)
 {
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert_msg(ret, "setopt for option %d failed: %s",
                   option, tmp_err->message);
     fail_if(tmp_err);
@@ -161,7 +161,7 @@ repoconf_assert_set_str(LrYumRepoConf *repoconf,
                         gchar *val)
 {
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert_msg(ret, "setopt for option %d failed: %s",
                   option, tmp_err->message);
     fail_if(tmp_err);
@@ -187,7 +187,7 @@ repoconf_assert_set_strv(LrYumRepoConf *repoconf,
     va_end (args);
 
     // Set the option
-    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, array->pdata);
+    gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, array->pdata);
     ck_assert_msg(ret, "setopt for option %d failed: %s",
                   option, tmp_err->message);
     fail_if(tmp_err);
@@ -202,7 +202,7 @@ repoconf_assert_set_int(LrYumRepoConf *repoconf,
                         intmax_t val)
 {
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert_msg(ret, "setopt for option %d failed: %s",
                   option, tmp_err->message);
     fail_if(tmp_err);
@@ -217,7 +217,7 @@ repoconf_assert_set_uint(LrYumRepoConf *repoconf,
                          uintmax_t val)
 {
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yumrepoconf_setopt(repoconf, &tmp_err, option, val);
+    gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert_msg(ret, "setopt for option %d failed: %s",
                   option, tmp_err->message);
     fail_if(tmp_err);

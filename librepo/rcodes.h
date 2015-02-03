@@ -116,7 +116,7 @@ typedef enum {
         '1k', etc., but we got something like 'asdf', '1024S', etc.) */
     LRE_NOTSET, /*!<
         (38) Requested option/value is not set. Used for example in
-        lr_yumrepoconf_getinfo() */
+        lr_yum_repoconf_getinfo() */
     LRE_FILE, /*!<
         (39) File operation error (operation not permited, filename too long,
         no memory available, bad file descriptor, ...) */
