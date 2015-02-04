@@ -832,7 +832,7 @@ for attr in dir(_librepo):
     if attr.startswith("LRI_"):
         ATTR_TO_LRI[attr.lower()[4:]] = val
     if attr.startswith("LR_LRR_"):
-        ATTR_TO_LRR[attr.lower()[4:]] = val
+        ATTR_TO_LRR[attr.lower()[7:]] = val
     if attr.startswith("LR_CHECKSUM_"):
         setattr(current_module, attr[12:], val)
         _CHECKSUM_STR_TO_VAL_MAP[attr[12:].lower()] = val
