@@ -81,7 +81,10 @@ typedef enum {
     LR_YRC_SSLCLIENTCERT,   /*!< 28 (gchar *) SSL Client certificate */
     LR_YRC_SSLCLIENTKEY,    /*!< 29 (gchar *) SSL Client key */
 
-    LR_YRC_DELTAREPOBASEURL,/*!< (char **) Deltarepo mirror URLs */
+    LR_YRC_DELTAREPOBASEURL,/*!< 30 (char **) Deltarepo mirror URLs */
+
+    LR_YRC_FAILOVERMETHOD,  /*!< 31 (char *) Failover method */
+    LR_YRC_SKIP_IF_UNAVAILABLE, /*!< 32 (long 1 or 0) Skip if unavailable */
 } LrYumRepoConfOption;
 
 /** Return new empty LrYumRepoConfs

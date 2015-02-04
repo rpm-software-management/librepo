@@ -291,6 +291,9 @@ START_TEST(test_parse_repoconf_minimal)
 
     conf_assert_na(LR_YRC_DELTAREPOBASEURL);
 
+    conf_assert_na(LR_YRC_FAILOVERMETHOD);
+    conf_assert_na(LR_YRC_SKIP_IF_UNAVAILABLE);
+
     // Test content of second repo config
 
     conf = g_slist_nth_data(list, 1);
@@ -333,6 +336,9 @@ START_TEST(test_parse_repoconf_minimal)
     conf_assert_na(LR_YRC_SSLCLIENTCERT);
     conf_assert_na(LR_YRC_SSLCLIENTKEY);
 
+    conf_assert_na(LR_YRC_FAILOVERMETHOD);
+
+    conf_assert_na(LR_YRC_SKIP_IF_UNAVAILABLE);
     conf_assert_na(LR_YRC_DELTAREPOBASEURL);
 
     lr_yum_repoconfs_free(confs);
@@ -411,6 +417,9 @@ START_TEST(test_parse_repoconf_big)
                       "http://deltarepomirror.org/",
                       "http://deltarepomirror2.org",
                       NULL);
+
+    conf_assert_str_eq(LR_YRC_FAILOVERMETHOD, "priority");
+    conf_assert_true(LR_YRC_SKIP_IF_UNAVAILABLE);
 
     lr_yum_repoconfs_free(confs);
 }
@@ -572,6 +581,15 @@ START_TEST(test_write_repoconf)
     conf_assert_na(LR_YRC_DELTAREPOBASEURL);
     conf_assert_set_strv(LR_YRC_DELTAREPOBASEURL, "test_deltarepobaseurl", NULL);
     conf_assert_strv_eq(LR_YRC_DELTAREPOBASEURL, "test_deltarepobaseurl", NULL);
+
+
+    conf_assert_na(LR_YRC_FAILOVERMETHOD);
+    conf_assert_set_str(LR_YRC_FAILOVERMETHOD, "test_failovermethod");
+    conf_assert_str_eq(LR_YRC_FAILOVERMETHOD, "test_failovermethod");
+
+    conf_assert_na(LR_YRC_SKIP_IF_UNAVAILABLE);
+    conf_assert_set_boolean(LR_YRC_SKIP_IF_UNAVAILABLE, TRUE);
+    conf_assert_true(LR_YRC_SKIP_IF_UNAVAILABLE);
 
     // Write out modified config
     ret = lr_yum_repoconfs_save(confs, &tmp_err);

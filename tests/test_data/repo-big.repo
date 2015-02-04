@@ -30,3 +30,5 @@ sslverify=TRUE
 sslclientcert=file:///etc/client.cert
 sslclientkey=file:///etc/client.key
 deltarepobaseurl=http://deltarepomirror.org/ http://deltarepomirror2.org
+failovermethod=priority
+skip_if_unavailable=True

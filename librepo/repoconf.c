@@ -858,6 +858,16 @@ lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
         *strv = lr_key_file_get_string_list(keyfile, id, "deltarepobaseurl", &tmp_err);
         break;
 
+    case LR_YRC_FAILOVERMETHOD:   /*!< (gchar *) Failover method */
+        str = va_arg(arg, char **);
+        *str = g_key_file_get_string(keyfile, id, "failovermethod", &tmp_err);
+        break;
+
+    case LR_YRC_SKIP_IF_UNAVAILABLE:/*!< (long 1 or 0) Skip if unavailable */
+        lnum = va_arg(arg, long *);
+        *lnum = lr_key_file_get_boolean_long(keyfile, id, "skip_if_unavailable", TRUE, &tmp_err);
+        break;
+
     }
 
     va_end(arg);
@@ -1078,9 +1088,19 @@ lr_yum_repoconf_setopt(LrYumRepoConf *repoconf,
         lr_key_file_set_string(keyfile, id, "sslclientkey", str);
         break;
 
-    case LR_YRC_DELTAREPOBASEURL:/*!< (char **) Deltarepo mirror URLs */
+    case LR_YRC_DELTAREPOBASEURL:/*!< 30 (char **) Deltarepo mirror URLs */
         strv = va_arg(arg, char **);
         lr_key_file_set_string_list(keyfile, id, "deltarepobaseurl", (const gchar **) strv);
+        break;
+
+    case LR_YRC_FAILOVERMETHOD:   /*!< 31 (gchar *) Failover method */
+        str = va_arg(arg, char *);
+        lr_key_file_set_string(keyfile, id, "failovermethod", str);
+        break;
+
+    case LR_YRC_SKIP_IF_UNAVAILABLE: /*!< 32 (long 1 or 0) Skip if unavailable */
+        lnum = va_arg(arg, long);
+        g_key_file_set_boolean(keyfile, id, "skip_if_unavailable", (gboolean) lnum);
         break;
     }
 
