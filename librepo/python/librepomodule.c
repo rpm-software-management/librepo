@@ -369,7 +369,13 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_MEMORY", LRE_MEMORY);
     PyModule_AddIntConstant(m, "LRE_XMLPARSER", LRE_XMLPARSER);
     PyModule_AddIntConstant(m, "LRE_CBINTERRUPTED", LRE_CBINTERRUPTED);
+    PyModule_AddIntConstant(m, "LRE_REPOMD", LRE_REPOMD);
+    PyModule_AddIntConstant(m, "LRE_VALUE", LRE_VALUE);
+    PyModule_AddIntConstant(m, "LRE_NOTSET", LRE_NOTSET);
+    PyModule_AddIntConstant(m, "LRE_FILE", LRE_FILE);
+    PyModule_AddIntConstant(m, "LRE_KEYFILE", LRE_KEYFILE);
     PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
+
 
     // Result option
     PyModule_AddIntConstant(m, "LR_LRR_YUM_REPO", LRR_YUM_REPO);
