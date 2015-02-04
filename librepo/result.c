@@ -103,7 +103,7 @@ lr_result_getinfo(LrResult *result,
             *ts = 0;
             rc = FALSE;
             g_set_error(err, LR_RESULT_ERROR, LRE_REPOMD,
-                        "No repomd data available");
+                        "No repomd data available - cannot get a timestamp");
         }
         break;
     }

@@ -161,7 +161,7 @@ getinfo(_ResultObject *self, PyObject *args)
      * Unknown options
      */
     default:
-        PyErr_SetString(PyExc_TypeError, "Unknown option");
+        PyErr_SetString(PyExc_ValueError, "Unknown option");
         return NULL;
     }
 
