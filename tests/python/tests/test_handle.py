@@ -9,6 +9,16 @@ def foo_hmfcb(data, msg, url, metadata):
 
 class TestCaseHandle(unittest.TestCase):
 
+    def test_handle_exceptions(self):
+        h = librepo.Handle()
+        self.assertTrue(h)
+
+        self.assertRaises(AttributeError, getattr, h, 'foobar_attr')
+        self.assertRaises(AttributeError, setattr, h, 'foobar_attr', 'xyz')
+
+        self.assertRaises(ValueError, h.getinfo, 999999)
+        self.assertRaises(ValueError, h.setopt, 999999, 'xyz')
+
     def test_handle_setopt_getinfo(self):
         """No exception should be raised."""
         h = librepo.Handle()

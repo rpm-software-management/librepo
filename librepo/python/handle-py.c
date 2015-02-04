@@ -835,7 +835,7 @@ py_setopt(_HandleObject *self, PyObject *args)
      * Unknown options
      */
     default:
-        PyErr_SetString(PyExc_TypeError, "Unknown option");
+        PyErr_SetString(PyExc_ValueError, "Unknown option");
         return NULL;
     }
 
@@ -1026,7 +1026,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     }
 
     default:
-        PyErr_SetString(PyExc_TypeError, "Unknown option");
+        PyErr_SetString(PyExc_ValueError, "Unknown option");
         return NULL;
     }
 
