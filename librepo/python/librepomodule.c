@@ -226,6 +226,7 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LR_VERSION_MAJOR", LR_VERSION_MAJOR);
     PyModule_AddIntConstant(m, "LR_VERSION_MINOR", LR_VERSION_MINOR);
     PyModule_AddIntConstant(m, "LR_VERSION_PATCH", LR_VERSION_PATCH);
+    PyModule_AddStringConstant(m, "LR_VERSION", LR_VERSION);
 
     // Handle options
     PyModule_AddIntConstant(m, "LRO_UPDATE", LRO_UPDATE);

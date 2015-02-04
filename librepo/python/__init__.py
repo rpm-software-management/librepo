@@ -838,8 +838,6 @@ for attr in dir(_librepo):
         _CHECKSUM_STR_TO_VAL_MAP[attr[12:].lower()] = val
 
 
-VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
-
 YUM_FULL        = LR_YUM_FULL         = None
 YUM_REPOMDONLY  = LR_YUM_REPOMDONLY   = [None]
 YUM_BASEXML     = LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
