@@ -223,9 +223,9 @@ init_librepo(void)
     // Module constants
 
     // Version
-    PyModule_AddIntConstant(m, "VERSION_MAJOR", LR_VERSION_MAJOR);
-    PyModule_AddIntConstant(m, "VERSION_MINOR", LR_VERSION_MINOR);
-    PyModule_AddIntConstant(m, "VERSION_PATCH", LR_VERSION_PATCH);
+    PyModule_AddIntConstant(m, "LR_VERSION_MAJOR", LR_VERSION_MAJOR);
+    PyModule_AddIntConstant(m, "LR_VERSION_MINOR", LR_VERSION_MINOR);
+    PyModule_AddIntConstant(m, "LR_VERSION_PATCH", LR_VERSION_PATCH);
 
     // Handle options
     PyModule_AddIntConstant(m, "LRO_UPDATE", LRO_UPDATE);
@@ -372,37 +372,37 @@ init_librepo(void)
     PyModule_AddIntConstant(m, "LRE_UNKNOWNERROR", LRE_UNKNOWNERROR);
 
     // Result option
-    PyModule_AddIntConstant(m, "LRR_YUM_REPO", LRR_YUM_REPO);
-    PyModule_AddIntConstant(m, "LRR_YUM_REPOMD", LRR_YUM_REPOMD);
-    PyModule_AddIntConstant(m, "LRR_YUM_TIMESTAMP", LRR_YUM_TIMESTAMP);
-    PyModule_AddIntConstant(m, "LRR_SENTINEL", LRR_SENTINEL);
+    PyModule_AddIntConstant(m, "LR_LRR_YUM_REPO", LRR_YUM_REPO);
+    PyModule_AddIntConstant(m, "LR_LRR_YUM_REPOMD", LRR_YUM_REPOMD);
+    PyModule_AddIntConstant(m, "LR_LRR_YUM_TIMESTAMP", LRR_YUM_TIMESTAMP);
+    PyModule_AddIntConstant(m, "LR_LRR_SENTINEL", LRR_SENTINEL);
 
     // Checksums
-    PyModule_AddIntConstant(m, "CHECKSUM_UNKNOWN", LR_CHECKSUM_UNKNOWN);
-    PyModule_AddIntConstant(m, "CHECKSUM_MD5", LR_CHECKSUM_MD5);
-    PyModule_AddIntConstant(m, "CHECKSUM_SHA1", LR_CHECKSUM_SHA1);
-    PyModule_AddIntConstant(m, "CHECKSUM_SHA224", LR_CHECKSUM_SHA224);
-    PyModule_AddIntConstant(m, "CHECKSUM_SHA256", LR_CHECKSUM_SHA256);
-    PyModule_AddIntConstant(m, "CHECKSUM_SHA384", LR_CHECKSUM_SHA384);
-    PyModule_AddIntConstant(m, "CHECKSUM_SHA512", LR_CHECKSUM_SHA512);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_UNKNOWN", LR_CHECKSUM_UNKNOWN);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_MD5", LR_CHECKSUM_MD5);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_SHA1", LR_CHECKSUM_SHA1);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_SHA224", LR_CHECKSUM_SHA224);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_SHA256", LR_CHECKSUM_SHA256);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_SHA384", LR_CHECKSUM_SHA384);
+    PyModule_AddIntConstant(m, "LR_CHECKSUM_SHA512", LR_CHECKSUM_SHA512);
 
     // Transfer statuses
-    PyModule_AddIntConstant(m, "TRANSFER_SUCCESSFUL", LR_TRANSFER_SUCCESSFUL);
-    PyModule_AddIntConstant(m, "TRANSFER_ALREADYEXISTS", LR_TRANSFER_ALREDYEXISTS);
-    PyModule_AddIntConstant(m, "TRANSFER_ERROR", LR_TRANSFER_ERROR);
+    PyModule_AddIntConstant(m, "LR_TRANSFER_SUCCESSFUL", LR_TRANSFER_SUCCESSFUL);
+    PyModule_AddIntConstant(m, "LR_TRANSFER_ALREADYEXISTS", LR_TRANSFER_ALREDYEXISTS);
+    PyModule_AddIntConstant(m, "LR_TRANSFER_ERROR", LR_TRANSFER_ERROR);
 
     // Fastest mirror stages
-    PyModule_AddIntConstant(m, "FMSTAGE_INIT", LR_FMSTAGE_INIT);
-    PyModule_AddIntConstant(m, "FMSTAGE_CACHELOADING", LR_FMSTAGE_CACHELOADING);
-    PyModule_AddIntConstant(m, "FMSTAGE_CACHELOADINGSTATUS", LR_FMSTAGE_CACHELOADINGSTATUS);
-    PyModule_AddIntConstant(m, "FMSTAGE_DETECTION", LR_FMSTAGE_DETECTION);
-    PyModule_AddIntConstant(m, "FMSTAGE_FINISHING", LR_FMSTAGE_FINISHING);
-    PyModule_AddIntConstant(m, "FMSTAGE_STATUS", LR_FMSTAGE_STATUS);
+    PyModule_AddIntConstant(m, "LR_FMSTAGE_INIT", LR_FMSTAGE_INIT);
+    PyModule_AddIntConstant(m, "LR_FMSTAGE_CACHELOADING", LR_FMSTAGE_CACHELOADING);
+    PyModule_AddIntConstant(m, "LR_FMSTAGE_CACHELOADINGSTATUS", LR_FMSTAGE_CACHELOADINGSTATUS);
+    PyModule_AddIntConstant(m, "LR_FMSTAGE_DETECTION", LR_FMSTAGE_DETECTION);
+    PyModule_AddIntConstant(m, "LR_FMSTAGE_FINISHING", LR_FMSTAGE_FINISHING);
+    PyModule_AddIntConstant(m, "LR_FMSTAGE_STATUS", LR_FMSTAGE_STATUS);
 
     // Callbacks return values
-    PyModule_AddIntConstant(m, "CB_OK", LR_CB_OK);
-    PyModule_AddIntConstant(m, "CB_ABORT", LR_CB_ABORT);
-    PyModule_AddIntConstant(m, "CB_ERROR", LR_CB_ERROR);
+    PyModule_AddIntConstant(m, "LR_CB_OK", LR_CB_OK);
+    PyModule_AddIntConstant(m, "LR_CB_ABORT", LR_CB_ABORT);
+    PyModule_AddIntConstant(m, "LR_CB_ERROR", LR_CB_ERROR);
 
 #if PY_MAJOR_VERSION >= 3
     return m;

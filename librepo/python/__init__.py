@@ -825,17 +825,17 @@ for attr in dir(_librepo):
         # Do not any additional magic for sentinel values
         continue
 
+    if attr.startswith("LR_"):
+        setattr(current_module, attr[3:], val)
     if attr.startswith("LRO_"):
         ATTR_TO_LRO[attr.lower()[4:]] = val
-    elif attr.startswith("LRI_"):
+    if attr.startswith("LRI_"):
         ATTR_TO_LRI[attr.lower()[4:]] = val
-    elif attr.startswith("LR_"):
-        setattr(current_module, attr[3:], val)
-    elif attr.startswith("LRR_"):
+    if attr.startswith("LRR_"):
         ATTR_TO_LRR[attr.lower()[4:]] = val
-    elif attr.startswith("CHECKSUM_"):
-        setattr(current_module, attr[9:], val)
-        _CHECKSUM_STR_TO_VAL_MAP[attr[9:].lower()] = val
+    if attr.startswith("LR_CHECKSUM_"):
+        setattr(current_module, attr[12:], val)
+        _CHECKSUM_STR_TO_VAL_MAP[attr[12:].lower()] = val
 
 
 VERSION = u"%d.%d.%d" % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
