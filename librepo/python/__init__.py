@@ -822,7 +822,7 @@ for attr in dir(_librepo):
     setattr(current_module, attr, val)
 
     if attr.endswith("_SENTINEL"):
-        # Do not any additional magic for sentinel values
+        # Ignore sentinel values
         continue
 
     if attr.startswith("LR_"):
@@ -831,7 +831,7 @@ for attr in dir(_librepo):
         ATTR_TO_LRO[attr.lower()[4:]] = val
     if attr.startswith("LRI_"):
         ATTR_TO_LRI[attr.lower()[4:]] = val
-    if attr.startswith("LRR_"):
+    if attr.startswith("LR_LRR_"):
         ATTR_TO_LRR[attr.lower()[4:]] = val
     if attr.startswith("LR_CHECKSUM_"):
         setattr(current_module, attr[12:], val)
