@@ -36,6 +36,7 @@
 #include "util.h"
 #include "version.h"
 #include "metalink.h"
+#include "cleanup.h"
 
 #define DIR_SEPARATOR   "/"
 #define ENV_DEBUG       "LIBREPO_DEBUG"
@@ -136,8 +137,10 @@ lr_free(void *m)
 int
 lr_gettmpfile()
 {
-    char template[] = "/tmp/librepo-tmp-XXXXXX";
-    int fd = mkstemp(template);
+    int fd;
+    _cleanup_free_ char *template = NULL;
+    template = g_build_filename(g_get_tmp_dir(), "librepo-tmp-XXXXXX", NULL);
+    fd = mkstemp(template);
     if (fd < 0) {
         perror("Cannot create temporary file - mkstemp");
         exit(1);
@@ -149,11 +152,12 @@ lr_gettmpfile()
 char *
 lr_gettmpdir()
 {
-    char *template = g_strdup("/tmp/librepo-tmpdir-XXXXXX");
-    char *dir = mkdtemp(template);
-    if (!dir)
+    char *template = g_build_filename(g_get_tmp_dir(), "librepo-tmpdir-XXXXXX", NULL);
+    if (!mkdtemp(template)) {
         lr_free(template);
-    return dir;
+        return NULL;
+    }
+    return template;
 }
 
 char *
