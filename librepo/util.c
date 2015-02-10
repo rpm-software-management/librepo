@@ -424,8 +424,6 @@ lr_strv_dup(gchar **array)
 gboolean
 lr_is_local_path(const gchar *path)
 {
-    char resolved_path[PATH_MAX];
-
     if (!path || !*path)
         return FALSE;
 
