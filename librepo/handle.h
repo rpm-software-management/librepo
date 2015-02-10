@@ -38,13 +38,13 @@ G_BEGIN_DECLS
 typedef struct _LrHandle LrHandle;
 
 /** LRO_FASTESTMIRRORMAXAGE default value */
-#define LRO_FASTESTMIRRORMAXAGE_DEFAULT     2592000 // 30 days
+#define LRO_FASTESTMIRRORMAXAGE_DEFAULT     2592000L // 30 days
 
 /** LRO_FASTESTMIRRORMAXAGE minimal allowed value */
-#define LRO_FASTESTMIRRORMAXAGE_MIN         0
+#define LRO_FASTESTMIRRORMAXAGE_MIN         0L
 
 /** LRO_PROXYPORT default value */
-#define LRO_PROXYPORT_DEFAULT               1080
+#define LRO_PROXYPORT_DEFAULT               1080L
 
 /** LRO_PROXYTYPE default value */
 #define LRO_PROXYTYPE_DEFAULT               LR_PROXY_HTTP
@@ -53,49 +53,49 @@ typedef struct _LrHandle LrHandle;
 #define LRO_MAXSPEED_DEFAULT                G_GINT64_CONSTANT(0)
 
 /** LRO_CONNECTTIMEOUT default value */
-#define LRO_CONNECTTIMEOUT_DEFAULT          120
+#define LRO_CONNECTTIMEOUT_DEFAULT          120L
 
 /** LRO_MAXMIRRORTRIES default value */
-#define LRO_MAXMIRRORTRIES_DEFAULT          0
+#define LRO_MAXMIRRORTRIES_DEFAULT          0L
 
 /** LRO_MAXMIRRORTRIES minimal allowed value */
-#define LRO_MAXMIRRORTRIES_MIN              0
+#define LRO_MAXMIRRORTRIES_MIN              0L
 
 /** LRO_MAXPARALLELDOWNLOADS default value */
-#define LRO_MAXPARALLELDOWNLOADS_DEFAULT    3
+#define LRO_MAXPARALLELDOWNLOADS_DEFAULT    3L
 
 /** LRO_MAXPARALLELDOWNLOADS minimal allowed value */
-#define LRO_MAXPARALLELDOWNLOADS_MIN        1
+#define LRO_MAXPARALLELDOWNLOADS_MIN        1L
 
 /** LRO_MAXPARALLELDOWNLOADS maximal allowed value */
-#define LRO_MAXPARALLELDOWNLOADS_MAX        20
+#define LRO_MAXPARALLELDOWNLOADS_MAX        20L
 
 /** LRO_MAXDOWNLOADSPERMIRROR default value */
-#define LRO_MAXDOWNLOADSPERMIRROR_DEFAULT   3
+#define LRO_MAXDOWNLOADSPERMIRROR_DEFAULT   3L
 
 /** LRO_MAXDOWNLOADSPERMIRROR minimal allowed value */
-#define LRO_MAXDOWNLOADSPERMIRROR_MIN       1
+#define LRO_MAXDOWNLOADSPERMIRROR_MIN       1L
 
 /** LRO_LOWSPEEDTIME minimal allowed value */
-#define LRO_LOWSPEEDTIME_MIN                0
+#define LRO_LOWSPEEDTIME_MIN                0L
 
 /** LRO_LOWSPEEDTIME default value */
-#define LRO_LOWSPEEDTIME_DEFAULT            120
+#define LRO_LOWSPEEDTIME_DEFAULT            120L
 
 /** LRO_LOWSPEEDLIMIT minimal allowed value */
-#define LRO_LOWSPEEDLIMIT_MIN               0
+#define LRO_LOWSPEEDLIMIT_MIN               0L
 
 /** LRO_LOWSPEEDLIMIT default value */
-#define LRO_LOWSPEEDLIMIT_DEFAULT           1000
+#define LRO_LOWSPEEDLIMIT_DEFAULT           1000L
 
 /** LRO_IPRESOLVE default value */
 #define LRO_IPRESOLVE_DEFAULT               LR_IPRESOLVE_WHATEVER
 
 /** LRO_ALLOWEDMIRRORFAILURES default value */
-#define LRO_ALLOWEDMIRRORFAILURES_DEFAULT   4
+#define LRO_ALLOWEDMIRRORFAILURES_DEFAULT   4L
 
 /** LRO_ADAPTIVEMIRRORSORTING default value */
-#define LRO_ADAPTIVEMIRRORSORTING_DEFAULT   1
+#define LRO_ADAPTIVEMIRRORSORTING_DEFAULT   1L
 
 /** LRO_GNUPGHOMEDIR default value */
 #define LRO_GNUPGHOMEDIR_DEFAULT            NULL
