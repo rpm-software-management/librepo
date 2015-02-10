@@ -43,6 +43,7 @@
 #include "result_internal.h"
 #include "yum_internal.h"
 #include "gpg.h"
+#include "cleanup.h"
 
 /* helper functions for YumRepo manipulation */
 
@@ -542,157 +543,168 @@ lr_yum_check_repo_checksums(LrYumRepo *repo,
 }
 
 static gboolean
-lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
+lr_yum_use_local_load_base(LrHandle *handle,
+                           LrResult *result,
+                           LrYumRepo *repo,
+                           LrYumRepoMd *repomd,
+                           const gchar *baseurl,
+                           GError **err)
 {
     gboolean ret;
-    char *path;
+    GError *tmp_err = NULL;
+    _cleanup_free_ gchar *path = NULL;
+    _cleanup_free_ gchar *sig = NULL;
+    _cleanup_file_close_ int fd = -1;
+
+    if (handle->mirrorlist_fd != -1) {
+        // Locate mirrorlist if available.
+        gchar *mrl_fn = lr_pathconcat(baseurl, "mirrorlist", NULL);
+        if (g_file_test(mrl_fn, G_FILE_TEST_IS_REGULAR)) {
+            g_debug("%s: Found local mirrorlist: %s", __func__, mrl_fn);
+            repo->mirrorlist = mrl_fn;
+        } else {
+            repo->mirrorlist = NULL;
+            lr_free(mrl_fn);
+        }
+    }
+
+    if (handle->metalink_fd != -1) {
+        // Locate metalink.xml if available.
+        gchar *mtl_fn = lr_pathconcat(baseurl, "metalink.xml", NULL);
+        if (g_file_test(mtl_fn, G_FILE_TEST_IS_REGULAR)) {
+            g_debug("%s: Found local metalink: %s", __func__, mtl_fn);
+            repo->metalink = mtl_fn;
+        } else {
+            repo->metalink = NULL;
+            lr_free(mtl_fn);
+        }
+    }
+
+    // Open repomd.xml
+    path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
+    fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        g_debug("%s: open(%s): %s", __func__, path, strerror(errno));
+        g_set_error(err, LR_YUM_ERROR, LRE_IO,
+                    "Cannot open %s: %s", path, strerror(errno));
+        return FALSE;
+    }
+
+    // Parse repomd.xml
+    g_debug("%s: Parsing repomd.xml", __func__);
+    ret = lr_yum_repomd_parse_file(repomd, fd, lr_xml_parser_warning_logger,
+                                   "Repomd xml parser", &tmp_err);
+    if (!ret) {
+        g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);
+        g_propagate_prefixed_error(err, tmp_err,
+                                   "repomd.xml parser error: ");
+        return FALSE;
+    }
+
+    // Fill result object
+    result->destdir = g_strdup(baseurl);
+    repo->destdir = g_strdup(baseurl);
+    repo->repomd = g_strdup(path);
+
+    // Check if signature file exists
+    sig = lr_pathconcat(baseurl, "repodata/repomd.xml.asc", NULL);
+    if (access(sig, F_OK) == 0)
+        repo->signature = g_strdup(sig);
+
+    // Signature checking
+    if (handle->checks & LR_CHECK_GPG) {
+
+        if (!repo->signature) {
+            // Signature doesn't exist
+            g_debug("%s: GPG signature doesn't exists", __func__);
+            g_set_error(err, LR_YUM_ERROR, LRE_BADGPG,
+                        "GPG verification is enabled, but GPG signature "
+                        "repomd.xml.asc is not available");
+            return FALSE;
+        }
+
+        ret = lr_gpg_check_signature(repo->signature,
+                                     repo->repomd,
+                                     handle->gnupghomedir,
+                                     &tmp_err);
+        if (!ret) {
+            g_debug("%s: repomd.xml GPG signature verification failed: %s",
+                    __func__, tmp_err->message);
+            g_propagate_prefixed_error(err, tmp_err,
+                        "repomd.xml GPG signature verification failed: ");
+            return FALSE;
+        }
+    }
+
+    // Done - repomd is loaded and checked
+    g_debug("%s: Repomd revision: %s", __func__, repomd->revision);
+
+    return TRUE;
+}
+
+/* Do not duplicate repoata, just locate the local one */
+static gboolean
+lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
+{
     char *baseurl;
     LrYumRepo *repo;
     LrYumRepoMd *repomd;
-    GError *tmp_err = NULL;
 
     assert(!err || *err == NULL);
 
     g_debug("%s: Locating repo..", __func__);
 
+    // Shortcuts
     repo   = result->yum_repo;
     repomd = result->yum_repomd;
     baseurl = handle->urls[0];
 
-    /* Do not duplicate repoata, just locate the local one */
-    if (strncmp(baseurl, "file://", 7)) {
-        if (strstr(baseurl, "://")) {
-            g_set_error(err, LR_YUM_ERROR, LRE_NOTLOCAL,
-                        "URL: %s doesn't seem to be a local repository",
-                        baseurl);
-            return FALSE;
-        }
-    } else {
-        /* Skip file:// in baseurl */
-        baseurl = baseurl+7;
+    // Skip "file://" prefix if present
+    if (g_str_has_prefix(baseurl, "file://"))
+        baseurl += 7;
+
+    // Check sanity
+    if (strstr(baseurl, "://")) {
+        g_set_error(err, LR_YUM_ERROR, LRE_NOTLOCAL,
+                    "URL: %s doesn't seem to be a local repository",
+                    baseurl);
+        return FALSE;
     }
 
     if (!handle->update) {
-        if (handle->mirrorlist_fd != -1) {
-            // Locate mirrorlist if available.
-            path = lr_pathconcat(baseurl, "mirrorlist", NULL);
-            if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
-                g_debug("%s: Found local mirrorlist: %s", __func__, path);
-                repo->mirrorlist = path;
-            } else {
-                repo->mirrorlist = NULL;
-                lr_free(path);
-            }
-
-        }
-
-        if (handle->metalink_fd != -1) {
-            // Locate metalink.xml if available.
-            path = lr_pathconcat(baseurl, "metalink.xml", NULL);
-            if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
-                g_debug("%s: Found local metalink: %s", __func__, path);
-                repo->metalink = path;
-            } else {
-                repo->metalink = NULL;
-                lr_free(path);
-            }
-
-        }
-
-        /* Open and parse repomd */
-        char *sig;
-
-        path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
-        int fd = open(path, O_RDONLY);
-        if (fd < 0) {
-            g_debug("%s: open(%s): %s", __func__, path, strerror(errno));
-            g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                        "Cannot open %s: %s", path, strerror(errno));
-            lr_free(path);
+        // Load repomd.xml and mirrorlist+metalink if locally available
+        if (!lr_yum_use_local_load_base(handle, result, repo, repomd, baseurl, err))
             return FALSE;
-        }
-
-        g_debug("%s: Parsing repomd.xml", __func__);
-        ret = lr_yum_repomd_parse_file(repomd, fd, lr_xml_parser_warning_logger,
-                                       "Repomd xml parser", &tmp_err);
-        close(fd);
-        if (!ret) {
-            g_debug("%s: Parsing unsuccessful: %s", __func__, tmp_err->message);
-            g_propagate_prefixed_error(err, tmp_err,
-                                       "repomd.xml parser error: ");
-            lr_free(path);
-            return FALSE;
-        }
-
-        /* Fill result object */
-        result->destdir = g_strdup(baseurl);
-        repo->destdir = g_strdup(baseurl);
-        repo->repomd = path;
-
-        /* Check if signature file exists */
-        sig = lr_pathconcat(baseurl, "repodata/repomd.xml.asc", NULL);
-        if (access(sig, F_OK) == 0)
-            repo->signature = sig;  // File with key exists
-        else
-            lr_free(sig);
-
-        /* Signature checking */
-        if (handle->checks & LR_CHECK_GPG) {
-            if (!repo->signature) {
-                // Signature doesn't exist
-                g_debug("%s: GPG signature doesn't exists", __func__);
-                g_set_error(err, LR_YUM_ERROR, LRE_BADGPG,
-                            "GPG verification is enabled, but GPG signature "
-                            "repomd.xml.asc is not available");
-                return FALSE;
-            }
-
-            ret = lr_gpg_check_signature(repo->signature,
-                                         repo->repomd,
-                                         handle->gnupghomedir,
-                                         &tmp_err);
-            if (!ret) {
-                g_debug("%s: repomd.xml GPG signature verification failed: %s",
-                        __func__, tmp_err->message);
-                g_propagate_prefixed_error(err, tmp_err,
-                            "repomd.xml GPG signature verification failed: ");
-                return FALSE;
-            }
-        }
-
-
-        g_debug("%s: Repomd revision: %s", __func__, repomd->revision);
     }
 
-    /* Locate rest of metadata files */
+    // Locate rest of metadata files
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
-        char *path;
+        _cleanup_free_ char *path = NULL;
         LrYumRepoMdRecord *record = elem->data;
 
         assert(record);
 
         if (!lr_yum_repomd_record_enabled(handle, record->type))
-            continue;
+            continue; // Caller isn't interested in this record type
         if (lr_yum_repo_path(repo, record->type))
-            continue; /* This path already exists in repo */
+            continue; // This path already exists in repo
 
         path = lr_pathconcat(baseurl, record->location_href, NULL);
-        if (path) {
-            if (access(path, F_OK) == -1) {
-                /* A repo file is missing */
-                if (!handle->ignoremissing) {
-                    g_debug("%s: Incomplete repository - %s is missing",
-                            __func__, path);
-                    g_set_error(err, LR_YUM_ERROR, LRE_INCOMPLETEREPO,
-                                "Incomplete repository - %s is missing",
-                                path);
-                    lr_free(path);
-                    return FALSE;
-                }
-            } else
-                lr_yum_repo_append(repo, record->type, path);
-            lr_free(path);
+        if (access(path, F_OK) == -1) {
+            // A repo file is missing
+            if (!handle->ignoremissing) {
+                g_debug("%s: Incomplete repository - %s is missing",
+                        __func__, path);
+                g_set_error(err, LR_YUM_ERROR, LRE_INCOMPLETEREPO,
+                            "Incomplete repository - %s is missing",
+                            path);
+                return FALSE;
+            }
+
+            continue;
         }
+
+        lr_yum_repo_append(repo, record->type, path);
     }
 
     g_debug("%s: Repository was successfully located", __func__);
