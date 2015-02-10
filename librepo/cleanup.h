@@ -31,6 +31,14 @@
 
 G_BEGIN_DECLS
 
+static int
+lr_close(int fildes)
+{
+    if (fildes < 0)
+        return 0;
+    return close(fildes);
+}
+
 #define LR_DEFINE_CLEANUP_FUNCTION(Type, name, func) \
   static inline void name (void *v) \
   { \
@@ -54,7 +62,7 @@ G_BEGIN_DECLS
 LR_DEFINE_CLEANUP_FUNCTION0(GArray*, lr_local_array_unref, g_array_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GChecksum*, lr_local_checksum_free, g_checksum_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GDir*, lr_local_dir_close, g_dir_close)
-LR_DEFINE_CLEANUP_FUNCTION0(int, lr_local_file_close, close)
+LR_DEFINE_CLEANUP_FUNCTION0(int, lr_local_file_close, lr_close)
 LR_DEFINE_CLEANUP_FUNCTION0(GError*, lr_local_free_error, g_error_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GHashTable*, lr_local_hashtable_unref, g_hash_table_unref)
 #if GLIB_CHECK_VERSION(2, 32, 0)
