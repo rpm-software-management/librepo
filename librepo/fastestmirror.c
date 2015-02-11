@@ -591,6 +591,12 @@ lr_fastestmirror_detailed(LrHandle *handle,
             cb = handle->fastestmirrorcb;
         cbdata = handle->fastestmirrordata;
         length_of_measurement = handle->fastestmirrortimeout;
+
+        if (handle->offline) {
+            g_debug("%s: Fastest mirror determination "
+                    "skipped... LRO_OFFLINE enabled", __func__);
+            return TRUE;
+        }
     }
 
     g_debug("%s: Fastest mirror determination in progress...", __func__);

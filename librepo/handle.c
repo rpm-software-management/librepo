@@ -102,6 +102,7 @@ lr_handle_init()
     handle->adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
     handle->gnupghomedir = g_strdup(LRO_GNUPGHOMEDIR_DEFAULT);
     handle->fastestmirrortimeout = LRO_FASTESTMIRRORTIMEOUT_DEFAULT;
+    handle->offline = LRO_OFFLINE_DEFAULT;
 
     return handle;
 }
@@ -144,14 +145,21 @@ typedef enum {
     LR_REMOTESOURCE_URLS,
     LR_REMOTESOURCE_MIRRORLIST,
     LR_REMOTESOURCE_METALINK,
+    LR_REMOTESOURCE_LOCAL_OPT,
+    LR_REMOTESOURCE_OFFLINE_OPT,
     LR_REMOTESOURCE_OTHER,
 } LrChangedRemoteSource;
 
 static void
 lr_handle_remote_sources_changed(LrHandle *handle, LrChangedRemoteSource type)
 {
-    // Called when LRO_URLS, LRO_MIRRORLISTURL
-    // or LRO_METALINKURL is changed
+    // Called when options like:
+    // LRO_URLS
+    // LRO_MIRRORLISTURL
+    // LRO_METALINKURL
+    // LRO_LOCAL
+    // LRO_OFFLINE
+    // are changed
 
     // Internal mirrorlist is no more valid
     lr_lrmirrorlist_free(handle->internal_mirrorlist);
@@ -256,7 +264,7 @@ lr_handle_setopt(LrHandle *handle,
         break;
 
     case LRO_LOCAL:
-        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_OTHER);
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_LOCAL_OPT);
         handle->local = va_arg(arg, long) ? 1 : 0;
         break;
 
@@ -616,6 +624,11 @@ lr_handle_setopt(LrHandle *handle,
         handle->fastestmirrortimeout = va_arg(arg, double);
         break;
 
+    case LRO_OFFLINE:
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_OFFLINE_OPT);
+        handle->offline = va_arg(arg, long) ? 1 : 0;
+        break;
+
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                     "Unknown option");
@@ -730,10 +743,15 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
     } else if (!handle->mirrorlisturl) {
         // Nothing to do
         return TRUE;
+    } else if (handle->offline && !lr_is_local_path(handle->mirrorlisturl)) {
+        // We should work offline, ignore remote mirrorlist
+        g_debug("%s: LRO_OFFLINE used, remote mirrorlist ignored: %s",
+                __func__, handle->mirrorlisturl);
+        return TRUE;
     } else if (handle->local && !lr_is_local_path(handle->mirrorlisturl)) {
-        // We should work only locally, do not try to download anything
-        g_debug("%s: LRO_LOCAL used - do not try to download: %s",
-                __func__, handle->metalinkurl);
+        // We should work only locally, ignore remote mirrorlist
+        g_debug("%s: LRO_LOCAL used, remote mirrorlist ignored: %s",
+                __func__, handle->mirrorlisturl);
         return TRUE;
     } else if (handle->mirrorlisturl) {
         // Download remote mirrorlist
@@ -841,9 +859,14 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
     } else if (!handle->metalinkurl) {
         // Nothing to do
         return TRUE;
+    } else if (handle->offline && !lr_is_local_path(handle->metalinkurl)) {
+        // We should work offline, ignore remote mirrorlist
+        g_debug("%s: LRO_OFFLINE used, remote metalink ignored: %s",
+                __func__, handle->metalinkurl);
+        return TRUE;
     } else if (handle->local && !lr_is_local_path(handle->metalinkurl)) {
-        // We should work only locally, do not try to download anything
-        g_debug("%s: LRO_LOCAL used - do not try to download: %s",
+        // We should work only locally, ignore remote mirrorlist
+        g_debug("%s: LRO_LOCAL used, remote metalink ignored: %s",
                 __func__, handle->metalinkurl);
         return TRUE;
     } else if (handle->metalinkurl) {
@@ -1355,6 +1378,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_FASTESTMIRRORTIMEOUT:
         dnum = va_arg(arg, double *);
         *dnum = (double) handle->fastestmirrortimeout;
+        break;
+
+    case LRI_OFFLINE:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->offline;
         break;
 
     default:

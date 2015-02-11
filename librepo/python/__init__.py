@@ -328,6 +328,12 @@ Version contants
     use the form 'MyHeader;' (note the ending semicolon).
     Note: Headers must not be CRLF-terminated!
 
+.. data:: LRO_OFFLINE
+
+    *Boolean* Make the handle work only locally, all remote URLs are
+    ignored. Remote mirrorlists/metalinks (if they are specified)
+    are ignored. Fastest mirror check (if enabled) is skiped.
+
 
 .. _handle-info-options-label:
 
@@ -367,6 +373,7 @@ Version contants
 .. data:: LRI_GNUPGHOMEDIR
 .. data:: LRI_FASTESTMIRRORTIMEOUT
 .. data:: LRI_HTTPHEADER
+.. data:: LRI_OFFLINE
 
 .. _proxy-type-label:
 
@@ -1091,6 +1098,10 @@ class Handle(_librepo.Handle):
     .. attribute:: httpheader:
 
         See :data:`.LRO_HTTPHEADER`
+
+    .. attribute:: offline:
+
+        See :data:`.LRO_OFFLINE`
 
     """
 

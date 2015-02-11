@@ -192,6 +192,10 @@ struct _LrHandle {
     struct curl_slist *curl_httpheader; /*!<
         Curl's list of HTTP headers - items in the list
         refers into the httpheader list (defined above) */
+
+    gboolean offline; /*!<
+        If TRUE, librepo should work offline - ignore all
+        non local URLs, etc. */
 };
 
 /** Return new CURL easy handle with some default options setted.

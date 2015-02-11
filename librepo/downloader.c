@@ -563,6 +563,16 @@ select_suitable_mirror(LrDownload *dd,
             continue;
         }
 
+        if (target->handle
+            && target->handle->offline
+            && c_mirror->mirror->protocol != LR_PROTOCOL_FILE)
+        {
+            // Skip each url that doesn't have file://
+            g_debug("%s: Skipping mirror %s - Offline mode enabled",
+                    __func__, mirrorurl);
+            continue;
+        }
+
         if (c_mirror->successful_transfers == 0 &&
             dd->allowed_mirror_failures > 0 &&
             c_mirror->failed_transfers >= dd->allowed_mirror_failures)
@@ -703,6 +713,15 @@ select_next_target(LrDownload *dd,
                 g_debug("%s: Currently there is no free mirror for: %s",
                         __func__, target->target->path);
             }
+        }
+
+        if (target->handle
+            && target->handle->offline
+            && !lr_is_local_path(full_url))
+        {
+            g_debug("%s: Skipping %s because LRO_OFFLINE is specified",
+                    __func__, full_url);
+            continue;
         }
 
         if (full_url) {  // A waiting target found

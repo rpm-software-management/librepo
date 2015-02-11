@@ -103,6 +103,8 @@ typedef struct _LrHandle LrHandle;
 /** LRO_FASTESTMIRRORTIMEOUT default value */
 #define LRO_FASTESTMIRRORTIMEOUT_DEFAULT    2.0
 
+/** LRO_OFFLINE default value */
+#define LRO_OFFLINE_DEFAULT                 0L
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
@@ -303,6 +305,11 @@ typedef enum {
         List of HTTP header to pass to the server and/or proxy in
         Librepo's HTTP requests. */
 
+    LRO_OFFLINE, /*!< (long 1 or 0)
+        Make the handle work only locally, all remote URLs are ignored.
+        Remote mirrorlists/metalinks (if they are specified) are ignored.
+        Fastest mirror check (if enabled) is skiped. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -358,6 +365,7 @@ typedef enum {
     LRI_HTTPHEADER,             /*!< (char *** Malloced)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
+    LRI_OFFLINE,                /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

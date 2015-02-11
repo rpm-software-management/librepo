@@ -381,6 +381,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_SSLVERIFYPEER:
     case LRO_SSLVERIFYHOST:
     case LRO_ADAPTIVEMIRRORSORTING:
+    case LRO_OFFLINE:
     {
         long d;
 
@@ -899,6 +900,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_SSLVERIFYHOST:
     case LRI_ALLOWEDMIRRORFAILURES:
     case LRI_ADAPTIVEMIRRORSORTING:
+    case LRI_OFFLINE:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,
