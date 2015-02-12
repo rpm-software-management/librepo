@@ -195,6 +195,13 @@ lr_downloadtarget_new(LrHandle *handle,
                       gint64 byterangestart,
                       gint64 byterangeend);
 
+/** Reset download data filled during downloading. E.g. Error messages,
+ * effective URL, used mirror etc.
+ * @param target        Target
+ */
+void
+lr_downloadtarget_reset(LrDownloadTarget *target);
+
 /** Free a ::LrDownloadTarget element and its content.
  * @param target        Target to free.
  */

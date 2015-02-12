@@ -111,6 +111,18 @@ lr_downloadtarget_new(LrHandle *handle,
 }
 
 void
+lr_downloadtarget_reset(LrDownloadTarget *target)
+{
+    if (!target)
+        return;
+
+    target->usedmirror = NULL;
+    target->effectiveurl = NULL;
+    target->rcode = LRE_OK;
+    target->err = NULL;
+}
+
+void
 lr_downloadtarget_free(LrDownloadTarget *target)
 {
     if (!target)
