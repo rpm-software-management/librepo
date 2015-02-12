@@ -1406,3 +1406,135 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         self.assertTrue(h.mirrors)  # List of mirrors should be re-initialized
                                     # and should contain mirrors from the metalink
+
+    def test_download_with_offline_enabled_01(self):
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.urls = [url]
+        h.destdir = self.tmpdir
+        h.offline = True
+        # Only one remote URL is specified - this should fail
+        self.assertRaises(librepo.LibrepoException, h.perform)
+
+        shutil.rmtree(os.path.join(self.tmpdir, "repodata"))
+
+        # But everything should be ok when we disable the option
+        h.offline = False
+        h.perform()
+
+    def test_download_with_offline_enabled_02(self):
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        dir_01 = os.path.join(self.tmpdir, "01")
+        dir_02 = os.path.join(self.tmpdir, "02")
+        os.makedirs(dir_01)
+        os.makedirs(dir_02)
+
+        # Prepare local cache
+        h_l = librepo.Handle()
+        h_l.repotype = librepo.YUMREPO
+        h_l.urls = [url]
+        h_l.destdir = dir_01
+        h_l.perform()
+
+        # Let's work offline
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.urls = ["http://foo.bar/xyz", dir_01]
+        h.metalinkurl = "http://foo.bar/mtl"
+        h.mirrorlisturl = "http://foo.bar/mrl"
+        h.fastestmirror = True
+        h.destdir = dir_02
+        h.offline = True
+        # Bad URLs for metalink and mirrorlist should be ok, they
+        # should be ignored - we should work offline
+        # First remote URL set in urls option should be ignored
+        # Fastestmirror should be skipped
+        h.perform()
+
+    def test_download_with_offline_enabled_03(self):
+        url_mtl = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
+        url_mrl = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
+
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.metalinkurl = url_mtl
+        h.mirrorlisturl = url_mrl
+        h.fastestmirror = True
+        h.offline = True
+        h.fetchmirrors = True
+        h.destdir = self.tmpdir
+        # We only want to fetch mirrors
+        # But both metalink and mirrorlist is specified by remote URL
+        # Output mirrorlist should be empty
+        h.perform()
+        self.assertFalse(h.mirrors)
+
+        # But when we disable offline, it should work
+        h.offline = False
+        h.perform()
+        self.assertTrue(h.mirrors)
+
+    def test_download_with_offline_enabled_04(self):
+        url_mtl = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
+        url_mrl = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
+        dir_01 = os.path.join(self.tmpdir, "01")
+        dir_02 = os.path.join(self.tmpdir, "02")
+        os.makedirs(dir_01)
+        os.makedirs(dir_02)
+
+        EXP_MRS = [u'http://127.0.0.1:5000/yum/static/01/',
+                   u'http://127.0.0.1:5000/yum/static/01/']
+
+        # 1) At first, work online
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.metalinkurl = url_mtl
+        h.mirrorlisturl = url_mrl
+        h.fastestmirror = True
+        h.offline = False
+        h.destdir = dir_01
+        h.perform()
+        self.assertTrue(h.mirrors)
+
+        # 2) Then switch to offline mode
+        h.offline = True
+        h.destdir = dir_02
+        # We should not be able to download the repodata
+        self.assertRaises(librepo.LibrepoException, h.perform)
+        # Mirrors should still be there from the first try
+        self.assertTrue(h.mirrors)
+        self.assertEqual(h.mirrors, EXP_MRS)
+
+        # 3) Let's stay offline but use repodata from first try
+        shutil.rmtree(os.path.join(dir_02, "repodata"))
+        h.urls = [dir_01]
+        h.perform()
+        # Mirrors should still be there from the first try
+        self.assertTrue(h.mirrors)
+        self.assertEqual(h.mirrors, EXP_MRS)
+
+        # 4) Still offline, but mirrors get reset
+        shutil.rmtree(os.path.join(dir_02, "repodata"))
+        h.metalinkurl = url_mtl
+        h.mirrorlisturl = url_mrl
+        h.perform()
+        # Mirrors should be reset and thus empty
+        self.assertFalse(h.mirrors)
+
+        # 5) Create a brand new handle and load a local mirrorlists
+        shutil.rmtree(os.path.join(dir_02, "repodata"))
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.metalinkurl = os.path.join(dir_01, "metalink.xml")
+        h.mirrorlisturl = os.path.join(dir_02, "mirrorlist")
+        h.fastestmirror = True
+        h.offline = True
+        h.destdir = dir_02
+        # Perform should fail, because we are working offline
+        self.assertRaises(librepo.LibrepoException, h.perform)
+        # The local mirrorlists should be loaded
+        self.assertTrue(h.mirrors)
+        self.assertEqual(h.mirrors, EXP_MRS)
+
+

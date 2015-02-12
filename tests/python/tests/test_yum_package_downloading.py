@@ -759,3 +759,67 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
             self.assertTrue(pkg.err is None)
             self.assertTrue(os.path.isfile(pkg.local_path))
 
+    def test_download_packages_with_offline_enabled_01(self):
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+
+        h = librepo.Handle()
+        h.urls = [url]
+        h.repotype = librepo.YUMREPO
+        h.offline = True
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir))
+
+        librepo.download_packages(pkgs)
+
+        # Offline is True, no package should be downloaded successfully
+        for pkg in pkgs:
+            self.assertTrue(pkg.err)
+
+        h.offline = False
+
+        librepo.download_packages(pkgs)
+        # Offline is True, no package should be downloaded successfully
+        for pkg in pkgs:
+            self.assertFalse(pkg.err)
+
+    def test_download_packages_with_offline_enabled_02(self):
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+
+        h = librepo.Handle()
+        h.repotype = librepo.YUMREPO
+        h.offline = True
+        h.urls = [url]
+
+        # 1) Try to download a package with only rel path specified
+        # (mirrors from handle will be used)
+        pkgs = [librepo.PackageTarget(config.PACKAGE_01_01,
+                                      handle=h,
+                                      dest=os.path.join(self.tmpdir, "01"))]
+        self.assertRaises(librepo.LibrepoException,
+                          librepo.download_packages, pkgs, failfast=True)
+        self.assertTrue(pkgs[0].err)
+
+        # Remove mirrors from handle (the one which was inserted via urls opt)
+        h.urls = []
+
+        # 2) Try to download a package with full path specified
+        full_url = os.path.join(url, config.PACKAGE_01_01)
+        pkgs = [librepo.PackageTarget(full_url,
+                                      handle=h,
+                                      dest=os.path.join(self.tmpdir, "01"))]
+        self.assertRaises(librepo.LibrepoException,
+                          librepo.download_packages, pkgs, failfast=True)
+        self.assertTrue(pkgs[0].err)
+
+        # 3) Try to download a package with rel path and base url specified
+        pkgs = [librepo.PackageTarget(config.PACKAGE_01_01,
+                                      base_url=url,
+                                      handle=h,
+                                      dest=os.path.join(self.tmpdir, "01"))]
+        self.assertRaises(librepo.LibrepoException,
+                          librepo.download_packages, pkgs, failfast=True)
+        self.assertTrue(pkgs[0].err)
+

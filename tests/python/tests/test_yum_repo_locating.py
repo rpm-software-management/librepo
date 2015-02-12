@@ -251,7 +251,6 @@ class TestCaseYumRepoLocating(TestCase):
 
     def test_locate_with_metalink_and_mirrorlist_urls_set(self):
         # See: https://github.com/Tojaj/librepo/issues/41
-        # At first, download whole repository
         h = librepo.Handle()
         r = librepo.Result()
 
@@ -263,3 +262,14 @@ class TestCaseYumRepoLocating(TestCase):
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         h.setopt(librepo.LRO_LOCAL, True)
         h.perform(r)
+
+    def test_locate_with_offline(self):
+        h = librepo.Handle()
+        h.urls = [REPO_YUM_02_PATH]
+        h.metalinkurl = "xyz://really-bad-url-sf987243kj.com"
+        h.mirrorlisturl = "xyz://really-bad-url-mi-qcwmi.com"
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
+        h.offline = True
+        # Offline and Local options shouldn't collide in any way
+        h.perform()
