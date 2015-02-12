@@ -715,7 +715,8 @@ select_next_target(LrDownload *dd,
             }
         }
 
-        if (target->handle
+        if (full_url
+            && target->handle
             && target->handle->offline
             && !lr_is_local_path(full_url))
         {
@@ -1879,6 +1880,7 @@ lr_download(GSList *targets,
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrDownloadTarget *dtarget = elem->data;
 
+        // Assertions
         assert(dtarget);
         assert(dtarget->path);
         assert((dtarget->fd > 0 && !dtarget->fn) || (dtarget->fd < 0 && dtarget->fn));
@@ -1886,6 +1888,10 @@ lr_download(GSList *targets,
                 dtarget->path,
                 (dtarget->baseurl) ? dtarget->baseurl : "-");
 
+        // Cleanup of LrDownloadTarget
+        lr_downloadtarget_reset(dtarget);
+
+        // Create and fill LrTarget
         LrTarget *target = lr_malloc0(sizeof(*target));
         target->state           = LR_DS_WAITING;
         target->target          = dtarget;
