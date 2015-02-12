@@ -160,6 +160,13 @@ lr_packagetarget_new_v3(LrHandle *handle,
 }
 
 void
+lr_packagetarget_reset(LrPackageTarget *target)
+{
+    target->local_path = NULL;
+    target->err = NULL;
+}
+
+void
 lr_packagetarget_free(LrPackageTarget *target)
 {
     g_string_chunk_free(target->chunk);
@@ -237,6 +244,9 @@ lr_download_packages(GSList *targets,
         LrDownloadTarget *downloadtarget;
         gint64 realsize = -1;
         gboolean doresume = packagetarget->resume;
+
+        // Reset output attributes of the handle
+        lr_packagetarget_reset(packagetarget);
 
         // Prepare destination filename
         if (packagetarget->dest) {
