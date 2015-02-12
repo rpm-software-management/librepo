@@ -8,3 +8,6 @@ doc/c/Doxyfile.in
 librepo-*.tar.xz
 librepo-*.rpm
 python-librepo-*.rpm
+BUG*
+ISSUE*
+*.spec
