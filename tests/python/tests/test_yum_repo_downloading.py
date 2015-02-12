@@ -39,9 +39,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -159,9 +159,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_02_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -317,9 +317,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.BADURL)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
 
         raised = False
         try:
@@ -338,10 +338,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_YUMDLIST, [])
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.yumdlist = []
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -381,10 +381,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_YUMDLIST, ["other", "primary"])
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.yumdlist = ["other", "primary"]
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -424,10 +424,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_YUMBLIST, ["other", "filelists"])
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.yumblist = ["other", "filelists"]
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -466,10 +466,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h = librepo.Handle()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         r = h.perform()
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -483,10 +483,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -500,10 +500,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s%s" % (self.MOCKURL, config.HARMCHECKSUM % "primary.xml", config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -517,10 +517,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -537,10 +537,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s%s" % (self.MOCKURL, config.BADGPG, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -555,9 +555,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s%s" % (self.MOCKURL, config.MISSINGFILE % "primary.xml", config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -572,10 +572,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s%s" % (self.MOCKURL, config.MISSINGFILE % "primary.xml", config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_YUMDLIST, ["other"])
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.yumdlist = ["other"]
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -589,9 +589,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.BADURL)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
 # Metalink tests
@@ -601,10 +601,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
         h.perform(r)
         self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
 
@@ -678,10 +678,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -714,9 +714,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_02)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -730,9 +730,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_BADFILENAME)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -746,10 +746,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_BADCHECKSUM)
-        h.setopt(librepo.LRO_METALINKURL, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.metalinkurl = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -769,9 +769,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_NOURLS)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -785,9 +785,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTURL)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -808,10 +808,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTHOST)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.maxmirrortries = 1
 
         # Because first host is bad and maxmirrortries == 1
         # Download should fail
@@ -823,12 +823,12 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTHOST)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FASTESTMIRROR, True)
-        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT, 5.0)
-        h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fastestmirror = True
+        h.fastestmirrortimeout = 5.0
+        h.maxmirrortries = 1
 
         # First host is bad, but fastestmirror is used and thus
         # working mirror should be added to the first position
@@ -858,13 +858,13 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         self.assertFalse(os.path.exists(cache))
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_BADFIRSTHOST)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FASTESTMIRROR, True)
-        h.setopt(librepo.LRO_FASTESTMIRRORTIMEOUT, 5.0)
-        h.setopt(librepo.LRO_FASTESTMIRRORCACHE, cache)
-        h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fastestmirror = True
+        h.fastestmirrortimeout = 5.0
+        h.fastestmirrorcache = cache
+        h.maxmirrortries = 1
 
         # First host is bad, but fastestmirror is used and thus
         # working mirror should be added to the first position
@@ -896,10 +896,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_FIRSTURLHASCORRUPTEDFILES)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -921,12 +921,12 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
+        h.urls = [url]
         url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
         h.perform(r)
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
@@ -952,11 +952,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
+        h.urls = [url]
         url = "%s%s" % (self.MOCKURL, config.METALINK_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.fastestmirror = True # XXX
         h.perform(r)
 
@@ -985,10 +985,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
         h.perform(r)
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
@@ -999,10 +999,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1017,10 +1017,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_02)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1035,9 +1035,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_NOURLS)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1051,9 +1051,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_BADFIRSTURL)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1074,10 +1074,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1102,11 +1102,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
-        h.setopt(librepo.LRO_MAXMIRRORTRIES, 1)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.maxmirrortries = 1
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
     def test_download_repo_01_via_mirrorlist_firsturlhascorruptedfiles_maxmirrortries_enabled_2(self):
@@ -1118,11 +1118,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
-        h.setopt(librepo.LRO_MAXMIRRORTRIES, 2)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.maxmirrortries = 2
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1144,12 +1144,12 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
+        h.urls = [url]
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
         h.perform(r)
 
         self.assertEqual(h.mirrors,
@@ -1161,11 +1161,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
+        h.urls = [url]
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_GOOD_01)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         h.perform(r)
 
         self.assertEqual(h.mirrors,
@@ -1179,11 +1179,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_FIRSTURLHASCORRUPTEDFILES)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
-        h.setopt(librepo.LRO_YUMDLIST, [None])
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.yumdlist = [None]
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1202,8 +1202,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
                 self.assertTrue(yum_repo[key] == None)
 
         # Update repo
-        h.setopt(librepo.LRO_UPDATE, True)
-        h.setopt(librepo.LRO_YUMDLIST, ["primary"])
+        h.update = True
+        h.yumdlist = ["primary"]
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1224,10 +1224,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s%s" % (self.MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
     def test_download_repo_01_from_base_auth_secured_web_02(self):
@@ -1235,12 +1235,12 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s%s" % (self.MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
-        h.setopt(librepo.LRO_HTTPAUTH, True)
-        h.setopt(librepo.LRO_USERPWD, "%s:%s" % (config.AUTH_USER, config.AUTH_PASS))
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.httpauth = True
+        h.userpwd = "%s:%s" % (config.AUTH_USER, config.AUTH_PASS)
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1262,12 +1262,12 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
-        h.setopt(librepo.LRO_PROGRESSDATA, data)
-        h.setopt(librepo.LRO_PROGRESSCB, cb)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.progressdata = data
+        h.progresscb = cb
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1285,11 +1285,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH_VAR)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_CHECKSUM, True)
-        h.setopt(librepo.LRO_VARSUB, config.REPO_YUM_01_VARSUB_LIST)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.varsub = config.REPO_YUM_01_VARSUB_LIST
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -1304,11 +1304,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_VARED)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
-        h.setopt(librepo.LRO_VARSUB, config.MIRRORLIST_VARED_LIST)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
+        h.varsub = config.MIRRORLIST_VARED_LIST
         h.perform(r)
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
@@ -1319,11 +1319,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.MIRRORLIST_VARSUB)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
-        h.setopt(librepo.LRO_VARSUB, config.MIRRORLIST_VARSUB_LIST)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
+        h.varsub = config.MIRRORLIST_VARSUB_LIST
         h.perform(r)
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
@@ -1334,11 +1334,11 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.METALINK_VARSUB)
-        h.setopt(librepo.LRO_MIRRORLIST, url)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
-        h.setopt(librepo.LRO_VARSUB, config.METALINK_VARSUB_LIST)
+        h.mirrorlist = url
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
+        h.varsub = config.METALINK_VARSUB_LIST
         h.perform(r)
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:%d/yum/static/01/' % self.PORT])
@@ -1357,20 +1357,20 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         r = librepo.Result()
 
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_02_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
     def test_download_with_custom_http_headers(self):
         h = librepo.Handle()
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.setopt(librepo.LRO_URLS, [url])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
         headers = ["Accept: audio/mpeg"]
-        h.setopt(librepo.LRO_HTTPHEADER, headers)
+        h.httpheader = headers
         del headers
         # An error should be raised
         self.assertRaises(librepo.LibrepoException, h.perform)

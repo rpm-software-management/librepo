@@ -39,10 +39,10 @@ class TestCaseYumRepoLocating(TestCase):
     def test_read_mirrorlist(self):
         h = librepo.Handle()
         r = librepo.Result()
-        h.setopt(librepo.LRO_MIRRORLIST, MIRRORLIST)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.mirrorlist = MIRRORLIST
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
         h.perform(r)
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink, None)
@@ -50,10 +50,10 @@ class TestCaseYumRepoLocating(TestCase):
     def test_read_metalink(self):
         h = librepo.Handle()
         r = librepo.Result()
-        h.setopt(librepo.LRO_MIRRORLIST, METALINK)
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.mirrorlist = METALINK
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.fetchmirrors = True
         h.perform(r)
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
         self.assertEqual(h.metalink,
@@ -78,10 +78,10 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.urls = [REPO_YUM_01_PATH]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -95,10 +95,10 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [self.tmpdir])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_LOCAL, True)
-        h.setopt(librepo.LRO_FETCHMIRRORS, True)
+        h.urls = [self.tmpdir]
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
+        h.fetchmirrors = True
         h.perform(r)
 
         self.assertEqual(h.mirrors, ['http://127.0.0.1:5000/yum/static/01/'])
@@ -124,10 +124,10 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
+        h.urls = [REPO_YUM_01_PATH]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -137,9 +137,9 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [self.tmpdir])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_LOCAL, True)
+        h.urls = [self.tmpdir]
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -155,10 +155,10 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, False)
+        h.urls = [REPO_YUM_02_PATH]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = False
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -168,9 +168,9 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [self.tmpdir])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_LOCAL, True)
+        h.urls = [self.tmpdir]
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -186,11 +186,11 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
-        h.setopt(librepo.LRO_YUMDLIST, ["primary"])
+        h.urls = [REPO_YUM_01_PATH]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
+        h.yumdlist = ["primary"]
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -200,9 +200,9 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [self.tmpdir])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_LOCAL, True)
+        h.urls = [self.tmpdir]
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
     def test_locate_incomplete_repo_01_2(self):
@@ -210,11 +210,11 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_01_PATH])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_DESTDIR, self.tmpdir)
-        h.setopt(librepo.LRO_GPGCHECK, True)
-        h.setopt(librepo.LRO_YUMDLIST, ["primary"])
+        h.urls = [REPO_YUM_01_PATH]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
+        h.yumdlist = ["primary"]
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -224,10 +224,10 @@ class TestCaseYumRepoLocating(TestCase):
         h = librepo.Handle()
         r = librepo.Result()
 
-        h.setopt(librepo.LRO_URLS, [self.tmpdir])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_LOCAL, True)
-        h.setopt(librepo.LRO_IGNOREMISSING, True)
+        h.urls = [self.tmpdir]
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
+        h.ignoremissing = True
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -241,29 +241,26 @@ class TestCaseYumRepoLocating(TestCase):
     def test_locate_with_gpgcheck_enabled_but_without_signature(self):
         # At first, download whole repository
         h = librepo.Handle()
-        r = librepo.Result()
-
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_GPGCHECK, True)
-        h.setopt(librepo.LRO_LOCAL, True)
-        self.assertRaises(librepo.LibrepoException, h.perform, (r))
+        h.urls = [REPO_YUM_02_PATH]
+        h.repotype = librepo.LR_YUMREPO
+        h.gpgcheck = True
+        h.local = True
+        self.assertRaises(librepo.LibrepoException, h.perform)
 
     def test_locate_with_metalink_and_mirrorlist_urls_set(self):
         # See: https://github.com/Tojaj/librepo/issues/41
         h = librepo.Handle()
-        r = librepo.Result()
-
-        h.setopt(librepo.LRO_URLS, [REPO_YUM_02_PATH])
+        h.urls = [REPO_YUM_02_PATH]
         # These bad URLs should not raise any error because
         # librepo shoudn't try to download them
-        h.setopt(librepo.LRO_METALINKURL, "xyz://really-bad-url-sf987243kj.com")
-        h.setopt(librepo.LRO_MIRRORLISTURL, "xyz://really-bad-url-mi-qcwmi.com")
-        h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
-        h.setopt(librepo.LRO_LOCAL, True)
-        h.perform(r)
+        h.metalinkurl = "xyz://really-bad-url-sf987243kj.com"
+        h.mirrorlisturl = "xyz://really-bad-url-mi-qcwmi.com"
+        h.repotype = librepo.LR_YUMREPO
+        h.local = True
+        h.perform()
 
     def test_locate_with_offline(self):
+        # Offline and Local options shouldn't collide in any way
         h = librepo.Handle()
         h.urls = [REPO_YUM_02_PATH]
         h.metalinkurl = "xyz://really-bad-url-sf987243kj.com"
@@ -271,5 +268,4 @@ class TestCaseYumRepoLocating(TestCase):
         h.repotype = librepo.LR_YUMREPO
         h.local = True
         h.offline = True
-        # Offline and Local options shouldn't collide in any way
         h.perform()
