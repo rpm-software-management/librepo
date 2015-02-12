@@ -526,7 +526,6 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     return cur_written_expected;
 }
 
-
 /** Select a suitable mirror
  */
 static gboolean
@@ -715,6 +714,11 @@ select_next_target(LrDownload *dd,
             }
         }
 
+        // If LRO_OFFLINE is specified, check if the obtained full_url
+        // is local or not
+        // This condition should never be true for a full_url built
+        // from a mirror, because select_suitable_mirror() checks if
+        // the URL is local if LRO_OFFLINE is enabled by itself.
         if (full_url
             && target->handle
             && target->handle->offline
@@ -722,7 +726,38 @@ select_next_target(LrDownload *dd,
         {
             g_debug("%s: Skipping %s because LRO_OFFLINE is specified",
                     __func__, full_url);
-            continue;
+
+            // Mark the target as failed
+            target->state = LR_DS_FAILED;
+            lr_downloadtarget_set_error(target->target, LRE_NOURL,
+                    "Cannot download, offline mode is specified and no "
+                    "local URL is available");
+
+            // Call end callback
+            LrEndCb end_cb =  target->target->endcb;
+            if (end_cb) {
+                int ret = end_cb(target->target->cbdata,
+                                 LR_TRANSFER_ERROR,
+                                "Cannot download: Offline mode is specified "
+                                "and no local URL is available");
+                if (ret == LR_CB_ERROR) {
+                    target->cb_return_code = LR_CB_ERROR;
+                    g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                            "from end callback", __func__);
+                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
+                            "Interupted by LR_CB_ERROR from end callback");
+                    return FALSE;
+                }
+            }
+
+            if (dd->failfast) {
+                // Fail immediately
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+                            "Cannot download %s: Offline mode is specified "
+                            "and no local URL is available",
+                            target->target->path);
+                return FALSE;
+            }
         }
 
         if (full_url) {  // A waiting target found
