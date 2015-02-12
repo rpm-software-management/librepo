@@ -155,6 +155,7 @@ lr_handle_remote_sources_changed(LrHandle *handle, LrChangedRemoteSource type)
 {
     // Called when options like:
     // LRO_URLS
+    // LRO_MIRRORLIST
     // LRO_MIRRORLISTURL
     // LRO_METALINKURL
     // LRO_LOCAL
