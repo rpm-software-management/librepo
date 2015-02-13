@@ -1527,7 +1527,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         h = librepo.Handle()
         h.repotype = librepo.YUMREPO
         h.metalinkurl = os.path.join(dir_01, "metalink.xml")
-        h.mirrorlisturl = os.path.join(dir_02, "mirrorlist")
+        h.mirrorlisturl = os.path.join(dir_01, "mirrorlist")
         h.fastestmirror = True
         h.offline = True
         h.destdir = dir_02

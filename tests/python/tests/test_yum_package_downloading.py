@@ -781,7 +781,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         h.offline = False
 
         librepo.download_packages(pkgs)
-        # Offline is True, no package should be downloaded successfully
+        # Offline is False, the package should be downloaded successfully
         for pkg in pkgs:
             self.assertFalse(pkg.err)
 
