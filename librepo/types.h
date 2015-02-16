@@ -105,7 +105,8 @@ typedef int (*LrProgressCb)(void *clientp,
 /** Transfer status codes */
 typedef enum {
     LR_TRANSFER_SUCCESSFUL,
-    LR_TRANSFER_ALREDYEXISTS,
+    LR_TRANSFER_ALREADYEXISTS,
+    LR_TRANSFER_ALREDYEXISTS = LR_TRANSFER_ALREADYEXISTS, // Deprecated - Backward comp. - remove in future release
     LR_TRANSFER_ERROR,
 } LrTransferStatus;
 

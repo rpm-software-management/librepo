@@ -322,7 +322,7 @@ lr_download_packages(GSList *targets,
                     LrEndCb end_cb = packagetarget->endcb;
                     if (end_cb)
                         end_cb(packagetarget->cbdata,
-                               LR_TRANSFER_ALREDYEXISTS,
+                               LR_TRANSFER_ALREADYEXISTS,
                                "Already downloaded");
 
                     continue;
@@ -351,7 +351,7 @@ lr_download_packages(GSList *targets,
             LrEndCb end_cb = packagetarget->endcb;
             if (end_cb)
                 end_cb(packagetarget->cbdata,
-                       LR_TRANSFER_ALREDYEXISTS,
+                       LR_TRANSFER_ALREADYEXISTS,
                        "Already downloaded");
 
             continue;
