@@ -86,7 +86,7 @@ repoconf_assert_uint64_eq(LrYumRepoConf *repoconf,
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
-    ck_assert_uint_eq(val, expected);
+    g_assert_cmpint(val, ==, expected);
 }
 
 #define conf_assert_uint64_eq(option, expected) \
