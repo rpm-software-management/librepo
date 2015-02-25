@@ -432,3 +432,18 @@ lr_is_local_path(const gchar *path)
 
     return TRUE;
 }
+
+gboolean
+lr_key_file_save_to_file(GKeyFile *keyfile,
+                         const gchar *filename,
+                         GError **err)
+{
+    _cleanup_free_ gchar *content = NULL;
+    gsize length;
+
+    content = g_key_file_to_data(keyfile, &length, err);
+    if (!content)
+        return FALSE;
+
+    return g_file_set_contents(filename, content, length, err);
+}

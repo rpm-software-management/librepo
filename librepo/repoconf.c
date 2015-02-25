@@ -80,9 +80,9 @@ repofile_save_keyfile(LrYumRepoFile *repofile,
         return TRUE;
 
     // Write the contents of the keyfile
-    ret = g_key_file_save_to_file(repofile->keyfile,
-                                  repofile->path,
-                                  &tmp_err);
+    ret = lr_key_file_save_to_file(repofile->keyfile,
+                                   repofile->path,
+                                   &tmp_err);
 
     // Act upon the return status
     if (ret)

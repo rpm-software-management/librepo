@@ -183,6 +183,19 @@ lr_strv_dup(gchar **array);
 gboolean
 lr_is_local_path(const gchar *path);
 
+/** Re-implementatio of g_key_file_save_to_file,
+ * because the function is available since 2.40 but we need
+ * to support older glib
+ * @param key_file  key file
+ * @param filename  filename
+ * @param error     GError **
+ * @return          TRUE if successful, FALSE otherwise
+ */
+gboolean
+lr_key_file_save_to_file(GKeyFile *key_file,
+                         const gchar *filename,
+                         GError **error);
+
 /** @} */
 
 G_END_DECLS
