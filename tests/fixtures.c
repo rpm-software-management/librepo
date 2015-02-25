@@ -43,7 +43,7 @@ lr_assert_strv_eq(const gchar * const *strv, ...)
     va_list args;
     ck_assert_msg(strv, "NULL isn't strv");
     va_start (args, strv);
-    gchar **strv_p = strv;
+    gchar **strv_p = (gchar **) strv;
     for (; *strv_p; strv_p++) {
         gchar *s = va_arg (args, gchar*);
         ck_assert_msg(s, "Lengths of lists are not the same");
