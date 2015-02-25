@@ -55,3 +55,10 @@ lr_assert_strv_eq(const gchar * const *strv, ...)
 
     va_end (args);
 }
+
+void
+lr_assert_msg(int exp)
+{
+    if (!exp)
+        ck_abort();
+}
