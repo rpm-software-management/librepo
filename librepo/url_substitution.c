@@ -81,6 +81,8 @@ lr_urlvars_set(LrUrlVars *list, const char *var, const char *value)
 void
 lr_urlvars_free(LrUrlVars *list)
 {
+    if (!list)
+        return;
     for (LrUrlVars *elem = list; elem; elem = g_slist_next(elem))
         lr_var_free(elem->data);
     g_slist_free(list);

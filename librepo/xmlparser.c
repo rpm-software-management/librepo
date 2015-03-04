@@ -43,6 +43,8 @@ lr_xml_parser_data_new(unsigned int numstates)
 void
 lr_xml_parser_data_free(LrParserData *pd)
 {
+    if (!pd)
+        return;
     g_free(pd->content);
     g_free(pd->swtab);
     g_free(pd->sbtab);

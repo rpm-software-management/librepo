@@ -169,6 +169,8 @@ lr_packagetarget_reset(LrPackageTarget *target)
 void
 lr_packagetarget_free(LrPackageTarget *target)
 {
+    if (!target)
+        return;
     g_string_chunk_free(target->chunk);
     g_free(target);
 }
