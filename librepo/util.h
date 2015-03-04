@@ -103,7 +103,7 @@ char *lr_gettmpdir();
  * @param ...           NULL terminated list of strings.
  * @return              Concatenated path.
  */
-char *lr_pathconcat(const char *str, ...);
+char *lr_pathconcat(const char *str, ...) G_GNUC_NULL_TERMINATED;
 
 /** Recursively remove directory.
  * @param path          Path to the directory.
