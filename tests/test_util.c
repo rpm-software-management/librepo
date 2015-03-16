@@ -62,7 +62,7 @@ START_TEST(test_pathconcat)
 {
     char *path = NULL;
 
-    path = lr_pathconcat(NULL);
+    path = lr_pathconcat(NULL, NULL);
     fail_if(path != NULL);
 
     path = lr_pathconcat("", NULL);
