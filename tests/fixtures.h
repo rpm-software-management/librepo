@@ -19,10 +19,11 @@ test_log_handler_cb(const gchar *log_domain, GLogLevelFlags log_level,
 void
 lr_assert_strv_eq(const gchar * const *strv, ...);
 
-
-#if (CHECK_MAJOR_VERSION == 0) && (CHECK_MINOR_VERSION == 9) && (CHECK_MICRO_VERSION <= 9)
-#define ck_assert_msg(exp, ...) lr_assert_msg((int) (exp))
-void lr_assert_msg(int exp);
+/* Old versions of check.h don't have this, just use g_assert() and drop
+   the message
+*/
+#ifndef ck_assert_msg
+#define ck_assert_msg(exp, ...) g_assert (exp)
 #endif
 
 #endif /* FIXTURES_H */

@@ -41,12 +41,12 @@ void
 lr_assert_strv_eq(const gchar * const *strv, ...)
 {
     va_list args;
-    ck_assert_msg(strv, "NULL isn't strv");
+    ck_assert_msg(strv != NULL, "NULL isn't strv");
     va_start (args, strv);
     gchar **strv_p = (gchar **) strv;
     for (; *strv_p; strv_p++) {
         gchar *s = va_arg (args, gchar*);
-        ck_assert_msg(s, "Lengths of lists are not the same");
+        ck_assert_msg(s != NULL, "Lengths of lists are not the same");
         ck_assert_str_eq(*strv_p, s);
     }
 
@@ -54,11 +54,4 @@ lr_assert_strv_eq(const gchar * const *strv, ...)
                   "Lengths of lists are not the same");
 
     va_end (args);
-}
-
-void
-lr_assert_msg(int exp)
-{
-    if (!exp)
-        ck_abort();
 }

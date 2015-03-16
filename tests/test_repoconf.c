@@ -24,7 +24,7 @@ repoconf_assert_true(LrYumRepoConf *repoconf,
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
-    ck_assert_msg(ptr, "Not a True value (Option %d)", option);
+    ck_assert_msg(ptr != NULL, "Not a True value (Option %d)", option);
 }
 
 #define conf_assert_true(option) \
@@ -154,13 +154,13 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
     ck_assert_msg(ret, "Getinfo failed for %d: %s", option, tmp_err->message);
     fail_if(tmp_err);
 
-    ck_assert_msg(strv, "NULL isn't strv");
+    ck_assert_msg(strv != NULL, "NULL isn't strv");
 
     va_start (args, option);
     gchar **strv_p = strv;
     for (; *strv_p; strv_p++) {
         gchar *s = va_arg (args, gchar*);
-        ck_assert_msg(s, "Lengths of lists are not the same");
+        ck_assert_msg(s != NULL, "Lengths of lists are not the same");
         ck_assert_str_eq(*strv_p, s);
     }
 
@@ -513,7 +513,7 @@ START_TEST(test_write_repoconf)
     // Check if the repoconf with the section was created
     repos = lr_yum_repoconfs_get_list(confs, &tmp_err);
     ck_assert_msg(!tmp_err, tmp_err->message);
-    ck_assert_msg(repos, "No repo has been created");
+    ck_assert_msg(repos != NULL, "No repo has been created");
     conf = g_slist_nth_data(repos, 0);
 
     // Ty to set and get options
