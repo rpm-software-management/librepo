@@ -126,6 +126,9 @@ lr_handle_free(LrHandle *handle)
     lr_free(handle->used_mirror);
     lr_free(handle->destdir);
     lr_free(handle->useragent);
+    lr_free(handle->sslclientcert);
+    lr_free(handle->sslclientkey);
+    lr_free(handle->sslcacert);
     lr_lrmirrorlist_free(handle->internal_mirrorlist);
     lr_lrmirrorlist_free(handle->urls_mirrors);
     lr_lrmirrorlist_free(handle->mirrorlist_mirrors);
@@ -584,6 +587,27 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_SSLVERIFYHOST:
         handle->sslverifyhost = va_arg(arg, long) ? 2 : 0;
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifyhost);
+        break;
+
+    case LRO_SSLCLIENTCERT:
+        if (handle->sslclientcert)
+            lr_free(handle->sslclientcert);
+        handle->sslclientcert = g_strdup(va_arg(arg, char *));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_SSLCERT, handle->sslclientcert);
+        break;
+
+    case LRO_SSLCLIENTKEY:
+        if (handle->sslclientkey)
+            lr_free(handle->sslclientkey);
+        handle->sslclientkey = g_strdup(va_arg(arg, char *));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_SSLKEY, handle->sslclientkey);
+        break;
+
+    case LRO_SSLCACERT:
+        if (handle->sslcacert)
+            lr_free(handle->sslcacert);
+        handle->sslcacert = g_strdup(va_arg(arg, char *));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_CAINFO, handle->sslcacert);
         break;
 
     case LRO_IPRESOLVE: {
@@ -1353,6 +1377,21 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_SSLVERIFYHOST:
         lnum = va_arg(arg, long *);
         *lnum = (long) (handle->sslverifyhost ? 1 : 0);
+        break;
+
+    case LRI_SSLCLIENTCERT:
+        str = va_arg(arg, char **);
+        *str = handle->sslclientcert;
+        break;
+
+    case LRI_SSLCLIENTKEY:
+        str = va_arg(arg, char **);
+        *str = handle->sslclientkey;
+        break;
+
+    case LRI_SSLCACERT:
+        str = va_arg(arg, char **);
+        *str = handle->sslcacert;
         break;
 
     case LRI_IPRESOLVE: {

@@ -50,6 +50,9 @@ START_TEST(test_handle)
     fail_if(!lr_handle_setopt(h, NULL, LRO_VARSUB, vars));
     fail_if(!lr_handle_setopt(h, NULL, LRO_FASTESTMIRRORCACHE,
                               "/var/cache/fastestmirror.librepo"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCLIENTCERT, "/etc/cert.pem"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCLIENTKEY, "/etc/cert.key"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCACERT, "/etc/ca.pem"));
     lr_handle_free(h);
 }
 END_TEST
@@ -117,6 +120,18 @@ START_TEST(test_handle_getinfo)
     num = -1;
     fail_if(!lr_handle_getinfo(h, NULL, LRI_FASTESTMIRRORMAXAGE, &num));
     fail_if(num != LRO_FASTESTMIRRORMAXAGE_DEFAULT);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_SSLCLIENTCERT, &str));
+    fail_if(str != NULL);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_SSLCLIENTKEY, &str));
+    fail_if(str != NULL);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_SSLCACERT, &str));
+    fail_if(str != NULL);
 
     lr_handle_free(h);
 }
