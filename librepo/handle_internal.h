@@ -168,6 +168,15 @@ struct _LrHandle {
         Determines whether the server name should be checked agains the name
         in the certificate */
 
+    char *sslclientcert; /*!<
+        Client certificate filename. */
+
+    char *sslclientkey; /*!<
+        Client certificate key. */
+
+    char *sslcacert; /*!<
+        CA certificate path. */
+
     LrIpResolveType ipresolve; /*!<
         What kind of IP addresses to use when resolving host names. */
 

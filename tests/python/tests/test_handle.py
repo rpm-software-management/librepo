@@ -152,6 +152,30 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_SSLVERIFYHOST, None)
         self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYHOST))
 
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTCERT), None)
+        h.setopt(librepo.LRO_SSLCLIENTCERT, "/etc/cert.pem")
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTCERT), "/etc/cert.pem")
+        h.setopt(librepo.LRO_SSLCLIENTCERT, "")
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTCERT), "")
+        h.setopt(librepo.LRO_SSLCLIENTCERT, None)
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTCERT), None)
+
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTKEY), None)
+        h.setopt(librepo.LRO_SSLCLIENTKEY, "/etc/cert.key")
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTKEY), "/etc/cert.key")
+        h.setopt(librepo.LRO_SSLCLIENTKEY, "")
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTKEY), "")
+        h.setopt(librepo.LRO_SSLCLIENTKEY, None)
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCLIENTKEY), None)
+
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCACERT), None)
+        h.setopt(librepo.LRO_SSLCACERT, "/etc/ca.pem")
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCACERT), "/etc/ca.pem")
+        h.setopt(librepo.LRO_SSLCACERT, "")
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCACERT), "")
+        h.setopt(librepo.LRO_SSLCACERT, None)
+        self.assertEqual(h.getinfo(librepo.LRI_SSLCACERT), None)
+
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_WHATEVER)
         h.setopt(librepo.LRO_IPRESOLVE, librepo.IPRESOLVE_V6)
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_V6)
@@ -432,6 +456,12 @@ class TestCaseHandle(unittest.TestCase):
         h.sslverifypeer = None
         h.setopt(librepo.LRO_SSLVERIFYHOST, None)
         h.sslverifyhost = None
+        h.setopt(librepo.LRO_SSLCLIENTCERT, None)
+        h.sslclientcert = None
+        h.setopt(librepo.LRO_SSLCLIENTKEY, None)
+        h.sslclientkey = None
+        h.setopt(librepo.LRO_SSLCACERT, None)
+        h.sslcacert = None
 
         h.setopt(librepo.LRO_IPRESOLVE, None)
         h.ipresolve = None

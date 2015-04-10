@@ -306,6 +306,9 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_USERAGENT:
     case LRO_FASTESTMIRRORCACHE:
     case LRO_GNUPGHOMEDIR:
+    case LRO_SSLCLIENTCERT:
+    case LRO_SSLCLIENTKEY:
+    case LRO_SSLCACERT:
     {
         char *str = NULL, *alloced = NULL;
 
@@ -870,6 +873,9 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_USERAGENT:
     case LRI_FASTESTMIRRORCACHE:
     case LRI_GNUPGHOMEDIR:
+    case LRI_SSLCLIENTCERT:
+    case LRI_SSLCLIENTKEY:
+    case LRI_SSLCACERT:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

@@ -314,6 +314,19 @@ typedef enum {
         Remote mirrorlists/metalinks (if they are specified) are ignored.
         Fastest mirror check (if enabled) is skiped. */
 
+    LRO_SSLCLIENTCERT, /*!< (char *)
+        Path to the PEM format SSL client certificate librepo should use
+        when talking to the server. */
+
+    LRO_SSLCLIENTKEY, /*!< (char *)
+        Path to the PEM format SSL client key librepo should use when
+        talking to the server, if not included in the client certificate
+        file. */
+
+    LRO_SSLCACERT, /*!< (char *)
+        Path to a file containing the list of PEM format trusted CA
+        certificates. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -372,6 +385,9 @@ typedef enum {
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
     LRI_OFFLINE,                /*!< (long *) */
+    LRI_SSLCLIENTCERT,          /*!< (char **) */
+    LRI_SSLCLIENTKEY,           /*!< (char **) */
+    LRI_SSLCACERT,              /*!< (char **) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

@@ -290,6 +290,21 @@ Version contants
     *Boolean*. This option determines whether librepo verifies that
     the server cert is for the server it is known as.
 
+.. data:: LRO_SSLCLIENTCERT
+
+    *String or None*. Path to the PEM format SSL client certificate to use
+    when talking to the server.
+
+.. data:: LRO_SSLCLIENTKEY
+
+    *String or None*. Path to the PEM format SSL client key to use when
+    talking to the server.
+
+.. data:: LRO_SSLCACERT
+
+    *String or None*. Path to a file containing the list of PEM format
+    trusted CA certificates.
+
 .. data:: LRO_IPRESOLVE
 
     *Integer or None* Sets kind of IP addresses to use when resolving host
@@ -377,6 +392,9 @@ Version contants
 .. data:: LRI_HMFCB
 .. data:: LRI_SSLVERIFYPEER
 .. data:: LRI_SSLVERIFYHOST
+.. data:: LRI_SSLCLIENTCERT
+.. data:: LRI_SSLCLIENTKEY
+.. data:: LRI_SSLCACERT
 .. data:: LRI_IPRESOLVE
 .. data:: LRI_ALLOWEDMIRRORFAILURES
 .. data:: LRI_ADAPTIVEMIRRORSORTING
@@ -1096,6 +1114,18 @@ class Handle(_librepo.Handle):
     .. attribute:: sslverifyhost:
 
         See :data:`.LRO_SSLVERIFYHOST`
+
+    .. attribute:: sslclientcert:
+
+        See :data:`.LRO_SSLCLIENTCERT`
+
+    .. attribute:: sslclientkey:
+
+        See :data:`.LRO_SSLCLIENTKEY`
+
+    .. attribute:: sslcacert:
+
+        See :data:`.LRO_SSLCACERT`
 
     .. attribute:: ipresolve:
 
