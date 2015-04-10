@@ -17,9 +17,10 @@ if __name__ == "__main__":
     # public key, private key, and root certificates.
     h.setopt(librepo.LRO_SSLCLIENTCERT, "/etc/pki/client.pem")
 
-    # In case the .pem just contains the public key,
-    # you should set the private key and certificate authority
+    # In case the .pem just contains the public key, set the private key
     h.setopt(librepo.LRO_SSLCLIENTKEY, "/etc/client.key")
+
+    # Set the certificate authority
     h.setopt(librepo.LRO_SSLCACERT, "/etc/ca.pem")
 
     h.progressdata = "i2c-tools-eepromer"
