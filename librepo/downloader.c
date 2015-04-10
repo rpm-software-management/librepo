@@ -519,7 +519,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     cur_written = fwrite(ptr, size, nmemb, target->f);
     if (cur_written != nmemb) {
         g_debug("%s: Error while writting out file: %s",
-                __func__, strerror(errno));
+                __func__, g_strerror(errno));
         return 0; // There was an error
     }
 
@@ -793,7 +793,7 @@ add_librepo_xattr(int fd, const gchar *fn)
     int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "", 1, 0);
     if (attr_ret == -1) {
         g_debug("%s: Cannot set xattr %s (%s): %s",
-                __func__, XATTR_LIBREPO, dst, strerror(errno));
+                __func__, XATTR_LIBREPO, dst, g_strerror(errno));
     }
 }
 
@@ -806,7 +806,7 @@ has_librepo_xattr(int fd)
     ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0);
     if (attr_ret == -1) {
         //g_debug("%s: Cannot get xattr %s: %s",
-        //        __func__, XATTR_LIBREPO, strerror(errno));
+        //        __func__, XATTR_LIBREPO, g_strerror(errno));
         return FALSE;
     }
     return TRUE;
@@ -898,7 +898,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if (fd == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "dup(%d) failed: %s",
-                        target->target->fd, strerror(errno));
+                        target->target->fd, g_strerror(errno));
             curl_easy_cleanup(h);
             return FALSE;
         }
@@ -912,7 +912,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if (fd < 0) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "Cannot open %s: %s",
-                        target->target->fn, strerror(errno));
+                        target->target->fn, g_strerror(errno));
             curl_easy_cleanup(h);
             return FALSE;
         }
@@ -922,7 +922,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     if (!f) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                     "fdopen(%d) failed: %s",
-                    fd, strerror(errno));
+                    fd, g_strerror(errno));
         curl_easy_cleanup(h);
         return FALSE;
     }
@@ -939,7 +939,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 "being downloaded by Librepo", __func__);
         if (ftruncate(fd, 0) == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                        "ftruncate() failed: %s", strerror(errno));
+                        "ftruncate() failed: %s", g_strerror(errno));
             return FALSE;
         }
     }
@@ -1360,7 +1360,7 @@ truncate_transfer_file(LrTarget *target, GError **err)
 
     if (rc == -1) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                    "ftruncate() failed: %s", strerror(errno));
+                    "ftruncate() failed: %s", g_strerror(errno));
         return FALSE;
     }
 
@@ -1368,7 +1368,7 @@ truncate_transfer_file(LrTarget *target, GError **err)
         // In case fd is used, seek to the original offset
         if (lseek(target->target->fd, original_offset, SEEK_SET) == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                        "lseek() failed: %s", strerror(errno));
+                        "lseek() failed: %s", g_strerror(errno));
             return FALSE;
         }
     }
@@ -1805,7 +1805,7 @@ lr_perform(LrDownload *dd, GError **err)
                 //goto retry;
             } else {
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_SELECT,
-                            "select() error: %s", strerror(errno));
+                            "select() error: %s", g_strerror(errno));
                 return FALSE;
             }
         }
@@ -2026,7 +2026,7 @@ lr_download_cleanup:
                     // We can remove only files that were specified by fn
                     if (unlink(target->target->fn) != 0) {
                         g_debug("%s: Error while removing: %s",
-                                __func__, strerror(errno));
+                                __func__, g_strerror(errno));
                     }
                 }
             }

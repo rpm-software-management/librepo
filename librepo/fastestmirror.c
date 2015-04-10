@@ -258,7 +258,7 @@ lr_fastestmirrorcache_write(LrFastestMirrorCache *cache, GError **err)
     FILE *f = fopen(cache->path, "w");
     if (!f) {
         g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_IO,
-                    "Cannot open %s: %s", cache->path, strerror(errno));
+                    "Cannot open %s: %s", cache->path, g_strerror(errno));
         return FALSE;
     }
 
@@ -476,7 +476,7 @@ lr_fastestmirror_perform(GSList *list,
                 g_debug("%s: select() interrupted by signal", __func__);
             } else {
                 g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_SELECT,
-                            "select() error: %s", strerror(errno));
+                            "select() error: %s", g_strerror(errno));
                 return FALSE;
             }
         }

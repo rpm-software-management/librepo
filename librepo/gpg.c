@@ -179,20 +179,20 @@ lr_gpg_check_signature(const char *signature_fn,
     signature_fd = open(signature_fn, O_RDONLY);
     if (signature_fd == -1) {
         g_debug("%s: Opening signature %s: %s",
-                __func__, signature_fn, strerror(errno));
+                __func__, signature_fn, g_strerror(errno));
         g_set_error(err, LR_GPG_ERROR, LRE_IO,
                     "Error while opening signature %s: %s",
-                    signature_fn, strerror(errno));
+                    signature_fn, g_strerror(errno));
         return FALSE;
     }
 
     data_fd = open(data_fn, O_RDONLY);
     if (data_fd == -1) {
         g_debug("%s: Opening data %s: %s",
-                __func__, data_fn, strerror(errno));
+                __func__, data_fn, g_strerror(errno));
         g_set_error(err, LR_GPG_ERROR, LRE_IO,
                     "Error while opening %s: %s",
-                    data_fn, strerror(errno));
+                    data_fn, g_strerror(errno));
         close(signature_fd);
         return FALSE;
     }
@@ -263,10 +263,10 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
 
     key_fd = open(key_fn, O_RDONLY);
     if (key_fd == -1) {
-        g_debug("%s: Opening key: %s", __func__, strerror(errno));
+        g_debug("%s: Opening key: %s", __func__, g_strerror(errno));
         g_set_error(err, LR_GPG_ERROR, LRE_IO,
                     "Error while opening key %s: %s",
-                    key_fn, strerror(errno));
+                    key_fn, g_strerror(errno));
         gpgme_release(context);
         return FALSE;
     }

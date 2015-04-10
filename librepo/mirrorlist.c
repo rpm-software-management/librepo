@@ -63,15 +63,15 @@ lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
     fd_dup = dup(fd);
     if (fd_dup == -1) {
         g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
-                    "dup(%d) error: %s", fd, strerror(errno));
+                    "dup(%d) error: %s", fd, g_strerror(errno));
         return FALSE;
     }
 
     f = fdopen(fd_dup, "r");
     if (!f) {
-        g_debug("%s: Cannot fdopen(mirrorlist_fd): %s", __func__, strerror(errno));
+        g_debug("%s: Cannot fdopen(mirrorlist_fd): %s", __func__, g_strerror(errno));
         g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
-                    "fdopen(%d, \"r\") error: %s", fd_dup, strerror(errno));
+                    "fdopen(%d, \"r\") error: %s", fd_dup, g_strerror(errno));
         return FALSE;
     }
 

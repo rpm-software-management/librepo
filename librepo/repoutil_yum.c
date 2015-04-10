@@ -92,7 +92,7 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
 
     if (stat(in_path, &st) != 0) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
-                    "stat(%s,) error: %s", in_path, strerror(errno));
+                    "stat(%s,) error: %s", in_path, g_strerror(errno));
         return FALSE;
     }
 
@@ -104,7 +104,7 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
     fd = open(path, O_RDONLY);
     if (fd < 0) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
-                    "open(%s, O_RDONLY) error: %s", path, strerror(errno));
+                    "open(%s, O_RDONLY) error: %s", path, g_strerror(errno));
         lr_free(path);
         return FALSE;
     }

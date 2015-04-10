@@ -339,9 +339,9 @@ lr_yum_download_repo(LrHandle *handle,
         fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0666);
         if (fd < 0) {
             g_debug("%s: Cannot create/open %s (%s)",
-                    __func__, path, strerror(errno));
+                    __func__, path, g_strerror(errno));
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                        "Cannot create/open %s: %s", path, strerror(errno));
+                        "Cannot create/open %s: %s", path, g_strerror(errno));
             lr_free(path);
             g_slist_free_full(targets, (GDestroyNotify) lr_downloadtarget_free);
             return FALSE;
@@ -486,7 +486,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
     if (fd < 0) {
         g_debug("%s: Cannot open %s", __func__, path);
         g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                    "Cannot open %s: %s", path, strerror(errno));
+                    "Cannot open %s: %s", path, g_strerror(errno));
         return FALSE;
     }
 
@@ -584,9 +584,9 @@ lr_yum_use_local_load_base(LrHandle *handle,
     path = lr_pathconcat(baseurl, "repodata/repomd.xml", NULL);
     fd = open(path, O_RDONLY);
     if (fd < 0) {
-        g_debug("%s: open(%s): %s", __func__, path, strerror(errno));
+        g_debug("%s: open(%s): %s", __func__, path, g_strerror(errno));
         g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                    "Cannot open %s: %s", path, strerror(errno));
+                    "Cannot open %s: %s", path, g_strerror(errno));
         return FALSE;
     }
 
@@ -744,10 +744,10 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
         rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
         if (rc == -1) {
             g_debug("%s: Cannot create dir: %s (%s)",
-                    __func__, path_to_repodata, strerror(errno));
+                    __func__, path_to_repodata, g_strerror(errno));
             g_set_error(err, LR_YUM_ERROR, LRE_CANNOTCREATEDIR,
                         "Cannot create directory: %s: %s",
-                        path_to_repodata, strerror(errno));
+                        path_to_repodata, g_strerror(errno));
             lr_free(path_to_repodata);
             return FALSE;
         }
@@ -765,7 +765,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             if (fd < 0) {
                 g_debug("%s: Cannot create: %s", __func__, ml_file_path);
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                        "Cannot create %s: %s", ml_file_path, strerror(errno));
+                        "Cannot create %s: %s", ml_file_path, g_strerror(errno));
                 lr_free(ml_file_path);
                 return FALSE;
             }
@@ -775,7 +775,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                 g_debug("%s: Cannot copy content of mirrorlist file", __func__);
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot copy content of mirrorlist file %s: %s",
-                        ml_file_path, strerror(errno));
+                        ml_file_path, g_strerror(errno));
                 lr_free(ml_file_path);
                 return FALSE;
             }
@@ -789,7 +789,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             if (fd < 0) {
                 g_debug("%s: Cannot create: %s", __func__, ml_file_path);
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                        "Cannot create %s: %s", ml_file_path, strerror(errno));
+                        "Cannot create %s: %s", ml_file_path, g_strerror(errno));
                 lr_free(ml_file_path);
                 return FALSE;
             }
@@ -799,7 +799,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                 g_debug("%s: Cannot copy content of metalink file", __func__);
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot copy content of metalink file %s: %s",
-                        ml_file_path, strerror(errno));
+                        ml_file_path, g_strerror(errno));
                 lr_free(ml_file_path);
                 return FALSE;
             }
@@ -811,7 +811,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
         fd = open(path, O_CREAT|O_TRUNC|O_RDWR, 0666);
         if (fd == -1) {
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                        "Cannot open %s: %s", path, strerror(errno));
+                        "Cannot open %s: %s", path, g_strerror(errno));
             lr_free(path);
             return FALSE;
         }
@@ -842,7 +842,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             if (fd_sig == -1) {
                 g_debug("%s: Cannot open: %s", __func__, signature);
                 g_set_error(err, LR_YUM_ERROR, LRE_IO,
-                            "Cannot open %s: %s", signature, strerror(errno));
+                            "Cannot open %s: %s", signature, g_strerror(errno));
                 close(fd);
                 lr_free(path);
                 lr_free(signature);

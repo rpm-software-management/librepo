@@ -280,7 +280,7 @@ lr_download_packages(GSList *targets,
             if (stat(packagetarget->local_path, &buf)) {
                 g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
                         "Cannot stat %s: %s", packagetarget->local_path,
-                        strerror(errno));
+                        g_strerror(errno));
                 return FALSE;
             }
 

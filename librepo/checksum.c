@@ -147,7 +147,7 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
     if (lseek(fd, 0, SEEK_SET) == -1) {
         g_set_error(err, LR_CHECKSUM_ERROR, LRE_IO,
                     "Cannot seek to the begin of the file. "
-                    "lseek(%d, 0, SEEK_SET) error: %s", fd, strerror(errno));
+                    "lseek(%d, 0, SEEK_SET) error: %s", fd, g_strerror(errno));
         return NULL;
     }
 
@@ -161,7 +161,7 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
     if (readed == -1) {
         EVP_MD_CTX_destroy(ctx);
         g_set_error(err, LR_CHECKSUM_ERROR, LRE_IO,
-                    "read(%d) failed: %s", fd, strerror(errno));
+                    "read(%d) failed: %s", fd, g_strerror(errno));
         return NULL;
     }
 

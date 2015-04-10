@@ -708,10 +708,10 @@ lr_handle_prepare_urls(LrHandle *handle, GError **err)
                 // Base URL is relative path
                 char *resolved_path = realpath(url, NULL);
                 if (!resolved_path) {
-                    g_debug("%s: realpath: %s", __func__, strerror(errno));
+                    g_debug("%s: realpath: %s", __func__, g_strerror(errno));
                     g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
                                 "realpath(%s) error: %s",
-                                url, strerror(errno));
+                                url, g_strerror(errno));
                     return FALSE;
                 }
                 final_url = g_strconcat("file://", resolved_path, NULL);
@@ -755,7 +755,7 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
             if (fd < 0) {
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                             "Cannot open %s: %s",
-                            path, strerror(errno));
+                            path, g_strerror(errno));
                 g_free(path);
                 return FALSE;
             }
@@ -797,10 +797,10 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         if (lseek(fd, 0, SEEK_SET) != 0) {
-            g_debug("%s: Seek error: %s", __func__, strerror(errno));
+            g_debug("%s: Seek error: %s", __func__, g_strerror(errno));
             g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                         "lseek(%d, 0, SEEK_SET) error: %s",
-                        fd, strerror(errno));
+                        fd, g_strerror(errno));
             close(fd);
             return FALSE;
         }
@@ -871,7 +871,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
             if (fd < 0) {
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                             "Cannot open %s: %s",
-                            path, strerror(errno));
+                            path, g_strerror(errno));
                 g_free(path);
                 return FALSE;
             }
@@ -913,10 +913,10 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         if (lseek(fd, 0, SEEK_SET) != 0) {
-            g_debug("%s: Seek error: %s", __func__, strerror(errno));
+            g_debug("%s: Seek error: %s", __func__, g_strerror(errno));
             g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                         "lseek(%d, 0, SEEK_SET) error: %s",
-                        fd, strerror(errno));
+                        fd, g_strerror(errno));
             close(fd);
             return FALSE;
         }
@@ -1127,7 +1127,7 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         handle->destdir = g_strdup(TMP_DIR_TEMPLATE);
         if (!mkdtemp(handle->destdir)) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_CANNOTCREATETMP,
-                        "Cannot create tmpdir: %s", strerror(errno));
+                        "Cannot create tmpdir: %s", g_strerror(errno));
             return FALSE;
         }
     }
