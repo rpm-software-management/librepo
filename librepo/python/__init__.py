@@ -256,10 +256,18 @@ Version contants
     all metadata files will be downloaded. If *val* is ``[]`` or ``[None]``
     only ``repomd.xml`` will be downloaded.
 
+.. data:: LRO_RPMMDDLIST
+
+    See LRO_YUMDLIST
+
 .. data:: LRO_YUMBLIST
 
     *List of strings*. Set blacklist of yum metadata files.
     This files will not be downloaded.
+
+.. data:: LRO_RPMMDBLIST
+
+    See LRO_YUMBLIST
 
 .. data:: LRO_HMFCB
 
@@ -355,7 +363,9 @@ Version contants
 .. data:: LRI_REPOTYPE
 .. data:: LRI_USERAGENT
 .. data:: LRI_YUMDLIST
+.. data:: LRI_RPMMDDLIST
 .. data:: LRI_YUMBLIST
+.. data:: LRI_RPMMDBLIST
 .. data:: LRI_FETCHMIRRORS
 .. data:: LRI_MAXMIRRORTRIES
 .. data:: LRI_VARSUB
@@ -410,9 +420,13 @@ Supported IP resolving
 Repo type constants
 -------------------
 
+.. data:: RPMMDREPO (LR_RPMMDREPO)
+
+    Classical repository in repo-md format with ``repodata/`` directory.
+
 .. data:: YUMREPO (LR_YUMREPO)
 
-    Classical yum repository with ``repodata/`` directory.
+    See RPMMDREPO
 
 .. data:: SUSEREPO (LR_SUSEREPO)
 
@@ -431,23 +445,23 @@ Repo type constants
 Predefined yumdlist lists
 -------------------------
 
-.. data:: YUM_FULL (LR_YUM_FULL)
+.. data:: RPMMD_FULL (YUM_FULL, LR_YUM_FULL)
 
     Download all repodata files
 
-.. data:: YUM_REPOMDONLY (LR_YUM_REPOMDONLY)
+.. data:: RPMMD_REPOMDONLY (YUM_REPOMDONLY, LR_YUM_REPOMDONLY)
 
     Download only repomd.xml file
 
-.. data:: YUM_BASEXML (LR_YUM_BASEXML)
+.. data:: RPMMD_BASEXML (YUM_BASEXML, LR_YUM_BASEXML)
 
     Download only primary.xml, filelists.xml and other.xml
 
-.. data:: YUM_BASEDB (LR_YUM_BASEDB)
+.. data:: RPMMD_BASEDB (YUM_BASEDB, LR_YUM_BASEDB)
 
     Download only primary, filelists and other databases.
 
-.. data:: YUM_HAWKEY (LR_YUM_HAWKEY)
+.. data:: RPMMD_HAWKEY (YUM_HAWKEY, LR_YUM_HAWKEY)
 
     Download only files used by Hawkey (https://github.com/akozumpl/hawkey/).
     (primary, filelists, prestodelta)
@@ -657,17 +671,17 @@ LibRepo Error codes.
 
 LibRepo Result options for use in :meth:`~.Result.getinfo` method.
 
-.. data:: LRR_YUM_REPO
+.. data:: LRR_RPMMD_REPO (LRR_YUM_REPO)
 
     Return a dict with local paths to downloaded/localised
     yum repository.
 
-.. data:: LRR_YUM_REPOMD
+.. data:: LRR_RPMMD_REPOMD (LRR_YUM_REPOMD)
 
     Return a dict representing a repomd.xml file of downloaded
     yum repository.
 
-.. data:: LRR_YUM_TIMESTAMP
+.. data:: LRR_RPMMD_TIMESTAMP (LRR_YUM_TIMESTAMP)
 
     Return the highest timestamp from all records in the repomd.
     See: http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f
@@ -845,11 +859,11 @@ for attr in dir(_librepo):
         _CHECKSUM_STR_TO_VAL_MAP[attr[12:].lower()] = val
 
 
-YUM_FULL        = LR_YUM_FULL         = None
-YUM_REPOMDONLY  = LR_YUM_REPOMDONLY   = [None]
-YUM_BASEXML     = LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
-YUM_BASEDB      = LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
-YUM_HAWKEY      = LR_YUM_HAWKEY       = ["primary", "filelists", "prestodelta", None]
+RPMMD_FULL      = YUM_FULL        = LR_YUM_FULL         = None
+RPMMD_REPOMDONLY= YUM_REPOMDONLY  = LR_YUM_REPOMDONLY   = [None]
+RPMMD_BASEXML   = YUM_BASEXML     = LR_YUM_BASEXML      = ["primary", "filelists", "other", None]
+RPMMD_BASEDB    = YUM_BASEDB      = LR_YUM_BASEDB       = ["primary_db", "filelists_db", "other_db", None]
+RPMMD_HAWKEY    = YUM_HAWKEY      = LR_YUM_HAWKEY       = ["primary", "filelists", "prestodelta", None]
 
 
 def checksum_str_to_type(name):
@@ -1055,9 +1069,17 @@ class Handle(_librepo.Handle):
 
         See: :data:`.LRO_CHECKSUM`
 
+    .. attribute:: rpmmddlist:
+
+        See: :data:`.LRO_RPMMDDLIST`
+
     .. attribute:: yumdlist:
 
         See: :data:`.LRO_YUMDLIST`
+
+    .. attribute:: rpmmdblist:
+
+        See: :data:`.LRO_RPMMDBLIST`
 
     .. attribute:: yumblist:
 
@@ -1233,13 +1255,25 @@ class Result(_librepo.Result):
 
     **Attributes:**
 
+    .. attribute:: rpmmd_repo
+
+        See: :data:`.LRR_RPMMD_REPO`
+
     .. attribute:: yum_repo
 
         See: :data:`.LRR_YUM_REPO`
 
+    .. attribute:: rpmmd_repomd
+
+        See: :data:`.LRR_RPMMD_REPOMD`
+
     .. attribute:: yum_repomd
 
         See: :data:`.LRR_YUM_REPOMD`
+
+    .. attribute:: rpmmd_timestamp
+
+        See: :data:`.LRR_RPMMD_TIMESTAMP`
 
     .. attribute:: yum_timestamp
 

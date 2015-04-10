@@ -126,7 +126,7 @@ Checksum verification
     if __name__ == "__main__":
         h = librepo.Handle()
         r = librepo.Result()
-        # Yum metadata
+        # Repository with repodata in the rpm-md format
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         # Path to the metadata
         h.setopt(librepo.LRO_URLS, [METADATA_PATH])

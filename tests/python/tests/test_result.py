@@ -13,6 +13,10 @@ class TestCaseResult(unittest.TestCase):
         self.assertFalse(r.getinfo(librepo.LRR_YUM_REPOMD))
         self.assertRaises(LibrepoException, r.getinfo, librepo.LRR_YUM_TIMESTAMP)
 
+        self.assertFalse(r.getinfo(librepo.LRR_RPMMD_REPO))
+        self.assertFalse(r.getinfo(librepo.LRR_RPMMD_REPOMD))
+        self.assertRaises(LibrepoException, r.getinfo, librepo.LRR_RPMMD_TIMESTAMP)
+
     def test_result_attrs(self):
         r = librepo.Result()
         self.assertTrue(r)
@@ -25,3 +29,6 @@ class TestCaseResult(unittest.TestCase):
         self.assertFalse(r.yum_repo)
         self.assertFalse(r.yum_repomd)
         self.assertRaises(LibrepoException, getattr, r, 'yum_timestamp')
+
+        self.assertFalse(r.rpmmd_repo)
+        self.assertFalse(r.rpmmd_repomd)

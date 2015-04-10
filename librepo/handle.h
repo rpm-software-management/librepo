@@ -252,9 +252,13 @@ typedef enum {
         "filelists", NULL]).
         Note: Last element of the list must be NULL! */
 
+    LRO_RPMMDDLIST = LRO_YUMDLIST,
+
     LRO_YUMBLIST,  /*!< (char ** NULL-terminated)
         Do not download this specified records from repomd (blacklist).
         Note: Last element of the list must be NULL! */
+
+    LRO_RPMMDBLIST = LRO_YUMBLIST,
 
     LRO_HMFCB, /*!< (LrHandleMirrorFailureCb)
         Handle specific mirror failure callaback.
@@ -332,9 +336,11 @@ typedef enum {
     LRI_YUMDLIST,               /*!< (char *** Malloced)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
+    LRI_RPMMDDLIST = LRI_YUMDLIST,
     LRI_YUMBLIST,               /*!< (char *** Malloced)
         NOTE: Returned list must be freed as well as all its items!
         You could use g_strfreev() function. */
+    LRI_RPMMDBLIST = LRI_YUMBLIST,
     LRI_FETCHMIRRORS,           /*!< (long *) */
     LRI_MAXMIRRORTRIES,         /*!< (long *) */
     LRI_VARSUB,                 /*!< (LrUrlVars **) */

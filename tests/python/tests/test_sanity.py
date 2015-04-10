@@ -14,7 +14,9 @@ class TestCaseSanity(unittest.TestCase):
         self.assertEqual(h.repotype, 0)
         self.assertEqual(h.useragent, None)
         self.assertEqual(h.yumdlist, None)
+        self.assertEqual(h.rpmmddlist, None)
         self.assertEqual(h.yumblist, None)
+        self.assertEqual(h.rpmmdblist, None)
         self.assertEqual(h.fetchmirrors, False)
         self.assertEqual(h.maxmirrortries, 0)
         self.assertEqual(h.varsub, None)
@@ -26,6 +28,8 @@ class TestCaseSanity(unittest.TestCase):
         r = librepo.Result()
         self.assertEqual(r.yum_repo, None)
         self.assertEqual(r.yum_repomd, None)
+        self.assertEqual(r.rpmmd_repo, None)
+        self.assertEqual(r.rpmmd_repomd, None)
 
     def test_raw_result_sanity(self):
         t = librepo.PackageTarget("foo")

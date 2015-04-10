@@ -43,6 +43,7 @@ typedef enum {
 /** Repo types flags. */
 typedef enum {
     LR_YUMREPO          = (1<<1),   /*!< Yum repository */
+    LR_RPMMDREPO        = LR_YUMREPO,
     LR_SUSEREPO         = (1<<2),   /*!< YaST2 repository - Not implemented yet */
     LR_DEBREPO          = (1<<3),   /*!< Debian repository - Not implemented yet */
 } LrRepotype;
@@ -68,20 +69,25 @@ typedef enum {
 
 /** Predefined value for LRO_YUMDLIST option - Download whole repo. */
 #define LR_YUM_FULL         NULL
+#define LR_RPMMD_FULL       NULL
 
 /** Predefined value for LRO_YUMDLIST option - Download only repomd.xml. */
 #define LR_YUM_REPOMDONLY   {NULL}
+#define LR_RPMMD_REPOMDONLY {NULL}
 
 /** Predefined value for LRO_YUMDLIST option - Download only base xml files. */
 #define LR_YUM_BASEXML      {"primary", "filelists", "other", NULL}
+#define LR_RPMMD_BASEXML    {"primary", "filelists", "other", NULL}
 
 /** Predefined value for LRO_YUMDLIST option - Download only base db files. */
 #define LR_YUM_BASEDB       {"primary_db", "filelists_db", "other_db", NULL}
+#define LR_RPMMD_BASEDB     {"primary_db", "filelists_db", "other_db", NULL}
 
 /** Predefined value for LRO_YUMDLIST option - Download only primary,
  * filelists and prestodelta.
  */
 #define LR_YUM_HAWKEY       {"primary", "filelists", "prestodelta", NULL}
+#define LR_RPMMD_HAWKEY     {"primary", "filelists", "prestodelta", NULL}
 
 typedef enum LrCbReturnCode_e {
     LR_CB_OK = 0,   /*!< All fine */
