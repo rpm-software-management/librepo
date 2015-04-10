@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 """
-Example: Localise metadata files of local yum repository
+Example: Localize metadata files of a local repository
 
 Use case:
-We have a local yum repositository and want to
-paths to all its metadata files.
+We have a local repositository in the rpm-md format
+and want to paths to all its metadata files.
 Repomd content is just a bonus.
 """
 
@@ -18,7 +18,7 @@ METADATA_PATH = "downloaded_metadata"
 if __name__ == "__main__":
     h = librepo.Handle()
     r = librepo.Result()
-    # Yum metadata
+    # Repository with repodata in the rpm-md format
     h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
     # Path to metadata
     h.setopt(librepo.LRO_URLS, [METADATA_PATH])

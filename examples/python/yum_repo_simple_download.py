@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Example: Simple download whole yum repository
+Example: Simple download whole repository
 
 This example uses more "pythonic" way of usage.
 Instead of use setopt() method it uses class properties.
@@ -22,7 +22,7 @@ DESTDIR = "downloaded_metadata"
 if __name__ == "__main__":
     h = librepo.Handle()
     r = librepo.Result()
-    # Set type of repo to Yum
+    # Repository with repodata in the rpm-md format
     h.repotype = librepo.LR_YUMREPO
     # Set metalink url
     h.mirrorlist = METALINK_URL

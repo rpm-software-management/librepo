@@ -14,7 +14,7 @@ Simple download of metadata
 ::
 
     """
-    Example: Simple download whole yum repository
+    Example: Simple download whole repository
 
     This example uses more "pythonic" way of usage.
     Instead of use setopt() method it uses class properties.
@@ -35,7 +35,7 @@ Simple download of metadata
     if __name__ == "__main__":
         h = librepo.Handle()
         r = librepo.Result()
-        # Set type of repo to Yum
+        # Repository with repodata in the rpm-md format
         h.repotype = librepo.LR_YUMREPO
         # Set metalink url
         h.mirrorlist = METALINK_URL
@@ -57,11 +57,11 @@ Metadata localisation
 ::
 
     """
-    Example: Localise metadata files of local yum repository
+    Example: Localize metadata files of a local repository
 
     Use case:
-    We have a local yum repositository and want to
-    paths to all its metadata files.
+    We have a local repositository in the rpm-md format
+    and want to paths to all its metadata files.
     Repomd content is just a bonus.
     """
 
@@ -74,7 +74,7 @@ Metadata localisation
     if __name__ == "__main__":
         h = librepo.Handle()
         r = librepo.Result()
-        # Yum metadata
+        # Repository with repodata in the rpm-md format
         h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
         # Path to metadata
         h.setopt(librepo.LRO_URLS, [METADATA_PATH])
@@ -108,10 +108,10 @@ Checksum verification
 ::
 
     """
-    Example: Verify checksum of local yum metadata
+    Example: Verify checksum of local metadata
 
     Use case:
-    We have some incomplete yum metadata localy.
+    We have some incomplete metadata localy.
     They are incomplete because they doesn't
     contain all files specified in repomd.xml.
     They contains only primary.xml and filelists.xml.

@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 """
-Example: Verify checksum of local yum metadata
+Example: Verify checksum of local metadata
 
 Use case:
-We have some incomplete yum metadata localy.
+We have some incomplete metadata localy.
 They are incomplete because they doesn't
 contain all files specified in repomd.xml.
 They contains only primary.xml and filelists.xml.
@@ -19,7 +19,7 @@ METADATA_PATH = "downloaded_metadata"
 if __name__ == "__main__":
     h = librepo.Handle()
     r = librepo.Result()
-    # Yum metadata
+    # Repository with repodata in the rpm-md format
     h.setopt(librepo.LRO_REPOTYPE, librepo.LR_YUMREPO)
     # Path to the metadata
     h.setopt(librepo.LRO_URLS, [METADATA_PATH])
