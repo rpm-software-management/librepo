@@ -504,8 +504,10 @@ lr_metalink_parse_file(LrMetalink *metalink,
     // Parsing
 
     ret = lr_xml_parser_generic(parser, pd, fd, &tmp_err);
-    if (tmp_err)
+    if (tmp_err) {
         g_propagate_error(err, tmp_err);
+        goto err;
+    }
 
     // Clean up
 
@@ -515,6 +517,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
         ret = FALSE; // The wanted file was not found in metalink
     }
 
+err:
     lr_xml_parser_data_free(pd);
     XML_ParserFree(parser);
 
