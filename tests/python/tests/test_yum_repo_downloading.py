@@ -69,9 +69,6 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               'metalink': None}
         )
 
-        from pprint import pprint
-        pprint(yum_repomd)
-
         self.assertEqual(yum_repomd,
             {   'content_tags': [],
                 #'deltainfo': None,
