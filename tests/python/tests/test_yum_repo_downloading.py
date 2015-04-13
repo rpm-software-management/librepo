@@ -69,6 +69,9 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
               'metalink': None}
         )
 
+        from pprint import pprint
+        pprint(yum_repomd)
+
         self.assertEqual(yum_repomd,
             {   'content_tags': [],
                 #'deltainfo': None,
@@ -153,6 +156,120 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         self.assertFalse(h.mirrors)
         self.assertFalse(h.metalink)
+
+    def test_download_repo_01_rpmmd(self):
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_RPMMDREPO
+        h.destdir = self.tmpdir
+        h.perform(r)
+
+        rpmmd_repo   = r.getinfo(librepo.LRR_RPMMD_REPO)
+        rpmmd_repomd = r.getinfo(librepo.LRR_RPMMD_REPOMD)
+        timestamp  = r.getinfo(librepo.LRR_RPMMD_TIMESTAMP)
+
+        self.assertEqual(rpmmd_repo,
+            { 'destdir': self.tmpdir,
+              'url': url,
+              'signature': None,
+              'mirrorlist': None,
+              'metalink': None,
+              'repomd': self.tmpdir+'/repodata/repomd.xml',
+              'paths': {
+                  'primary': self.tmpdir+'/repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+                  'primary_db': self.tmpdir+'/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+                  'filelists': self.tmpdir+'/repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+                  'filelists_db': self.tmpdir+'/repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+                  'other': self.tmpdir+'/repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+                  'other_db': self.tmpdir+'/repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2',
+                  }
+            }
+        )
+
+        self.assertEqual(rpmmd_repomd,
+            {   'revision': '1347459931',
+                'content_tags': [],
+                'distro_tags': [],
+                'repo_tags': [],
+                'records': {
+                    'primary': {
+                        'checksum': '4543ad62e4d86337cd1949346f9aec976b847b58',
+                        'checksum_open': '68457ceb8e20bda004d46e0a4dfa4a69ce71db48',
+                        'checksum_open_type': 'sha1',
+                        'checksum_type': 'sha1',
+                        'db_version': 0,
+                        'location_href': 'repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+                        'size': 936,
+                        'size_open': 3385,
+                        'timestamp': 1347459930},
+                    'primary_db': {
+                        'checksum': '735cd6294df08bdf28e2ba113915ca05a151118e',
+                        'checksum_open': 'ba636386312e1b597fc4feb182d04c059b2a77d5',
+                        'checksum_open_type': 'sha1',
+                        'checksum_type': 'sha1',
+                        'db_version': 10,
+                        'location_href': 'repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+                        'size': 2603,
+                        'size_open': 23552,
+                        'timestamp': 1347459931},
+                    'filelists': {
+                        'checksum': 'aeca08fccd3c1ab831e1df1a62711a44ba1922c9',
+                        'checksum_open': '52d30ae3162ca863c63c345ffdb7f0e10c1414a5',
+                        'checksum_open_type': 'sha1',
+                        'checksum_type': 'sha1',
+                        'db_version': 0,
+                        'location_href': 'repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+                        'size': 43310,
+                        'size_open': 735088,
+                        'timestamp': 1347459930},
+                    'filelists_db': {
+                        'checksum': '4034dcea76c94d3f7a9616779539a4ea8cac288f',
+                        'checksum_open': '949c6b7b605b2bc66852630c841a5003603ca5b2',
+                        'checksum_open_type': 'sha1',
+                        'checksum_type': 'sha1',
+                        'db_version': 10,
+                        'location_href': 'repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+                        'size': 22575,
+                        'size_open': 201728,
+                        'timestamp': 1347459931},
+                    'other': {
+                        'checksum': 'a8977cdaa0b14321d9acfab81ce8a85e869eee32',
+                        'checksum_open': '4b5b8874fb233a626b03b3260a1aa08dce90e81a',
+                        'checksum_open_type': 'sha1',
+                        'checksum_type': 'sha1',
+                        'db_version': 0,
+                        'location_href': 'repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+                        'size': 807,
+                        'size_open': 1910,
+                        'timestamp': 1347459930},
+                    'other_db': {
+                        'checksum': 'fd96942c919628895187778633001cff61e872b8',
+                        'checksum_open': 'c5262f62b6b3360722b9b2fb5d0a9335d0a51112',
+                        'checksum_open_type': 'sha1',
+                        'checksum_type': 'sha1',
+                        'db_version': 10,
+                        'location_href': 'repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2',
+                        'size': 1407,
+                        'size_open': 8192,
+                        'timestamp': 1347459931},
+                    }
+                }
+        )
+
+        self.assertEqual(timestamp, 1347459931)
+
+        # Test if all mentioned files really exist
+        self.assertTrue(os.path.isdir(rpmmd_repo["destdir"]))
+        for key in rpmmd_repo.get("records", []):
+            self.assertTrue(os.path.isfile(rpmmd_repo[key]))
+
+        self.assertFalse(h.mirrors)
+        self.assertFalse(h.metalink)
+
+
 
     def test_download_repo_02(self):
         h = librepo.Handle()

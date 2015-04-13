@@ -689,19 +689,177 @@ LibRepo Error codes.
 
 LibRepo Result options for use in :meth:`~.Result.getinfo` method.
 
-.. data:: LRR_RPMMD_REPO (LRR_YUM_REPO)
+.. data:: LRR_YUM_REPO (deprecated - use LRR_RPMMD_REPO instead)
 
-    Return a dict with local paths to downloaded/localised
-    yum repository.
+    Returns a flat dictionary with local paths to downloaded/localised
+    rpmmd repository and basic repository's information.::
 
-.. data:: LRR_RPMMD_REPOMD (LRR_YUM_REPOMD)
+        {'repomd': u'/tmp/librepotest-jPMmX5/repodata/repomd.xml',
+         'url': u'http://127.0.0.1:5000/yum/static/01/'
+         'destdir': u'/tmp/librepotest-jPMmX5',
+         'metalink': None,
+         'mirrorlist': None,
+         'signature': None,
+         'primary': u'/tmp/librepotest-jPMmX5/repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+         'primary_db': u'/tmp/librepotest-jPMmX5/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+         'filelists': u'/tmp/librepotest-jPMmX5/repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+         'filelists_db': u'/tmp/librepotest-jPMmX5/repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+         'other': u'/tmp/librepotest-jPMmX5/repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+         'other_db': u'/tmp/librepotest-jPMmX5/repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2',
+        }
 
-    Return a dict representing a repomd.xml file of downloaded
-    yum repository.
+.. data:: LRR_RPMMD_REPO
+
+    Returns a dict with local paths to downloaded/localised
+    rpmmd repository and basic repository's information.::
+
+        {'repomd': u'/tmp/librepotest-jPMmX5/repodata/repomd.xml',
+         'url': u'http://127.0.0.1:5000/yum/static/01/'
+         'destdir': u'/tmp/librepotest-jPMmX5',
+         'metalink': None,
+         'mirrorlist': None,
+         'signature': None,
+         'paths': {'primary': u'/tmp/librepotest-jPMmX5/repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+                   'primary_db': u'/tmp/librepotest-jPMmX5/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+                   'filelists': u'/tmp/librepotest-jPMmX5/repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+                   'filelists_db': u'/tmp/librepotest-jPMmX5/repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+                   'other': u'/tmp/librepotest-jPMmX5/repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+                   'other_db': u'/tmp/librepotest-jPMmX5/repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2'}
+        }
+
+.. data:: LRR_YUM_REPOMD (deprecated - use LRR_RPMMD_REPOMD instead)
+
+    Returns a flat dict representing a repomd.xml file of downloaded
+    rpmmd repository.::
+
+        {'revision': u'1347459931',
+         'repo_tags': [],
+         'content_tags': [],
+         'distro_tags': [],
+         'primary': {'checksum': u'4543ad62e4d86337cd1949346f9aec976b847b58',
+                     'checksum_open': u'68457ceb8e20bda004d46e0a4dfa4a69ce71db48',
+                     'checksum_open_type': u'sha1',
+                     'checksum_type': u'sha1',
+                     'db_version': 0L,
+                     'location_href': u'repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+                     'size': 936L,
+                     'size_open': 3385L,
+                     'timestamp': 1347459930L},
+         'primary_db': {'checksum': u'735cd6294df08bdf28e2ba113915ca05a151118e',
+                        'checksum_open': u'ba636386312e1b597fc4feb182d04c059b2a77d5',
+                        'checksum_open_type': u'sha1',
+                        'checksum_type': u'sha1',
+                        'db_version': 10L,
+                        'location_href': u'repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+                        'size': 2603L,
+                        'size_open': 23552L,
+                        'timestamp': 1347459931L},
+         'filelists': {'checksum': u'aeca08fccd3c1ab831e1df1a62711a44ba1922c9',
+                       'checksum_open': u'52d30ae3162ca863c63c345ffdb7f0e10c1414a5',
+                       'checksum_open_type': u'sha1',
+                       'checksum_type': u'sha1',
+                       'db_version': 0L,
+                       'location_href': u'repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+                       'size': 43310L,
+                       'size_open': 735088L,
+                       'timestamp': 1347459930L},
+         'filelists_db': {'checksum': u'4034dcea76c94d3f7a9616779539a4ea8cac288f',
+                          'checksum_open': u'949c6b7b605b2bc66852630c841a5003603ca5b2',
+                          'checksum_open_type': u'sha1',
+                          'checksum_type': u'sha1',
+                          'db_version': 10L,
+                          'location_href': u'repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+                          'size': 22575L,
+                          'size_open': 201728L,
+                          'timestamp': 1347459931L},
+         'other': {'checksum': u'a8977cdaa0b14321d9acfab81ce8a85e869eee32',
+                   'checksum_open': u'4b5b8874fb233a626b03b3260a1aa08dce90e81a',
+                   'checksum_open_type': u'sha1',
+                   'checksum_type': u'sha1',
+                   'db_version': 0L,
+                   'location_href': u'repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+                   'size': 807L,
+                   'size_open': 1910L,
+                   'timestamp': 1347459930L},
+         'other_db': {'checksum': u'fd96942c919628895187778633001cff61e872b8',
+                      'checksum_open': u'c5262f62b6b3360722b9b2fb5d0a9335d0a51112',
+                      'checksum_open_type': u'sha1',
+                      'checksum_type': u'sha1',
+                      'db_version': 10L,
+                      'location_href': u'repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2',
+                      'size': 1407L,
+                      'size_open': 8192L,
+                      'timestamp': 1347459931L},
+        }
+
+.. data:: LRR_RPMMD_REPOMD
+
+    Returns a dict representing a repomd.xml file of downloaded
+    rpmmd repository.::
+
+        {'revision': u'1347459931',
+         'repo_tags': [],
+         'content_tags': [],
+         'distro_tags': [],
+         'records': {'primary': {'checksum': u'4543ad62e4d86337cd1949346f9aec976b847b58',
+                                 'checksum_open': u'68457ceb8e20bda004d46e0a4dfa4a69ce71db48',
+                                 'checksum_open_type': u'sha1',
+                                 'checksum_type': u'sha1',
+                                 'db_version': 0L,
+                                 'location_href': u'repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz',
+                                 'size': 936L,
+                                 'size_open': 3385L,
+                                 'timestamp': 1347459930L},
+                     'primary_db': {'checksum': u'735cd6294df08bdf28e2ba113915ca05a151118e',
+                                    'checksum_open': u'ba636386312e1b597fc4feb182d04c059b2a77d5',
+                                    'checksum_open_type': u'sha1',
+                                    'checksum_type': u'sha1',
+                                    'db_version': 10L,
+                                    'location_href': u'repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2',
+                                    'size': 2603L,
+                                    'size_open': 23552L,
+                                    'timestamp': 1347459931L}},
+                     'filelists': {'checksum': u'aeca08fccd3c1ab831e1df1a62711a44ba1922c9',
+                                   'checksum_open': u'52d30ae3162ca863c63c345ffdb7f0e10c1414a5',
+                                   'checksum_open_type': u'sha1',
+                                   'checksum_type': u'sha1',
+                                   'db_version': 0L,
+                                   'location_href': u'repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz',
+                                   'size': 43310L,
+                                   'size_open': 735088L,
+                                   'timestamp': 1347459930L},
+                     'filelists_db': {'checksum': u'4034dcea76c94d3f7a9616779539a4ea8cac288f',
+                                      'checksum_open': u'949c6b7b605b2bc66852630c841a5003603ca5b2',
+                                      'checksum_open_type': u'sha1',
+                                      'checksum_type': u'sha1',
+                                      'db_version': 10L,
+                                      'location_href': u'repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2',
+                                      'size': 22575L,
+                                      'size_open': 201728L,
+                                      'timestamp': 1347459931L},
+                     'other': {'checksum': u'a8977cdaa0b14321d9acfab81ce8a85e869eee32',
+                               'checksum_open': u'4b5b8874fb233a626b03b3260a1aa08dce90e81a',
+                               'checksum_open_type': u'sha1',
+                               'checksum_type': u'sha1',
+                               'db_version': 0L,
+                               'location_href': u'repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz',
+                               'size': 807L,
+                               'size_open': 1910L,
+                               'timestamp': 1347459930L},
+                     'other_db': {'checksum': u'fd96942c919628895187778633001cff61e872b8',
+                                  'checksum_open': u'c5262f62b6b3360722b9b2fb5d0a9335d0a51112',
+                                  'checksum_open_type': u'sha1',
+                                  'checksum_type': u'sha1',
+                                  'db_version': 10L,
+                                  'location_href': u'repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2',
+                                  'size': 1407L,
+                                  'size_open': 8192L,
+                                  'timestamp': 1347459931L},
+        }
 
 .. data:: LRR_RPMMD_TIMESTAMP (LRR_YUM_TIMESTAMP)
 
-    Return the highest timestamp from all records in the repomd.
+    Returns the highest timestamp from all records in the repomd.
     See: http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f
 
 .. _endcb-statuses-label:

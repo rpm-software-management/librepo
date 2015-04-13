@@ -145,6 +145,7 @@ getinfo(_ResultObject *self, PyObject *args)
         return PyObject_FromYumRepoMd(repomd);
     }
 
+    case LRR_RPMMD_TIMESTAMP:
     case LRR_YUM_TIMESTAMP: {
         gint64 ts;
         GError *tmp_err = NULL;
@@ -157,11 +158,36 @@ getinfo(_ResultObject *self, PyObject *args)
         return PyLong_FromLongLong((PY_LONG_LONG) ts);
     }
 
+    case LRR_RPMMD_REPO: {
+        LrYumRepo *repo;
+        GError *tmp_err = NULL;
+        res = lr_result_getinfo(self->result,
+                                &tmp_err,
+                                (LrResultInfoOption)option,
+                                &repo);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        return PyObject_FromYumRepo_v2(repo);
+    }
+
+    case LRR_RPMMD_REPOMD: {
+        LrYumRepoMd *repomd;
+        GError *tmp_err = NULL;
+        res = lr_result_getinfo(self->result,
+                                &tmp_err,
+                                (LrResultInfoOption)option,
+                                &repomd);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        PyObject *obj = PyObject_FromYumRepoMd_v2(repomd);
+        return obj;
+    }
+
     /*
      * Unknown options
      */
     default:
-        PyErr_SetString(PyExc_ValueError, "Unknown option");
+        PyErr_Format(PyExc_ValueError, "Unknown option (%d)", option);
         return NULL;
     }
 

@@ -89,6 +89,46 @@ PyObject_FromYumRepo(LrYumRepo *repo)
 }
 
 PyObject *
+PyObject_FromYumRepo_v2(LrYumRepo *repo)
+{
+    PyObject *dict, *paths;
+
+    if (!repo)
+        Py_RETURN_NONE;
+
+    if ((dict = PyDict_New()) == NULL)
+        return NULL;
+
+    PyDict_SetItemString(dict, "repomd",
+            PyStringOrNone_FromString(repo->repomd));
+    PyDict_SetItemString(dict, "url",
+            PyStringOrNone_FromString(repo->url));
+    PyDict_SetItemString(dict, "destdir",
+            PyStringOrNone_FromString(repo->destdir));
+    PyDict_SetItemString(dict, "signature",
+            PyStringOrNone_FromString(repo->signature));
+    PyDict_SetItemString(dict, "mirrorlist",
+            PyStringOrNone_FromString(repo->mirrorlist));
+    PyDict_SetItemString(dict, "metalink",
+            PyStringOrNone_FromString(repo->metalink));
+
+    if ((paths = PyDict_New()) == NULL)
+        return NULL;
+
+    for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
+        LrYumRepoPath *yumrepopath = elem->data;
+        if (!yumrepopath || !yumrepopath->type) continue;
+        PyDict_SetItemString(paths,
+                             yumrepopath->type,
+                             PyStringOrNone_FromString(yumrepopath->path));
+    }
+
+    PyDict_SetItemString(dict, "paths", paths);
+
+    return dict;
+}
+
+PyObject *
 PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
 {
     PyObject *dict;
@@ -180,6 +220,71 @@ PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
                             record->type,
                             PyObject_FromRepoMdRecord(record));
     }
+
+    return dict;
+}
+
+PyObject *
+PyObject_FromYumRepoMd_v2(LrYumRepoMd *repomd)
+{
+    PyObject *dict, *list, *records;
+
+    if (!repomd)
+        Py_RETURN_NONE;
+
+    if ((dict = PyDict_New()) == NULL)
+        return NULL;
+
+    PyDict_SetItemString(dict,
+                         "revision",
+                         PyStringOrNone_FromString(repomd->revision));
+
+    list = PyList_New(0);
+    for (GSList *elem = repomd->repo_tags; elem; elem = g_slist_next(elem)) {
+        char *tag = elem->data;
+        if (tag)
+            PyList_Append(list, PyStringOrNone_FromString(tag));
+    }
+    PyDict_SetItemString(dict, "repo_tags", list);
+
+    list = PyList_New(0);
+    for (GSList *elem = repomd->distro_tags; elem; elem = g_slist_next(elem)) {
+        LrYumDistroTag *distrotag = elem->data;
+
+        if (!elem->data)
+            continue;
+
+        char *cpeid = distrotag->cpeid;
+        char *value = distrotag->tag;
+
+        if (value) {
+            PyList_Append(list, Py_BuildValue("(NN)",
+                                    PyStringOrNone_FromString(cpeid),
+                                    PyStringOrNone_FromString(value)));
+        }
+    }
+    PyDict_SetItemString(dict, "distro_tags", list);
+
+    list = PyList_New(0);
+    for (GSList *elem = repomd->content_tags; elem; elem = g_slist_next(elem)) {
+        char *tag = elem->data;
+        if (tag)
+            PyList_Append(list, PyStringOrNone_FromString(tag));
+    }
+    PyDict_SetItemString(dict, "content_tags", list);
+
+    records = PyDict_New();
+    for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
+        LrYumRepoMdRecord *record = elem->data;
+
+        if (!record)
+            continue;
+
+        PyDict_SetItemString(records,
+                            record->type,
+                            PyObject_FromRepoMdRecord(record));
+    }
+    PyDict_SetItemString(dict, "records", records);
 
     return dict;
 }
