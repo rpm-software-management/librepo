@@ -78,6 +78,7 @@ lr_result_getinfo(LrResult *result,
     va_start(arg, option);
 
     switch (option) {
+    case LRR_RPMMD_REPO:
     case LRR_YUM_REPO: {
         LrYumRepo **repo;
         repo = va_arg(arg, LrYumRepo **);
@@ -85,12 +86,14 @@ lr_result_getinfo(LrResult *result,
         break;
     }
 
+    case LRR_RPMMD_REPOMD:
     case LRR_YUM_REPOMD: {
         LrYumRepoMd **repomd = va_arg(arg, LrYumRepoMd **);
         *repomd = result->yum_repomd;
         break;
     }
 
+    case LRR_RPMMD_TIMESTAMP:
     case LRR_YUM_TIMESTAMP: {
         gint64 *ts = va_arg(arg, gint64 *);
         if (result->yum_repomd) {
