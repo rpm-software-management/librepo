@@ -1486,8 +1486,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         headers = ["Accept: audio/mpeg"]
         h.httpheader = headers
         del headers
-        # An error should be raised
-        self.assertRaises(librepo.LibrepoException, h.perform)
+        h.perform()
 
     def test_download_with_local_enabled(self):
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
