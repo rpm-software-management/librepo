@@ -310,8 +310,6 @@ lr_fastestmirror_prepare(LrHandle *handle,
         CURLcode curlcode;
         CURL *curlh;
 
-        // TODO: For prefixed by "file://" - set plain_connect_time to zero
-
         // Try to find item in the cache
         gint64 ts;
         double connecttime;
@@ -509,7 +507,7 @@ lr_fastestmirror_perform(GSList *list,
         if (!effective_url) {
             // No effective url is most likely an error
             mirror->plain_connect_time = -1.0;
-        } else if (g_str_has_prefix(effective_url, "file://")) {
+        } else if (g_str_has_prefix(effective_url, "file:")) {
             // Local directories are considered to be the best mirrors
             mirror->plain_connect_time = 0.0;
         } else {
