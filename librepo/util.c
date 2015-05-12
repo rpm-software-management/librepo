@@ -308,6 +308,9 @@ lr_prepend_url_protocol(const char *path)
     if (strstr(path, "://"))  // Protocol was specified
         return g_strdup(path);
 
+    if (g_str_has_prefix(path, "file:/"))
+        return g_strdup(path);
+
     if (path[0] == '/')  // Path is absolute path
         return g_strconcat("file://", path, NULL);
 
