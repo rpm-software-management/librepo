@@ -179,6 +179,12 @@ START_TEST(test_url_without_path)
     fail_if(strcmp(new_url, "file://"));
     lr_free(new_url);
     new_url = NULL;
+
+    new_url = lr_url_without_path("file:/home/foobar");
+    fail_if(new_url == NULL);
+    fail_if(strcmp(new_url, "file://"));
+    lr_free(new_url);
+    new_url = NULL;
 }
 END_TEST
 

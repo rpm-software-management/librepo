@@ -384,6 +384,12 @@ lr_url_without_path(const char *url)
 {
     if (!url) return NULL;
 
+    // Filesystem
+    if (g_str_has_prefix(url, "file:///"))
+        return g_strdup("file://");
+    if (g_str_has_prefix(url, "file:/"))
+        return g_strdup("file://");
+
     // Skip protocol prefix (ftp://, http://, file://, etc.)
     gchar *ptr = strstr(url, "://");
     if (ptr)
