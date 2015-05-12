@@ -973,14 +973,15 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
     // Get local path in case of local repository
     gchar *local_path = NULL;
     if (handle->urls && handle->urls[0]) {
-        // Check if the first element of urls is local path
+        // If first base URL is local path, get that path
+        // (without file: or file:// prefix if specified)
         gchar *url = handle->urls[0];
-        if (strstr(url, "://")) {
-            if (!strncmp(url, "file://", 7))
-                local_path = url + 7;
-        } else {
+        if (g_str_has_prefix(url, "file://"))
+            local_path = url + 7;
+        else if (g_str_has_prefix(url, "file:"))  // RFC 3986
+            local_path = url + 5;
+        else if (!strstr(url, "://"))
             local_path = url;
-        }
     }
 
     gboolean ret;
