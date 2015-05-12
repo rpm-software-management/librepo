@@ -221,6 +221,8 @@ START_TEST(test_is_local_path)
     fail_if(!lr_is_local_path("foo/bar"));
     fail_if(!lr_is_local_path("bar"));
     fail_if(!lr_is_local_path("/"));
+    fail_if(!lr_is_local_path("file:///tmp"));
+    fail_if(!lr_is_local_path("file:/tmp"));
 
     fail_if(lr_is_local_path(NULL));
     fail_if(lr_is_local_path(""));
