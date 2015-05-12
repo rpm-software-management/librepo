@@ -691,43 +691,23 @@ lr_handle_prepare_urls(LrHandle *handle, GError **err)
 {
     assert(!handle->urls_mirrors);
 
-    int x = 0;
-    while (handle->urls[x]) {
+    for (int x=0; handle->urls[x]; x++) {
         gchar *url = handle->urls[x];
-        gchar *final_url = NULL;
+        _cleanup_free_ gchar *final_url = NULL;
 
-        if (strstr(url, "://")) {
-            // Base URL has specified protocol
-            final_url = g_strdup(url);
-        } else {
-            // No protocol specified - if local path => prepend file://
-            if (url[0] == '/') {
-                // Base URL is absolute path
-                final_url = g_strconcat("file://", url, NULL);
-            } else {
-                // Base URL is relative path
-                char *resolved_path = realpath(url, NULL);
-                if (!resolved_path) {
-                    g_debug("%s: realpath: %s", __func__, g_strerror(errno));
-                    g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
-                                "realpath(%s) error: %s",
-                                url, g_strerror(errno));
-                    return FALSE;
-                }
-                final_url = g_strconcat("file://", resolved_path, NULL);
-                free(resolved_path);
-            }
+        // Make sure that url has protocol specified
+        final_url = lr_prepend_url_protocol(url);
+        if (!final_url) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
+                        "Cannot resolve path for: \"%s\"", url);
+            return FALSE;
         }
 
-        if (final_url) {
-            handle->urls_mirrors = lr_lrmirrorlist_append_url(
-                                                handle->urls_mirrors,
-                                                final_url,
-                                                handle->urlvars);
-            lr_free(final_url);
-        }
-
-        x++;
+        // Append the url into internal list of urls specified by LRO_URLS
+        handle->urls_mirrors = lr_lrmirrorlist_append_url(
+                                            handle->urls_mirrors,
+                                            final_url,
+                                            handle->urlvars);
     }
 
     return TRUE;
