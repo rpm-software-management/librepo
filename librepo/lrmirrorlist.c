@@ -36,7 +36,7 @@ lr_detect_protocol(const char *url)
     if (g_str_has_prefix(url, "ftp://"))
         return LR_PROTOCOL_FTP;
 
-    if (g_str_has_prefix(url, "file://"))
+    if (g_str_has_prefix(url, "file:/"))
         return LR_PROTOCOL_FILE;
 
     if (g_str_has_prefix(url, "rsync://"))

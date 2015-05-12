@@ -566,7 +566,7 @@ select_suitable_mirror(LrDownload *dd,
             && target->handle->offline
             && c_mirror->mirror->protocol != LR_PROTOCOL_FILE)
         {
-            // Skip each url that doesn't have file://
+            // Skip each url that doesn't have "file://" or "file:" prefix
             g_debug("%s: Skipping mirror %s - Offline mode enabled",
                     __func__, mirrorurl);
             continue;
