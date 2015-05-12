@@ -662,6 +662,8 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
     // Skip "file://" prefix if present
     if (g_str_has_prefix(baseurl, "file://"))
         baseurl += 7;
+    else if (g_str_has_prefix(baseurl, "file:"))
+        baseurl += 5;
 
     // Check sanity
     if (strstr(baseurl, "://")) {
