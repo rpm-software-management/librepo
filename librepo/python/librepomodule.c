@@ -32,6 +32,7 @@
 #include "downloader-py.h"
 #include "globalstate-py.h" // GIL Hack
 #include "typeconversion.h"
+#include "logging.h"
 
 volatile int global_logger = 0;
 volatile PyThreadState **global_state = NULL;
@@ -117,6 +118,10 @@ static struct PyMethodDef librepo_methods[] = {
       METH_VARARGS, NULL },
     { "download_url",           (PyCFunction)py_download_url,
       METH_VARARGS, NULL },
+    { "log_set_file",           (PyCFunction)py_log_set_file,
+      METH_VARARGS, NULL },
+    { "log_remove_handler",     (PyCFunction)py_log_remove_handler,
+      METH_VARARGS, NULL },
     { NULL }
 };
 
@@ -147,6 +152,7 @@ static int librepo_traverse(PyObject *m, visitproc visit, void *arg) {
 }
 
 static int librepo_clear(PyObject *m) {
+    remove_all_log_handlers();
     Py_CLEAR(GETSTATE(m)->error);
         return 0;
 }

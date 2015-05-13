@@ -1527,7 +1527,11 @@ def yum_repomd_get_age(result_object):
 
 def set_debug_log_handler(log_function, user_data=None):
     """
+    ONLY FOR DEVELOPMENT (DEBUGGING) PURPOSES!
+
     When python debug log handler is used, the librepo is **THREAD-UNSAFE**!
+
+    If used, it overrides logging set by log_set_file and vice versa.
 
     :param log_function: Function that will handle the debug messages.
     :param user_data: An data you want to be passed to the log_function
@@ -1543,3 +1547,23 @@ def set_debug_log_handler(log_function, user_data=None):
     """
     return _librepo.set_debug_log_handler(log_function, user_data)
 
+def log_set_file(filename):
+    """Set a filename of a file where logs are going to be written.
+
+    Note: Only one file could be set at a time.
+
+    Note: If the LIBREPO_DEBUG environ variable is set and this
+    function is used then the LIBREPO_DEBUG effect will be suppressed.
+    (All debug output will be redirected to the specified file)
+
+    :param filename: Filename
+    :returns: Id of the handler
+    """
+    return _librepo.log_set_file(filename)
+
+def log_remove_handler(handler_id):
+    """Remove handler.
+
+    :param handler_id: id
+    """
+    return _librepo.log_remove_handler(handler_id)
