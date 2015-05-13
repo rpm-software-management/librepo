@@ -9,10 +9,11 @@ MY_DIR=`dirname "$0"`
 
 if [ $# -lt "1"  -o $# -gt "2" ]
 then
-    echo "Usage: `basename "$0"` <root_project_dir> [revision]"
+    echo "Usage: `basename "$0"` <root_project_dir> [rpmbuild options]"
     exit 1
 fi
 
+BUILD_OPTS="$2"
 PREFIX="$1/"
 
 if [ ! -d "$RPMBUILD_DIR" ]; then
@@ -54,7 +55,7 @@ fi
 echo "Copying done"
 
 echo "> Starting rpmbuild $PACKAGE.."
-rpmbuild -ba "$RPMBUILD_DIR/SPECS/$PACKAGE.spec"
+rpmbuild -ba $BUILD_OPTS "$RPMBUILD_DIR/SPECS/$PACKAGE.spec"
 if [ ! $? == "0" ]; then
     echo "Error while: rpmbuild -ba $RPMBUILD_DIR/SPECS/$PACKAGE.spec"
     exit 1
