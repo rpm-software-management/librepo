@@ -1171,7 +1171,8 @@ lr_handle_perform(LrHandle *handle, LrResult *result, GError **err)
         if (lr_interrupt) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_INTERRUPTED,
                         "Librepo was interrupted by a signal");
-            g_error_free(tmp_err);
+            if (tmp_err)
+                g_error_free(tmp_err);
             return FALSE;
         }
     }
