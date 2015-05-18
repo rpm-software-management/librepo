@@ -162,7 +162,8 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
         ck_assert_str_eq(*strv_p, s);
     }
 
-    ck_assert_msg((*strv_p == va_arg(args, gchar*)),
+    // strv list already ended, check if we really expected the end
+    ck_assert_msg(va_arg(args, gchar*) == NULL,
                   "Lengths of lists are not the same");
 
     va_end (args);
