@@ -15,10 +15,12 @@
 #include "librepo/cleanup.h"
 
 
+
 static void
 repoconf_assert_true(LrYumRepoConf *repoconf,
                      LrYumRepoConfOption option)
 {
+    ck_assert(1);
     void *ptr = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
@@ -34,6 +36,7 @@ static void
 repoconf_assert_false(LrYumRepoConf *repoconf,
                       LrYumRepoConfOption option)
 {
+    ck_assert(1);
     void *ptr = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
@@ -49,6 +52,7 @@ static void
 repoconf_assert_na(LrYumRepoConf *repoconf,
                    LrYumRepoConfOption option)
 {
+    ck_assert(1);
     void *ptr = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
@@ -65,6 +69,7 @@ repoconf_assert_str_eq(LrYumRepoConf *repoconf,
                        LrYumRepoConfOption option,
                        gchar *expected)
 {
+    ck_assert(1);
     _cleanup_free_ gchar *str = NULL;
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &str);
@@ -81,6 +86,7 @@ repoconf_assert_uint64_eq(LrYumRepoConf *repoconf,
                           LrYumRepoConfOption option,
                           guint64 expected)
 {
+    ck_assert(1);
     guint64 val = (expected - 1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
@@ -97,6 +103,7 @@ repoconf_assert_int_eq(LrYumRepoConf *repoconf,
                        LrYumRepoConfOption option,
                        gint expected)
 {
+    ck_assert(1);
     gint val = (expected - 1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
@@ -113,6 +120,7 @@ repoconf_assert_int64_eq(LrYumRepoConf *repoconf,
                          LrYumRepoConfOption option,
                          gint64 expected)
 {
+    ck_assert(1);
     gint64 val = (expected - 1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
@@ -129,6 +137,7 @@ repoconf_assert_lripresolvetype_eq(LrYumRepoConf *repoconf,
                                    LrYumRepoConfOption option,
                                    LrIpResolveType expected)
 {
+    ck_assert(1);
     LrIpResolveType val = (expected - 1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
@@ -146,6 +155,7 @@ repoconf_assert_strv_eq(LrYumRepoConf *repoconf,
                            LrYumRepoConfOption option,
                            ...)
 {
+    ck_assert(1);
     va_list args;
     _cleanup_error_free_ GError *tmp_err = NULL;
     _cleanup_strv_free_ char **strv = NULL;
@@ -178,6 +188,7 @@ repoconf_assert_set_boolean(LrYumRepoConf *repoconf,
                             LrYumRepoConfOption option,
                             gboolean val)
 {
+    ck_assert(1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert(!tmp_err);
@@ -192,6 +203,7 @@ repoconf_assert_set_str(LrYumRepoConf *repoconf,
                         LrYumRepoConfOption option,
                         gchar *val)
 {
+    ck_assert(1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert(!tmp_err);
@@ -206,6 +218,7 @@ repoconf_assert_set_strv(LrYumRepoConf *repoconf,
                          LrYumRepoConfOption option,
                          ...)
 {
+    ck_assert(1);
     va_list args;
     _cleanup_error_free_ GError *tmp_err = NULL;
     _cleanup_ptrarray_unref_ GPtrArray *array = g_ptr_array_new();
@@ -231,6 +244,7 @@ repoconf_assert_set_int(LrYumRepoConf *repoconf,
                         LrYumRepoConfOption option,
                         gint val)
 {
+    ck_assert(1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert(!tmp_err);
@@ -245,6 +259,7 @@ repoconf_assert_set_int64(LrYumRepoConf *repoconf,
                           LrYumRepoConfOption option,
                           gint64 val)
 {
+    ck_assert(1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert(!tmp_err);
@@ -259,6 +274,7 @@ repoconf_assert_set_uint64(LrYumRepoConf *repoconf,
                            LrYumRepoConfOption option,
                            guint64 val)
 {
+    ck_assert(1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert(!tmp_err);
@@ -273,6 +289,7 @@ repoconf_assert_set_lripresolvetype(LrYumRepoConf *repoconf,
                                     LrYumRepoConfOption option,
                                     LrIpResolveType val)
 {
+    ck_assert(1);
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_setopt(repoconf, &tmp_err, option, val);
     ck_assert(!tmp_err);
@@ -457,11 +474,11 @@ START_TEST(test_parse_repoconf_big)
     conf_assert_true(LR_YRC_REPO_GPGCHECK);
     conf_assert_true(LR_YRC_ENABLEGROUPS);
 
-    conf_assert_uint64_eq(LR_YRC_BANDWIDTH, 1024*1024);
+    conf_assert_uint64_eq(LR_YRC_BANDWIDTH, G_GUINT64_CONSTANT(1048576));  // 1024*1024
     conf_assert_str_eq(LR_YRC_THROTTLE, "50%");
     conf_assert_lripresolvetype_eq(LR_YRC_IP_RESOLVE, LR_IPRESOLVE_V6);
 
-    conf_assert_int64_eq(LR_YRC_METADATA_EXPIRE, 60*60*24*5);
+    conf_assert_int64_eq(LR_YRC_METADATA_EXPIRE, G_GINT64_CONSTANT(432000)); // 60*60*24*5
     conf_assert_int_eq(LR_YRC_COST, 500);
     conf_assert_int_eq(LR_YRC_PRIORITY, 10);
 
@@ -518,7 +535,9 @@ START_TEST(test_write_repoconf)
 
     conf_assert_na(LR_YRC_ENABLED);
     conf_assert_set_boolean(LR_YRC_ENABLED, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_ENABLED);
+    ck_assert(1);
 
     conf_assert_na(LR_YRC_BASEURL);
     conf_assert_set_strv(LR_YRC_BASEURL, "test_baseurl1", "test_baseurl2", NULL);
@@ -556,7 +575,9 @@ START_TEST(test_write_repoconf)
 
     conf_assert_na(LR_YRC_FASTESTMIRROR);
     conf_assert_set_boolean(LR_YRC_FASTESTMIRROR, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_FASTESTMIRROR);
+    ck_assert(1);
 
     conf_assert_na(LR_YRC_PROXY);
     conf_assert_set_str(LR_YRC_PROXY, "test_proxy");
@@ -581,20 +602,26 @@ START_TEST(test_write_repoconf)
 
     conf_assert_na(LR_YRC_GPGCHECK);
     conf_assert_set_boolean(LR_YRC_GPGCHECK, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_GPGCHECK);
+    ck_assert(1);
 
     conf_assert_na(LR_YRC_REPO_GPGCHECK);
     conf_assert_set_boolean(LR_YRC_REPO_GPGCHECK, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_REPO_GPGCHECK);
+    ck_assert(1);
 
     conf_assert_na(LR_YRC_ENABLEGROUPS);
     conf_assert_set_boolean(LR_YRC_ENABLEGROUPS, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_ENABLEGROUPS);
+    ck_assert(1);
 
 
     conf_assert_na(LR_YRC_BANDWIDTH);
-    conf_assert_set_uint64(LR_YRC_BANDWIDTH, 55);
-    conf_assert_uint64_eq(LR_YRC_BANDWIDTH, 55);
+    conf_assert_set_uint64(LR_YRC_BANDWIDTH, G_GUINT64_CONSTANT(55));
+    conf_assert_uint64_eq(LR_YRC_BANDWIDTH, G_GUINT64_CONSTANT(55));
 
     conf_assert_na(LR_YRC_THROTTLE);
     conf_assert_set_str(LR_YRC_THROTTLE, "test_throttle");
@@ -606,8 +633,8 @@ START_TEST(test_write_repoconf)
 
 
     conf_assert_na(LR_YRC_METADATA_EXPIRE);
-    conf_assert_set_int64(LR_YRC_METADATA_EXPIRE, 123);
-    conf_assert_int64_eq(LR_YRC_METADATA_EXPIRE, 123);
+    conf_assert_set_int64(LR_YRC_METADATA_EXPIRE, G_GINT64_CONSTANT(123));
+    conf_assert_int64_eq(LR_YRC_METADATA_EXPIRE, G_GINT64_CONSTANT(123));
 
     conf_assert_na(LR_YRC_COST);
     conf_assert_set_int(LR_YRC_COST, 456);
@@ -624,7 +651,9 @@ START_TEST(test_write_repoconf)
 
     conf_assert_na(LR_YRC_SSLVERIFY);
     conf_assert_set_boolean(LR_YRC_SSLVERIFY, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_SSLVERIFY);
+    ck_assert(1);
 
     conf_assert_na(LR_YRC_SSLCLIENTCERT);
     conf_assert_set_str(LR_YRC_SSLCLIENTCERT, "test_sslclientcert");
@@ -646,7 +675,9 @@ START_TEST(test_write_repoconf)
 
     conf_assert_na(LR_YRC_SKIP_IF_UNAVAILABLE);
     conf_assert_set_boolean(LR_YRC_SKIP_IF_UNAVAILABLE, TRUE);
+    ck_assert(1);
     conf_assert_true(LR_YRC_SKIP_IF_UNAVAILABLE);
+    ck_assert(1);
 
     // Write out modified config
     ret = lr_yum_repoconfs_save(confs, &tmp_err);
