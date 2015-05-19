@@ -188,6 +188,9 @@ typedef struct {
     GSList *running_transfers; /*!<
         List of running transfers (list of pointer to LrTarget structures) */
 
+    GError *last_transfer_error; /*!<
+        The error encountered from the last mirror we tried */
+
 } LrDownload;
 
 /** Schema of structures as used in downloader module:
@@ -631,9 +634,16 @@ select_suitable_mirror(LrDownload *dd,
 
         if (dd->failfast) {
             // Fail immediately
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
-                        "Cannot download %s: All mirrors were tried",
-                        target->target->path);
+	    if (dd->last_transfer_error) {
+		g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+			    "Cannot download %s: All mirrors were tried.  Last error: %s",
+			    target->target->path,
+			    dd->last_transfer_error->message);
+	    } else {
+		g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
+			    "Cannot download %s: All mirrors were tried",
+			    target->target->path);
+	    }
             return FALSE;
         }
     }
@@ -1628,7 +1638,10 @@ transfer_error:
                 // Try another mirror
                 g_debug("%s: Ignore error - Try another mirror", __func__);
                 target->state = LR_DS_WAITING;
-                g_error_free(transfer_err);  // Ignore the error
+		// Cache this transfer error as the last encountered
+		g_clear_error(&dd->last_transfer_error);
+		dd->last_transfer_error = transfer_err;
+		transfer_err = NULL;
 
                 // Truncate file - remove downloaded garbage (error html page etc.)
                 if (!truncate_transfer_file(target, err))
@@ -1878,6 +1891,7 @@ lr_download(GSList *targets,
 
     // Prepare download data
     dd.failfast = failfast;
+    dd.last_transfer_error = NULL;
 
     if (lr_handle) {
         dd.max_parallel_connections = lr_handle->maxparalleldownloads;
@@ -2032,6 +2046,8 @@ lr_download_cleanup:
         lr_free(target);
     }
     g_slist_free(dd.targets);
+
+    g_clear_error(&dd.last_transfer_error);
 
     return ret;
 }
