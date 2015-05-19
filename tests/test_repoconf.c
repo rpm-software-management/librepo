@@ -21,12 +21,12 @@ repoconf_assert_true(LrYumRepoConf *repoconf,
                      LrYumRepoConfOption option)
 {
     ck_assert(1);
-    void *ptr = NULL;
+    long val = 0L;
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
     ck_assert(!tmp_err);
     ck_assert(ret);
-    ck_assert_msg(ptr != NULL, "Not a True value (Option %d)", option);
+    ck_assert_msg(val != 0, "Not a True value (Option %d)", option);
 }
 
 #define conf_assert_true(option) \
@@ -37,12 +37,12 @@ repoconf_assert_false(LrYumRepoConf *repoconf,
                       LrYumRepoConfOption option)
 {
     ck_assert(1);
-    void *ptr = NULL;
+    long val = 1L;
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
     ck_assert(!tmp_err);
     ck_assert(ret);
-    ck_assert_msg(!ptr, "Not a NULL/0 value (Option %d)", option);
+    ck_assert_msg(!val, "Not a 0 (False) value (Option %d)", option);
 }
 
 #define conf_assert_false(option) \
