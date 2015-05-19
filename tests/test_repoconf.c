@@ -53,9 +53,16 @@ repoconf_assert_na(LrYumRepoConf *repoconf,
                    LrYumRepoConfOption option)
 {
     ck_assert(1);
-    void *ptr = NULL;
+    char array[2048];
+    /* ^^^XXX the lr_yum_repoconf_getinfo always expects that you have
+     * passed an argument of an appropriate size and even when an error
+     * occurs, it can write a value (e.g. default value) into the
+     * destination. Because we don't care about the value and the size
+     * are different for different types (char*, gint64, long, ...)
+     * we pass in an array with (hopefully) enough space to accomodate
+     * all reasonable return values. */
     _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &ptr);
+    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, array);
     ck_assert(!ret);
     ck_assert(tmp_err);
     ck_assert(tmp_err->code == LRE_NOTSET);
