@@ -28,6 +28,7 @@
 #include "repoconf_internal.h"
 #include "cleanup.h"
 
+
 static LrYumRepoFile *
 lr_yum_repofile_init(const gchar *path, GKeyFile *keyfile)
 {
@@ -332,7 +333,7 @@ lr_convert_interval_to_seconds(const char *str,
     gdouble mult = 1.0;
     gchar *endptr = NULL;
 
-    *out = 0;
+    *out = G_GINT64_CONSTANT(0);
 
     // Initial sanity checking
     if (!str) {
@@ -395,13 +396,13 @@ lr_key_file_get_metadata_expire(GKeyFile *keyfile,
                                 gint64 default_value,
                                 GError **err)
 {
-    gint64 res = -1;
+    gint64 res = G_GINT64_CONSTANT(-1);
     _cleanup_free_ gchar *string = NULL;
     string = g_key_file_get_string(keyfile, groupname, key, err);
     if (!string)
         return default_value;
     if (!lr_convert_interval_to_seconds(string, &(res), err))
-        return -1;
+        return G_GINT64_CONSTANT(-1);
     return res;
 }
 
@@ -414,7 +415,7 @@ lr_convert_bandwidth_to_bytes(const char *str,
     gdouble mult = 1.0;
     gchar *endptr = NULL;
 
-    *out = 0;
+    *out = G_GUINT64_CONSTANT(0);
 
     // Initial sanity checking
     if (!str) {
@@ -480,13 +481,13 @@ lr_key_file_get_bandwidth(GKeyFile *keyfile,
                           guint64 default_value,
                           GError **err)
 {
-    guint64 res = 0;
+    guint64 res = G_GUINT64_CONSTANT(0);
     _cleanup_free_ gchar *string = NULL;
     string = g_key_file_get_string(keyfile, groupname, key, err);
     if (!string)
         return default_value;
     if (!lr_convert_bandwidth_to_bytes(string, &(res), err))
-        return 0;
+        return G_GUINT64_CONSTANT(0);
     return res;
 }
 
@@ -798,7 +799,7 @@ lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
     case LR_YRC_BANDWIDTH:      /*!< (guint64) Bandwidth - Number of bytes */
     {
         guint64 *num = va_arg(arg, guint64 *);
-        *num = lr_key_file_get_bandwidth(keyfile, id, "bandwidth", TRUE, &tmp_err);
+        *num = lr_key_file_get_bandwidth(keyfile, id, "bandwidth", G_GUINT64_CONSTANT(0), &tmp_err);
         break;
     }
 
@@ -817,7 +818,11 @@ lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
     case LR_YRC_METADATA_EXPIRE:/*!< (gint64) Interval in secs for metadata expiration */
     {
         gint64 *num = va_arg(arg, gint64 *);
-        *num = lr_key_file_get_metadata_expire(keyfile, id, "metadata_expire", LR_YUMREPOCONF_METADATA_EXPIRE_DEFAULT, &tmp_err);
+        *num = lr_key_file_get_metadata_expire(keyfile,
+                                               id,
+                                               "metadata_expire",
+                                               LR_YUMREPOCONF_METADATA_EXPIRE_DEFAULT,
+                                               &tmp_err);
         break;
     }
 
