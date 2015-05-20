@@ -77,7 +77,6 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
     PyObject *user_data, *result;
 
     self = (_PackageTargetObject *)data;
-    assert(self->handle);
     if (!self->progress_cb)
         return ret;
 
@@ -127,7 +126,6 @@ packagetarget_end_callback(void *data,
     PyObject *user_data, *result, *py_msg;
 
     self = (_PackageTargetObject *)data;
-    assert(self->handle);
     if (!self->end_cb)
         return ret;
 
@@ -179,7 +177,6 @@ packagetarget_mirrorfailure_callback(void *data,
     PyObject *user_data, *result, *py_msg, *py_url;
 
     self = (_PackageTargetObject *)data;
-    assert(self->handle);
     if (!self->mirrorfailure_cb)
         return ret;
 
