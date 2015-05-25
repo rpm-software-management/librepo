@@ -907,6 +907,8 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_ALLOWEDMIRRORFAILURES:
     case LRI_ADAPTIVEMIRRORSORTING:
     case LRI_OFFLINE:
+    case LRI_LOWSPEEDTIME:
+    case LRI_LOWSPEEDLIMIT:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

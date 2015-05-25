@@ -388,6 +388,8 @@ typedef enum {
     LRI_SSLCLIENTCERT,          /*!< (char **) */
     LRI_SSLCLIENTKEY,           /*!< (char **) */
     LRI_SSLCACERT,              /*!< (char **) */
+    LRI_LOWSPEEDTIME,           /*!< (long) */
+    LRI_LOWSPEEDLIMIT,          /*!< (long) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

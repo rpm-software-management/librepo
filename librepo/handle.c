@@ -94,6 +94,7 @@ lr_handle_init()
     handle->checks |= LR_CHECK_CHECKSUM;
     handle->maxparalleldownloads = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
     handle->maxdownloadspermirror = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
+    handle->lowspeedtime = LRO_LOWSPEEDTIME_DEFAULT;
     handle->lowspeedlimit = LRO_LOWSPEEDLIMIT_DEFAULT;
     handle->sslverifypeer = 1;
     handle->sslverifyhost = 2;
@@ -551,6 +552,7 @@ lr_handle_setopt(LrHandle *handle,
             ret = FALSE;
         } else {
             curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_TIME, val_long);
+            handle->lowspeedtime = val_long;
         }
 
         break;
@@ -1405,6 +1407,16 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_OFFLINE:
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->offline;
+        break;
+
+    case LRI_LOWSPEEDTIME:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) (handle->lowspeedtime);
+        break;
+
+    case LRI_LOWSPEEDLIMIT:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) (handle->lowspeedlimit);
         break;
 
     default:

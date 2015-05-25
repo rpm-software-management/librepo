@@ -134,6 +134,18 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_FASTESTMIRROR, False)
         self.assertEqual(h.getinfo(librepo.LRI_FASTESTMIRROR), False)
 
+        self.assertEqual(h.getinfo(librepo.LRI_LOWSPEEDTIME), 120)
+        h.setopt(librepo.LRO_LOWSPEEDTIME, 30)
+        self.assertEqual(h.getinfo(librepo.LRI_LOWSPEEDTIME), 30)
+        h.setopt(librepo.LRO_LOWSPEEDTIME, None)
+        self.assertEqual(h.getinfo(librepo.LRI_LOWSPEEDTIME), 120)
+
+        self.assertEqual(h.getinfo(librepo.LRI_LOWSPEEDLIMIT), 1000)
+        h.setopt(librepo.LRO_LOWSPEEDLIMIT, 123)
+        self.assertEqual(h.getinfo(librepo.LRI_LOWSPEEDLIMIT), 123)
+        h.setopt(librepo.LRO_LOWSPEEDLIMIT, None)
+        self.assertEqual(h.getinfo(librepo.LRI_LOWSPEEDLIMIT), 1000)
+
         self.assertFalse(h.getinfo(librepo.LRI_HMFCB))
         h.setopt(librepo.LRO_HMFCB, foo_hmfcb)
         self.assertEqual(h.getinfo(librepo.LRI_HMFCB), foo_hmfcb)

@@ -150,10 +150,15 @@ struct _LrHandle {
     LrUrlVars *urlvars; /*!<
         List with url substitutions */
 
-    long lowspeedlimit; /*!<
+    long lowspeedtime; /*!<
         The time in seconds that the transfer should be below the
         LRO_LOWSPEEDLIMIT for the library to consider it too slow
         and abort. */
+
+    long lowspeedlimit; /*!<
+        The transfer speed in bytes per second that the transfer
+        should be below during LRO_LOWSPEEDTIME seconds for
+        the library to consider it too slow and abort. */
 
     LrHandleMirrorFailureCb hmfcb; /*!<
         Callaback called when a repodata download from a mirror fails. */
