@@ -1174,8 +1174,8 @@ check_finished_transfer_status(CURLMsg *msg,
             case CURLE_NOT_BUILT_IN:
 #endif
             case CURLE_OUT_OF_MEMORY:
-            case CURLE_RECV_ERROR:
-            case CURLE_SEND_ERROR:
+            //case CURLE_RECV_ERROR:  // See RhBug: 1219817
+            //case CURLE_SEND_ERROR:
             case CURLE_SSL_CACERT_BADFILE:
             case CURLE_SSL_CRL_BADFILE:
             case CURLE_WRITE_ERROR:
