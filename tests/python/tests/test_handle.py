@@ -326,6 +326,18 @@ class TestCaseHandle(unittest.TestCase):
         h.fastestmirror = False
         self.assertEqual(h.fastestmirror, False)
 
+        self.assertEqual(h.lowspeedtime, 120)
+        h.lowspeedtime = 20
+        self.assertEqual(h.lowspeedtime, 20)
+        h.lowspeedtime = None
+        self.assertEqual(h.lowspeedtime, 120)
+
+        self.assertEqual(h.lowspeedlimit, 1000)
+        h.lowspeedlimit = 55
+        self.assertEqual(h.lowspeedlimit, 55)
+        h.lowspeedlimit = None
+        self.assertEqual(h.lowspeedlimit, 1000)
+
         self.assertFalse(h.hmfcb)
         h.hmfcb = foo_hmfcb
         self.assertEqual(h.hmfcb, foo_hmfcb)
