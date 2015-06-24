@@ -64,7 +64,7 @@ repoconf_assert_na(LrYumRepoConf *repoconf,
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, array);
     ck_assert(!ret);
-    ck_assert(tmp_err);
+    ck_assert(tmp_err != NULL);
     ck_assert(tmp_err->code == LRE_NOTSET);
 }
 
