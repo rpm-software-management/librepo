@@ -140,7 +140,7 @@ typedef struct {
     gchar *headercb_interrupt_reason; /*!<
         Reason why was the transfer interrupted */
     gint64 writecb_recieved; /*!<
-        Total number of bytes recieved by the write function
+        Total number of bytes received by the write function
         during the current transfer. */
     gboolean writecb_required_range_written; /*!<
         If a byte range was specified to download and the
@@ -931,11 +931,11 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
 
-    // Allow resume only for files that were originaly being
+    // Allow resume only for files that were originally being
     // downloaded by librepo
     if (target->resume && !has_librepo_xattr(fd)) {
         target->resume = FALSE;
-        g_debug("%s: Resume ignored, existing file was not originaly "
+        g_debug("%s: Resume ignored, existing file was not originally "
                 "being downloaded by Librepo", __func__);
         if (ftruncate(fd, 0) == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
@@ -1431,7 +1431,7 @@ sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success, gboolean serio
 
     // Serious errors
     if (serious && mirror->successful_transfers == 0) {
-        // Mirror that encounter a serious error and has no successfull
+        // Mirror that encounter a serious error and has no successful
         // transfers should be moved at the end of the list
         // (such mirror is probably down/broken/buggy)
         GSList *last = g_slist_last(elem);
@@ -1714,7 +1714,7 @@ transfer_error:
 
         if (fail_fast_error) {
             // Interrupt whole downloading
-            // A fatal error occured or interrupted by callback
+            // A fatal error occurred or interrupted by callback
             g_propagate_error(err, fail_fast_error);
             return FALSE;
         }

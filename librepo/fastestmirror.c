@@ -37,7 +37,7 @@
 
 #define CACHE_GROUP_METADATA    ":_librepo_:"   // Group with metadata
 #define CACHE_KEY_TS            "ts"            // Timestamp
-#define CACHE_KEY_CONNECTTIME   "connectime"    // Time of reponse
+#define CACHE_KEY_CONNECTTIME   "connectime"    // Time of response
 #define CACHE_KEY_VERSION       "version"       // Version of cache format
 
 #define CACHE_VERSION   1   // Current version of cache format
@@ -813,7 +813,7 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
         // If multiple mirrors with the same lr_url_without_path(url)
         // were present, only the first occurrence was inserted to the
         // the new_list and removed from the mirrors list.
-        // The remaining occurences will be moved here.
+        // The remaining occurrences will be moved here.
         for (GSList *elem = mirrors; elem; elem = g_slist_next(elem)) {
             LrInternalMirror *im = elem->data;
             new_list = g_slist_prepend(new_list, im);

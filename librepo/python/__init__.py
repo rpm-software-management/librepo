@@ -1487,7 +1487,7 @@ def download_packages(list, failfast=False):
     """
     Download list of packages. *list* is a list of
     :class:`~librepo.PackageTarget` objects.
-    If the *failfast* is True, then whole downloading is stoped
+    If the *failfast* is True, then whole downloading is stopped
     immediately when any of download fails (and exception is raised).
     If the failfast is False, then this function returns after all
     downloads finish (no matter if successfully or unsuccessfully)

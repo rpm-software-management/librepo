@@ -285,7 +285,7 @@ lr_yum_download_repomd(LrHandle *handle,
         g_propagate_prefixed_error(err, tmp_err,
                                    "Cannot download repomd.xml: ");
     } else if (target->err) {
-        assert(0); // This shoud not happend since failfast sould be TRUE
+        assert(0); // This should not happen since failfast should be TRUE
         ret = FALSE;
         g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode,
                     "Cannot download repomd.xml: %s",target->err);

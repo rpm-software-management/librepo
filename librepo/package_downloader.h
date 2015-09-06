@@ -137,7 +137,7 @@ typedef struct {
  * @param handle            Handle related to this download or NULL.
  * @param relative_url      Relative part of URL to download.
  *                          First part of URL will be picked from the LrHandle
- *                          (LRO_URL or mirror) during download proccess or
+ *                          (LRO_URL or mirror) during download process or
  *                          base_url will be used if it is specified.
  * @param dest              Destination filename or just directory (filename
  *                          itself will be derived from the relative_url) or
@@ -175,7 +175,7 @@ lr_packagetarget_new(LrHandle *handle,
  * @param handle            Handle related to this download or NULL.
  * @param relative_url      Relative part of URL to download.
  *                          First part of URL will be picked from the LrHandle
- *                          (LRO_URL or mirror) during download proccess or
+ *                          (LRO_URL or mirror) during download process or
  *                          base_url will be used if it is specified.
  * @param dest              Destination filename or just directory (filename
  *                          itself will be derived from the relative_url) or

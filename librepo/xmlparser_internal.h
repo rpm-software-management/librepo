@@ -58,7 +58,7 @@ typedef struct {
 
     int     docontent;  /*!< Store text content of the current element? */
     char    *content;   /*!< Text content of the element */
-    int     lcontent;   /*!< The content lenght */
+    int     lcontent;   /*!< The content length */
     int     acontent;   /*!< Available bytes in the content */
 
     XML_Parser      *parser;    /*!< The parser */

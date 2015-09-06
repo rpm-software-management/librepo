@@ -756,7 +756,7 @@ lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
         *lnum = lr_key_file_get_boolean_long(keyfile, id, "fastestmirror", TRUE, &tmp_err);
         break;
 
-    case LR_YRC_PROXY:          /*!< (char *) Proxy addres */
+    case LR_YRC_PROXY:          /*!< (char *) Proxy address */
         str = va_arg(arg, char **);
         *str = g_key_file_get_string(keyfile, id, "proxy", &tmp_err);
         break;
@@ -994,7 +994,7 @@ lr_yum_repoconf_setopt(LrYumRepoConf *repoconf,
         g_key_file_set_boolean(keyfile, id, "fastestmirror", lnum);
         break;
 
-    case LR_YRC_PROXY:           /*!< 12 (char *) Proxy addres */
+    case LR_YRC_PROXY:           /*!< 12 (char *) Proxy address */
         str = va_arg(arg, char *);
         lr_key_file_set_string(keyfile, id, "proxy", str);
         break;

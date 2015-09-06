@@ -58,7 +58,7 @@ typedef enum {
     LR_YRC_INCLUDE,         /*!< 10 (char **) List of included packages */
 
     LR_YRC_FASTESTMIRROR,   /*!< 11 (long 1 or 0) Fastest mirror determination */
-    LR_YRC_PROXY,           /*!< 12 (char *) Proxy addres */
+    LR_YRC_PROXY,           /*!< 12 (char *) Proxy address */
     LR_YRC_PROXY_USERNAME,  /*!< 13 (char *) Proxy username */
     LR_YRC_PROXY_PASSWORD,  /*!< 14 (char *) Proxy password */
     LR_YRC_USERNAME,        /*!< 15 (char *) Username */
