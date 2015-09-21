@@ -685,7 +685,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         # Mark the file as it was downloaded by Librepo
         # Otherwise librepo refuse to resume
-        xattr.setxattr(pkg.local_path, "user.Librepo.DownloadInProgress", "")
+        xattr.setxattr(pkg.local_path, "user.Librepo.DownloadInProgress".encode(encoding='UTF-8'), "".encode(encoding='UTF-8'))
 
         # Now try to resume from bad URL
         pkgs = []
