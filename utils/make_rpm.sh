@@ -6,15 +6,41 @@ BUILD_DIR="$RPMBUILD_DIR/BUILD"
 GITREV=`git rev-parse --short HEAD`
 PREFIX=""   # Root project dir
 MY_DIR=`dirname "$0"`
+SRPM_ONLY=0
 
-if [ $# -lt "1"  -o $# -gt "2" ]
+USAGE_STRING="Usage: `basename "$0"` <root_project_dir> [-s|--srpm-only] [--rpmbuild-options OPTIONS]"
+
+## Arguments sanity check
+if [ $# -lt "1"  -o $# -gt "4" ]
 then
-    echo "Usage: `basename "$0"` <root_project_dir> [rpmbuild options]"
+    echo $USAGE_STRING
     exit 1
 fi
 
-BUILD_OPTS="$2"
-PREFIX="$1/"
+## Argument parser
+while [[ $# > 0 ]]
+do
+key="$1"
+case $key in
+    -h|--help)
+        echo $USAGE_STRING
+        exit 0
+        ;;
+    -s|--srpm-only)
+        SRPM_ONLY=1
+        ;;
+    --rpmbuild-options)
+        BUILD_OPTS="$2"
+        shift # past argument
+        ;;
+    *)
+        # unknown option
+        PREFIX=$1
+        ;;
+esac
+shift # past argument or value
+done
+
 
 if [ ! -d "$RPMBUILD_DIR" ]; then
     echo "rpmbuild dir $RPMBUILD_DIR doesn't exist!"
@@ -54,8 +80,15 @@ if [ ! $? == "0" ]; then
 fi
 echo "Copying done"
 
+RPMBUILD_ACTION="-ba"
+if [ "$SRPM_ONLY" -eq "1" ]
+then
+    RPMBUILD_ACTION="-bs"
+    echo "> Building only srpm"
+fi
+
 echo "> Starting rpmbuild $PACKAGE.."
-rpmbuild -ba $BUILD_OPTS "$RPMBUILD_DIR/SPECS/$PACKAGE.spec"
+rpmbuild $RPMBUILD_ACTION $BUILD_OPTS "$RPMBUILD_DIR/SPECS/$PACKAGE.spec"
 if [ ! $? == "0" ]; then
     echo "Error while: rpmbuild -ba $RPMBUILD_DIR/SPECS/$PACKAGE.spec"
     exit 1
@@ -66,10 +99,14 @@ echo "> Cleanup .."
 rpmbuild --clean "$RPMBUILD_DIR/SPECS/$PACKAGE.spec"
 echo "Cleanup done"
 
-echo "> Moving rpms and srpm .."
+echo "> Moving srpm .."
 mv --verbose "$RPMBUILD_DIR"/SRPMS/"$PACKAGE"-*.src.rpm "$PREFIX/."
-mv --verbose "$RPMBUILD_DIR"/RPMS/*/"$PACKAGE"-*.rpm "$PREFIX/."
-mv --verbose "$RPMBUILD_DIR"/RPMS/*/python*-"$PACKAGE"-*.rpm "$PREFIX/."
+if [ "$SRPM_ONLY" -ne "1" ]
+then
+    echo "> Moving rpms .."
+    mv --verbose "$RPMBUILD_DIR"/RPMS/*/"$PACKAGE"-*.rpm "$PREFIX/."
+    mv --verbose "$RPMBUILD_DIR"/RPMS/*/python*-"$PACKAGE"-*.rpm "$PREFIX/."
+fi
 echo "Moving done"
 
 echo "All done!"
