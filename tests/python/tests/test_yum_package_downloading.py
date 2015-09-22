@@ -686,8 +686,9 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         # Mark the file as it was downloaded by Librepo
         # Otherwise librepo refuse to resume
         try:
-            xattr.setxattr(pkg.local_path, "user.Librepo.DownloadInProgress",
-                           "")
+            xattr.setxattr(pkg.local_path,
+                           "user.Librepo.DownloadInProgress".encode("utf-8"),
+                           "".encode("utf-8"))
         except IOError as err:
             if err.errno == 95:
                 self.skipTest('extended attributes are not supported')
