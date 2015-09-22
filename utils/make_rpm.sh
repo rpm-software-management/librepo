@@ -71,9 +71,8 @@ if [ ! $? == "0" ]; then
     exit 1
 fi
 
-# Copy via sed
-sed -i "s/%global gitrev .*/%global gitrev $GITREV/g" "$PREFIX/$PACKAGE.spec"
-sed "s/%global gitrev .*/%global gitrev $GITREV/g" "$PREFIX/$PACKAGE.spec" > "$RPMBUILD_DIR/SPECS/$PACKAGE.spec"
+sed -i "s/%{\!?gitrev: %global gitrev .*/%{\!?gitrev: %global gitrev $GITREV}/g" "$PREFIX/$PACKAGE.spec"
+cp "$PREFIX/$PACKAGE.spec" "$RPMBUILD_DIR/SPECS/"
 if [ ! $? == "0" ]; then
     echo "Error while: cp $PREFIX/$PACKAGE.spec $RPMBUILD_DIR/SPECS/"
     exit 1
