@@ -82,9 +82,9 @@ py_download_packages(G_GNUC_UNUSED PyObject *self, PyObject *args)
     if (ret)
         Py_RETURN_NONE; // All fine - Return None
 
-    // Error occured
+    // Error occurred
     if (PyErr_Occurred()) {
-        // Python exception occured (in a python callback probably)
+        // Python exception occurred (in a python callback probably)
         return NULL;
     } else if(tmp_err->code == LRE_INTERRUPTED) {
         // Interrupted by Ctr+C

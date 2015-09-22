@@ -59,7 +59,7 @@ repoconf_assert_na(LrYumRepoConf *repoconf,
      * occurs, it can write a value (e.g. default value) into the
      * destination. Because we don't care about the value and the size
      * are different for different types (char*, gint64, long, ...)
-     * we pass in an array with (hopefully) enough space to accomodate
+     * we pass in an array with (hopefully) enough space to accommodate
      * all reasonable return values. */
     _cleanup_error_free_ GError *tmp_err = NULL;
     gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, array);

@@ -289,7 +289,7 @@ else() # not WIN32
                 if ( NOT _gpgme_${_name}_lib )
                   if ( GPGME_${_FLAVOUR}_FOUND )
                     set( GPGME_${_FLAVOUR}_FOUND false )
-                    set( _not_found_reason "dependant library ${_name} wasn't found" )
+                    set( _not_found_reason "dependent library ${_name} wasn't found" )
                   endif()
                 endif()
 

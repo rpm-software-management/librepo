@@ -113,7 +113,7 @@ struct _LrHandle {
         Type of repository */
 
     LrChecks checks; /*!<
-        Which check sould be applied */
+        Which check should be applied */
 
     LrProgressCb user_cb; /*!<
         User progress callback */
@@ -170,7 +170,7 @@ struct _LrHandle {
         Determines whether verify the autenticity of the peer's certificate */
 
     long sslverifyhost; /*!<
-        Determines whether the server name should be checked agains the name
+        Determines whether the server name should be checked against the name
         in the certificate */
 
     char *sslclientcert; /*!<

@@ -946,7 +946,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # First host is bad, but fastestmirror is used and thus
         # working mirror should be added to the first position
-        # and download should be successfull even if maxmirrortries
+        # and download should be successful even if maxmirrortries
         # is equal to 1.
         h.perform(r)
 
@@ -982,7 +982,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
 
         # First host is bad, but fastestmirror is used and thus
         # working mirror should be added to the first position
-        # and download should be successfull even if maxmirrortries
+        # and download should be successful even if maxmirrortries
         # is equal to 1.
         h.perform(r)
 

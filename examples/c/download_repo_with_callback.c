@@ -62,7 +62,7 @@ main(void)
     lr_handle_getinfo(h, NULL, LRI_DESTDIR, &destdir);
 
     if (ret) {
-        printf("Download successfull (Destination dir: %s)\n", destdir);
+        printf("Download successful (Destination dir: %s)\n", destdir);
     } else {
         fprintf(stderr, "Error encountered: %s\n", tmp_err->message);
         g_error_free(tmp_err);

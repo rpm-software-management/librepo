@@ -45,7 +45,7 @@ Functions
 Debugging
 ---------
 
-Some tricky/unsafe stuff which can be usefull during developing and debugging,
+Some tricky/unsafe stuff which can be useful during developing and debugging,
 but definitely shouldn't be used in production.
 
 .. autofunction:: set_debug_log_handler

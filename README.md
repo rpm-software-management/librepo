@@ -97,7 +97,7 @@ And then run:
 
     CK_FORK=no gvalgrind --leak-check=full build/tests/test_main tests/test_data/
 
-Supress known still_reachable memory:
+Suppress known still_reachable memory:
 
     CK_FORK=no gvalgrind --leak-check=full --suppressions=still_reachable.supp build/tests/test_main tests/test_data/
 

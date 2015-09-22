@@ -324,7 +324,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         # Err state of first download is undefined,
         # it could be error because of interruption
-        # of could bo None (when the download was successfull)
+        # or could be None (when the download was successful)
         # in case that it was downloaded at one shot before
         # the second download fails.
 
