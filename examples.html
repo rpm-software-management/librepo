@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Examples &mdash; librepo 1.7.4-1 documentation</title>
+    <title>Examples &mdash; librepo 1.7.16-1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '1.7.4-1',
+        URL_ROOT:    './',
+        VERSION:     '1.7.16-1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="librepo 1.7.4-1 documentation" href="index.html" />
+    <link rel="top" title="librepo 1.7.16-1 documentation" href="index.html" />
     <link rel="prev" title="PackageTarget (librepo.PackageTarget)" href="packagetarget.html" /> 
   </head>
   <body>
@@ -41,7 +39,7 @@
         <li class="right" >
           <a href="packagetarget.html" title="PackageTarget (librepo.PackageTarget)"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.4-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.16-1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,7 +55,7 @@
 <div class="section" id="simple-download-of-metadata">
 <h2>Simple download of metadata<a class="headerlink" href="#simple-download-of-metadata" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Example: Simple download whole yum repository</span>
+<span class="sd">Example: Simple download whole repository</span>
 
 <span class="sd">This example uses more &quot;pythonic&quot; way of usage.</span>
 <span class="sd">Instead of use setopt() method it uses class properties.</span>
@@ -78,7 +76,7 @@
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
-    <span class="c"># Set type of repo to Yum</span>
+    <span class="c"># Repository with repodata in the rpm-md format</span>
     <span class="n">h</span><span class="o">.</span><span class="n">repotype</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span>
     <span class="c"># Set metalink url</span>
     <span class="n">h</span><span class="o">.</span><span class="n">mirrorlist</span> <span class="o">=</span> <span class="n">METALINK_URL</span>
@@ -99,11 +97,11 @@
 <div class="section" id="metadata-localisation">
 <h2>Metadata localisation<a class="headerlink" href="#metadata-localisation" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Example: Localise metadata files of local yum repository</span>
+<span class="sd">Example: Localize metadata files of a local repository</span>
 
 <span class="sd">Use case:</span>
-<span class="sd">We have a local yum repositository and want to</span>
-<span class="sd">paths to all its metadata files.</span>
+<span class="sd">We have a local repositository in the rpm-md format</span>
+<span class="sd">and want to paths to all its metadata files.</span>
 <span class="sd">Repomd content is just a bonus.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -116,7 +114,7 @@
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
-    <span class="c"># Yum metadata</span>
+    <span class="c"># Repository with repodata in the rpm-md format</span>
     <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
     <span class="c"># Path to metadata</span>
     <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URLS</span><span class="p">,</span> <span class="p">[</span><span class="n">METADATA_PATH</span><span class="p">])</span>
@@ -150,10 +148,10 @@
 for illustration it is better to write the command anyway.</p>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Example: Verify checksum of local yum metadata</span>
+<span class="sd">Example: Verify checksum of local metadata</span>
 
 <span class="sd">Use case:</span>
-<span class="sd">We have some incomplete yum metadata localy.</span>
+<span class="sd">We have some incomplete metadata localy.</span>
 <span class="sd">They are incomplete because they doesn&#39;t</span>
 <span class="sd">contain all files specified in repomd.xml.</span>
 <span class="sd">They contains only primary.xml and filelists.xml.</span>
@@ -168,7 +166,7 @@ for illustration it is better to write the command anyway.</p>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Handle</span><span class="p">()</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">librepo</span><span class="o">.</span><span class="n">Result</span><span class="p">()</span>
-    <span class="c"># Yum metadata</span>
+    <span class="c"># Repository with repodata in the rpm-md format</span>
     <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_REPOTYPE</span><span class="p">,</span> <span class="n">librepo</span><span class="o">.</span><span class="n">LR_YUMREPO</span><span class="p">)</span>
     <span class="c"># Path to the metadata</span>
     <span class="n">h</span><span class="o">.</span><span class="n">setopt</span><span class="p">(</span><span class="n">librepo</span><span class="o">.</span><span class="n">LRO_URLS</span><span class="p">,</span> <span class="p">[</span><span class="n">METADATA_PATH</span><span class="p">])</span>
@@ -380,12 +378,12 @@ for illustration it is better to write the command anyway.</p>
         <li class="right" >
           <a href="packagetarget.html" title="PackageTarget (librepo.PackageTarget)"
              >previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.4-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.16-1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Red Hat.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

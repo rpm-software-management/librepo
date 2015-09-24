@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Librepo Library &mdash; librepo 1.7.4-1 documentation</title>
+    <title>The Librepo Library &mdash; librepo 1.7.16-1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '1.7.4-1',
+        URL_ROOT:    './',
+        VERSION:     '1.7.16-1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="librepo 1.7.4-1 documentation" href="index.html" />
+    <link rel="top" title="librepo 1.7.16-1 documentation" href="index.html" />
     <link rel="next" title="Handle (librepo.Handle)" href="handle.html" />
     <link rel="prev" title="librepo" href="index.html" /> 
   </head>
@@ -45,7 +43,7 @@
         <li class="right" >
           <a href="index.html" title="librepo"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.4-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.16-1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -361,7 +359,7 @@ on <em>stage</em> value. See the list of available stages.</p>
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_LOWSPEEDTIME</tt><a class="headerlink" href="#librepo.LRO_LOWSPEEDTIME" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Integer or None</em>. The time in seconds that the transfer should be below
 the LRO_LOWSPEEDLIMIT for the library to consider it too slow and abort.
-Default: 10 (sec)</p>
+Default: 30 (sec)</p>
 </dd></dl>
 
 <dl class="data">
@@ -405,10 +403,22 @@ only <tt class="docutils literal"><span class="pre">repomd.xml</span></tt> will 
 </dd></dl>
 
 <dl class="data">
+<dt id="librepo.LRO_RPMMDDLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_RPMMDDLIST</tt><a class="headerlink" href="#librepo.LRO_RPMMDDLIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>See LRO_YUMDLIST</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="librepo.LRO_YUMBLIST">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_YUMBLIST</tt><a class="headerlink" href="#librepo.LRO_YUMBLIST" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>List of strings</em>. Set blacklist of yum metadata files.
 This files will not be downloaded.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_RPMMDBLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_RPMMDBLIST</tt><a class="headerlink" href="#librepo.LRO_RPMMDBLIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>See LRO_YUMBLIST</p>
 </dd></dl>
 
 <dl class="data">
@@ -439,10 +449,104 @@ the server cert is for the server it is known as.</p>
 </dd></dl>
 
 <dl class="data">
+<dt id="librepo.LRO_SSLCLIENTCERT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_SSLCLIENTCERT</tt><a class="headerlink" href="#librepo.LRO_SSLCLIENTCERT" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>String or None</em>. Path to the PEM format SSL client certificate to use
+when talking to the server.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_SSLCLIENTKEY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_SSLCLIENTKEY</tt><a class="headerlink" href="#librepo.LRO_SSLCLIENTKEY" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>String or None</em>. Path to the PEM format SSL client key to use when
+talking to the server.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_SSLCACERT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_SSLCACERT</tt><a class="headerlink" href="#librepo.LRO_SSLCACERT" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>String or None</em>. Path to a file containing the list of PEM format
+trusted CA certificates.</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="librepo.LRO_IPRESOLVE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_IPRESOLVE</tt><a class="headerlink" href="#librepo.LRO_IPRESOLVE" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Integer or None</em> Sets kind of IP addresses to use when resolving host
 names. Could be one of: <a class="reference internal" href="#ipresolve-type-label"><em>Supported IP resolving</em></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_ALLOWEDMIRRORFAILURES">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_ALLOWEDMIRRORFAILURES</tt><a class="headerlink" href="#librepo.LRO_ALLOWEDMIRRORFAILURES" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Integer or None</em> If all transfers from a mirror failed (no successful transfer
+from the mirror exists) and the number
+of failed downloads is higher or equal to this value
+the mirror will be skipped (ignored) for all next downloads.</p>
+<p><strong>Note:</strong> Number of failed transfers for a single mirror can
+outreach this number! For example, if you set this value to 1
+but you allow 3 parallel downloads it is possible that all
+three downloads start from the mirror,
+before any of them can fail. Then, if all three transfers
+fail, the number of failures for the mirror
+will be 3, even if this option was set to 1.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_ADAPTIVEMIRRORSORTING">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_ADAPTIVEMIRRORSORTING</tt><a class="headerlink" href="#librepo.LRO_ADAPTIVEMIRRORSORTING" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Integer or None</em> If enabled, internal list of mirrors for each
+handle is re-sorted after each finished transfer.
+The the sorting is based on mirror error rate etc.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_GNUPGHOMEDIR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_GNUPGHOMEDIR</tt><a class="headerlink" href="#librepo.LRO_GNUPGHOMEDIR" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>String or None</em> set own GNUPG configuration directory (a dir with keyring).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_FASTESTMIRRORTIMEOUT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_FASTESTMIRRORTIMEOUT</tt><a class="headerlink" href="#librepo.LRO_FASTESTMIRRORTIMEOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Float of None</em> Max length of fastest mirror measurement in seconds.
+Default value is 2sec.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_HTTPHEADER">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_HTTPHEADER</tt><a class="headerlink" href="#librepo.LRO_HTTPHEADER" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>List of strings or None</em> List of strings that represent http headers.
+Each header has format &#8220;header_name: content&#8221;. If you add a header
+with no content as in &#8216;Accept:&#8217; (no data on the right side of the colon),
+the internally used header will get disabled. With this option you can
+add new headers, replace internal headers and remove internal headers.
+To add a header with no content (nothing to the right side of the colon),
+use the form &#8216;MyHeader;&#8217; (note the ending semicolon).
+Note: Headers must not be CRLF-terminated!</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_OFFLINE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_OFFLINE</tt><a class="headerlink" href="#librepo.LRO_OFFLINE" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Boolean</em> Make the handle work only locally, all remote URLs are
+ignored. Remote mirrorlists/metalinks (if they are specified)
+are ignored. Fastest mirror check (if enabled) is skiped.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_HTTPAUTHMETHODS">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_HTTPAUTHMETHODS</tt><a class="headerlink" href="#librepo.LRO_HTTPAUTHMETHODS" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Long (bitmask)</em> Bitmask which tell Librepo which auth metods to use.
+See: <a class="reference internal" href="#auth-methods-label"><em>Auth methods</em></a></p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRO_PROXYAUTHMETHODS">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRO_PROXYAUTHMETHODS</tt><a class="headerlink" href="#librepo.LRO_PROXYAUTHMETHODS" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Long (bitmask)</em> Bitmask which tell Librepo which auth metods to use
+for proxy authentication.
+See: <a class="reference internal" href="#auth-methods-label"><em>Auth methods</em></a></p>
 </dd></dl>
 
 </div>
@@ -512,8 +616,18 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dd></dd></dl>
 
 <dl class="data">
+<dt id="librepo.LRI_RPMMDDLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_RPMMDDLIST</tt><a class="headerlink" href="#librepo.LRI_RPMMDDLIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
 <dt id="librepo.LRI_YUMBLIST">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_YUMBLIST</tt><a class="headerlink" href="#librepo.LRI_YUMBLIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_RPMMDBLIST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_RPMMDBLIST</tt><a class="headerlink" href="#librepo.LRI_RPMMDBLIST" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="data">
@@ -572,8 +686,63 @@ from <a class="reference internal" href="handle.html#librepo.Handle" title="libr
 <dd></dd></dl>
 
 <dl class="data">
+<dt id="librepo.LRI_SSLCLIENTCERT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_SSLCLIENTCERT</tt><a class="headerlink" href="#librepo.LRI_SSLCLIENTCERT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_SSLCLIENTKEY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_SSLCLIENTKEY</tt><a class="headerlink" href="#librepo.LRI_SSLCLIENTKEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_SSLCACERT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_SSLCACERT</tt><a class="headerlink" href="#librepo.LRI_SSLCACERT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
 <dt id="librepo.LRI_IPRESOLVE">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRI_IPRESOLVE</tt><a class="headerlink" href="#librepo.LRI_IPRESOLVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_ALLOWEDMIRRORFAILURES">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_ALLOWEDMIRRORFAILURES</tt><a class="headerlink" href="#librepo.LRI_ALLOWEDMIRRORFAILURES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_ADAPTIVEMIRRORSORTING">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_ADAPTIVEMIRRORSORTING</tt><a class="headerlink" href="#librepo.LRI_ADAPTIVEMIRRORSORTING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_GNUPGHOMEDIR">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_GNUPGHOMEDIR</tt><a class="headerlink" href="#librepo.LRI_GNUPGHOMEDIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_FASTESTMIRRORTIMEOUT">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_FASTESTMIRRORTIMEOUT</tt><a class="headerlink" href="#librepo.LRI_FASTESTMIRRORTIMEOUT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_HTTPHEADER">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_HTTPHEADER</tt><a class="headerlink" href="#librepo.LRI_HTTPHEADER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_OFFLINE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_OFFLINE</tt><a class="headerlink" href="#librepo.LRI_OFFLINE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_HTTPAUTHMETHODS">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_HTTPAUTHMETHODS</tt><a class="headerlink" href="#librepo.LRI_HTTPAUTHMETHODS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRI_PROXYAUTHMETHODS">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRI_PROXYAUTHMETHODS</tt><a class="headerlink" href="#librepo.LRI_PROXYAUTHMETHODS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -635,9 +804,15 @@ your system allows.</p>
 <div class="section" id="repo-type-constants">
 <span id="repotype-constants-label"></span><h3>Repo type constants<a class="headerlink" href="#repo-type-constants" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
+<dt id="librepo.RPMMDREPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">RPMMDREPO</tt><big>(</big><em>LR_RPMMDREPO</em><big>)</big><a class="headerlink" href="#librepo.RPMMDREPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classical repository in repo-md format with <tt class="docutils literal"><span class="pre">repodata/</span></tt> directory.</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="librepo.YUMREPO">
 <tt class="descclassname">librepo.</tt><tt class="descname">YUMREPO</tt><big>(</big><em>LR_YUMREPO</em><big>)</big><a class="headerlink" href="#librepo.YUMREPO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Classical yum repository with <tt class="docutils literal"><span class="pre">repodata/</span></tt> directory.</p>
+<dd><p>See RPMMDREPO</p>
 </dd></dl>
 
 <dl class="data">
@@ -664,34 +839,98 @@ your system allows.</p>
 <div class="section" id="predefined-yumdlist-lists">
 <span id="predefined-yumdlists-label"></span><h3>Predefined yumdlist lists<a class="headerlink" href="#predefined-yumdlist-lists" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
-<dt id="librepo.YUM_FULL">
-<tt class="descclassname">librepo.</tt><tt class="descname">YUM_FULL</tt><big>(</big><em>LR_YUM_FULL</em><big>)</big><a class="headerlink" href="#librepo.YUM_FULL" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.RPMMD_FULL">
+<tt class="descclassname">librepo.</tt><tt class="descname">RPMMD_FULL</tt><big>(</big><em>YUM_FULL</em>, <em>LR_YUM_FULL</em><big>)</big><a class="headerlink" href="#librepo.RPMMD_FULL" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download all repodata files</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="librepo.YUM_REPOMDONLY">
-<tt class="descclassname">librepo.</tt><tt class="descname">YUM_REPOMDONLY</tt><big>(</big><em>LR_YUM_REPOMDONLY</em><big>)</big><a class="headerlink" href="#librepo.YUM_REPOMDONLY" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.RPMMD_REPOMDONLY">
+<tt class="descclassname">librepo.</tt><tt class="descname">RPMMD_REPOMDONLY</tt><big>(</big><em>YUM_REPOMDONLY</em>, <em>LR_YUM_REPOMDONLY</em><big>)</big><a class="headerlink" href="#librepo.RPMMD_REPOMDONLY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download only repomd.xml file</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="librepo.YUM_BASEXML">
-<tt class="descclassname">librepo.</tt><tt class="descname">YUM_BASEXML</tt><big>(</big><em>LR_YUM_BASEXML</em><big>)</big><a class="headerlink" href="#librepo.YUM_BASEXML" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.RPMMD_BASEXML">
+<tt class="descclassname">librepo.</tt><tt class="descname">RPMMD_BASEXML</tt><big>(</big><em>YUM_BASEXML</em>, <em>LR_YUM_BASEXML</em><big>)</big><a class="headerlink" href="#librepo.RPMMD_BASEXML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download only primary.xml, filelists.xml and other.xml</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="librepo.YUM_BASEDB">
-<tt class="descclassname">librepo.</tt><tt class="descname">YUM_BASEDB</tt><big>(</big><em>LR_YUM_BASEDB</em><big>)</big><a class="headerlink" href="#librepo.YUM_BASEDB" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.RPMMD_BASEDB">
+<tt class="descclassname">librepo.</tt><tt class="descname">RPMMD_BASEDB</tt><big>(</big><em>YUM_BASEDB</em>, <em>LR_YUM_BASEDB</em><big>)</big><a class="headerlink" href="#librepo.RPMMD_BASEDB" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download only primary, filelists and other databases.</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="librepo.YUM_HAWKEY">
-<tt class="descclassname">librepo.</tt><tt class="descname">YUM_HAWKEY</tt><big>(</big><em>LR_YUM_HAWKEY</em><big>)</big><a class="headerlink" href="#librepo.YUM_HAWKEY" title="Permalink to this definition">¶</a></dt>
+<dt id="librepo.RPMMD_HAWKEY">
+<tt class="descclassname">librepo.</tt><tt class="descname">RPMMD_HAWKEY</tt><big>(</big><em>YUM_HAWKEY</em>, <em>LR_YUM_HAWKEY</em><big>)</big><a class="headerlink" href="#librepo.RPMMD_HAWKEY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download only files used by Hawkey (<a class="reference external" href="https://github.com/akozumpl/hawkey/">https://github.com/akozumpl/hawkey/</a>).
 (primary, filelists, prestodelta)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="auth-methods">
+<span id="auth-methods-label"></span><h3>Auth methods<a class="headerlink" href="#auth-methods" title="Permalink to this headline">¶</a></h3>
+<p>Supported auth methods for <a class="reference internal" href="#librepo.LRO_HTTPAUTHMETHODS" title="librepo.LRO_HTTPAUTHMETHODS"><tt class="xref py py-data docutils literal"><span class="pre">LRO_HTTPAUTHMETHODS</span></tt></a> and
+<a class="reference internal" href="#librepo.LRO_PROXYAUTHMETHODS" title="librepo.LRO_PROXYAUTHMETHODS"><tt class="xref py py-data docutils literal"><span class="pre">LRO_PROXYAUTHMETHODS</span></tt></a> options.</p>
+<dl class="data">
+<dt id="librepo.LR_AUTH_NONE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_NONE</tt><a class="headerlink" href="#librepo.LR_AUTH_NONE" title="Permalink to this definition">¶</a></dt>
+<dd><p>No auth method enabled.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_BASIC">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_BASIC</tt><a class="headerlink" href="#librepo.LR_AUTH_BASIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP Basic authentication (Default).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_DIGEST">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_DIGEST</tt><a class="headerlink" href="#librepo.LR_AUTH_DIGEST" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP Digest authentication.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_NEGOTIATE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_NEGOTIATE</tt><a class="headerlink" href="#librepo.LR_AUTH_NEGOTIATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP Negotiate (SPNEGO) authentication.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_NTLM">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_NTLM</tt><a class="headerlink" href="#librepo.LR_AUTH_NTLM" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP NTLM authentication.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_DIGEST_IE">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_DIGEST_IE</tt><a class="headerlink" href="#librepo.LR_AUTH_DIGEST_IE" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP Digest authentication with an IE flavor.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_NTLM_WB">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_NTLM_WB</tt><a class="headerlink" href="#librepo.LR_AUTH_NTLM_WB" title="Permalink to this definition">¶</a></dt>
+<dd><p>NTLM delegating to winbind helper.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_ONLY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_ONLY</tt><a class="headerlink" href="#librepo.LR_AUTH_ONLY" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a meta symbol. OR this value
+together with a single specific auth
+value to force libcurl to probe for
+un-restricted auth and if not, only
+that single auth algorithm is
+acceptable.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LR_AUTH_ANY">
+<tt class="descclassname">librepo.</tt><tt class="descname">LR_AUTH_ANY</tt><a class="headerlink" href="#librepo.LR_AUTH_ANY" title="Permalink to this definition">¶</a></dt>
+<dd><p>All suitable methods.</p>
 </dd></dl>
 
 </div>
@@ -718,7 +957,7 @@ your system allows.</p>
 <dt id="librepo.FMSTAGE_CACHELOADINGSTATUS">
 <tt class="descclassname">librepo.</tt><tt class="descname">FMSTAGE_CACHELOADINGSTATUS</tt><a class="headerlink" href="#librepo.FMSTAGE_CACHELOADINGSTATUS" title="Permalink to this definition">¶</a></dt>
 <dd><ol class="arabic simple" start="2">
-<li>Cache loading finished. If successfull, <em>data</em> is None, otherwise
+<li>Cache loading finished. If successful, <em>data</em> is None, otherwise
 <em>data</em> is string with error message.</li>
 </ol>
 </dd></dl>
@@ -744,7 +983,7 @@ If all times were loaded from cache, this stage is skiped.</p>
 <tt class="descclassname">librepo.</tt><tt class="descname">FMSTAGE_STATUS</tt><a class="headerlink" href="#librepo.FMSTAGE_STATUS" title="Permalink to this definition">¶</a></dt>
 <dd><ol class="arabic simple" start="5">
 <li>The very last invocation of fastest mirror callback.
-If fastest mirror detection was successfull <em>data</em>,
+If fastest mirror detection was successful <em>data</em>,
 otherwise <em>data</em> contain string with error message.</li>
 </ol>
 </dd></dl>
@@ -1064,22 +1303,188 @@ file, mirrorlist doesn&#8217;t contain urls, ..)</div></blockquote>
 <p>LibRepo Result options for use in <a class="reference internal" href="result.html#librepo.Result.getinfo" title="librepo.Result.getinfo"><tt class="xref py py-meth docutils literal"><span class="pre">getinfo()</span></tt></a> method.</p>
 <dl class="data">
 <dt id="librepo.LRR_YUM_REPO">
-<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_REPO</tt><a class="headerlink" href="#librepo.LRR_YUM_REPO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dict with local paths to downloaded/localised
-yum repository.</p>
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_REPO</tt><big>(</big><em>deprecated - use LRR_RPMMD_REPO instead</em><big>)</big><a class="headerlink" href="#librepo.LRR_YUM_REPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a flat dictionary with local paths to downloaded/localised
+rpmmd repository and basic repository&#8217;s information.:</p>
+<div class="highlight-python"><div class="highlight"><pre>{&#39;repomd&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/repomd.xml&#39;,
+ &#39;url&#39;: u&#39;http://127.0.0.1:5000/yum/static/01/&#39;
+ &#39;destdir&#39;: u&#39;/tmp/librepotest-jPMmX5&#39;,
+ &#39;metalink&#39;: None,
+ &#39;mirrorlist&#39;: None,
+ &#39;signature&#39;: None,
+ &#39;primary&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz&#39;,
+ &#39;primary_db&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2&#39;,
+ &#39;filelists&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz&#39;,
+ &#39;filelists_db&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2&#39;,
+ &#39;other&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz&#39;,
+ &#39;other_db&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2&#39;,
+}
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRR_RPMMD_REPO">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_RPMMD_REPO</tt><a class="headerlink" href="#librepo.LRR_RPMMD_REPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict with local paths to downloaded/localised
+rpmmd repository and basic repository&#8217;s information.:</p>
+<div class="highlight-python"><div class="highlight"><pre>{&#39;repomd&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/repomd.xml&#39;,
+ &#39;url&#39;: u&#39;http://127.0.0.1:5000/yum/static/01/&#39;
+ &#39;destdir&#39;: u&#39;/tmp/librepotest-jPMmX5&#39;,
+ &#39;metalink&#39;: None,
+ &#39;mirrorlist&#39;: None,
+ &#39;signature&#39;: None,
+ &#39;paths&#39;: {&#39;primary&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz&#39;,
+           &#39;primary_db&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2&#39;,
+           &#39;filelists&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz&#39;,
+           &#39;filelists_db&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2&#39;,
+           &#39;other&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz&#39;,
+           &#39;other_db&#39;: u&#39;/tmp/librepotest-jPMmX5/repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2&#39;}
+}
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="data">
 <dt id="librepo.LRR_YUM_REPOMD">
-<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_REPOMD</tt><a class="headerlink" href="#librepo.LRR_YUM_REPOMD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dict representing a repomd.xml file of downloaded
-yum repository.</p>
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_REPOMD</tt><big>(</big><em>deprecated - use LRR_RPMMD_REPOMD instead</em><big>)</big><a class="headerlink" href="#librepo.LRR_YUM_REPOMD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a flat dict representing a repomd.xml file of downloaded
+rpmmd repository.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;revision&#39;</span><span class="p">:</span> <span class="s">u&#39;1347459931&#39;</span><span class="p">,</span>
+ <span class="s">&#39;repo_tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+ <span class="s">&#39;content_tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+ <span class="s">&#39;distro_tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+ <span class="s">&#39;primary&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;4543ad62e4d86337cd1949346f9aec976b847b58&#39;</span><span class="p">,</span>
+             <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;68457ceb8e20bda004d46e0a4dfa4a69ce71db48&#39;</span><span class="p">,</span>
+             <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+             <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+             <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">0L</span><span class="p">,</span>
+             <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz&#39;</span><span class="p">,</span>
+             <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">936L</span><span class="p">,</span>
+             <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">3385L</span><span class="p">,</span>
+             <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459930L</span><span class="p">},</span>
+ <span class="s">&#39;primary_db&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;735cd6294df08bdf28e2ba113915ca05a151118e&#39;</span><span class="p">,</span>
+                <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;ba636386312e1b597fc4feb182d04c059b2a77d5&#39;</span><span class="p">,</span>
+                <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">10L</span><span class="p">,</span>
+                <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2&#39;</span><span class="p">,</span>
+                <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">2603L</span><span class="p">,</span>
+                <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">23552L</span><span class="p">,</span>
+                <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459931L</span><span class="p">},</span>
+ <span class="s">&#39;filelists&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;aeca08fccd3c1ab831e1df1a62711a44ba1922c9&#39;</span><span class="p">,</span>
+               <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;52d30ae3162ca863c63c345ffdb7f0e10c1414a5&#39;</span><span class="p">,</span>
+               <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+               <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+               <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">0L</span><span class="p">,</span>
+               <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz&#39;</span><span class="p">,</span>
+               <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">43310L</span><span class="p">,</span>
+               <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">735088L</span><span class="p">,</span>
+               <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459930L</span><span class="p">},</span>
+ <span class="s">&#39;filelists_db&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;4034dcea76c94d3f7a9616779539a4ea8cac288f&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;949c6b7b605b2bc66852630c841a5003603ca5b2&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">10L</span><span class="p">,</span>
+                  <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">22575L</span><span class="p">,</span>
+                  <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">201728L</span><span class="p">,</span>
+                  <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459931L</span><span class="p">},</span>
+ <span class="s">&#39;other&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;a8977cdaa0b14321d9acfab81ce8a85e869eee32&#39;</span><span class="p">,</span>
+           <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;4b5b8874fb233a626b03b3260a1aa08dce90e81a&#39;</span><span class="p">,</span>
+           <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+           <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+           <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">0L</span><span class="p">,</span>
+           <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz&#39;</span><span class="p">,</span>
+           <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">807L</span><span class="p">,</span>
+           <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">1910L</span><span class="p">,</span>
+           <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459930L</span><span class="p">},</span>
+ <span class="s">&#39;other_db&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;fd96942c919628895187778633001cff61e872b8&#39;</span><span class="p">,</span>
+              <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;c5262f62b6b3360722b9b2fb5d0a9335d0a51112&#39;</span><span class="p">,</span>
+              <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+              <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+              <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">10L</span><span class="p">,</span>
+              <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2&#39;</span><span class="p">,</span>
+              <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">1407L</span><span class="p">,</span>
+              <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">8192L</span><span class="p">,</span>
+              <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459931L</span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="data">
-<dt id="librepo.LRR_YUM_TIMESTAMP">
-<tt class="descclassname">librepo.</tt><tt class="descname">LRR_YUM_TIMESTAMP</tt><a class="headerlink" href="#librepo.LRR_YUM_TIMESTAMP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the highest timestamp from all records in the repomd.
+<dt id="librepo.LRR_RPMMD_REPOMD">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_RPMMD_REPOMD</tt><a class="headerlink" href="#librepo.LRR_RPMMD_REPOMD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict representing a repomd.xml file of downloaded
+rpmmd repository.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;revision&#39;</span><span class="p">:</span> <span class="s">u&#39;1347459931&#39;</span><span class="p">,</span>
+ <span class="s">&#39;repo_tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+ <span class="s">&#39;content_tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+ <span class="s">&#39;distro_tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+ <span class="s">&#39;records&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;primary&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;4543ad62e4d86337cd1949346f9aec976b847b58&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;68457ceb8e20bda004d46e0a4dfa4a69ce71db48&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">0L</span><span class="p">,</span>
+                         <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/4543ad62e4d86337cd1949346f9aec976b847b58-primary.xml.gz&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">936L</span><span class="p">,</span>
+                         <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">3385L</span><span class="p">,</span>
+                         <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459930L</span><span class="p">},</span>
+             <span class="s">&#39;primary_db&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;735cd6294df08bdf28e2ba113915ca05a151118e&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;ba636386312e1b597fc4feb182d04c059b2a77d5&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">10L</span><span class="p">,</span>
+                            <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/735cd6294df08bdf28e2ba113915ca05a151118e-primary.sqlite.bz2&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">2603L</span><span class="p">,</span>
+                            <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">23552L</span><span class="p">,</span>
+                            <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459931L</span><span class="p">}},</span>
+             <span class="s">&#39;filelists&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;aeca08fccd3c1ab831e1df1a62711a44ba1922c9&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;52d30ae3162ca863c63c345ffdb7f0e10c1414a5&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">0L</span><span class="p">,</span>
+                           <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/aeca08fccd3c1ab831e1df1a62711a44ba1922c9-filelists.xml.gz&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">43310L</span><span class="p">,</span>
+                           <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">735088L</span><span class="p">,</span>
+                           <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459930L</span><span class="p">},</span>
+             <span class="s">&#39;filelists_db&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;4034dcea76c94d3f7a9616779539a4ea8cac288f&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;949c6b7b605b2bc66852630c841a5003603ca5b2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">10L</span><span class="p">,</span>
+                              <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/4034dcea76c94d3f7a9616779539a4ea8cac288f-filelists.sqlite.bz2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">22575L</span><span class="p">,</span>
+                              <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">201728L</span><span class="p">,</span>
+                              <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459931L</span><span class="p">},</span>
+             <span class="s">&#39;other&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;a8977cdaa0b14321d9acfab81ce8a85e869eee32&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;4b5b8874fb233a626b03b3260a1aa08dce90e81a&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">0L</span><span class="p">,</span>
+                       <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/a8977cdaa0b14321d9acfab81ce8a85e869eee32-other.xml.gz&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">807L</span><span class="p">,</span>
+                       <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">1910L</span><span class="p">,</span>
+                       <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459930L</span><span class="p">},</span>
+             <span class="s">&#39;other_db&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;checksum&#39;</span><span class="p">:</span> <span class="s">u&#39;fd96942c919628895187778633001cff61e872b8&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;checksum_open&#39;</span><span class="p">:</span> <span class="s">u&#39;c5262f62b6b3360722b9b2fb5d0a9335d0a51112&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;checksum_open_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;checksum_type&#39;</span><span class="p">:</span> <span class="s">u&#39;sha1&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;db_version&#39;</span><span class="p">:</span> <span class="il">10L</span><span class="p">,</span>
+                          <span class="s">&#39;location_href&#39;</span><span class="p">:</span> <span class="s">u&#39;repodata/fd96942c919628895187778633001cff61e872b8-other.sqlite.bz2&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;size&#39;</span><span class="p">:</span> <span class="il">1407L</span><span class="p">,</span>
+                          <span class="s">&#39;size_open&#39;</span><span class="p">:</span> <span class="il">8192L</span><span class="p">,</span>
+                          <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="il">1347459931L</span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="librepo.LRR_RPMMD_TIMESTAMP">
+<tt class="descclassname">librepo.</tt><tt class="descname">LRR_RPMMD_TIMESTAMP</tt><big>(</big><em>LRR_YUM_TIMESTAMP</em><big>)</big><a class="headerlink" href="#librepo.LRR_RPMMD_TIMESTAMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the highest timestamp from all records in the repomd.
 See: <a class="reference external" href="http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f">http://yum.baseurl.org/gitweb?p=yum.git;a=commitdiff;h=59d3d67f</a></p>
 </dd></dl>
 
@@ -1297,7 +1702,7 @@ that represents the hash in createrepo_c.</p>
 <tt class="descclassname">librepo.</tt><tt class="descname">download_packages</tt><big>(</big><em>list</em>, <em>failfast=False</em><big>)</big><a class="headerlink" href="#librepo.download_packages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download list of packages. <em>list</em> is a list of
 <a class="reference internal" href="packagetarget.html#librepo.PackageTarget" title="librepo.PackageTarget"><tt class="xref py py-class docutils literal"><span class="pre">PackageTarget</span></tt></a> objects.
-If the <em>failfast</em> is True, then whole downloading is stoped
+If the <em>failfast</em> is True, then whole downloading is stopped
 immediately when any of download fails (and exception is raised).
 If the failfast is False, then this function returns after all
 downloads finish (no matter if successfully or unsuccessfully)
@@ -1366,12 +1771,14 @@ use for example <strong>os.open()</strong>.</li>
 </div>
 <div class="section" id="debugging">
 <h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
-<p>Some tricky/unsafe stuff which can be usefull during developing and debugging,
+<p>Some tricky/unsafe stuff which can be useful during developing and debugging,
 but definitely shouldn&#8217;t be used in production.</p>
 <dl class="function">
 <dt id="librepo.set_debug_log_handler">
 <tt class="descclassname">librepo.</tt><tt class="descname">set_debug_log_handler</tt><big>(</big><em>log_function</em>, <em>user_data=None</em><big>)</big><a class="headerlink" href="#librepo.set_debug_log_handler" title="Permalink to this definition">¶</a></dt>
-<dd><p>When python debug log handler is used, the librepo is <strong>THREAD-UNSAFE</strong>!</p>
+<dd><p>ONLY FOR DEVELOPMENT (DEBUGGING) PURPOSES!</p>
+<p>When python debug log handler is used, the librepo is <strong>THREAD-UNSAFE</strong>!</p>
+<p>If used, it overrides logging set by log_set_file and vice versa.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1408,9 +1815,7 @@ during call.</li>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">The Librepo Library</a><ul>
-<li><a class="reference internal" href="#classes">Classes</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#module-librepo">Constants</a><ul>
 <li><a class="reference internal" href="#version-contants">Version contants</a></li>
@@ -1420,6 +1825,7 @@ during call.</li>
 <li><a class="reference internal" href="#supported-ip-resolving">Supported IP resolving</a></li>
 <li><a class="reference internal" href="#repo-type-constants">Repo type constants</a></li>
 <li><a class="reference internal" href="#predefined-yumdlist-lists">Predefined yumdlist lists</a></li>
+<li><a class="reference internal" href="#auth-methods">Auth methods</a></li>
 <li><a class="reference internal" href="#fastest-mirror-stages">Fastest mirror stages</a></li>
 <li><a class="reference internal" href="#error-codes">Error codes</a></li>
 <li><a class="reference internal" href="#result-options"><tt class="docutils literal"><span class="pre">Result</span></tt> options</a></li>
@@ -1483,12 +1889,12 @@ during call.</li>
         <li class="right" >
           <a href="index.html" title="librepo"
              >previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.4-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.16-1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Red Hat.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>
