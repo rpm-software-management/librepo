@@ -357,6 +357,17 @@ Version contants
     ignored. Remote mirrorlists/metalinks (if they are specified)
     are ignored. Fastest mirror check (if enabled) is skiped.
 
+.. data:: LRO_HTTPAUTHMETHODS
+
+    *Long (bitmask)* Bitmask which tell Librepo which auth metods to use.
+    See: :ref:`auth-methods-label`
+
+.. data:: LRO_PROXYAUTHMETHODS
+
+    *Long (bitmask)* Bitmask which tell Librepo which auth metods to use
+    for proxy authentication.
+    See: :ref:`auth-methods-label`
+
 
 .. _handle-info-options-label:
 
@@ -402,6 +413,8 @@ Version contants
 .. data:: LRI_FASTESTMIRRORTIMEOUT
 .. data:: LRI_HTTPHEADER
 .. data:: LRI_OFFLINE
+.. data:: LRI_HTTPAUTHMETHODS
+.. data:: LRI_PROXYAUTHMETHODS
 
 .. _proxy-type-label:
 
@@ -483,6 +496,57 @@ Predefined yumdlist lists
 
     Download only files used by Hawkey (https://github.com/akozumpl/hawkey/).
     (primary, filelists, prestodelta)
+
+
+.. _auth-methods-label:
+
+Auth methods
+------------
+
+Supported auth methods for :data:`~.LRO_HTTPAUTHMETHODS` and
+:data:`~.LRO_PROXYAUTHMETHODS` options.
+
+.. data:: LR_AUTH_NONE
+
+    No auth method enabled.
+
+.. data:: LR_AUTH_BASIC
+
+    HTTP Basic authentication (Default).
+
+.. data:: LR_AUTH_DIGEST
+
+    HTTP Digest authentication.
+
+.. data:: LR_AUTH_NEGOTIATE
+
+    HTTP Negotiate (SPNEGO) authentication.
+
+.. data:: LR_AUTH_NTLM
+
+    HTTP NTLM authentication.
+
+.. data:: LR_AUTH_DIGEST_IE
+
+    HTTP Digest authentication with an IE flavor.
+
+.. data:: LR_AUTH_NTLM_WB
+
+    NTLM delegating to winbind helper.
+
+.. data:: LR_AUTH_ONLY
+
+    This is a meta symbol. OR this value
+    together with a single specific auth
+    value to force libcurl to probe for
+    un-restricted auth and if not, only
+    that single auth algorithm is
+    acceptable.
+
+.. data:: LR_AUTH_ANY
+
+    All suitable methods.
+
 
 .. _fastestmirror-stages-constants-label:
 
@@ -1312,6 +1376,14 @@ class Handle(_librepo.Handle):
     .. attribute:: offline:
 
         See :data:`.LRO_OFFLINE`
+
+    .. attribute:: httpauthmethods
+
+        See :data:`.LRO_HTTPAUTHMETHODS`
+
+    .. attribute:: proxyauthmethods
+
+        See :data:`.LRO_PROXYAUTHMETHODS`
 
     """
 

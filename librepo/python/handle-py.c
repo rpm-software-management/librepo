@@ -479,6 +479,8 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_MAXMIRRORTRIES:
     case LRO_MAXPARALLELDOWNLOADS:
     case LRO_MAXDOWNLOADSPERMIRROR:
+    case LRO_HTTPAUTHMETHODS:
+    case LRO_PROXYAUTHMETHODS:
     {
         long d;
 
@@ -500,6 +502,10 @@ py_setopt(_HandleObject *self, PyObject *args)
                 d = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
             else if (option == LRO_MAXDOWNLOADSPERMIRROR)
                 d = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
+            else if (option == LRO_HTTPAUTHMETHODS)
+                d = LRO_HTTPAUTHMETHODS_DEFAULT;
+            else if (option == LRO_PROXYAUTHMETHODS)
+                d = LRO_PROXYAUTHMETHODS_DEFAULT;
             else
                 assert(0);
         } else {
@@ -916,6 +922,19 @@ py_getinfo(_HandleObject *self, PyObject *args)
         if (!res)
             RETURN_ERROR(&tmp_err, -1, NULL);
         return PyLong_FromLong(lval);
+
+    /* LrAuth* option */
+    case LRI_HTTPAUTHMETHODS:
+    case LRI_PROXYAUTHMETHODS: {
+        LrAuth auth = 0;
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
+                                (LrHandleInfoOption)option,
+                                &auth);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        return PyLong_FromLong((long) auth);
+    }
 
     /* LrIpResolveType* option  */
     case LRI_IPRESOLVE: {

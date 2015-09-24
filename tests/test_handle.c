@@ -53,6 +53,8 @@ START_TEST(test_handle)
     fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCLIENTCERT, "/etc/cert.pem"));
     fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCLIENTKEY, "/etc/cert.key"));
     fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCACERT, "/etc/ca.pem"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_HTTPAUTHMETHODS, LR_AUTH_NTLM));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_PROXYAUTHMETHODS, LR_AUTH_DIGEST));
     lr_handle_free(h);
 }
 END_TEST
@@ -132,6 +134,14 @@ START_TEST(test_handle_getinfo)
     str = NULL;
     fail_if(!lr_handle_getinfo(h, NULL, LRI_SSLCACERT, &str));
     fail_if(str != NULL);
+
+    LrAuth auth = LR_AUTH_NONE;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_HTTPAUTHMETHODS, &auth));
+    fail_if(auth != LR_AUTH_BASIC);
+
+    auth = LR_AUTH_NONE;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_PROXYAUTHMETHODS, &auth));
+    fail_if(auth != LR_AUTH_BASIC);
 
     lr_handle_free(h);
 }

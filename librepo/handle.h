@@ -106,6 +106,13 @@ typedef struct _LrHandle LrHandle;
 /** LRO_OFFLINE default value */
 #define LRO_OFFLINE_DEFAULT                 0L
 
+/** LRO_HTTPAUTHMETHODS default value*/
+#define LRO_HTTPAUTHMETHODS_DEFAULT         LR_AUTH_BASIC
+
+/** LRO_PROXYAUTHMETHODS default value*/
+#define LRO_PROXYAUTHMETHODS_DEFAULT        LR_AUTH_BASIC
+
+
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
 
@@ -117,7 +124,9 @@ typedef enum {
         List of base repo URLs */
 
     LRO_MIRRORLIST,  /*!< (char *)
-        Mirrorlist or metalink url. This option is DEPRECATED */
+        Mirrorlist or metalink url.
+        This option is DEPRECATED!
+        Use LRO_MIRRORLISTURL or LRO_METALINKURL instead. */
 
     LRO_MIRRORLISTURL, /*!< (char *)
         Mirrorlist url */
@@ -129,7 +138,9 @@ typedef enum {
         Do not duplicate local metadata, just locate the old one */
 
     LRO_HTTPAUTH,  /*!< (long 1 or 0)
-        Enable all supported method of HTTP authentification. */
+        Enable all supported method of HTTP authentification.
+        This option is DEPRECATED!
+        Use LRO_HTTPAUTHMETHODS */
 
     LRO_USERPWD,  /*!< (char *)
         User and password for http authetification in format user:password */
@@ -144,7 +155,9 @@ typedef enum {
         Type of the proxy used. */
 
     LRO_PROXYAUTH,  /*!< (long 1 or 0)
-        Enable all supported method for proxy authentification */
+        Enable all supported method for proxy authentification.
+        This option is DEPRECATED!
+        Use LRO_PROXYAUTHMETHODS */
 
     LRO_PROXYUSERPWD,  /*!< (char *)
         User and password for proxy in format user:password */
@@ -327,6 +340,13 @@ typedef enum {
         Path to a file containing the list of PEM format trusted CA
         certificates. */
 
+    LRO_HTTPAUTHMETHODS, /*!< (LrAuth)
+        Bitmask which tell Librepo which auth metods you wan to use. */
+
+    LRO_PROXYAUTHMETHODS, /*!< (LrAuth)
+        A long bitmask which tell Librepo which auth methods you want
+        to use for proxy auth. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -390,6 +410,8 @@ typedef enum {
     LRI_SSLCACERT,              /*!< (char **) */
     LRI_LOWSPEEDTIME,           /*!< (long) */
     LRI_LOWSPEEDLIMIT,          /*!< (long) */
+    LRI_HTTPAUTHMETHODS,        /*!< (LrAuth) */
+    LRI_PROXYAUTHMETHODS,       /*!< (LrAuth) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

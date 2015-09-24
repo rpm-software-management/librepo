@@ -210,6 +210,12 @@ struct _LrHandle {
     gboolean offline; /*!<
         If TRUE, librepo should work offline - ignore all
         non local URLs, etc. */
+
+    LrAuth httpauthmethods; /*!<
+        Bitmask with auth methods */
+
+    LrAuth proxyauthmethods; /*!<
+        Bitmask with auth methods */
 };
 
 /** Return new CURL easy handle with some default options setted.

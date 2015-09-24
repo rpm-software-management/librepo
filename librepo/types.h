@@ -65,6 +65,24 @@ typedef enum {
     LR_IPRESOLVE_V6,        /*!< Resolve to IPv6 addresses */
 } LrIpResolveType;
 
+/** LrAuth methods */
+typedef enum {
+    LR_AUTH_NONE        = 0,       /*!< None auth method */
+    LR_AUTH_BASIC       = (1<<0),  /*!< HTTP Basic authentication (Default) */
+    LR_AUTH_DIGEST      = (1<<1),  /*!< HTTP Digest authentication */
+    LR_AUTH_NEGOTIATE   = (1<<2),  /*!< HTTP Negotiate (SPNEGO) authentication */
+    LR_AUTH_NTLM        = (1<<3),  /*!< HTTP NTLM authentication */
+    LR_AUTH_DIGEST_IE   = (1<<4),  /*!< HTTP Digest authentication with an IE flavor */
+    LR_AUTH_NTLM_WB     = (1<<5),  /*!< NTLM delegating to winbind helper */
+    LR_AUTH_ONLY        = (1<<31), /*!< This is a meta symbol. OR this value
+                                        together with a single specific auth
+                                        value to force libcurl to probe for
+                                        un-restricted auth and if not, only
+                                        that single auth algorithm is
+                                        acceptable.  */
+    LR_AUTH_ANY         = (~LR_AUTH_DIGEST_IE), /*!< All suitable methods */
+} LrAuth;
+
 /* Some common used arrays for LRO_YUMDLIST */
 
 /** Predefined value for LRO_YUMDLIST option - Download whole repo. */

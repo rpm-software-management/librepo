@@ -226,6 +226,19 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_HTTPHEADER, None)
         self.assertEqual(h.getinfo(librepo.LRI_HTTPHEADER), None)
 
+        self.assertEqual(h.getinfo(librepo.LRI_HTTPAUTHMETHODS), librepo.LR_AUTH_BASIC)
+        h.setopt(librepo.LRO_HTTPAUTHMETHODS,  librepo.LR_AUTH_DIGEST)
+        self.assertEqual(h.getinfo(librepo.LRI_HTTPAUTHMETHODS), librepo.LR_AUTH_DIGEST)
+        h.setopt(librepo.LRO_HTTPAUTHMETHODS,  None)
+        self.assertEqual(h.getinfo(librepo.LRI_HTTPAUTHMETHODS), librepo.LR_AUTH_BASIC)
+
+        self.assertEqual(h.getinfo(librepo.LRI_PROXYAUTHMETHODS), librepo.LR_AUTH_BASIC)
+        h.setopt(librepo.LRO_PROXYAUTHMETHODS,  librepo.LR_AUTH_DIGEST)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXYAUTHMETHODS), librepo.LR_AUTH_DIGEST)
+        h.setopt(librepo.LRO_PROXYAUTHMETHODS,  None)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXYAUTHMETHODS), librepo.LR_AUTH_BASIC)
+
+
     def test_handle_setget_attr(self):
         """No exception should be raised."""
         h = librepo.Handle()
@@ -394,6 +407,19 @@ class TestCaseHandle(unittest.TestCase):
         h.httpheader = None
         self.assertEqual(h.httpheader, None)
 
+        self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_BASIC)
+        h.httpauthmethods = librepo.LR_AUTH_NTLM
+        self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_NTLM)
+        h.httpauthmethods = None
+        self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_BASIC)
+
+        self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_BASIC)
+        h.proxyauthmethods = librepo.LR_AUTH_NTLM
+        self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_NTLM)
+        h.proxyauthmethods = None
+        self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_BASIC)
+
+
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
         h = librepo.Handle()
@@ -500,3 +526,6 @@ class TestCaseHandle(unittest.TestCase):
         h.fastestmirrortimeout = None
         h.setopt(librepo.LRO_HTTPHEADER, None)
         h.httpheader = None
+
+        h.httpauthmethods = None
+        h.proxyauthmethods = None
