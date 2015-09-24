@@ -168,7 +168,11 @@ static unsigned long curlauth_bitmask(LrAuth mask)
     if (mask & LR_AUTH_DIGEST)
         out_mask |= CURLAUTH_DIGEST;
     if (mask & LR_AUTH_NEGOTIATE)
+#ifdef CURLAUTH_NEGOTIATE
         out_mask |= CURLAUTH_NEGOTIATE;
+#else
+        out_mask |= CURLAUTH_GSSNEGOTIATE;
+#endif
     if (mask & LR_AUTH_NTLM)
         out_mask |= CURLAUTH_NTLM;
     if (mask & LR_AUTH_DIGEST_IE)
