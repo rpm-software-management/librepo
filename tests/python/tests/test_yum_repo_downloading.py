@@ -1596,8 +1596,8 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         os.makedirs(dir_01)
         os.makedirs(dir_02)
 
-        EXP_MRS = [u'http://127.0.0.1:5000/yum/static/01/',
-                   u'http://127.0.0.1:5000/yum/static/01/']
+        EXP_MRS = [u'http://127.0.0.1:%s/yum/static/01/' % self.PORT,
+                   u'http://127.0.0.1:%s/yum/static/01/' % self.PORT]
 
         # 1) At first, work online
         h = librepo.Handle()
