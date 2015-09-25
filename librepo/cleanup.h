@@ -70,6 +70,7 @@ LR_DEFINE_CLEANUP_FUNCTION0(GKeyFile*, lr_local_keyfile_unref, g_key_file_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GKeyFile*, lr_local_keyfile_free, g_key_file_free)
 LR_DEFINE_CLEANUP_FUNCTION0(GPtrArray*, lr_local_ptrarray_unref, g_ptr_array_unref)
 LR_DEFINE_CLEANUP_FUNCTION0(GTimer*, lr_local_destroy_timer, g_timer_destroy)
+LR_DEFINE_CLEANUP_FUNCTION0(GDateTime*, lr_local_date_time_unref, g_date_time_unref)
 
 LR_DEFINE_CLEANUP_FUNCTIONt(GString*, lr_local_free_string, g_string_free)
 
@@ -92,6 +93,7 @@ LR_DEFINE_CLEANUP_FUNCTION(int, lr_local_file_close, lr_close)
 #define _cleanup_keyfile_unref_ __attribute__ ((cleanup(lr_local_keyfile_unref)))
 #define _cleanup_keyfile_free_ __attribute__ ((cleanup(lr_local_keyfile_free)))
 #define _cleanup_ptrarray_unref_ __attribute__ ((cleanup(lr_local_ptrarray_unref)))
+#define _cleanup_date_time_unref_ __attribute__ ((cleanup(lr_local_date_time_unref)))
 
 G_END_DECLS
 
