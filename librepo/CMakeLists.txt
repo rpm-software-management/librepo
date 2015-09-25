@@ -46,6 +46,7 @@ ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
 TARGET_LINK_LIBRARIES(librepo
                         ${EXPAT_LIBRARY}
                         ${CURL_LIBRARY}
+                        ${LIBCRYPTO_LIBRARIES}
                         ${GPGME_VANILLA_LIBRARIES}
                         ${GLIB2_LIBRARIES}
                      )
