@@ -1601,9 +1601,11 @@ def set_debug_log_handler(log_function, user_data=None):
     """
     ONLY FOR DEVELOPMENT (DEBUGGING) PURPOSES!
 
+    (Deprecated, use :func:`~log_set_file` instead)
+
     When python debug log handler is used, the librepo is **THREAD-UNSAFE**!
 
-    If used, it overrides logging set by log_set_file and vice versa.
+    If used, it overrides logging set by :func:`~log_set_file` and vice versa.
 
     :param log_function: Function that will handle the debug messages.
     :param user_data: An data you want to be passed to the log_function
