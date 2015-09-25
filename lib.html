@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Librepo Library &mdash; librepo 1.7.16-1 documentation</title>
+    <title>The Librepo Library &mdash; librepo 1.7.17-1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.7.16-1',
+        VERSION:     '1.7.17-1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="librepo 1.7.16-1 documentation" href="index.html" />
+    <link rel="top" title="librepo 1.7.17-1 documentation" href="index.html" />
     <link rel="next" title="Handle (librepo.Handle)" href="handle.html" />
     <link rel="prev" title="librepo" href="index.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="index.html" title="librepo"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.16-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.17-1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -1774,11 +1774,46 @@ use for example <strong>os.open()</strong>.</li>
 <p>Some tricky/unsafe stuff which can be useful during developing and debugging,
 but definitely shouldn&#8217;t be used in production.</p>
 <dl class="function">
+<dt id="librepo.log_set_file">
+<tt class="descclassname">librepo.</tt><tt class="descname">log_set_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#librepo.log_set_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a filename of a file where logs are going to be written.</p>
+<p>Note: Only one file could be set at a time.</p>
+<p>Note: If the LIBREPO_DEBUG environ variable is set and this
+function is used then the LIBREPO_DEBUG effect will be suppressed.
+(All debug output will be redirected to the specified file)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; Filename</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Id of the handler</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="librepo.log_remove_handler">
+<tt class="descclassname">librepo.</tt><tt class="descname">log_remove_handler</tt><big>(</big><em>handler_id</em><big>)</big><a class="headerlink" href="#librepo.log_remove_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove handler.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>handler_id</strong> &#8211; id</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="librepo.set_debug_log_handler">
 <tt class="descclassname">librepo.</tt><tt class="descname">set_debug_log_handler</tt><big>(</big><em>log_function</em>, <em>user_data=None</em><big>)</big><a class="headerlink" href="#librepo.set_debug_log_handler" title="Permalink to this definition">¶</a></dt>
 <dd><p>ONLY FOR DEVELOPMENT (DEBUGGING) PURPOSES!</p>
+<p>(Deprecated, use <a class="reference internal" href="#librepo.log_set_file" title="librepo.log_set_file"><tt class="xref py py-func docutils literal"><span class="pre">log_set_file()</span></tt></a> instead)</p>
 <p>When python debug log handler is used, the librepo is <strong>THREAD-UNSAFE</strong>!</p>
-<p>If used, it overrides logging set by log_set_file and vice versa.</p>
+<p>If used, it overrides logging set by <a class="reference internal" href="#librepo.log_set_file" title="librepo.log_set_file"><tt class="xref py py-func docutils literal"><span class="pre">log_set_file()</span></tt></a> and vice versa.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1889,7 +1924,7 @@ during call.</li>
         <li class="right" >
           <a href="index.html" title="librepo"
              >previous</a> |</li>
-        <li><a href="index.html">librepo 1.7.16-1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">librepo 1.7.17-1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
