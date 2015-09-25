@@ -41,6 +41,14 @@
 #define DIR_SEPARATOR   "/"
 #define ENV_DEBUG       "LIBREPO_DEBUG"
 
+#ifdef CURL_GLOBAL_ACK_EINTR
+#define EINTR_SUPPORT " with CURL_GLOBAL_ACK_EINTR support"
+#define CURL_GLOBAL_INIT_FLAGS  CURL_GLOBAL_ALL|CURL_GLOBAL_ACK_EINTR
+#else
+#define EINTR_SUPPORT ""
+#define CURL_GLOBAL_INIT_FLAGS  CURL_GLOBAL_ALL
+#endif
+
 static void
 lr_log_handler(G_GNUC_UNUSED const gchar *log_domain,
                G_GNUC_UNUSED GLogLevelFlags log_level,
@@ -60,24 +68,30 @@ lr_init_debugging(void)
                                  | G_LOG_FLAG_RECURSION, lr_log_handler, NULL);
 }
 
-static gpointer
-lr_init_once_cb(gpointer user_data G_GNUC_UNUSED)
+void
+lr_log_librepo_summary()
 {
-#ifdef CURL_GLOBAL_ACK_EINTR
-#define EINTR_SUPPORT " with CURL_GLOBAL_ACK_EINTR support"
-    curl_global_init(CURL_GLOBAL_ALL|CURL_GLOBAL_ACK_EINTR);
-#else
-#define EINTR_SUPPORT ""
-    curl_global_init(CURL_GLOBAL_ALL);
-#endif
+    _cleanup_free_ gchar *time = NULL;
+    _cleanup_date_time_unref_ GDateTime *datetime = NULL;
 
-    lr_init_debugging();
     g_debug("Librepo version: %d.%d.%d%s (%s)", LR_VERSION_MAJOR,
                                                 LR_VERSION_MINOR,
                                                 LR_VERSION_PATCH,
                                                 EINTR_SUPPORT,
                                                 curl_version());
 
+    datetime = g_date_time_new_now_local();
+    // Date+Time in ISO 8601 format
+    time = g_date_time_format(datetime, "%Y-%m-%dT%H:%M:%S%z");
+    g_debug("Current date: %s", time);
+}
+
+static gpointer
+lr_init_once_cb(gpointer user_data G_GNUC_UNUSED)
+{
+    curl_global_init((long) CURL_GLOBAL_INIT_FLAGS);
+    lr_init_debugging();
+    lr_log_librepo_summary();
     return GINT_TO_POINTER(1);
 }
 
@@ -87,6 +101,7 @@ lr_global_init()
     static GOnce init_once = G_ONCE_INIT;
     g_once(&init_once, lr_init_once_cb, NULL);
 }
+
 
 /*
 void

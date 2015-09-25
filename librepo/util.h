@@ -58,6 +58,10 @@ void lr_global_init();
 void lr_global_cleanup();
 */
 
+/** Log a debug message with Librepo version and current time.
+ */
+void lr_log_librepo_summary(void);
+
 /** Print "Out of memory" message to stderr and abort program execution.
  * This function is used when malloc call fails.
  */
