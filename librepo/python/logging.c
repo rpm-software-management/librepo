@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "librepo/librepo.h"
+#include "librepo/cleanup.h"
 
 #include "typeconversion.h"
 #include "exception-py.h"
@@ -75,7 +76,13 @@ logfile_func(G_GNUC_UNUSED const gchar *log_domain,
              gpointer user_data)
 {
     LogFileData *data = user_data;
-    fprintf(data->f, "%s\n", msg);
+    _cleanup_free_ gchar *time = NULL;
+    _cleanup_date_time_unref_ GDateTime *datetime = NULL;
+
+    datetime = g_date_time_new_now_local();
+    time = g_date_time_format(datetime, "%H:%M:%S");
+    fprintf(data->f, "%s %s\n", time, msg);
+
     fflush(data->f);
 }
 
@@ -117,6 +124,9 @@ py_log_set_file(G_GNUC_UNUSED PyObject *self, PyObject *args)
     logfiledata_list = g_slist_prepend(logfiledata_list, data);
 
     G_UNLOCK(logfiledata_list_lock);
+
+    // Log librepo version and current time (including timezone)
+    lr_log_librepo_summary();
 
     // Return unique id of the handler data
     return PyLong_FromLong(data->uid);
