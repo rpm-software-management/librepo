@@ -15,7 +15,7 @@ TMP_DIR=$( mktemp -d )
 echo "Using temporary directory: $TMP_DIR"
 
 pushd "$TMP_DIR"
-git clone "$GITREPO"
+git clone --depth 1 --branch master --single-branch "$GITREPO"
 cd "$REPONAME"
 mkdir build
 cd build
