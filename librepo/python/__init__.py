@@ -148,7 +148,7 @@ Version contants
 .. data:: LRO_CONNECTTIMEOUT
 
     *Integer or None. Set maximal timeout in sec for connection phase.
-    Default value is 300. None as *val* sets the default value.
+    Default value is 120. None as *val* sets the default value.
 
 .. data:: LRO_IGNOREMISSING
 
@@ -226,7 +226,7 @@ Version contants
 
     *Integer or None*. The time in seconds that the transfer should be below
     the LRO_LOWSPEEDLIMIT for the library to consider it too slow and abort.
-    Default: 30 (sec)
+    Default: 120 (sec)
 
 .. data:: LRO_LOWSPEEDLIMIT
 
@@ -338,7 +338,7 @@ Version contants
 .. data:: LRO_FASTESTMIRRORTIMEOUT
 
     *Float of None* Max length of fastest mirror measurement in seconds.
-    Default value is 2sec.
+    Default value is 2.0sec.
 
 .. data:: LRO_HTTPHEADER
 
