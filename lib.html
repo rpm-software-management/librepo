@@ -253,7 +253,7 @@ calls (if some download failed and another mirror is tried).</p>
 <dt id="librepo.LRO_CONNECTTIMEOUT">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_CONNECTTIMEOUT</tt><a class="headerlink" href="#librepo.LRO_CONNECTTIMEOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Integer or None. Set maximal timeout in sec for connection phase.
-Default value is 300. None as *val</em> sets the default value.</p>
+Default value is 120. None as *val</em> sets the default value.</p>
 </dd></dl>
 
 <dl class="data">
@@ -359,7 +359,7 @@ on <em>stage</em> value. See the list of available stages.</p>
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_LOWSPEEDTIME</tt><a class="headerlink" href="#librepo.LRO_LOWSPEEDTIME" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Integer or None</em>. The time in seconds that the transfer should be below
 the LRO_LOWSPEEDLIMIT for the library to consider it too slow and abort.
-Default: 30 (sec)</p>
+Default: 120 (sec)</p>
 </dd></dl>
 
 <dl class="data">
@@ -510,7 +510,7 @@ The the sorting is based on mirror error rate etc.</p>
 <dt id="librepo.LRO_FASTESTMIRRORTIMEOUT">
 <tt class="descclassname">librepo.</tt><tt class="descname">LRO_FASTESTMIRRORTIMEOUT</tt><a class="headerlink" href="#librepo.LRO_FASTESTMIRRORTIMEOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>Float of None</em> Max length of fastest mirror measurement in seconds.
-Default value is 2sec.</p>
+Default value is 2.0sec.</p>
 </dd></dl>
 
 <dl class="data">
