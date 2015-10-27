@@ -45,7 +45,7 @@ Version contants
             # The command:
             h.setopt(librepo.LRO_URLS, ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"])
             # is equivalent to:
-            h.urls = "http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"
+            h.urls = ["http://ftp.linux.ncsu.edu/pub/fedora/linux/releases/17/Everything/i386/os/"]
 
     .. note:: For detailed description of this options consult :class:`.Handle` page.
 
