@@ -31,7 +31,7 @@ Fedora/Ubuntu name
     cmake ..
     make
 
-### Build from you checkout dir (Python 3 bindings):
+### Build from your checkout dir (Python 3 bindings):
 
     mkdir build
     cd build/
