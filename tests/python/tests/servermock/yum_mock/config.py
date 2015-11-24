@@ -33,6 +33,7 @@ METALINK_FIRSTURLHASCORRUPTEDFILES = METALINK_DIR+"firsturlhascorruptedfiles.xml
 METALINK_VARSUB = METALINK_DIR+"varsub.xml"
 METALINK_VARSUB_LIST = [("version", "01")]
 METALINK_WITH_ALTERNATES = METALINK_DIR+"metalink_with_alternates.xml"
+METALINK_MIRRORS_01 = METALINK_DIR+"mirrors_01.xml"
 
 MIRRORLIST_DIR = "yum/static/mirrorlist/"
 MIRRORLIST_GOOD_01 = MIRRORLIST_DIR+"good_01"
