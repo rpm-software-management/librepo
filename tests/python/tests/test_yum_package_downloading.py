@@ -626,6 +626,66 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertTrue(cbdata["called"])
         self.assertTrue(cbdata["detection"])
 
+    def test_download_packages_from_different_mirrors_1(self):
+        cbdata = {
+            "failed_urls" : [],
+        }
+
+        def mirrorfailurecb(userdata, msg, url):
+            cbdata["failed_urls"].append(url)
+            return None
+
+        h = librepo.Handle()
+
+        url1 = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        url2 = "%s%s" % (self.MOCKURL, config.REPO_YUM_03_PATH)
+        url3 = "%s%s" % (self.MOCKURL, config.REPO_YUM_04_PATH)
+
+        h.mirrorlist = "%s%s" % (self.MOCKURL, config.METALINK_MIRRORS_01)
+        h.repotype = librepo.LR_YUMREPO
+        h.maxparalleldownloads = 1
+        h.fastestmirror = True
+
+        pkgs = []
+        for P in [config.PACKAGE_01_01, config.PACKAGE_03_01, config.PACKAGE_04_01]:
+            pkgs.append(librepo.PackageTarget(P,
+                                              handle=h,
+                                              dest=self.tmpdir,
+                                              mirrorfailurecb=mirrorfailurecb))
+
+        librepo.download_packages(pkgs, failfast=True)
+
+        # the mirror list should be 1, 3, 4. The metalink file
+        # defines preference order. This is the order in which
+        # the URLs are listed in the file
+        self.assertEquals(h.mirrors, [url1, url2, url3])
+
+        # YUM 01 contains P_01
+        # YUM 03 contains P_03
+        # YUM_04 contains P_04
+        # Mirror order of preference is 01 03, 04
+        # When a package fails to download, librepo moves to the next mirror;
+        # after a successfull download of the package librepo should continue trying
+        # to download the remaining packages from the first mirror. e.g.
+        # always try to download from the fastest mirror containing the package
+
+        # Expected download sequence (restart from fastest mirror):
+        # - P_01 from YUM_01 - PASS
+        # - P_03 from YUM_01 - FAIL
+        # - P_03 from YUM_03 - PASS
+        # - P_04 from YUM_04 - FAIL
+        # - P_04 from YUM_03 - FAIL
+        # - P_04 from YUM_04 - PASS
+        self.assertEquals(len(cbdata["failed_urls"]), 3)
+        self.assertEquals(cbdata["failed_urls"][0], url1+config.PACKAGE_03_01)
+        self.assertEquals(cbdata["failed_urls"][1], url1+config.PACKAGE_04_01)
+        self.assertEquals(cbdata["failed_urls"][2], url2+config.PACKAGE_04_01)
+
+        # assert that all packages have been downloaded
+        for pkg in pkgs:
+            self.assertTrue(pkg.err is None)
+            self.assertTrue(os.path.isfile(pkg.local_path))
+
     def test_download_packages_with_bad_first_mirror_1(self):
         h = librepo.Handle()
 

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/" type="dynamic" pubdate="Tue, 11 Sep 2012 07:36:51 GMT" generator="mirrormanager" xmlns:mm0="http://127.0.0.1:5000/yum/static/metalink">
+  <files>
+    <file name="repomd.xml">
+      <resources maxconnections="1">
+        <url protocol="http" type="http" location="BG" preference="100" mm0:private="True">http://127.0.0.1:{PORT_PLACEHOLDER}/yum/static/01/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="CZ" preference="50"  mm0:private="True">http://127.0.0.1:{PORT_PLACEHOLDER}/yum/static/03/repodata/repomd.xml</url>
+        <url protocol="http" type="http" location="US" preference="10"  mm0:private="True">http://127.0.0.1:{PORT_PLACEHOLDER}/yum/static/04/repodata/repomd.xml</url>
+      </resources>
+    </file>
+  </files>
+</metalink>
