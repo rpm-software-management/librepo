@@ -147,6 +147,8 @@ typedef struct {
         range was downloaded, it is TRUE. Otherwise FALSE. */
     LrCbReturnCode cb_return_code; /*!<
         Last cb return code. */
+    struct curl_slist *curl_rqheaders; /*!<
+        Extra headers for request. */
 } LrTarget;
 
 typedef struct {
@@ -990,6 +992,22 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 G_GINT64_FORMAT, __func__, target->target->byterangestart);
         curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
                          (curl_off_t) target->target->byterangestart);
+    }
+
+    if (target->target->cacherevalidate) {
+        target->curl_rqheaders =
+            curl_slist_append(target->curl_rqheaders,
+                              "Cache-Control: max-age=0");
+        if (!target->curl_rqheaders) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
+                        "curl_slist_append(curl_rqheaders,"
+                        " \"Cache-Control: max-age=0\") failed"
+                        " (Out of memory?)");
+            fclose(f);
+            curl_easy_cleanup(h);
+            return FALSE;
+        }
+        curl_easy_setopt(h, CURLOPT_HTTPHEADER, target->curl_rqheaders);
     }
 
     // Prepare progress callback
@@ -2022,6 +2040,7 @@ lr_download_cleanup:
         }
 
         g_slist_free(target->tried_mirrors);
+        curl_slist_free_all(target->curl_rqheaders);
         lr_free(target);
     }
     g_slist_free(dd.targets);
