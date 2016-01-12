@@ -974,17 +974,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         g_debug("%s: Used offset for download resume: %"G_GINT64_FORMAT,
                 __func__, used_offset);
 
-        c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
-                                (curl_off_t) used_offset);
-        if (c_rc != CURLE_OK) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                        "curl_easy_setopt(h, LR_DOWNLOADER_ERROR, %"
-                        G_GINT64_FORMAT") failed: %s",
-                        used_offset, curl_easy_strerror(c_rc));
-            fclose(f);
-            curl_easy_cleanup(h);
-            return FALSE;
-        }
+        curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
+                         (curl_off_t) used_offset);
     }
 
     // Add librepo extended attribute to the file
@@ -999,8 +990,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         assert(!target->target->resume);
         g_debug("%s: byterangestart is specified -> resume is set to %"
                 G_GINT64_FORMAT, __func__, target->target->byterangestart);
-        c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
-                                (curl_off_t) target->target->byterangestart);
+        curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
+                         (curl_off_t) target->target->byterangestart);
     }
 
     // Prepare progress callback
