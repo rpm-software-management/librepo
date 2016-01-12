@@ -130,6 +130,12 @@ typedef struct {
         User data - This data are not used by lr_downloader or touched
         by lr_downloadtarget_free. */
 
+    gboolean cacherevalidate; /*!<
+        Force HTTP proxy to revalidate cache:
+         0 - allow standard caching, generally fine as new versions of files
+             get new names
+         otherwise - force revalidate, needed for repomd.xml only */
+
 } LrDownloadTarget;
 
 /** Create new empty ::LrDownloadTarget.

@@ -275,6 +275,10 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      0,
                                                      0);
 
+    // Disable heuristic caching in HTTP proxies.
+    // Not needed for any other files, because they change names when updated.
+    target->cacherevalidate = TRUE;
+
     ret = lr_download_target(target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
 

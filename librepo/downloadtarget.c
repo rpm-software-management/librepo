@@ -106,6 +106,7 @@ lr_downloadtarget_new(LrHandle *handle,
     target->userdata        = userdata;
     target->byterangestart  = byterangestart;
     target->byterangeend    = byterangeend;
+    target->cacherevalidate = FALSE;
 
     return target;
 }
