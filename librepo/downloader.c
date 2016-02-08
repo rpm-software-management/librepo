@@ -942,6 +942,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if (ftruncate(fd, 0) == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "ftruncate() failed: %s", g_strerror(errno));
+            fclose(f);
+            curl_easy_cleanup(h);
             return FALSE;
         }
     }
