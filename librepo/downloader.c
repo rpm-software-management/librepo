@@ -1028,7 +1028,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     curl_easy_setopt(h, CURLOPT_HTTPHEADER, headers);
 
     // Add the new handle to the curl multi handle
-    curl_multi_add_handle(dd->multi_handle, h);
+    CURLMcode cm_rc = curl_multi_add_handle(dd->multi_handle, h);
+    assert(cm_rc == CURLM_OK);
 
     // Set the state of transfer as running
     target->state = LR_DS_RUNNING;
