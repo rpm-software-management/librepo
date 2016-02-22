@@ -203,10 +203,6 @@ struct _LrHandle {
         Curl doesn't copy HTTP header values from curl_slist.
         We need to keep them around. */
 
-    struct curl_slist *curl_httpheader; /*!<
-        Curl's list of HTTP headers - items in the list
-        refers into the httpheader list (defined above) */
-
     gboolean offline; /*!<
         If TRUE, librepo should work offline - ignore all
         non local URLs, etc. */

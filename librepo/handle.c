@@ -143,7 +143,6 @@ lr_handle_free(LrHandle *handle)
     lr_urlvars_free(handle->urlvars);
     lr_free(handle->gnupghomedir);
     lr_handle_free_list(&handle->httpheader);
-    curl_slist_free_all(handle->curl_httpheader);
     lr_free(handle);
 }
 
@@ -478,15 +477,7 @@ lr_handle_setopt(LrHandle *handle,
     {
         char **list = va_arg(arg, char **);
         lr_handle_free_list(&handle->httpheader);
-        curl_slist_free_all(handle->curl_httpheader);
         handle->httpheader = lr_strv_dup(list);
-
-        struct curl_slist *headers = NULL;
-        for (int x=0; list && handle->httpheader[x]; x++)
-            headers = curl_slist_append(headers, handle->httpheader[x]);
-
-        handle->curl_httpheader = headers;
-        curl_easy_setopt(c_h, CURLOPT_HTTPHEADER, headers);
         break;
     }
 
