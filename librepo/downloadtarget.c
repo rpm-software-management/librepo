@@ -62,7 +62,8 @@ lr_downloadtarget_new(LrHandle *handle,
                       LrMirrorFailureCb mirrorfailurecb,
                       void *userdata,
                       gint64 byterangestart,
-                      gint64 byterangeend)
+                      gint64 byterangeend,
+                      gboolean no_cache)
 {
     LrDownloadTarget *target;
     _cleanup_free_ gchar *final_path = NULL;
@@ -106,6 +107,7 @@ lr_downloadtarget_new(LrHandle *handle,
     target->userdata        = userdata;
     target->byterangestart  = byterangestart;
     target->byterangeend    = byterangeend;
+    target->no_cache        = no_cache;
 
     return target;
 }

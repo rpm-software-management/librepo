@@ -2071,7 +2071,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
                                    NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL, 0, 0);
+                                   NULL, NULL, NULL, 0, 0, FALSE);
 
     // Download the target
     ret = lr_download_target(target, &tmp_err);

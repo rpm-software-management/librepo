@@ -393,7 +393,8 @@ lr_download_packages(GSList *targets,
                                                packagetarget->mirrorfailurecb,
                                                packagetarget,
                                                packagetarget->byterangestart,
-                                               packagetarget->byterangeend);
+                                               packagetarget->byterangeend,
+                                               FALSE);
 
         downloadtargets = g_slist_append(downloadtargets, downloadtarget);
     }

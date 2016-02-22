@@ -273,7 +273,8 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      (cbdata) ? hmfcb : NULL,
                                                      NULL,
                                                      0,
-                                                     0);
+                                                     0,
+                                                     TRUE);
 
     ret = lr_download_target(target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
@@ -379,7 +380,8 @@ lr_yum_download_repo(LrHandle *handle,
                                        NULL,
                                        NULL,
                                        0,
-                                       0);
+                                       0,
+                                       FALSE);
 
         targets = g_slist_append(targets, target);
 
