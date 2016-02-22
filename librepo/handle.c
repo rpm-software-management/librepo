@@ -735,6 +735,41 @@ lr_handle_setopt(LrHandle *handle,
  */
 
 static gboolean
+download_non_cached_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
+{
+    // This function is almost 1:1 copy of lr_download_url
+
+    gboolean ret;
+    LrDownloadTarget *target;
+    GError *tmp_err = NULL;
+
+    assert(url);
+    assert(!err || *err == NULL);
+
+    // Prepare target
+    target = lr_downloadtarget_new(lr_handle,
+                                   url, NULL, fd, NULL,
+                                   NULL, 0, 0, NULL, NULL,
+                                   NULL, NULL, NULL, 0, 0, TRUE);
+
+    // Download the target
+    ret = lr_download_target(target, &tmp_err);
+
+    assert(ret || tmp_err);
+    assert(!(target->err) || !ret);
+
+    if (!ret)
+        g_propagate_error(err, tmp_err);
+
+    lr_downloadtarget_free(target);
+
+    lseek(fd, 0, SEEK_SET);
+
+    return ret;
+}
+
+
+static gboolean
 lr_handle_prepare_urls(LrHandle *handle, GError **err)
 {
     assert(!handle->urls_mirrors);
@@ -819,7 +854,7 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->mirrorlisturl);
-        if (!lr_download_url(handle, url, fd, err)) {
+        if (!download_non_cached_url(handle, url, fd, err)) {
             close(fd);
             return FALSE;
         }
@@ -935,7 +970,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->metalinkurl);
-        if (!lr_download_url(handle, url, fd, err)) {
+        if (!download_non_cached_url(handle, url, fd, err)) {
             close(fd);
             return FALSE;
         }
