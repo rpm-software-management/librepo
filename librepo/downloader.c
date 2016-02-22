@@ -147,6 +147,8 @@ typedef struct {
         range was downloaded, it is TRUE. Otherwise FALSE. */
     LrCbReturnCode cb_return_code; /*!<
         Last cb return code. */
+    struct curl_slist *curl_rqheaders; /*!<
+        Extra headers for request. */
 } LrTarget;
 
 typedef struct {
@@ -1017,6 +1019,21 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb);
     curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
 
+    // Set extra HTTP headers
+    struct curl_slist *headers = NULL;
+    if (target->handle) {
+        // Fill in headers specified by user in LrHandle via LRO_HTTPHEADER
+        for (int x=0; target->handle->httpheader && target->handle->httpheader[x]; x++)
+            headers = curl_slist_append(headers, target->handle->httpheader[x]);
+    }
+    if (target->target->no_cache) {
+        // Add headers that tell proxy to serve us fresh data
+        headers = curl_slist_append(headers, "Cache-Control: no-cache");
+        headers = curl_slist_append(headers, "Pragma: no-cache");
+    }
+    target->curl_rqheaders = headers;
+    curl_easy_setopt(h, CURLOPT_HTTPHEADER, headers);
+
     // Add the new handle to the curl multi handle
     curl_multi_add_handle(dd->multi_handle, h);
 
@@ -1575,6 +1592,10 @@ transfer_error:
         target->headercb_interrupt_reason = NULL;
         fclose(target->f);
         target->f = NULL;
+        if (target->curl_rqheaders) {
+            curl_slist_free_all(target->curl_rqheaders);
+            target->curl_rqheaders = NULL;
+        }
 
         dd->running_transfers = g_slist_remove(dd->running_transfers,
                                                (gconstpointer) target);
