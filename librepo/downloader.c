@@ -1014,9 +1014,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Set extra HTTP headers
     struct curl_slist *headers = NULL;
-    if (target->handle) {
+    if (target->handle && target->handle->httpheader) {
         // Fill in headers specified by user in LrHandle via LRO_HTTPHEADER
-        for (int x=0; target->handle->httpheader && target->handle->httpheader[x]; x++)
+        for (int x=0; target->handle->httpheader[x]; x++)
             headers = curl_slist_append(headers, target->handle->httpheader[x]);
     }
     if (target->target->no_cache) {
