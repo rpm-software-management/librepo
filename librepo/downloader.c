@@ -974,8 +974,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         g_debug("%s: Used offset for download resume: %"G_GINT64_FORMAT,
                 __func__, used_offset);
 
-        curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
-                         (curl_off_t) used_offset);
+        c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
+                                (curl_off_t) used_offset);
+        assert(c_rc == CURLE_OK);
     }
 
     // Add librepo extended attribute to the file
@@ -990,39 +991,46 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         assert(!target->target->resume);
         g_debug("%s: byterangestart is specified -> resume is set to %"
                 G_GINT64_FORMAT, __func__, target->target->byterangestart);
-        curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
-                         (curl_off_t) target->target->byterangestart);
+        c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
+                                (curl_off_t) target->target->byterangestart);
+        assert(c_rc == CURLE_OK);
     }
 
     // Prepare progress callback
     target->cb_return_code = LR_CB_OK;
     if (target->target->progresscb) {
-        curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb);
-        curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0);
-        curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+        c_rc = curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb) ||
+               curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0) ||
+               curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+        assert(c_rc == CURLE_OK);
     }
 
     // Prepare header callback
     if (target->target->expectedsize > 0) {
-        curl_easy_setopt(h, CURLOPT_HEADERFUNCTION, lr_headercb);
-        curl_easy_setopt(h, CURLOPT_HEADERDATA, target);
+        c_rc = curl_easy_setopt(h, CURLOPT_HEADERFUNCTION, lr_headercb) ||
+               curl_easy_setopt(h, CURLOPT_HEADERDATA, target);
+        assert(c_rc == CURLE_OK);
     }
 
     // Prepare write callback
-    curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb);
-    curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
+    c_rc = curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb) ||
+           curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
+    assert(c_rc == CURLE_OK);
 
     // Set extra HTTP headers
     struct curl_slist *headers = NULL;
     if (target->handle && target->handle->httpheader) {
         // Fill in headers specified by user in LrHandle via LRO_HTTPHEADER
-        for (int x=0; target->handle->httpheader[x]; x++)
+        for (int x=0; target->handle->httpheader[x]; x++) {
             headers = curl_slist_append(headers, target->handle->httpheader[x]);
+            assert(headers);
+        }
     }
     if (target->target->no_cache) {
         // Add headers that tell proxy to serve us fresh data
         headers = curl_slist_append(headers, "Cache-Control: no-cache");
         headers = curl_slist_append(headers, "Pragma: no-cache");
+        assert(headers);
     }
     target->curl_rqheaders = headers;
     curl_easy_setopt(h, CURLOPT_HTTPHEADER, headers);
