@@ -368,6 +368,10 @@ Version contants
     for proxy authentication.
     See: :ref:`auth-methods-label`
 
+.. data:: LRO_FTPUSEEPSV
+
+    *Boolean* Enable/Disable EPSV (Extended Passive mode) for FTP.
+
 
 .. _handle-info-options-label:
 
@@ -415,6 +419,7 @@ Version contants
 .. data:: LRI_OFFLINE
 .. data:: LRI_HTTPAUTHMETHODS
 .. data:: LRI_PROXYAUTHMETHODS
+.. data:: LRI_FTPUSEEPSV
 
 .. _proxy-type-label:
 
@@ -1384,6 +1389,10 @@ class Handle(_librepo.Handle):
     .. attribute:: proxyauthmethods
 
         See :data:`.LRO_PROXYAUTHMETHODS`
+
+    .. attribute:: ftpuseepsv
+
+        See :data:`.LRO_FTPUSEEPSV`
 
     """
 

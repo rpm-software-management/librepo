@@ -63,6 +63,8 @@ lr_get_curl_handle()
     curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT);
     curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2);
     curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1);
+    curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT);
+
     return h;
 }
 
@@ -106,6 +108,7 @@ lr_handle_init()
     handle->offline = LRO_OFFLINE_DEFAULT;
     handle->httpauthmethods = LRO_HTTPAUTHMETHODS_DEFAULT;
     handle->proxyauthmethods = LRO_PROXYAUTHMETHODS_DEFAULT;
+    handle->ftpuseepsv = LRO_FTPUSEEPSV_DEFAULT;
 
     return handle;
 }
@@ -702,11 +705,17 @@ lr_handle_setopt(LrHandle *handle,
         break;
     }
 
+    case LRO_FTPUSEEPSV:
+        handle->ftpuseepsv = va_arg(arg, long) ? 1 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_FTP_USE_EPSV, handle->ftpuseepsv);
+        break;
+
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                     "Unknown option");
         ret = FALSE;
         break;
+
     };
 
     /* Handle CURL error return code */
@@ -1511,6 +1520,11 @@ lr_handle_getinfo(LrHandle *handle,
         *auth = handle->proxyauthmethods;
         break;
     }
+
+    case LRI_FTPUSEEPSV:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->ftpuseepsv;
+        break;
 
     default:
         rc = FALSE;

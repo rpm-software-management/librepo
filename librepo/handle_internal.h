@@ -212,6 +212,9 @@ struct _LrHandle {
 
     LrAuth proxyauthmethods; /*!<
         Bitmask with auth methods */
+
+    long ftpuseepsv; /*!<
+        Use FTP EPSV (extended passive mode) mode */
 };
 
 /** Return new CURL easy handle with some default options setted.

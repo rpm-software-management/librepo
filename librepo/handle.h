@@ -112,6 +112,9 @@ typedef struct _LrHandle LrHandle;
 /** LRO_PROXYAUTHMETHODS default value*/
 #define LRO_PROXYAUTHMETHODS_DEFAULT        LR_AUTH_BASIC
 
+/** LRO_FTPUSEEPSV default value */
+#define LRO_FTPUSEEPSV_DEFAULT              1L
+
 
 /** Handle options for the ::lr_handle_setopt function. */
 typedef enum {
@@ -347,6 +350,9 @@ typedef enum {
         A long bitmask which tell Librepo which auth methods you want
         to use for proxy auth. */
 
+    LRO_FTPUSEEPSV, /*!< (long 1 or 0)
+        Enable/Disable EPSV (Extended Passive mode) for FTP. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -412,6 +418,7 @@ typedef enum {
     LRI_LOWSPEEDLIMIT,          /*!< (long) */
     LRI_HTTPAUTHMETHODS,        /*!< (LrAuth) */
     LRI_PROXYAUTHMETHODS,       /*!< (LrAuth) */
+    LRI_FTPUSEEPSV,             /*!< (long) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 
