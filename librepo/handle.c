@@ -142,6 +142,7 @@ lr_handle_free(LrHandle *handle)
     lr_lrmirrorlist_free(handle->mirrors);
     lr_metalink_free(handle->metalink);
     lr_handle_free_list(&handle->yumdlist);
+    lr_urlvars_free(handle->yumslist);
     lr_handle_free_list(&handle->yumblist);
     lr_urlvars_free(handle->urlvars);
     lr_free(handle->gnupghomedir);
@@ -528,6 +529,13 @@ lr_handle_setopt(LrHandle *handle,
         }
 
         break;
+
+    case LRO_YUMSLIST: {
+        LrUrlVars *vars = va_arg(arg, LrUrlVars *);
+        lr_urlvars_free(handle->yumslist);
+        handle->yumslist = vars;
+        break;
+    }
 
     case LRO_VARSUB: {
         LrUrlVars *vars = va_arg(arg, LrUrlVars *);
@@ -1387,6 +1395,12 @@ lr_handle_getinfo(LrHandle *handle,
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->maxmirrortries;
         break;
+
+    case LRI_YUMSLIST: {
+        LrUrlVars **slist = va_arg(arg, LrUrlVars **);
+        *slist = handle->yumslist;
+        break;
+    }
 
     case LRI_VARSUB: {
         LrUrlVars **vars = va_arg(arg, LrUrlVars **);

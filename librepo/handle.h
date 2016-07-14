@@ -353,6 +353,8 @@ typedef enum {
     LRO_FTPUSEEPSV, /*!< (long 1 or 0)
         Enable/Disable EPSV (Extended Passive mode) for FTP. */
 
+    LRO_YUMSLIST,
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -419,6 +421,7 @@ typedef enum {
     LRI_HTTPAUTHMETHODS,        /*!< (LrAuth) */
     LRI_PROXYAUTHMETHODS,       /*!< (LrAuth) */
     LRI_FTPUSEEPSV,             /*!< (long) */
+    LRI_YUMSLIST,
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

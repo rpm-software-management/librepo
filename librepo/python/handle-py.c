@@ -618,6 +618,7 @@ py_setopt(_HandleObject *self, PyObject *args)
         break;
     }
 
+    case LRO_YUMSLIST:
     case LRO_VARSUB: {
         Py_ssize_t len = 0;
         LrUrlVars *vars = NULL;
@@ -953,6 +954,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     }
 
     /* List option */
+    case LRI_YUMSLIST:
     case LRI_VARSUB: {
         LrUrlVars *vars;
         PyObject *list;
