@@ -134,11 +134,10 @@ lr_yum_repo_update(LrYumRepo *repo, const char *type, const char *path)
 gint
 compare_records(gconstpointer a, gconstpointer b)
 {
-    GSList* elem = (GSList*) a;
-    LrYumRepoMdRecord* yum_record = (LrYumRepoMdRecord*) elem;
+    LrYumRepoMdRecord* yum_record = (LrYumRepoMdRecord*) a;
     char *type1 = (char *) yum_record->type;
     char *type2 = (char *) b;
-    return strcmp(type1, type2);
+    return g_strcmp0(type1, type2);
 }
 
 static gboolean
@@ -164,23 +163,17 @@ lr_yum_repomd_record_enabled(LrHandle *handle, const char *type, GSList* records
         }
         // Substitution check
         if (handle->yumslist) {
-            LrUrlVars* elem = handle->yumslist;
-            while (TRUE) {
+            for (GSList *elem = handle->yumslist; elem; elem = g_slist_next(elem)) {
                 LrVar* subs = elem->data;
-                if (!strcmp(subs->var, type)) {
-                    char *orig = subs->val;
-                    int y = 0;
-                    while (handle->yumdlist[y]) {
-                        if (!strcmp(orig, handle->yumdlist[y]) &&
+                if (!g_strcmp0(subs->val, type)) {
+                    char *orig = subs->var;
+                    for (guint i = 0; handle->yumdlist[i]; i++) {
+                        if (!g_strcmp0(orig, handle->yumdlist[i]) &&
                             !g_slist_find_custom(records, orig, (GCompareFunc) compare_records))
                             return TRUE;
-                        y++;
                     }
                     return FALSE;
                 }
-                elem = g_slist_next(elem);
-                if (!elem)
-                    break;
             }
         }
         return FALSE;
