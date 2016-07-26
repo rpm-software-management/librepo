@@ -353,7 +353,12 @@ typedef enum {
     LRO_FTPUSEEPSV, /*!< (long 1 or 0)
         Enable/Disable EPSV (Extended Passive mode) for FTP. */
 
-    LRO_YUMSLIST,
+    LRO_YUMSLIST, /*!< (LrUrlVars *)
+        Repomd records and their substitutions.
+        [{"group_gz", "group"}], ...;
+        If var record is not listed in repomd, librepo will download val
+        instead. After set the list to the handle, it has not to be freed!
+        Handle itself takes care about freeing the list. */
 
     LRO_SENTINEL,    /*!< Sentinel */
 
@@ -421,7 +426,7 @@ typedef enum {
     LRI_HTTPAUTHMETHODS,        /*!< (LrAuth) */
     LRI_PROXYAUTHMETHODS,       /*!< (LrAuth) */
     LRI_FTPUSEEPSV,             /*!< (long) */
-    LRI_YUMSLIST,
+    LRI_YUMSLIST,               /*!< (LrUrlVars **) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 
