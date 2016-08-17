@@ -26,7 +26,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef	__APPLE__
+#include <sys/errno.h>
+#include <sys/xattr.h>
+#else
 #include <attr/xattr.h>
+#endif
 #include <openssl/evp.h>
 
 #include "cleanup.h"
@@ -226,7 +231,11 @@ lr_checksum_fd_compare(LrChecksumType type,
 
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                                   (unsigned long long) st.st_mtime);
+#ifdef	__APPLE__
+            attr_ret = fgetxattr(fd, key, &buf, 256, 0, 0);
+#else
             attr_ret = fgetxattr(fd, key, &buf, 256);
+#endif
             if (attr_ret != -1) {
                 // Cached checksum found
                 g_debug("%s: Using checksum cached in xattr: [%s] %s",
@@ -250,7 +259,11 @@ lr_checksum_fd_compare(LrChecksumType type,
             _cleanup_free_ gchar *key = NULL;
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                                   (unsigned long long) st.st_mtime);
+#ifdef	__APPLE__
+            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0, 0);
+#else
             fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
+#endif
         }
     }
 

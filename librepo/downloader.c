@@ -30,7 +30,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <curl/curl.h>
+#ifdef	__APPLE__
+#include <sys/xattr.h>
+#else
 #include <attr/xattr.h>
+#endif
 
 #include "downloader.h"
 #include "rcodes.h"
@@ -792,7 +796,11 @@ add_librepo_xattr(int fd, const gchar *fn)
     else
         dst = g_strdup(fn);
 
+#ifdef	__APPLE__
+    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "", 1, 0, 0);
+#else
     int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "", 1, 0);
+#endif
     if (attr_ret == -1) {
         g_debug("%s: Cannot set xattr %s (%s): %s",
                 __func__, XATTR_LIBREPO, dst, g_strerror(errno));
@@ -805,7 +813,11 @@ add_librepo_xattr(int fd, const gchar *fn)
 static gboolean
 has_librepo_xattr(int fd)
 {
+#ifdef	__APPLE__
+    ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0, 0, 0);
+#else
     ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0);
+#endif
     if (attr_ret == -1) {
         //g_debug("%s: Cannot get xattr %s: %s",
         //        __func__, XATTR_LIBREPO, g_strerror(errno));
@@ -820,7 +832,11 @@ has_librepo_xattr(int fd)
 static void
 remove_librepo_xattr(int fd)
 {
+#ifdef	__APPLE__
+    fremovexattr(fd, XATTR_LIBREPO, 0);
+#else
     fremovexattr(fd, XATTR_LIBREPO);
+#endif
 }
 
 

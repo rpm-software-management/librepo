@@ -1,6 +1,9 @@
 PROJECT (librepo C)
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 
+set(CMAKE_INCLUDE_PATH /opt/local/include ${CMAKE_INCLUDE_PATH})
+set(CMAKE_LIBRARY_PATH /opt/local/lib ${CMAKE_LIBRARY_PATH})
+
 OPTION (ENABLE_TESTS "Build test?" ON)
 OPTION (ENABLE_DOCS "Build docs?" ON)
 
