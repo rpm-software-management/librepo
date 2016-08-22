@@ -22,4 +22,4 @@ cd build
 make
 make test
 
-#sudo make install
+sudo make install
