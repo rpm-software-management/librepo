@@ -17,3 +17,9 @@ cd build && cmake \
     -DPYTHON_DESIRED="2" \
     -DCMAKE_MACOSX_RPATH="1" \
 	../
+
+cd build
+make
+make test
+
+#sudo make install
