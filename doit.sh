@@ -15,7 +15,7 @@ cd build && cmake \
         -DSHARE_INSTALL_PREFIX:PATH=/opt/local/share \
         -DBUILD_SHARED_LIBS:BOOL=ON \
     -DPYTHON_DESIRED="2" \
-    -DCMAKE_MACOSX_RPATH="1" \
+    -DMACOSX="1" \
 	../
 
 cd build

@@ -26,8 +26,13 @@ add_definitions( -DG_LOG_DOMAIN="librepo" )
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+IF (MACOSX)
+MESSAGE(STATUS "Building for Mac OS X")
+SET (CMAKE_MACOSX_RPATH	"1")
+ADD_DEFINITIONS (-DMACOSX)
+ENDIF (MACOSX)
 
-# Find necessare libraries
+# Find necessary libraries
 
 FIND_PACKAGE(PkgConfig)
 PKG_CHECK_MODULES(GLIB2 glib-2.0 REQUIRED)
