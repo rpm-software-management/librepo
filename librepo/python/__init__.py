@@ -256,6 +256,12 @@ Version contants
     all metadata files will be downloaded. If *val* is ``[]`` or ``[None]``
     only ``repomd.xml`` will be downloaded.
 
+.. data:: LRO_YUMSLIST
+
+    *[(String, String), ...] or None*. Set list of substitutions
+    for repomd records.
+    ``[("group_gz", "group")]`
+
 .. data:: LRO_RPMMDDLIST
 
     See LRO_YUMDLIST
@@ -393,6 +399,7 @@ Version contants
 .. data:: LRI_REPOTYPE
 .. data:: LRI_USERAGENT
 .. data:: LRI_YUMDLIST
+.. data:: LRI_YUMSLIST
 .. data:: LRI_RPMMDDLIST
 .. data:: LRI_YUMBLIST
 .. data:: LRI_RPMMDBLIST
@@ -1321,6 +1328,10 @@ class Handle(_librepo.Handle):
     .. attribute:: yumdlist:
 
         See: :data:`.LRO_YUMDLIST`
+
+    .. attribute:: yumslist:
+
+        See: :data:`.LRO_YUMSLIST`
 
     .. attribute:: rpmmdblist:
 

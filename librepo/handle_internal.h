@@ -215,6 +215,8 @@ struct _LrHandle {
 
     long ftpuseepsv; /*!<
         Use FTP EPSV (extended passive mode) mode */
+
+    LrUrlVars *yumslist;
 };
 
 /** Return new CURL easy handle with some default options setted.
