@@ -18,8 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef	__APPLE__
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 500
+#endif	/* __APPLE__ */
+
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <curl/curl.h>
