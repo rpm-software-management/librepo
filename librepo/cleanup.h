@@ -31,7 +31,7 @@
 
 G_BEGIN_DECLS
 
-static void
+static inline void
 lr_close(int fildes)
 {
     if (fildes < 0)
@@ -40,23 +40,23 @@ lr_close(int fildes)
 }
 
 #define LR_DEFINE_CLEANUP_FUNCTION(Type, name, func) \
-  static inline void name (void *v) \
+  static inline void name (Type *v) \
   { \
-    func (*(Type*)v); \
+    func (*v); \
   }
 
 #define LR_DEFINE_CLEANUP_FUNCTION0(Type, name, func) \
-  static inline void name (void *v) \
+  static inline void name (Type *v) \
   { \
-    if (*(Type*)v) \
-      func (*(Type*)v); \
+    if (*v) \
+      func (*v); \
   }
 
 #define LR_DEFINE_CLEANUP_FUNCTIONt(Type, name, func) \
-  static inline void name (void *v) \
+  static inline void name (Type *v) \
   { \
-    if (*(Type*)v) \
-      func (*(Type*)v, TRUE); \
+    if (*v) \
+      func (*v, TRUE); \
   }
 
 LR_DEFINE_CLEANUP_FUNCTION0(GArray*, lr_local_array_unref, g_array_unref)
@@ -76,8 +76,17 @@ LR_DEFINE_CLEANUP_FUNCTIONt(GString*, lr_local_free_string, g_string_free)
 
 LR_DEFINE_CLEANUP_FUNCTION(char**, lr_local_strfreev, g_strfreev)
 LR_DEFINE_CLEANUP_FUNCTION(GList*, lr_local_free_list, g_list_free)
-LR_DEFINE_CLEANUP_FUNCTION(void*, lr_local_free, g_free)
 LR_DEFINE_CLEANUP_FUNCTION(int, lr_local_file_close, lr_close)
+
+/*
+ * g_free() could be used for any pointer type.
+ * To avoid warnings, we must take void * in place of void **.
+ */
+static inline void
+lr_local_free(void *v)
+{
+    g_free(*(void **)v);
+}
 
 #define _cleanup_dir_close_ __attribute__ ((cleanup(lr_local_dir_close)))
 #define _cleanup_file_close_ __attribute__ ((cleanup(lr_local_file_close)))
