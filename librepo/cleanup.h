@@ -76,7 +76,7 @@ LR_DEFINE_CLEANUP_FUNCTIONt(GString*, lr_local_free_string, g_string_free)
 
 LR_DEFINE_CLEANUP_FUNCTION(char**, lr_local_strfreev, g_strfreev)
 LR_DEFINE_CLEANUP_FUNCTION(GList*, lr_local_free_list, g_list_free)
-LR_DEFINE_CLEANUP_FUNCTION(int, lr_local_file_close, lr_close)
+LR_DEFINE_CLEANUP_FUNCTION(int, lr_local_fd_close, lr_close)
 
 /*
  * g_free() could be used for any pointer type.
@@ -89,7 +89,7 @@ lr_local_free(void *v)
 }
 
 #define _cleanup_dir_close_ __attribute__ ((cleanup(lr_local_dir_close)))
-#define _cleanup_file_close_ __attribute__ ((cleanup(lr_local_file_close)))
+#define _cleanup_fd_close_ __attribute__ ((cleanup(lr_local_fd_close)))
 #define _cleanup_timer_destroy_ __attribute__ ((cleanup(lr_local_destroy_timer)))
 #define _cleanup_free_ __attribute__ ((cleanup(lr_local_free)))
 #define _cleanup_checksum_free_ __attribute__ ((cleanup(lr_local_checksum_free)))

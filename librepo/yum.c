@@ -1103,7 +1103,7 @@ lr_yum_use_local_load_base(LrHandle *handle,
     GError *tmp_err = NULL;
     _cleanup_free_ gchar *path = NULL;
     _cleanup_free_ gchar *sig = NULL;
-    _cleanup_file_close_ int fd = -1;
+    _cleanup_fd_close_ int fd = -1;
 
     if (handle->mirrorlist_fd != -1) {
         // Locate mirrorlist if available.
