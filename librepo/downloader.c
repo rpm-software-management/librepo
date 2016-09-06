@@ -2102,7 +2102,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
     while ((msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue))) {
         LrTarget *target = NULL;
-        char *effective_url = NULL;
+        _cleanup_free_ char *effective_url = NULL;
         int fd;
         gboolean matches = TRUE;
         GError *transfer_err = NULL;
@@ -2395,8 +2395,6 @@ transfer_error:
             lr_downloadtarget_set_effectiveurl(target->target,
                                                effective_url);
         }
-
-        lr_free(effective_url);
 
         if (fail_fast_error) {
             // Interrupt whole downloading
