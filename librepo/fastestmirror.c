@@ -27,6 +27,7 @@
 #include <curl/curl.h>
 
 #include "util.h"
+#include "cleanup.h"
 #include "handle_internal.h"
 #include "rcodes.h"
 #include "fastestmirror.h"
@@ -248,7 +249,8 @@ lr_fastestmirrorcache_write(LrFastestMirrorCache *cache, GError **err)
 
     // Gen cache content
     GError *tmp_err = NULL;
-    gchar *content = g_key_file_to_data(cache->keyfile, NULL, &tmp_err);
+    _cleanup_free_ gchar *content =
+                          g_key_file_to_data(cache->keyfile, NULL, &tmp_err);
     if (tmp_err) {
         g_propagate_error(err, tmp_err);
         return FALSE;
@@ -264,7 +266,6 @@ lr_fastestmirrorcache_write(LrFastestMirrorCache *cache, GError **err)
 
     fputs(content, f);
     fclose(f);
-    g_free(content);
 
     return TRUE;
 }
