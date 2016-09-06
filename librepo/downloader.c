@@ -1554,17 +1554,20 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         // Fill in headers specified by user in LrHandle via LRO_HTTPHEADER
         for (int x=0; target->handle->httpheader[x]; x++) {
             headers = curl_slist_append(headers, target->handle->httpheader[x]);
-            assert(headers);
+            if (!headers)
+                lr_out_of_memory();
         }
     }
     if (target->target->no_cache) {
         // Add headers that tell proxy to serve us fresh data
         headers = curl_slist_append(headers, "Cache-Control: no-cache");
         headers = curl_slist_append(headers, "Pragma: no-cache");
-        assert(headers);
+        if (!headers)
+            lr_out_of_memory();
     }
     target->curl_rqheaders = headers;
-    curl_easy_setopt(h, CURLOPT_HTTPHEADER, headers);
+    c_rc = curl_easy_setopt(h, CURLOPT_HTTPHEADER, headers);
+    assert(c_rc == CURLE_OK);
 
     // Add the new handle to the curl multi handle
     CURLMcode cm_rc = curl_multi_add_handle(dd->multi_handle, h);
