@@ -466,6 +466,7 @@ lr_fastestmirror_perform(GSList *list,
             g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_CURLM,
                         "curl_multi_fdset() error: %s",
                         curl_multi_strerror(cm_rc));
+            curl_multi_cleanup(multihandle);
             return FALSE;
         }
 
@@ -476,6 +477,7 @@ lr_fastestmirror_perform(GSList *list,
             } else {
                 g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_SELECT,
                             "select() error: %s", g_strerror(errno));
+                curl_multi_cleanup(multihandle);
                 return FALSE;
             }
         }
