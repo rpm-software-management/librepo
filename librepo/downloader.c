@@ -1321,13 +1321,57 @@ check_zck(LrTarget *target, GError **err)
 }
 #endif /* WITH_ZCHUNK */
 
-/** Prepares next transfer
+/** Open the file to write to
+ */
+static FILE*
+open_target_file(LrTarget *target, GError **err)
+{
+    int fd;
+    FILE *f;
+
+    if (target->target->fd != -1) {
+        // Use supplied filedescriptor
+        fd = dup(target->target->fd);
+        if (fd == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "dup(%d) failed: %s",
+                        target->target->fd, g_strerror(errno));
+           return NULL;
+        }
+    } else {
+        // Use supplied filename
+        int open_flags = O_CREAT|O_TRUNC|O_RDWR;
+        if (target->resume || target->target->is_zchunk)
+            open_flags &= ~O_TRUNC;
+
+        fd = open(target->target->fn, open_flags, 0666);
+        if (fd == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "Cannot open %s: %s",
+                        target->target->fn, g_strerror(errno));
+            return NULL;
+        }
+    }
+
+    f = fdopen(fd, "w+b");
+    if (!f) {
+        close(fd);
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                    "fdopen(%d) failed: %s",
+                    fd, g_strerror(errno));
+        return NULL;
+    }
+
+    return f;
+}
+
+/** Prepare next transfer
  */
 static gboolean
 prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 {
     LrTarget *target;
-    char *full_url = NULL;
+    _cleanup_free_ char *full_url = NULL;
     LrProtocol protocol = LR_PROTOCOL_OTHER;
     gboolean ret;
     GError *tmp_err = NULL;
@@ -1361,8 +1405,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         // Something went wrong
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
                     "curl_easy_duphandle() call failed");
-        return FALSE;
+        goto fail;
     }
+    target->curl_handle = h;
 
     // Set URL
     c_rc = curl_easy_setopt(h, CURLOPT_URL, full_url);
@@ -1370,9 +1415,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
                     "curl_easy_setopt(h, CURLOPT_URL, %s) failed: %s",
                     full_url, curl_easy_strerror(c_rc));
-        lr_free(full_url);
-        curl_easy_cleanup(h);
-        return FALSE;
+        goto fail;
     }
 
     // Set error buffer
@@ -1382,52 +1425,13 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
                     "curl_easy_setopt(h, CURLOPT_ERRORBUFFER, %s) failed: %s",
                     full_url, curl_easy_strerror(c_rc));
-        lr_free(full_url);
-        curl_easy_cleanup(h);
-        return FALSE;
+        goto fail;
     }
-
-    lr_free(full_url);
 
     // Prepare FILE
-    int fd;
-
-    if (target->target->fd != -1) {
-        // Use supplied filedescriptor
-        fd = dup(target->target->fd);
-        if (fd == -1) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                        "dup(%d) failed: %s",
-                        target->target->fd, g_strerror(errno));
-            curl_easy_cleanup(h);
-            return FALSE;
-        }
-    } else {
-        // Use supplied filename
-        int open_flags = O_CREAT|O_TRUNC|O_RDWR;
-        if (target->resume || target->target->is_zchunk)
-            open_flags &= ~O_TRUNC;
-
-        fd = open(target->target->fn, open_flags, 0666);
-        if (fd < 0) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                        "Cannot open %s: %s",
-                        target->target->fn, g_strerror(errno));
-            curl_easy_cleanup(h);
-            return FALSE;
-        }
-    }
-
-    FILE *f = fdopen(fd, "w+b");
-    if (!f) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                    "fdopen(%d) failed: %s",
-                    fd, g_strerror(errno));
-        curl_easy_cleanup(h);
-        return FALSE;
-    }
-
-    target->f = f;
+    target->f = open_target_file(target, err);
+    if (!target->f)
+        goto fail;
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
 
@@ -1438,8 +1442,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                     "Unable to initialize zchunk file %s: %s",
                     target->target->path,
                     tmp_err->message);
-        curl_easy_cleanup(h);
-        return FALSE;
+        goto fail;
     }
 
     // If zchunk is finished, we're done
@@ -1447,7 +1450,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
        target->zck_state == LR_ZCK_DL_FINISHED) {
         g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
         target->state = LR_DS_FINISHED;
-        curl_easy_cleanup(h);
+        curl_easy_cleanup(target->handle);
+        target->handle = NULL;
         g_free(target->headercb_interrupt_reason);
         target->headercb_interrupt_reason = NULL;
         fclose(target->f);
@@ -1456,6 +1460,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         return TRUE;
     }
     # endif /* WITH_ZCHUNK */
+
+    int fd = fileno(target->f);
 
     // Allow resume only for files that were originally being
     // downloaded by librepo
@@ -1466,9 +1472,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if (ftruncate(fd, 0) == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "ftruncate() failed: %s", g_strerror(errno));
-            fclose(f);
-            curl_easy_cleanup(h);
-            return FALSE;
+            goto fail;
         }
     }
 
@@ -1484,8 +1488,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
         if (target->original_offset == -1) {
             // Determine offset
-            fseek(f, 0L, SEEK_END);
-            gint64 determined_offset = ftell(f);
+            fseek(target->f, 0L, SEEK_END);
+            gint64 determined_offset = ftell(target->f);
             if (determined_offset == -1) {
                 // An error while determining offset =>
                 // Download the whole file again
@@ -1589,13 +1593,23 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // Set protocol of the target
     target->protocol = protocol;
 
-    // Save curl handle for the current transfer
-    target->curl_handle = h;
-
     // Add the transfer to the list of running transfers
     dd->running_transfers = g_slist_append(dd->running_transfers, target);
 
     return TRUE;
+
+fail:
+    // Cleanup target
+    if (target->curl_handle) {
+        curl_easy_cleanup(target->curl_handle);
+        target->curl_handle = NULL;
+    }
+    if (target->f != NULL) {
+        fclose(target->f);
+        target->f = NULL;
+    }
+
+    return FALSE;
 }
 
 static gboolean
