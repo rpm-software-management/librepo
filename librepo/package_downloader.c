@@ -242,7 +242,7 @@ lr_download_packages(GSList *targets,
 
     // Prepare targets
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        gchar *local_path;
+        _cleanup_free_ gchar *local_path = NULL;
         LrPackageTarget *packagetarget = elem->data;
         LrDownloadTarget *downloadtarget;
         gint64 realsize = -1;
@@ -255,11 +255,12 @@ lr_download_packages(GSList *targets,
         if (packagetarget->dest) {
             if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
                 // Dir specified
-                gchar *file_basename = g_path_get_basename(packagetarget->relative_url);
+                _cleanup_free_ gchar *file_basename;
+                file_basename = g_path_get_basename(packagetarget->relative_url);
+
                 local_path = g_build_filename(packagetarget->dest,
                                               file_basename,
                                               NULL);
-                g_free(file_basename);
             } else {
                 local_path = g_strdup(packagetarget->dest);
             }
@@ -270,7 +271,6 @@ lr_download_packages(GSList *targets,
 
         packagetarget->local_path = g_string_chunk_insert(packagetarget->chunk,
                                                           local_path);
-        g_free(local_path);
 
         // Check expected size and real size if the file exists
         if (doresume
@@ -542,11 +542,12 @@ lr_check_packages(GSList *targets,
         if (packagetarget->dest) {
             if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
                 // Dir specified
-                gchar *file_basename = g_path_get_basename(packagetarget->relative_url);
+                _cleanup_free_ gchar *file_basename;
+                file_basename = g_path_get_basename(packagetarget->relative_url);
+
                 local_path = g_build_filename(packagetarget->dest,
                                               file_basename,
                                               NULL);
-                g_free(file_basename);
             } else {
                 local_path = g_strdup(packagetarget->dest);
             }
