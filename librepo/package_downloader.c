@@ -30,6 +30,7 @@
 #include <fcntl.h>
 
 #include "types.h"
+#include "cleanup.h"
 #include "util.h"
 #include "package_downloader.h"
 #include "handle_internal.h"
@@ -534,7 +535,7 @@ lr_check_packages(GSList *targets,
     }
 
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        gchar *local_path;
+        _cleanup_free_ gchar *local_path = NULL;
         LrPackageTarget *packagetarget = elem->data;
 
         // Prepare destination filename
