@@ -419,7 +419,7 @@ lr_fastestmirror_perform(GSList *list,
 
     int still_running;
     gdouble elapsed_time = 0.0;
-    GTimer *timer = g_timer_new();
+    _cleanup_timer_destroy_ GTimer *timer = g_timer_new();
     g_timer_start(timer);
 
     do {
@@ -488,8 +488,6 @@ lr_fastestmirror_perform(GSList *list,
         elapsed_time = g_timer_elapsed(timer, NULL);
 
     } while(still_running && elapsed_time < length_of_measurement);
-
-    g_timer_destroy(timer);
 
     // Remove curl easy handles from multi handle
     // and calculate plain_connect_time
@@ -726,7 +724,7 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
     if (!handles)
         return TRUE;
 
-    GTimer *timer = g_timer_new();
+    _cleanup_timer_destroy_ GTimer *timer = g_timer_new();
     g_timer_start(timer);
 
     LrHandle *main_handle = handles->data;  // Network configuration for the
@@ -735,10 +733,11 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
 
     // Prepare list of hosts
     gchar *fastestmirrorcache = main_handle->fastestmirrorcache;
-    GHashTable *hosts_ht = g_hash_table_new_full(g_str_hash,
-                                                 g_str_equal,
-                                                 g_free,
-                                                 NULL);
+    _cleanup_hashtable_unref_ GHashTable *hosts_ht =
+                                          g_hash_table_new_full(g_str_hash,
+                                                                g_str_equal,
+                                                                g_free,
+                                                                NULL);
 
     for (GSList *ehandle = handles; ehandle; ehandle = g_slist_next(ehandle)) {
         LrHandle *handle = ehandle->data;
@@ -764,20 +763,16 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
         }
     }
 
-    GList *tmp_list_of_urls = g_hash_table_get_keys(hosts_ht);
-    GSList *list_of_urls = NULL;
+    _cleanup_list_free_ GList *tmp_list_of_urls = g_hash_table_get_keys(hosts_ht);
+    _cleanup_slist_free_ GSList *list_of_urls = NULL;
     int number_of_mirrors = 0;
     for (GList *elem = tmp_list_of_urls; elem; elem = g_list_next(elem)) {
         list_of_urls = g_slist_prepend(list_of_urls, elem->data);
         number_of_mirrors++;
     }
-    g_list_free(tmp_list_of_urls);
 
     if (number_of_mirrors <= 1) {
         // Nothing to do
-        g_slist_free(list_of_urls);
-        g_hash_table_destroy(hosts_ht);
-        g_timer_destroy(timer);
         return TRUE;
     }
 
@@ -787,9 +782,6 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
                                     err);
     if (!ret) {
         g_debug("%s: lr_fastestmirror failed", __func__);
-        g_slist_free(list_of_urls);
-        g_hash_table_destroy(hosts_ht);
-        g_timer_destroy(timer);
         return FALSE;
     }
 
@@ -828,12 +820,8 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
         handle->internal_mirrorlist = g_slist_reverse(new_list);
     }
 
-    g_slist_free(list_of_urls);
-    g_hash_table_destroy(hosts_ht);
-
     g_timer_stop(timer);
     g_debug("%s: Duration: %f", __func__, g_timer_elapsed(timer, NULL));
-    g_timer_destroy(timer);
 
     return TRUE;
 }

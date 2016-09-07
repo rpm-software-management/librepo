@@ -76,6 +76,7 @@ LR_DEFINE_CLEANUP_FUNCTIONt(GString*, lr_local_free_string, g_string_free)
 
 LR_DEFINE_CLEANUP_FUNCTION(char**, lr_local_strfreev, g_strfreev)
 LR_DEFINE_CLEANUP_FUNCTION(GList*, lr_local_free_list, g_list_free)
+LR_DEFINE_CLEANUP_FUNCTION(GSList*, lr_local_free_slist, g_slist_free)
 LR_DEFINE_CLEANUP_FUNCTION(int, lr_local_fd_close, lr_close)
 
 /*
@@ -95,6 +96,7 @@ lr_local_free(void *v)
 #define _cleanup_checksum_free_ __attribute__ ((cleanup(lr_local_checksum_free)))
 #define _cleanup_error_free_ __attribute__ ((cleanup(lr_local_free_error)))
 #define _cleanup_list_free_ __attribute__ ((cleanup(lr_local_free_list)))
+#define _cleanup_slist_free_ __attribute__ ((cleanup(lr_local_free_slist)))
 #define _cleanup_string_free_ __attribute__ ((cleanup(lr_local_free_string)))
 #define _cleanup_strv_free_ __attribute__ ((cleanup(lr_local_strfreev)))
 #define _cleanup_array_unref_ __attribute__ ((cleanup(lr_local_array_unref)))
