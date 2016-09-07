@@ -796,7 +796,9 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         return TRUE;
     } else if (localpath && !handle->mirrorlisturl) {
         // Just try to use mirrorlist of the local repository
-        gchar *path = lr_pathconcat(localpath, "mirrorlist", NULL);
+        _cleanup_free_ gchar *path;
+        path = lr_pathconcat(localpath, "mirrorlist", NULL);
+
         if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
             g_debug("%s: Local mirrorlist found at %s", __func__, path);
             fd = open(path, O_RDONLY);
@@ -804,13 +806,10 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                             "Cannot open %s: %s",
                             path, g_strerror(errno));
-                g_free(path);
                 return FALSE;
             }
-            g_free(path);
         } else {
             // No local mirrorlist
-            g_free(path);
             return TRUE;
         }
     } else if (!handle->mirrorlisturl) {
@@ -912,7 +911,9 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         return TRUE;
     } else if (localpath && !handle->metalinkurl) {
         // Just try to use metalink of the local repository
-        gchar *path = lr_pathconcat(localpath, "metalink.xml", NULL);
+        _cleanup_free_ gchar *path;
+        path = lr_pathconcat(localpath, "metalink.xml", NULL);
+
         if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
             g_debug("%s: Local metalink.xml found at %s", __func__, path);
             fd = open(path, O_RDONLY);
@@ -920,13 +921,10 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
                 g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
                             "Cannot open %s: %s",
                             path, g_strerror(errno));
-                g_free(path);
                 return FALSE;
             }
-            g_free(path);
         } else {
             // No local metalink
-            g_free(path);
             return TRUE;
         }
     } else if (!handle->metalinkurl) {
