@@ -796,12 +796,9 @@ lr_handle_prepare_urls(LrHandle *handle, GError **err)
         _cleanup_free_ gchar *final_url = NULL;
 
         // Make sure that url has protocol specified
-        final_url = lr_prepend_url_protocol(url);
-        if (!final_url) {
-            g_set_error(err, LR_HANDLE_ERROR, LRE_BADURL,
-                        "Cannot resolve path for: \"%s\"", url);
+        final_url = lr_add_url_protocol(url, err);
+        if (!final_url)
             return FALSE;
-        }
 
         // Append the url into internal list of urls specified by LRO_URLS
         handle->urls_mirrors = lr_lrmirrorlist_append_url(
@@ -870,8 +867,8 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
             return FALSE;
         }
 
-        url = lr_prepend_url_protocol(handle->mirrorlisturl);
-        if (!download_non_cached_url(handle, url, fd, err)) {
+        url = lr_add_url_protocol(handle->mirrorlisturl, err);
+        if (!url || !download_non_cached_url(handle, url, fd, err)) {
             close(fd);
             return FALSE;
         }
@@ -986,8 +983,8 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
             return FALSE;
         }
 
-        url = lr_prepend_url_protocol(handle->metalinkurl);
-        if (!download_non_cached_url(handle, url, fd, err)) {
+        url = lr_add_url_protocol(handle->metalinkurl, err);
+        if (!url || !download_non_cached_url(handle, url, fd, err)) {
             close(fd);
             return FALSE;
         }
