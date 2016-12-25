@@ -31,6 +31,17 @@ PyStringOrNone_FromString(const char *str)
 }
 
 /**
+ * Set an object to a dict and decref its ref count.
+ */
+static int
+PyDict_SetItemStringAndDecref(PyObject *p, const char *key, PyObject *val)
+{
+    int ret = PyDict_SetItemString(p, key, val);
+    Py_XDECREF(val);
+    return ret;
+}
+
+/**
  * bytes, basic string or unicode string in Python 2/3 to c string converter,
  * you need to call Py_XDECREF(tmp_py_str) after usage of returned string
  */
@@ -64,23 +75,23 @@ PyObject_FromYumRepo(LrYumRepo *repo)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "repomd",
+    PyDict_SetItemStringAndDecref(dict, "repomd",
             PyStringOrNone_FromString(repo->repomd));
-    PyDict_SetItemString(dict, "url",
+    PyDict_SetItemStringAndDecref(dict, "url",
             PyStringOrNone_FromString(repo->url));
-    PyDict_SetItemString(dict, "destdir",
+    PyDict_SetItemStringAndDecref(dict, "destdir",
             PyStringOrNone_FromString(repo->destdir));
-    PyDict_SetItemString(dict, "signature",
+    PyDict_SetItemStringAndDecref(dict, "signature",
             PyStringOrNone_FromString(repo->signature));
-    PyDict_SetItemString(dict, "mirrorlist",
+    PyDict_SetItemStringAndDecref(dict, "mirrorlist",
             PyStringOrNone_FromString(repo->mirrorlist));
-    PyDict_SetItemString(dict, "metalink",
+    PyDict_SetItemStringAndDecref(dict, "metalink",
             PyStringOrNone_FromString(repo->metalink));
 
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
         LrYumRepoPath *yumrepopath = elem->data;
         if (!yumrepopath || !yumrepopath->type) continue;
-        PyDict_SetItemString(dict,
+        PyDict_SetItemStringAndDecref(dict,
                              yumrepopath->type,
                              PyStringOrNone_FromString(yumrepopath->path));
     }
@@ -99,17 +110,17 @@ PyObject_FromYumRepo_v2(LrYumRepo *repo)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "repomd",
+    PyDict_SetItemStringAndDecref(dict, "repomd",
             PyStringOrNone_FromString(repo->repomd));
-    PyDict_SetItemString(dict, "url",
+    PyDict_SetItemStringAndDecref(dict, "url",
             PyStringOrNone_FromString(repo->url));
-    PyDict_SetItemString(dict, "destdir",
+    PyDict_SetItemStringAndDecref(dict, "destdir",
             PyStringOrNone_FromString(repo->destdir));
-    PyDict_SetItemString(dict, "signature",
+    PyDict_SetItemStringAndDecref(dict, "signature",
             PyStringOrNone_FromString(repo->signature));
-    PyDict_SetItemString(dict, "mirrorlist",
+    PyDict_SetItemStringAndDecref(dict, "mirrorlist",
             PyStringOrNone_FromString(repo->mirrorlist));
-    PyDict_SetItemString(dict, "metalink",
+    PyDict_SetItemStringAndDecref(dict, "metalink",
             PyStringOrNone_FromString(repo->metalink));
 
     if ((paths = PyDict_New()) == NULL)
@@ -118,12 +129,12 @@ PyObject_FromYumRepo_v2(LrYumRepo *repo)
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
         LrYumRepoPath *yumrepopath = elem->data;
         if (!yumrepopath || !yumrepopath->type) continue;
-        PyDict_SetItemString(paths,
+        PyDict_SetItemStringAndDecref(paths,
                              yumrepopath->type,
                              PyStringOrNone_FromString(yumrepopath->path));
     }
 
-    PyDict_SetItemString(dict, "paths", paths);
+    PyDict_SetItemStringAndDecref(dict, "paths", paths);
 
     return dict;
 }
@@ -139,23 +150,23 @@ PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "location_href",
+    PyDict_SetItemStringAndDecref(dict, "location_href",
             PyStringOrNone_FromString(rec->location_href));
-    PyDict_SetItemString(dict, "checksum",
+    PyDict_SetItemStringAndDecref(dict, "checksum",
             PyStringOrNone_FromString(rec->checksum));
-    PyDict_SetItemString(dict, "checksum_type",
+    PyDict_SetItemStringAndDecref(dict, "checksum_type",
             PyStringOrNone_FromString(rec->checksum_type));
-    PyDict_SetItemString(dict, "checksum_open",
+    PyDict_SetItemStringAndDecref(dict, "checksum_open",
             PyStringOrNone_FromString(rec->checksum_open));
-    PyDict_SetItemString(dict, "checksum_open_type",
+    PyDict_SetItemStringAndDecref(dict, "checksum_open_type",
             PyStringOrNone_FromString(rec->checksum_open_type));
-    PyDict_SetItemString(dict, "timestamp",
+    PyDict_SetItemStringAndDecref(dict, "timestamp",
             PyLong_FromLongLong((PY_LONG_LONG) rec->timestamp));
-    PyDict_SetItemString(dict, "size",
+    PyDict_SetItemStringAndDecref(dict, "size",
             PyLong_FromLongLong((PY_LONG_LONG) rec->size));
-    PyDict_SetItemString(dict, "size_open",
+    PyDict_SetItemStringAndDecref(dict, "size_open",
             PyLong_FromLongLong((PY_LONG_LONG) rec->size_open));
-    PyDict_SetItemString(dict, "db_version",
+    PyDict_SetItemStringAndDecref(dict, "db_version",
             PyLong_FromLong((long) rec->db_version));
 
     return dict;
@@ -172,7 +183,7 @@ PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict,
+    PyDict_SetItemStringAndDecref(dict,
                          "revision",
                          PyStringOrNone_FromString(repomd->revision));
 
@@ -182,7 +193,7 @@ PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
         if (tag)
             PyList_Append(list, PyStringOrNone_FromString(tag));
     }
-    PyDict_SetItemString(dict, "repo_tags", list);
+    PyDict_SetItemStringAndDecref(dict, "repo_tags", list);
 
     list = PyList_New(0);
     for (GSList *elem = repomd->distro_tags; elem; elem = g_slist_next(elem)) {
@@ -200,7 +211,7 @@ PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
                                     PyStringOrNone_FromString(value)));
         }
     }
-    PyDict_SetItemString(dict, "distro_tags", list);
+    PyDict_SetItemStringAndDecref(dict, "distro_tags", list);
 
     list = PyList_New(0);
     for (GSList *elem = repomd->content_tags; elem; elem = g_slist_next(elem)) {
@@ -208,7 +219,7 @@ PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
         if (tag)
             PyList_Append(list, PyStringOrNone_FromString(tag));
     }
-    PyDict_SetItemString(dict, "content_tags", list);
+    PyDict_SetItemStringAndDecref(dict, "content_tags", list);
 
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         LrYumRepoMdRecord *record = elem->data;
@@ -216,7 +227,7 @@ PyObject_FromYumRepoMd(LrYumRepoMd *repomd)
         if (!record)
             continue;
 
-        PyDict_SetItemString(dict,
+        PyDict_SetItemStringAndDecref(dict,
                             record->type,
                             PyObject_FromRepoMdRecord(record));
     }
@@ -235,7 +246,7 @@ PyObject_FromYumRepoMd_v2(LrYumRepoMd *repomd)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict,
+    PyDict_SetItemStringAndDecref(dict,
                          "revision",
                          PyStringOrNone_FromString(repomd->revision));
 
@@ -245,7 +256,7 @@ PyObject_FromYumRepoMd_v2(LrYumRepoMd *repomd)
         if (tag)
             PyList_Append(list, PyStringOrNone_FromString(tag));
     }
-    PyDict_SetItemString(dict, "repo_tags", list);
+    PyDict_SetItemStringAndDecref(dict, "repo_tags", list);
 
     list = PyList_New(0);
     for (GSList *elem = repomd->distro_tags; elem; elem = g_slist_next(elem)) {
@@ -263,7 +274,7 @@ PyObject_FromYumRepoMd_v2(LrYumRepoMd *repomd)
                                     PyStringOrNone_FromString(value)));
         }
     }
-    PyDict_SetItemString(dict, "distro_tags", list);
+    PyDict_SetItemStringAndDecref(dict, "distro_tags", list);
 
     list = PyList_New(0);
     for (GSList *elem = repomd->content_tags; elem; elem = g_slist_next(elem)) {
@@ -271,7 +282,7 @@ PyObject_FromYumRepoMd_v2(LrYumRepoMd *repomd)
         if (tag)
             PyList_Append(list, PyStringOrNone_FromString(tag));
     }
-    PyDict_SetItemString(dict, "content_tags", list);
+    PyDict_SetItemStringAndDecref(dict, "content_tags", list);
 
     records = PyDict_New();
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
@@ -280,11 +291,11 @@ PyObject_FromYumRepoMd_v2(LrYumRepoMd *repomd)
         if (!record)
             continue;
 
-        PyDict_SetItemString(records,
+        PyDict_SetItemStringAndDecref(records,
                             record->type,
                             PyObject_FromRepoMdRecord(record));
     }
-    PyDict_SetItemString(dict, "records", records);
+    PyDict_SetItemStringAndDecref(dict, "records", records);
 
     return dict;
 }
@@ -300,11 +311,11 @@ PyObject_FromMetalink(LrMetalink *metalink)
     if ((dict = PyDict_New()) == NULL)
         return NULL;
 
-    PyDict_SetItemString(dict, "filename",
+    PyDict_SetItemStringAndDecref(dict, "filename",
             PyStringOrNone_FromString(metalink->filename));
-    PyDict_SetItemString(dict, "timestamp",
+    PyDict_SetItemStringAndDecref(dict, "timestamp",
             PyLong_FromLongLong((PY_LONG_LONG)metalink->timestamp));
-    PyDict_SetItemString(dict, "size",
+    PyDict_SetItemStringAndDecref(dict, "size",
             PyLong_FromLongLong((PY_LONG_LONG)metalink->size));
 
     // Hashes
@@ -312,7 +323,7 @@ PyObject_FromMetalink(LrMetalink *metalink)
         PyDict_Clear(dict);
         return NULL;
     }
-    PyDict_SetItemString(dict, "hashes", sub_list);
+    PyDict_SetItemStringAndDecref(dict, "hashes", sub_list);
 
     for (GSList *elem = metalink->hashes; elem; elem = g_slist_next(elem)) {
         LrMetalinkHash *metalinkhash = elem->data;
@@ -333,7 +344,7 @@ PyObject_FromMetalink(LrMetalink *metalink)
         PyDict_Clear(dict);
         return NULL;
     }
-    PyDict_SetItemString(dict, "urls", sub_list);
+    PyDict_SetItemStringAndDecref(dict, "urls", sub_list);
 
     for (GSList *elem = metalink->urls; elem; elem = g_slist_next(elem)) {
         LrMetalinkUrl *metalinkurl = elem->data;
@@ -342,15 +353,15 @@ PyObject_FromMetalink(LrMetalink *metalink)
             PyDict_Clear(dict);
             return NULL;
         }
-        PyDict_SetItemString(udict, "protocol",
+        PyDict_SetItemStringAndDecref(udict, "protocol",
                 PyStringOrNone_FromString(metalinkurl->protocol));
-        PyDict_SetItemString(udict, "type",
+        PyDict_SetItemStringAndDecref(udict, "type",
                 PyStringOrNone_FromString(metalinkurl->type));
-        PyDict_SetItemString(udict, "location",
+        PyDict_SetItemStringAndDecref(udict, "location",
                 PyStringOrNone_FromString(metalinkurl->location));
-        PyDict_SetItemString(udict, "preference",
+        PyDict_SetItemStringAndDecref(udict, "preference",
                 PyLong_FromLong((long) metalinkurl->preference));
-        PyDict_SetItemString(udict, "url",
+        PyDict_SetItemStringAndDecref(udict, "url",
                 PyStringOrNone_FromString(metalinkurl->url));
         PyList_Append(sub_list, udict);
     }
@@ -363,7 +374,7 @@ PyObject_FromMetalink(LrMetalink *metalink)
             PyDict_Clear(dict);
             return NULL;
         }
-        PyDict_SetItemString(dict, "alternates", sub_list);
+        PyDict_SetItemStringAndDecref(dict, "alternates", sub_list);
 
         for (GSList *elem = metalink->alternates; elem; elem = g_slist_next(elem)) {
             LrMetalinkAlternate *ma = elem->data;
@@ -372,9 +383,9 @@ PyObject_FromMetalink(LrMetalink *metalink)
                 PyDict_Clear(dict);
                 return NULL;
             }
-            PyDict_SetItemString(udict, "timestamp",
+            PyDict_SetItemStringAndDecref(udict, "timestamp",
                 PyLong_FromLongLong((PY_LONG_LONG)ma->timestamp));
-            PyDict_SetItemString(udict, "size",
+            PyDict_SetItemStringAndDecref(udict, "size",
                 PyLong_FromLongLong((PY_LONG_LONG)ma->size));
 
             PyObject *usub_list;
@@ -382,7 +393,7 @@ PyObject_FromMetalink(LrMetalink *metalink)
                 PyDict_Clear(dict);
                 return NULL;
             }
-            PyDict_SetItemString(udict, "hashes", usub_list);
+            PyDict_SetItemStringAndDecref(udict, "hashes", usub_list);
 
             for (GSList *subelem = ma->hashes; subelem; subelem = g_slist_next(subelem)) {
                 LrMetalinkHash *metalinkhash = subelem->data;
