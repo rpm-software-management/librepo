@@ -32,7 +32,7 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
             os.environ.pop('GNUPGHOME')
         else:
             os.environ['GNUPGHOME'] = self._gnupghome
-        shutil.rmtree(self.tmpdir)
+        shutil.rmtree(self.tmpdir, True)
 
     def test_download_repo_01(self):
         h = librepo.Handle()
