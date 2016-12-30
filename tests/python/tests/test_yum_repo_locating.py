@@ -34,7 +34,7 @@ class TestCaseYumRepoLocating(TestCase):
             os.environ.pop('GNUPGHOME')
         else:
             os.environ['GNUPGHOME'] = self._gnupghome
-        shutil.rmtree(self.tmpdir)
+        shutil.rmtree(self.tmpdir, True)
 
     def test_read_mirrorlist(self):
         h = librepo.Handle()
