@@ -1,5 +1,5 @@
 /* librepo - A library providing (libcURL like) API to downloading repository
- * Copyright (C) 2012  Tomas Mlcoch
+ * Copyright (C) 2016  Martin Hatina
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
