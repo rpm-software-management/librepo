@@ -33,6 +33,7 @@
 #include <attr/xattr.h>
 
 #include "downloader.h"
+#include "downloader_internal.h"
 #include "rcodes.h"
 #include "util.h"
 #include "downloadtarget.h"
@@ -2199,25 +2200,6 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 
     return ret;
 }
-
-typedef struct {
-    LrProgressCb cb; /*!<
-        User callback */
-
-    LrMirrorFailureCb mfcb; /*!<
-        Mirror failure callback */
-
-    GSList *singlecbdata; /*!<
-        List of LrCallbackData */
-
-} LrSharedCallbackData;
-
-typedef struct {
-    double downloaded;  /*!< Currently downloaded bytes of target */
-    double total;       /*!< Total size of the target */
-    void *userdata;     /*!< User data related to the target */
-    LrSharedCallbackData *sharedcbdata; /*!< Shared cb data */
-} LrCallbackData;
 
 int
 lr_multi_progress_func(void* ptr,

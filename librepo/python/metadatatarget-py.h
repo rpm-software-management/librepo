@@ -1,5 +1,5 @@
 /* librepo - A library providing (libcURL like) API to downloading repository
- * Copyright (C) 2012  Tomas Mlcoch
+ * Copyright (C) 2016  Martin Hatina
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -18,34 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef __LR_LIBREPO_H__
-#define __LR_LIBREPO_H__
+#ifndef LIBREPO_METADATATARGET_PY_H
+#define LIBREPO_METADATATARGET_PY_H
 
-#include <glib.h>
+#include <Python.h>
+#include <librepo/librepo.h>
 
-#include "checksum.h"
-#include "fastestmirror.h"
-#include "gpg.h"
-#include "handle.h"
-#include "metalink.h"
-#include "metadata_downloader.h"
-#include "package_downloader.h"
-#include "rcodes.h"
-#include "repoconf.h"
-#include "repomd.h"
-#include "repoutil_yum.h"
-#include "result.h"
-#include "types.h"
-#include "url_substitution.h"
-#include "util.h"
-#include "version.h"
-#include "xmlparser.h"
-#include "yum.h"
+extern PyTypeObject MetadataTarget_Type;
 
-// Low level downloading interface
-// (API could be changed significantly between two versions)
+#define MetadataTargetObject_Check(o)   PyObject_TypeCheck(o, &MetadataTarget_Type)
 
-#include "downloader.h"
-#include "downloadtarget.h"
+LrMetadataTarget *MetadataTarget_FromPyObject(PyObject *o);
+void MetadataTarget_SetThreadState(PyObject *o, PyThreadState **state);
 
-#endif
+
+#endif //LIBREPO_METADATATARGET_PY_H

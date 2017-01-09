@@ -23,7 +23,10 @@
 
 #include <glib.h>
 
+#include "handle.h"
+#include "metalink.h"
 #include "rcodes.h"
+#include "repomd.h"
 #include "result.h"
 
 G_BEGIN_DECLS
@@ -52,6 +55,16 @@ typedef struct {
     char *metalink;     /*!< Metalink filename */
 } LrYumRepo;
 
+/** Mirror Failure Callback Data
+ */
+typedef struct CbData_s {
+    void *userdata;                 /*!< User data */
+    void *cbdata;                   /*!< User's callback data */
+    LrProgressCb progresscb;        /*!< Progress callback */
+    LrHandleMirrorFailureCb hmfcb;  /*!< Handle mirror failure callback */
+    char *metadata;                 /*!< "primary", "filelists", ... */
+} CbData;
+
 /** Allocate new yum repo object.
  * @return              New yum repo object.
  */
@@ -71,6 +84,79 @@ lr_yum_repo_free(LrYumRepo *repo);
  */
 const char *
 lr_yum_repo_path(LrYumRepo *repo, const char *type);
+
+/**
+ * Handle mirror failure callback
+ * @param clientp Pointer to user data.
+ * @param msg Error message.
+ * @param url Mirror URL.
+ * @return See LrCbReturnCode codes
+ */
+int
+hmfcb(void *clientp, const char *msg, const char *url);
+
+/** Prepares directory for repo data
+ * @param handle        Handle object containing path to repo data
+ * @param err           Object for storing errors
+ * @return              True on success
+ */
+gboolean
+lr_prepare_repodata_dir(LrHandle *handle, GError **err);
+
+
+/** Stores mirror list files
+ * @param handle        Handle object containing path to mirror list
+ * @param repo          Yum repository
+ * @param err           Object for storing errors
+ * @return              True on success
+ */
+gboolean
+lr_store_mirrorlist_files(LrHandle *handle, LrYumRepo *repo, GError **err);
+
+/** Copies metalink content
+ * @param handle        Handle object containing dest dir path
+ * @param repo          Yum repository
+ * @param err           Object for storing errors
+ * @return              True on success
+ */
+gboolean
+lr_copy_metalink_content(LrHandle *handle, LrYumRepo *repo, GError **err);
+
+/** Prepares repomd.xml file
+ * @param handle        Handle object containing dest dir path
+ * @param path
+ * @param err           Object for storing errors
+ * @return              File descriptor of repomd.xml file
+ */
+int
+lr_prepare_repomd_xml_file(LrHandle *handle, char **path, GError **err);
+
+gboolean
+lr_check_repomd_xml_asc_availability(LrHandle *handle, LrYumRepo *repo, int fd, char *path, GError **err);
+
+/** Stores best checksum on the beginning of @param checksums
+ * @param metalink      Metalink
+ * @param checksums     List of checksums
+ */
+void
+lr_get_best_checksum(const LrMetalink *metalink, GSList **checksums);
+
+/** Returns mirror failure callback data
+ * @param handle        Handle object
+ * @return              Mirror Failure Callback Data
+ */
+CbData *
+lr_get_metadata_failure_callback(const LrHandle *handle);
+
+/**
+ *
+ * @param targets
+ * @param err
+ * @return return TRUE on success, FALSE otherwise
+ */
+gboolean
+lr_yum_download_repos(GSList *targets,
+                      GError **err);
 
 /** @} */
 

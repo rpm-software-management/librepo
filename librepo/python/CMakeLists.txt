@@ -6,6 +6,8 @@ SET (librepomodule_SRCS
      ${pylibrepo_SRCDIR}/handle-py.c
      ${pylibrepo_SRCDIR}/librepomodule.c
      ${pylibrepo_SRCDIR}/logging.c
+     ${pylibrepo_SRCDIR}/metadatadownloader-py.c
+     ${pylibrepo_SRCDIR}/metadatatarget-py.c
      ${pylibrepo_SRCDIR}/packagedownloader-py.c
      ${pylibrepo_SRCDIR}/packagetarget-py.c
      ${pylibrepo_SRCDIR}/result-py.c
