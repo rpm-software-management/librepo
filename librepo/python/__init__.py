@@ -1129,6 +1129,12 @@ def checksum_str_to_type(name):
     name = name.lower()
     return _CHECKSUM_STR_TO_VAL_MAP.get(name, CHECKSUM_UNKNOWN)
 
+class MetadataTarget(_librepo.MetadataTarget):
+
+    def __init__(self, handle=None, cbdata=None, progresscb=None, mirrorfailurecb=None, endcb=None):
+        _librepo.MetadataTarget.__init__(self, handle, cbdata, progresscb, mirrorfailurecb,
+                                        endcb)
+
 class PackageTarget(_librepo.PackageTarget):
     """
     Represent a single package that will be downloaded by
@@ -1574,6 +1580,20 @@ class Result(_librepo.Result):
         return self.getinfo(ATTR_TO_LRR[attr])
 
 # Functions
+
+def download_metadata(list):
+    """
+    Download metadata. *list* is a list of
+    :class:`~librepo.MetadataTarget` objects.
+    Exception is raised only if a nonrecoverable
+    error related to the function itself is meet
+    (Errors related to individual downloads are
+    reported via corresponding MetadataTarget objects)
+
+    :param list: List of :class:`~.librepo.MetadataTarget` objects.
+    :returns: *None*
+    """
+    return _librepo.download_metadata(list)
 
 def download_packages(list, failfast=False):
     """

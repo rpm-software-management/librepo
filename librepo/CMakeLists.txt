@@ -7,6 +7,7 @@ SET (librepo_SRCS
      handle.c
      lrmirrorlist.c
      metalink.c
+     metadata_downloader.c
      mirrorlist.c
      package_downloader.c
      rcodes.c
@@ -25,6 +26,7 @@ SET(librepo_HEADERS
     gpg.h
     handle.h
     librepo.h
+    metadata_downloader.h
     metalink.h
     mirrorlist.h
     package_downloader.h

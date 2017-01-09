@@ -39,6 +39,25 @@ G_BEGIN_DECLS
  */
 extern volatile sig_atomic_t lr_interrupt;
 
+typedef struct {
+    LrProgressCb cb; /*!<
+        User callback */
+
+    LrMirrorFailureCb mfcb; /*!<
+        Mirror failure callback */
+
+    GSList *singlecbdata; /*!<
+        List of LrCallbackData */
+
+} LrSharedCallbackData;
+
+typedef struct {
+    double downloaded;  /*!< Currently downloaded bytes of target */
+    double total;       /*!< Total size of the target */
+    void *userdata;     /*!< User data related to the target */
+    LrSharedCallbackData *sharedcbdata; /*!< Shared cb data */
+} LrCallbackData;
+
 /** SIGINT Signal handler.
  * @param sig       Signal number.
  */
