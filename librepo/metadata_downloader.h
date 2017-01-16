@@ -63,9 +63,30 @@ typedef struct {
 
 } LrMetadataTarget;
 
+/**
+ * Create new LrMetadataTarget object.
+ * @param handle Handle related to this download or NULL.
+ * @param repo Related repo.
+ * @param repomd Related repomd.
+ * @param cbdata User data for the callback
+ * @param err GError **
+ * @return Newly allocated LrMetadataTarget or NULL on error
+ */
 LrMetadataTarget *
 lr_metadatatarget_new(LrHandle *handle, LrYumRepo *repo, LrYumRepoMd *repomd, void *cbdata, GError **err);
 
+/**
+ * Create new LrMetadataTarget object.
+ * Almost same as lr_metadatatarget_new() except this function
+ * could set more callbacks.
+ * @param handle Handle related to this download or NULL.
+ * @param cbdata User data for the callback
+ * @param progresscb Progress callback for this transfer.
+ * @param mirror_failure_cb Called when download from a mirror failed.
+ * @param endcb Callback called when target transfer is done.
+ * @param err GError **
+ * @return Newly allocated LrMetadataTarget or NULL on error
+ */
 LrMetadataTarget *
 lr_metadatatarget_new2(LrHandle *handle,
                        void *cbdata,
@@ -74,9 +95,18 @@ lr_metadatatarget_new2(LrHandle *handle,
                        LrEndCb endcb,
                        GError **err);
 
+/** Free ::LrMetadataTarget object.
+ * @param target LrMetadataTarget object
+ */
 void
 lr_metadatatarget_free(LrMetadataTarget *target);
 
+/**
+ * Download all LrMetadataTargets at the targets GSList.
+ * @param targets GSList where each element is a ::LrPackageTarget object
+ * @param err GError **
+ * @return If FALSE then err is set.
+ */
 gboolean
 lr_download_metadata(GSList *targets, GError **err);
 

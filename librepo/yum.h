@@ -85,6 +85,13 @@ lr_yum_repo_free(LrYumRepo *repo);
 const char *
 lr_yum_repo_path(LrYumRepo *repo, const char *type);
 
+/**
+ * Handle mirror failure callback
+ * @param clientp Pointer to user data.
+ * @param msg Error message.
+ * @param url Mirror URL.
+ * @return See LrCbReturnCode codes
+ */
 int
 hmfcb(void *clientp, const char *msg, const char *url);
 

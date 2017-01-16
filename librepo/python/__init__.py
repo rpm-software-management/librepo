@@ -1132,8 +1132,7 @@ def checksum_str_to_type(name):
 class MetadataTarget(_librepo.MetadataTarget):
 
     def __init__(self, handle=None, cbdata=None, progresscb=None, mirrorfailurecb=None, endcb=None):
-        _librepo.MetadataTarget.__init__(self, handle, cbdata, progresscb, mirrorfailurecb,
-                                        endcb)
+        _librepo.MetadataTarget.__init__(self, handle, cbdata, progresscb, mirrorfailurecb, endcb)
 
 class PackageTarget(_librepo.PackageTarget):
     """
