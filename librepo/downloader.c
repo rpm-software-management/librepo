@@ -33,6 +33,7 @@
 #include <attr/xattr.h>
 
 #include "downloader.h"
+#include "downloader_internal.h"
 #include "rcodes.h"
 #include "util.h"
 #include "downloadtarget.h"

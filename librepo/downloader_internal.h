@@ -1,5 +1,5 @@
 /* librepo - A library providing (libcURL like) API to downloading repository
- * Copyright (C) 2012  Tomas Mlcoch
+ * Copyright (C) 2016  Martin Hatina
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -18,35 +18,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef __LR_LIBREPO_H__
-#define __LR_LIBREPO_H__
+#ifndef LIBREPO_DOWNLOADER_INTERNAL_H
+#define LIBREPO_DOWNLOADER_INTERNAL_H
 
-#include <glib.h>
-
-#include "checksum.h"
-#include "downloader_internal.h"
-#include "fastestmirror.h"
-#include "gpg.h"
 #include "handle.h"
-#include "metalink.h"
-#include "metadata_downloader.h"
-#include "package_downloader.h"
-#include "rcodes.h"
-#include "repoconf.h"
-#include "repomd.h"
-#include "repoutil_yum.h"
-#include "result.h"
-#include "types.h"
-#include "url_substitution.h"
-#include "util.h"
-#include "version.h"
-#include "xmlparser.h"
-#include "yum.h"
 
-// Low level downloading interface
-// (API could be changed significantly between two versions)
+typedef struct {
+    LrProgressCb cb; /*!<
+        User callback */
 
-#include "downloader.h"
-#include "downloadtarget.h"
+    LrMirrorFailureCb mfcb; /*!<
+        Mirror failure callback */
 
-#endif
+    GSList *singlecbdata; /*!<
+        List of LrCallbackData */
+
+} LrSharedCallbackData;
+
+typedef struct {
+    double downloaded;  /*!< Currently downloaded bytes of target */
+    double total;       /*!< Total size of the target */
+    void *userdata;     /*!< User data related to the target */
+    LrSharedCallbackData *sharedcbdata; /*!< Shared cb data */
+} LrCallbackData;
+
+#endif //LIBREPO_DOWNLOADER_INTERNAL_H

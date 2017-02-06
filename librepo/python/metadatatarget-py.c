@@ -19,7 +19,7 @@
  */
 
 #include <err.h>
-#include <librepo/librepo.h>
+
 #include "librepo/librepo.h"
 #include "metadatatarget-py.h"
 #include "handle-py.h"
