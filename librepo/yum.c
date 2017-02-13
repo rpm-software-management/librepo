@@ -748,9 +748,7 @@ lr_yum_download_repo(LrHandle *handle,
                                 &tmp_err);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));
-    fprintf(stderr, "ret : %d\n", ret);
-
-    error_handling(targets, err, tmp_err);
+    ret = error_handling(targets, err, tmp_err);
 
     g_slist_free_full(cbdata_list, (GDestroyNotify)cbdata_free);
     g_slist_free_full(targets, (GDestroyNotify)lr_downloadtarget_free);
@@ -1096,7 +1094,6 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
 
     /* Download rest of metadata files */
     ret = lr_yum_download_repo(handle, repo, repomd, &tmp_err);
-    fprintf(stderr, "ret : %d\n", ret);
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
     if (!ret) {
