@@ -18,11 +18,11 @@ def feature_setup(feature):
     world.packages = []
     world.filenames = []
 
-@step('(\w+): (\S+)')
+@step(r'(\w+): (\S+)')
 def handle_set_str(step, option, val):
     world.handle_options[option] = val
 
-@step('Want to download location: (\S+)')
+@step(r'Want to download location: (\S+)')
 def package_to_download(step, path):
     world.filenames.append(os.path.basename(path))
     world.packages.append(path)
