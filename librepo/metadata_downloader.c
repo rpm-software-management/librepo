@@ -279,7 +279,7 @@ create_repomd_xml_download_targets(GSList *targets,
         }
 
         if (handle->metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
-            lr_get_best_checksum(handle->metalink, checksums);
+            lr_get_best_checksum(handle->metalink, &checksums);
         }
 
         CbData *cbdata = lr_get_metadata_failure_callback(handle);

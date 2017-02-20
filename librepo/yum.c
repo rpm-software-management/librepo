@@ -424,7 +424,7 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
 
 void
 lr_get_best_checksum(const LrMetalink *metalink,
-                     GSList *checksums)
+                     GSList **checksums)
 {
     gboolean ret;
     LrChecksumType ch_type;
@@ -436,7 +436,7 @@ lr_get_best_checksum(const LrMetalink *metalink,
     {
         LrDownloadTargetChecksum *dtch;
         dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
-        checksums = g_slist_prepend(checksums, dtch);
+        *checksums = g_slist_prepend(*checksums, dtch);
         g_debug("%s: Expected checksum for repomd.xml: (%s) %s",
                 __func__, lr_checksum_type_to_str(ch_type), ch_value);
     }
@@ -449,7 +449,7 @@ lr_get_best_checksum(const LrMetalink *metalink,
         if (ret) {
             LrDownloadTargetChecksum *dtch;
             dtch = lr_downloadtargetchecksum_new(ch_type, ch_value);
-            checksums = g_slist_prepend(checksums, dtch);
+            *checksums = g_slist_prepend(*checksums, dtch);
             g_debug("%s: Expected alternate checksum for repomd.xml: (%s) %s",
                     __func__, lr_checksum_type_to_str(ch_type), ch_value);
         }
@@ -485,7 +485,7 @@ lr_yum_download_repomd(LrHandle *handle,
 
     GSList *checksums = NULL;
     if (metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
-        lr_get_best_checksum(metalink, checksums);
+        lr_get_best_checksum(metalink, &checksums);
     }
 
     CbData *cbdata = lr_get_metadata_failure_callback(handle);

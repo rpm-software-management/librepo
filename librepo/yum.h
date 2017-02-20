@@ -139,7 +139,7 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle, LrYumRepo *repo, int fd, 
  * @param checksums     List of checksums
  */
 void
-lr_get_best_checksum(const LrMetalink *metalink, GSList *checksums);
+lr_get_best_checksum(const LrMetalink *metalink, GSList **checksums);
 
 /** Returns mirror failure callback data
  * @param handle        Handle object
