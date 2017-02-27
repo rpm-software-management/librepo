@@ -1046,6 +1046,10 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // Set the state of transfer as running
     target->state = LR_DS_RUNNING;
 
+    // Increase running transfers counter for mirror
+    if (target->mirror)
+        target->mirror->running_transfers++;
+
     // Set the state of header callback for this transfer
     target->headercb_state = LR_HCS_DEFAULT;
     g_free(target->headercb_interrupt_reason);
@@ -1608,18 +1612,23 @@ transfer_error:
         target->tried_mirrors = g_slist_append(target->tried_mirrors,
                                                target->mirror);
 
+        // Update mirror statistics
+        if (target->mirror) {
+            target->mirror->running_transfers--;
+            gboolean success = transfer_err == NULL;
+            if (success)
+                target->mirror->successful_transfers++;
+            else
+                target->mirror->failed_transfers++;
+            if (dd->adaptivemirrorsorting)
+                sort_mirrors(target->lrmirrors, target->mirror, success, serious_error);
+        }
+
         if (transfer_err) {  // There was an error during transfer
             int complete_url_in_path = strstr(target->target->path, "://") ? 1 : 0;
             guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
 
             g_debug("%s: Error during transfer: %s", __func__, transfer_err->message);
-
-            // Update mirror statistics
-            if (target->mirror) {
-                target->mirror->failed_transfers++;
-                if (dd->adaptivemirrorsorting)
-                    sort_mirrors(target->lrmirrors, target->mirror, FALSE, serious_error);
-            }
 
             // Call mirrorfailure callback
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
@@ -1727,13 +1736,6 @@ transfer_error:
                                 LRE_CBINTERRUPTED,
                                 "Interupted by LR_CB_ERROR from end callback");
                 }
-            }
-
-            // Update mirror statistics
-            if (target->mirror) {
-                target->mirror->successful_transfers++;
-                if (dd->adaptivemirrorsorting)
-                    sort_mirrors(target->lrmirrors, target->mirror, TRUE, serious_error);
             }
         }
 
