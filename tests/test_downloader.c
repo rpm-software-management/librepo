@@ -292,11 +292,10 @@ END_TEST
 
 START_TEST(test_downloader_checksum)
 {
-    #define NUM_CHECKSUM_TESTS 2
     const struct {
         const char *sha512;
         int expect_err;
-    } tests[NUM_CHECKSUM_TESTS] = {
+    } tests[] = {
         {
             "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
             0,
@@ -305,10 +304,13 @@ START_TEST(test_downloader_checksum)
             "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             1,
         },
+        {
+            NULL
+        }
     };
     int i;
 
-    for (i = 0; i < NUM_CHECKSUM_TESTS; i++) {
+    for (i = 0; tests[i].sha512; i++) {
         int ret;
         LrHandle *handle;
         GSList *list = NULL;
