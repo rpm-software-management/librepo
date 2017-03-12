@@ -57,7 +57,7 @@ echo "Removing $RPMBUILD_DIR/$PACKAGE.spec"
 rm -f "$RPMBUILD_DIR/$PACKAGE.spec"
 
 echo "> Making tarball .."
-"$MY_DIR/make_tarball.sh" "$GITREV"
+TARBALL=$("$MY_DIR/make_tarball.sh" "$GITREV" | grep ".tar.gz")
 if [ ! $? == "0" ]; then
     echo "Error while making tarball"
     exit 1
@@ -65,9 +65,9 @@ fi
 echo "Tarball done"
 
 echo "> Copying tarball and .spec file into the $RPMBUILD_DIR .."
-cp "$PREFIX/$PACKAGE-$GITREV.tar.xz" "$RPMBUILD_DIR/SOURCES/"
+cp "$PREFIX/$TARBALL" "$RPMBUILD_DIR/SOURCES/"
 if [ ! $? == "0" ]; then
-    echo "Error while: cp $PREFIX/$PACKAGE-$GITREV.tar.xz $RPMBUILD_DIR/SOURCES/"
+    echo "Error while: cp $PREFIX/$TARBALL $RPMBUILD_DIR/SOURCES/"
     exit 1
 fi
 

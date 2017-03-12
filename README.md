@@ -57,7 +57,7 @@ Fedora/Ubuntu name
 
 ### Online python bindings documentation:
 
-http://tojaj.github.com/librepo/
+https://rpm-software-management.github.com/librepo/
 
 ## Python 3 notes:
 

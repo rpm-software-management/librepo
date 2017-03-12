@@ -238,6 +238,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_PROXYAUTHMETHODS,  None)
         self.assertEqual(h.getinfo(librepo.LRI_PROXYAUTHMETHODS), librepo.LR_AUTH_BASIC)
 
+        self.assertEqual(h.getinfo(librepo.LRI_FTPUSEEPSV), 1)
+        h.setopt(librepo.LRO_FTPUSEEPSV, 0)
+        self.assertEqual(h.getinfo(librepo.LRI_FTPUSEEPSV), 0)
+        h.setopt(librepo.LRO_FTPUSEEPSV, None)
+        self.assertEqual(h.getinfo(librepo.LRI_FTPUSEEPSV), 1)
+
 
     def test_handle_setget_attr(self):
         """No exception should be raised."""
@@ -419,6 +425,19 @@ class TestCaseHandle(unittest.TestCase):
         h.proxyauthmethods = None
         self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_BASIC)
 
+        self.assertTrue(h.ftpuseepsv)
+        h.ftpuseepsv = 0
+        self.assertFalse(h.ftpuseepsv)
+        h.ftpuseepsv = 1
+        self.assertTrue(h.ftpuseepsv)
+        h.ftpuseepsv = False
+        self.assertFalse(h.ftpuseepsv)
+        h.ftpuseepsv = True
+        self.assertTrue(h.ftpuseepsv)
+        h.ftpuseepsv = 0
+        h.ftpuseepsv = None
+        self.assertTrue(h.ftpuseepsv)
+
 
     def test_handle_setopt_none_value(self):
         """Using None in setopt."""
@@ -526,6 +545,8 @@ class TestCaseHandle(unittest.TestCase):
         h.fastestmirrortimeout = None
         h.setopt(librepo.LRO_HTTPHEADER, None)
         h.httpheader = None
+        h.setopt(librepo.LRO_FTPUSEEPSV, None)
+        h.ftpuseepsv = None
 
         h.httpauthmethods = None
         h.proxyauthmethods = None

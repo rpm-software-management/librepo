@@ -147,6 +147,8 @@ typedef struct {
         range was downloaded, it is TRUE. Otherwise FALSE. */
     LrCbReturnCode cb_return_code; /*!<
         Last cb return code. */
+    struct curl_slist *curl_rqheaders; /*!<
+        Extra headers for request. */
 } LrTarget;
 
 typedef struct {
@@ -940,6 +942,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if (ftruncate(fd, 0) == -1) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "ftruncate() failed: %s", g_strerror(errno));
+            fclose(f);
+            curl_easy_cleanup(h);
             return FALSE;
         }
     }
@@ -972,15 +976,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
         c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
                                 (curl_off_t) used_offset);
-        if (c_rc != CURLE_OK) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURL,
-                        "curl_easy_setopt(h, LR_DOWNLOADER_ERROR, %"
-                        G_GINT64_FORMAT") failed: %s",
-                        used_offset, curl_easy_strerror(c_rc));
-            fclose(f);
-            curl_easy_cleanup(h);
-            return FALSE;
-        }
+        assert(c_rc == CURLE_OK);
     }
 
     // Add librepo extended attribute to the file
@@ -997,28 +993,51 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 G_GINT64_FORMAT, __func__, target->target->byterangestart);
         c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
                                 (curl_off_t) target->target->byterangestart);
+        assert(c_rc == CURLE_OK);
     }
 
     // Prepare progress callback
     target->cb_return_code = LR_CB_OK;
     if (target->target->progresscb) {
-        curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb);
-        curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0);
-        curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+        c_rc = curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb) ||
+               curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0) ||
+               curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+        assert(c_rc == CURLE_OK);
     }
 
     // Prepare header callback
     if (target->target->expectedsize > 0) {
-        curl_easy_setopt(h, CURLOPT_HEADERFUNCTION, lr_headercb);
-        curl_easy_setopt(h, CURLOPT_HEADERDATA, target);
+        c_rc = curl_easy_setopt(h, CURLOPT_HEADERFUNCTION, lr_headercb) ||
+               curl_easy_setopt(h, CURLOPT_HEADERDATA, target);
+        assert(c_rc == CURLE_OK);
     }
 
     // Prepare write callback
-    curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb);
-    curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
+    c_rc = curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, lr_writecb) ||
+           curl_easy_setopt(h, CURLOPT_WRITEDATA, target);
+    assert(c_rc == CURLE_OK);
+
+    // Set extra HTTP headers
+    struct curl_slist *headers = NULL;
+    if (target->handle && target->handle->httpheader) {
+        // Fill in headers specified by user in LrHandle via LRO_HTTPHEADER
+        for (int x=0; target->handle->httpheader[x]; x++) {
+            headers = curl_slist_append(headers, target->handle->httpheader[x]);
+            assert(headers);
+        }
+    }
+    if (target->target->no_cache) {
+        // Add headers that tell proxy to serve us fresh data
+        headers = curl_slist_append(headers, "Cache-Control: no-cache");
+        headers = curl_slist_append(headers, "Pragma: no-cache");
+        assert(headers);
+    }
+    target->curl_rqheaders = headers;
+    curl_easy_setopt(h, CURLOPT_HTTPHEADER, headers);
 
     // Add the new handle to the curl multi handle
-    curl_multi_add_handle(dd->multi_handle, h);
+    CURLMcode cm_rc = curl_multi_add_handle(dd->multi_handle, h);
+    assert(cm_rc == CURLM_OK);
 
     // Set the state of transfer as running
     target->state = LR_DS_RUNNING;
@@ -1575,6 +1594,10 @@ transfer_error:
         target->headercb_interrupt_reason = NULL;
         fclose(target->f);
         target->f = NULL;
+        if (target->curl_rqheaders) {
+            curl_slist_free_all(target->curl_rqheaders);
+            target->curl_rqheaders = NULL;
+        }
 
         dd->running_transfers = g_slist_remove(dd->running_transfers,
                                                (gconstpointer) target);
@@ -2071,7 +2094,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
                                    NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL, 0, 0);
+                                   NULL, NULL, NULL, 0, 0, FALSE);
 
     // Download the target
     ret = lr_download_target(target, &tmp_err);

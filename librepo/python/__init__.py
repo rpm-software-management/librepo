@@ -256,6 +256,12 @@ Version contants
     all metadata files will be downloaded. If *val* is ``[]`` or ``[None]``
     only ``repomd.xml`` will be downloaded.
 
+.. data:: LRO_YUMSLIST
+
+    *[(String, String), ...] or None*. Set list of substitutions
+    for repomd records.
+    ``[("group_gz", "group")]`
+
 .. data:: LRO_RPMMDDLIST
 
     See LRO_YUMDLIST
@@ -368,6 +374,10 @@ Version contants
     for proxy authentication.
     See: :ref:`auth-methods-label`
 
+.. data:: LRO_FTPUSEEPSV
+
+    *Boolean* Enable/Disable EPSV (Extended Passive mode) for FTP.
+
 
 .. _handle-info-options-label:
 
@@ -389,6 +399,7 @@ Version contants
 .. data:: LRI_REPOTYPE
 .. data:: LRI_USERAGENT
 .. data:: LRI_YUMDLIST
+.. data:: LRI_YUMSLIST
 .. data:: LRI_RPMMDDLIST
 .. data:: LRI_YUMBLIST
 .. data:: LRI_RPMMDBLIST
@@ -415,6 +426,7 @@ Version contants
 .. data:: LRI_OFFLINE
 .. data:: LRI_HTTPAUTHMETHODS
 .. data:: LRI_PROXYAUTHMETHODS
+.. data:: LRI_FTPUSEEPSV
 
 .. _proxy-type-label:
 
@@ -1317,6 +1329,10 @@ class Handle(_librepo.Handle):
 
         See: :data:`.LRO_YUMDLIST`
 
+    .. attribute:: yumslist:
+
+        See: :data:`.LRO_YUMSLIST`
+
     .. attribute:: rpmmdblist:
 
         See: :data:`.LRO_RPMMDBLIST`
@@ -1384,6 +1400,10 @@ class Handle(_librepo.Handle):
     .. attribute:: proxyauthmethods
 
         See :data:`.LRO_PROXYAUTHMETHODS`
+
+    .. attribute:: ftpuseepsv
+
+        See :data:`.LRO_FTPUSEEPSV`
 
     """
 

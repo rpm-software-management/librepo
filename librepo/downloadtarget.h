@@ -110,6 +110,10 @@ typedef struct {
     gint64 byterangeend; /*!<
         Download only specified range of bytes. */
 
+    gboolean no_cache; /*!<
+        Add headers that tell proxy server to provide a fresh data
+        instead of cached one. */
+
     // Items filled by downloader
 
     char *usedmirror; /*!<
@@ -176,6 +180,8 @@ typedef struct {
  * @param byterangeend      Download only specified byte range.
  *                          If this value is less or equal byterangestart, then
  *                          it is ignored. 0 is default.
+ * @param no_cache          Tell proxy server that we don't want to use cache
+ *                          for this request and we want fresh data.
  * @return                  New allocated target
  */
 LrDownloadTarget *
@@ -193,7 +199,8 @@ lr_downloadtarget_new(LrHandle *handle,
                       LrMirrorFailureCb mirrorfailurecb,
                       void *userdata,
                       gint64 byterangestart,
-                      gint64 byterangeend);
+                      gint64 byterangeend,
+                      gboolean no_cache);
 
 /** Reset download data filled during downloading. E.g. Error messages,
  * effective URL, used mirror etc.

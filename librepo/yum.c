@@ -131,8 +131,17 @@ lr_yum_repo_update(LrYumRepo *repo, const char *type, const char *path)
 
 /* main bussines logic */
 
+gint
+compare_records(gconstpointer a, gconstpointer b)
+{
+    LrYumRepoMdRecord* yum_record = (LrYumRepoMdRecord*) a;
+    char *type1 = (char *) yum_record->type;
+    char *type2 = (char *) b;
+    return g_strcmp0(type1, type2);
+}
+
 static gboolean
-lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
+lr_yum_repomd_record_enabled(LrHandle *handle, const char *type, GSList* records)
 {
     // Blacklist check
     if (handle->yumblist) {
@@ -152,9 +161,23 @@ lr_yum_repomd_record_enabled(LrHandle *handle, const char *type)
                 return TRUE;
             x++;
         }
+        // Substitution check
+        if (handle->yumslist) {
+            for (GSList *elem = handle->yumslist; elem; elem = g_slist_next(elem)) {
+                LrVar* subs = elem->data;
+                if (!g_strcmp0(subs->val, type)) {
+                    char *orig = subs->var;
+                    for (guint i = 0; handle->yumdlist[i]; i++) {
+                        if (!g_strcmp0(orig, handle->yumdlist[i]) &&
+                            !g_slist_find_custom(records, orig, (GCompareFunc) compare_records))
+                            return TRUE;
+                    }
+                    return FALSE;
+                }
+            }
+        }
         return FALSE;
     }
-
     return TRUE;
 }
 
@@ -273,7 +296,8 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      (cbdata) ? hmfcb : NULL,
                                                      NULL,
                                                      0,
-                                                     0);
+                                                     0,
+                                                     TRUE);
 
     ret = lr_download_target(target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
@@ -332,7 +356,7 @@ lr_yum_download_repo(LrHandle *handle,
 
         assert(record);
 
-        if (!lr_yum_repomd_record_enabled(handle, record->type))
+        if (!lr_yum_repomd_record_enabled(handle, record->type, repomd->records))
             continue;
 
         path = lr_pathconcat(destdir, record->location_href, NULL);
@@ -379,7 +403,8 @@ lr_yum_download_repo(LrHandle *handle,
                                        NULL,
                                        NULL,
                                        0,
-                                       0);
+                                       0,
+                                       FALSE);
 
         targets = g_slist_append(targets, target);
 
@@ -686,7 +711,7 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 
         assert(record);
 
-        if (!lr_yum_repomd_record_enabled(handle, record->type))
+        if (!lr_yum_repomd_record_enabled(handle, record->type, repomd->records))
             continue; // Caller isn't interested in this record type
         if (lr_yum_repo_path(repo, record->type))
             continue; // This path already exists in repo
@@ -873,6 +898,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                                              path,
                                              handle->gnupghomedir,
                                              &tmp_err);
+                lr_free(signature);
                 if (!ret) {
                     g_debug("%s: GPG signature verification failed: %s",
                             __func__, tmp_err->message);
@@ -880,7 +906,6 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
                             "repomd.xml GPG signature verification error: ");
                     close(fd);
                     lr_free(path);
-                    lr_free(signature);
                     return FALSE;
                 }
                 g_debug("%s: GPG signature successfully verified", __func__);

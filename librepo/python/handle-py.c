@@ -384,6 +384,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_SSLVERIFYPEER:
     case LRO_SSLVERIFYHOST:
     case LRO_ADAPTIVEMIRRORSORTING:
+    case LRO_FTPUSEEPSV:
     case LRO_OFFLINE:
     {
         long d;
@@ -395,6 +396,8 @@ py_setopt(_HandleObject *self, PyObject *args)
             d = 1;
         } else if (obj == Py_None && option == LRO_ADAPTIVEMIRRORSORTING) {
             d = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
+        } else if (obj == Py_None && option == LRO_FTPUSEEPSV) {
+            d = LRO_FTPUSEEPSV_DEFAULT;
         // end of default attributes
         } else if (PyObject_IsTrue(obj) == 1)
             d = 1;
@@ -615,6 +618,7 @@ py_setopt(_HandleObject *self, PyObject *args)
         break;
     }
 
+    case LRO_YUMSLIST:
     case LRO_VARSUB: {
         Py_ssize_t len = 0;
         LrUrlVars *vars = NULL;
@@ -915,6 +919,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_OFFLINE:
     case LRI_LOWSPEEDTIME:
     case LRI_LOWSPEEDLIMIT:
+    case LRI_FTPUSEEPSV:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,
@@ -949,6 +954,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     }
 
     /* List option */
+    case LRI_YUMSLIST:
     case LRI_VARSUB: {
         LrUrlVars *vars;
         PyObject *list;
