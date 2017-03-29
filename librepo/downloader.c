@@ -1717,12 +1717,14 @@ transfer_error:
                 !target->target->baseurl)
             {   
               
-                // Another transfers are running or there are successful transfers
+                // Temporary error (serious_error) during download occured and
+                // another transfers are running or there are successful transfers
                 // and fewer failed transfers than tried parallel connections. It may be mirror is OK
                 // but accepts fewer parallel connections.
-                if (has_running_transfers(target->mirror) ||
-                    (target->mirror->successful_transfers > 0 &&
-                      target->mirror->failed_transfers < target->mirror->max_tried_parallel_connections))
+                if (serious_error &&
+                    (has_running_transfers(target->mirror) ||
+                      (target->mirror->successful_transfers > 0 &&
+                        target->mirror->failed_transfers < target->mirror->max_tried_parallel_connections)))
                 {
                     g_debug("%s: Lower maximum of allowed parallel connections for this mirror", __func__);
                     if (has_running_transfers(target->mirror))
