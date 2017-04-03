@@ -21,6 +21,7 @@
 #include <err.h>
 
 #include "librepo/librepo.h"
+#include "librepo/downloader_internal.h"
 #include "metadatatarget-py.h"
 #include "handle-py.h"
 #include "typeconversion.h"

@@ -24,7 +24,6 @@
 #include <glib.h>
 
 #include "checksum.h"
-#include "downloader_internal.h"
 #include "fastestmirror.h"
 #include "gpg.h"
 #include "handle.h"
