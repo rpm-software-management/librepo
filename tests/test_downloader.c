@@ -281,12 +281,104 @@ START_TEST(test_downloader_three_files_with_error)
             }
 
             if (x == 3 && !dtarget->err) {
-                printf("No 404 error raised!");
+                printf("No 404 error raised!\n");
                 ck_abort();
             }
     }
 
     g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+}
+END_TEST
+
+START_TEST(test_downloader_checksum)
+{
+    const struct {
+        const char *sha512;
+        int expect_err;
+    } tests[] = {
+        {
+            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+            0,
+        },
+        {
+            "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            1,
+        },
+        {
+            NULL
+        }
+    };
+    int i;
+
+    for (i = 0; tests[i].sha512; i++) {
+        int ret;
+        LrHandle *handle;
+        GSList *list = NULL;
+        GError *err = NULL;
+        int fd1;
+        char *tmpfn1;
+        LrDownloadTargetChecksum *checksum;
+        GSList *checksums = NULL;
+        LrDownloadTarget *t1;
+        GError *tmp_err = NULL;
+
+        // Prepare handle
+
+        handle = lr_handle_init();
+        fail_if(handle == NULL);
+
+        char *urls[] = {"file:///", NULL};
+        lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+        lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
+        fail_if(tmp_err);
+
+
+        // Prepare list of download targets
+
+        tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
+
+        mktemp(tmpfn1);
+        fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+        lr_free(tmpfn1);
+        fail_if(fd1 < 0);
+
+        checksum = lr_downloadtargetchecksum_new(LR_CHECKSUM_SHA512,
+                                                 tests[i].sha512);
+        checksums = g_slist_append(checksums, checksum);
+
+        t1 = lr_downloadtarget_new(handle, "dev/null", NULL, fd1, NULL, checksums,
+                                   0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, FALSE);
+        fail_if(!t1);
+
+        list = g_slist_append(list, t1);
+
+        // Download
+
+        ret = lr_download(list, FALSE, &err);
+        fail_if(!ret);
+        fail_if(err);
+
+        lr_handle_free(handle);
+
+        // Check results
+
+        for (GSList *elem = list; elem; elem = g_slist_next(elem)) {
+                LrDownloadTarget *dtarget = elem->data;
+                if (!tests[i].expect_err) {
+                    if (dtarget->err) {
+                        printf("Error msg: %s\n", dtarget->err);
+                        ck_abort();
+                    }
+                } else {
+                    if (!dtarget->err) {
+                        printf("No checksum error raised!\n");
+                        ck_abort();
+                    }
+                }
+        }
+
+        g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+    }
 }
 END_TEST
 
@@ -300,6 +392,7 @@ downloader_suite(void)
     tcase_add_test(tc, test_downloader_single_file_2);
     tcase_add_test(tc, test_downloader_two_files);
     tcase_add_test(tc, test_downloader_three_files_with_error);
+    tcase_add_test(tc, test_downloader_checksum);
     suite_add_tcase(s, tc);
     return s;
 }
