@@ -53,7 +53,7 @@ typedef struct _LrHandle LrHandle;
 #define LRO_MAXSPEED_DEFAULT                G_GINT64_CONSTANT(0)
 
 /** LRO_CONNECTTIMEOUT default value */
-#define LRO_CONNECTTIMEOUT_DEFAULT          120L
+#define LRO_CONNECTTIMEOUT_DEFAULT          30L
 
 /** LRO_MAXMIRRORTRIES default value */
 #define LRO_MAXMIRRORTRIES_DEFAULT          0L
@@ -80,7 +80,7 @@ typedef struct _LrHandle LrHandle;
 #define LRO_LOWSPEEDTIME_MIN                0L
 
 /** LRO_LOWSPEEDTIME default value */
-#define LRO_LOWSPEEDTIME_DEFAULT            120L
+#define LRO_LOWSPEEDTIME_DEFAULT            30L
 
 /** LRO_LOWSPEEDLIMIT minimal allowed value */
 #define LRO_LOWSPEEDLIMIT_MIN               0L

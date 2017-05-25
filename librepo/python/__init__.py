@@ -148,7 +148,7 @@ Version contants
 .. data:: LRO_CONNECTTIMEOUT
 
     *Integer or None. Set maximal timeout in sec for connection phase.
-    Default value is 120. None as *val* sets the default value.
+    Default value is 30. None as *val* sets the default value.
 
 .. data:: LRO_IGNOREMISSING
 
@@ -226,7 +226,7 @@ Version contants
 
     *Integer or None*. The time in seconds that the transfer should be below
     the LRO_LOWSPEEDLIMIT for the library to consider it too slow and abort.
-    Default: 120 (sec)
+    Default: 30 (sec)
 
 .. data:: LRO_LOWSPEEDLIMIT
 
