@@ -233,25 +233,31 @@ START_TEST(test_is_local_path)
 }
 END_TEST
 
-START_TEST(test_prepend_url_protocol)
+START_TEST(test_add_url_protocol)
 {
     gchar *url = NULL;
+    GError *err = NULL;
 
-    url = lr_prepend_url_protocol("/tmp");
+    url = lr_add_url_protocol("/tmp", NULL);
     fail_if(g_strcmp0(url, "file:///tmp"));
     g_free(url);
 
-    url = lr_prepend_url_protocol("file:///tmp");
+    url = lr_add_url_protocol("file:///tmp", NULL);
     fail_if(g_strcmp0(url, "file:///tmp"));
     g_free(url);
 
-    url = lr_prepend_url_protocol("http://tmp");
+    url = lr_add_url_protocol("http://tmp", NULL);
     fail_if(g_strcmp0(url, "http://tmp"));
     g_free(url);
 
-    url = lr_prepend_url_protocol("file:/tmp");
+    url = lr_add_url_protocol("file:/tmp", NULL);
     fail_if(g_strcmp0(url, "file:/tmp"));
     g_free(url);
+
+    url = lr_add_url_protocol("relative/path", &err);
+    fail_if(url != NULL);
+    fail_if(err == NULL);
+    g_error_free(err);
 }
 END_TEST
 
@@ -271,7 +277,7 @@ util_suite(void)
     tcase_add_test(tc, test_url_without_path);
     tcase_add_test(tc, test_strv_dup);
     tcase_add_test(tc, test_is_local_path);
-    tcase_add_test(tc, test_prepend_url_protocol);
+    tcase_add_test(tc, test_add_url_protocol);
     suite_add_tcase(s, tc);
     return s;
 }

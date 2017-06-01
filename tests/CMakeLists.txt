@@ -14,6 +14,7 @@ SET (librepotest_SRCS
      testsys.c
      test_url_substitution.c
      test_util.c
+     test_util_deprecated.c
      test_version.c
     )
 

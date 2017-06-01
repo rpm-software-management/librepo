@@ -146,6 +146,7 @@ const char *lr_strerror(int rc);
 #define LR_REPOMD_ERROR             lr_repomd_error_quark()
 #define LR_REPOUTIL_YUM_ERROR       lr_repoutil_yum_error_quark()
 #define LR_RESULT_ERROR             lr_result_error_quark()
+#define LR_UTIL_ERROR             lr_util_error_quark()
 #define LR_XML_PARSER_ERROR         lr_xml_parser_error_quark()
 #define LR_YUM_ERROR                lr_yum_error_quark()
 
@@ -161,6 +162,7 @@ GQuark lr_repoconf_error_quark(void);
 GQuark lr_repomd_error_quark(void);
 GQuark lr_repoutil_yum_error_quark(void);
 GQuark lr_result_error_quark(void);
+GQuark lr_util_error_quark(void);
 GQuark lr_xml_parser_error_quark(void);
 GQuark lr_yum_error_quark(void);
 

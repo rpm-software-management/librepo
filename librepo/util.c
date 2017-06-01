@@ -37,6 +37,7 @@
 #include "version.h"
 #include "metalink.h"
 #include "cleanup.h"
+#include "rcodes.h"
 
 #define DIR_SEPARATOR   "/"
 #define ENV_DEBUG       "LIBREPO_DEBUG"
@@ -315,10 +316,9 @@ lr_copy_content(int source, int dest)
 }
 
 char *
-lr_prepend_url_protocol(const char *path)
+lr_add_url_protocol(const char *path, GError **err)
 {
-    if (!path)
-        return NULL;
+    assert(path);
 
     if (strstr(path, "://"))  // Protocol was specified
         return g_strdup(path);
@@ -329,14 +329,27 @@ lr_prepend_url_protocol(const char *path)
     if (path[0] == '/')  // Path is absolute path
         return g_strconcat("file://", path, NULL);
 
-    char *path_with_protocol, *resolved_path = realpath(path, NULL);
-    if (!resolved_path) {
-        g_debug("%s: %s - realpath: %s ", __func__, path, g_strerror(errno));
-        return NULL;
-    }
-    path_with_protocol = g_strconcat("file://", resolved_path, NULL);
-    free(resolved_path);
-    return path_with_protocol;
+    // Path is relative, but we didn't have any base url
+    g_set_error(err, LR_UTIL_ERROR, LRE_BADURL,
+                "Invalid URL: \"%s\"", path);
+    return NULL;
+}
+
+char *
+lr_prepend_url_protocol(const char *path)
+{
+	_cleanup_free_ const char *absolute_path = NULL;
+
+	if (!strstr(path, "://")) {
+		absolute_path = realpath(path, NULL);
+		if (absolute_path)
+			path = absolute_path;
+		else
+			g_debug("%s: %s - realpath: %s ",
+			        __func__, path, g_strerror(errno));
+	}
+
+	return lr_add_url_protocol(path, NULL);
 }
 
 gchar *
