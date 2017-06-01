@@ -111,24 +111,25 @@ char *lr_pathconcat(const char *str, ...) G_GNUC_NULL_TERMINATED;
 
 /** Recursively remove directory.
  * @param path          Path to the directory.
- * @return              0 on succes, -1 on error.
+ * @return              0 on success, -1 on error.
  */
 int lr_remove_dir(const char *path);
 
 /** Copy content from source file descriptor to the dest file descriptor.
  * @param source        Source opened file descriptor
  * @param dest          Destination openede file descriptor
- * @return              0 on succes, -1 on error
+ * @return              0 on success, -1 on error
  */
 int lr_copy_content(int source, int dest);
 
 /** If protocol is specified ("http://foo") return copy of path.
  * If path is absolute ("/foo/bar/") return path with "file://" prefix.
- * If path is relative ("bar/") return absolute path with "file://" prefix.
- * @param               path
- * @return              url with protocol
+ * If path is relative ("bar/"), the result is an error
+ * @param path
+ * @param error         GError **
+ * @return              url with protocol, NULL on error
  */
-char *lr_prepend_url_protocol(const char *path);
+char *lr_prepend_url_protocol(const char *path, GError **err);
 
 /** Same as g_string_chunk_insert, but allows NULL as string.
  * If the string is NULL, then returns NULL and do nothing.

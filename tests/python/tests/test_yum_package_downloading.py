@@ -404,15 +404,16 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
     def test_download_packages_with_baseurl(self):
         h = librepo.Handle()
 
-        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
-        h.urls = ["."]
+        url = "%s%s" % (self.MOCKURL, config.BADURL)
+        baseurl = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h.urls = [url]
         h.repotype = librepo.LR_YUMREPO
 
         pkgs = []
         pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
                                           handle=h,
                                           dest=self.tmpdir,
-                                          base_url=url))
+                                          base_url=baseurl))
 
         librepo.download_packages(pkgs)
 

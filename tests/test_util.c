@@ -236,22 +236,28 @@ END_TEST
 START_TEST(test_prepend_url_protocol)
 {
     gchar *url = NULL;
+    GError *err = NULL;
 
-    url = lr_prepend_url_protocol("/tmp");
+    url = lr_prepend_url_protocol("/tmp", NULL);
     fail_if(g_strcmp0(url, "file:///tmp"));
     g_free(url);
 
-    url = lr_prepend_url_protocol("file:///tmp");
+    url = lr_prepend_url_protocol("file:///tmp", NULL);
     fail_if(g_strcmp0(url, "file:///tmp"));
     g_free(url);
 
-    url = lr_prepend_url_protocol("http://tmp");
+    url = lr_prepend_url_protocol("http://tmp", NULL);
     fail_if(g_strcmp0(url, "http://tmp"));
     g_free(url);
 
-    url = lr_prepend_url_protocol("file:/tmp");
+    url = lr_prepend_url_protocol("file:/tmp", NULL);
     fail_if(g_strcmp0(url, "file:/tmp"));
     g_free(url);
+
+    url = lr_prepend_url_protocol("relative/path", &err);
+    fail_if(url != NULL);
+    fail_if(err == NULL);
+    g_error_free(err);
 }
 END_TEST
 
