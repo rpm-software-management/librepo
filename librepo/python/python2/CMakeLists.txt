@@ -12,7 +12,7 @@ set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-strict-aliasing")
 SET (librepo_COPIES ${pylibrepo_SRCDIR}/__init__.py)
 FILE(COPY ${librepo_COPIES} DESTINATION ./librepo/)
 
-ADD_LIBRARY(_librepomodule SHARED ${librepomodule_SRCS})
+ADD_LIBRARY(_librepomodule MODULE ${librepomodule_SRCS})
 SET_TARGET_PROPERTIES(_librepomodule PROPERTIES PREFIX "")
 SET_TARGET_PROPERTIES(_librepomodule PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
 TARGET_LINK_LIBRARIES(_librepomodule librepo)

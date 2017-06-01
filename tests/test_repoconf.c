@@ -33,6 +33,7 @@ repoconf_assert_true(LrYumRepoConf *repoconf,
 #define conf_assert_true(option) \
             repoconf_assert_true(conf, (option))
 
+#ifdef	UNUSED
 static void
 repoconf_assert_false(LrYumRepoConf *repoconf,
                       LrYumRepoConfOption option)
@@ -48,6 +49,7 @@ repoconf_assert_false(LrYumRepoConf *repoconf,
 
 #define conf_assert_false(option) \
             repoconf_assert_false(conf, (option))
+#endif	/* UNUSED */
 
 static void
 repoconf_assert_na(LrYumRepoConf *repoconf,
