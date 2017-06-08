@@ -629,7 +629,7 @@ lr_handle_setopt(LrHandle *handle,
 
     case LRO_SSLVERIFYHOST:
         handle->sslverifyhost = va_arg(arg, long) ? 2 : 0;
-        c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifyhost);
+        c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYHOST, handle->sslverifyhost);
         break;
 
     case LRO_SSLCLIENTCERT:
