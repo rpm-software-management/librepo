@@ -1,6 +1,11 @@
 FIND_PACKAGE (PythonLibs 2 )
 FIND_PACKAGE (PythonInterp 2 REQUIRED)
-EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "from sys import stdout; from distutils import sysconfig; stdout.write(sysconfig.get_python_lib(True))" OUTPUT_VARIABLE PYTHON_INSTALL_DIR)
+EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "
+from sys import stdout
+from distutils import sysconfig
+path=sysconfig.get_python_lib(True, prefix='${CMAKE_INSTALL_PREFIX}')
+stdout.write(path)"
+OUTPUT_VARIABLE PYTHON_INSTALL_DIR)
 INCLUDE_DIRECTORIES (${PYTHON_INCLUDE_PATH})
 
 MESSAGE(STATUS "Python install dir is ${PYTHON_INSTALL_DIR}")
