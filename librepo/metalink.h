@@ -67,7 +67,7 @@ typedef struct {
  * @return              New metalink object.
  */
 LrMetalink *
-lr_metalink_init();
+lr_metalink_init(void);
 
 /** Parse metalink file.
  * @param metalink          Metalink object.

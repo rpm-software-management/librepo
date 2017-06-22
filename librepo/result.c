@@ -32,7 +32,7 @@
 #include "repomd.h"
 
 LrResult *
-lr_result_init()
+lr_result_init(void)
 {
     return lr_malloc0(sizeof(struct _LrResult));
 }

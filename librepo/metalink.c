@@ -106,7 +106,7 @@ lr_free_metalinkalternate(LrMetalinkAlternate *metalinkalternate)
 }
 
 LrMetalink *
-lr_metalink_init()
+lr_metalink_init(void)
 {
     return lr_malloc0(sizeof(LrMetalink));
 }

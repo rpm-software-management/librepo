@@ -434,7 +434,7 @@ typedef enum {
  * @return              New allocated handle.
  */
 LrHandle *
-lr_handle_init();
+lr_handle_init(void);
 
 /** Frees handle and its content.
  * @param handle        Handle.

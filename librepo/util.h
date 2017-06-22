@@ -52,7 +52,7 @@ G_BEGIN_DECLS
  * This is called automatically to initialize librepo.
  * You normally don't have to call this function manually.
  */
-void lr_global_init();
+void lr_global_init(void);
 
 /** Clean up librepo library.
 void lr_global_cleanup();
@@ -65,7 +65,7 @@ void lr_log_librepo_summary(void);
 /** Print "Out of memory" message to stderr and abort program execution.
  * This function is used when malloc call fails.
  */
-void lr_out_of_memory();
+void lr_out_of_memory(void);
 
 /** Allocate len bytes of memory.
  * @param len           Number of bytes to be allocated.
@@ -94,12 +94,12 @@ void lr_free(void *mem);
 /** Create temporary librepo file in /tmp directory.
  * @return              File descriptor.
  */
-int lr_gettmpfile();
+int lr_gettmpfile(void);
 
 /** Create temporary directory in /tmp directory.
  * @return              Path to directory.
  */
-char *lr_gettmpdir();
+char *lr_gettmpdir(void);
 
 /** Concatenate all of given part of path.
  * If last chunk is "" then separator will be appended to the result.

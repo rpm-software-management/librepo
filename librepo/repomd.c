@@ -55,7 +55,7 @@ lr_yum_repomdrecord_free(LrYumRepoMdRecord *rec)
 }
 
 LrYumRepoMd *
-lr_yum_repomd_init()
+lr_yum_repomd_init(void)
 {
     LrYumRepoMd *repomd = lr_malloc0(sizeof(*repomd));
     repomd->chunk = g_string_chunk_new(32);

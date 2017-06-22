@@ -69,7 +69,7 @@ lr_init_debugging(void)
 }
 
 void
-lr_log_librepo_summary()
+lr_log_librepo_summary(void)
 {
     _cleanup_free_ gchar *time = NULL;
     _cleanup_date_time_unref_ GDateTime *datetime = NULL;
@@ -96,7 +96,7 @@ lr_init_once_cb(gpointer user_data G_GNUC_UNUSED)
 }
 
 void
-lr_global_init()
+lr_global_init(void)
 {
     static GOnce init_once = G_ONCE_INIT;
     g_once(&init_once, lr_init_once_cb, NULL);
@@ -112,7 +112,7 @@ lr_global_cleanup()
 */
 
 void
-lr_out_of_memory()
+lr_out_of_memory(void)
 {
     fprintf(stderr, "Out of memory\n");
     abort();
@@ -150,7 +150,7 @@ lr_free(void *m)
 }
 
 int
-lr_gettmpfile()
+lr_gettmpfile(void)
 {
     int fd;
     _cleanup_free_ char *template = NULL;
@@ -165,7 +165,7 @@ lr_gettmpfile()
 }
 
 char *
-lr_gettmpdir()
+lr_gettmpdir(void)
 {
     char *template = g_build_filename(g_get_tmp_dir(), "librepo-tmpdir-XXXXXX", NULL);
     if (!mkdtemp(template)) {

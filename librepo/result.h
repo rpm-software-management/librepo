@@ -60,7 +60,7 @@ typedef enum {
  * @return          New allocated ::LrResult object
  */
 LrResult *
-lr_result_init();
+lr_result_init(void);
 
 /** Clean result object.
  * @param result    Result object.

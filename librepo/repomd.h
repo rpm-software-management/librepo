@@ -75,7 +75,7 @@ typedef struct {
  * @return              New repomd object.
  */
 LrYumRepoMd *
-lr_yum_repomd_init();
+lr_yum_repomd_init(void);
 
 /** Free repomd content and repomd object itself.
  * @param repomd        Repomd object.
