@@ -40,7 +40,7 @@ typedef struct {
  * @return              New empty mirrorlist.
  */
 LrMirrorlist *
-lr_mirrorlist_init();
+lr_mirrorlist_init(void);
 
 /**
  * Parse mirrorlist file.

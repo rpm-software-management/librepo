@@ -56,7 +56,7 @@ typedef struct {
  * @return              New yum repo object.
  */
 LrYumRepo *
-lr_yum_repo_init();
+lr_yum_repo_init(void);
 
 /** Free yum repo - free its item and the repo itself.
  * @param repo          Yum repo object.

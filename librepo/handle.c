@@ -80,7 +80,7 @@ lr_handle_free_list(char ***list)
 }
 
 LrHandle *
-lr_handle_init()
+lr_handle_init(void)
 {
     LrHandle *handle;
     CURL *curl = lr_get_curl_handle();
