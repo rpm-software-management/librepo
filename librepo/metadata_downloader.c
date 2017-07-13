@@ -58,6 +58,7 @@ lr_metadatatarget_new(LrHandle *handle,
     target->cbdata = cbdata;
     target->repomd_records_to_download = 0;
     target->repomd_records_downloaded = 0;
+    target->download_target = NULL;
 
     return target;
 }
@@ -300,6 +301,7 @@ create_repomd_xml_download_targets(GSList *targets,
                                                 0,
                                                 TRUE);
 
+        target->download_target = download_target;
         (*download_targets) = g_slist_append((*download_targets), download_target);
 
         (*fd_list) = appendFdValue((*fd_list), fd);
@@ -309,9 +311,9 @@ create_repomd_xml_download_targets(GSList *targets,
 
 void
 process_repomd_xml(GSList *targets,
-                           GSList *fd_list,
-                           GSList *paths,
-                           GError **err)
+                   GSList *fd_list,
+                   GSList *paths,
+                   GError **err)
 {
     GError *repo_error = NULL;
 
@@ -335,6 +337,8 @@ process_repomd_xml(GSList *targets,
         }
 
         handle = target->handle;
+        handle->used_mirror =  g_strdup(target->download_target->usedmirror);
+        target->download_target = NULL;
 
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &repo_error)) {
             continue;

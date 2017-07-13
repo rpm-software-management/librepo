@@ -26,6 +26,7 @@
 #include "yum.h"
 #include "handle.h"
 #include "repomd.h"
+#include "downloadtarget.h"
 
 /** LrMetadataTarget structure */
 typedef struct {
@@ -60,6 +61,9 @@ typedef struct {
 
     GStringChunk *chunk; /*!<
         String chunk */
+
+    LrDownloadTarget *download_target; /*!<
+        Download target for repomd.xml */
 
 } LrMetadataTarget;
 
