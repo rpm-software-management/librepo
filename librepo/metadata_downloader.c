@@ -59,6 +59,7 @@ lr_metadatatarget_new(LrHandle *handle,
     target->repomd_records_to_download = 0;
     target->repomd_records_downloaded = 0;
     target->download_target = NULL;
+    target->gnupghomedir = NULL;
 
     return target;
 }
@@ -69,12 +70,14 @@ lr_metadatatarget_new2(LrHandle *handle,
                        LrProgressCb progresscb,
                        LrMirrorFailureCb mirrorfailure_cb,
                        LrEndCb endcb,
+                       char *gnupghomedir,
                        GError **err)
 {
     LrMetadataTarget *target = lr_metadatatarget_new(handle, NULL, NULL, cbdata, err);
     target->progresscb = progresscb;
     target->mirrorfailurecb = mirrorfailure_cb;
     target->endcb = endcb;
+    target->gnupghomedir = g_strdup(gnupghomedir);
 
     return target;
 }
@@ -338,7 +341,14 @@ process_repomd_xml(GSList *targets,
 
         handle = target->handle;
         handle->used_mirror =  g_strdup(target->download_target->usedmirror);
-        target->download_target = NULL;
+        handle->gnupghomedir = g_strdup(target->gnupghomedir);
+
+        if (target->download_target->rcode != LRE_OK) {
+            g_set_error(err, LR_YUM_ERROR, target->download_target->rcode,
+                        lr_strerror(target->download_target->rcode));
+            g_debug("%s: %s", __func__, lr_strerror(target->download_target->rcode));
+            continue;
+        }
 
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &repo_error)) {
             continue;

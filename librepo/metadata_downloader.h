@@ -65,6 +65,9 @@ typedef struct {
     LrDownloadTarget *download_target; /*!<
         Download target for repomd.xml */
 
+    gchar *gnupghomedir; /*!<
+        GNUPG home dir. */
+
 } LrMetadataTarget;
 
 /**
@@ -97,6 +100,7 @@ lr_metadatatarget_new2(LrHandle *handle,
                        LrProgressCb progresscb,
                        LrMirrorFailureCb mirror_failure_cb,
                        LrEndCb endcb,
+                       char *gnupghomedir,
                        GError **err);
 
 /** Free ::LrMetadataTarget object.

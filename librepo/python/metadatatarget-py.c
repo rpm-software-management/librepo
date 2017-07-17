@@ -267,6 +267,7 @@ metadatatarget_init(_MetadataTargetObject *self,
                     PyObject *args,
                     PyObject *kwds G_GNUC_UNUSED)
 {
+    char *gnupghomedir;
     PyObject *pyhandle, *py_cbdata;
     PyObject *py_endcb, *py_progresscb;
     PyObject *py_mirrorfailurecb;
@@ -276,9 +277,9 @@ metadatatarget_init(_MetadataTargetObject *self,
     LrMirrorFailureCb mirrorfailurecb = NULL;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "OOOOO:metadatatarget_init",
+    if (!PyArg_ParseTuple(args, "OOOOOs:metadatatarget_init",
                           &pyhandle, &py_cbdata, &py_progresscb,
-                          &py_mirrorfailurecb, &py_endcb))
+                          &py_mirrorfailurecb, &py_endcb, &gnupghomedir))
         return -1;
 
     if (pyhandle != Py_None) {
@@ -327,7 +328,7 @@ metadatatarget_init(_MetadataTargetObject *self,
         Py_XINCREF(self->end_cb);
     }
 
-    self->target = lr_metadatatarget_new2(handle, self, progresscb, mirrorfailurecb, endcb, &tmp_err);
+    self->target = lr_metadatatarget_new2(handle, self, progresscb, mirrorfailurecb, endcb, gnupghomedir, &tmp_err);
 
     if (self->target == NULL) {
         PyErr_Format(LrErr_Exception,
