@@ -70,14 +70,14 @@ lr_metadatatarget_new2(LrHandle *handle,
                        LrProgressCb progresscb,
                        LrMirrorFailureCb mirrorfailure_cb,
                        LrEndCb endcb,
-                       char *gnupghomedir,
+                       const char *gnupghomedir,
                        GError **err)
 {
     LrMetadataTarget *target = lr_metadatatarget_new(handle, NULL, NULL, cbdata, err);
     target->progresscb = progresscb;
     target->mirrorfailurecb = mirrorfailure_cb;
     target->endcb = endcb;
-    target->gnupghomedir = g_strdup(gnupghomedir);
+    target->gnupghomedir = g_string_chunk_insert(target->chunk, gnupghomedir);
 
     return target;
 }
@@ -150,7 +150,7 @@ lr_metadata_download_cleanup(GSList *download_targets,
                                                 download_target->err);
 
         if (target->err != NULL) {
-            ret &= FALSE;
+            ret = FALSE;
             g_set_error(err, LR_DOWNLOADER_ERROR, 1,
                         "Cannot download repomd.xml: %s",target->err);
         }

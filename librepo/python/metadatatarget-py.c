@@ -267,7 +267,7 @@ metadatatarget_init(_MetadataTargetObject *self,
                     PyObject *args,
                     PyObject *kwds G_GNUC_UNUSED)
 {
-    char *gnupghomedir;
+    const char *gnupghomedir;
     PyObject *pyhandle, *py_cbdata;
     PyObject *py_endcb, *py_progresscb;
     PyObject *py_mirrorfailurecb;

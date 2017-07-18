@@ -100,7 +100,7 @@ lr_metadatatarget_new2(LrHandle *handle,
                        LrProgressCb progresscb,
                        LrMirrorFailureCb mirror_failure_cb,
                        LrEndCb endcb,
-                       char *gnupghomedir,
+                       const char *gnupghomedir,
                        GError **err);
 
 /** Free ::LrMetadataTarget object.
