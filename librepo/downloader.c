@@ -174,9 +174,6 @@ typedef struct {
     int max_mirrors_to_try; /*!<
         Maximal number of mirrors to try. Number <= 0 means no limit. */
 
-    gint64 max_speed; /*!<
-        Maximal speed in bytes per sec */
-
     long allowed_mirror_failures; /*!<
         See LRO_ALLOWEDMIRRORFAILURES */
 
@@ -1132,34 +1129,60 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 static gboolean
 set_max_speeds_to_transfers(LrDownload *dd, GError **err)
 {
-    guint length;
-    gint64 single_target_speed;
-
     assert(!err || *err == NULL);
 
-    if (!dd->max_speed)  // Nothing to do
+    if (!g_slist_length(dd->running_transfers)) // Nothing to do
         return TRUE;
 
-    length = g_slist_length(dd->running_transfers);
-    if (!length)  // Nothing to do
-        return TRUE;
-
-    // Calculate a max speed (rounded up) per target
-    single_target_speed = (dd->max_speed + (length - 1)) / length;
-
+    // Compute number of running downloads from repos with limited speed
+    GHashTable *num_running_downloads_per_repo = g_hash_table_new(NULL, NULL);
     for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
-        LrTarget *ltarget = elem->data;
-        CURL *curl_handle = ltarget->curl_handle;
-        CURLcode code = curl_easy_setopt(curl_handle,
-                                         CURLOPT_MAX_RECV_SPEED_LARGE,
-                                         (curl_off_t) single_target_speed);
-        if (code != CURLE_OK) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLSETOPT,
-                        "Cannot set CURLOPT_MAX_RECV_SPEED_LARGE option: %s",
-                        curl_easy_strerror(code));
-            return FALSE;
+        const LrTarget *ltarget = elem->data;
+
+        if (!ltarget->handle->maxspeed) // Skip repos with unlimited speed
+            continue;
+
+        guint num_running_downloads_from_repo =
+            GPOINTER_TO_UINT(g_hash_table_lookup(num_running_downloads_per_repo, ltarget->handle));
+        if (num_running_downloads_from_repo)
+            ++num_running_downloads_from_repo;
+        else
+            num_running_downloads_from_repo = 1;
+        g_hash_table_insert(num_running_downloads_per_repo, ltarget->handle,
+                            GUINT_TO_POINTER(num_running_downloads_from_repo));
+    }
+
+    // Set max speed to transfers
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, num_running_downloads_per_repo);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        const LrHandle *repo = key;
+        const guint num_running_downloads_from_repo = GPOINTER_TO_UINT(value);
+
+        // Calculate a max speed (rounded up) per target (for repo)
+        const gint64 single_target_speed = 
+            (repo->maxspeed + (num_running_downloads_from_repo - 1)) / num_running_downloads_from_repo;
+
+        for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
+            LrTarget *ltarget = elem->data;
+            if (ltarget->handle == repo) {
+                CURL *curl_handle = ltarget->curl_handle;
+                CURLcode code = curl_easy_setopt(curl_handle,
+                                                 CURLOPT_MAX_RECV_SPEED_LARGE,
+                                                 (curl_off_t)single_target_speed);
+                if (code != CURLE_OK) {
+                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLSETOPT,
+                                "Cannot set CURLOPT_MAX_RECV_SPEED_LARGE option: %s",
+                                curl_easy_strerror(code));
+                    g_hash_table_destroy(num_running_downloads_per_repo);
+                    return FALSE;
+                }
+            }
         }
     }
+
+    g_hash_table_destroy(num_running_downloads_per_repo);
 
     return TRUE;
 }
@@ -1172,18 +1195,18 @@ prepare_next_transfers(LrDownload *dd, GError **err)
 
     assert(!err || *err == NULL);
 
-    gboolean candidatefound = TRUE;
-    while (free_slots > 0 && candidatefound) {
-        gboolean ret = prepare_next_transfer(dd, &candidatefound, err);
-        if (!ret)
+    while (free_slots > 0) {
+        gboolean candidatefound;
+        if (!prepare_next_transfer(dd, &candidatefound, err))
             return FALSE;
+        if (!candidatefound)
+            break;
         free_slots--;
     }
 
     // Set maximal speed for each target
-    if (dd->max_speed)
-        if (!set_max_speeds_to_transfers(dd, err))
-            return FALSE;
+    if (!set_max_speeds_to_transfers(dd, err))
+        return FALSE;
 
     return TRUE;
 }
@@ -1995,7 +2018,6 @@ lr_download(GSList *targets,
         dd.max_parallel_connections = lr_handle->maxparalleldownloads;
         dd.max_connection_per_host = lr_handle->maxdownloadspermirror;
         dd.max_mirrors_to_try = lr_handle->maxmirrortries;
-        dd.max_speed = lr_handle->maxspeed;
         dd.allowed_mirror_failures = lr_handle->allowed_mirror_failures;
         dd.adaptivemirrorsorting = lr_handle->adaptivemirrorsorting;
     } else {
@@ -2004,7 +2026,6 @@ lr_download(GSList *targets,
         dd.max_parallel_connections = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
         dd.max_connection_per_host = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
         dd.max_mirrors_to_try = LRO_MAXMIRRORTRIES_DEFAULT;
-        dd.max_speed = LRO_MAXSPEED_DEFAULT;
         dd.allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
         dd.adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
     }
