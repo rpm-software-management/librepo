@@ -1,6 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-libdir=@LIB_INSTALL_DIR@
-includedir=@CMAKE_INSTALL_PREFIX@/include
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 
 Name: librepo
 Description: Repodata downloading library.
