@@ -345,7 +345,7 @@ process_repomd_xml(GSList *targets,
 
         if (target->download_target->rcode != LRE_OK) {
             g_set_error(err, LR_YUM_ERROR, target->download_target->rcode,
-                        lr_strerror(target->download_target->rcode));
+                        "%s", lr_strerror(target->download_target->rcode));
             g_debug("%s: %s", __func__, lr_strerror(target->download_target->rcode));
             continue;
         }
