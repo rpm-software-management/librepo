@@ -1139,7 +1139,7 @@ set_max_speeds_to_transfers(LrDownload *dd, GError **err)
     for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
         const LrTarget *ltarget = elem->data;
 
-        if (!ltarget->handle->maxspeed) // Skip repos with unlimited speed
+        if (!ltarget->handle || !ltarget->handle->maxspeed) // Skip repos with unlimited speed or without handle
             continue;
 
         guint num_running_downloads_from_repo =
