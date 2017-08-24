@@ -60,6 +60,7 @@ lr_downloadtarget_new(LrHandle *handle,
                       void *cbdata,
                       LrEndCb endcb,
                       LrMirrorFailureCb mirrorfailurecb,
+                      LrStartTransferCb starttranscb,
                       void *userdata,
                       gint64 byterangestart,
                       gint64 byterangeend,
@@ -103,6 +104,7 @@ lr_downloadtarget_new(LrHandle *handle,
     target->cbdata          = cbdata;
     target->endcb           = endcb;
     target->mirrorfailurecb = mirrorfailurecb;
+    target->starttranscb    = starttranscb;
     target->rcode           = LRE_UNFINISHED;
     target->userdata        = userdata;
     target->byterangestart  = byterangestart;

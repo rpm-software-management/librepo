@@ -243,6 +243,9 @@ typedef enum {
     LRO_FASTESTMIRRORDATA, /* (void *)
         User data for LRO_FASTESTMIRRORCB */
 
+    LRO_STARTTRANSFERCB, /* (LrStartTransferCb)
+        Start transfer callback */
+
     LRO_LOWSPEEDTIME, /*< (long)
         The time in seconds that the transfer should be below the
         LRO_LOWSPEEDLIMIT for the library to consider it too slow
@@ -376,6 +379,7 @@ typedef enum {
     LRI_LOCAL,                  /*!< (long *) */
     LRI_PROGRESSCB,             /*!< (void *) */
     LRI_PROGRESSDATA,           /*!< (LrProgressCb) */
+    LRI_STARTTRANSFERCB,        /*!< (LrStartTransferCb) */
     LRI_DESTDIR,                /*!< (char **) */
     LRI_REPOTYPE,               /*!< (long *) */
     LRI_USERAGENT,              /*!< (char **) */

@@ -187,6 +187,7 @@ static CbData *cbdata_new(void *userdata,
                           void *cbdata,
                           LrProgressCb progresscb,
                           LrHandleMirrorFailureCb hmfcb,
+                          LrStartTransferCb starttranscb,
                           const char *metadata)
 {
     CbData *data = calloc(1, sizeof(*data));
@@ -194,6 +195,7 @@ static CbData *cbdata_new(void *userdata,
     data->cbdata = cbdata;
     data->progresscb = progresscb;
     data->hmfcb = hmfcb;
+    data->starttranscb = starttranscb;
     data->metadata = g_strdup(metadata);
     return data;
 }
@@ -222,6 +224,14 @@ hmfcb(void *clientp, const char *msg, const char *url)
     if (data->hmfcb)
         return data->hmfcb(data->userdata, msg, url, data->metadata);
     return LR_CB_OK;
+}
+
+void
+starttranscb(void *clientp, int total_mirrors, int tried_mirrors)
+{
+    CbData *data = clientp;
+    if (data->starttranscb)
+        data->starttranscb(data->userdata, total_mirrors, tried_mirrors);
 }
 
 gboolean
@@ -457,14 +467,15 @@ lr_get_best_checksum(const LrMetalink *metalink,
 }
 
 CbData *
-lr_get_metadata_failure_callback(const LrHandle *handle)
+lr_get_repomd_download_callbacks(const LrHandle *handle)
 {
     CbData *cbdata = NULL;
-    if (handle->hmfcb) {
+    if (handle->hmfcb || handle->stransfercb) {
         cbdata = cbdata_new(handle->user_data,
                             NULL,
                             NULL,
                             handle->hmfcb,
+                            handle->stransfercb,
                             "repomd.xml");
     }
     return cbdata;
@@ -488,7 +499,7 @@ lr_yum_download_repomd(LrHandle *handle,
         lr_get_best_checksum(metalink, &checksums);
     }
 
-    CbData *cbdata = lr_get_metadata_failure_callback(handle);
+    CbData *cbdata = lr_get_repomd_download_callbacks(handle);
 
     LrDownloadTarget *target = lr_downloadtarget_new(handle,
                                                      "repodata/repomd.xml",
@@ -502,6 +513,7 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      cbdata,
                                                      NULL,
                                                      (cbdata) ? hmfcb : NULL,
+                                                     (cbdata) ? starttranscb : NULL,
                                                      NULL,
                                                      0,
                                                      0,
@@ -595,11 +607,12 @@ prepare_repo_download_targets(LrHandle *handle,
             checksums = g_slist_prepend(checksums, checksum);
         }
 
-        if (handle->user_cb || handle->hmfcb) {
+        if (handle->user_cb || handle->hmfcb || handle->stransfercb) {
             cbdata = cbdata_new(handle->user_data,
                                 user_cbdata,
                                 handle->user_cb,
                                 handle->hmfcb,
+                                handle->stransfercb,
                                 record->type);
             *cbdata_list = g_slist_append(*cbdata_list, cbdata);
         }
@@ -615,6 +628,7 @@ prepare_repo_download_targets(LrHandle *handle,
                                        NULL,
                                        cbdata,
                                        endcb,
+                                       NULL,
                                        NULL,
                                        NULL,
                                        0,
@@ -713,6 +727,7 @@ lr_yum_download_repos(GSList *targets,
                                 FALSE,
                                 (cbdata_list) ? progresscb : NULL,
                                 (cbdata_list) ? hmfcb : NULL,
+                                (cbdata_list) ? starttranscb : NULL,
                                 &download_error);
 
     error_handling(download_targets, err, download_error);
@@ -745,6 +760,7 @@ lr_yum_download_repo(LrHandle *handle,
                                 FALSE,
                                 (cbdata_list) ? progresscb : NULL,
                                 (cbdata_list) ? hmfcb : NULL,
+                                (cbdata_list) ? starttranscb : NULL,
                                 &tmp_err);
 
     assert((ret && !tmp_err) || (!ret && tmp_err));

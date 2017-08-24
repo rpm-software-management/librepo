@@ -622,6 +622,10 @@ lr_handle_setopt(LrHandle *handle,
         handle->hmfcb = va_arg(arg, LrHandleMirrorFailureCb);
         break;
 
+    case LRO_STARTTRANSFERCB:
+        handle->stransfercb = va_arg(arg, LrStartTransferCb);
+        break;
+
     case LRO_SSLVERIFYPEER:
         handle->sslverifypeer = va_arg(arg, long) ? 1 : 0;
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifypeer);
@@ -767,7 +771,7 @@ download_non_cached_url(LrHandle *lr_handle, const char *url, int fd, GError **e
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
                                    NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL, 0, 0, TRUE);
+                                   NULL, NULL, NULL, NULL, 0, 0, TRUE);
 
     // Download the target
     ret = lr_download_target(target, &tmp_err);
@@ -1454,6 +1458,12 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_HMFCB: {
         LrHandleMirrorFailureCb *cb= va_arg(arg, LrHandleMirrorFailureCb *);
         *cb = handle->hmfcb;
+        break;
+    }
+
+    case LRI_STARTTRANSFERCB: {
+        LrStartTransferCb *cb = va_arg(arg, LrStartTransferCb *);
+        *cb = handle->stransfercb;
         break;
     }
 

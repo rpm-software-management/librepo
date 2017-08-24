@@ -99,7 +99,10 @@ typedef struct {
         (Use status to check if successfully or unsuccessfully) */
 
     LrMirrorFailureCb mirrorfailurecb; /*!<
-        Callen when download from a mirror failed. */
+        Called when download from a mirror failed. */
+
+    LrStartTransferCb starttranscb; /*!<
+        Called when starting a new transfer. */
 
     GStringChunk *chunk; /*!<
         Chunk for strings used in this structure. */
@@ -197,6 +200,7 @@ lr_downloadtarget_new(LrHandle *handle,
                       void *cbdata,
                       LrEndCb endcb,
                       LrMirrorFailureCb mirrorfailurecb,
+                      LrStartTransferCb starttranscb,
                       void *userdata,
                       gint64 byterangestart,
                       gint64 byterangeend,

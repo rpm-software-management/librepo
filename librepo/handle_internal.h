@@ -65,6 +65,9 @@ struct _LrHandle {
     void *fastestmirrordata; /*!<
         User data for fastestmirrorcb. */
 
+    LrStartTransferCb stransfercb; /*!<
+        Start transfer callback */
+
     // Mirrorlist related stuff
 
     char *mirrorlist; /*!<
