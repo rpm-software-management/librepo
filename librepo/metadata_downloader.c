@@ -18,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define _POSIX_SOURCE
-#define _DEFAULT_SOURCE
+#define _GNU_SOURCE // for SA_RESTART
 
 #include <assert.h>
 #include <string.h>
