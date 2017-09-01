@@ -1,7 +1,6 @@
 build/
 TAGS
 tags
-./librepo.spec
 librepo/version.h
 *.pyc
 doc/c/Doxyfile.in
@@ -10,4 +9,3 @@ librepo-*.rpm
 python-librepo-*.rpm
 BUG*
 ISSUE*
-*.spec
