@@ -150,12 +150,19 @@ lr_metadata_download_cleanup(GSList *download_targets,
 
         if (target->err != NULL) {
             ret = FALSE;
-            g_set_error(err, LR_DOWNLOADER_ERROR, 1,
-                        "Cannot download repomd.xml: %s",target->err);
+
+            if (*err == NULL) {
+                g_set_error(err, LR_DOWNLOADER_ERROR, 1, "%s", target->err);
+            } else {
+                g_prefix_error(err, "%s, ", target->err);
+            }
         }
 
         lr_downloadtarget_free(download_target);
     }
+
+
+    g_prefix_error(err, "Cannot download repomd.xml: ");
 
     return ret;
 }
@@ -241,7 +248,8 @@ create_repomd_xml_download_targets(GSList *targets,
         if (!lr_handle_prepare_internal_mirrorlist(handle,
                                                    handle->fastestmirror,
                                                    &repo_error)) {
-            g_debug("Cannot prepare internal mirrorlist: %s", repo_error->message);
+            g_set_error(&repo_error, LR_HANDLE_ERROR, LRE_BADURL,
+                        "Cannot prepare internal mirrorlist: %s", repo_error->message);
             fillInvalidationValues(fd_list, paths);
             continue;
         }
@@ -373,6 +381,21 @@ process_repomd_xml(GSList *targets,
     }
 }
 
+gboolean cleanup(GSList *download_targets, GError **err)
+{
+    struct sigaction old_sigact;
+    GError *repo_error = NULL;
+
+    lr_metadata_download_cleanup(download_targets, err);
+
+    if (!lr_restore_sigaction(&old_sigact, FALSE, &repo_error)) {
+        g_propagate_error(err, repo_error);
+        return FALSE;
+    }
+
+    return *err == NULL;
+}
+
 gboolean
 lr_download_metadata(GSList *targets,
                      GError **err)
@@ -381,7 +404,6 @@ lr_download_metadata(GSList *targets,
     GSList *download_targets = NULL;
     GSList *fd_list = NULL;
     GSList *paths = NULL;
-    gboolean interruptible = FALSE;
     GError *repo_error = NULL;
 
     assert(!err || *err == NULL);
@@ -389,34 +411,32 @@ lr_download_metadata(GSList *targets,
     if (!targets)
         return TRUE;
 
-    if (!lr_setup_sigaction(&old_sigact, interruptible, err)) {
+    if (!lr_setup_sigaction(&old_sigact, FALSE, err)) {
         return FALSE;
     }
 
-    create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths, err);
+    create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths, &repo_error);
+    if (repo_error != NULL) {
+        g_propagate_error(err, repo_error);
+        cleanup(download_targets, err);
+        return FALSE;
+    }
 
     // Start downloading
     if (!lr_download(download_targets, FALSE, &repo_error)) {
         g_propagate_error(err, repo_error);
-        goto cleanup;
+        return cleanup(download_targets, err);
     }
 
     process_repomd_xml(targets, fd_list, paths, err);
 
     if (!lr_yum_download_repos(targets, &repo_error)) {
         g_propagate_error(err, repo_error);
+        cleanup(download_targets, err);
         return FALSE;
     }
 
-    cleanup:
-    lr_metadata_download_cleanup(download_targets, &repo_error);
-
-    if (!lr_restore_sigaction(&old_sigact, interruptible, &repo_error)) {
-        g_propagate_error(err, repo_error);
-        return FALSE;
-    }
-
-    return *err == NULL;
+    return cleanup(download_targets, err);
 }
 
 
