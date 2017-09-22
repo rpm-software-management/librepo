@@ -59,8 +59,6 @@ MetadataTarget_SetThreadState(PyObject *o, PyThreadState **state)
     if (!self) return;
     self->state = state;
 
-    // XXX: Little tricky (but not so much)
-    // Set the state to the depending handle as well
     if (self->handle) {
         Handle_SetThreadState(self->handle, state);
     }
@@ -81,7 +79,7 @@ check_MetadataTargetStatus(const _MetadataTargetObject *self)
 static int
 metadatatarget_progress_callback(void *data, double total_to_download, double now_downloaded)
 {
-    int ret = LR_CB_OK; // Assume everything will be ok
+    int ret = LR_CB_OK;
     _MetadataTargetObject *self;
     PyObject *user_data, *result;
     LrCallbackData *callback_data = (LrCallbackData *) data;
@@ -101,12 +99,9 @@ metadatatarget_progress_callback(void *data, double total_to_download, double no
                                    "(Odd)", user_data, total_to_download, now_downloaded);
 
     if (!result) {
-        // Exception raised in callback leads to the abortion
-        // of whole downloading (it is considered fatal)
         ret = LR_CB_ERROR;
     } else {
         if (result == Py_None) {
-            // Assume that None means that everything is ok
             ret = LR_CB_OK;
 #if PY_MAJOR_VERSION < 3
         } else if (PyInt_Check(result)) {
@@ -356,18 +351,6 @@ metadatatarget_dealloc(_MetadataTargetObject *o)
 #define OFFSET(member) (void *) offsetof(LrMetadataTarget, member)
 
 static PyObject *
-get_str(_MetadataTargetObject *self, void *member_offset)
-{
-    if (check_MetadataTargetStatus(self))
-        return NULL;
-    LrMetadataTarget *target = self->target;
-    char *str = *((char **) ((size_t) target + (size_t) member_offset));
-    if (str == NULL)
-        Py_RETURN_NONE;
-    return PyStringOrNone_FromString(str);
-}
-
-static PyObject *
 get_pythonobj(_MetadataTargetObject *self, void *member_offset)
 {
     if (check_MetadataTargetStatus(self))
@@ -408,6 +391,24 @@ get_pythonobj(_MetadataTargetObject *self, void *member_offset)
         return self->mirrorfailure_cb;
     }
 
+    if (member_offset == OFFSET(err)) {
+        LrMetadataTarget *target = self->target;
+
+        if (!target->err)
+            Py_RETURN_NONE;
+
+        int i = 0;
+        PyObject *pylist = PyTuple_New(g_list_length(target->err));
+        for (GList *elem = target->err; elem; i++, elem = g_list_next(elem)) {
+            gchar *error_message = (gchar *) elem->data;
+            PyObject *str = PyStringOrNone_FromString(error_message);
+            PyTuple_SetItem(pylist, i, str);
+        }
+
+        Py_XINCREF(target->err);
+        return pylist;
+    }
+
     Py_RETURN_NONE;
 }
 
@@ -417,7 +418,7 @@ static PyGetSetDef metadatatarget_getsetters[] = {
     {"progresscb",    (getter)get_pythonobj, NULL, NULL, OFFSET(progresscb)},
     {"mirrorfailurecb",(getter)get_pythonobj,NULL, NULL, OFFSET(mirrorfailurecb)},
     {"endcb",         (getter)get_pythonobj, NULL, NULL, OFFSET(endcb)},
-    {"err",           (getter)get_str,       NULL, NULL, OFFSET(err)},
+    {"err",           (getter)get_pythonobj, NULL, NULL, OFFSET(err)},
     {NULL, NULL, NULL, NULL, NULL} /* sentinel */
 };
 

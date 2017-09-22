@@ -56,8 +56,8 @@ typedef struct {
         Callback called when target transfer is done.
         (Use status to check if successfully or unsuccessfully) */
 
-    char *err; /*!<
-        Error message or NULL. NULL means no error. */
+    GList *err; /*!<
+        Array of error messages or NULL. NULL means no error. */
 
     GStringChunk *chunk; /*!<
         String chunk */
