@@ -20,6 +20,7 @@
 
 #define _POSIX_SOURCE
 #define _DEFAULT_SOURCE
+#define  BITS_IN_BYTE 8
 
 #include <stdio.h>
 #include <assert.h>
@@ -27,25 +28,19 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include <curl/curl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <time.h>
 
 #include "util.h"
 #include "metalink.h"
-#include "mirrorlist.h"
 #include "repomd.h"
 #include "downloader.h"
-#include "checksum.h"
 #include "handle_internal.h"
 #include "result_internal.h"
 #include "yum_internal.h"
 #include "gpg.h"
 #include "cleanup.h"
 #include "librepo.h"
-#include "yum.h"
 
 /* helper functions for YumRepo manipulation */
 
@@ -610,7 +605,7 @@ prepare_repo_download_targets(LrHandle *handle,
                                        fd,
                                        NULL,
                                        checksums,
-                                       0,
+                                       record->size / BITS_IN_BYTE,
                                        0,
                                        NULL,
                                        cbdata,

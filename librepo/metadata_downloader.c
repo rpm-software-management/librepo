@@ -18,7 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define _GNU_SOURCE // for SA_RESTART
+#define _GNU_SOURCE
+#define RESERVE 128
 
 #include <assert.h>
 #include <string.h>
@@ -59,6 +60,7 @@ lr_metadatatarget_new(LrHandle *handle,
     target->repomd_records_downloaded = 0;
     target->download_target = NULL;
     target->gnupghomedir = NULL;
+    target->err = NULL;
 
     return target;
 }
@@ -87,7 +89,35 @@ lr_metadatatarget_free(LrMetadataTarget *target)
     if (!target)
         return;
     g_string_chunk_free(target->chunk);
+    if (target->err != NULL)
+        g_list_free(target->err);
     g_free(target);
+}
+
+void
+lr_metadatatarget_append_error(LrMetadataTarget *target, char *format, ...)
+{
+    va_list valist;
+    size_t length = strlen(format);
+    char *error_message = NULL;
+
+    va_start(valist, format);
+    while (1) {
+        char *arg = va_arg(valist, char*);
+        if (arg == NULL)
+            break;
+
+        length += strlen(arg);
+    }
+    length += RESERVE;
+    va_end(valist);
+
+    va_start(valist, format);
+    error_message = malloc(length * sizeof(char));
+    vsnprintf(error_message, length, format, valist);
+    va_end(valist);
+
+    target->err = g_list_append(target->err, (gpointer) error_message);
 }
 
 static gboolean
@@ -95,7 +125,6 @@ lr_setup_sigaction(struct sigaction *old_sigact,
                    gboolean interruptible,
                    GError **err)
 {
-    // Setup sighandler
     if (interruptible) {
         struct sigaction sigact;
         g_debug("%s: Using own SIGINT handler", __func__);
@@ -126,38 +155,12 @@ lr_restore_sigaction(struct sigaction *old_sigact,
             if (err && *err != NULL)
                 g_clear_error(err);
             g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_INTERRUPTED,
-                        "Insterupted by a SIGINT signal");
+                        "Interrupted by a SIGINT signal");
             return FALSE;
         }
     }
 
     return TRUE;
-}
-
-static gboolean
-lr_metadata_download_cleanup(GSList *download_targets,
-                             GError **err)
-{
-    gboolean ret = TRUE;
-
-    // Copy download statuses from download_targets to targets
-    for (GSList *elem = download_targets; elem; elem = g_slist_next(elem)) {
-        LrDownloadTarget *download_target = elem->data;
-        LrMetadataTarget *target = download_target->userdata;
-        if (download_target->err)
-            target->err = g_string_chunk_insert(target->chunk,
-                                                download_target->err);
-
-        if (target->err != NULL) {
-            ret = FALSE;
-            g_set_error(err, LR_DOWNLOADER_ERROR, 1,
-                        "Cannot download repomd.xml: %s",target->err);
-        }
-
-        lr_downloadtarget_free(download_target);
-    }
-
-    return ret;
 }
 
 GSList *
@@ -176,33 +179,35 @@ appendPath(GSList *paths, const char *path)
     return paths;
 }
 
-void fillInvalidationValues(GSList **fd_list, GSList **paths)
+void
+fillInvalidationValues(GSList **fd_list, GSList **paths)
 {
     (*fd_list) = appendFdValue((*fd_list), -1);
     (*paths) = appendPath((*paths), "");
 }
 
 void
+handle_failure(LrMetadataTarget *target,
+               GSList **fd_list,
+               GSList **paths,
+               GError *err)
+{
+    lr_metadatatarget_append_error(target, err->message, NULL);
+    fillInvalidationValues(fd_list, paths);
+    g_error_free(err);
+}
+
+void
 create_repomd_xml_download_targets(GSList *targets,
                                    GSList **download_targets,
                                    GSList **fd_list,
-                                   GSList **paths,
-                                   GError **err)
+                                   GSList **paths)
 {
-    GError *repo_error = NULL;
-
-    for (GSList *elem = targets;; elem = g_slist_next(elem)) {
-        if (repo_error != NULL) {
-            g_propagate_error(err, repo_error);
-            repo_error = NULL;
-        }
-
-        if (elem == NULL)
-            break;
-
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrMetadataTarget *target = elem->data;
         LrDownloadTarget *download_target;
         GSList *checksums = NULL;
+        GError *err = NULL;
         LrHandle *handle;
         char *path = NULL;
         int fd = -1;
@@ -216,17 +221,13 @@ create_repomd_xml_download_targets(GSList *targets,
         handle = target->handle;
 
         if (!handle->urls && !handle->mirrorlisturl && !handle->metalinkurl) {
-            g_set_error(&repo_error, LR_HANDLE_ERROR, LRE_NOURL,
-                        "No LRO_URLS, LRO_MIRRORLISTURL nor LRO_METALINKURL specified");
-            /* every target must have fd and path, even invalid */
+            lr_metadatatarget_append_error(target, "No LRO_URLS, LRO_MIRRORLISTURL nor LRO_METALINKURL specified", NULL);
             fillInvalidationValues(fd_list, paths);
             continue;
         }
 
         if (handle->repotype != LR_YUMREPO) {
-            g_set_error(&repo_error, LR_HANDLE_ERROR, LRE_BADFUNCARG,
-                        "Bad LRO_REPOTYPE specified");
-            /* every target must have fd and path, even invalid */
+            lr_metadatatarget_append_error(target, "Bad LRO_REPOTYPE specified", NULL);
             fillInvalidationValues(fd_list, paths);
             continue;
         }
@@ -240,42 +241,38 @@ create_repomd_xml_download_targets(GSList *targets,
 
         if (!lr_handle_prepare_internal_mirrorlist(handle,
                                                    handle->fastestmirror,
-                                                   &repo_error)) {
-            g_debug("Cannot prepare internal mirrorlist: %s", repo_error->message);
+                                                   &err)) {
+            lr_metadatatarget_append_error(target, "Cannot prepare internal mirrorlist: %s", err->message, NULL);
             fillInvalidationValues(fd_list, paths);
+            g_error_free(err);
             continue;
         }
 
         if (mkdir(handle->destdir, S_IRWXU) == -1 && errno != EEXIST) {
-            g_set_error(&repo_error, LR_HANDLE_ERROR, LRE_CANNOTCREATETMP,
-                        "Cannot create tmpdir: %s %s", handle->destdir, g_strerror(errno));
-            /* every target must have fd and path, even invalid */
+            lr_metadatatarget_append_error(target, "Cannot create tmpdir: %s %s", handle->destdir, g_strerror(errno), NULL);
             fillInvalidationValues(fd_list, paths);
+            g_error_free(err);
             continue;
         }
 
-        if (!lr_prepare_repodata_dir(handle, &repo_error)) {
-            /* every target must have fd and path, even invalid */
-            fillInvalidationValues(fd_list, paths);
+        if (!lr_prepare_repodata_dir(handle, &err)) {
+            handle_failure(target, fd_list, paths, err);
             continue;
         }
 
         if (!handle->update) {
-            if (!lr_store_mirrorlist_files(handle, target->repo, &repo_error)) {
-                /* every target must have fd and path, even invalid */
-                fillInvalidationValues(fd_list, paths);
+            if (!lr_store_mirrorlist_files(handle, target->repo, &err)) {
+                handle_failure(target, fd_list, paths, err);
                 continue;
             }
 
-            if (!lr_copy_metalink_content(handle, target->repo, &repo_error)) {
-                /* every target must have fd and path, even invalid */
-                fillInvalidationValues(fd_list, paths);
+            if (!lr_copy_metalink_content(handle, target->repo, &err)) {
+                handle_failure(target, fd_list, paths, err);
                 continue;
             }
 
-            if ((fd = lr_prepare_repomd_xml_file(handle, &path, &repo_error)) == -1) {
-                /* every target must have fd and path, even invalid */
-                fillInvalidationValues(fd_list, paths);
+            if ((fd = lr_prepare_repomd_xml_file(handle, &path, &err)) == -1) {
+                handle_failure(target, fd_list, paths, err);
                 continue;
             }
         }
@@ -314,20 +311,12 @@ create_repomd_xml_download_targets(GSList *targets,
 void
 process_repomd_xml(GSList *targets,
                    GSList *fd_list,
-                   GSList *paths,
-                   GError **err)
+                   GSList *paths)
 {
-    GError *repo_error = NULL;
+    GError *error = NULL;
 
-    for (GSList *elem = targets, *fd = fd_list, *path = paths;;
+    for (GSList *elem = targets, *fd = fd_list, *path = paths; elem;
          elem = g_slist_next(elem), fd = g_slist_next(fd), path = g_slist_next(path)) {
-        if (repo_error != NULL) {
-            g_propagate_error(err, repo_error);
-            repo_error = NULL;
-        }
-
-        if (elem == NULL)
-            break;
 
         LrMetadataTarget *target = elem->data;
         LrHandle *handle;
@@ -343,34 +332,66 @@ process_repomd_xml(GSList *targets,
         handle->gnupghomedir = g_strdup(target->gnupghomedir);
 
         if (target->download_target->rcode != LRE_OK) {
-            g_set_error(err, LR_YUM_ERROR, target->download_target->rcode,
-                        "%s", lr_strerror(target->download_target->rcode));
-            g_debug("%s: %s", __func__, lr_strerror(target->download_target->rcode));
+            lr_metadatatarget_append_error(target, (char *) lr_strerror(target->download_target->rcode), NULL);
             continue;
         }
 
-        if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &repo_error)) {
+        if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &error)) {
+            lr_metadatatarget_append_error(target, error->message, NULL);
+            g_error_free(error);
             continue;
         }
 
         lseek(fd_value, SEEK_SET, 0);
         ret = lr_yum_repomd_parse_file(target->repomd, fd_value, lr_xml_parser_warning_logger,
-                                       "Repomd xml parser", &repo_error);
+                                       "Repomd xml parser", &error);
         close(fd_value);
         if (!ret) {
-            g_debug("%s: Parsing unsuccessful: %s", __func__, repo_error->message);
+            lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message, NULL);
             lr_free(path->data);
+            g_error_free(error);
             continue;
         }
 
         target->repo->destdir = g_strdup(handle->destdir);
         target->repo->repomd = path->data;
     }
+}
 
-    if (repo_error != NULL) {
-        g_propagate_error(err, repo_error);
-        repo_error = NULL;
+static gboolean
+lr_metadata_download_cleanup(GSList *download_targets)
+{
+    gboolean ret = TRUE;
+
+    for (GSList *elem = download_targets; elem; elem = g_slist_next(elem)) {
+        LrDownloadTarget *download_target = elem->data;
+        LrMetadataTarget *target = download_target->userdata;
+        if (download_target->err)
+            lr_metadatatarget_append_error(target, download_target->err, NULL);
+
+        if (target->err != NULL) {
+            ret = FALSE;
+        }
+
+        lr_downloadtarget_free(download_target);
     }
+
+    return ret;
+}
+
+gboolean cleanup(GSList *download_targets, GError **err)
+{
+    struct sigaction old_sigact;
+    GError *repo_error = NULL;
+
+    lr_metadata_download_cleanup(download_targets);
+
+    if (!lr_restore_sigaction(&old_sigact, FALSE, &repo_error)) {
+        g_propagate_error(err, repo_error);
+        return FALSE;
+    }
+
+    return *err == NULL;
 }
 
 gboolean
@@ -381,42 +402,26 @@ lr_download_metadata(GSList *targets,
     GSList *download_targets = NULL;
     GSList *fd_list = NULL;
     GSList *paths = NULL;
-    gboolean interruptible = FALSE;
-    GError *repo_error = NULL;
 
     assert(!err || *err == NULL);
 
     if (!targets)
         return TRUE;
 
-    if (!lr_setup_sigaction(&old_sigact, interruptible, err)) {
+    if (!lr_setup_sigaction(&old_sigact, FALSE, err)) {
         return FALSE;
     }
 
-    create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths, err);
+    create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths);
 
-    // Start downloading
-    if (!lr_download(download_targets, FALSE, &repo_error)) {
-        g_propagate_error(err, repo_error);
-        goto cleanup;
+    if (!lr_download(download_targets, FALSE, err)) {
+        return cleanup(download_targets, err);
     }
 
-    process_repomd_xml(targets, fd_list, paths, err);
+    process_repomd_xml(targets, fd_list, paths);
+    lr_yum_download_repos(targets, err);
 
-    if (!lr_yum_download_repos(targets, &repo_error)) {
-        g_propagate_error(err, repo_error);
-        return FALSE;
-    }
-
-    cleanup:
-    lr_metadata_download_cleanup(download_targets, &repo_error);
-
-    if (!lr_restore_sigaction(&old_sigact, interruptible, &repo_error)) {
-        g_propagate_error(err, repo_error);
-        return FALSE;
-    }
-
-    return *err == NULL;
+    return cleanup(download_targets, err);
 }
 
 
