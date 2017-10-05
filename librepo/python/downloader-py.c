@@ -62,8 +62,6 @@ py_download_url(G_GNUC_UNUSED PyObject *self, PyObject *args)
                           &py_handle, &url, &fd))
         return NULL;
 
-    Py_XINCREF(py_handle);
-
     if (HandleObject_Check(py_handle)) {
         handle = Handle_FromPyObject(py_handle);
     } else if (py_handle != Py_None) {
