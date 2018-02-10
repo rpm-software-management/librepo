@@ -23,10 +23,11 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/xattr.h>
 #include <unistd.h>
-#include <attr/xattr.h>
 #include <openssl/evp.h>
 
 #include "cleanup.h"

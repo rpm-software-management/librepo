@@ -28,9 +28,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/xattr.h>
 #include <fcntl.h>
 #include <curl/curl.h>
-#include <attr/xattr.h>
 
 #include "downloader.h"
 #include "downloader_internal.h"
