@@ -8,5 +8,5 @@ Version: @VERSION@
 Requires: glib-2.0
 Requires.private: libcurl openssl
 Libs: -L${libdir} -lrepo
-Libs.private: -lexpat -gpgme -gpg-error
+Libs.private: -lexpat -lgpgme -lgpg-error
 Cflags: -I${includedir} -D_FILE_OFFSET_BITS=64
