@@ -43,6 +43,7 @@ typedef struct {
     PyObject *fastestmirror_cb;
     PyObject *fastestmirror_cb_data;
     PyObject *hmf_cb;
+    PyObject *starttransfer_cb;
     /* GIL stuff */
     // See: http://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code
     PyThreadState **state;
@@ -172,6 +173,30 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
     return;
 }
 
+static void
+starttransfer_callback(void *data, int total_mirrors, int tried_mirrors)
+{
+    _HandleObject *self;
+    PyObject *user_data, *result;
+
+    self = (_HandleObject *)data;
+    if (!self->starttransfer_cb)
+        return;
+
+    if (self->progress_cb_data)
+        user_data = self->progress_cb_data;
+    else
+        user_data = Py_None;
+
+    EndAllowThreads(self->state);
+    result = PyObject_CallFunction(self->starttransfer_cb,
+                        "(Oii)", user_data, total_mirrors, tried_mirrors);
+    Py_XDECREF(result);
+    BeginAllowThreads(self->state);
+
+    return;
+}
+
 static int
 hmf_callback(void *data, const char *msg, const char *url, const char *metadata)
 {
@@ -243,6 +268,7 @@ handle_new(PyTypeObject *type,
         self->fastestmirror_cb = NULL;
         self->fastestmirror_cb_data = NULL;
         self->hmf_cb = NULL;
+        self->starttransfer_cb = NULL;
         self->state = NULL;
     }
     return (PyObject *)self;
@@ -274,6 +300,7 @@ handle_dealloc(_HandleObject *o)
     Py_XDECREF(o->progress_cb_data);
     Py_XDECREF(o->fastestmirror_cb);
     Py_XDECREF(o->fastestmirror_cb_data);
+    Py_XDECREF(o->starttransfer_cb);
     Py_XDECREF(o->hmf_cb);
     Py_TYPE(o)->tp_free(o);
 }
@@ -821,6 +848,39 @@ py_setopt(_HandleObject *self, PyObject *args)
         break;
     }
 
+    case LRO_STARTTRANSFERCB: {
+        if (!PyCallable_Check(obj) && obj != Py_None) {
+            PyErr_SetString(PyExc_TypeError, "Only callable argument or None is supported with this option");
+            return NULL;
+        }
+
+        Py_XDECREF(self->starttransfer_cb);
+        if (obj == Py_None) {
+            // None object
+            self->starttransfer_cb = NULL;
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   (LrHandleOption)option,
+                                   NULL);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+        } else {
+            // New callback object
+            Py_XINCREF(obj);
+            self->starttransfer_cb = obj;
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   (LrHandleOption)option,
+                                   starttransfer_callback);
+            if (!res)
+                RETURN_ERROR(&tmp_err, -1, NULL);
+            res = lr_handle_setopt(self->handle,
+                                   &tmp_err,
+                                   LRO_PROGRESSDATA,
+                                   self);
+        }
+        break;
+    }
 
     /*
      * Options with callback data
@@ -1043,6 +1103,13 @@ py_getinfo(_HandleObject *self, PyObject *args)
             Py_RETURN_NONE;
         Py_INCREF(self->hmf_cb);
         return self->hmf_cb;
+
+    /* callback option */
+    case LRI_STARTTRANSFERCB:
+        if (self->starttransfer_cb == NULL)
+            Py_RETURN_NONE;
+        Py_INCREF(self->starttransfer_cb);
+        return self->starttransfer_cb;
 
     /* metalink */
     case LRI_METALINK: {

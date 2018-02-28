@@ -62,6 +62,7 @@ typedef struct CbData_s {
     void *cbdata;                   /*!< User's callback data */
     LrProgressCb progresscb;        /*!< Progress callback */
     LrHandleMirrorFailureCb hmfcb;  /*!< Handle mirror failure callback */
+    LrStartTransferCb starttranscb; /*!< Start transfer callback */
     char *metadata;                 /*!< "primary", "filelists", ... */
 } CbData;
 
@@ -94,6 +95,15 @@ lr_yum_repo_path(LrYumRepo *repo, const char *type);
  */
 int
 hmfcb(void *clientp, const char *msg, const char *url);
+
+/**
+ * Start transaction callback
+ * @param clientp Pointer to user data.
+ * @param total_mirrors all mirrors to try
+ * @param tried_mirrors mirrors failed yet
+ */
+void
+starttranscb(void *clientp, int total_mirrors, int tried_mirrors);
 
 /** Prepares directory for repo data
  * @param handle        Handle object containing path to repo data
@@ -146,7 +156,7 @@ lr_get_best_checksum(const LrMetalink *metalink, GSList **checksums);
  * @return              Mirror Failure Callback Data
  */
 CbData *
-lr_get_metadata_failure_callback(const LrHandle *handle);
+lr_get_repomd_download_callbacks(const LrHandle *handle);
 
 /**
  *

@@ -284,6 +284,16 @@ Version contants
     Call of this callback doesn't mean that whole downloading failed.
     If there are other mirrors on the list, these mirrors will be tried.
 
+.. data:: LRO_STARTTRANSFERCB
+
+    *Function or None*.
+    Start transaction callback.
+    Its prototype looks like:
+    ``callback(userdata, total_mirrors_cnt, tried_mirrors_cnt)``
+    Where *userdata* are data passed by user via LRO_PROGRESSDATA.
+    *total_mirrors_cnt* max. count of mirrors that will be tried for connection.
+    *tried_mirrors_cnt* count of mirrors which already failed to connect.
+
 .. data:: LRO_SSLVERIFYPEER
 
     *Boolean*. This option determines whether librepo verifies the
@@ -412,6 +422,7 @@ Version contants
 .. data:: LRI_FASTESTMIRRORCACHE
 .. data:: LRI_FASTESTMIRRORMAXAGE
 .. data:: LRI_HMFCB
+.. data:: LRI_STARTTRANSFERCB
 .. data:: LRI_SSLVERIFYPEER
 .. data:: LRI_SSLVERIFYHOST
 .. data:: LRI_SSLCLIENTCERT
@@ -1349,6 +1360,10 @@ class Handle(_librepo.Handle):
     .. attribute:: hmfcb:
 
         See: :data:`.LRO_HMFCB`
+
+    .. attribute:: starttransactioncb:
+
+        See: :data:`.LRO_STARTTRANSFERCB`
 
     .. attribute:: sslverifypeer:
 

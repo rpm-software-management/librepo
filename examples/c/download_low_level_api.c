@@ -55,6 +55,7 @@ main(void)
                 NULL,   // User data for progress callback
                 NULL,   // End callback
                 NULL,   // Mirror failure callback
+                NULL,   // Start transaction callback
                 NULL,   // User's data for the end and mirror failure callbacks
                 0,      // Start of byterange
                 3788       // End of byterange

@@ -390,6 +390,32 @@ lr_progresscb(void *ptr,
     return ret;
 }
 
+static int
+lr_sockoptcb(void *ptr,
+             curl_socket_t curlfd,
+             curlsocktype purpose)
+{
+    int ret = CURL_SOCKOPT_OK;
+    LrTarget *target = ptr;
+
+    assert(target);
+    assert(target->target);
+
+    if (target->state != LR_DS_RUNNING)
+        return ret;
+    if (!target->target->starttranscb)
+        return ret;
+
+    int total = g_slist_length(target->lrmirrors);
+    int tried = g_slist_length(target->tried_mirrors);
+
+    target->target->starttranscb(target->target->cbdata, total, tried);
+
+    target->cb_return_code = ret;
+
+    return ret;
+}
+
 #define STRLEN(s) (sizeof(s)/sizeof(s[0]) - 1)
 
 
@@ -1064,6 +1090,13 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         c_rc = curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb) ||
                curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0) ||
                curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+        assert(c_rc == CURLE_OK);
+    }
+
+    // Prepare sockopt callback
+    if (target->target->starttranscb) {
+        c_rc = curl_easy_setopt(h, CURLOPT_SOCKOPTFUNCTION, lr_sockoptcb) ||
+               curl_easy_setopt(h, CURLOPT_SOCKOPTDATA, target);
         assert(c_rc == CURLE_OK);
     }
 
@@ -2204,7 +2237,7 @@ lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
     target = lr_downloadtarget_new(lr_handle,
                                    url, NULL, fd, NULL,
                                    NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL, 0, 0, FALSE);
+                                   NULL, NULL, NULL, NULL, 0, 0, FALSE);
 
     // Download the target
     ret = lr_download_target(target, &tmp_err);
@@ -2280,6 +2313,7 @@ lr_download_single_cb(GSList *targets,
                       gboolean failfast,
                       LrProgressCb cb,
                       LrMirrorFailureCb mfcb,
+                      LrStartTransferCb stcb,
                       GError **err)
 {
     gboolean ret;
@@ -2303,6 +2337,7 @@ lr_download_single_cb(GSList *targets,
 
         target->progresscb      = (cb) ? lr_multi_progress_func : NULL;
         target->mirrorfailurecb = (mfcb) ? lr_multi_mf_func : NULL;
+        target->starttranscb    = stcb;
         target->cbdata          = lrcbdata;
 
         shared_cbdata.singlecbdata = g_slist_append(shared_cbdata.singlecbdata,
@@ -2318,6 +2353,7 @@ lr_download_single_cb(GSList *targets,
         target->cbdata = cbdata->userdata;
         target->progresscb = NULL;
         target->mirrorfailurecb = NULL;
+        target->starttranscb = NULL;
         lr_free(cbdata);
     }
     g_slist_free(shared_cbdata.singlecbdata);

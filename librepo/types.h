@@ -126,6 +126,15 @@ typedef int (*LrProgressCb)(void *clientp,
                             double total_to_download,
                             double now_downloaded);
 
+/** Start transfer callback prototype
+ * @param clientp           Pointer to user data.
+ * @param total_mirrors     Total number of mirrors to try
+ * @param tried_mirrors     Already tried mirrors
+ */
+typedef void (*LrStartTransferCb)(void *clientp,
+                                  int total_mirrors,
+                                  int tried_mirrors);
+
 /** Transfer status codes */
 typedef enum {
     LR_TRANSFER_SUCCESSFUL,

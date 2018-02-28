@@ -100,6 +100,7 @@ lr_download_single_cb(GSList *targets,
                       gboolean failfast,
                       LrProgressCb cb,
                       LrMirrorFailureCb mfcb,
+                      LrStartTransferCb stcb,
                       GError **err);
 
 /** @} */
