@@ -42,6 +42,7 @@
 #include "handle_internal.h"
 #include "cleanup.h"
 #include "url_substitution.h"
+#include "yum_internal.h"
 
 volatile sig_atomic_t lr_interrupt = 0;
 
@@ -2193,33 +2194,7 @@ lr_download_target(LrDownloadTarget *target,
 gboolean
 lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 {
-    gboolean ret;
-    LrDownloadTarget *target;
-    GError *tmp_err = NULL;
-
-    assert(url);
-    assert(!err || *err == NULL);
-
-    // Prepare target
-    target = lr_downloadtarget_new(lr_handle,
-                                   url, NULL, fd, NULL,
-                                   NULL, 0, 0, NULL, NULL,
-                                   NULL, NULL, NULL, 0, 0, FALSE);
-
-    // Download the target
-    ret = lr_download_target(target, &tmp_err);
-
-    assert(ret || tmp_err);
-    assert(!(target->err) || !ret);
-
-    if (!ret)
-        g_propagate_error(err, tmp_err);
-
-    lr_downloadtarget_free(target);
-
-    lseek(fd, 0, SEEK_SET);
-
-    return ret;
+    return lr_yum_download_url(lr_handle, url, fd, FALSE, err);
 }
 
 int

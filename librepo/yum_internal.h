@@ -31,6 +31,8 @@ G_BEGIN_DECLS
 
 gboolean
 lr_yum_perform(LrHandle *handle, LrResult *result, GError **err);
+gboolean
+lr_yum_download_url(LrHandle *lr_handle, const char *url, int fd, gboolean no_cache, GError **err);
 
 G_END_DECLS
 
