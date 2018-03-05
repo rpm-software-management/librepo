@@ -64,6 +64,7 @@ py_download_url(G_GNUC_UNUSED PyObject *self, PyObject *args)
 
     if (HandleObject_Check(py_handle)) {
         handle = Handle_FromPyObject(py_handle);
+        Handle_SetThreadState(py_handle, &state);
     } else if (py_handle != Py_None) {
         PyErr_SetString(PyExc_TypeError, "Only Handle or None is supported");
         return NULL;

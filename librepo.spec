@@ -7,9 +7,10 @@
 %bcond_without python3
 %bcond_without tests
 %endif
+%global dnf_conflict 2.8.8
 
 Name:           librepo
-Version:        1.8.1
+Version:        1.9.0
 Release:        1%{?dist}
 Summary:        Repodata downloading library
 
@@ -51,6 +52,7 @@ BuildRequires:  python-nose
 BuildRequires:  python-sphinx
 BuildRequires:  pyxattr
 Requires:       %{name}%{?_isa} = %{version}-%{release}
+Conflicts:      python2-dnf < %{dnf_conflict}
 
 %description -n python2-%{name}
 Python 2 bindings for the librepo library.
@@ -69,6 +71,7 @@ BuildRequires:  python3-nose
 BuildRequires:  python3-sphinx
 BuildRequires:  python3-pyxattr
 Requires:       %{name}%{?_isa} = %{version}-%{release}
+Conflicts:      python3-dnf < %{dnf_conflict}
 
 %description -n python3-%{name}
 Python 3 bindings for the librepo library.
