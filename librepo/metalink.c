@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <expat.h>
+#include <libxml/parser.h>
 
 #include "rcodes.h"
 #include "util.h"
@@ -169,11 +169,13 @@ static LrStatesSwitch stateswitches[] = {
     { NUMSTATES,        NULL,               NUMSTATES,                     0 }
 };
 
-static void XMLCALL
-lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
+static void
+lr_metalink_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar **xmlAttr)
 {
     LrParserData *pd = pdata;
     LrStatesSwitch *sw;
+    const char **attr = (const char **)xmlAttr;
+    const char *element = (const char *)xmlElement;
 
     if (pd->err)
         return; // There was an error -> do nothing
@@ -339,8 +341,8 @@ lr_metalink_start_handler(void *pdata, const char *element, const char **attr)
     return;
 }
 
-static void XMLCALL
-lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
+static void
+lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
 {
     LrParserData *pd = pdata;
     unsigned int state = pd->state;
@@ -470,7 +472,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
 {
     gboolean ret = TRUE;
     LrParserData *pd;
-    XML_Parser parser;
+    XmlParser parser;
     GError *tmp_err = NULL;
 
     assert(metalink);
@@ -480,9 +482,10 @@ lr_metalink_parse_file(LrMetalink *metalink,
 
     // Init
 
-    parser = XML_ParserCreate(NULL);
-    XML_SetElementHandler(parser, lr_metalink_start_handler, lr_metalink_end_handler);
-    XML_SetCharacterDataHandler(parser, lr_char_handler);
+    memset(&parser, 0, sizeof(parser));
+    parser.startElement = lr_metalink_start_handler;
+    parser.endElement = lr_metalink_end_handler;
+    parser.characters = lr_char_handler;
 
     pd = lr_xml_parser_data_new(NUMSTATES);
     pd->parser = &parser;
@@ -498,8 +501,6 @@ lr_metalink_parse_file(LrMetalink *metalink,
             pd->swtab[sw->from] = sw;
         pd->sbtab[sw->to] = sw->from;
     }
-
-    XML_SetUserData(parser, pd);
 
     // Parsing
 
@@ -519,7 +520,6 @@ lr_metalink_parse_file(LrMetalink *metalink,
 
 err:
     lr_xml_parser_data_free(pd);
-    XML_ParserFree(parser);
 
     return ret;
 }

@@ -22,7 +22,7 @@
 #include <glib/gprintf.h>
 #include <assert.h>
 #include <errno.h>
-#include <expat.h>
+#include <libxml/parser.h>
 #include <unistd.h>
 #include "xmlparser.h"
 #include "xmlparser_internal.h"
@@ -51,8 +51,8 @@ lr_xml_parser_data_free(LrParserData *pd)
     g_free(pd);
 }
 
-void XMLCALL
-lr_char_handler(void *pdata, const XML_Char *s, int len)
+void
+lr_char_handler(void *pdata, const xmlChar *s, int len)
 {
     int l;
     char *c;
@@ -143,7 +143,7 @@ lr_xml_parser_strtoll(LrParserData *pd,
 }
 
 gboolean
-lr_xml_parser_generic(XML_Parser parser,
+lr_xml_parser_generic(XmlParser parser,
                       LrParserData *pd,
                       int fd,
                       GError **err)
@@ -151,42 +151,40 @@ lr_xml_parser_generic(XML_Parser parser,
     /* Note: This function uses .err members of LrParserData! */
 
     gboolean ret = TRUE;
+    xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(&parser, pd, NULL, 0, NULL);
+    ctxt->linenumbers = 1;
 
-    assert(parser);
+    assert(ctxt);
     assert(pd);
     assert(fd >= 0);
     assert(!err || *err == NULL);
 
     while (1) {
         int len;
-        void *buf = XML_GetBuffer(parser, XML_BUFFER_SIZE);
-        if (!buf) {
-            ret = FALSE;
-            g_set_error(err, LR_XML_PARSER_ERROR, LRE_MEMORY,
-                        "Out of memory: Cannot allocate buffer for xml parser");
-            break;
-        }
+        char buf[XML_BUFFER_SIZE];
 
         len = read(fd, (void *) buf, XML_BUFFER_SIZE);
         if (len < 0) {
             ret = FALSE;
             g_debug("%s: Error while reading xml : %s\n",
-                       __func__, g_strerror(errno));
+                        __func__, g_strerror(errno));
             g_set_error(err, LR_XML_PARSER_ERROR, LRE_IO,
                         "Error while reading xml: %s", g_strerror(errno));
             break;
         }
 
-        if (!XML_ParseBuffer(parser, len, len == 0)) {
+        if (xmlParseChunk(ctxt, buf, len, len == 0)) {
+            xmlErrorPtr error = xmlCtxtGetLastError(ctxt);
             ret = FALSE;
+
             g_debug("%s: Parse error at line: %d (%s)",
                         __func__,
-                        (int) XML_GetCurrentLineNumber(parser),
-                        (char *) XML_ErrorString(XML_GetErrorCode(parser)));
+                        xmlSAX2GetLineNumber(ctxt),
+                        error->message);
             g_set_error(err, LR_XML_PARSER_ERROR, LRE_XMLPARSER,
                         "Parse error at line: %d (%s)",
-                        (int) XML_GetCurrentLineNumber(parser),
-                        (char *) XML_ErrorString(XML_GetErrorCode(parser)));
+                        xmlSAX2GetLineNumber(ctxt),
+                        error->message);
             break;
         }
 
@@ -199,6 +197,8 @@ lr_xml_parser_generic(XML_Parser parser,
         if (len == 0)
             break;
     }
+
+    xmlFreeParserCtxt(ctxt);
 
     return ret;
 }

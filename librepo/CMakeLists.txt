@@ -47,7 +47,7 @@ SET(librepo_HEADERS
 
 ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
 TARGET_LINK_LIBRARIES(librepo
-                        ${EXPAT_LIBRARY}
+                        ${LIBXML2_LIBRARIES}
                         ${CURL_LIBRARY}
                         ${LIBCRYPTO_LIBRARIES}
                         ${GPGME_VANILLA_LIBRARIES}

@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <expat.h>
+#include <libxml/parser.h>
 #include <errno.h>
 
 #include "repomd.h"
@@ -206,11 +206,13 @@ static LrStatesSwitch stateswitches[] = {
     { NUMSTATES,        NULL,               NUMSTATES,          0 }
 };
 
-static void XMLCALL
-lr_start_handler(void *pdata, const char *element, const char **attr)
+static void
+lr_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar **xmlAttr)
 {
     LrParserData *pd = pdata;
     LrStatesSwitch *sw;
+    const char **attr = (const char **)xmlAttr;
+    const char *element = (const char *)xmlElement;
 
     if (pd->err)
         return; // There was an error -> do nothing
@@ -357,8 +359,8 @@ lr_start_handler(void *pdata, const char *element, const char **attr)
     }
 }
 
-static void XMLCALL
-lr_end_handler(void *pdata, G_GNUC_UNUSED const char *element)
+static void
+lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
 {
     LrParserData *pd = pdata;
     unsigned int state = pd->state;
@@ -501,7 +503,7 @@ lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
 {
     gboolean ret = TRUE;
     LrParserData *pd;
-    XML_Parser parser;
+    XmlParser parser;
     GError *tmp_err = NULL;
 
     assert(fd >= 0);
@@ -510,9 +512,10 @@ lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
 
     // Init
 
-    parser = XML_ParserCreate(NULL);
-    XML_SetElementHandler(parser, lr_start_handler, lr_end_handler);
-    XML_SetCharacterDataHandler(parser, lr_char_handler);
+    memset(&parser, 0, sizeof(parser));
+    parser.startElement = lr_start_handler;
+    parser.endElement = lr_end_handler;
+    parser.characters = lr_char_handler;
 
     pd = lr_xml_parser_data_new(NUMSTATES);
     pd->parser = &parser;
@@ -525,8 +528,6 @@ lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
             pd->swtab[sw->from] = sw;
         pd->sbtab[sw->to] = sw->from;
     }
-
-    XML_SetUserData(parser, pd);
 
     // Parsing
 
@@ -545,7 +546,6 @@ lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
     // Clean up
 
     lr_xml_parser_data_free(pd);
-    XML_ParserFree(parser);
 
     return ret;
 }
