@@ -37,6 +37,8 @@ G_BEGIN_DECLS
 #define XML_BUFFER_SIZE         8192
 #define CONTENT_REALLOC_STEP    256
 
+typedef xmlSAXHandler XmlParser;
+
 /** Structure used for elements in the state switches in XML parsers
  */
 typedef struct {
@@ -61,7 +63,7 @@ typedef struct {
     int     lcontent;   /*!< The content length */
     int     acontent;   /*!< Available bytes in the content */
 
-    XML_Parser      *parser;    /*!< The parser */
+    XmlParser      *parser;    /*!< The parser */
     LrStatesSwitch **swtab;    /*!< Pointers to statesswitches table */
     unsigned int    *sbtab;     /*!< stab[to_state] = from_state */
 
@@ -114,7 +116,7 @@ lr_xml_parser_data_free(LrParserData *pd);
 /** XML character handler
  */
 void XMLCALL
-lr_char_handler(void *pdata, const XML_Char *s, int len);
+lr_char_handler(void *pdata, const xmlChar *s, int len);
 
 /** Find attribute in list of attributes.
  * @param name      Attribute name.
@@ -124,6 +126,10 @@ lr_char_handler(void *pdata, const XML_Char *s, int len);
 static inline const char *
 lr_find_attr(const char *name, const char **attr)
 {
+    /* attr can be NULL when using libxml2 */
+    if (!attr)
+        return NULL;
+
     while (*attr) {
         if (!strcmp(name, *attr))
             return attr[1];
@@ -153,7 +159,7 @@ lr_xml_parser_strtoll(LrParserData *pd,
 /** Generic parser.
  */
 gboolean
-lr_xml_parser_generic(XML_Parser parser,
+lr_xml_parser_generic(XmlParser parser,
                       LrParserData *pd,
                       int fd,
                       GError **err);
