@@ -43,14 +43,23 @@ Development files for librepo.
 %package -n python2-%{name}
 Summary:        Python bindings for the librepo library
 %{?python_provide:%python_provide python2-%{name}}
-BuildRequires:  pygpgme
-BuildRequires:  python2-devel
-%if %{with tests}
-BuildRequires:  python-flask
-BuildRequires:  python-nose
-%endif
+%if 0%{?rhel} && 0%{?rhel} <= 7
 BuildRequires:  python-sphinx
+BuildRequires:  pygpgme
+%else
+BuildRequires:  python2-sphinx
+BuildRequires:  python2-pygpgme
+%endif
+BuildRequires:  python2-devel
+%if (0%{?rhel} && 0%{?rhel} <= 7) || (0%{?fedora} && 0%{?fedora} <= 27)
 BuildRequires:  pyxattr
+%else
+BuildRequires:  python2-pyxattr
+%endif
+%if %{with tests}
+BuildRequires:  python2-flask
+BuildRequires:  python2-nose
+%endif
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Conflicts:      python2-dnf < %{dnf_conflict}
 
@@ -121,7 +130,6 @@ popd
 %endif
 
 %post -p /sbin/ldconfig
-
 %postun -p /sbin/ldconfig
 
 %files
