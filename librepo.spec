@@ -22,11 +22,11 @@ BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  check-devel
 BuildRequires:  doxygen
-BuildRequires:  expat-devel
 BuildRequires:  glib2-devel >= 2.26.0
 BuildRequires:  gpgme-devel
 BuildRequires:  libattr-devel
 BuildRequires:  libcurl-devel >= 7.19.0
+BuildRequires:  libxml2-devel
 BuildRequires:  openssl-devel
 
 %description
