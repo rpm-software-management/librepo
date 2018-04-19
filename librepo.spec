@@ -11,7 +11,7 @@
 
 Name:           librepo
 Version:        1.9.0
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Repodata downloading library
 
 License:        LGPLv2+
