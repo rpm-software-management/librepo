@@ -25,9 +25,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <curl/curl.h>
+#include <zck.h>
 
 #include "checksum.h"
 #include "xmlparser.h"
+#include "downloadtarget.h"
 
 G_BEGIN_DECLS
 
@@ -199,6 +201,90 @@ gboolean
 lr_key_file_save_to_file(GKeyFile *key_file,
                          const gchar *filename,
                          GError **error);
+
+/** Get LrChecksumType that corresponds to zck_hash
+ * @param zck_checksum_type  zck_hash value
+ * @return checksum_type     corresponding LrChecksumType value
+ *
+ * Return value will be LR_CHECKSUM_UNKNOWN if zck_checksum_type isn't available
+ * as a LrChecksumType
+ */
+LrChecksumType
+lr_checksum_from_zck_hash(zck_hash zck_checksum_type);
+
+/** Get zck_hash that corresponds to LrChecksumType
+ * @param checksum_type       LrChecksumType value
+ * @return zck_checksum_type  corresponding zck_hash value
+ *
+ * Return value will be ZCK_HASH_UNKNOWN if checksum_type isn't available as a
+ * zck_hash
+ */
+zck_hash
+lr_zck_hash_from_lr_checksum(LrChecksumType checksum_type);
+
+/** Base function for initializing zchunk file for reading while verifying
+ *  header checksum
+ * @param checksum            header checksum
+ * @param checksum_type       header checksum type
+ * @param zck_header_size     header size
+ * @param fd                  file descriptor to read from
+ * @return zck                zchunk context opened for reading
+ *
+ * Return value will be NULL if the header checksum doesn't match the provided
+ * checksum, is invalid, or if the header can't be read
+ */
+zckCtx *
+lr_zck_init_read_base(const char *checksum, LrChecksumType checksum_type,
+                      gint64 zck_header_size, int fd, GError **err);
+
+/** Base function for checking whether zchunk file has valid header checksum
+ * @param checksum            header checksum
+ * @param checksum_type       header checksum type
+ * @param zck_header_size     header size
+ * @param fd                  file descriptor to read from
+ * @return zck                zchunk context opened for reading
+ *
+ * Return value will be FALSE if the header checksum doesn't match the provided
+ * checksum, is invalid, or if the header can't be read
+ */
+gboolean
+lr_zck_valid_header_base(const char *checksum, LrChecksumType checksum_type,
+                         gint64 zck_header_size, int fd, GError **err);
+
+/** Initialize zchunk file for reading while verifying header checksum
+ * @param checksum            target containing checksum information
+ * @param fd                  file descriptor to read from
+ * @return zck                zchunk context opened for reading
+ *
+ * Return value will be NULL if the header checksum doesn't match the provided
+ * checksum, is invalid, or if the header can't be read
+ */
+zckCtx *
+lr_zck_init_read(LrDownloadTarget *target, char *filename, int fd, GError **err);
+
+/** Check whether zchunk file has valid header checksum
+ * @param checksum            target containing checksum information
+ * @param fd                  file descriptor to read from
+ * @return zck                zchunk context opened for reading
+ *
+ * Return value will be FALSE if the header checksum doesn't match the provided
+ * checksum, is invalid, or if the header can't be read
+ */
+gboolean
+lr_zck_valid_header(LrDownloadTarget *target, char *filename, int fd, GError **err);
+
+/** Recursively get list of all files in path that end with extension
+ * @param path                path to search
+ * @param extension           return files with this extension (including .)
+ * @param err                 GError **
+ * @return filelist           GSList* of files that have extension
+ *
+ * Return value will be NULL if no files match or there's an error.
+ * err will be set if there's an error
+ */
+
+GSList *
+lr_get_recursive_files(char *path, char *extension, GError **err);
 
 /** @} */
 

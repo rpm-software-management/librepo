@@ -216,6 +216,9 @@ struct _LrHandle {
     long ftpuseepsv; /*!<
         Use FTP EPSV (extended passive mode) mode */
 
+    gchar *cachedir; /*!<
+        Base cache dir for repositories */
+
     LrUrlVars *yumslist;
 };
 

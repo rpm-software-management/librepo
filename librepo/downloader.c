@@ -31,6 +31,7 @@
 #include <sys/xattr.h>
 #include <fcntl.h>
 #include <curl/curl.h>
+#include <zck.h>
 
 #include "downloader.h"
 #include "downloader_internal.h"
@@ -75,6 +76,21 @@ typedef enum {
         All headers which we were looking for are already found*/
 } LrHeaderCbState;
 
+/** Enum with zchunk file status */
+typedef enum {
+    LR_ZCK_DL_HEADER_CK, /*!<
+        The zchunk file is waiting to check whether the header is available
+        locally. */
+    LR_ZCK_DL_HEADER, /*!<
+        The zchunk file is waiting to download the header */
+    LR_ZCK_DL_BODY_CK, /*!<
+        The zchunk file is waiting to check what chunks are available locally */
+    LR_ZCK_DL_BODY, /*!<
+        The zchunk file is waiting for its body to be downloaded. */
+    LR_ZCK_DL_FINISHED /*!<
+        The zchunk file is finished being downloaded. */
+} LrZckState;
+
 typedef struct {
     LrHandle *handle; /*!<
         Handle (could be NULL) */
@@ -98,6 +114,9 @@ typedef struct {
         How many transfers was finished successfully from the mirror. */
     int failed_transfers; /*!<
         How many transfers failed. */
+    int max_ranges; /*!<
+        Maximum ranges supported in a single request.  This will be automatically
+        adjusted when mirrors respond with 200 to a range request */
 } LrMirror;
 
 typedef struct {
@@ -157,6 +176,10 @@ typedef struct {
         Last cb return code. */
     struct curl_slist *curl_rqheaders; /*!<
         Extra headers for request. */
+    LrZckState zck_state; /*!<
+        Zchunk download status */
+    gboolean range_fail; ; /*!<
+        Whether range request failed. */
 } LrTarget;
 
 typedef struct {
@@ -346,6 +369,7 @@ lr_prepare_lrmirrors(GSList *list, LrTarget *target)
 
             LrMirror *mirror = lr_malloc0(sizeof(*mirror));
             mirror->mirror = imirror;
+            mirror->max_ranges = 256;
             lrmirrors = g_slist_append(lrmirrors, mirror);
         }
     }
@@ -379,6 +403,7 @@ lr_progresscb(void *ptr,
 
     if (target->state != LR_DS_RUNNING)
         return ret;
+
     if (!target->target->progresscb)
         return ret;
 
@@ -393,6 +418,20 @@ lr_progresscb(void *ptr,
 
 #define STRLEN(s) (sizeof(s)/sizeof(s[0]) - 1)
 
+/* Fail if dl_ctx->fail_no_ranges is set and we get a 200 response */
+size_t lr_zckheadercb(char *b, size_t l, size_t c, void *dl_v) {
+    LrTarget *target = (LrTarget *)dl_v;
+    assert(target && target->target);
+
+    long code = -1;
+    curl_easy_getinfo(target->curl_handle, CURLINFO_RESPONSE_CODE, &code);
+    if(code == 200) {
+        g_debug("%s: Too many ranges were attempted in one download", __func__);
+        target->range_fail = 1;
+        return 0;
+    }
+    return zck_header_cb(b, l, c, target->target->zck_dl);
+}
 
 /** Header callback for CURL handles.
  * It parses HTTP and FTP headers and try to find length of the content
@@ -414,6 +453,9 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
         return ret;
     }
 
+    if(lrtarget->target->is_zchunk)
+        return lr_zckheadercb(ptr, size, nmemb, userdata);
+
     char *header = g_strstrip(g_strndup(ptr, size*nmemb));
     gint64 expected = lrtarget->target->expectedsize;
 
@@ -421,7 +463,8 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
         if (lrtarget->protocol == LR_PROTOCOL_HTTP
             && g_str_has_prefix(header, "HTTP/")) {
             // Header of a HTTP protocol
-            if (g_strrstr(header, "200") && !(
+            if ((g_strrstr(header, "200") ||
+                 g_strrstr(header, "206")) && !(
                             g_strrstr(header, "connection established") ||
                             g_strrstr(header, "Connection established") ||
                             g_strrstr(header, "Connection Established")
@@ -497,6 +540,18 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
 }
 
 
+/** Zchunk write callback for CURL handles.
+ */
+size_t
+lr_zck_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    LrTarget *target = (LrTarget *) userdata;
+    if(target->zck_state == LR_ZCK_DL_HEADER)
+        return zck_write_zck_header_cb(ptr, size, nmemb, target->target->zck_dl);
+    else
+        return zck_write_chunk_cb(ptr, size, nmemb, target->target->zck_dl);
+}
+
 /** Write callback for CURL handles.
  * This callback handles situation when an user wants only specified
  * byte range of the target file.
@@ -507,6 +562,9 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     size_t cur_written_expected = nmemb;
     size_t cur_written;
     LrTarget *target = (LrTarget *) userdata;
+    if(target->target->is_zchunk)
+        return lr_zck_writecb(ptr, size, nmemb, userdata);
+
     gint64 all = size * nmemb;  // Total number of bytes from curl
     gint64 range_start = target->target->byterangestart;
     gint64 range_end = target->target->byterangeend;
@@ -886,6 +944,339 @@ remove_librepo_xattr(int fd)
     fremovexattr(fd, XATTR_LIBREPO);
 }
 
+gboolean
+lr_zck_clear_header(LrTarget *target, GError **err)
+{
+    assert(target && target->f && target->target && target->target->path);
+
+    int fd = fileno(target->f);
+    lseek(fd, 0, SEEK_END);
+    if(ftruncate(fd, 0) < 0) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                    "Unable to truncate %s", target->target->path);
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
+static gboolean
+find_local_zck_header(LrTarget *target, GError **err)
+{
+    zckCtx *zck = NULL;
+    gboolean found = FALSE;
+    int fd = fileno(target->f);
+
+    if(target->target->handle->cachedir) {
+        g_debug("%s: Cache directory: %s\n", __func__,
+                target->handle->cachedir);
+        GError *tmp_err = NULL;
+        GSList *filelist =
+            lr_get_recursive_files(target->handle->cachedir, ".zck",
+                                   &tmp_err);
+        if(tmp_err) {
+            g_debug("%s: Error reading cache directory %s: %s", __func__,
+                    target->handle->cachedir, tmp_err->message);
+            g_clear_error(&tmp_err);
+        }
+
+        char *uf = g_build_path("/", target->handle->destdir,
+                                target->target->path, NULL);
+
+        for(GSList *file = filelist; file && !found; file = g_slist_next(file)) {
+            char *cf = (char *)file->data;
+
+            /* Don't try to read from self */
+            if (strcmp(cf, uf) == 0)
+                continue;
+
+            int chk_fd = open(file->data, O_RDONLY);
+            if (chk_fd < 0) {
+                g_debug("%s: Unable to open %s: %s", __func__, cf,
+                        g_strerror(errno));
+                continue;
+            }
+            if(lr_zck_valid_header(target->target, (char *)file->data, chk_fd,
+                                   &tmp_err)) {
+                g_debug("%s: Found file with same header at %s", __func__,
+                        (char *)file->data);
+                lseek(fd, 0, SEEK_SET);
+                lseek(chk_fd, 0, SEEK_SET);
+                if(lr_copy_content(chk_fd, fd) == 0 &&
+                   ftruncate(fd, lseek(chk_fd, 0, SEEK_END)) >= 0 &&
+                   lseek(fd, 0, SEEK_SET) == 0 &&
+                   (zck = lr_zck_init_read(target->target, (char *)file->data,
+                                           chk_fd, &tmp_err))) {
+                    found = TRUE;
+                    break;
+                } else {
+                    g_debug("%s: Error copying file", __func__);
+                    g_clear_error(&tmp_err);
+                }
+            } else {
+                g_clear_error(&tmp_err);
+            }
+            close(chk_fd);
+        }
+        g_slist_free_full(filelist, free);
+        free(uf);
+    } else {
+        g_debug("%s: No cache directory set", __func__);
+    }
+
+    if(found) {
+        zckCtx *old_zck = zck_dl_get_zck(target->target->zck_dl);
+        zck_free(&old_zck);
+        if(!zck_dl_set_zck(target->target->zck_dl, zck)) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "Unable to setup zchunk download context for %s",
+                        target->target->path);
+            return FALSE;
+        }
+        target->zck_state = LR_ZCK_DL_BODY_CK;
+        return TRUE;
+    }
+    target->zck_state = LR_ZCK_DL_HEADER;
+    return TRUE;
+}
+
+static gboolean
+prep_zck_header(LrTarget *target, GError **err)
+{
+    zckCtx *zck = NULL;
+    int fd = fileno(target->f);
+    GError *tmp_err = NULL;
+
+    if(lr_zck_valid_header(target->target, target->target->path, fd,
+                           &tmp_err)) {
+        zck = lr_zck_init_read(target->target, target->target->path,
+                               fd, &tmp_err);
+        if(zck) {
+            if(!zck_dl_set_zck(target->target->zck_dl, zck)) {
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                            "Unable to setup zchunk download context");
+                return FALSE;
+            }
+            target->zck_state = LR_ZCK_DL_BODY_CK;
+            return TRUE;
+        } else {
+            g_debug("%s: Error reading validated header: %s", __func__,
+                    tmp_err->message);
+            g_clear_error(&tmp_err);
+        }
+    } else {
+        g_clear_error(&tmp_err);
+    }
+
+    lseek(fd, 0, SEEK_SET);
+    zck = zck_init_adv_read(fd);
+    if(zck == NULL) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                    "Unable to initialize zchunk file %s for reading",
+                    target->target->path);
+        return FALSE;
+    }
+
+    if(target->target->zck_dl) {
+        zckCtx *old_zck = zck_dl_get_zck(target->target->zck_dl);
+        zck_free(&old_zck);
+        if(!zck_dl_set_zck(target->target->zck_dl, zck)) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "Unable to setup zchunk download context for %s",
+                        target->target->path);
+            return FALSE;
+        }
+    } else {
+        target->target->zck_dl = zck_dl_init(zck);
+    }
+    target->target->range = zck_get_range(0, target->target->zck_header_size-1);
+    target->target->resume = 0;
+    target->zck_state = LR_ZCK_DL_HEADER;
+    return lr_zck_clear_header(target, err);
+}
+
+static gboolean
+find_local_zck_chunks(LrTarget *target, GError **err)
+{
+    assert(!err || *err == NULL);
+    assert(target && target->target && target->target->zck_dl);
+
+    zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
+    int fd = fileno(target->f);
+    if(zck && fd != zck_get_fd(zck))
+        zck_set_fd(zck, fd);
+
+    if(target->target->handle->cachedir) {
+        g_debug("%s: Cache directory: %s\n", __func__,
+                target->handle->cachedir);
+        GError *tmp_err = NULL;
+        GSList *filelist =
+            lr_get_recursive_files(target->handle->cachedir, ".zck",
+                                   &tmp_err);
+        if(tmp_err) {
+            g_debug("%s: Error reading cache directory %s: %s", __func__,
+                    target->handle->cachedir, tmp_err->message);
+            g_clear_error(&tmp_err);
+        }
+
+        gboolean found = FALSE;
+        char *uf = g_build_path("/", target->handle->destdir,
+                                target->target->path, NULL);
+        for(GSList *file = filelist; file && !found; file = g_slist_next(file)) {
+            char *cf = (char *)file->data;
+
+            /* Don't try to read from self */
+            if (strcmp(cf, uf) == 0)
+                continue;
+
+            int chk_fd = open(file->data, O_RDONLY);
+            if (chk_fd < 0) {
+                g_debug("%s: Unable to open %s: %s", __func__, cf,
+                        g_strerror(errno));
+                continue;
+            }
+
+            zckCtx *zck_src = zck_init_read(chk_fd);
+            if(zck_src == NULL) {
+                close(chk_fd);
+                continue;
+            }
+
+            if(!zck_copy_chunks(zck_src, zck)) {
+                g_debug("%s: Error copying chunks from %s to %s", __func__, cf, uf);
+                zck_free(&zck_src);
+                close(chk_fd);
+                continue;
+            }
+            zck_free(&zck_src);
+            close(chk_fd);
+        }
+        g_slist_free_full(filelist, free);
+        free(uf);
+    }
+    target->zck_state = LR_ZCK_DL_BODY;
+    return TRUE;
+}
+
+static gboolean
+prep_zck_body(LrTarget *target, GError **err)
+{
+    zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
+    int fd = fileno(target->f);
+    if(zck && fd != zck_get_fd(zck))
+        zck_set_fd(zck, fd);
+
+    zck_reset_failed_chunks(zck);
+    if(zck_missing_chunks(zck) == 0) {
+        target->zck_state = LR_ZCK_DL_FINISHED;
+        return TRUE;
+    }
+
+    lseek(fd, 0, SEEK_SET);
+
+    g_debug("%s: Chunks that still need to be downloaded: %i", __func__,
+            zck_missing_chunks(zck));
+    zck_dl_reset(target->target->zck_dl);
+    zckRange *range = zck_get_missing_range(zck, target->mirror->max_ranges);
+    zckRange *old_range = zck_dl_get_range(target->target->zck_dl);
+    if(old_range)
+        zck_range_free(&old_range);
+    if(!zck_dl_set_range(target->target->zck_dl, range)) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                    "Unable to set range for zchunk downloader");
+        return FALSE;
+    }
+    if(target->target->range)
+        free(target->target->range);
+    target->target->range = zck_get_range_char(range);
+    target->target->expectedsize = 1;
+    target->zck_state = LR_ZCK_DL_BODY;
+    return TRUE;
+}
+
+static gboolean
+check_zck(LrTarget *target, GError **err)
+{
+    assert(!err || *err == NULL);
+    assert(target && target->f && target->target);
+
+    if(target->target->zck_dl == NULL) {
+        target->target->zck_dl = zck_dl_init(NULL);
+        if(target->target->zck_dl == NULL) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "Unable to setup zchunk download context");
+            return FALSE;
+        }
+        target->zck_state = LR_ZCK_DL_HEADER_CK;
+    }
+
+    /* Reset range fail flag */
+    target->range_fail = FALSE;
+
+    /* If we've finished, then there's no point in checking any further */
+    if(target->zck_state == LR_ZCK_DL_FINISHED)
+        return TRUE;
+
+    zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
+    if (!zck) {
+        target->zck_state = LR_ZCK_DL_HEADER_CK;
+        g_debug("%s: Unable to read zchunk header: %s", __func__, target->target->path);
+        if(!find_local_zck_header(target, err))
+            return FALSE;
+    }
+    zck = zck_dl_get_zck(target->target->zck_dl);
+
+    if(target->zck_state == LR_ZCK_DL_HEADER) {
+        if(!prep_zck_header(target, err))
+            return FALSE;
+        if(target->zck_state == LR_ZCK_DL_HEADER)
+            return TRUE;
+    }
+    zck = zck_dl_get_zck(target->target->zck_dl);
+
+    if(target->zck_state == LR_ZCK_DL_BODY_CK) {
+        g_debug("%s: Checking zchunk data checksum: %s", __func__, target->target->path);
+        // Check whether file has been fully downloaded
+        int cks_good = zck_find_valid_chunks(zck);
+        if(!cks_good) { // Error while validating checksums
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "%s: Error validating zchunk file: %s", __func__,
+                        target->target->path);
+            return FALSE;
+        }
+
+        if(cks_good == 1) {  // All checksums good
+            g_debug("%s: File is complete", __func__);
+            if(target->target->zck_dl)
+                zck_dl_free(&(target->target->zck_dl));
+            target->zck_state = LR_ZCK_DL_FINISHED;
+            return TRUE;
+        }
+
+        g_debug("%s: Downloading rest of zchunk body: %s", __func__, target->target->path);
+        // Download the remaining checksums
+        zck_reset_failed_chunks(zck);
+        if(!find_local_zck_chunks(target, err))
+            return FALSE;
+
+        cks_good = zck_find_valid_chunks(zck);
+        if(!cks_good) { // Error while validating checksums
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "%s: Error validating zchunk file: %s", __func__,
+                        target->target->path);
+            return FALSE;
+        }
+
+        if(cks_good == 1) {  // All checksums good
+            if(target->target->zck_dl)
+                zck_dl_free(&(target->target->zck_dl));
+            target->zck_state = LR_ZCK_DL_FINISHED;
+            return TRUE;
+        }
+    }
+    zck_reset_failed_chunks(zck);
+    return prep_zck_body(target, err);
+}
 
 /** Prepares next transfer
  */
@@ -896,6 +1287,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     char *full_url = NULL;
     LrProtocol protocol = LR_PROTOCOL_OTHER;
     gboolean ret;
+    GError *tmp_err = NULL;
 
     assert(dd);
     assert(!err || *err == NULL);
@@ -970,7 +1362,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     } else {
         // Use supplied filename
         int open_flags = O_CREAT|O_TRUNC|O_RDWR;
-        if (target->resume)
+        if (target->resume || target->target->is_zchunk)
             open_flags &= ~O_TRUNC;
 
         fd = open(target->target->fn, open_flags, 0666);
@@ -995,6 +1387,29 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     target->f = f;
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
+
+    // If file is zchunk, prep it
+    if(target->target->is_zchunk && !check_zck(target, &tmp_err)) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                    "Unable to initialize zchunk file %s",
+                    target->target->path);
+        curl_easy_cleanup(h);
+        return FALSE;
+    }
+
+    // If zchunk is finished, we're done
+    if(target->target->is_zchunk &&
+       target->zck_state == LR_ZCK_DL_FINISHED) {
+        g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
+        target->state = LR_DS_FINISHED;
+        curl_easy_cleanup(h);
+        g_free(target->headercb_interrupt_reason);
+        target->headercb_interrupt_reason = NULL;
+        fclose(target->f);
+        target->f = NULL;
+        lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
+        return TRUE;
+    }
 
     // Allow resume only for files that were originally being
     // downloaded by librepo
@@ -1051,11 +1466,18 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     add_librepo_xattr(fd, target->target->fn);
 
     if (target->target->byterangestart > 0) {
-        assert(!target->target->resume);
+        assert(!target->target->resume && !target->target->range);
         g_debug("%s: byterangestart is specified -> resume is set to %"
                 G_GINT64_FORMAT, __func__, target->target->byterangestart);
         c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
                                 (curl_off_t) target->target->byterangestart);
+        assert(c_rc == CURLE_OK);
+    }
+
+    // Set range if user specified one
+    if (target->target->range) {
+        assert(!target->target->resume && !target->target->byterangestart);
+        c_rc = curl_easy_setopt(h, CURLOPT_RANGE, target->target->range);
         assert(c_rc == CURLE_OK);
     }
 
@@ -1162,7 +1584,7 @@ set_max_speeds_to_transfers(LrDownload *dd, GError **err)
         const guint num_running_downloads_from_repo = GPOINTER_TO_UINT(value);
 
         // Calculate a max speed (rounded up) per target (for repo)
-        const gint64 single_target_speed = 
+        const gint64 single_target_speed =
             (repo->maxspeed + (num_running_downloads_from_repo - 1)) / num_running_downloads_from_repo;
 
         for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
@@ -1267,6 +1689,15 @@ check_finished_transfer_status(CURLMsg *msg,
             g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
                         "Interrupted by header callback: %s",
                         target->headercb_interrupt_reason);
+        } else if (target->range_fail) {
+            zckRange *range = zck_dl_get_range(target->target->zck_dl);
+            int range_count = zck_get_range_count(range);
+            if(target->mirror->max_ranges >= range_count) {
+                target->mirror->max_ranges = range_count / 2;
+                g_debug("%s: Setting mirror's max_ranges to %i", __func__,
+                        target->mirror->max_ranges);
+            }
+            return TRUE;
         } else {
             // There was a CURL error
             g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
@@ -1657,18 +2088,49 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         fflush(target->f);
         fd = fileno(target->f);
-        ret = check_finished_trasfer_checksum(fd,
-                                              target->target->checksums,
-                                              &matches,
-                                              &transfer_err,
-                                              &tmp_err);
-        if (!ret) { // Error
-            g_propagate_prefixed_error(err, tmp_err, "Downloading from %s"
-                    "was successful but error encountered while "
-                    "checksuming: ", effective_url);
-            return FALSE;
+        if (target->target->is_zchunk) {
+            zckCtx *zck = NULL;
+            if (target->zck_state == LR_ZCK_DL_HEADER) {
+                if(!lr_zck_valid_header(target->target, target->target->path,
+                                        fd, &transfer_err))
+                    goto transfer_error;
+            } else if(target->zck_state == LR_ZCK_DL_BODY) {
+                zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
+                if(zck == NULL) {
+                    g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                                "Unable to get zchunk file from download context");
+                    goto transfer_error;
+                }
+                if(zck_failed_chunks(zck) == 0 && zck_missing_chunks(zck) == 0)
+                    target->zck_state = LR_ZCK_DL_FINISHED;
+            }
+            if(target->zck_state == LR_ZCK_DL_FINISHED) {
+                zck = lr_zck_init_read(target->target, target->target->path, fd,
+                                       &transfer_err);
+                if(!zck)
+                    goto transfer_error;
+                if(!zck_validate_checksums(zck)) {
+                    zck_free(&zck);
+                    g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_BADCHECKSUM,
+                                "At least one of the zchunk checksums doesn't match in %s",
+                                effective_url);
+                    goto transfer_error;
+                }
+                zck_free(&zck);
+            }
+        } else {
+            ret = check_finished_trasfer_checksum(fd,
+                                                  target->target->checksums,
+                                                  &matches,
+                                                  &transfer_err,
+                                                  &tmp_err);
+            if (!ret) { // Error
+                g_propagate_prefixed_error(err, tmp_err, "Downloading from %s"
+                        "was successful but error encountered while "
+                        "checksuming: ", effective_url);
+                return FALSE;
+            }
         }
-
         if (transfer_err)  // Checksum doesn't match
             goto transfer_error;
 
@@ -1740,8 +2202,8 @@ transfer_error:
             if (!fatal_error &&
                 !complete_url_in_path &&
                 !target->target->baseurl)
-            {   
-              
+            {
+
                 // Temporary error (serious_error) during download occured and
                 // another transfers are running or there are successful transfers
                 // and fewer failed transfers than tried parallel connections. It may be mirror is OK
@@ -1775,7 +2237,7 @@ transfer_error:
                       return FALSE;
                 }
             }
-            
+
             if (!retry) {
                 // No more mirrors to try or baseurl used or fatal error
                 g_debug("%s: No more retries (tried: %d)",
@@ -1816,34 +2278,47 @@ transfer_error:
 
         } else {
             // No error encountered, transfer finished successfully
-            target->state = LR_DS_FINISHED;
+            if(target->target->is_zchunk &&
+               target->zck_state != LR_ZCK_DL_FINISHED) {
+                // If we haven't finished downloading zchunk file, setup next
+                // download
+                target->state           = LR_DS_WAITING;
+                target->original_offset = -1;
+                target->target->rcode   = LRE_UNFINISHED;
+                target->target->err     = "Not finished";
+                target->handle          = target->target->handle;
+                target->tried_mirrors = g_slist_remove(target->tried_mirrors, target->mirror);
+            } else {
+                target->state = LR_DS_FINISHED;
+
+                // Remove xattr that states that the file is being downloaded
+                // by librepo, because the file is now completly downloaded
+                // and the xattr is not needed (is is useful only for resuming)
+                remove_librepo_xattr(target->target->fd);
+
+                // Call end callback
+                LrEndCb end_cb = target->target->endcb;
+                if (end_cb) {
+                    int rc = end_cb(target->target->cbdata,
+                                    LR_TRANSFER_SUCCESSFUL,
+                                    NULL);
+                    if (rc == LR_CB_ERROR) {
+                        target->cb_return_code = LR_CB_ERROR;
+                        g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                                "from end callback", __func__);
+                        g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
+                                    LRE_CBINTERRUPTED,
+                                    "Interupted by LR_CB_ERROR from end callback");
+                    }
+                }
+                if (target->mirror)
+                    lr_downloadtarget_set_usedmirror(target->target,
+                                                     target->mirror->mirror->url);
+            }
+
             lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
-            if (target->mirror)
-                lr_downloadtarget_set_usedmirror(target->target,
-                                                 target->mirror->mirror->url);
             lr_downloadtarget_set_effectiveurl(target->target,
                                                effective_url);
-
-            // Remove xattr that states that the file is being downloaded
-            // by librepo, because the file is now completly downloaded
-            // and the xattr is not needed (is is useful only for resuming)
-            remove_librepo_xattr(target->target->fd);
-
-            // Call end callback
-            LrEndCb end_cb = target->target->endcb;
-            if (end_cb) {
-                int rc = end_cb(target->target->cbdata,
-                                LR_TRANSFER_SUCCESSFUL,
-                                NULL);
-                if (rc == LR_CB_ERROR) {
-                    target->cb_return_code = LR_CB_ERROR;
-                    g_debug("%s: Downloading was aborted by LR_CB_ERROR "
-                            "from end callback", __func__);
-                    g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
-                                LRE_CBINTERRUPTED,
-                                "Interupted by LR_CB_ERROR from end callback");
-                }
-            }
         }
 
         lr_free(effective_url);
@@ -2198,7 +2673,7 @@ lr_download_target(LrDownloadTarget *target,
 gboolean
 lr_download_url(LrHandle *lr_handle, const char *url, int fd, GError **err)
 {
-    return lr_yum_download_url(lr_handle, url, fd, FALSE, err);
+    return lr_yum_download_url(lr_handle, url, fd, FALSE, FALSE, err);
 }
 
 int
