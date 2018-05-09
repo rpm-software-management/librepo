@@ -123,6 +123,8 @@ typedef enum {
     LRE_KEYFILE, /*!<
         (40) Key file error (unknown encoding, ill-formed, file not found,
         key/group not found, ...) */
+    LRE_ZCK, /*!<
+        (41) Zchunk error (error reading zchunk file, ...) */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
 } LrRc; /*!< Return codes */

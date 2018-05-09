@@ -37,6 +37,7 @@
 #include "version.h"
 #include "metalink.h"
 #include "cleanup.h"
+#include "yum.h"
 
 #define DIR_SEPARATOR   "/"
 #define ENV_DEBUG       "LIBREPO_DEBUG"
@@ -470,4 +471,212 @@ lr_key_file_save_to_file(GKeyFile *keyfile,
         return FALSE;
 
     return g_file_set_contents(filename, content, length, err);
+}
+
+LrChecksumType
+lr_checksum_from_zck_hash(zck_hash zck_checksum_type)
+{
+    switch (zck_checksum_type) {
+        case ZCK_HASH_SHA1:
+            return LR_CHECKSUM_SHA1;
+        case ZCK_HASH_SHA256:
+            return LR_CHECKSUM_SHA256;
+        default:
+            return LR_CHECKSUM_UNKNOWN;
+    }
+}
+
+zck_hash
+lr_zck_hash_from_lr_checksum(LrChecksumType checksum_type)
+{
+    switch (checksum_type) {
+        case LR_CHECKSUM_SHA1:
+            return ZCK_HASH_SHA1;
+        case LR_CHECKSUM_SHA256:
+            return ZCK_HASH_SHA256;
+        default:
+            return ZCK_HASH_UNKNOWN;
+    }
+}
+
+static zckCtx *
+init_zck_read(const char *checksum, LrChecksumType checksum_type,
+              gint64 zck_header_size, int fd, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    zckCtx *zck = zck_init_adv_read(fd);
+
+    zck_hash ct = lr_zck_hash_from_lr_checksum(checksum_type);
+    if(ct == ZCK_HASH_UNKNOWN) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Zchunk doesn't support checksum type %i",
+                    checksum_type);
+        free(zck);
+        return NULL;
+    }
+    if(!zck_set_ioption(zck, ZCK_VAL_HEADER_HASH_TYPE, ct)) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Error setting validation checksum type");
+        free(zck);
+        return NULL;
+    }
+    if(!zck_set_ioption(zck, ZCK_VAL_HEADER_LENGTH, zck_header_size)) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Error setting header size");
+        free(zck);
+        return NULL;
+    }
+    if(!zck_set_soption(zck, ZCK_VAL_HEADER_DIGEST, checksum,
+                        strlen(checksum))) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Unable to set validation checksum: %s",
+                    checksum);
+        free(zck);
+        return NULL;
+    }
+    return zck;
+}
+
+zckCtx *
+lr_zck_init_read_base(const char *checksum, LrChecksumType checksum_type,
+                      gint64 zck_header_size, int fd, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    lseek(fd, 0, SEEK_SET);
+    zckCtx *zck = init_zck_read(checksum, checksum_type, zck_header_size, fd, err);
+    if(zck == NULL)
+        return NULL;
+
+    if(!zck_read_lead(zck)) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Unable to read zchunk lead");
+        zck_free(&zck);
+        return NULL;
+    }
+    if(!zck_read_header(zck)) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Unable to read zchunk header");
+        zck_free(&zck);
+        return NULL;
+    }
+    return zck;
+}
+
+gboolean
+lr_zck_valid_header_base(const char *checksum, LrChecksumType checksum_type,
+                         gint64 zck_header_size, int fd, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    lseek(fd, 0, SEEK_SET);
+    zckCtx *zck = init_zck_read(checksum, checksum_type, zck_header_size, fd, err);
+    if(zck == NULL)
+        return FALSE;
+
+    if(!zck_validate_lead(zck)) {
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Unable to read zchunk lead");
+        zck_free(&zck);
+        return FALSE;
+    }
+    zck_free(&zck);
+    return TRUE;
+}
+
+zckCtx *
+lr_zck_init_read(LrDownloadTarget *target, char *filename, int fd, GError **err)
+{
+    zckCtx *zck = NULL;
+    gboolean found = FALSE;
+    for(GSList *cksum = target->checksums; cksum; cksum = g_slist_next(cksum)) {
+        GError *tmp_err = NULL;
+        LrDownloadTargetChecksum *ck =
+            (LrDownloadTargetChecksum*)(cksum->data);
+        g_debug("Checking checksum: %i: %s", ck->type, ck->value);
+        zck = lr_zck_init_read_base(ck->value, ck->type, target->zck_header_size,
+                                    fd, &tmp_err);
+        if(zck == NULL) {
+            g_debug("%s: Didn't find matching header in %s: %s", __func__,
+                    filename, tmp_err->message);
+            g_clear_error(&tmp_err);
+            continue;
+        }
+        g_debug("%s: Found matching header in %s", __func__, filename);
+        found = TRUE;
+        break;
+    }
+    if(!found)
+        g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
+                    "Zchunk header checksum didn't match expected checksum");
+    return zck;
+}
+
+gboolean
+lr_zck_valid_header(LrDownloadTarget *target, char *filename, int fd, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    for(GSList *cksum = target->checksums; cksum; cksum = g_slist_next(cksum)) {
+        GError *tmp_err = NULL;
+        LrDownloadTargetChecksum *ck =
+            (LrDownloadTargetChecksum*)(cksum->data);
+        if(lr_zck_valid_header_base(ck->value, ck->type, target->zck_header_size,
+                                    fd, &tmp_err)) {
+            return TRUE;
+        }
+        g_clear_error(&tmp_err);
+    }
+    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                "%s's zchunk header doesn't match", filename);
+    return FALSE;
+}
+
+gboolean
+lr_get_recursive_files_rec(char *path, char *extension, GSList **filelist,
+                           GError **err)
+{
+    assert(!err || *err == NULL);
+    assert(filelist);
+
+    GDir *d = g_dir_open(path, 0, err);
+    if(d == NULL)
+        return FALSE;
+
+    const char *file = NULL;
+    while((file = g_dir_read_name(d))) {
+        GError *tmp_err = NULL;
+
+        char *fullpath = g_build_path("/", path, file, NULL);
+        if(g_file_test(fullpath, G_FILE_TEST_IS_DIR)) {
+            lr_get_recursive_files_rec(fullpath, extension, filelist, &tmp_err);
+            if(tmp_err) {
+                g_debug("%s: Unable to read directory %s: %s\n", __func__,
+                        fullpath, tmp_err->message);
+                g_clear_error(&tmp_err);
+            }
+            g_free(fullpath);
+        } else if(g_file_test(fullpath, G_FILE_TEST_IS_REGULAR) &&
+                  g_str_has_suffix(fullpath, extension)) {
+            *filelist = g_slist_prepend(*filelist, fullpath);
+        } else {
+            g_free(fullpath);
+        }
+    }
+    g_dir_close(d);
+    return TRUE;
+}
+
+GSList *
+lr_get_recursive_files(char *path, char *extension, GError **err)
+{
+    GSList *filelist = NULL;
+    assert(!err || *err == NULL);
+
+    if(!lr_get_recursive_files_rec(path, extension, &filelist, err)) {
+        g_slist_free_full(filelist, free);
+        return NULL;
+    }
+    return filelist;
 }

@@ -173,11 +173,15 @@ typedef enum {
     STATE_DISTRO,
     STATE_DATA,
     STATE_LOCATION,
+    STATE_ZCK_LOC,
     STATE_CHECKSUM,
     STATE_OPENCHECKSUM,
+    STATE_HEADERCHECKSUM,
     STATE_TIMESTAMP,
+    STATE_ZCK_TIMESTAMP,
     STATE_SIZE,
     STATE_OPENSIZE,
+    STATE_HEADERSIZE,
     STATE_DBVERSION,
     NUMSTATES
 } LrRepomdState;
@@ -188,22 +192,26 @@ typedef enum {
 * has a "file" element listed first, because it is more frequent
 * than a "version" element). */
 static LrStatesSwitch stateswitches[] = {
-    { STATE_START,      "repomd",           STATE_REPOMD,       0 },
-    { STATE_REPOMD,     "revision",         STATE_REVISION,     1 },
-    { STATE_REPOMD,     "repoid",           STATE_REPOID,       1 },
-    { STATE_REPOMD,     "tags",             STATE_TAGS,         0 },
-    { STATE_REPOMD,     "data",             STATE_DATA,         0 },
-    { STATE_TAGS,       "repo",             STATE_REPO,         1 },
-    { STATE_TAGS,       "content",          STATE_CONTENT,      1 },
-    { STATE_TAGS,       "distro",           STATE_DISTRO,       1 },
-    { STATE_DATA,       "location",         STATE_LOCATION,     0 },
-    { STATE_DATA,       "checksum",         STATE_CHECKSUM,     1 },
-    { STATE_DATA,       "open-checksum",    STATE_OPENCHECKSUM, 1 },
-    { STATE_DATA,       "timestamp",        STATE_TIMESTAMP,    1 },
-    { STATE_DATA,       "size",             STATE_SIZE,         1 },
-    { STATE_DATA,       "open-size",        STATE_OPENSIZE,     1 },
-    { STATE_DATA,       "database_version", STATE_DBVERSION,    1 },
-    { NUMSTATES,        NULL,               NUMSTATES,          0 }
+    { STATE_START,      "repomd",              STATE_REPOMD,         0 },
+    { STATE_REPOMD,     "revision",            STATE_REVISION,       1 },
+    { STATE_REPOMD,     "repoid",              STATE_REPOID,         1 },
+    { STATE_REPOMD,     "tags",                STATE_TAGS,           0 },
+    { STATE_REPOMD,     "data",                STATE_DATA,           0 },
+    { STATE_TAGS,       "repo",                STATE_REPO,           1 },
+    { STATE_TAGS,       "content",             STATE_CONTENT,        1 },
+    { STATE_TAGS,       "distro",              STATE_DISTRO,         1 },
+    { STATE_DATA,       "location",            STATE_LOCATION,       0 },
+    { STATE_DATA,       "zck-location",        STATE_ZCK_LOC,        0 },
+    { STATE_DATA,       "checksum",            STATE_CHECKSUM,       1 },
+    { STATE_DATA,       "open-checksum",       STATE_OPENCHECKSUM,   1 },
+    { STATE_DATA,       "zck-header-checksum", STATE_HEADERCHECKSUM, 1 },
+    { STATE_DATA,       "timestamp",           STATE_TIMESTAMP,      1 },
+    { STATE_DATA,       "zck-timestamp",       STATE_ZCK_TIMESTAMP,  1 },
+    { STATE_DATA,       "size",                STATE_SIZE,           1 },
+    { STATE_DATA,       "open-size",           STATE_OPENSIZE,       1 },
+    { STATE_DATA,       "zck-header-size",     STATE_HEADERSIZE,     1 },
+    { STATE_DATA,       "database_version",    STATE_DBVERSION,      1 },
+    { NUMSTATES,        NULL,                  NUMSTATES,            0 }
 };
 
 static void
@@ -318,6 +326,21 @@ lr_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar **xmlAttr
 
         break;
 
+    case STATE_ZCK_LOC:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        val = lr_find_attr("href", attr);
+        if (val)
+            pd->repomdrecord->zck_loc_href = g_string_chunk_insert(
+                                                    pd->repomdrecord->chunk,
+                                                    val);
+        else
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                    "Missing attribute \"href\" of a location element");
+
+        break;
+
     case STATE_CHECKSUM:
         assert(pd->repomd);
         assert(pd->repomdrecord);
@@ -350,9 +373,27 @@ lr_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar **xmlAttr
                                                     val);
         break;
 
+    case STATE_HEADERCHECKSUM:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        val = lr_find_attr("type", attr);
+        if (!val) {
+            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
+                    "Missing attribute \"type\" of an open checksum element");
+            break;
+        }
+
+        pd->repomdrecord->zck_header_checksum_type = g_string_chunk_insert(
+                                                     pd->repomdrecord->chunk,
+                                                     val);
+        break;
+
     case STATE_TIMESTAMP:
+    case STATE_ZCK_TIMESTAMP:
     case STATE_SIZE:
     case STATE_OPENSIZE:
+    case STATE_HEADERSIZE:
     case STATE_DBVERSION:
     default:
         break;
@@ -441,6 +482,7 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
         break;
 
     case STATE_LOCATION:
+    case STATE_ZCK_LOC:
         break;
 
     case STATE_CHECKSUM:
@@ -461,11 +503,28 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
                                             pd->content);
         break;
 
+    case STATE_HEADERCHECKSUM:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->zck_header_checksum = lr_string_chunk_insert(
+                                                pd->repomdrecord->chunk,
+                                                pd->content);
+        break;
+
     case STATE_TIMESTAMP:
         assert(pd->repomd);
         assert(pd->repomdrecord);
 
         pd->repomdrecord->timestamp = lr_xml_parser_strtoll(pd, pd->content, 0);
+        break;
+
+    case STATE_ZCK_TIMESTAMP:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->zck_timestamp = lr_xml_parser_strtoll(pd, pd->content,
+                                                                0);
         break;
 
     case STATE_SIZE:
@@ -480,6 +539,14 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
         assert(pd->repomdrecord);
 
         pd->repomdrecord->size_open = lr_xml_parser_strtoll(pd, pd->content, 0);
+        break;
+
+    case STATE_HEADERSIZE:
+        assert(pd->repomd);
+        assert(pd->repomdrecord);
+
+        pd->repomdrecord->size_header = lr_xml_parser_strtoll(pd, pd->content,
+                                                              0);
         break;
 
     case STATE_DBVERSION:

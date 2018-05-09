@@ -22,11 +22,13 @@
 #define __LR_DOWNLOADTARGET_H__
 
 #include <glib.h>
+#include <zck.h>
 
 #include "handle.h"
 #include "rcodes.h"
 #include "checksum.h"
 #include "types.h"
+#include "yum.h"
 
 G_BEGIN_DECLS
 
@@ -134,6 +136,19 @@ typedef struct {
         User data - This data are not used by lr_downloader or touched
         by lr_downloadtarget_free. */
 
+    // New options for zchunk - put at end to maintain API stability
+    gboolean is_zchunk; /*!<
+        Whether record is a zchunk file or not */
+
+    char *range; /*!<
+        Range string to download, overrides byterangestart and end */
+
+    zckDL *zck_dl; /*!<
+        Zchunk download context */
+
+    gint64 zck_header_size; /*!<
+        Zchunk header size */
+
 } LrDownloadTarget;
 
 /** Create new empty ::LrDownloadTarget.
@@ -182,6 +197,8 @@ typedef struct {
  *                          it is ignored. 0 is default.
  * @param no_cache          Tell proxy server that we don't want to use cache
  *                          for this request and we want fresh data.
+ * @param is_zchunk         This target is a zchunk file, so be ready to use
+ *                          different download code paths
  * @return                  New allocated target
  */
 LrDownloadTarget *
@@ -200,7 +217,9 @@ lr_downloadtarget_new(LrHandle *handle,
                       void *userdata,
                       gint64 byterangestart,
                       gint64 byterangeend,
-                      gboolean no_cache);
+                      char *range,
+                      gboolean no_cache,
+                      gboolean is_zchunk);
 
 /** Reset download data filled during downloading. E.g. Error messages,
  * effective URL, used mirror etc.

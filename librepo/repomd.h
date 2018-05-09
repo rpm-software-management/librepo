@@ -43,14 +43,19 @@ typedef struct {
 typedef struct {
     char *type;                 /*!< Type of record (e.g. "primary") */
     char *location_href;        /*!< Location href attribute */
+    char *zck_loc_href;         /*!< Zchunk location href attribute */
     char *location_base;        /*!< Location base attribute */
     char *checksum;             /*!< Checksum value */
     char *checksum_type;        /*!< Type of checksum */
     char *checksum_open;        /*!< Checksum of uncompressed file */
     char *checksum_open_type;   /*!< Type of checksum of uncompressed file */
+    char *zck_header_checksum;  /*!< Checksum of zchunk header */
+    char *zck_header_checksum_type; /*!< Type of checksum of zchunk header */
     gint64 timestamp;           /*!< File timestamp */
+    gint64 zck_timestamp;       /*!< Zchunk file timestamp */
     gint64 size;                /*!< File size */
     gint64 size_open;           /*!< Size of uncompressed file */
+    gint64 size_header;         /*!< Size of zchunk header */
     int db_version;             /*!< Version of database */
 
     GStringChunk *chunk;        /*!< String chunk */

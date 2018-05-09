@@ -52,6 +52,7 @@ TARGET_LINK_LIBRARIES(librepo
                         ${LIBCRYPTO_LIBRARIES}
                         ${GPGME_VANILLA_LIBRARIES}
                         ${GLIB2_LIBRARIES}
+                        ${ZCHUNKLIB}
                      )
 SET_TARGET_PROPERTIES(librepo PROPERTIES OUTPUT_NAME "repo")
 SET_TARGET_PROPERTIES(librepo PROPERTIES SOVERSION 0)

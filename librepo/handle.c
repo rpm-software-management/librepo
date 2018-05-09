@@ -109,6 +109,7 @@ lr_handle_init(void)
     handle->httpauthmethods = LRO_HTTPAUTHMETHODS_DEFAULT;
     handle->proxyauthmethods = LRO_PROXYAUTHMETHODS_DEFAULT;
     handle->ftpuseepsv = LRO_FTPUSEEPSV_DEFAULT;
+    handle->cachedir = NULL;
 
     return handle;
 }
@@ -146,6 +147,7 @@ lr_handle_free(LrHandle *handle)
     lr_handle_free_list(&handle->yumblist);
     lr_urlvars_free(handle->urlvars);
     lr_free(handle->gnupghomedir);
+    lr_free(handle->cachedir);
     lr_handle_free_list(&handle->httpheader);
     lr_free(handle);
 }
@@ -718,6 +720,11 @@ lr_handle_setopt(LrHandle *handle,
         c_rc = curl_easy_setopt(c_h, CURLOPT_FTP_USE_EPSV, handle->ftpuseepsv);
         break;
 
+    case LRO_CACHEDIR:
+        if (handle->cachedir) lr_free(handle->cachedir);
+        handle->cachedir = g_strdup(va_arg(arg, char *));
+        break;
+
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                     "Unknown option");
@@ -832,7 +839,7 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->mirrorlisturl);
-        if (!lr_yum_download_url(handle, url, fd, TRUE, err)) {
+        if (!lr_yum_download_url(handle, url, fd, TRUE, FALSE, err)) {
             close(fd);
             return FALSE;
         }
@@ -948,7 +955,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->metalinkurl);
-        if (!lr_yum_download_url(handle, url, fd, TRUE, err)) {
+        if (!lr_yum_download_url(handle, url, fd, TRUE, FALSE, err)) {
             close(fd);
             return FALSE;
         }
@@ -1499,6 +1506,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_FTPUSEEPSV:
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->ftpuseepsv;
+        break;
+
+    case LRI_CACHEDIR:
+        str = va_arg(arg, char **);
+        *str = handle->cachedir;
         break;
 
     default:

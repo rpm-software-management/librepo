@@ -309,6 +309,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_SSLCLIENTCERT:
     case LRO_SSLCLIENTKEY:
     case LRO_SSLCACERT:
+    case LRO_CACHEDIR:
     {
         char *str = NULL, *alloced = NULL;
 
@@ -886,6 +887,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_SSLCLIENTCERT:
     case LRI_SSLCLIENTKEY:
     case LRI_SSLCACERT:
+    case LRI_CACHEDIR:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

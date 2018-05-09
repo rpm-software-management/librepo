@@ -298,7 +298,9 @@ create_repomd_xml_download_targets(GSList *targets,
                                                 target,
                                                 0,
                                                 0,
-                                                TRUE);
+                                                NULL,
+                                                TRUE,
+                                                FALSE);
 
         target->download_target = download_target;
         (*download_targets) = g_slist_append((*download_targets), download_target);
