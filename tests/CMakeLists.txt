@@ -11,6 +11,7 @@ SET (librepotest_SRCS
      test_package_downloader.c
      test_repoconf.c
      test_repomd.c
+     test_repo_zck.c
      testsys.c
      test_url_substitution.c
      test_util.c
