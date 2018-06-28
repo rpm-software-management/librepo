@@ -69,7 +69,6 @@ Python 2 bindings for the librepo library.
 %if %{with python3}
 %package -n python3-%{name}
 Summary:        Python 3 bindings for the librepo library
-%{?system_python_abi}
 %{?python_provide:%python_provide python3-%{name}}
 BuildRequires:  python3-pygpgme
 BuildRequires:  python3-devel
@@ -80,6 +79,8 @@ BuildRequires:  python3-nose
 BuildRequires:  python3-sphinx
 BuildRequires:  python3-pyxattr
 Requires:       %{name}%{?_isa} = %{version}-%{release}
+# Obsoletes Fedora 27 package
+Obsoletes:      platform-python-%{name} < %{version}-%{release}
 Conflicts:      python3-dnf < %{dnf_conflict}
 
 %description -n python3-%{name}
@@ -129,8 +130,12 @@ pushd build-py3
 popd
 %endif
 
+%if 0%{?rhel} && 0%{?rhel} <= 7
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
+%else
+%ldconfig_scriptlets
+%endif
 
 %files
 %license COPYING
