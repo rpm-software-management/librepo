@@ -1,15 +1,3 @@
-SET(Python_ADDITIONAL_VERSIONS 3.3)
-message("--- ${PYTHON_LIBRARY}")
-message("--- ${PYTHON_INCLUDE_DIR}")
-unset(PYTHON_LIBRARY)
-unset(PYTHON_INCLUDE_DIR)
-unset(PYTHON_LIBRARY CACHE)
-unset(PYTHON_INCLUDE_DIR CACHE)
-message("--- ${PYTHON_LIBRARY}")
-message("--- ${PYTHON_INCLUDE_DIR}")
-
-FIND_PACKAGE(PythonLibs 3.0)
-FIND_PACKAGE(PythonInterp 3.0 REQUIRED)
 EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "
 from sys import stdout
 from distutils import sysconfig
