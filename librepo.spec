@@ -94,13 +94,13 @@ mkdir build build-py3
 
 %build
 pushd build
-  %cmake ..
+  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python2} ..
   %make_build
 popd
 
 %if %{with python3}
 pushd build-py3
-  %cmake -DPYTHON_DESIRED:str=3 ..
+  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python3} ..
   %make_build
 popd
 %endif

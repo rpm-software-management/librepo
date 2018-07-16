@@ -1,5 +1,3 @@
-FIND_PACKAGE (PythonLibs 2 )
-FIND_PACKAGE (PythonInterp 2 REQUIRED)
 EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "
 from sys import stdout
 from distutils import sysconfig
