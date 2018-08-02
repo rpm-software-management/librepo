@@ -57,7 +57,7 @@ lr_checksum_type(const char *type)
     if (!strncmp(type_lower, "md", 2)) {
         // MD* family
         char *md_type = type_lower + 2;
-        if (strcmp(md_type, "5"))
+        if (!strcmp(md_type, "5"))
             return LR_CHECKSUM_MD5;
     } else if (!strncmp(type_lower, "sha", 3)) {
         // SHA* family
