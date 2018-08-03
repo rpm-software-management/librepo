@@ -30,4 +30,6 @@ CONFIGURE_FILE("run_tests.sh.in"  "${CMAKE_BINARY_DIR}/tests/run_tests.sh")
 ADD_TEST(test_main run_tests.sh)
 
 
-ADD_SUBDIRECTORY (python)
+IF (ENABLE_PYTHON_TESTS)
+    ADD_SUBDIRECTORY (python)
+ENDIF()
