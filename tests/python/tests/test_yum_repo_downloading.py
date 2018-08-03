@@ -1,6 +1,5 @@
 import sys
 import time
-import gpgme
 import shutil
 import os.path
 import tempfile
@@ -8,7 +7,7 @@ import unittest
 
 import librepo
 
-from tests.base import TestCaseWithFlask, TEST_DATA
+from tests.base import Context, TestCaseWithFlask, TEST_DATA
 from tests.servermock.server import app
 import tests.servermock.yum_mock.config as config
 
@@ -23,11 +22,10 @@ class TestCaseYumRepoDownloading(TestCaseWithFlask):
         gpghome = os.path.join(self.tmpdir, "keyring")
         os.mkdir(gpghome, 0o700)
         os.environ['GNUPGHOME'] = gpghome
-        self.ctx = gpgme.Context()
-        self.ctx.import_(open(PUB_KEY, 'rb'))
+        self.ctx = Context()
+        self.ctx.op_import(open(PUB_KEY, 'rb'))
 
     def tearDown(self):
-        self.ctx.delete(self.ctx.get_key('22F2C4E9'))
         if self._gnupghome is None:
             os.environ.pop('GNUPGHOME')
         else:

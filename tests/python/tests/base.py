@@ -12,6 +12,41 @@ except ImportError:
 
 import librepo
 
+try:
+    from gpg import Context
+except ImportError:
+    import gpgme
+
+    class Context(object):
+        def __init__(self):
+            self.__dict__["ctx"] = gpgme.Context()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, type, value, tb):
+            pass
+
+        @property
+        def armor(self):
+            return self.ctx.armor
+
+        @armor.setter
+        def armor(self, value):
+            self.ctx.armor = value
+
+        def op_import(self, key_fo):
+            if isinstance(key_fo, basestring):
+                key_fo = io.BytesIO(key_fo)
+            self.ctx.import_(key_fo)
+
+        def op_export(self, pattern, mode, keydata):
+            self.ctx.export(pattern, keydata)
+
+        def __getattr__(self, name):
+            return getattr(self.ctx, name)
+
+
 MOCKURL_TEMPLATE = "http://127.0.0.1:%d/"
 TEST_DATA = os.path.normpath(os.path.join(__file__, "../../../test_data"))
 

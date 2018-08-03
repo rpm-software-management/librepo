@@ -10,7 +10,7 @@
 %global dnf_conflict 2.8.8
 
 Name:           librepo
-Version:        1.9.0
+Version:        1.9.1
 Release:        1%{?dist}
 Summary:        Repodata downloading library
 
@@ -48,7 +48,7 @@ BuildRequires:  python-sphinx
 BuildRequires:  pygpgme
 %else
 BuildRequires:  python2-sphinx
-BuildRequires:  python2-pygpgme
+BuildRequires:  python2-gpg
 %endif
 BuildRequires:  python2-devel
 %if (0%{?rhel} && 0%{?rhel} <= 7) || (0%{?fedora} && 0%{?fedora} <= 27)
@@ -70,7 +70,7 @@ Python 2 bindings for the librepo library.
 %package -n python3-%{name}
 Summary:        Python 3 bindings for the librepo library
 %{?python_provide:%python_provide python3-%{name}}
-BuildRequires:  python3-pygpgme
+BuildRequires:  python3-gpg
 BuildRequires:  python3-devel
 %if %{with tests}
 BuildRequires:  python3-flask

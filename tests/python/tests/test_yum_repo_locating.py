@@ -2,10 +2,9 @@ import os.path
 import tempfile
 import shutil
 import unittest
-import gpgme
 import librepo
 
-from tests.base import TestCase, TEST_DATA
+from tests.base import Context, TestCase, TEST_DATA
 
 # Repositories used in download tests
 #REPOS_YUM = "tests/python/tests/servermock/yum_mock/static/"
@@ -25,11 +24,10 @@ class TestCaseYumRepoLocating(TestCase):
         gpghome = os.path.join(self.tmpdir, "keyring")
         os.mkdir(gpghome, 0o700)
         os.environ['GNUPGHOME'] = gpghome
-        self.ctx = gpgme.Context()
-        self.ctx.import_(open(PUB_KEY, 'rb'))
+        self.ctx = Context()
+        self.ctx.op_import(open(PUB_KEY, 'rb'))
 
     def tearDown(self):
-        self.ctx.delete(self.ctx.get_key('22F2C4E9'))
         if self._gnupghome is None:
             os.environ.pop('GNUPGHOME')
         else:
