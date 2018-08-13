@@ -36,8 +36,6 @@ except ImportError:
             self.ctx.armor = value
 
         def op_import(self, key_fo):
-            if isinstance(key_fo, basestring):
-                key_fo = io.BytesIO(key_fo)
             self.ctx.import_(key_fo)
 
         def op_export(self, pattern, mode, keydata):
