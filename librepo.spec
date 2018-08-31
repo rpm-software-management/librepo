@@ -15,6 +15,11 @@
 %bcond_without python2
 %endif
 
+%if 0%{?rhel}
+%bcond_with zchunk
+%else
+%bcond_without zchunk
+%endif
 
 %global dnf_conflict 2.8.8
 
@@ -38,6 +43,9 @@ BuildRequires:  libcurl-devel >= 7.19.0
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libcrypto)
 BuildRequires:  pkgconfig(openssl)
+%if %{with zchunk}
+BuildRequires:  zchunk-devel
+%endif
 
 %description
 A library providing C and Python (libcURL like) API to downloading repository
@@ -108,14 +116,14 @@ mkdir build-py3
 %build
 %if %{with python2}
 pushd build-py2
-  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python2} ..
+  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python2} %{!?with_zchunk:-DWITH_ZCHUNK=OFF} ..
   %make_build
 popd
 %endif
 
 %if %{with python3}
 pushd build-py3
-  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python3} ..
+  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python3} %{!?with_zchunk:-DWITH_ZCHUNK=OFF} ..
   %make_build
 popd
 %endif

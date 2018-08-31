@@ -31,7 +31,10 @@
 #include <sys/xattr.h>
 #include <fcntl.h>
 #include <curl/curl.h>
+
+#ifdef WITH_ZCHUNK
 #include <zck.h>
+#endif /* WITH_ZCHUNK */
 
 #include "downloader.h"
 #include "downloader_internal.h"
@@ -176,8 +179,12 @@ typedef struct {
         Last cb return code. */
     struct curl_slist *curl_rqheaders; /*!<
         Extra headers for request. */
+
+    #ifdef WITH_ZCHUNK
     LrZckState zck_state; /*!<
         Zchunk download status */
+    #endif /* WITH_ZCHUNK */
+
     gboolean range_fail; ; /*!<
         Whether range request failed. */
 } LrTarget;
@@ -418,6 +425,7 @@ lr_progresscb(void *ptr,
 
 #define STRLEN(s) (sizeof(s)/sizeof(s[0]) - 1)
 
+#ifdef WITH_ZCHUNK
 /* Fail if dl_ctx->fail_no_ranges is set and we get a 200 response */
 size_t lr_zckheadercb(char *b, size_t l, size_t c, void *dl_v) {
     LrTarget *target = (LrTarget *)dl_v;
@@ -432,6 +440,7 @@ size_t lr_zckheadercb(char *b, size_t l, size_t c, void *dl_v) {
     }
     return zck_header_cb(b, l, c, target->target->zck_dl);
 }
+#endif /* WITH_ZCHUNK */
 
 /** Header callback for CURL handles.
  * It parses HTTP and FTP headers and try to find length of the content
@@ -453,8 +462,10 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
         return ret;
     }
 
+    #ifdef WITH_ZCHUNK
     if(lrtarget->target->is_zchunk)
         return lr_zckheadercb(ptr, size, nmemb, userdata);
+    #endif /* WITH_ZCHUNK */
 
     char *header = g_strstrip(g_strndup(ptr, size*nmemb));
     gint64 expected = lrtarget->target->expectedsize;
@@ -540,6 +551,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
 }
 
 
+#ifdef WITH_ZCHUNK
 /** Zchunk write callback for CURL handles.
  */
 size_t
@@ -551,6 +563,7 @@ lr_zck_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     else
         return zck_write_chunk_cb(ptr, size, nmemb, target->target->zck_dl);
 }
+#endif /* WITH_ZCHUNK */
 
 /** Write callback for CURL handles.
  * This callback handles situation when an user wants only specified
@@ -562,8 +575,10 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     size_t cur_written_expected = nmemb;
     size_t cur_written;
     LrTarget *target = (LrTarget *) userdata;
+    #ifdef WITH_ZCHUNK
     if(target->target->is_zchunk)
         return lr_zck_writecb(ptr, size, nmemb, userdata);
+    #endif /* WITH_ZCHUNK */
 
     gint64 all = size * nmemb;  // Total number of bytes from curl
     gint64 range_start = target->target->byterangestart;
@@ -944,6 +959,7 @@ remove_librepo_xattr(int fd)
     fremovexattr(fd, XATTR_LIBREPO);
 }
 
+#ifdef WITH_ZCHUNK
 gboolean
 lr_zck_clear_header(LrTarget *target, GError **err)
 {
@@ -1277,6 +1293,7 @@ check_zck(LrTarget *target, GError **err)
     zck_reset_failed_chunks(zck);
     return prep_zck_body(target, err);
 }
+#endif /* WITH_ZCHUNK */
 
 /** Prepares next transfer
  */
@@ -1388,6 +1405,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
 
+    #ifdef WITH_ZCHUNK
     // If file is zchunk, prep it
     if(target->target->is_zchunk && !check_zck(target, &tmp_err)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
@@ -1410,6 +1428,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
         return TRUE;
     }
+    # endif /* WITH_ZCHUNK */
 
     // Allow resume only for files that were originally being
     // downloaded by librepo
@@ -1689,7 +1708,9 @@ check_finished_transfer_status(CURLMsg *msg,
             g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
                         "Interrupted by header callback: %s",
                         target->headercb_interrupt_reason);
-        } else if (target->range_fail) {
+        }
+        #ifdef WITH_ZCHUNK
+        else if (target->range_fail) {
             zckRange *range = zck_dl_get_range(target->target->zck_dl);
             int range_count = zck_get_range_count(range);
             if(target->mirror->max_ranges >= range_count) {
@@ -1698,7 +1719,9 @@ check_finished_transfer_status(CURLMsg *msg,
                         target->mirror->max_ranges);
             }
             return TRUE;
-        } else {
+        }
+        #endif /* WITH_ZCHUNK */
+        else {
             // There was a CURL error
             g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_CURL,
                         "Curl error (%d): %s for %s [%s]",
@@ -2088,6 +2111,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         fflush(target->f);
         fd = fileno(target->f);
+        #ifdef WITH_ZCHUNK
         if (target->target->is_zchunk) {
             zckCtx *zck = NULL;
             if (target->zck_state == LR_ZCK_DL_HEADER) {
@@ -2119,6 +2143,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                 zck_free(&zck);
             }
         } else {
+        #endif /* WITH_ZCHUNK */
             ret = check_finished_trasfer_checksum(fd,
                                                   target->target->checksums,
                                                   &matches,
@@ -2130,7 +2155,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                         "checksuming: ", effective_url);
                 return FALSE;
             }
+        #ifdef WITH_ZCHUNK
         }
+        #endif /* WITH_ZCHUNK */
         if (transfer_err)  // Checksum doesn't match
             goto transfer_error;
 
@@ -2277,6 +2304,7 @@ transfer_error:
             }
 
         } else {
+            #ifdef WITH_ZCHUNK
             // No error encountered, transfer finished successfully
             if(target->target->is_zchunk &&
                target->zck_state != LR_ZCK_DL_FINISHED) {
@@ -2289,6 +2317,7 @@ transfer_error:
                 target->handle          = target->target->handle;
                 target->tried_mirrors = g_slist_remove(target->tried_mirrors, target->mirror);
             } else {
+            #endif /* WITH_ZCHUNK */
                 target->state = LR_DS_FINISHED;
 
                 // Remove xattr that states that the file is being downloaded
@@ -2314,7 +2343,9 @@ transfer_error:
                 if (target->mirror)
                     lr_downloadtarget_set_usedmirror(target->target,
                                                      target->mirror->mirror->url);
+            #ifdef WITH_ZCHUNK
             }
+            #endif /* WITH_ZCHUNK */
 
             lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
             lr_downloadtarget_set_effectiveurl(target->target,

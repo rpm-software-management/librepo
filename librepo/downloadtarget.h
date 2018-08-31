@@ -22,7 +22,10 @@
 #define __LR_DOWNLOADTARGET_H__
 
 #include <glib.h>
+
+#ifdef WITH_ZCHUNK
 #include <zck.h>
+#endif /* WITH_ZCHUNK */
 
 #include "handle.h"
 #include "rcodes.h"
@@ -143,11 +146,13 @@ typedef struct {
     char *range; /*!<
         Range string to download, overrides byterangestart and end */
 
+    #ifdef WITH_ZCHUNK
     zckDL *zck_dl; /*!<
         Zchunk download context */
 
     gint64 zck_header_size; /*!<
         Zchunk header size */
+    #endif /* WITH_ZCHUNK */
 
 } LrDownloadTarget;
 

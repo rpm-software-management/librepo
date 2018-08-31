@@ -473,6 +473,7 @@ lr_key_file_save_to_file(GKeyFile *keyfile,
     return g_file_set_contents(filename, content, length, err);
 }
 
+#ifdef WITH_ZCHUNK
 LrChecksumType
 lr_checksum_from_zck_hash(zck_hash zck_checksum_type)
 {
@@ -632,6 +633,7 @@ lr_zck_valid_header(LrDownloadTarget *target, char *filename, int fd, GError **e
                 "%s's zchunk header doesn't match", filename);
     return FALSE;
 }
+#endif /* WITH_ZCHUNK */
 
 gboolean
 lr_get_recursive_files_rec(char *path, char *extension, GSList **filelist,

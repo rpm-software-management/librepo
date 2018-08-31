@@ -30,7 +30,10 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#ifdef WITH_ZCHUNK
 #include <zck.h>
+#endif /* WITH_ZCHUNK */
 
 #include "util.h"
 #include "metalink.h"
@@ -613,6 +616,7 @@ prepare_repo_download_std_target(LrHandle *handle,
     return TRUE;
 }
 
+#ifdef WITH_ZCHUNK
 gboolean
 prepare_repo_download_zck_target(LrHandle *handle,
                                  LrYumRepoMdRecord *record,
@@ -644,6 +648,7 @@ prepare_repo_download_zck_target(LrHandle *handle,
     }
     return TRUE;
 }
+#endif /* WITH_ZCHUNK */
 
 gboolean
 prepare_repo_download_targets(LrHandle *handle,
@@ -682,16 +687,20 @@ prepare_repo_download_targets(LrHandle *handle,
 
         char *location_href = record->location_href;
         gboolean is_zchunk = FALSE;
+        #ifdef WITH_ZCHUNK
         if (record->zck_loc_href) {
             location_href = record->zck_loc_href;
             is_zchunk = TRUE;
         }
+        #endif /* WITH_ZCHUNK */
 
         GSList *checksums = NULL;
         if (is_zchunk) {
+            #ifdef WITH_ZCHUNK
             if(!prepare_repo_download_zck_target(handle, record, &path, &fd,
                                                  &checksums, targets, err))
                 return FALSE;
+            #endif /* WITH_ZCHUNK */
         } else {
             if(!prepare_repo_download_std_target(handle, record, &path, &fd,
                                                  &checksums, targets, err))
@@ -727,8 +736,10 @@ prepare_repo_download_targets(LrHandle *handle,
                                        is_zchunk);
 
         if(is_zchunk) {
+            #ifdef WITH_ZCHUNK
             target->expectedsize = record->size_header;
             target->zck_header_size = record->size_header;
+            #endif /* WITH_ZCHUNK */
         }
 
         if (mdtarget != NULL)
@@ -883,14 +894,18 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
     if (!rec || !path)
         return TRUE;
 
+    #ifdef WITH_ZCHUNK
     if(rec->zck_loc_href) {
         expected_checksum = rec->zck_header_checksum;
         checksum_type = lr_checksum_type(rec->zck_header_checksum_type);
         is_zchunk = TRUE;
     } else {
+    #endif /* WITH_ZCHUNK */
         expected_checksum = rec->checksum;
         checksum_type = lr_checksum_type(rec->checksum_type);
+    #ifdef WITH_ZCHUNK
     }
+    #endif /* WITH_ZCHUNK */
 
     g_debug("%s: Checking checksum of %s (expected: %s [%s])",
                        __func__, path, expected_checksum, rec->checksum_type);
@@ -917,6 +932,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
     }
 
     if (is_zchunk) {
+        #ifdef WITH_ZCHUNK
         ret = FALSE;
         matches = FALSE;
         zckCtx *zck = lr_zck_init_read_base(expected_checksum, checksum_type,
@@ -932,6 +948,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
         }
         if (zck)
             zck_free(&zck);
+        #endif /* WITH_ZCHUNK */
     } else {
         ret = lr_checksum_fd_cmp(checksum_type,
                                  fd,
@@ -1135,9 +1152,11 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
         if (lr_yum_repo_path(repo, record->type))
             continue; // This path already exists in repo
 
+        #ifdef WITH_ZCHUNK
         if(record->zck_loc_href)
             path = lr_pathconcat(baseurl, record->zck_loc_href, NULL);
         else
+        #endif /* WITH_ZCHUNK */
             path = lr_pathconcat(baseurl, record->location_href, NULL);
 
         if (access(path, F_OK) == -1) {
