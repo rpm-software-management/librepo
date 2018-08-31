@@ -25,7 +25,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <curl/curl.h>
+
+#ifdef WITH_ZCHUNK
 #include <zck.h>
+#endif /* WITH_ZCHUNK */
 
 #include "checksum.h"
 #include "xmlparser.h"
@@ -202,6 +205,7 @@ lr_key_file_save_to_file(GKeyFile *key_file,
                          const gchar *filename,
                          GError **error);
 
+#ifdef WITH_ZCHUNK
 /** Get LrChecksumType that corresponds to zck_hash
  * @param zck_checksum_type  zck_hash value
  * @return checksum_type     corresponding LrChecksumType value
@@ -282,6 +286,7 @@ lr_zck_valid_header(LrDownloadTarget *target, char *filename, int fd, GError **e
  * Return value will be NULL if no files match or there's an error.
  * err will be set if there's an error
  */
+#endif /* WITH_ZCHUNK */
 
 GSList *
 lr_get_recursive_files(char *path, char *extension, GError **err);
