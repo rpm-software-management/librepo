@@ -1919,6 +1919,10 @@ lr_perform(LrDownload *dd, GError **err)
             else
                 timeout.tv_usec = (curl_timeout % 1000) * 1000;
         }
+        else if (!still_running) {
+            // do not sleep for 1s if no more transfers are running
+            timeout.tv_sec = 0;
+        }
 
         // Get file descriptors from the transfers
         cm_rc = curl_multi_fdset(dd->multi_handle, &fdread, &fdwrite,
