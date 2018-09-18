@@ -366,7 +366,7 @@ typedef enum {
 
     LRO_CACHEDIR, /*!< (char *)
         Path to base cache directory for repositories, used by zchunk to find
-        old files to copy data from */
+        old files to copy data from.  If this is NULL, zchunk will be disabled */
 
     LRO_SENTINEL,    /*!< Sentinel */
 

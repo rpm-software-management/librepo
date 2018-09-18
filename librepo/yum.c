@@ -78,10 +78,29 @@ lr_yum_repo_free(LrYumRepo *repo)
     lr_free(repo);
 }
 
-const char *
-lr_yum_repo_path(LrYumRepo *repo, const char *type)
+static char *
+get_type(LrYumRepo *repo, const char *type)
+{
+    if (!repo->use_zchunk)
+        return g_strdup(type);
+
+    gchar *chk_type = g_strconcat(type, "_zck", NULL);
+
+    for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
+        LrYumRepoPath *yumrepopath = elem->data;
+        assert(yumrepopath);
+        if (!strcmp(yumrepopath->type, chk_type))
+            return chk_type;
+    }
+    g_free(chk_type);
+    return g_strdup(type);
+}
+
+static const char *
+yum_repo_path(LrYumRepo *repo, const char *type)
 {
     assert(repo);
+
     for (GSList *elem = repo->paths; elem; elem = g_slist_next(elem)) {
         LrYumRepoPath *yumrepopath = elem->data;
         assert(yumrepopath);
@@ -89,6 +108,17 @@ lr_yum_repo_path(LrYumRepo *repo, const char *type)
             return yumrepopath->path;
     }
     return NULL;
+}
+
+const char *
+lr_yum_repo_path(LrYumRepo *repo, const char *type)
+{
+    assert(repo);
+
+    gchar *chk_type = get_type(repo, type);
+    const char *path = yum_repo_path(repo, chk_type);
+    g_free(chk_type);
+    return path;
 }
 
 /** Append path to the repository object.
@@ -139,6 +169,57 @@ compare_records(gconstpointer a, gconstpointer b)
     char *type1 = (char *) yum_record->type;
     char *type2 = (char *) b;
     return g_strcmp0(type1, type2);
+}
+
+static void
+lr_yum_switch_to_zchunk(LrHandle *handle, LrYumRepoMd *repomd)
+{
+    if (handle->yumdlist) {
+        int x = 0;
+        while (handle->yumdlist[x]) {
+            char *check_type = g_strconcat(handle->yumdlist[x], "_zck", NULL);
+            assert(check_type);
+
+            /* Check whether we already want the zchunk version of this record */
+            int found = FALSE;
+            int y = 0;
+            while (handle->yumdlist[y]) {
+                if (y == x) {
+                    y++;
+                    continue;
+                }
+                if (strcmp(handle->yumdlist[y], check_type) == 0) {
+                    found = TRUE;
+                    break;
+                }
+                y++;
+            }
+            if (found) {
+                g_free(check_type);
+                x++;
+                continue;
+            }
+
+            found = FALSE;
+            /* Check whether the zchunk version of this record exists */
+            for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
+                LrYumRepoMdRecord *record = elem->data;
+
+                if (strcmp(record->type, check_type) == 0) {
+                    g_debug("Found %s so using instead of %s", check_type,
+                            handle->yumdlist[x]);
+                    g_free(handle->yumdlist[x]);
+                    handle->yumdlist[x] = check_type;
+                    found = TRUE;
+                    break;
+                }
+            }
+            if (!found)
+                g_free(check_type);
+            x++;
+        }
+    }
+    return;
 }
 
 static gboolean
@@ -626,7 +707,7 @@ prepare_repo_download_zck_target(LrHandle *handle,
                                  GSList **targets,
                                  GError **err)
 {
-    *path = lr_pathconcat(handle->destdir, record->zck_loc_href, NULL);
+    *path = lr_pathconcat(handle->destdir, record->location_href, NULL);
     *fd = open(*path, O_CREAT|O_RDWR, 0666);
     if (*fd < 0) {
         g_debug("%s: Cannot create/open %s (%s)",
@@ -642,8 +723,8 @@ prepare_repo_download_zck_target(LrHandle *handle,
         // Select proper checksum type only if checksum check is enabled
         LrDownloadTargetChecksum *checksum;
         checksum = lr_downloadtargetchecksum_new(
-                       lr_checksum_type(record->zck_header_checksum_type),
-                       record->zck_header_checksum);
+                       lr_checksum_type(record->header_checksum_type),
+                       record->header_checksum);
         *checksums = g_slist_prepend(*checksums, checksum);
     }
     return TRUE;
@@ -665,6 +746,14 @@ prepare_repo_download_targets(LrHandle *handle,
     assert(destdir);
     assert(strlen(destdir));
     assert(!err || *err == NULL);
+
+    if(handle->cachedir) {
+        lr_yum_switch_to_zchunk(handle, repomd);
+        repo->use_zchunk = TRUE;
+    } else {
+        g_debug("%s: Cache directory not set, disabling zchunk", __func__);
+        repo->use_zchunk = FALSE;
+    }
 
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         int fd;
@@ -688,10 +777,8 @@ prepare_repo_download_targets(LrHandle *handle,
         char *location_href = record->location_href;
         gboolean is_zchunk = FALSE;
         #ifdef WITH_ZCHUNK
-        if (record->zck_loc_href) {
-            location_href = record->zck_loc_href;
+        if (handle->cachedir && record->header_checksum)
             is_zchunk = TRUE;
-        }
         #endif /* WITH_ZCHUNK */
 
         GSList *checksums = NULL;
@@ -895,9 +982,9 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
         return TRUE;
 
     #ifdef WITH_ZCHUNK
-    if(rec->zck_loc_href) {
-        expected_checksum = rec->zck_header_checksum;
-        checksum_type = lr_checksum_type(rec->zck_header_checksum_type);
+    if(rec->header_checksum) {
+        expected_checksum = rec->header_checksum;
+        checksum_type = lr_checksum_type(rec->header_checksum_type);
         is_zchunk = TRUE;
     } else {
     #endif /* WITH_ZCHUNK */
@@ -994,7 +1081,8 @@ lr_yum_check_repo_checksums(LrYumRepo *repo,
 
         assert(record);
 
-        const char *path = lr_yum_repo_path(repo, record->type);
+        const char *path = yum_repo_path(repo, record->type);
+
         ret = lr_yum_check_checksum_of_md_record(record, path, err);
         if (!ret)
             return FALSE;
@@ -1140,6 +1228,14 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
             return FALSE;
     }
 
+    if(handle->cachedir) {
+        lr_yum_switch_to_zchunk(handle, repomd);
+        repo->use_zchunk = TRUE;
+    } else {
+        g_debug("%s: Cache directory not set, disabling zchunk", __func__);
+        repo->use_zchunk = FALSE;
+    }
+
     // Locate rest of metadata files
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         _cleanup_free_ char *path = NULL;
@@ -1149,15 +1245,10 @@ lr_yum_use_local(LrHandle *handle, LrResult *result, GError **err)
 
         if (!lr_yum_repomd_record_enabled(handle, record->type, repomd->records))
             continue; // Caller isn't interested in this record type
-        if (lr_yum_repo_path(repo, record->type))
+        if (yum_repo_path(repo, record->type))
             continue; // This path already exists in repo
 
-        #ifdef WITH_ZCHUNK
-        if(record->zck_loc_href)
-            path = lr_pathconcat(baseurl, record->zck_loc_href, NULL);
-        else
-        #endif /* WITH_ZCHUNK */
-            path = lr_pathconcat(baseurl, record->location_href, NULL);
+        path = lr_pathconcat(baseurl, record->location_href, NULL);
 
         if (access(path, F_OK) == -1) {
             // A repo file is missing
