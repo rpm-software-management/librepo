@@ -152,8 +152,6 @@ PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
 
     PyDict_SetItemStringAndDecref(dict, "location_href",
             PyStringOrNone_FromString(rec->location_href));
-    PyDict_SetItemStringAndDecref(dict, "zck_loc_href",
-            PyStringOrNone_FromString(rec->zck_loc_href));
     PyDict_SetItemStringAndDecref(dict, "checksum",
             PyStringOrNone_FromString(rec->checksum));
     PyDict_SetItemStringAndDecref(dict, "checksum_type",
@@ -162,14 +160,12 @@ PyObject_FromRepoMdRecord(LrYumRepoMdRecord *rec)
             PyStringOrNone_FromString(rec->checksum_open));
     PyDict_SetItemStringAndDecref(dict, "checksum_open_type",
             PyStringOrNone_FromString(rec->checksum_open_type));
-    PyDict_SetItemStringAndDecref(dict, "zck_header_checksum",
-            PyStringOrNone_FromString(rec->zck_header_checksum));
-    PyDict_SetItemStringAndDecref(dict, "zck_header_checksum_type",
-            PyStringOrNone_FromString(rec->zck_header_checksum_type));
+    PyDict_SetItemStringAndDecref(dict, "header_checksum",
+            PyStringOrNone_FromString(rec->header_checksum));
+    PyDict_SetItemStringAndDecref(dict, "header_checksum_type",
+            PyStringOrNone_FromString(rec->header_checksum_type));
     PyDict_SetItemStringAndDecref(dict, "timestamp",
             PyLong_FromLongLong((PY_LONG_LONG) rec->timestamp));
-    PyDict_SetItemStringAndDecref(dict, "zck_timestamp",
-            PyLong_FromLongLong((PY_LONG_LONG) rec->zck_timestamp));
     PyDict_SetItemStringAndDecref(dict, "size",
             PyLong_FromLongLong((PY_LONG_LONG) rec->size));
     PyDict_SetItemStringAndDecref(dict, "size_open",

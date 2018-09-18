@@ -506,7 +506,12 @@ init_zck_read(const char *checksum, LrChecksumType checksum_type,
 {
     assert(!err || *err == NULL);
 
-    zckCtx *zck = zck_init_adv_read(fd);
+    zckCtx *zck = zck_create();
+    if(!zck_init_adv_read(zck, fd)) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                    "Unable to initialize zchunk file for reading");
+        return FALSE;
+    }
 
     zck_hash ct = lr_zck_hash_from_lr_checksum(checksum_type);
     if(ct == ZCK_HASH_UNKNOWN) {

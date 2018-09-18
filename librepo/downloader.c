@@ -1085,8 +1085,8 @@ prep_zck_header(LrTarget *target, GError **err)
     }
 
     lseek(fd, 0, SEEK_SET);
-    zck = zck_init_adv_read(fd);
-    if(zck == NULL) {
+    zck = zck_create();
+    if(!zck_init_adv_read(zck, fd)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to initialize zchunk file %s for reading",
                     target->target->path);
@@ -1119,8 +1119,12 @@ find_local_zck_chunks(LrTarget *target, GError **err)
 
     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
     int fd = fileno(target->f);
-    if(zck && fd != zck_get_fd(zck))
-        zck_set_fd(zck, fd);
+    if(zck && fd != zck_get_fd(zck) && !zck_set_fd(zck, fd)) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                    "Unable to set zchunk file descriptor for %s: %s",
+                    target->target->path, zck_get_error(zck));
+        return FALSE;
+    }
 
     if(target->target->handle->cachedir) {
         g_debug("%s: Cache directory: %s\n", __func__,
@@ -1152,8 +1156,8 @@ find_local_zck_chunks(LrTarget *target, GError **err)
                 continue;
             }
 
-            zckCtx *zck_src = zck_init_read(chk_fd);
-            if(zck_src == NULL) {
+            zckCtx *zck_src = zck_create();
+            if(!zck_init_read(zck_src, chk_fd)) {
                 close(chk_fd);
                 continue;
             }
@@ -1179,8 +1183,12 @@ prep_zck_body(LrTarget *target, GError **err)
 {
     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
     int fd = fileno(target->f);
-    if(zck && fd != zck_get_fd(zck))
-        zck_set_fd(zck, fd);
+    if(zck && fd != zck_get_fd(zck) && !zck_set_fd(zck, fd)) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                    "Unable to set zchunk file descriptor for %s: %s",
+                    target->target->path, zck_get_error(zck));
+        return FALSE;
+    }
 
     zck_reset_failed_chunks(zck);
     if(zck_missing_chunks(zck) == 0) {
@@ -1204,7 +1212,7 @@ prep_zck_body(LrTarget *target, GError **err)
     }
     if(target->target->range)
         free(target->target->range);
-    target->target->range = zck_get_range_char(range);
+    target->target->range = zck_get_range_char(zck, range);
     target->target->expectedsize = 1;
     target->zck_state = LR_ZCK_DL_BODY;
     return TRUE;
@@ -1219,8 +1227,8 @@ check_zck(LrTarget *target, GError **err)
     if(target->target->zck_dl == NULL) {
         target->target->zck_dl = zck_dl_init(NULL);
         if(target->target->zck_dl == NULL) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
-                        "Unable to setup zchunk download context");
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK, "%s",
+                        zck_get_error(NULL));
             return FALSE;
         }
         target->zck_state = LR_ZCK_DL_HEADER_CK;
@@ -1409,8 +1417,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // If file is zchunk, prep it
     if(target->target->is_zchunk && !check_zck(target, &tmp_err)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
-                    "Unable to initialize zchunk file %s",
-                    target->target->path);
+                    "Unable to initialize zchunk file %s: %s",
+                    target->target->path,
+                    tmp_err->message);
         curl_easy_cleanup(h);
         return FALSE;
     }

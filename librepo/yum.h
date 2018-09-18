@@ -53,6 +53,7 @@ typedef struct {
                              was enabled during repo downloading) */
     char *mirrorlist;   /*!< Mirrolist filename */
     char *metalink;     /*!< Metalink filename */
+    gboolean use_zchunk; /*!< Use zchunk in this repo */
 } LrYumRepo;
 
 /** Mirror Failure Callback Data

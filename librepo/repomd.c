@@ -127,6 +127,7 @@ lr_yum_repomd_get_record(LrYumRepoMd *repomd, const char *type)
 {
     assert(repomd);
     assert(type);
+
     for (GSList *elem = repomd->records; elem; elem = g_slist_next(elem)) {
         LrYumRepoMdRecord *record = elem->data;
         assert(record);
@@ -173,12 +174,10 @@ typedef enum {
     STATE_DISTRO,
     STATE_DATA,
     STATE_LOCATION,
-    STATE_ZCK_LOC,
     STATE_CHECKSUM,
     STATE_OPENCHECKSUM,
     STATE_HEADERCHECKSUM,
     STATE_TIMESTAMP,
-    STATE_ZCK_TIMESTAMP,
     STATE_SIZE,
     STATE_OPENSIZE,
     STATE_HEADERSIZE,
@@ -201,15 +200,13 @@ static LrStatesSwitch stateswitches[] = {
     { STATE_TAGS,       "content",             STATE_CONTENT,        1 },
     { STATE_TAGS,       "distro",              STATE_DISTRO,         1 },
     { STATE_DATA,       "location",            STATE_LOCATION,       0 },
-    { STATE_DATA,       "zck-location",        STATE_ZCK_LOC,        0 },
     { STATE_DATA,       "checksum",            STATE_CHECKSUM,       1 },
     { STATE_DATA,       "open-checksum",       STATE_OPENCHECKSUM,   1 },
-    { STATE_DATA,       "zck-header-checksum", STATE_HEADERCHECKSUM, 1 },
+    { STATE_DATA,       "header-checksum",     STATE_HEADERCHECKSUM, 1 },
     { STATE_DATA,       "timestamp",           STATE_TIMESTAMP,      1 },
-    { STATE_DATA,       "zck-timestamp",       STATE_ZCK_TIMESTAMP,  1 },
     { STATE_DATA,       "size",                STATE_SIZE,           1 },
     { STATE_DATA,       "open-size",           STATE_OPENSIZE,       1 },
-    { STATE_DATA,       "zck-header-size",     STATE_HEADERSIZE,     1 },
+    { STATE_DATA,       "header-size",         STATE_HEADERSIZE,     1 },
     { STATE_DATA,       "database_version",    STATE_DBVERSION,      1 },
     { NUMSTATES,        NULL,                  NUMSTATES,            0 }
 };
@@ -326,21 +323,6 @@ lr_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar **xmlAttr
 
         break;
 
-    case STATE_ZCK_LOC:
-        assert(pd->repomd);
-        assert(pd->repomdrecord);
-
-        val = lr_find_attr("href", attr);
-        if (val)
-            pd->repomdrecord->zck_loc_href = g_string_chunk_insert(
-                                                    pd->repomdrecord->chunk,
-                                                    val);
-        else
-            lr_xml_parser_warning(pd, LR_XML_WARNING_MISSINGATTR,
-                    "Missing attribute \"href\" of a location element");
-
-        break;
-
     case STATE_CHECKSUM:
         assert(pd->repomd);
         assert(pd->repomdrecord);
@@ -384,13 +366,12 @@ lr_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar **xmlAttr
             break;
         }
 
-        pd->repomdrecord->zck_header_checksum_type = g_string_chunk_insert(
+        pd->repomdrecord->header_checksum_type = g_string_chunk_insert(
                                                      pd->repomdrecord->chunk,
                                                      val);
         break;
 
     case STATE_TIMESTAMP:
-    case STATE_ZCK_TIMESTAMP:
     case STATE_SIZE:
     case STATE_OPENSIZE:
     case STATE_HEADERSIZE:
@@ -482,7 +463,6 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
         break;
 
     case STATE_LOCATION:
-    case STATE_ZCK_LOC:
         break;
 
     case STATE_CHECKSUM:
@@ -507,7 +487,7 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
         assert(pd->repomd);
         assert(pd->repomdrecord);
 
-        pd->repomdrecord->zck_header_checksum = lr_string_chunk_insert(
+        pd->repomdrecord->header_checksum = lr_string_chunk_insert(
                                                 pd->repomdrecord->chunk,
                                                 pd->content);
         break;
@@ -517,14 +497,6 @@ lr_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
         assert(pd->repomdrecord);
 
         pd->repomdrecord->timestamp = lr_xml_parser_strtoll(pd, pd->content, 0);
-        break;
-
-    case STATE_ZCK_TIMESTAMP:
-        assert(pd->repomd);
-        assert(pd->repomdrecord);
-
-        pd->repomdrecord->zck_timestamp = lr_xml_parser_strtoll(pd, pd->content,
-                                                                0);
         break;
 
     case STATE_SIZE:
