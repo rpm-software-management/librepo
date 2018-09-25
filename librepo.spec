@@ -7,6 +7,15 @@
 %bcond_without python3
 %bcond_without tests
 %endif
+
+%if 0%{?rhel} && 0%{?rhel} > 7
+# Do not build bindings for python2 for RHEL > 7
+%bcond_with python2
+%else
+%bcond_without python2
+%endif
+
+
 %global dnf_conflict 2.8.8
 
 Name:           librepo
@@ -22,12 +31,13 @@ BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  check-devel
 BuildRequires:  doxygen
-BuildRequires:  glib2-devel >= 2.26.0
+BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  gpgme-devel
 BuildRequires:  libattr-devel
 BuildRequires:  libcurl-devel >= 7.19.0
-BuildRequires:  libxml2-devel
-BuildRequires:  openssl-devel
+BuildRequires:  pkgconfig(libxml-2.0)
+BuildRequires:  pkgconfig(libcrypto)
+BuildRequires:  pkgconfig(openssl)
 
 %description
 A library providing C and Python (libcURL like) API to downloading repository
@@ -40,6 +50,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description devel
 Development files for librepo.
 
+%if %{with python2}
 %package -n python2-%{name}
 Summary:        Python bindings for the librepo library
 %{?python_provide:%python_provide python2-%{name}}
@@ -65,6 +76,7 @@ Conflicts:      python2-dnf < %{dnf_conflict}
 
 %description -n python2-%{name}
 Python 2 bindings for the librepo library.
+%endif
 
 %if %{with python3}
 %package -n python3-%{name}
@@ -90,13 +102,16 @@ Python 3 bindings for the librepo library.
 %prep
 %autosetup -p1
 
-mkdir build build-py3
+mkdir build-py2
+mkdir build-py3
 
 %build
-pushd build
+%if %{with python2}
+pushd build-py2
   %cmake -DPYTHON_DESIRED:FILEPATH=%{__python2} ..
   %make_build
 popd
+%endif
 
 %if %{with python3}
 pushd build-py3
@@ -107,10 +122,12 @@ popd
 
 %if %{with tests}
 %check
-pushd build
+%if %{with python2}
+pushd build-py2
   #ctest -VV
   make ARGS="-V" test
 popd
+%endif
 
 %if %{with python3}
 pushd build-py3
@@ -121,9 +138,12 @@ popd
 %endif
 
 %install
-pushd build
+%if %{with python2}
+pushd build-py2
   %make_install
 popd
+%endif
+
 %if %{with python3}
 pushd build-py3
   %make_install
@@ -147,8 +167,10 @@ popd
 %{_libdir}/pkgconfig/%{name}.pc
 %{_includedir}/%{name}/
 
+%if %{with python2}
 %files -n python2-%{name}
 %{python2_sitearch}/%{name}/
+%endif
 
 %if %{with python3}
 %files -n python3-%{name}
