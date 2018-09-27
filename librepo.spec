@@ -8,8 +8,8 @@
 %bcond_without tests
 %endif
 
-%if 0%{?rhel} && 0%{?rhel} > 7
-# Do not build bindings for python2 for RHEL > 7
+%if 0%{?rhel} > 7 || 0%{?fedora} > 29
+# Do not build bindings for python2 for RHEL > 7 and Fedora > 29
 %bcond_with python2
 %else
 %bcond_without python2
