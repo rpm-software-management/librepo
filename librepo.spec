@@ -44,7 +44,7 @@ BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libcrypto)
 BuildRequires:  pkgconfig(openssl)
 %if %{with zchunk}
-BuildRequires:  zchunk-devel
+BuildRequires:  pkgconfig(zck) >= 0.9.11
 %endif
 
 %description
