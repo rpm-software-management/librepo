@@ -150,7 +150,6 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
         case LR_FMSTAGE_CACHELOADINGSTATUS:
         case LR_FMSTAGE_STATUS:
             pydata = PyStringOrNone_FromString((char *) ptr);
-            pydata = PyUnicode_FromString((char *) ptr);
             break;
         case LR_FMSTAGE_DETECTION:
             pydata = PyLong_FromLong(*((long *) ptr));
@@ -340,24 +339,13 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_FASTESTMIRRORTIMEOUT:
     {
         double d;
-        int badarg = 0;
 
         if (PyFloat_Check(obj))
             d = PyFloat_AS_DOUBLE(obj);
         else if (obj == Py_None) {
             // None stands for default value
-            switch (option) {
-            case LRO_FASTESTMIRRORTIMEOUT:
-                d = LRO_FASTESTMIRRORTIMEOUT_DEFAULT;
-                break;
-            default:
-                badarg = 1;
-            }
+            d = LRO_FASTESTMIRRORTIMEOUT_DEFAULT;
         } else {
-            badarg = 1;
-        }
-
-        if (badarg) {
             PyErr_SetString(PyExc_TypeError, "Only float or None is supported with this option");
             return NULL;
         }
