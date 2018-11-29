@@ -104,6 +104,7 @@ START_TEST(test_cached_checksum)
 
     filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum", NULL);
     f = fopen(filename, "w");
+    fail_if(f == NULL);
     fwrite("foo\nbar\n", 1, 8, f);
     fclose(f);
 
