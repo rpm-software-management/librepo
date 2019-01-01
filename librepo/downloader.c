@@ -414,6 +414,13 @@ lr_progresscb(void *ptr,
     if (!target->target->progresscb)
         return ret;
 
+#ifdef WITH_ZCHUNK
+    if (target->target->is_zchunk) {
+        total_to_download = target->target->total_to_download;
+        now_downloaded = now_downloaded + target->target->downloaded;
+    }
+#endif /* WITH_ZCHUNK */
+
     ret = target->target->progresscb(target->target->cbdata,
                                      total_to_download,
                                      now_downloaded);
@@ -1106,6 +1113,7 @@ prep_zck_header(LrTarget *target, GError **err)
         target->target->zck_dl = zck_dl_init(zck);
     }
     target->target->range = zck_get_range(0, target->target->zck_header_size-1);
+    target->target->total_to_download = target->target->zck_header_size;
     target->target->resume = 0;
     target->zck_state = LR_ZCK_DL_HEADER;
     return lr_zck_clear_header(target, err);
@@ -1174,6 +1182,11 @@ find_local_zck_chunks(LrTarget *target, GError **err)
         g_slist_free_full(filelist, free);
         free(uf);
     }
+    target->target->downloaded = target->target->total_to_download;
+    /* Calculate how many bytes need to be downloaded */
+    for(zckChunk *idx = zck_get_first_chunk(zck); idx != NULL; idx = zck_get_next_chunk(idx))
+        if(zck_get_chunk_valid(idx) != 1)
+            target->target->total_to_download += zck_get_chunk_comp_size(idx) + 92; /* Estimate of multipart overhead */
     target->zck_state = LR_ZCK_DL_BODY;
     return TRUE;
 }
@@ -1299,6 +1312,11 @@ check_zck(LrTarget *target, GError **err)
         }
     }
     zck_reset_failed_chunks(zck);
+    /* Recalculate how many bytes remain to be downloaded by subtracting from total_to_download */
+    target->target->downloaded = target->target->total_to_download;
+    for(zckChunk *idx = zck_get_first_chunk(zck); idx != NULL; idx = zck_get_next_chunk(idx))
+        if(zck_get_chunk_valid(idx) != 1)
+            target->target->downloaded -= zck_get_chunk_comp_size(idx) + 92;
     return prep_zck_body(target, err);
 }
 #endif /* WITH_ZCHUNK */

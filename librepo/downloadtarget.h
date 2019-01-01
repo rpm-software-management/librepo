@@ -152,6 +152,12 @@ typedef struct {
 
     gint64 zck_header_size; /*!<
         Zchunk header size */
+
+    double total_to_download; /*!<
+        Total to download in zchunk file */
+
+    double downloaded; /*!<
+        Amount already downloaded in zchunk file */
     #endif /* WITH_ZCHUNK */
 
 } LrDownloadTarget;
