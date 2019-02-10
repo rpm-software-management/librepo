@@ -1374,7 +1374,6 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     _cleanup_free_ char *full_url = NULL;
     LrProtocol protocol = LR_PROTOCOL_OTHER;
     gboolean ret;
-    GError *tmp_err = NULL;
 
     assert(dd);
     assert(!err || *err == NULL);
@@ -1437,27 +1436,30 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     #ifdef WITH_ZCHUNK
     // If file is zchunk, prep it
-    if(target->target->is_zchunk && !check_zck(target, &tmp_err)) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
-                    "Unable to initialize zchunk file %s: %s",
-                    target->target->path,
-                    tmp_err->message);
-        goto fail;
-    }
+    if(target->target->is_zchunk) {
+        GError *tmp_err = NULL;
 
-    // If zchunk is finished, we're done
-    if(target->target->is_zchunk &&
-       target->zck_state == LR_ZCK_DL_FINISHED) {
-        g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
-        target->state = LR_DS_FINISHED;
-        curl_easy_cleanup(target->handle);
-        target->handle = NULL;
-        g_free(target->headercb_interrupt_reason);
-        target->headercb_interrupt_reason = NULL;
-        fclose(target->f);
-        target->f = NULL;
-        lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
-        return TRUE;
+        if (!check_zck(target, &tmp_err)) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "Unable to initialize zchunk file %s: %s",
+                        target->target->path,
+                        tmp_err->message);
+            goto fail;
+        }
+
+        // If zchunk is finished, we're done
+        if(target->zck_state == LR_ZCK_DL_FINISHED) {
+            g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
+            target->state = LR_DS_FINISHED;
+            curl_easy_cleanup(target->handle);
+            target->handle = NULL;
+            g_free(target->headercb_interrupt_reason);
+            target->headercb_interrupt_reason = NULL;
+            fclose(target->f);
+            target->f = NULL;
+            lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
+            return TRUE;
+        }
     }
     # endif /* WITH_ZCHUNK */
 
