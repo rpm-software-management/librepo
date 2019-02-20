@@ -2517,7 +2517,7 @@ lr_perform(LrDownload *dd, GError **err)
                             curl_multi_strerror(cm_rc));
                 return FALSE;
             }
-        } while (still_running == 0 && dd->running_transfers);
+        } while (still_running && dd->running_transfers);
     }
 
     return check_transfer_statuses(dd, err);
