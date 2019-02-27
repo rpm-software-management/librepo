@@ -81,7 +81,10 @@ lr_yum_repo_free(LrYumRepo *repo)
 static char *
 get_type(LrYumRepo *repo, const char *type)
 {
-    if (!repo->use_zchunk)
+    if (!repo->use_zchunk ||
+        (g_strcmp0(type, "primary") != 0 &&
+         g_strcmp0(type, "filelists") != 0 &&
+         g_strcmp0(type, "other") != 0))
         return g_strdup(type);
 
     gchar *chk_type = g_strconcat(type, "_zck", NULL);
@@ -177,6 +180,13 @@ lr_yum_switch_to_zchunk(LrHandle *handle, LrYumRepoMd *repomd)
     if (handle->yumdlist) {
         int x = 0;
         while (handle->yumdlist[x]) {
+            if(g_strcmp0(handle->yumdlist[x], "primary") != 0 &&
+               g_strcmp0(handle->yumdlist[x], "filelists") != 0 &&
+               g_strcmp0(handle->yumdlist[x], "other") != 0) {
+                x++;
+                continue;
+            }
+
             char *check_type = g_strconcat(handle->yumdlist[x], "_zck", NULL);
             assert(check_type);
 
