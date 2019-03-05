@@ -718,11 +718,6 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         self.assertFalse(os.path.isfile(pkgs[1].local_path))
 
     def test_download_packages_with_resume_02(self):
-        return # This test causes issues on Fedora rawhide (F26)
-               # Flask/werkzeug/SocketServer/socket fails on Broken pipe
-               # and causes next test (test_download_packages_without_handle)
-               # to always fail
-
         # If download that should be resumed fails,
         # the original file should not be modified or deleted
         h = librepo.Handle()
@@ -733,25 +728,14 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
 
         fn = os.path.join(self.tmpdir, "package.rpm")
 
-        # Download first 10 bytes of the package
-        pkgs = []
-        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
-                                          handle=h,
-                                          dest=fn,
-                                          resume=False,
-                                          byterangeend=9))
-
-        librepo.download_packages(pkgs)
-        pkg = pkgs[0]
-        self.assertTrue(pkg.err is None)
-        self.assertTrue(os.path.isfile(pkg.local_path))
-        self.assertEqual(os.path.getsize(pkg.local_path), 10)
-        fchksum = hashlib.md5(open(pkg.local_path, "rb").read()).hexdigest()
+        # Make fake unfinished download
+        CONTENT = "0123456789"
+        open(fn, "w").write(CONTENT)
 
         # Mark the file as it was downloaded by Librepo
         # Otherwise librepo refuse to resume
         try:
-            xattr.setxattr(pkg.local_path,
+            xattr.setxattr(fn,
                            "user.Librepo.DownloadInProgress".encode("utf-8"),
                            "".encode("utf-8"))
         except IOError as err:
@@ -776,9 +760,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         pkg = pkgs[0]
         self.assertTrue(pkg.err)
         self.assertTrue(os.path.isfile(pkg.local_path))
-        self.assertEqual(os.path.getsize(pkg.local_path), 10)
-        fchksum_new = hashlib.md5(open(pkg.local_path, "rb").read()).hexdigest()
-        self.assertEqual(fchksum, fchksum_new)
+        self.assertEqual(open(pkg.local_path, "rb").read(), CONTENT)
 
     def test_download_packages_mirror_penalization_01(self):
 
