@@ -2,10 +2,10 @@
 # Do not build bindings for python3 for RHEL <= 7
 %bcond_with python3
 # python-flask is not in RHEL7
-%bcond_with tests
+%bcond_with pythontests
 %else
 %bcond_without python3
-%bcond_without tests
+%bcond_without pythontests
 %endif
 
 %if 0%{?rhel} > 7 || 0%{?fedora} > 29
@@ -64,21 +64,21 @@ Summary:        Python bindings for the librepo library
 %{?python_provide:%python_provide python2-%{name}}
 %if 0%{?rhel} && 0%{?rhel} <= 7
 BuildRequires:  python-sphinx
-BuildRequires:  pygpgme
 %else
 BuildRequires:  python2-sphinx
-BuildRequires:  python2-gpg
 %endif
 BuildRequires:  python2-devel
-%if (0%{?rhel} && 0%{?rhel} <= 7) || (0%{?fedora} && 0%{?fedora} <= 27)
-BuildRequires:  pyxattr
-%else
-BuildRequires:  python2-pyxattr
-%endif
-%if %{with tests}
+%if %{with pythontests}
 BuildRequires:  python2-flask
 BuildRequires:  python2-nose
+%if (0%{?rhel} && 0%{?rhel} <= 7)
+BuildRequires:  pyxattr
+BuildRequires:  pygpgme
+%else
+BuildRequires:  python2-pyxattr
+BuildRequires:  python2-gpg
 %endif
+%endif # with pythontests
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Conflicts:      python2-dnf < %{dnf_conflict}
 
@@ -90,14 +90,14 @@ Python 2 bindings for the librepo library.
 %package -n python3-%{name}
 Summary:        Python 3 bindings for the librepo library
 %{?python_provide:%python_provide python3-%{name}}
-BuildRequires:  python3-gpg
 BuildRequires:  python3-devel
-%if %{with tests}
+%if %{with pythontests}
+BuildRequires:  python3-gpg
 BuildRequires:  python3-flask
 BuildRequires:  python3-nose
+BuildRequires:  python3-pyxattr
 %endif
 BuildRequires:  python3-sphinx
-BuildRequires:  python3-pyxattr
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 # Obsoletes Fedora 27 package
 Obsoletes:      platform-python-%{name} < %{version}-%{release}
@@ -116,19 +116,18 @@ mkdir build-py3
 %build
 %if %{with python2}
 pushd build-py2
-  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python2} %{!?with_zchunk:-DWITH_ZCHUNK=OFF} ..
+  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python2} %{!?with_zchunk:-DWITH_ZCHUNK=OFF} -DENABLE_PYTHON_TESTS=%{?with_pythontests:ON}%{!?with_pythontests:OFF} ..
   %make_build
 popd
 %endif
 
 %if %{with python3}
 pushd build-py3
-  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python3} %{!?with_zchunk:-DWITH_ZCHUNK=OFF} ..
+  %cmake -DPYTHON_DESIRED:FILEPATH=%{__python3} %{!?with_zchunk:-DWITH_ZCHUNK=OFF} -DENABLE_PYTHON_TESTS=%{?with_pythontests:ON}%{!?with_pythontests:OFF} ..
   %make_build
 popd
 %endif
 
-%if %{with tests}
 %check
 %if %{with python2}
 pushd build-py2
@@ -142,7 +141,6 @@ pushd build-py3
   #ctest -VV
   make ARGS="-V" test
 popd
-%endif
 %endif
 
 %install
