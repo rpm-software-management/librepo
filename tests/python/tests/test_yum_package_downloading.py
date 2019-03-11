@@ -760,7 +760,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         pkg = pkgs[0]
         self.assertTrue(pkg.err)
         self.assertTrue(os.path.isfile(pkg.local_path))
-        self.assertEqual(open(pkg.local_path, "rb").read(), CONTENT)
+        self.assertEqual(open(pkg.local_path, "rb").read(), CONTENT.encode('utf-8'))
 
     def test_download_packages_mirror_penalization_01(self):
 
