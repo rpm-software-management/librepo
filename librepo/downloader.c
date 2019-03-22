@@ -2418,43 +2418,41 @@ static gboolean
 lr_perform(LrDownload *dd, GError **err)
 {
     CURLMcode cm_rc;    // CurlM_ReturnCode
-    int still_running;
 
     assert(dd);
     assert(!err || *err == NULL);
 
-    do { // Before version 7.20.0 CURLM_CALL_MULTI_PERFORM can appear
+    while (1) {
+
+        int still_running = 0;
+
         cm_rc = curl_multi_perform(dd->multi_handle, &still_running);
-    } while (cm_rc == CURLM_CALL_MULTI_PERFORM);
 
-    if (cm_rc != CURLM_OK) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
-                    "curl_multi_perform() error: %s",
-                    curl_multi_strerror(cm_rc));
-        return FALSE;
-    }
+        if (lr_interrupt) {
+            // Check interrupt after each call of curl_multi_perform
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
+                        "Interrupted by signal");
+            return FALSE;
+        }
 
-    if (lr_interrupt) {
-        // Check interrupt after each call of curl_multi_perform
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
-                    "Interrupted by signal");
-        return FALSE;
-    }
+        if (cm_rc != CURLM_OK) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
+                        "curl_multi_perform() error: %s",
+                        curl_multi_strerror(cm_rc));
+            return FALSE;
+        }
 
-    while (dd->running_transfers) {
-        int rc;
-        int maxfd = -1;
+        // Check if any handle finished and potentialy add one or more
+        // waiting downloads to the multi_handle.
+        int rc = check_transfer_statuses(dd, err);
+        if (!rc)
+            return FALSE;
+
+        // Leave if there's nothing to wait for
+        if (!still_running && !dd->running_transfers)
+            break;
+
         long curl_timeout = -1;
-        struct timeval timeout;
-        fd_set fdread, fdwrite, fdexcep;
-
-        FD_ZERO(&fdread);
-        FD_ZERO(&fdwrite);
-        FD_ZERO(&fdexcep);
-
-        // Set suitable timeout to play around with
-        timeout.tv_sec  = 1;
-        timeout.tv_usec = 0;
 
         cm_rc = curl_multi_timeout(dd->multi_handle, &curl_timeout);
         if (cm_rc != CURLM_OK) {
@@ -2464,82 +2462,22 @@ lr_perform(LrDownload *dd, GError **err)
             return FALSE;
         }
 
-        if (curl_timeout >= 0) {
-            timeout.tv_sec = curl_timeout / 1000;
-            if (timeout.tv_sec > 1)
-                timeout.tv_sec = 1;
-            else
-                timeout.tv_usec = (curl_timeout % 1000) * 1000;
-        }
-        else if (!still_running) {
-            // do not sleep for 1s if no more transfers are running
-            timeout.tv_sec = 0;
-        }
+        if (curl_timeout <= 0) // No wait
+            continue;
 
-        // Get file descriptors from the transfers
-        cm_rc = curl_multi_fdset(dd->multi_handle, &fdread, &fdwrite,
-                                 &fdexcep, &maxfd);
+        if (curl_timeout > 1000) // Wait no more than 1s
+            curl_timeout = 1000;
+
+        cm_rc = curl_multi_wait(dd->multi_handle, NULL, 0, curl_timeout, NULL);
         if (cm_rc != CURLM_OK) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
-                        "curl_multi_fdset() error: %s",
+                        "curl_multi_wait() error: %s",
                         curl_multi_strerror(cm_rc));
             return FALSE;
         }
-
-        rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-        if (rc < 0) {
-            if (errno == EINTR) {
-                g_debug("%s: select() interrupted by signal", __func__);
-                //goto retry;
-            } else {
-                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_SELECT,
-                            "select() error: %s", g_strerror(errno));
-                return FALSE;
-            }
-        }
-
-        // This do-while loop is important. Because if curl_multi_perform sets
-        // still_running to 0, we need to check if there are any next
-        // transfers available (we need to call check_transfer_statuses).
-        // Because if there will be no next transfers available and the
-        // curl multi handle is empty (all transfers already
-        // finished - this is what still_running == 0 means),
-        // then the next iteration of main downloding loop cause a 1sec
-        // waiting on the select() call.
-        do {
-            // Check if any handle finished and potentialy add one or more
-            // waiting downloads to the multi_handle.
-            rc = check_transfer_statuses(dd, err);
-            if (!rc)
-                return FALSE;
-
-            if (lr_interrupt) {
-                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
-                            "Interrupted by signal");
-                return FALSE;
-            }
-
-            // Do curl_multi_perform()
-            do { // Before version 7.20.0 CURLM_CALL_MULTI_PERFORM can appear
-                cm_rc = curl_multi_perform(dd->multi_handle, &still_running);
-                if (lr_interrupt) {
-                    // Check interrupt after each call of curl_multi_perform
-                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_INTERRUPTED,
-                                "Interrupted by signal");
-                    return FALSE;
-                }
-            } while (cm_rc == CURLM_CALL_MULTI_PERFORM);
-
-            if (cm_rc != CURLM_OK) {
-                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
-                            "curl_multi_perform() error: %s",
-                            curl_multi_strerror(cm_rc));
-                return FALSE;
-            }
-        } while (still_running && dd->running_transfers);
     }
 
-    return check_transfer_statuses(dd, err);
+    return TRUE;
 }
 
 gboolean
