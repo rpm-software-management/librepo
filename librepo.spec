@@ -1,3 +1,5 @@
+%global libcurl_version 7.28.0
+
 %if 0%{?rhel} && 0%{?rhel} <= 7
 # Do not build bindings for python3 for RHEL <= 7
 %bcond_with python3
@@ -39,13 +41,14 @@ BuildRequires:  doxygen
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  gpgme-devel
 BuildRequires:  libattr-devel
-BuildRequires:  libcurl-devel >= 7.19.0
+BuildRequires:  libcurl-devel >= %{libcurl_version}
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libcrypto)
 BuildRequires:  pkgconfig(openssl)
 %if %{with zchunk}
 BuildRequires:  pkgconfig(zck) >= 0.9.11
 %endif
+Requires:       libcurl%{?_isa} >= %{libcurl_version}
 
 %description
 A library providing C and Python (libcURL like) API to downloading repository
