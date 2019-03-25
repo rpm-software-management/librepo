@@ -437,7 +437,7 @@ cleanup:
             if (err && *err != NULL)
                 g_clear_error(err);
             g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_INTERRUPTED,
-                        "Insterupted by a SIGINT signal");
+                        "Interrupted by a SIGINT signal");
             return FALSE;
         }
     }
@@ -620,7 +620,7 @@ lr_check_packages(GSList *targets,
             if (err && *err != NULL)
                 g_clear_error(err);
             g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_INTERRUPTED,
-                        "Insterupted by a SIGINT signal");
+                        "Interrupted by a SIGINT signal");
             return FALSE;
         }
     }
