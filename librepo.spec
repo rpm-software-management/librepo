@@ -74,6 +74,7 @@ BuildRequires:  python2-devel
 %if %{with pythontests}
 BuildRequires:  python2-flask
 BuildRequires:  python2-nose
+BuildRequires:  python2-requests
 %if (0%{?rhel} && 0%{?rhel} <= 7)
 BuildRequires:  pyxattr
 BuildRequires:  pygpgme
@@ -99,6 +100,7 @@ BuildRequires:  python3-gpg
 BuildRequires:  python3-flask
 BuildRequires:  python3-nose
 BuildRequires:  python3-pyxattr
+BuildRequires:  python3-requests
 %endif
 BuildRequires:  python3-sphinx
 Requires:       %{name}%{?_isa} = %{version}-%{release}

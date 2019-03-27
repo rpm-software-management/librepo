@@ -3,6 +3,7 @@ import time
 import socket
 import ctypes
 import os.path
+import requests
 from multiprocessing import Process, Value
 from tests.servermock.server import app
 try:
@@ -93,9 +94,20 @@ class TestCaseWithFlask(TestCase):
     def setUpClass(cls):
         cls.server = Process(target=application, args=(cls._TS_PORT,))
         cls.server.start()
-        time.sleep(0.5)
         cls.MOCKURL = MOCKURL_TEMPLATE % cls._TS_PORT.value
         cls.PORT = cls._TS_PORT.value
+        # Wait for the server to start (max 5 seconds)
+        for i in range(50):
+            try:
+                requests.get(cls.MOCKURL, timeout=0.1)
+                break
+            except (requests.exceptions.ConnectionError):
+                time.sleep(0.1)
+            except (requests.exceptions.Timeout):
+                pass
+        else:
+            cls.tearDownClass()
+            raise Exception("Server didn't start even after 5 seconds.")
 
     @classmethod
     def tearDownClass(cls):
