@@ -1451,8 +1451,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if(target->zck_state == LR_ZCK_DL_FINISHED) {
             g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
             target->state = LR_DS_FINISHED;
-            curl_easy_cleanup(target->handle);
-            target->handle = NULL;
+            curl_easy_cleanup(target->curl_handle);
+            target->curl_handle = NULL;
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
             fclose(target->f);
