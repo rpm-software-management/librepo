@@ -368,6 +368,10 @@ typedef enum {
         Path to base cache directory for repositories, used by zchunk to find
         old files to copy data from.  If this is NULL, zchunk will be disabled */
 
+    LRO_PRESERVETIME, /*!< (long 1 or 0)
+        If enabled, librepo will try to keep timestamps of the downloaded files
+        in sync with that on the remote side. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */

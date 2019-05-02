@@ -19,6 +19,8 @@
  */
 
 #define _XOPEN_SOURCE   500 // Because of fdopen() and ftruncate()
+#define _DEFAULT_SOURCE     // Because of futimes()
+#define _BSD_SOURCE         // Because of futimes()
 
 #include <glib.h>
 #include <assert.h>
@@ -28,6 +30,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/xattr.h>
 #include <fcntl.h>
 #include <curl/curl.h>
@@ -2212,6 +2215,21 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         // Any other checks should go here
         //
+
+        // Preserve timestamp of downloaded file if requested
+        if (target->target->handle && target->target->handle->preservetime) {
+            long remote_filetime = -1;
+            curl_easy_getinfo(target->curl_handle, CURLINFO_FILETIME, &remote_filetime);
+            if (remote_filetime >= 0) {
+                const struct timeval tv[] = {{remote_filetime, 0}, {remote_filetime, 0}};
+                if (futimes(fileno(target->f), tv) == -1)
+                    g_debug("%s: Failed to change timestamps of downloaded file.", __func__);
+            } else {
+                g_debug("%s: Unable to get remote time of retrieved document \"%s\"",
+                        __func__, target->target->path);
+            }
+        }
+
 
 transfer_error:
 

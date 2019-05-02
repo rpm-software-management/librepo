@@ -378,6 +378,10 @@ Version contants
 
     *Boolean* Enable/Disable EPSV (Extended Passive mode) for FTP.
 
+.. data:: LRO_PRESERVETIME
+
+    *Boolean* If enabled, librepo will try to keep timestamps of the downloaded files
+    in sync with that on the remote side.
 
 .. _handle-info-options-label:
 
@@ -1409,6 +1413,10 @@ class Handle(_librepo.Handle):
     .. attribute:: ftpuseepsv
 
         See :data:`.LRO_FTPUSEEPSV`
+
+    .. attribute:: preservetime
+
+        See :data:`.LRO_PRESERVETIME`
 
     """
 

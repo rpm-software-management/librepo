@@ -64,6 +64,7 @@ lr_get_curl_handle()
     curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2);
     curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1);
     curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT);
+    curl_easy_setopt(h, CURLOPT_FILETIME, 0);
 
     return h;
 }
@@ -110,6 +111,7 @@ lr_handle_init(void)
     handle->proxyauthmethods = LRO_PROXYAUTHMETHODS_DEFAULT;
     handle->ftpuseepsv = LRO_FTPUSEEPSV_DEFAULT;
     handle->cachedir = NULL;
+    handle->preservetime = 0;
 
     return handle;
 }
@@ -723,6 +725,11 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_CACHEDIR:
         if (handle->cachedir) lr_free(handle->cachedir);
         handle->cachedir = g_strdup(va_arg(arg, char *));
+        break;
+
+    case LRO_PRESERVETIME:
+        handle->preservetime = va_arg(arg, long) ? 1 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_FILETIME, handle->preservetime);
         break;
 
     default:

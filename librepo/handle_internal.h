@@ -219,6 +219,9 @@ struct _LrHandle {
     gchar *cachedir; /*!<
         Base cache dir for repositories */
 
+    long preservetime; /*!<
+        Preserve timestapms of downloaded files */
+
     LrUrlVars *yumslist;
 };
 
