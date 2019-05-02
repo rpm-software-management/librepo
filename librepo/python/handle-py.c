@@ -374,6 +374,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_SSLVERIFYHOST:
     case LRO_ADAPTIVEMIRRORSORTING:
     case LRO_FTPUSEEPSV:
+    case LRO_PRESERVETIME:
     case LRO_OFFLINE:
     {
         long d;
