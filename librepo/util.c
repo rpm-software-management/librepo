@@ -187,6 +187,7 @@ lr_pathconcat(const char *first, ...)
     size_t total_len;  // Maximal len of result
     size_t offset = 0;
     int is_first = 1;
+    char *qmark_section;
     int previous_was_empty = 0; // If last chunk was "" then separator will be
                                 // appended to the result
 
@@ -202,6 +203,8 @@ lr_pathconcat(const char *first, ...)
 
     if (total_len == 0)
         return g_strdup("");
+
+    qmark_section = strchr(first, '?');
 
     res = lr_malloc(total_len + separator_len + 1);
 
@@ -227,6 +230,8 @@ lr_pathconcat(const char *first, ...)
 
         start = current;
         end = start + current_len;
+         if (is_first && qmark_section)
+             end -= strlen(qmark_section);
 
         /* Skip leading separators - except first element */
         if (separator_len && is_first == 0) {
@@ -259,6 +264,11 @@ lr_pathconcat(const char *first, ...)
         offset += end - start;
     }
     va_end(args);
+
+    if (qmark_section) {
+        strcpy(res + offset, qmark_section);
+        offset += strlen(qmark_section);
+    }
 
     assert(offset <= total_len);
 
