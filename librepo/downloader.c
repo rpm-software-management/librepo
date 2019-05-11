@@ -2326,8 +2326,14 @@ transfer_error:
                   g_error_free(transfer_err);  // Ignore the error
 
                   // Truncate file - remove downloaded garbage (error html page etc.)
-                  if (!truncate_transfer_file(target, err))
-                      return FALSE;
+                  #ifdef WITH_ZCHUNK
+                  if (!target->target->is_zchunk || target->zck_state == LR_ZCK_DL_HEADER) {
+                  #endif
+                    if (!truncate_transfer_file(target, err))
+                        return FALSE;
+                  #ifdef WITH_ZCHUNK
+                  }
+                  #endif
                 }
             }
 
