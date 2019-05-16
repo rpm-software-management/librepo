@@ -1450,7 +1450,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
             goto fail;
         }
 
-        // If zchunk is finished, we're done
+        // If zchunk is finished, we're done, so move to next target
         if(target->zck_state == LR_ZCK_DL_FINISHED) {
             g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
             target->state = LR_DS_FINISHED;
@@ -1461,7 +1461,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
             fclose(target->f);
             target->f = NULL;
             lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
-            return TRUE;
+            return prepare_next_transfer(dd, candidatefound, err);
         }
     }
     # endif /* WITH_ZCHUNK */
