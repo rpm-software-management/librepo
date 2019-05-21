@@ -32,6 +32,30 @@
 #include "util.h"
 #include "gpg.h"
 
+static void
+kill_gpg_agent(gpgme_ctx_t context, const char *home_dir)
+{
+    gpgme_error_t gpgerr;
+
+    gpgerr = gpgme_set_protocol(context, GPGME_PROTOCOL_ASSUAN);
+    if (gpgerr != GPG_ERR_NO_ERROR) {
+        g_warning("%s: gpgme_set_protocol: %s", __func__, gpgme_strerror(gpgerr));
+        return;
+    }
+    if (home_dir) {
+        gchar * gpg_agent_sock = g_build_filename(home_dir, "S.gpg-agent", NULL);
+        gpgerr = gpgme_ctx_set_engine_info(context, GPGME_PROTOCOL_ASSUAN, gpg_agent_sock, home_dir);
+        g_free(gpg_agent_sock);
+        if (gpgerr != GPG_ERR_NO_ERROR) {
+            g_warning("%s: gpgme_ctx_set_engine_info: %s", __func__, gpgme_strerror(gpgerr));
+            return;
+        }
+    }
+    gpgerr = gpgme_op_assuan_transact_ext(context, "KILLAGENT", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    if (gpgerr != GPG_ERR_NO_ERROR)
+        g_debug("%s: gpgme_op_assuan_transact_ext: %s", __func__, gpgme_strerror(gpgerr));
+}
+
 gboolean
 lr_gpg_check_signature_fd(int signature_fd,
                           int data_fd,
@@ -295,6 +319,14 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
     }
 
     close(key_fd);
+
+    // Running gpg-agent kept opened sockets on the system.
+    // It tries to exit gpg-agent. Path to the communication socket is derived from homedir.
+    // The gpg-agent automaticaly removes all its socket before exit.
+    // Newer gpg-agent creates sockets under [/var]/run/user/{pid}/... if directory exists.
+    // In this case gpg-agent will not be exited.
+    kill_gpg_agent(context, home_dir);
+
     gpgme_release(context);
 
     return TRUE;
