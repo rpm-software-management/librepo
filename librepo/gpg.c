@@ -255,18 +255,6 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
             gpgme_release(context);
             return FALSE;
         }
-
-        // It configures the gpg agent to run in server mode and to wait for stdin commands.
-        // The default gpg agent mode is to create a socket and listen for commands there.
-        gchar * gpg_agent_conf_fn = g_strconcat(home_dir, "/gpg-agent.conf", NULL);
-        int confFd = open(gpg_agent_conf_fn,
-                          O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-        g_free(gpg_agent_conf_fn);
-        if (confFd != -1) {
-            const char * const agentConfig = "server\n";
-            write(confFd, agentConfig, strlen(agentConfig));
-            close(confFd);
-        }
     }
 
     gpgme_set_armor(context, 1);
