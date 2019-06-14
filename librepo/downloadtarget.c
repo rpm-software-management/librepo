@@ -100,6 +100,7 @@ lr_downloadtarget_new(LrHandle *handle,
     target->fn              = lr_string_chunk_insert(target->chunk, fn);
     target->checksums       = possiblechecksums;
     target->expectedsize    = expectedsize;
+    target->origsize        = expectedsize;
     target->resume          = resume;
     target->progresscb      = progresscb;
     target->cbdata          = cbdata;

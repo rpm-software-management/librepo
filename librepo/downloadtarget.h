@@ -88,6 +88,10 @@ typedef struct {
     gint64 expectedsize; /*!<
         Expected size of the target */
 
+    gint64 origsize; /*!<
+        Original expected size of the target.  Sometimes expectedsize will
+        change, especially if zchunk is in use, but this will never change */
+
     gboolean resume; /*!<
         Resume:
          0  - no resume, download whole file,
