@@ -473,7 +473,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     }
 
     #ifdef WITH_ZCHUNK
-    if(lrtarget->target->is_zchunk)
+    if(lrtarget->target->is_zchunk && lrtarget->mirror->max_ranges > 0)
         return lr_zckheadercb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
@@ -586,7 +586,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     size_t cur_written;
     LrTarget *target = (LrTarget *) userdata;
     #ifdef WITH_ZCHUNK
-    if(target->target->is_zchunk)
+    if(target->target->is_zchunk && target->mirror->max_ranges > 0)
         return lr_zck_writecb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
@@ -1239,6 +1239,12 @@ check_zck(LrTarget *target, GError **err)
 {
     assert(!err || *err == NULL);
     assert(target && target->f && target->target);
+
+    if(target->mirror->max_ranges == 0) {
+        target->zck_state = LR_ZCK_DL_BODY;
+        target->target->expectedsize = target->target->origsize;
+        return TRUE;
+    }
 
     if(target->target->zck_dl == NULL) {
         target->target->zck_dl = zck_dl_init(NULL);
@@ -2166,25 +2172,34 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         if (target->target->is_zchunk) {
             zckCtx *zck = NULL;
             if (target->zck_state == LR_ZCK_DL_HEADER) {
-                if(!lr_zck_valid_header(target->target, target->target->path,
+                if(target->mirror->max_ranges > 0 &&
+                   !lr_zck_valid_header(target->target, target->target->path,
                                         fd, &transfer_err))
                     goto transfer_error;
             } else if(target->zck_state == LR_ZCK_DL_BODY) {
-                zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
-                if(zck == NULL) {
-                    g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_ZCK,
-                                "Unable to get zchunk file from download context");
-                    goto transfer_error;
+                if(target->mirror->max_ranges > 0) {
+                    zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
+                    if(zck == NULL) {
+                        g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                                    "Unable to get zchunk file from download context");
+                        goto transfer_error;
+                    }
+                    if(zck_failed_chunks(zck) == 0 && zck_missing_chunks(zck) == 0)
+                        target->zck_state = LR_ZCK_DL_FINISHED;
+                } else {
+                    if(target->range_fail) {
+                        target->range_fail = FALSE;
+                    } else {
+                        target->zck_state = LR_ZCK_DL_FINISHED;
+                    }
                 }
-                if(zck_failed_chunks(zck) == 0 && zck_missing_chunks(zck) == 0)
-                    target->zck_state = LR_ZCK_DL_FINISHED;
             }
             if(target->zck_state == LR_ZCK_DL_FINISHED) {
                 zck = lr_zck_init_read(target->target, target->target->path, fd,
                                        &transfer_err);
                 if(!zck)
                     goto transfer_error;
-                if(!zck_validate_checksums(zck)) {
+                if(zck_validate_checksums(zck) < 1) {
                     zck_free(&zck);
                     g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_BADCHECKSUM,
                                 "At least one of the zchunk checksums doesn't match in %s",
