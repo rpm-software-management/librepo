@@ -691,64 +691,81 @@ select_suitable_mirror(LrDownload *dd,
     assert(!err || *err == NULL);
 
     *selected_mirror = NULL;
+    // mirrors_iterated is used to allow to use mirrors multiple times for a target
+    int mirrors_iterated = 0;
+    //  Iterate over mirrors for the target. If no suitable mirror is found on
+    //  the first iteration, relax the conditions (by allowing previously
+    //  failing mirrors to be used again) and do additional iterations up to
+    //  number af allowed failures equal to dd->allowed_mirror_failures.
+    do {
+        // Iterate over mirror for the target
+        for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
+            LrMirror *c_mirror = elem->data;
+            gchar *mirrorurl = c_mirror->mirror->url;
 
-    // Iterate over mirror for the target
-    for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
-        LrMirror *c_mirror = elem->data;
-        gchar *mirrorurl = c_mirror->mirror->url; // shortcut
+            // first iteration, filter out mirrors that failed previously
+            if (mirrors_iterated == 0) {
+                if (g_slist_find(target->tried_mirrors, c_mirror)) {
+                    // This mirror was already tried for this target
+                    continue;
+                }
+                if (c_mirror->successful_transfers == 0 &&
+                    dd->allowed_mirror_failures > 0 &&
+                    c_mirror->failed_transfers >= dd->allowed_mirror_failures)
+                {
+                    // Skip bad mirrors
+                    g_debug("%s: Skipping bad mirror (%d failures and no success): %s",
+                            __func__, c_mirror->failed_transfers, mirrorurl);
+                    continue;
+                }
+            // On subsequent iterations, only skip mirrors that failed proportionally to the number
+            // of iterations. It allows to reuse mirrors with low number of failures first.
+            } else if (mirrors_iterated < c_mirror->failed_transfers) {
+                continue;
+            }
 
-        if (g_slist_find(target->tried_mirrors, c_mirror)) {
-            // This mirror was already tried for this target
-            continue;
+            if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
+                if (mirrors_iterated == 0) {
+                    // Skip rsync mirrors
+                    g_debug("%s: Skipping rsync url: %s", __func__, mirrorurl);
+                }
+                continue;
+            }
+
+            if (target->handle
+                && target->handle->offline
+                && c_mirror->mirror->protocol != LR_PROTOCOL_FILE)
+            {
+                if (mirrors_iterated == 0) {
+                    // Skip each url that doesn't have "file://" or "file:" prefix
+                    g_debug("%s: Skipping mirror %s - Offline mode enabled", __func__, mirrorurl);
+                }
+                continue;
+            }
+
+            at_least_one_suitable_mirror_found = TRUE;
+
+            // Number of transfers which are downloading from the mirror
+            // should always be lower or equal than maximum allowed number
+            // of connection to a single host.
+            assert(dd->max_connection_per_host == -1 ||
+                c_mirror->running_transfers <= dd->max_connection_per_host);
+
+            // Init max of allowed parallel connections from config
+            init_once_allowed_parallel_connections(c_mirror, dd->max_connection_per_host);
+
+            // Check number of connections to the mirror
+            if (is_parallel_connections_limited_and_reached(c_mirror))
+            {
+                continue;
+            }
+
+            // This mirror looks suitable - use it
+            *selected_mirror = c_mirror;
+            return TRUE;
         }
-
-        if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
-            // Skip rsync mirrors
-            g_debug("%s: Skipping rsync url: %s", __func__, mirrorurl);
-            continue;
-        }
-
-        if (target->handle
-            && target->handle->offline
-            && c_mirror->mirror->protocol != LR_PROTOCOL_FILE)
-        {
-            // Skip each url that doesn't have "file://" or "file:" prefix
-            g_debug("%s: Skipping mirror %s - Offline mode enabled",
-                    __func__, mirrorurl);
-            continue;
-        }
-
-        if (c_mirror->successful_transfers == 0 &&
-            dd->allowed_mirror_failures > 0 &&
-            c_mirror->failed_transfers >= dd->allowed_mirror_failures)
-        {
-            // Skip bad mirrors
-            g_debug("%s: Skipping bad mirror (%d failures and no success): %s",
-                    __func__, c_mirror->failed_transfers, mirrorurl);
-            continue;
-        }
-
-        at_least_one_suitable_mirror_found = TRUE;
-
-        // Number of transfers which are downloading from the mirror
-        // should always be lower or equal than maximum allowed number
-        // of connection to a single host.
-        assert(dd->max_connection_per_host == -1 ||
-               c_mirror->running_transfers <= dd->max_connection_per_host);
-
-        // Init max of allowed parallel connections from config
-        init_once_allowed_parallel_connections(c_mirror, dd->max_connection_per_host);
-
-        // Check number of connections to the mirror
-        if (is_parallel_connections_limited_and_reached(c_mirror))
-        {
-            continue;
-        }
-
-        // This mirror looks suitable - use it
-        *selected_mirror = c_mirror;
-        return TRUE;
-    }
+    } while (g_slist_length(target->tried_mirrors) < dd->allowed_mirror_failures &&
+    ++mirrors_iterated < dd->allowed_mirror_failures);
 
     if (!at_least_one_suitable_mirror_found) {
         // No suitable mirror even exists => Set transfer as failed
