@@ -293,8 +293,11 @@ is_max_mirrors_unlimited(const LrDownload *download)
 }
 
 static gboolean
-can_try_more_mirrors(const LrDownload *download, int num_of_tried_mirrors)
+can_try_more(const LrDownload *download, int num_of_tried_mirrors, gboolean complete_path_or_baseurl)
 {
+    if (complete_path_or_baseurl) {
+        return download->allowed_mirror_failures > num_of_tried_mirrors;
+    }
     return is_max_mirrors_unlimited(download) ||
            num_of_tried_mirrors < download->max_mirrors_to_try;
 }
@@ -2324,16 +2327,14 @@ transfer_error:
                 }
             }
 
-            if (!fatal_error &&
-                !complete_url_in_path &&
-                !target->target->baseurl)
+            if (!fatal_error)
             {
 
                 // Temporary error (serious_error) during download occured and
                 // another transfers are running or there are successful transfers
                 // and fewer failed transfers than tried parallel connections. It may be mirror is OK
                 // but accepts fewer parallel connections.
-                if (serious_error &&
+                if (serious_error && target->mirror &&
                     (has_running_transfers(target->mirror) ||
                       (target->mirror->successful_transfers > 0 &&
                         target->mirror->failed_transfers < target->mirror->max_tried_parallel_connections)))
@@ -2348,11 +2349,15 @@ transfer_error:
                     target->tried_mirrors = g_slist_remove(target->tried_mirrors, target->mirror);
                     num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
                 }
-
-                if (can_try_more_mirrors(dd, num_of_tried_mirrors))
+                gboolean complete_url_or_baseurl = complete_url_in_path || target->target->baseurl;
+                if (can_try_more(dd, num_of_tried_mirrors, complete_url_or_baseurl))
                 {
-                  // Try another mirror
-                  g_debug("%s: Ignore error - Try another mirror", __func__);
+                  // Try another mirror or retry
+                  if (complete_url_or_baseurl) {
+                      g_debug("%s: Ignore error - Retry download", __func__);
+                  } else {
+                      g_debug("%s: Ignore error - Try another mirror", __func__);
+                  }
                   target->state = LR_DS_WAITING;
                   retry = TRUE;
                   g_error_free(transfer_err);  // Ignore the error
