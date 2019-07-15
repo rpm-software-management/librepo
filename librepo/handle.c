@@ -789,6 +789,28 @@ lr_handle_prepare_urls(LrHandle *handle, GError **err)
 }
 
 static gboolean
+lr_yum_download_url_retry(int attempts, LrHandle *lr_handle, const char *url,
+                          int fd, gboolean no_cache, gboolean is_zchunk,
+                          GError **err)
+{
+    gboolean ret = FALSE;
+
+    for (int i = 1;; i++) {
+        ret = lr_yum_download_url(lr_handle, url, fd, no_cache, is_zchunk, err);
+        if (ret)
+            return ret;
+
+        if (i >= attempts)
+            return ret; // Caller to handle the last err
+
+        g_debug("%s: Attempt #%d to download %s failed: %s",
+                __func__, i, url, (*err)->message);
+        ftruncate(fd, 0);
+        g_clear_error (err);
+    }
+}
+
+static gboolean
 lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
 {
     assert(handle->mirrorlist_fd == -1);
@@ -845,7 +867,7 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->mirrorlisturl);
-        if (!lr_yum_download_url(handle, url, fd, TRUE, FALSE, err)) {
+        if (!lr_yum_download_url_retry(3, handle, url, fd, TRUE, FALSE, err)) {
             close(fd);
             return FALSE;
         }
@@ -960,7 +982,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->metalinkurl);
-        if (!lr_yum_download_url(handle, url, fd, TRUE, FALSE, err)) {
+        if (!lr_yum_download_url_retry(3, handle, url, fd, TRUE, FALSE, err)) {
             close(fd);
             return FALSE;
         }
