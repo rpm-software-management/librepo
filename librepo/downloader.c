@@ -293,7 +293,14 @@ is_max_mirrors_unlimited(const LrDownload *download)
 }
 
 static gboolean
-can_try_more(const LrDownload *download, int num_of_tried_mirrors, gboolean complete_path_or_baseurl)
+/**
+ * @brief Returns whether the download can be retried, using the same URL in case of baseurl or full
+ *        path, or using another mirror in case of using mirrors.
+ *
+ * @param complete_path_or_baseurl determine type of download - mirrors or baseurl/fullpath
+ * @return gboolean Return TRUE when another chance to download is allowed.
+ */
+can_retry_download(const LrDownload *download, int num_of_tried_mirrors, gboolean complete_path_or_baseurl)
 {
     if (complete_path_or_baseurl) {
         return download->allowed_mirror_failures > num_of_tried_mirrors;
@@ -2329,7 +2336,6 @@ transfer_error:
 
             if (!fatal_error)
             {
-
                 // Temporary error (serious_error) during download occured and
                 // another transfers are running or there are successful transfers
                 // and fewer failed transfers than tried parallel connections. It may be mirror is OK
@@ -2349,8 +2355,10 @@ transfer_error:
                     target->tried_mirrors = g_slist_remove(target->tried_mirrors, target->mirror);
                     num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
                 }
+                // complete_url_in_path and target->baseurl doesn't have an alternatives like using
+                // mirrors, therefore they are handled differently
                 gboolean complete_url_or_baseurl = complete_url_in_path || target->target->baseurl;
-                if (can_try_more(dd, num_of_tried_mirrors, complete_url_or_baseurl))
+                if (can_retry_download(dd, num_of_tried_mirrors, complete_url_or_baseurl))
                 {
                   // Try another mirror or retry
                   if (complete_url_or_baseurl) {
