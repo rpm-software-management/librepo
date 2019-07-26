@@ -725,6 +725,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
         h.urls = [url]
         h.repotype = librepo.LR_YUMREPO
+        h.allowedmirrorfailures = 1
 
         fn = os.path.join(self.tmpdir, "package.rpm")
 
