@@ -965,7 +965,7 @@ add_librepo_xattr(int fd, const gchar *fn)
     else
         dst = g_strdup(fn);
 
-    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "", 1, 0);
+    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "1", 1, 0);
     if (attr_ret == -1) {
         g_debug("%s: Cannot set xattr %s (%s): %s",
                 __func__, XATTR_LIBREPO, dst, g_strerror(errno));
@@ -991,9 +991,20 @@ has_librepo_xattr(int fd)
 /** Remove Librepo extended attribute
  */
 static void
-remove_librepo_xattr(int fd)
+remove_librepo_xattr(LrDownloadTarget * target)
 {
+    int fd = target->fd;
+    if (fd != -1) {
+        fremovexattr(fd, XATTR_LIBREPO);
+        return;
+    }
+    // If file descriptor wasn't set, file name was, and we need to open it
+    fd = open(target->fn, O_RDWR, 0666);
+    if (fd == -1) {
+        return;
+    }
     fremovexattr(fd, XATTR_LIBREPO);
+    close(fd);
 }
 
 #ifdef WITH_ZCHUNK
@@ -2440,7 +2451,7 @@ transfer_error:
                 // Remove xattr that states that the file is being downloaded
                 // by librepo, because the file is now completly downloaded
                 // and the xattr is not needed (is is useful only for resuming)
-                remove_librepo_xattr(target->target->fd);
+                remove_librepo_xattr(target->target);
 
                 // Call end callback
                 LrEndCb end_cb = target->target->endcb;
