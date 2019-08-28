@@ -94,6 +94,18 @@ START_TEST(test_pathconcat)
     fail_if(strcmp(path, "foo/bar/"));
     lr_free(path);
     path = NULL;
+
+    path = lr_pathconcat("http://host.net", "path/to/somewhere", NULL);
+    fail_if(path == NULL);
+    fail_if(strcmp(path, "http://host.net/path/to/somewhere"));
+    lr_free(path);
+    path = NULL;
+
+    path = lr_pathconcat("http://host.net?hello=1", "path/to/", "somewhere", NULL);
+    fail_if(path == NULL);
+    fail_if(strcmp(path, "http://host.net/path/to/somewhere?hello=1"));
+    lr_free(path);
+    path = NULL;
 }
 END_TEST
 
