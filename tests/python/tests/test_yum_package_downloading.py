@@ -142,6 +142,27 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         pkg = os.path.join(self.tmpdir, config.PACKAGE_01_01)
         self.assertTrue(os.path.isfile(pkg))
 
+    def test_download_package_with_baseurl_and_arguments(self):
+        """
+        Tests that the path is correctly joined with a baseurl that has a
+        http argument after a question mark.
+        """
+        h = librepo.Handle()
+
+        url = "%s%s" % (self.MOCKURL, config.BADURL)
+        baseurl = "%s%s?hello=1" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.download(config.PACKAGE_01_01,
+                   checksum=config.PACKAGE_01_01_SHA256,
+                   checksum_type=librepo.CHECKSUM_SHA256,
+                   base_url=baseurl)
+
+        pkg = os.path.join(self.tmpdir, config.PACKAGE_01_01)
+        self.assertTrue(os.path.isfile(pkg))
+
 class TestCaseYumPackagesDownloading(TestCaseWithFlask):
     application = app
 
