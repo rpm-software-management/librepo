@@ -676,8 +676,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     assert(nmemb > 0);
     cur_written = fwrite(ptr, size, nmemb, target->f);
     if (cur_written != nmemb) {
-        g_debug("%s: Error while writing out file: %s",
-                __func__, g_strerror(errno));
+        g_warning("Error while writing file: %s", g_strerror(errno));
         return 0; // There was an error
     }
 
@@ -861,13 +860,13 @@ select_next_target(LrDownload *dd,
         {
             // Used relative path with empty internal mirrorlist
             // and no basepath specified!
-            g_debug("%s: Empty mirrorlist and no basepath specified", __func__);
+            g_warning("Empty mirrorlist and no basepath specified");
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
                         "Empty mirrorlist and no basepath specified!");
             return FALSE;
         }
 
-        g_debug("%s: Selecting mirror for: %s", __func__, target->target->path);
+        g_debug("Selecting mirror for: %s", target->target->path);
 
         // Prepare full target URL
 
@@ -1046,8 +1045,8 @@ find_local_zck_header(LrTarget *target, GError **err)
             lr_get_recursive_files(target->handle->cachedir, ".zck",
                                    &tmp_err);
         if(tmp_err) {
-            g_debug("%s: Error reading cache directory %s: %s", __func__,
-                    target->handle->cachedir, tmp_err->message);
+            g_warning("Error reading cache directory %s: %s",
+                      target->handle->cachedir, tmp_err->message);
             g_clear_error(&tmp_err);
         }
 
@@ -1063,8 +1062,7 @@ find_local_zck_header(LrTarget *target, GError **err)
 
             int chk_fd = open(file->data, O_RDONLY);
             if (chk_fd < 0) {
-                g_debug("%s: Unable to open %s: %s", __func__, cf,
-                        g_strerror(errno));
+                g_warning("Unable to open %s: %s", cf, g_strerror(errno));
                 continue;
             }
             if(lr_zck_valid_header(target->target, (char *)file->data, chk_fd,
@@ -1081,7 +1079,7 @@ find_local_zck_header(LrTarget *target, GError **err)
                     found = TRUE;
                     break;
                 } else {
-                    g_debug("%s: Error copying file", __func__);
+                    g_warning("Error copying file");
                     g_clear_error(&tmp_err);
                 }
             } else {
@@ -1131,8 +1129,7 @@ prep_zck_header(LrTarget *target, GError **err)
             target->zck_state = LR_ZCK_DL_BODY_CK;
             return TRUE;
         } else {
-            g_debug("%s: Error reading validated header: %s", __func__,
-                    tmp_err->message);
+            g_warning("Error reading validated header: %s", tmp_err->message);
             g_clear_error(&tmp_err);
         }
     } else {
@@ -1190,8 +1187,8 @@ find_local_zck_chunks(LrTarget *target, GError **err)
             lr_get_recursive_files(target->handle->cachedir, ".zck",
                                    &tmp_err);
         if(tmp_err) {
-            g_debug("%s: Error reading cache directory %s: %s", __func__,
-                    target->handle->cachedir, tmp_err->message);
+            g_warning("Error reading cache directory %s: %s",
+                      target->handle->cachedir, tmp_err->message);
             g_clear_error(&tmp_err);
         }
 
@@ -1207,8 +1204,7 @@ find_local_zck_chunks(LrTarget *target, GError **err)
 
             int chk_fd = open(file->data, O_RDONLY);
             if (chk_fd < 0) {
-                g_debug("%s: Unable to open %s: %s", __func__, cf,
-                        g_strerror(errno));
+                g_warning("Unable to open %s: %s", cf, g_strerror(errno));
                 continue;
             }
 
@@ -1219,7 +1215,7 @@ find_local_zck_chunks(LrTarget *target, GError **err)
             }
 
             if(!zck_copy_chunks(zck_src, zck)) {
-                g_debug("%s: Error copying chunks from %s to %s", __func__, cf, uf);
+                g_warning("Error copying chunks from %s to %s", cf, uf);
                 zck_free(&zck_src);
                 close(chk_fd);
                 continue;
@@ -1443,7 +1439,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     *candidatefound = TRUE;
 
-    g_debug("%s: URL: %s", __func__, full_url);
+    g_info("Downloading: %s", full_url);
 
     protocol = lr_detect_protocol(full_url);
 
@@ -1847,20 +1843,20 @@ check_finished_transfer_status(CURLMsg *msg,
             case CURLE_SSL_CRL_BADFILE:
             case CURLE_WRITE_ERROR:
                 // Fatal error
-                g_debug("%s: Fatal error - Curl code (%d): %s for %s [%s]",
-                        __func__, msg->data.result,
-                        curl_easy_strerror(msg->data.result),
-                        effective_url,
-                        target->errorbuffer);
+                g_info("Fatal error - Curl code (%d): %s for %s [%s]",
+                       msg->data.result,
+                       curl_easy_strerror(msg->data.result),
+                       effective_url,
+                       target->errorbuffer);
                 *fatal_error = TRUE;
                 break;
             case CURLE_OPERATION_TIMEDOUT:
                 // Serious error
-                g_debug("%s: Serious error - Curl code (%d): %s for %s [%s]",
-                        __func__, msg->data.result,
-                        curl_easy_strerror(msg->data.result),
-                        effective_url,
-                        target->errorbuffer);
+                g_info("Serious error - Curl code (%d): %s for %s [%s]",
+                       msg->data.result,
+                       curl_easy_strerror(msg->data.result),
+                       effective_url,
+                       target->errorbuffer);
                 *serious_error = TRUE;
                 break;
             default:
@@ -2194,8 +2190,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                                                  // persistent to survive
                                                  // the curl_easy_cleanup()
 
-        g_debug("%s: Transfer finished: %s (Effective url: %s)",
-                __func__, target->target->path, effective_url);
+        g_debug("Transfer finished: %s (Effective url: %s)", target->target->path, effective_url);
 
         //
         // Check status of finished transfer
@@ -2325,7 +2320,7 @@ transfer_error:
             guint num_of_tried_mirrors = g_slist_length(target->tried_mirrors);
             gboolean retry = FALSE;
 
-            g_debug("%s: Error during transfer: %s", __func__, transfer_err->message);
+            g_info("Error during transfer: %s", transfer_err->message);
 
             // Call mirrorfailure callback
             LrMirrorFailureCb mf_cb =  target->target->mirrorfailurecb;
@@ -2339,9 +2334,8 @@ transfer_error:
                 } else if (rc == LR_CB_ERROR) {
                     gchar *original_err_msg = g_strdup(transfer_err->message);
                     g_clear_error(&transfer_err);
-                    g_debug("%s: Downloading was aborted by LR_CB_ERROR from "
-                            "mirror failure callback. Original error was: "
-                            "%s", __func__, original_err_msg);
+                    g_info("Downloading was aborted by LR_CB_ERROR from "
+                           "mirror failure callback. Original error was: %s", original_err_msg);
                     g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
                                 "Downloading was aborted by LR_CB_ERROR from "
                                 "mirror failure callback. Original error was: "
@@ -2669,7 +2663,7 @@ lr_download_cleanup:
 
     if (tmp_err) {
         // If there was an error, stop all transfers that are in progress.
-        g_debug("%s: Error while downloading: %s", __func__, tmp_err->message);
+        g_info("Error while downloading: %s", tmp_err->message);
 
         for (GSList *elem = dd.running_transfers; elem; elem = g_slist_next(elem)){
             LrTarget *target = elem->data;
@@ -2736,8 +2730,7 @@ lr_download_cleanup:
                 if (target->target->fn) {
                     // We can remove only files that were specified by fn
                     if (unlink(target->target->fn) != 0) {
-                        g_debug("%s: Error while removing: %s",
-                                __func__, g_strerror(errno));
+                        g_warning("Error while removing: %s", g_strerror(errno));
                     }
                 }
             }

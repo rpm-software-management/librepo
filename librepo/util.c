@@ -75,11 +75,11 @@ lr_log_librepo_summary(void)
     _cleanup_free_ gchar *time = NULL;
     _cleanup_date_time_unref_ GDateTime *datetime = NULL;
 
-    g_debug("Librepo version: %d.%d.%d%s (%s)", LR_VERSION_MAJOR,
-                                                LR_VERSION_MINOR,
-                                                LR_VERSION_PATCH,
-                                                EINTR_SUPPORT,
-                                                curl_version());
+    g_info("Librepo version: %d.%d.%d%s (%s)", LR_VERSION_MAJOR,
+                                               LR_VERSION_MINOR,
+                                               LR_VERSION_PATCH,
+                                               EINTR_SUPPORT,
+                                               curl_version());
 
     datetime = g_date_time_new_now_local();
     // Date+Time in ISO 8601 format
@@ -298,7 +298,7 @@ lr_remove_dir_cb(const char *fpath,
 {
     int rv = remove(fpath);
     if (rv)
-        g_debug("%s: Cannot remove: %s: %s", __func__, fpath, g_strerror(errno));
+        g_warning("Cannot remove: %s: %s", fpath, g_strerror(errno));
     return rv;
 }
 
@@ -342,7 +342,7 @@ lr_prepend_url_protocol(const char *path)
 
     char *path_with_protocol, *resolved_path = realpath(path, NULL);
     if (!resolved_path) {
-        g_debug("%s: %s - realpath: %s ", __func__, path, g_strerror(errno));
+        g_warning("Error resolving real path of %s: %s", path, g_strerror(errno));
         return NULL;
     }
     path_with_protocol = g_strconcat("file://", resolved_path, NULL);
@@ -367,7 +367,7 @@ lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
                              void *cbdata,
                              GError **err G_GNUC_UNUSED)
 {
-    g_debug("WARNING: %s: %s", (char *) cbdata, msg);
+    g_warning("WARNING: %s: %s", (char *) cbdata, msg);
     return LR_CB_RET_OK;
 }
 
@@ -669,8 +669,7 @@ lr_get_recursive_files_rec(char *path, char *extension, GSList **filelist,
         if(g_file_test(fullpath, G_FILE_TEST_IS_DIR)) {
             lr_get_recursive_files_rec(fullpath, extension, filelist, &tmp_err);
             if(tmp_err) {
-                g_debug("%s: Unable to read directory %s: %s\n", __func__,
-                        fullpath, tmp_err->message);
+                g_warning("Unable to read directory %s: %s", fullpath, tmp_err->message);
                 g_clear_error(&tmp_err);
             }
             g_free(fullpath);
