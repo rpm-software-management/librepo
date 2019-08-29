@@ -272,7 +272,7 @@ lr_handle_setopt(LrHandle *handle,
 
     case LRO_MIRRORLIST:
         // DEPRECATED!
-        g_debug("%s: WARNING! Deprecated LRO_MIRRORLIST used", __func__);
+        g_warning("WARNING! Deprecated LRO_MIRRORLIST used");
         if (handle->mirrorlist) lr_free(handle->mirrorlist);
         handle->mirrorlist = g_strdup(va_arg(arg, char *));
 
@@ -996,7 +996,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
                                           "Metalink xml parser",
                                           err);
     if (!ret) {
-        g_debug("%s: Error while parsing metalink", __func__);
+        g_warning("Error while parsing metalink");
         close(fd);
         lr_metalink_free(ml);
         return FALSE;
@@ -1064,7 +1064,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
         ret = lr_handle_prepare_urls(handle, err);
         if (!ret) {
             assert(!err || *err);
-            g_debug("%s: LRO_URLS processing failed", __func__);
+            g_warning("LRO_URLS processing failed");
             return FALSE;
         }
     }
@@ -1074,7 +1074,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
         ret = lr_handle_prepare_mirrorlist(handle, local_path, err);
         if (!ret) {
             assert(!err || *err);
-            g_debug("%s: LRO_MIRRORLISTURL processing failed", __func__);
+            g_warning("LRO_MIRRORLISTURL processing failed");
             return FALSE;
         }
     }
@@ -1084,7 +1084,7 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
         ret = lr_handle_prepare_metalink(handle, local_path, err);
         if (!ret) {
             assert(!err || *err);
-            g_debug("%s: LRO_METALINKURL processing failed", __func__);
+            g_warning("LRO_METALINKURL processing failed");
             return FALSE;
         }
     }
