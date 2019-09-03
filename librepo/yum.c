@@ -468,12 +468,11 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
         lr_free(url);
         close(fd_sig);
         if (!ret) {
-            // Signature doesn't exist
-            g_debug("%s: GPG signature doesn't exists: %s",
-                    __func__, tmp_err->message);
+            // Error downloading signature
             g_set_error(err, LR_YUM_ERROR, LRE_BADGPG,
                         "GPG verification is enabled, but GPG signature "
-                                "repomd.xml.asc is not available: %s", tmp_err->message);
+                        "is not available. This may be an error or the "
+                        "repository does not support GPG verification: %s", tmp_err->message);
             g_clear_error(&tmp_err);
             unlink(signature);
             lr_free(signature);
@@ -1165,10 +1164,10 @@ lr_yum_use_local_load_base(LrHandle *handle,
 
         if (!repo->signature) {
             // Signature doesn't exist
-            g_debug("%s: GPG signature doesn't exists", __func__);
             g_set_error(err, LR_YUM_ERROR, LRE_BADGPG,
                         "GPG verification is enabled, but GPG signature "
-                        "repomd.xml.asc is not available");
+                        "repomd.xml.asc is not available. This may be an "
+                        "error or the repository does not support GPG verification.");
             return FALSE;
         }
 
