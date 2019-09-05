@@ -221,18 +221,20 @@ lr_checksum_fd_compare(LrChecksumType type,
         // Load cached checksum if enabled and used
         struct stat st;
         if (fstat(fd, &st) == 0) {
-            ssize_t attr_ret;
             _cleanup_free_ gchar *key = NULL;
             char buf[256];
 
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                                   (unsigned long long) st.st_mtime);
-            attr_ret = fgetxattr(fd, key, &buf, 256);
-            if (attr_ret != -1) {
+            ssize_t attr_size = fgetxattr(fd, key, &buf, sizeof(buf));
+            if (attr_size != -1) {
                 // Cached checksum found
                 g_debug("%s: Using checksum cached in xattr: [%s] %s",
                         __func__, key, buf);
-                *matches = strcmp(expected, buf) ? FALSE : TRUE;
+                size_t expected_len = strlen(expected);
+                // xattr may contain null terminator (+1 byte)
+                *matches = (attr_size == expected_len || attr_size == expected_len + 1) &&
+                           memcmp(expected, buf, attr_size) == 0;
                 return TRUE;
             }
         }
