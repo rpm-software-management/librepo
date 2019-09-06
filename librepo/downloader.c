@@ -51,6 +51,8 @@
 #include "url_substitution.h"
 #include "yum_internal.h"
 
+#include <unistd.h>
+
 volatile sig_atomic_t lr_interrupt = 0;
 
 void
@@ -702,12 +704,17 @@ select_suitable_mirror(LrDownload *dd,
 
     *selected_mirror = NULL;
     // mirrors_iterated is used to allow to use mirrors multiple times for a target
-    int mirrors_iterated = 0;
+    unsigned mirrors_iterated = 0;
     //  Iterate over mirrors for the target. If no suitable mirror is found on
     //  the first iteration, relax the conditions (by allowing previously
     //  failing mirrors to be used again) and do additional iterations up to
     //  number af allowed failures equal to dd->allowed_mirror_failures.
     do {
+        // Sleep when all mirrors were alredy tried
+        // It prevents to call same url inmediatly after fail
+        if (mirrors_iterated) {
+            sleep(mirrors_iterated);
+        }
         // Iterate over mirror for the target
         for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
             LrMirror *c_mirror = elem->data;
