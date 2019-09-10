@@ -112,12 +112,12 @@ typedef struct {
         Mirror */
     int allowed_parallel_connections; /*!<
         Maximum number of allowed parallel connections to this mirror. -1 means no limit.
-        Dynamicaly adjusted (decreased) if no fatal (temporary) error will occur. */
+        Dynamically adjusted (decreased) if no fatal (temporary) error will occur. */
     int max_tried_parallel_connections; /*!<
         The maximum number of tried parallel connections to this mirror
         (including unsuccessful). */
     int running_transfers; /*!<
-        How many transfers from this mirror are currently in progres. */
+        How many transfers from this mirror are currently in progress. */
     int successful_transfers; /*!<
         How many transfers was finished successfully from the mirror. */
     int failed_transfers; /*!<
@@ -511,7 +511,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
         } else if (lrtarget->protocol == LR_PROTOCOL_FTP) {
             // Headers of a FTP protocol
             if (g_str_has_prefix(header, "213 ")) {
-                // Code 213 shoud keep the file size
+                // Code 213 should keep the file size
                 gint64 content_length = g_ascii_strtoll(header+4, NULL, 0);
 
                 g_debug("%s: Server returned size: \"%s\" "
@@ -534,7 +534,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
                     lrtarget->headercb_state = LR_HCS_DONE;
                 }
             } else if (g_str_has_prefix(header, "150")) {
-                // Code 150 shoud keep the file size
+                // Code 150 should keep the file size
                 // TODO: See parse150 in /usr/lib64/python2.7/ftplib.py
             }
         }
@@ -676,7 +676,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     assert(nmemb > 0);
     cur_written = fwrite(ptr, size, nmemb, target->f);
     if (cur_written != nmemb) {
-        g_debug("%s: Error while writting out file: %s",
+        g_debug("%s: Error while writing out file: %s",
                 __func__, g_strerror(errno));
         return 0; // There was an error
     }
@@ -695,7 +695,7 @@ select_suitable_mirror(LrDownload *dd,
 
     gboolean at_least_one_suitable_mirror_found = FALSE;
     //  ^^^ This variable is used to indentify that all possible mirrors
-    // were already tried and the transfer shoud be marked as failed.
+    // were already tried and the transfer should be marked as failed.
 
     assert(dd);
     assert(target);
@@ -708,10 +708,10 @@ select_suitable_mirror(LrDownload *dd,
     //  Iterate over mirrors for the target. If no suitable mirror is found on
     //  the first iteration, relax the conditions (by allowing previously
     //  failing mirrors to be used again) and do additional iterations up to
-    //  number af allowed failures equal to dd->allowed_mirror_failures.
+    //  number of allowed failures equal to dd->allowed_mirror_failures.
     do {
-        // Sleep when all mirrors were alredy tried
-        // It prevents to call same url inmediatly after fail
+        // Sleep when all mirrors were already tried
+        // It prevents to call same url immediately after fail
         if (mirrors_iterated) {
             sleep(mirrors_iterated);
         }
@@ -806,7 +806,7 @@ select_suitable_mirror(LrDownload *dd,
                 g_debug("%s: Downloading was aborted by LR_CB_ERROR "
                         "from end callback", __func__);
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
-                        "Interupted by LR_CB_ERROR from end callback");
+                        "Interrupted by LR_CB_ERROR from end callback");
                 return FALSE;
             }
         }
@@ -927,7 +927,7 @@ select_next_target(LrDownload *dd,
                     g_debug("%s: Downloading was aborted by LR_CB_ERROR "
                             "from end callback", __func__);
                     g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
-                            "Interupted by LR_CB_ERROR from end callback");
+                            "Interrupted by LR_CB_ERROR from end callback");
                     return FALSE;
                 }
             }
@@ -959,7 +959,7 @@ select_next_target(LrDownload *dd,
 
 #define XATTR_LIBREPO   "user.Librepo.DownloadInProgress"
 
-/** Add an extendend attribute that indiciates that
+/** Add an extended attribute that indicates that
  * the file is being/was downloaded by Librepo
  */
 static void
@@ -1534,7 +1534,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     if (target->resume && target->resume_count >= LR_DOWNLOADER_MAXIMAL_RESUME_COUNT) {
         target->resume = FALSE;
-        g_debug("%s: Download resume ignored, maximal number of attemtps (%d)"
+        g_debug("%s: Download resume ignored, maximal number of attempts (%d)"
                 " has been reached", __func__, LR_DOWNLOADER_MAXIMAL_RESUME_COUNT);
     }
 
@@ -1565,7 +1565,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Add librepo extended attribute to the file
     // This xattr states that file is being downloaded by librepo
-    // This xattr is removed once the file is completly downloaded
+    // This xattr is removed once the file is completely downloaded
     // If librepo tries to resume a download, it checks if the xattr is present.
     // If it isn't the download is not resumed, but whole file is
     // downloaded again.
@@ -2190,9 +2190,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                           CURLINFO_EFFECTIVE_URL,
                           &effective_url);
 
-        effective_url = g_strdup(effective_url); // Make the effetive url
-                                                  // persistent to survive
-                                                  // the curl_easy_cleanup()
+        effective_url = g_strdup(effective_url); // Make the effective url
+                                                 // persistent to survive
+                                                 // the curl_easy_cleanup()
 
         g_debug("%s: Transfer finished: %s (Effective url: %s)",
                 __func__, target->target->path, effective_url);
@@ -2263,7 +2263,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             if (!ret) { // Error
                 g_propagate_prefixed_error(err, tmp_err, "Downloading from %s"
                         "was successful but error encountered while "
-                        "checksuming: ", effective_url);
+                        "checksumming: ", effective_url);
                 return FALSE;
             }
         #ifdef WITH_ZCHUNK
@@ -2354,7 +2354,7 @@ transfer_error:
 
             if (!fatal_error)
             {
-                // Temporary error (serious_error) during download occured and
+                // Temporary error (serious_error) during download occurred and
                 // another transfers are running or there are successful transfers
                 // and fewer failed transfers than tried parallel connections. It may be mirror is OK
                 // but accepts fewer parallel connections.
@@ -2456,7 +2456,7 @@ transfer_error:
                 target->state = LR_DS_FINISHED;
 
                 // Remove xattr that states that the file is being downloaded
-                // by librepo, because the file is now completly downloaded
+                // by librepo, because the file is now completely downloaded
                 // and the xattr is not needed (is is useful only for resuming)
                 remove_librepo_xattr(target->target);
 
@@ -2472,7 +2472,7 @@ transfer_error:
                                 "from end callback", __func__);
                         g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
                                     LRE_CBINTERRUPTED,
-                                    "Interupted by LR_CB_ERROR from end callback");
+                                    "Interrupted by LR_CB_ERROR from end callback");
                     }
                 }
                 if (target->mirror)
@@ -2529,7 +2529,7 @@ lr_perform(LrDownload *dd, GError **err)
             return FALSE;
         }
 
-        // Check if any handle finished and potentialy add one or more
+        // Check if any handle finished and potentially add one or more
         // waiting downloads to the multi_handle.
         int rc = check_transfer_statuses(dd, err);
         if (!rc)

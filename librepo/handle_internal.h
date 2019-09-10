@@ -161,13 +161,13 @@ struct _LrHandle {
         the library to consider it too slow and abort. */
 
     LrHandleMirrorFailureCb hmfcb; /*!<
-        Callaback called when a repodata download from a mirror fails. */
+        Callback called when a repodata download from a mirror fails. */
 
     gint64 maxspeed; /*!<
         Max speed in bytes per sec */
 
     long sslverifypeer; /*!<
-        Determines whether verify the autenticity of the peer's certificate */
+        Determines whether verify the authenticity of the peer's certificate */
 
     long sslverifyhost; /*!<
         Determines whether the server name should be checked against the name
@@ -220,7 +220,7 @@ struct _LrHandle {
         Base cache dir for repositories */
 
     long preservetime; /*!<
-        Preserve timestapms of downloaded files */
+        Preserve timestamps of downloaded files */
 
     LrUrlVars *yumslist;
 };

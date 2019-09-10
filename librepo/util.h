@@ -122,7 +122,7 @@ int lr_remove_dir(const char *path);
 
 /** Copy content from source file descriptor to the dest file descriptor.
  * @param source        Source opened file descriptor
- * @param dest          Destination openede file descriptor
+ * @param dest          Destination opened file descriptor
  * @return              0 on succes, -1 on error
  */
 int lr_copy_content(int source, int dest);
@@ -144,7 +144,7 @@ char *lr_prepend_url_protocol(const char *path);
 gchar *
 lr_string_chunk_insert(GStringChunk *chunk, const gchar *string);
 
-/** Warning callback to print warrnings via GLib logger
+/** Warning callback to print warnings via GLib logger
  * For more info take a look at ::LrXmlParserWarningCb
  */
 int
@@ -155,7 +155,7 @@ lr_xml_parser_warning_logger(LrXmlParserWarningType type G_GNUC_UNUSED,
 
 
 /** From the GSList of pointers to LrMetalinkHash objects, select the
- * strognest one which librepo could calculate.
+ * strongest one which librepo could calculate.
  * @param list      List of LrMetalinkHash*
  * @param type      Variable to store checksum type.
  * @param value     Variable to store pointer to value (pointer to original
@@ -183,7 +183,7 @@ lr_strv_dup(gchar **array);
 
 
 /** Check if string looks like a local path.
- * (This function doesn't do realpath resolving and existency checking)
+ * (This function doesn't do realpath resolving and existence checking)
  * If a path is empty, NULL or has protocol other then file:// specified
  * then the path is considered as remote, otherwise TRUE is returned.
  * @param path      A string path

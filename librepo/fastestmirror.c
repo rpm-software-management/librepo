@@ -38,6 +38,8 @@
 
 #define CACHE_GROUP_METADATA    ":_librepo_:"   // Group with metadata
 #define CACHE_KEY_TS            "ts"            // Timestamp
+// FIXME: next time the cache version is updated, please fix this typo! It
+// should obviously have been "connecttime".
 #define CACHE_KEY_CONNECTTIME   "connectime"    // Time of response
 #define CACHE_KEY_VERSION       "version"       // Version of cache format
 

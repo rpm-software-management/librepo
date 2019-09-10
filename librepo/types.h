@@ -183,7 +183,7 @@ typedef enum {
 
     LR_FMSTAGE_DETECTION, /*!<
         Detection (pinging) in progress.
-        If all data was loaded from cache, this stage is skiped.
+        If all data was loaded from cache, this stage is skipped.
         ptr is pointer to long. This is the number of how much
         mirrors have to be "pinged" */
 

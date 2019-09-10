@@ -578,10 +578,10 @@ lr_check_packages(GSList *targets,
                     g_debug("%s: Package %s is already downloaded (checksum matches)",
                             __func__, packagetarget->local_path);
                 } else {
-                    // Checksum doesn't match or checksuming error
+                    // Checksum doesn't match or checksumming error
                     packagetarget->err = g_string_chunk_insert(
                                                 packagetarget->chunk,
-                                                "Checksum of doesn't match");
+                                                "Checksum of file doesn't match");
                     if (failfast) {
                         ret = FALSE;
                         g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR,
