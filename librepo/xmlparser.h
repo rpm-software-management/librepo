@@ -49,7 +49,7 @@ typedef enum {
  * LR_CB_RET_OK then parsing is immediately interrupted.
  * @param type      Type of warning
  * @param msg       Warning msg. The message is destroyed after the call.
- *                  If you want touse the message later, you have to copy it.
+ *                  If you want to use the message later, you have to copy it.
  * @param cbdata    User data.
  * @param err       GError **
  * @return          LR_CB_RET_OK (0) or LR_CB_RET_ERR (1) - stops the parsing

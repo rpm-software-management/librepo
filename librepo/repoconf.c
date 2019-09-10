@@ -353,7 +353,7 @@ lr_convert_interval_to_seconds(const char *str,
     // String doesn't start with numbers
     if (endptr == str) {
         g_set_error(err, LR_REPOCONF_ERROR, LRE_VALUE,
-                    "Could't convert '%s' to seconds", str);
+                    "Couldn't convert '%s' to seconds", str);
         return FALSE;
     }
 
@@ -435,7 +435,7 @@ lr_convert_bandwidth_to_bytes(const char *str,
     // String doesn't start with numbers
     if (endptr == str) {
         g_set_error(err, LR_REPOCONF_ERROR, LRE_VALUE,
-                    "Could't convert '%s' to number", str);
+                    "Couldn't convert '%s' to number", str);
         return FALSE;
     }
 
@@ -741,7 +741,7 @@ lr_yum_repoconf_getinfo(LrYumRepoConf *repoconf,
         *strv = lr_key_file_get_string_list(keyfile, id, "gpgcakey", &tmp_err);
         break;
 
-    case LR_YRC_EXCLUDE:         /*!< (char **) List of exluded packages */
+    case LR_YRC_EXCLUDE:         /*!< (char **) List of excluded packages */
         strv = va_arg(arg, char ***);
         *strv = lr_key_file_get_string_list(keyfile, id, "exclude", &tmp_err);
         break;

@@ -32,7 +32,7 @@ G_BEGIN_DECLS
  *  @{
  */
 
-/** Handle object containing configration for repository metadata and
+/** Handle object containing configuration for repository metadata and
  * package downloading.
  */
 typedef struct _LrHandle LrHandle;
@@ -201,7 +201,7 @@ typedef enum {
         If true, Librepo setups its own signal handler for SIGTERM and stops
         downloading if SIGTERM is catched. In this case current operation
         could return any kind of error code. Handle which operation was
-        interrupted shoud never be used again! */
+        interrupted should never be used again! */
 
     LRO_USERAGENT,  /*!< (char *)
         String for  User-Agent: header in the http request sent to
@@ -283,9 +283,9 @@ typedef enum {
     LRO_RPMMDBLIST = LRO_YUMBLIST,
 
     LRO_HMFCB, /*!< (LrHandleMirrorFailureCb)
-        Handle specific mirror failure callaback.
+        Handle specific mirror failure callback.
         Callback called when a repodata download from a mirror fails.
-        This callback gets the user data setted by LRO_PROGRESSDATA */
+        This callback gets the user data set by LRO_PROGRESSDATA */
 
     LRO_SSLVERIFYPEER, /*!< (long 1 or 0)
         This option determines whether librepo verifies the authenticity
@@ -334,7 +334,7 @@ typedef enum {
     LRO_OFFLINE, /*!< (long 1 or 0)
         Make the handle work only locally, all remote URLs are ignored.
         Remote mirrorlists/metalinks (if they are specified) are ignored.
-        Fastest mirror check (if enabled) is skiped. */
+        Fastest mirror check (if enabled) is skipped. */
 
     LRO_SSLCLIENTCERT, /*!< (char *)
         Path to the PEM format SSL client certificate librepo should use
@@ -350,7 +350,7 @@ typedef enum {
         certificates. */
 
     LRO_HTTPAUTHMETHODS, /*!< (LrAuth)
-        Bitmask which tell Librepo which auth metods you wan to use. */
+        Bitmask which tell Librepo which auth methods you wan to use. */
 
     LRO_PROXYAUTHMETHODS, /*!< (LrAuth)
         A long bitmask which tell Librepo which auth methods you want

@@ -78,7 +78,7 @@ typedef struct {
     GSList *checksums; /*!<
         NULL or GSList with pointers to LrDownloadTargetChecksum
         structures. With possible checksums of the file.
-        Checksum check is stoped right after first match.
+        Checksum check is stopped right after first match.
         Useful in situation when the file could has one from set
         of available checksums.
         E.g. <mm0:alternates> element in metalink could contain alternate
@@ -108,7 +108,7 @@ typedef struct {
         (Use status to check if successfully or unsuccessfully) */
 
     LrMirrorFailureCb mirrorfailurecb; /*!<
-        Callen when download from a mirror failed. */
+        Called when download from a mirror failed. */
 
     GStringChunk *chunk; /*!<
         Chunk for strings used in this structure. */
@@ -177,7 +177,7 @@ typedef struct {
  *                          Note: Set this or fd, no both!
  * @param possiblechecksums NULL or GSList with pointers to
  *                          LrDownloadTargetChecksum structures. With possible
- *                          checksums of the file. Checksum check is stoped
+ *                          checksums of the file. Checksum check is stopped
  *                          right after first match. Useful in situation when
  *                          the file could has one from set of available
  *                          checksums.
@@ -186,7 +186,7 @@ typedef struct {
  *                          because metalink and mirrors could be out of
  *                          sync for a while.
  *                          Note: LrDownloadTarget takes responsibility
- *                          for destroing this list! So the list must not
+ *                          for destroying this list! So the list must not
  *                          be destroyed by the user, since it is passed
  *                          to this function.
  * @param expectedsize      Expected size of the target. If mirror reports
@@ -194,7 +194,7 @@ typedef struct {
  *                          If 0 then size of downloaded target is not checked.
  * @param resume            If FALSE, then no resume is done and whole file is
  *                          downloaded again. Otherwise offset will be
- *                          automaticaly detected from opened file descriptor
+ *                          automatically detected from opened file descriptor
  *                          by seek to the end.
  * @param progresscb        Progression callback or NULL
  * @param cbdata            Callback data or NULL

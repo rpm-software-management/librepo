@@ -160,7 +160,7 @@ lr_yum_repo_update(LrYumRepo *repo, const char *type, const char *path)
     lr_yum_repo_append(repo, type, path);
 }
 
-/* main bussines logic */
+/* main business logic */
 
 gint
 compare_records(gconstpointer a, gconstpointer b)

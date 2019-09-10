@@ -54,7 +54,7 @@ typedef enum {
     LR_YRC_MEDIAID,         /*!<  6 (char *) Media ID */
     LR_YRC_GPGKEY,          /*!<  7 (char **) URL of GPG key */
     LR_YRC_GPGCAKEY,        /*!<  8 (char **) GPG CA key */
-    LR_YRC_EXCLUDE,         /*!<  9 (char **) List of exluded packages */
+    LR_YRC_EXCLUDE,         /*!<  9 (char **) List of excluded packages */
     LR_YRC_INCLUDE,         /*!< 10 (char **) List of included packages */
 
     LR_YRC_FASTESTMIRROR,   /*!< 11 (long 1 or 0) Fastest mirror determination */
@@ -166,7 +166,7 @@ lr_yum_repoconf_save(LrYumRepoConf *repoconf,
  * @param err           GError **
  * @param option        An option
  * @param ...           Appropriate variable for the selected option.
- * @return              TRUE if everithing is ok, FALSE if err is set.
+ * @return              TRUE if everything is ok, FALSE if err is set.
  *                      Note value of the target variable passed as vararg
  *                      can be changed and it's state is undefined when
  *                      a FALSE is returned!

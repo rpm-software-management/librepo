@@ -118,7 +118,7 @@ typedef enum {
         (38) Requested option/value is not set. Used for example in
         lr_yum_repoconf_getinfo() */
     LRE_FILE, /*!<
-        (39) File operation error (operation not permited, filename too long,
+        (39) File operation error (operation not permitted, filename too long,
         no memory available, bad file descriptor, ...) */
     LRE_KEYFILE, /*!<
         (40) Key file error (unknown encoding, ill-formed, file not found,

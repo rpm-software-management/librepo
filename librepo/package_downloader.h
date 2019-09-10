@@ -46,7 +46,7 @@ G_BEGIN_DECLS
 
 /** Download package from repository or base_url.
  * Note: If resume, checksum and checksum_type are specified and
- * the downloaded package alredy exists and checksum matches, then
+ * the downloaded package already exists and checksum matches, then
  * no downloading is done and LRE_ALREADYDOWNLOADED return code is returned.
  * @param handle            Librepo handle.
  * @param relative_url      Relative part of url.
@@ -112,7 +112,7 @@ typedef struct {
         (Use status to check if successfully or unsuccessfully) */
 
     LrMirrorFailureCb mirrorfailurecb; /*!<
-        Callen when download from a mirror failed. */
+        Called when download from a mirror failed. */
 
     gint64 byterangestart; /*!<
         Download only specified range of bytes. */
@@ -253,7 +253,7 @@ lr_packagetarget_free(LrPackageTarget *target);
 /** Available flags for package downloader */
 typedef enum {
     LR_PACKAGEDOWNLOAD_FAILFAST    = 1 << 0, /*!<
-        If TRUE, then whole downloading is stoped immediately when any
+        If TRUE, then whole downloading is stopped immediately when any
         of download fails (FALSE is returned and err is set). If the failfast
         is FALSE, then this function returns after all downloads finish
         (no matter if successfully or unsuccessfully) and FALSE is returned
