@@ -302,9 +302,13 @@ static gboolean
  * @param complete_path_or_baseurl determine type of download - mirrors or baseurl/fullpath
  * @return gboolean Return TRUE when another chance to download is allowed.
  */
-can_retry_download(const LrDownload *download, int num_of_tried_mirrors, gboolean complete_path_or_baseurl)
+can_retry_download(const LrDownload *download, int num_of_tried_mirrors,
+                   const char * complete_path_or_baseurl)
 {
     if (complete_path_or_baseurl) {
+        if (g_str_has_prefix(complete_path_or_baseurl, "file:/")) {
+            return FALSE;
+        }
         return download->allowed_mirror_failures > num_of_tried_mirrors;
     }
     return is_max_mirrors_unlimited(download) ||
@@ -704,16 +708,13 @@ select_suitable_mirror(LrDownload *dd,
     *selected_mirror = NULL;
     // mirrors_iterated is used to allow to use mirrors multiple times for a target
     unsigned mirrors_iterated = 0;
+    // retry local paths have no reason
+    gboolean reiterate = FALSE;
     //  Iterate over mirrors for the target. If no suitable mirror is found on
     //  the first iteration, relax the conditions (by allowing previously
     //  failing mirrors to be used again) and do additional iterations up to
     //  number of allowed failures equal to dd->allowed_mirror_failures.
     do {
-        // Sleep when all mirrors were already tried
-        // It prevents to call same url immediately after fail
-        if (mirrors_iterated) {
-            sleep(mirrors_iterated);
-        }
         // Iterate over mirror for the target
         for (GSList *elem = target->lrmirrors; elem; elem = g_slist_next(elem)) {
             LrMirror *c_mirror = elem->data;
@@ -721,6 +722,8 @@ select_suitable_mirror(LrDownload *dd,
 
             // first iteration, filter out mirrors that failed previously
             if (mirrors_iterated == 0) {
+                if (c_mirror->mirror->protocol != LR_PROTOCOL_FILE)
+                    reiterate = TRUE;
                 if (g_slist_find(target->tried_mirrors, c_mirror)) {
                     // This mirror was already tried for this target
                     continue;
@@ -734,6 +737,9 @@ select_suitable_mirror(LrDownload *dd,
                             __func__, c_mirror->failed_transfers, mirrorurl);
                     continue;
                 }
+            // retry of local paths have no reason
+            } else if (c_mirror->mirror->protocol == LR_PROTOCOL_FILE) {
+                continue;
             // On subsequent iterations, only skip mirrors that failed proportionally to the number
             // of iterations. It allows to reuse mirrors with low number of failures first.
             } else if (mirrors_iterated < c_mirror->failed_transfers) {
@@ -780,7 +786,7 @@ select_suitable_mirror(LrDownload *dd,
             *selected_mirror = c_mirror;
             return TRUE;
         }
-    } while (g_slist_length(target->tried_mirrors) < dd->allowed_mirror_failures &&
+    } while (reiterate && g_slist_length(target->tried_mirrors) < dd->allowed_mirror_failures &&
     ++mirrors_iterated < dd->allowed_mirror_failures);
 
     if (!at_least_one_suitable_mirror_found) {
@@ -2369,7 +2375,7 @@ transfer_error:
                 }
                 // complete_url_in_path and target->baseurl doesn't have an alternatives like using
                 // mirrors, therefore they are handled differently
-                gboolean complete_url_or_baseurl = complete_url_in_path || target->target->baseurl;
+                const char * complete_url_or_baseurl = complete_url_in_path ? target->target->path : target->target->baseurl;
                 if (can_retry_download(dd, num_of_tried_mirrors, complete_url_or_baseurl))
                 {
                   // Try another mirror or retry
