@@ -1877,6 +1877,10 @@ check_finished_transfer_status(CURLMsg *msg,
     // curl return code is CURLE_OK but we need to check status code
     curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &code);
     if (code) {
+        char * effective_ip = NULL;
+        curl_easy_getinfo(msg->easy_handle,
+                      CURLINFO_PRIMARY_IP,
+                      &effective_ip);
         // Check status codes for some protocols
         if (effective_url && g_str_has_prefix(effective_url, "http")) {
             // Check HTTP(S) code
@@ -1884,7 +1888,7 @@ check_finished_transfer_status(CURLMsg *msg,
                 g_set_error(transfer_err,
                             LR_DOWNLOADER_ERROR,
                             LRE_BADSTATUS,
-                            "Status code: %ld for %s", code, effective_url);
+                            "Status code: %ld for %s (IP: %s)", code, effective_url, effective_ip);
             }
         } else if (effective_url) {
             // Check FTP
@@ -1892,14 +1896,14 @@ check_finished_transfer_status(CURLMsg *msg,
                 g_set_error(transfer_err,
                             LR_DOWNLOADER_ERROR,
                             LRE_BADSTATUS,
-                            "Status code: %ld for %s", code, effective_url);
+                            "Status code: %ld for %s (IP: %s)", code, effective_url, effective_ip);
             }
         } else {
             // Other protocols
             g_set_error(transfer_err,
                         LR_DOWNLOADER_ERROR,
                         LRE_BADSTATUS,
-                        "Status code: %ld for %s", code, effective_url);
+                        "Status code: %ld for %s (IP: %s)", code, effective_url, effective_ip);
         }
     }
 
