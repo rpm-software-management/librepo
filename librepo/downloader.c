@@ -1464,6 +1464,21 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     }
     target->curl_handle = h;
 
+    // Append the LRO_ONETIMEFLAG if instructed to do so
+    LrHandle *handle = target->handle;
+    if (handle && handle->onetimeflag && handle->otf_context) {
+        char *sep = "?";
+        if (g_strrstr(full_url, sep) != NULL)
+            sep = "&";
+        char *new_url = g_strjoin(sep, full_url, handle->onetimeflag, NULL);
+        g_free(full_url);
+        full_url = new_url;
+        // No other CURL handle on this LrHandle shall apply the flag again
+        free(handle->onetimeflag);
+        handle->onetimeflag = NULL;
+        handle->otf_context = FALSE;
+    }
+
     // Set URL
     c_rc = curl_easy_setopt(h, CURLOPT_URL, full_url);
     if (c_rc != CURLE_OK) {
