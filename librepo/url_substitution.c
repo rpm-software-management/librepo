@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <assert.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include "url_substitution.h"
@@ -93,7 +94,6 @@ lr_url_substitute(const char *url, LrUrlVars *list)
 {
     const char *cur = url;
     const char *p = url;
-    char *tmp_res, *res;
 
     if (!url)
         return NULL;
@@ -101,40 +101,54 @@ lr_url_substitute(const char *url, LrUrlVars *list)
     if (!list)
         return g_strdup(url);
 
-    res = g_strdup("");
+    char *res = g_strdup("");
 
     while (*cur != '\0') {
         if (*cur == '$') {
+            // Adds unprocessed text before the variable to the "res".
             if (cur-p) {
                 char *tmp = g_strndup(p, cur-p);
-                tmp_res = g_strconcat(res, tmp, NULL);
-                lr_free(tmp);
-                lr_free(res);
+                char *tmp_res = g_strconcat(res, tmp, NULL);
+                g_free(tmp);
+                g_free(res);
                 res = tmp_res;
                 p = cur;
             }
 
-            // Try to substitute the variable
-            for (LrUrlVars *elem = list; elem; elem = g_slist_next(elem)) {
-                LrVar *var_val = elem->data;
-                size_t len = strlen(var_val->var);
-                if (!strncmp(var_val->var, (cur+1), len)) {
-                    cur = cur + len;
-                    p = cur + 1;
-                    tmp_res = g_strconcat(res, var_val->val, NULL);
-                    lr_free(res);
-                    res = tmp_res;
-                    break;
+            // Tries to substitute the variable and store result to the "res".
+            gboolean bracket;
+            if (*++cur == '{') {
+                bracket = TRUE;
+                ++cur;
+            } else {
+                bracket = FALSE;
+            }
+            const char *varname = cur;
+            for (; isalnum(*cur) || *cur == '_'; ++cur);
+            if (cur != varname && (!bracket || *cur == '}')) {
+                for (LrUrlVars *elem = list; elem; elem = g_slist_next(elem)) {
+                    LrVar *var_val = elem->data;
+                    size_t var_len = strlen(var_val->var);
+                    if (var_len == cur - varname && strncmp(var_val->var, varname, var_len) == 0) {
+                        if (bracket)
+                            ++cur;
+                        p = cur;
+                        char *tmp_res = g_strconcat(res, var_val->val, NULL);
+                        g_free(res);
+                        res = tmp_res;
+                        break;
+                    }
                 }
             }
+        } else {
+            ++cur;
         }
-
-        ++cur;
     }
 
+    // Adds remaining text to the "res".
     if (*p != '\0') {
-        tmp_res = g_strconcat(res, p, NULL);
-        lr_free(res);
+        char *tmp_res = g_strconcat(res, p, NULL);
+        g_free(res);
         res = tmp_res;
     }
 
