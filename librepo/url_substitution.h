@@ -58,6 +58,9 @@ void
 lr_urlvars_free(LrUrlVars *list);
 
 /** Substitute variables in the url. Returns a newly allocated string.
+ * ${var_name} and $var_name syntaxes are supported.
+ * var_name: [A-Za-z0-9_]+
+ * Non-exsistent variables are not substituted.
  * @param url           a url
  * @param list          a list of variables and its substitutions or NULL
  * @return              a newly allocated string with substituted url
