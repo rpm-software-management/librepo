@@ -60,6 +60,10 @@ START_TEST(test_url_substitute_without_urlvars)
     fail_if(strcmp(url, "http://foo?id=$bar"));
     lr_free(url);
 
+    url = lr_url_substitute("http://foo?id=$foox", urlvars);
+    fail_if(strcmp(url, "http://foo?id=$foox"));
+    lr_free(url);
+
     lr_urlvars_free(urlvars);
 }
 END_TEST
@@ -70,6 +74,7 @@ START_TEST(test_url_substitute)
     LrUrlVars *urlvars = NULL;
 
     urlvars = lr_urlvars_set(urlvars, "foo", "version");
+    urlvars = lr_urlvars_set(urlvars, "fo", "ver");
     urlvars = lr_urlvars_set(urlvars, "bar", "repo");
 
     url = lr_url_substitute("", urlvars);
@@ -88,6 +93,10 @@ START_TEST(test_url_substitute)
     fail_if(strcmp(url, "http://version?id=repo"));
     lr_free(url);
 
+    url = lr_url_substitute("http://$fo?id=$bar", urlvars);
+    fail_if(strcmp(url, "http://ver?id=repo"));
+    lr_free(url);
+
     url = lr_url_substitute("http://$foo$bar", urlvars);
     fail_if(strcmp(url, "http://versionrepo"));
     lr_free(url);
@@ -100,28 +109,37 @@ START_TEST(test_url_substitute)
 }
 END_TEST
 
-START_TEST(test_url_substitute_empty_var)
+START_TEST(test_url_substitute_braces)
 {
     char *url;
     LrUrlVars *urlvars = NULL;
 
-    urlvars = lr_urlvars_set(urlvars, "", "version");
+    urlvars = lr_urlvars_set(urlvars, "foo", "version");
+    urlvars = lr_urlvars_set(urlvars, "fo", "ver");
     urlvars = lr_urlvars_set(urlvars, "bar", "repo");
 
-    url = lr_url_substitute("", urlvars);
-    fail_if(strcmp(url, ""));
-    lr_free(url);
-
-    url = lr_url_substitute("http://foo", urlvars);
-    fail_if(strcmp(url, "http://foo"));
-    lr_free(url);
-
-    url = lr_url_substitute("http://foo?id=$bar", urlvars);
+    url = lr_url_substitute("http://foo?id=${bar}", urlvars);
     fail_if(strcmp(url, "http://foo?id=repo"));
     lr_free(url);
 
-    url = lr_url_substitute("http://$foo?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://versionfoo?id=repo"));
+    url = lr_url_substitute("http://${foo}?id=${bar}", urlvars);
+    fail_if(strcmp(url, "http://version?id=repo"));
+    lr_free(url);
+
+    url = lr_url_substitute("http://${fo}?id=$bar", urlvars);
+    fail_if(strcmp(url, "http://ver?id=repo"));
+    lr_free(url);
+
+    url = lr_url_substitute("http://${fo?id=$bar", urlvars);
+    fail_if(strcmp(url, "http://${fo?id=repo"));
+    lr_free(url);
+
+    url = lr_url_substitute("http://${foo${bar}", urlvars);
+    fail_if(strcmp(url, "http://${foorepo"));
+    lr_free(url);
+
+    url = lr_url_substitute("http://${foo}${bar}/", urlvars);
+    fail_if(strcmp(url, "http://versionrepo/"));
     lr_free(url);
 
     lr_urlvars_free(urlvars);
@@ -136,7 +154,7 @@ url_substitution_suite(void)
     tcase_add_test(tc, test_urlvars_set);
     tcase_add_test(tc, test_url_substitute_without_urlvars);
     tcase_add_test(tc, test_url_substitute);
-    tcase_add_test(tc, test_url_substitute_empty_var);
+    tcase_add_test(tc, test_url_substitute_braces);
     suite_add_tcase(s, tc);
     return s;
 }
