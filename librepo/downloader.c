@@ -1448,7 +1448,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // Append the LRO_ONETIMEFLAG if instructed to do so
     LrHandle *handle = target->handle;
     if (handle && handle->onetimeflag && handle->onetimeflag_apply) {
-        char *sep = "?";
+        const char *sep = "?";
         if (g_strrstr(full_url, sep) != NULL)
             sep = "&";
         char *new_url = g_strjoin(sep, full_url, handle->onetimeflag, NULL);
