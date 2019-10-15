@@ -100,9 +100,8 @@ struct _LrHandle {
     char *onetimeflag; /*!<
         See: LRO_ONETIMEFLAG */
 
-    gboolean otf_context; /*!<
-        Whether this handle is running in a context where LRO_ONETIMEFLAG
-        applies */
+    gboolean onetimeflag_apply; /*!<
+        Whether LRO_ONETIMEFLAG should be applied to the next CURL request */
 
     int local; /*!<
         Do not duplicate local data */
