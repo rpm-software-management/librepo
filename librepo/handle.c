@@ -94,6 +94,7 @@ lr_handle_init(void)
     handle->fastestmirrormaxage = LRO_FASTESTMIRRORMAXAGE_DEFAULT;
     handle->mirrorlist_fd = -1;
     handle->metalink_fd = -1;
+    handle->onetimeflag_apply = FALSE;
     handle->checks |= LR_CHECK_CHECKSUM;
     handle->maxparalleldownloads = LRO_MAXPARALLELDOWNLOADS_DEFAULT;
     handle->maxdownloadspermirror = LRO_MAXDOWNLOADSPERMIRROR_DEFAULT;
@@ -874,7 +875,7 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->mirrorlisturl);
-        handle->otf_context = TRUE;
+        handle->onetimeflag_apply = TRUE;
         if (!lr_yum_download_url_retry(3, handle, url, fd, TRUE, FALSE, err)) {
             close(fd);
             return FALSE;
@@ -990,7 +991,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         }
 
         url = lr_prepend_url_protocol(handle->metalinkurl);
-        handle->otf_context = TRUE;
+        handle->onetimeflag_apply = TRUE;
         if (!lr_yum_download_url_retry(3, handle, url, fd, TRUE, FALSE, err)) {
             close(fd);
             return FALSE;

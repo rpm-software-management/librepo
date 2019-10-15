@@ -1447,7 +1447,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Append the LRO_ONETIMEFLAG if instructed to do so
     LrHandle *handle = target->handle;
-    if (handle && handle->onetimeflag && handle->otf_context) {
+    if (handle && handle->onetimeflag && handle->onetimeflag_apply) {
         char *sep = "?";
         if (g_strrstr(full_url, sep) != NULL)
             sep = "&";
@@ -1457,7 +1457,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         // No other CURL handle on this LrHandle shall apply the flag again
         free(handle->onetimeflag);
         handle->onetimeflag = NULL;
-        handle->otf_context = FALSE;
+        handle->onetimeflag_apply = FALSE;
     }
 
     g_info("Downloading: %s", full_url);
