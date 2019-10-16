@@ -143,30 +143,6 @@ typedef enum {
     LRO_METALINKURL, /*!< (char *)
         Metalink url */
 
-    LRO_ONETIMEFLAG, /*!< (char *)
-        A one-time flag is a URL query parameter (in the form "key=value") that
-        is added to the first HTTP request for LRO_METALINKURL or
-        LRO_MIRRORLIST (whichever comes first) made with this handle.  Any
-        subsequent requests with this handle, including any retry attempts made
-        by librepo internally, will not get the flag.
-
-        This is useful for implementing a mechanism for counting the users of a
-        repository (and, by extension, of the OS as a whole) in which all flags
-        received by the server in a specific time period are summed up to
-        produce a good estimate, with the advantage of bundling the flag into
-        regular metadata updates and not sending separate requests just for
-        that purpose alone.
-
-        The guarantee is that, once set on this handle, the flag will only be
-        used once and then thrown away (set to NULL).  The program may choose
-        to implement a sliding time window used to set this option on a regular
-        basis (such as once per week), to allow for gathering usage statistics
-        over time.
-
-        For a reference implementation, see the "countme" option in dnf.conf(5)
-        or the associated Fedora change:
-        https://fedoraproject.org/wiki/Changes/DNF_Better_Counting */
-
     LRO_LOCAL,  /*!< (long 1 or 0)
         Do not duplicate local metadata, just locate the old one */
 
@@ -397,6 +373,30 @@ typedef enum {
     LRO_PRESERVETIME, /*!< (long 1 or 0)
         If enabled, librepo will try to keep timestamps of the downloaded files
         in sync with that on the remote side. */
+
+    LRO_ONETIMEFLAG, /*!< (char *)
+        A one-time flag is a URL query parameter (in the form "key=value") that
+        is added to the first HTTP request for LRO_METALINKURL or
+        LRO_MIRRORLIST (whichever comes first) made with this handle.  Any
+        subsequent requests with this handle, including any retry attempts made
+        by librepo internally, will not get the flag.
+
+        This is useful for implementing a mechanism for counting the users of a
+        repository (and, by extension, of the OS as a whole) in which all flags
+        received by the server in a specific time period are summed up to
+        produce a good estimate, with the advantage of bundling the flag into
+        regular metadata updates and not sending separate requests just for
+        that purpose alone.
+
+        The guarantee is that, once set on this handle, the flag will only be
+        used once and then thrown away (set to NULL).  The program may choose
+        to implement a sliding time window used to set this option on a regular
+        basis (such as once per week), to allow for gathering usage statistics
+        over time.
+
+        For a reference implementation, see the "countme" option in dnf.conf(5)
+        or the associated Fedora change:
+        https://fedoraproject.org/wiki/Changes/DNF_Better_Counting */
 
     LRO_SENTINEL,    /*!< Sentinel */
 
