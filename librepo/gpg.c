@@ -32,28 +32,33 @@
 #include "util.h"
 #include "gpg.h"
 
-static void
-kill_gpg_agent(gpgme_ctx_t context, const char *home_dir)
-{
-    gpgme_error_t gpgerr;
-
-    gpgerr = gpgme_set_protocol(context, GPGME_PROTOCOL_ASSUAN);
-    if (gpgerr != GPG_ERR_NO_ERROR) {
-        g_warning("%s: gpgme_set_protocol: %s", __func__, gpgme_strerror(gpgerr));
-        return;
+/*
+ * Creates the '/run/user/$UID' directory if it doesn't exist. If this
+ * directory exists, gpgagent will create its sockets under
+ * '/run/user/$UID/gnupg'.
+ *
+ * If this directory doesn't exist, gpgagent will create its sockets in gpg
+ * home directory, which is under '/var/cache/yum/metadata/' and this was
+ * causing trouble with container images, see [1].
+ *
+ * Previous solution was to send the agent a "KILLAGENT" message, but that
+ * would cause a race condition with calling gpgme_release(), see [2], [3].
+ *
+ * Since the agent doesn't clean up its sockets properly, by creating this
+ * directory we make sure they are in a place that is not causing trouble with
+ * container images.
+ *
+ * [1] https://bugzilla.redhat.com/show_bug.cgi?id=1650266
+ * [2] https://bugzilla.redhat.com/show_bug.cgi?id=1769831
+ * [3] https://github.com/rpm-software-management/microdnf/issues/50
+ */
+void ensure_socket_dir_exists() {
+    char dirname[32];
+    snprintf(dirname, sizeof(dirname), "/run/user/%u", getuid());
+    int res = mkdir(dirname, 0700);
+    if (res != 0 && errno != EEXIST) {
+        g_debug("Failed to create \"%s\": %d - %s\n", dirname, errno, strerror(errno));
     }
-    if (home_dir) {
-        gchar * gpg_agent_sock = g_build_filename(home_dir, "S.gpg-agent", NULL);
-        gpgerr = gpgme_ctx_set_engine_info(context, GPGME_PROTOCOL_ASSUAN, gpg_agent_sock, home_dir);
-        g_free(gpg_agent_sock);
-        if (gpgerr != GPG_ERR_NO_ERROR) {
-            g_warning("%s: gpgme_ctx_set_engine_info: %s", __func__, gpgme_strerror(gpgerr));
-            return;
-        }
-    }
-    gpgerr = gpgme_op_assuan_transact_ext(context, "KILLAGENT", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    if (gpgerr != GPG_ERR_NO_ERROR)
-        g_debug("%s: gpgme_op_assuan_transact_ext: %s", __func__, gpgme_strerror(gpgerr));
 }
 
 gboolean
@@ -239,6 +244,8 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
 
     assert(!err || *err == NULL);
 
+    ensure_socket_dir_exists();
+
     // Initialization
     gpgme_check_version(NULL);
     gpgerr = gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP);
@@ -319,13 +326,6 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
     }
 
     close(key_fd);
-
-    // Running gpg-agent kept opened sockets on the system.
-    // It tries to exit gpg-agent. Path to the communication socket is derived from homedir.
-    // The gpg-agent automaticaly removes all its socket before exit.
-    // Newer gpg-agent creates sockets under [/var]/run/user/{pid}/... if directory exists.
-    // In this case gpg-agent will not be exited.
-    kill_gpg_agent(context, home_dir);
 
     gpgme_release(context);
 
