@@ -134,9 +134,10 @@ packagetarget_end_callback(void *data,
     else
         user_data = Py_None;
 
+    EndAllowThreads(self->state);
+
     py_msg = PyStringOrNone_FromString(msg);
 
-    EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->end_cb,
                                    "(OiO)", user_data, status, py_msg);
     Py_DECREF(py_msg);
@@ -185,10 +186,11 @@ packagetarget_mirrorfailure_callback(void *data,
     else
         user_data = Py_None;
 
+    EndAllowThreads(self->state);
+
     py_msg = PyStringOrNone_FromString(msg);
     py_url = PyStringOrNone_FromString(url);
 
-    EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->mirrorfailure_cb,
                                    "(OOO)", user_data, py_msg, py_url);
 

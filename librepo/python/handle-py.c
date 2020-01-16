@@ -142,6 +142,8 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
     else
         user_data = Py_None;
 
+    EndAllowThreads(self->state);
+
     if (!ptr) {
         pydata = Py_None;
     } else {
@@ -159,7 +161,6 @@ fastestmirror_callback(void *data, LrFastestMirrorStages stage, void *ptr)
         }
     }
 
-    EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->fastestmirror_cb,
                         "(OlO)", user_data, (long) stage, pydata);
     Py_XDECREF(result);
@@ -187,11 +188,12 @@ hmf_callback(void *data, const char *msg, const char *url, const char *metadata)
     else
         user_data = Py_None;
 
+    EndAllowThreads(self->state);
+
     py_msg = PyStringOrNone_FromString(msg);
     py_url = PyStringOrNone_FromString(url);
     py_metadata = PyStringOrNone_FromString(metadata);
 
-    EndAllowThreads(self->state);
     result = PyObject_CallFunction(self->hmf_cb,
                         "(OOOO)", user_data, py_msg, py_url, py_metadata);
 
