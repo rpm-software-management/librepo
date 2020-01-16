@@ -134,7 +134,6 @@ exit_librepo(void)
 {
     Py_XDECREF(debug_cb);
     Py_XDECREF(debug_cb_data);
-    Py_XDECREF(LrErr_Exception);
 }
 
 struct module_state {
