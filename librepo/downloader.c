@@ -1221,7 +1221,7 @@ find_local_zck_chunks(LrTarget *target, GError **err)
             }
 
             if(!zck_copy_chunks(zck_src, zck)) {
-                g_warning("Error copying chunks from %s to %s", cf, uf);
+                g_warning("Error copying chunks from %s to %s: %s", cf, uf, zck_get_error(zck));
                 zck_free(&zck_src);
                 close(chk_fd);
                 continue;
@@ -1334,7 +1334,7 @@ check_zck(LrTarget *target, GError **err)
         if(!cks_good) { // Error while validating checksums
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                         "%s: Error validating zchunk file: %s", __func__,
-                        target->target->path);
+                        zck_get_error(zck));
             return FALSE;
         }
 
@@ -1356,7 +1356,7 @@ check_zck(LrTarget *target, GError **err)
         if(!cks_good) { // Error while validating checksums
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                         "%s: Error validating zchunk file: %s", __func__,
-                        target->target->path);
+                        zck_get_error(zck));
             return FALSE;
         }
 
@@ -1834,6 +1834,25 @@ check_finished_transfer_status(CURLMsg *msg,
                 target->mirror->max_ranges = range_count / 2;
                 g_debug("%s: Setting mirror's max_ranges to %i", __func__,
                         target->mirror->max_ranges);
+            }
+            return TRUE;
+        } else if (target->target->zck_dl != NULL && zck_is_error(zck_dl_get_zck(target->target->zck_dl)) > 0) {
+            zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
+
+            // Something went wrong while writing the zchunk file
+            g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_ZCK,
+                        "Zchunk error: %s",
+                        zck_get_error(zck));
+            if (zck_is_error(zck) == 1) {
+                // Non-fatal zchunk error
+                g_info("Serious zchunk error: %s",
+                   zck_get_error(zck));
+                *serious_error = TRUE;
+            } else { // zck_is_error(zck) == 2
+                // Fatal zchunk error
+                g_info("Fatal zchunk error: %s",
+                   zck_get_error(zck));
+                *fatal_error = TRUE;
             }
             return TRUE;
         }
