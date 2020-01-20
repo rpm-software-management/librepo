@@ -72,7 +72,7 @@ lr_downloadtarget_new(LrHandle *handle,
     _cleanup_free_ gchar *final_baseurl = NULL;
 
     assert(path);
-    assert((fd > 0 && !fn) || (fd < 0 && fn));
+    assert((fd >= 0 && !fn) || (fd < 0 && fn));
 
     if (byterangestart && resume) {
         g_warning("Cannot specify byterangestart and set resume to TRUE at the same time");
