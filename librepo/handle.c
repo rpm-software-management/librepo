@@ -1129,11 +1129,6 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
 
     g_debug("%s: Finalizing internal mirrorlist", __func__);
 
-    // Mirrorlist from the LRO_URLS
-    handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
-                                            handle->internal_mirrorlist,
-                                            handle->urls_mirrors);
-
     // Mirrorlist from the LRO_MIRRORLISTURL
     if (handle->mirrorlisturl)
         handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
@@ -1145,6 +1140,11 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
         handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
                                                 handle->internal_mirrorlist,
                                                 handle->metalink_mirrors);
+
+    // Mirrorlist from the LRO_URLS
+    handle->internal_mirrorlist = lr_lrmirrorlist_append_lrmirrorlist(
+                                            handle->internal_mirrorlist,
+                                            handle->urls_mirrors);
 
     // If enabled, sort internal mirrorlist by the connection
     // speed (the LRO_FASTESTMIRROR option)
