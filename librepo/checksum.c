@@ -226,7 +226,11 @@ lr_checksum_fd_compare(LrChecksumType type,
 
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                                   (unsigned long long) st.st_mtime);
+#if __APPLE__
+            ssize_t attr_size = fgetxattr(fd, key, &buf, sizeof(buf), 0, 0);
+#else
             ssize_t attr_size = fgetxattr(fd, key, &buf, sizeof(buf));
+#endif
             if (attr_size != -1) {
                 // Cached checksum found
                 g_debug("%s: Using checksum cached in xattr: [%s] %s",
@@ -253,7 +257,11 @@ lr_checksum_fd_compare(LrChecksumType type,
             _cleanup_free_ gchar *key = NULL;
             key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                                   (unsigned long long) st.st_mtime);
+#if __APPLE__
+            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0, 0);
+#else
             fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
+#endif
         }
     }
 
