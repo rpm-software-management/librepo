@@ -113,7 +113,11 @@ START_TEST(test_cached_checksum)
     fail_if(ret != 0);
     key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                           (unsigned long long) st.st_mtime);
+#if __APPLE__
+    attr_ret = getxattr(filename, key, &buf, sizeof(buf), 0, 0);
+#else
     attr_ret = getxattr(filename, key, &buf, sizeof(buf));
+#endif
     lr_free(key);
     fail_if(attr_ret != -1);  // Cached checksum should not exists
 
@@ -136,7 +140,11 @@ START_TEST(test_cached_checksum)
     fail_if(ret != 0);
     key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
                           (unsigned long long) st.st_mtime);
+#if __APPLE__
+    attr_ret = getxattr(filename, key, &buf, sizeof(buf), 0, 0);
+#else
     attr_ret = getxattr(filename, key, &buf, sizeof(buf));
+#endif
 
     lr_free(key);
 
