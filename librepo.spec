@@ -82,7 +82,8 @@ BuildRequires:  pygpgme
 BuildRequires:  python2-pyxattr
 BuildRequires:  python2-gpg
 %endif
-%endif # with pythontests
+%endif
+# endif with pythontests
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Conflicts:      python2-dnf < %{dnf_conflict}
 
