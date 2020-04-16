@@ -138,7 +138,8 @@ typedef struct {
  * @param relative_url      Relative part of URL to download.
  *                          First part of URL will be picked from the LrHandle
  *                          (LRO_URL or mirror) during download process or
- *                          base_url will be used if it is specified.
+ *                          base_url will be used if it is specified. It is
+ *                          expected to already come URL-encoded.
  * @param dest              Destination filename or just directory (filename
  *                          itself will be derived from the relative_url) or
  *                          NULL (current working directory + filename derived

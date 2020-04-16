@@ -255,8 +255,10 @@ lr_download_packages(GSList *targets,
         if (packagetarget->dest) {
             if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
                 // Dir specified
-                _cleanup_free_ gchar *file_basename;
-                file_basename = g_path_get_basename(packagetarget->relative_url);
+                // unencode first in case there are any encoded slashes to
+                // prevent any path changing shenanigans
+                _cleanup_free_ gchar * unencoded_url = g_uri_unescape_string(packagetarget->relative_url, "");
+                _cleanup_free_ gchar * file_basename = g_path_get_basename(unencoded_url);
 
                 local_path = g_build_filename(packagetarget->dest,
                                               file_basename,
@@ -266,7 +268,10 @@ lr_download_packages(GSList *targets,
             }
         } else {
             // No destination path specified
-            local_path = g_path_get_basename(packagetarget->relative_url);
+            // unencode first in case there are any encoded slashes to
+            // prevent any path changing shenanigans
+            _cleanup_free_ gchar * unencoded_url = g_uri_unescape_string(packagetarget->relative_url, "");
+            local_path = g_path_get_basename(unencoded_url);
         }
 
         packagetarget->local_path = g_string_chunk_insert(packagetarget->chunk,
