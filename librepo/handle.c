@@ -1089,36 +1089,53 @@ lr_handle_prepare_internal_mirrorlist(LrHandle *handle,
             local_path = url;
     }
 
-    gboolean ret;
+    // Since urls, mirrorlists and metalinks are not exclusive its
+    // sufficient for at least on of the three to succeed in order to
+    // continue. In the case where all of present ones fail we propagate
+    // only the last error, because GError cannot handle multiple
+    // errors at the same time.
+
+    gboolean ret_urls = FALSE;
+    gboolean ret_mirrorlist = FALSE;
+    gboolean ret_metalink = FALSE;
+    gboolean at_least_one_present = FALSE;
+    GError *tmp_err = NULL;
 
     // LRO_URLS
     if (!handle->urls_mirrors && handle->urls) {
-        ret = lr_handle_prepare_urls(handle, err);
-        if (!ret) {
-            assert(!err || *err);
-            g_warning("LRO_URLS processing failed");
-            return FALSE;
+        at_least_one_present = TRUE;
+        ret_urls = lr_handle_prepare_urls(handle, &tmp_err);
+        if (!ret_urls) {
+            assert(tmp_err);
+            g_warning("LRO_URLS processing failed: %s", tmp_err->message);
         }
     }
 
     // LRO_MIRRORLISTURL
     if (!handle->mirrorlist_mirrors && (handle->mirrorlisturl || local_path)) {
-        ret = lr_handle_prepare_mirrorlist(handle, local_path, err);
-        if (!ret) {
-            assert(!err || *err);
-            g_warning("LRO_MIRRORLISTURL processing failed");
-            return FALSE;
+        g_clear_error(&tmp_err);
+        at_least_one_present = TRUE;
+        ret_mirrorlist = lr_handle_prepare_mirrorlist(handle, local_path, &tmp_err);
+        if (!ret_mirrorlist) {
+            assert(tmp_err);
+            g_warning("LRO_MIRRORLISTURL processing failed: %s", tmp_err->message);
         }
     }
 
     // LRO_METALINKURL
     if (!handle->metalink_mirrors && (handle->metalinkurl || local_path)) {
-        ret = lr_handle_prepare_metalink(handle, local_path, err);
-        if (!ret) {
-            assert(!err || *err);
-            g_warning("LRO_METALINKURL processing failed");
-            return FALSE;
+        g_clear_error(&tmp_err);
+        at_least_one_present = TRUE;
+        ret_metalink = lr_handle_prepare_metalink(handle, local_path, &tmp_err);
+        if (!ret_metalink) {
+            assert(tmp_err);
+            g_warning("LRO_METALINKURL processing failed: %s", tmp_err->message);
         }
+    }
+
+    if (!ret_urls && !ret_mirrorlist && !ret_metalink && at_least_one_present) {
+        g_propagate_error(err, tmp_err);
+        return FALSE;
     }
 
     // Append all the mirrorlist to the single internal mirrorlist
