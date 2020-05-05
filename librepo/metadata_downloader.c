@@ -326,7 +326,7 @@ process_repomd_xml(GSList *targets,
         int fd_value = *((int *) fd->data);
 
         if (!target->handle || fd_value == -1) {
-            continue;
+            goto fail;
         }
 
         handle = target->handle;
@@ -335,28 +335,35 @@ process_repomd_xml(GSList *targets,
 
         if (target->download_target->rcode != LRE_OK) {
             lr_metadatatarget_append_error(target, (char *) lr_strerror(target->download_target->rcode), NULL);
-            continue;
+            goto fail;
         }
 
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &error)) {
             lr_metadatatarget_append_error(target, error->message, NULL);
             g_error_free(error);
-            continue;
+            goto fail;
         }
 
         lseek(fd_value, SEEK_SET, 0);
         ret = lr_yum_repomd_parse_file(target->repomd, fd_value, lr_xml_parser_warning_logger,
                                        "Repomd xml parser", &error);
-        close(fd_value);
         if (!ret) {
             lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message, NULL);
-            lr_free(path->data);
             g_error_free(error);
-            continue;
+            goto fail;
         }
 
+        close(fd_value);
+        lr_free(fd->data);
         target->repo->destdir = g_strdup(handle->destdir);
         target->repo->repomd = path->data;
+        continue;
+    fail:
+        if (fd_value != -1) {
+            close(fd_value);
+        }
+        lr_free(path->data);
+        lr_free(fd->data);
     }
 }
 
@@ -421,6 +428,10 @@ lr_download_metadata(GSList *targets,
     }
 
     process_repomd_xml(targets, fd_list, paths);
+
+    g_slist_free(fd_list);
+    g_slist_free(paths);
+
     lr_yum_download_repos(targets, err);
 
     return cleanup(download_targets, err);
