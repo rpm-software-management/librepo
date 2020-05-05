@@ -457,8 +457,6 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
             g_debug("%s: Cannot open: %s", __func__, signature);
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot open %s: %s", signature, g_strerror(errno));
-            close(fd);
-            lr_free(path);
             lr_free(signature);
             return FALSE;
         }
@@ -490,8 +488,6 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
                         __func__, tmp_err->message);
                 g_propagate_prefixed_error(err, tmp_err,
                                            "repomd.xml GPG signature verification error: ");
-                close(fd);
-                lr_free(path);
                 return FALSE;
             }
             g_debug("%s: GPG signature successfully verified", __func__);
@@ -1309,8 +1305,11 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
             return FALSE;
         }
 
-        if (!lr_check_repomd_xml_asc_availability(handle, repo, fd, path, err))
+        if (!lr_check_repomd_xml_asc_availability(handle, repo, fd, path, err)) {
+            close(fd);
+            lr_free(path);
             return FALSE;
+        }
 
         lseek(fd, 0, SEEK_SET);
 
