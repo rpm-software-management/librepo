@@ -114,6 +114,36 @@ Example of run only one specific test: ``PYTHONPATH=`readlink -f ./build/librepo
 
     PYTHONPATH=`readlink -f ./build/librepo/python/python3/` nosetests-3.3 -s -v tests/python/tests/
 
+## Contribution
+
+Here's the most direct way to get your work merged into the project.
+
+1. Fork the project
+1. Clone down your fork
+1. Implement your feature or bug fix and commit changes
+1. If the change fixes a bug at [Red Hat bugzilla](https://bugzilla.redhat.com/), or if it is important to the end user, add the following block to the commit message:
+    
+       = changelog =
+       msg:           message to be included in the changelog
+       type:          one of: bugfix/enhancement/security (this field is required when message is present)
+       resolves:      URLs to bugs or issues resolved by this commit (can be specified multiple times)
+       related:       URLs to any related bugs or issues (can be specified multiple times)
+
+   * For example::
+
+         = changelog =
+         msg: Decode package URL when using for local filename
+         type: bugfix
+         resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1817130
+
+   * For your convenience, you can also use git commit template by running the following command in the top-level directory of this project:
+
+         git config commit.template ./.git-commit-template
+
+1. In a separate commit, add your name into the [authors file](https://github.com/rpm-software-management/librepo/blob/master/AUTHORS) as a reward for your generosity
+1. Push the branch to your fork
+1. Send a pull request for your branch
+
 ## Links
 
 * [Red Hat Bugzilla](https://bugzilla.redhat.com/buglist.cgi?query_format=advanced&bug_status=NEW&bug_status=ASSIGNED&bug_status=MODIFIED&bug_status=VERIFIED&component=librepo)
