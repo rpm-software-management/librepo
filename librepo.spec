@@ -1,5 +1,7 @@
 %global libcurl_version 7.28.0
 
+%define __cmake_in_source_build 1
+
 %if 0%{?rhel} && 0%{?rhel} <= 7
 # Do not build bindings for python3 for RHEL <= 7
 %bcond_with python3
