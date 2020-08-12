@@ -23,6 +23,7 @@
 #define  BITS_IN_BYTE 8
 
 #include <stdio.h>
+#include <libgen.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -770,6 +771,22 @@ prepare_repo_download_targets(LrHandle *handle,
             continue;
 
         char *location_href = record->location_href;
+
+        char *dest_dir = realpath(handle->destdir, NULL);
+        path = lr_pathconcat(handle->destdir, record->location_href, NULL);
+        char *requested_dir = realpath(dirname(path), NULL);
+        lr_free(path);
+        if (!g_str_has_prefix(requested_dir, dest_dir)) {
+            g_debug("%s: Invalid path: %s", __func__, location_href);
+            g_set_error(err, LR_YUM_ERROR, LRE_IO, "Invalid path: %s", location_href);
+            g_slist_free_full(*targets, (GDestroyNotify) lr_downloadtarget_free);
+            free(requested_dir);
+            free(dest_dir);
+            return FALSE;
+        }
+        free(requested_dir);
+        free(dest_dir);
+
         gboolean is_zchunk = FALSE;
         #ifdef WITH_ZCHUNK
         if (handle->cachedir && record->header_checksum)
