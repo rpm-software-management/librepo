@@ -669,6 +669,17 @@ prepare_repo_download_std_target(LrHandle *handle,
                                  GSList **targets,
                                  GError **err)
 {
+    /*check if record->location_href contains '..' to prevent directory traversal attacks*/
+    if(record && strstr(record->location_href, "..") != NULL)
+    {
+        g_debug("%s: .. is not allowed in Location href (%s)",
+                __func__, record->location_href);
+        g_set_error(err, LR_YUM_ERROR, LRE_BADURL,
+                    ".. is not allowed in Location href (%s)", record->location_href);
+        g_slist_free_full(*targets, (GDestroyNotify) lr_downloadtarget_free);
+        return FALSE;
+    }
+
     *path = lr_pathconcat(handle->destdir, record->location_href, NULL);
     *fd = open(*path, O_CREAT|O_TRUNC|O_RDWR, 0666);
     if (*fd < 0) {
@@ -702,6 +713,17 @@ prepare_repo_download_zck_target(LrHandle *handle,
                                  GSList **targets,
                                  GError **err)
 {
+    /*check if record->location_href contains '..' to prevent directory traversal attacks*/
+    if(strstr(record->location_href, "..") != NULL)
+    {
+        g_debug("%s: .. is not allowed in Location href (%s)",
+                __func__, record->location_href);
+        g_set_error(err, LR_YUM_ERROR, LRE_BADURL,
+                    ".. is not allowed in Location href (%s)", record->location_href);
+        g_slist_free_full(*targets, (GDestroyNotify) lr_downloadtarget_free);
+        return FALSE;
+    }
+
     *path = lr_pathconcat(handle->destdir, record->location_href, NULL);
     *fd = open(*path, O_CREAT|O_RDWR, 0666);
     if (*fd < 0) {
