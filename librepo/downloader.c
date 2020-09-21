@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <sys/xattr.h>
 #include <fcntl.h>
 #include <curl/curl.h>
@@ -151,6 +152,10 @@ typedef struct {
     FILE *f; /*!<
         fdopened file descriptor from LrDownloadTarget and used
         in curl_handle. */
+    FILE *writef; /*!<
+        the fd to write data to. Could be a subprocess. */
+    pid_t pid; /*!<
+        the pid of a transcoder. */
     char errorbuffer[CURL_ERROR_SIZE]; /*!<
         Error buffer used in curl handle */
     GSList *tried_mirrors; /*!<
@@ -619,7 +624,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if (range_start <= 0 && range_end <= 0) {
         // Write everything curl give to you
         target->writecb_recieved += all;
-        return fwrite(ptr, size, nmemb, target->f);
+        return fwrite(ptr, size, nmemb, target->writef);
     }
 
     /* Deal with situation when user wants only specific byte range of the
@@ -1433,6 +1438,136 @@ open_target_file(LrTarget *target, GError **err)
     return f;
 }
 
+/** Maybe transcode the file
+ */
+void
+maybe_transcode(LrTarget *target, GError **err)
+{
+    const char *e = g_getenv("LIBREPO_TRANSCODE_RPMS");
+    int transcoder_stdin[2], fd;
+    pid_t pid;
+    FILE *out;
+    _cleanup_strv_free_ gchar **args = NULL;
+    target->writef = NULL;
+    if (!e) {
+        g_debug("Not transcoding");
+        target->writef = target->f;
+        return;
+    }
+    if (g_str_has_suffix(target->target->path, ".rpm") == FALSE) {
+        g_debug("Not transcoding %s due to name", target->target->path);
+        target->writef = target->f;
+        return;
+    }
+    g_debug("Transcoding %s", target->target->path);
+    args = g_strsplit(e, " ", -1);
+    if (args[0] == NULL) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "transcode env empty");
+        return;
+    }
+    if (pipe(transcoder_stdin) != 0) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "input pipe creation failed: %s",
+                    g_strerror(errno));
+        return;
+    }
+    /** librepo collects the 'write' ends of the pipes. We must mark these as
+     * FD_CLOEXEC so a second download/transcode does not inherit them and
+     * hold them open, as it'll prevent an EOF and cause a deadlock.
+    */
+    if (fcntl(transcoder_stdin[1], F_SETFD, FD_CLOEXEC) != 0) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "input pipe write close-on-fork failed: %s",
+                    g_strerror(errno));
+        return;
+    }
+    pid = fork();
+    if (pid == -1) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "fork failed: %s",
+                    g_strerror(errno));
+        return;
+    }
+    if (pid == 0) {
+        /* child */
+        if (dup2(transcoder_stdin[0], STDIN_FILENO) == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                        "dup2 of stdin failed: %s",
+                        g_strerror(errno));
+            return;
+        }
+        close(transcoder_stdin[0]);
+        close(transcoder_stdin[1]);
+        fd = fileno(target->f);
+        if (fd == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                        "fileno for target failed");
+            return;
+        }
+        if (dup2(fd, STDOUT_FILENO) == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                        "dup2 of stdout failed: %s",
+                        g_strerror(errno));
+            return;
+        }
+        if (execv(args[0], args) == -1) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                        "execv failed: %s", g_strerror(errno));
+        }
+        /* we never get here, but appease static analysis */
+        return;
+    } else {
+        /* parent */
+        close(transcoder_stdin[0]);
+        out = fdopen(transcoder_stdin[1], "w");
+        if (out == NULL) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                        "fdopen failed: %s",
+                        g_strerror(errno));
+            return;
+        }
+        target->pid = pid;
+        target->writef = out;
+        /* resuming a transcode is not yet implemented */
+        target->resume = FALSE;
+    }
+}
+
+void
+cleanup_transcode(LrTarget *target, GError **err)
+{
+    int wstatus, trc;
+    if (!target->writef) {
+        return;
+    }
+    if (target->writef == target->f) {
+        return;
+    }
+    fclose(target->writef);
+    if(waitpid(target->pid, &wstatus, 0) == -1) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "transcode waitpid failed: %s", g_strerror(errno));
+    } else if (WIFEXITED(wstatus)) {
+        trc = WEXITSTATUS(wstatus);
+        if (trc != 0) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                        "transcode process non-zero exit code %d", trc);
+        }
+    } else if (WIFSIGNALED(wstatus)) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "transcode process was terminated with a signal: %d",
+                    WTERMSIG(wstatus));
+    } else {
+        /* don't think this can happen, but covering all bases */
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+                    "transcode unhandled circumstance in waitpid");
+    }
+    target->writef = NULL;
+    /* pid is only valid if writef is not NULL */
+    /* target->pid = -1; */
+}
+
 /** Prepare next transfer
  */
 static gboolean
@@ -1513,6 +1648,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // Prepare FILE
     target->f = open_target_file(target, err);
     if (!target->f)
+        goto fail;
+    maybe_transcode(target, err);
+    if (!target->writef)
         goto fail;
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
@@ -1689,6 +1827,7 @@ fail:
         curl_easy_cleanup(target->curl_handle);
         target->curl_handle = NULL;
     }
+    cleanup_transcode(target, err);
     if (target->f != NULL) {
         fclose(target->f);
         target->f = NULL;
@@ -2259,6 +2398,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         if (transfer_err)  // Transfer was unsuccessful
             goto transfer_error;
 
+        cleanup_transcode(target, err);
+
         //
         // Checksum checking
         //
@@ -2353,6 +2494,7 @@ transfer_error:
         target->curl_handle = NULL;
         g_free(target->headercb_interrupt_reason);
         target->headercb_interrupt_reason = NULL;
+        cleanup_transcode(target, err);
         fclose(target->f);
         target->f = NULL;
         if (target->curl_rqheaders) {
@@ -2756,6 +2898,7 @@ lr_download_cleanup:
             curl_multi_remove_handle(dd.multi_handle, target->curl_handle);
             curl_easy_cleanup(target->curl_handle);
             target->curl_handle = NULL;
+            cleanup_transcode(target, err);
             fclose(target->f);
             target->f = NULL;
             g_free(target->headercb_interrupt_reason);

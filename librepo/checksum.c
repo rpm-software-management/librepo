@@ -40,6 +40,9 @@
 #define BUFFER_SIZE             2048
 #define MAX_CHECKSUM_NAME_LEN   7
 
+/* magic value at end of file (64 bits) that indicates this is a transcoded rpm */
+#define MAGIC 3472329499408095051
+
 LrChecksumType
 lr_checksum_type(const char *type)
 {
@@ -99,6 +102,100 @@ lr_checksum_type_to_str(LrChecksumType type)
         return "sha384";
     case LR_CHECKSUM_SHA512:
         return "sha512";
+    }
+    return NULL;
+}
+
+char *
+lr_checksum_cow_fd(LrChecksumType type, int fd, GError **err)
+{
+    struct __attribute__ ((__packed__)) csum_offset_magic {
+        off64_t csum_offset;
+        uint64_t magic;
+    };
+    struct __attribute__ ((__packed__)) orig_size_algos_len {
+        ssize_t orig_size;
+        uint32_t algos_len;
+    };
+    struct __attribute__ ((__packed__)) algo_len_digest_len {
+        uint32_t algo_len;
+        uint32_t digest_len;
+    };
+
+    struct csum_offset_magic csum_offset_magic;
+    struct orig_size_algos_len orig_size_algos_len;
+    struct algo_len_digest_len algo_len_digest_len;
+    char *algo, *checksum;
+    unsigned char *digest;
+    size_t len = sizeof(csum_offset_magic);
+
+    if (g_getenv("LIBREPO_TRANSCODE_RPMS") == NULL) {
+        g_debug("Transcoding not enabled, skipping path");
+        return NULL;
+    }
+    if (lseek(fd, -len, SEEK_END) == -1) {
+        g_warning("seek for transcode failed, probably too small");
+        return NULL;
+    }
+    if (read(fd, &csum_offset_magic, len) != len) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_TRANSCODE,
+                    "Cannot read csum_offset, magic. size = %lu", len);
+        return NULL;
+    }
+    if (csum_offset_magic.magic != MAGIC) {
+        g_debug("Not transcoded");
+        return NULL;
+    }
+    g_debug("Is transcoded");
+    if (lseek(fd, csum_offset_magic.csum_offset, SEEK_SET) == -1) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_TRANSCODE,
+                    "seek for transcode csum_offset failed");
+        return NULL;
+    }
+    len = sizeof(orig_size_algos_len);
+    if (read(fd, &orig_size_algos_len, len) != len) {
+        g_set_error(err, LR_CHECKSUM_ERROR, LRE_TRANSCODE,
+                    "Cannot read orig_size_algos_len");
+        return NULL;
+    }
+    while (orig_size_algos_len.algos_len > 0) {
+        len = sizeof(algo_len_digest_len);
+        if (read(fd, &algo_len_digest_len, len) != len) {
+            g_set_error(err, LR_CHECKSUM_ERROR, LRE_TRANSCODE,
+                        "Cannot read algo_len_digest_len");
+            return NULL;
+        }
+
+        len = algo_len_digest_len.algo_len;
+        algo = lr_malloc0(len + 1);
+        if (read(fd, algo, len) != len) {
+            g_set_error(err, LR_CHECKSUM_ERROR, LRE_TRANSCODE,
+                        "Cannot read algo");
+            lr_free(algo);
+            return NULL;
+        }
+        len = algo_len_digest_len.digest_len;
+        digest = lr_malloc0(len);
+        if (read(fd, digest, len) != len) {
+            g_set_error(err, LR_CHECKSUM_ERROR, LRE_TRANSCODE,
+                        "Cannot read digest");
+            lr_free(algo);
+            lr_free(digest);
+            return NULL;
+        }
+        if (lr_checksum_type(algo) == type) {
+            /* found it, do the same as lr_checksum_fd does */
+            checksum = lr_malloc0(sizeof(char) * (len * 2 + 1));
+            for (size_t x = 0; x < len; x++) {
+                sprintf(checksum+(x*2), "%02x", digest[x]);
+            }
+            lr_free(algo);
+            lr_free(digest);
+            return checksum;
+        }
+        lr_free(algo);
+        lr_free(digest);
+        orig_size_algos_len.algos_len--;
     }
     return NULL;
 }
@@ -260,9 +357,17 @@ lr_checksum_fd_compare(LrChecksumType type,
         }
     }
 
-    char *checksum = lr_checksum_fd(type, fd, err);
-    if (!checksum)
-        return FALSE;
+    char *checksum = lr_checksum_cow_fd(type, fd, err);
+    if (checksum) {
+        // if checksum is found in CoW package, do not cache it in xattr
+        // because looking this up is nearly constant time (cheap) but
+        // is not valid when CoW is not enabled in RPM.
+        caching = FALSE;
+    } else {
+        checksum = lr_checksum_fd(type, fd, err);
+        if (!checksum)
+            return FALSE;
+    }
 
     *matches = (strcmp(expected, checksum)) ? FALSE : TRUE;
 
