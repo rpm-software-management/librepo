@@ -24,7 +24,7 @@ SET (librepotest_SRCS
 ADD_EXECUTABLE(test_main ${librepotest_SRCS})
 TARGET_LINK_LIBRARIES(test_main
     librepo
-    ${CHECK_LIBRARY}
+    ${LIBCHECK_LDFLAGS}
     )
 CONFIGURE_FILE("run_tests.sh.in"  "${CMAKE_BINARY_DIR}/tests/run_tests.sh")
 ADD_TEST(test_main run_tests.sh)
