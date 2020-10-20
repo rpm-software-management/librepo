@@ -489,7 +489,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     }
 
     #ifdef WITH_ZCHUNK
-    if(lrtarget->target->is_zchunk && lrtarget->mirror->max_ranges > 0)
+    if(lrtarget->target->is_zchunk && lrtarget->mirror->max_ranges > 0 && lrtarget->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
         return lr_zckheadercb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
@@ -602,7 +602,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     size_t cur_written;
     LrTarget *target = (LrTarget *) userdata;
     #ifdef WITH_ZCHUNK
-    if(target->target->is_zchunk && target->mirror->max_ranges > 0)
+    if(target->target->is_zchunk && target->mirror->max_ranges > 0 && target->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
         return lr_zck_writecb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
@@ -1303,7 +1303,7 @@ check_zck(LrTarget *target, GError **err)
     assert(!err || *err == NULL);
     assert(target && target->f && target->target);
 
-    if(target->mirror->max_ranges == 0) {
+    if(target->mirror->max_ranges == 0 || target->mirror->mirror->protocol != LR_PROTOCOL_HTTP) {
         target->zck_state = LR_ZCK_DL_BODY;
         target->target->expectedsize = target->target->origsize;
         return TRUE;
@@ -2272,12 +2272,12 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         if (target->target->is_zchunk) {
             zckCtx *zck = NULL;
             if (target->zck_state == LR_ZCK_DL_HEADER) {
-                if(target->mirror->max_ranges > 0 &&
+                if(target->mirror->max_ranges > 0 && target->mirror->mirror->protocol == LR_PROTOCOL_HTTP &&
                    !lr_zck_valid_header(target->target, target->target->path,
                                         fd, &transfer_err))
                     goto transfer_error;
             } else if(target->zck_state == LR_ZCK_DL_BODY) {
-                if(target->mirror->max_ranges > 0) {
+                if(target->mirror->max_ranges > 0 && target->mirror->mirror->protocol == LR_PROTOCOL_HTTP) {
                     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
                     if(zck == NULL) {
                         g_set_error(&transfer_err, LR_DOWNLOADER_ERROR, LRE_ZCK,
