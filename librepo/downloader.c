@@ -746,6 +746,10 @@ select_suitable_mirror(LrDownload *dd,
                 continue;
             }
 
+            if (mirrors_iterated == 0 && c_mirror->mirror->protocol == LR_PROTOCOL_FTP && target->target->is_zchunk) {
+                continue;
+            }
+
             if (c_mirror->mirror->protocol == LR_PROTOCOL_RSYNC) {
                 if (mirrors_iterated == 0) {
                     // Skip rsync mirrors
