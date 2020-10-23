@@ -190,7 +190,7 @@ typedef struct {
         Zchunk download status */
     #endif /* WITH_ZCHUNK */
 
-    gboolean range_fail; ; /*!<
+    gboolean range_fail; /*!<
         Whether range request failed. */
 } LrTarget;
 
