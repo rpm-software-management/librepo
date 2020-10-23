@@ -1306,6 +1306,8 @@ check_zck(LrTarget *target, GError **err)
     if(target->mirror->max_ranges == 0 || target->mirror->mirror->protocol != LR_PROTOCOL_HTTP) {
         target->zck_state = LR_ZCK_DL_BODY;
         target->target->expectedsize = target->target->origsize;
+        free(target->target->range);
+        target->target->range = NULL;
         return TRUE;
     }
 
