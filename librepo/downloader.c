@@ -2293,11 +2293,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
                     if(zck_failed_chunks(zck) == 0 && zck_missing_chunks(zck) == 0)
                         target->zck_state = LR_ZCK_DL_FINISHED;
                 } else {
-                    if(target->range_fail) {
-                        target->range_fail = FALSE;
-                    } else {
-                        target->zck_state = LR_ZCK_DL_FINISHED;
-                    }
+                    target->zck_state = LR_ZCK_DL_FINISHED;
                 }
             }
             if(target->zck_state == LR_ZCK_DL_FINISHED) {
