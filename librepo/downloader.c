@@ -489,7 +489,7 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     }
 
     #ifdef WITH_ZCHUNK
-    if(lrtarget->target->is_zchunk && lrtarget->mirror->max_ranges > 0 && lrtarget->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
+    if(lrtarget->target->is_zchunk && !lrtarget->range_fail && lrtarget->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
         return lr_zckheadercb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
@@ -602,7 +602,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     size_t cur_written;
     LrTarget *target = (LrTarget *) userdata;
     #ifdef WITH_ZCHUNK
-    if(target->target->is_zchunk && target->mirror->max_ranges > 0 && target->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
+    if(target->target->is_zchunk && !target->range_fail && target->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
         return lr_zck_writecb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
