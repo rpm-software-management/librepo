@@ -347,10 +347,6 @@ lr_fastestmirror_prepare(LrHandle *handle,
             break;
         }
 
-        LrFastestMirror *mirror = lr_lrfastestmirror_new();
-        mirror->url = url;
-        mirror->curl = curlh;
-
         curlcode = curl_easy_setopt(curlh, CURLOPT_URL, url);
         if (curlcode != CURLE_OK) {
             g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_CURL,
@@ -368,6 +364,10 @@ lr_fastestmirror_prepare(LrHandle *handle,
             ret = FALSE;
             break;
         }
+
+        LrFastestMirror *mirror = lr_lrfastestmirror_new();
+        mirror->url = url;
+        mirror->curl = curlh;
 
         list = g_slist_append(list, mirror);
     }
