@@ -158,6 +158,12 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_SSLVERIFYPEER, None)
         self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYPEER))
 
+        self.assertFalse(h.getinfo(librepo.LRI_SSLVERIFYSTATUS))
+        h.setopt(librepo.LRO_SSLVERIFYSTATUS, 1)
+        self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYSTATUS))
+        h.setopt(librepo.LRO_SSLVERIFYSTATUS, None)
+        self.assertFalse(h.getinfo(librepo.LRI_SSLVERIFYSTATUS))
+
         self.assertTrue(h.getinfo(librepo.LRI_SSLVERIFYHOST))
         h.setopt(librepo.LRO_SSLVERIFYHOST, 0)
         self.assertEqual(h.getinfo(librepo.LRI_SSLVERIFYHOST), False)

@@ -373,6 +373,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_FETCHMIRRORS:
     case LRO_FASTESTMIRROR:
     case LRO_SSLVERIFYPEER:
+    case LRO_SSLVERIFYSTATUS:
     case LRO_SSLVERIFYHOST:
     case LRO_ADAPTIVEMIRRORSORTING:
     case LRO_FTPUSEEPSV:
@@ -383,7 +384,8 @@ py_setopt(_HandleObject *self, PyObject *args)
 
         // Default values for None attribute
         if (obj == Py_None && (option == LRO_SSLVERIFYPEER ||
-                               option == LRO_SSLVERIFYHOST))
+                               option == LRO_SSLVERIFYHOST ||
+                               option == LRO_SSLVERIFYSTATUS))
         {
             d = 1;
         } else if (obj == Py_None && option == LRO_ADAPTIVEMIRRORSORTING) {
@@ -906,6 +908,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_FASTESTMIRROR:
     case LRI_FASTESTMIRRORMAXAGE:
     case LRI_SSLVERIFYPEER:
+    case LRI_SSLVERIFYSTATUS:
     case LRI_SSLVERIFYHOST:
     case LRI_ALLOWEDMIRRORFAILURES:
     case LRI_ADAPTIVEMIRRORSORTING:
