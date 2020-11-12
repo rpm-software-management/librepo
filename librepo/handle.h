@@ -398,6 +398,13 @@ typedef enum {
         or the associated Fedora change:
         https://fedoraproject.org/wiki/Changes/DNF_Better_Counting */
 
+    LRO_SSLVERIFYSTATUS, /*!< (long 1 or 0)
+        This option determines whether librepo verifies the status of the
+        server cert using the 'Certificate Status Request' TLS extension
+        (aka. OCSP stapling).
+        Note that if this option is enabled but the server does not support
+        the TLS extension, the verification will fail. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -446,6 +453,7 @@ typedef enum {
     LRI_FASTESTMIRRORMAXAGE,    /*!< (long *) */
     LRI_HMFCB,                  /*!< (LrHandleMirrorFailureCb) */
     LRI_SSLVERIFYPEER,          /*!< (long *) */
+    LRI_SSLVERIFYSTATUS,        /*!< (long *) */
     LRI_SSLVERIFYHOST,          /*!< (long *) */
     LRI_IPRESOLVE,              /*!< (LrIpResolveType *) */
     LRI_ALLOWEDMIRRORFAILURES,  /*!< (long *) */

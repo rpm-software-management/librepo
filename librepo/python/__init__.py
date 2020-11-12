@@ -291,6 +291,14 @@ Version contants
     of digital signatures, rooted in certification authority
     (CA) certificates.
 
+.. data:: LRO_SSLVERIFYSTATUS
+
+    *Boolean*.  This option determines whether librepo verifies the status
+    of the server cert using the 'Certificate Status Request' TLS extension
+    (aka. OCSP stapling).
+    Note that if this option is enabled but the server does not support
+    the TLS extension, the verification will fail. */
+
 .. data:: LRO_SSLVERIFYHOST
 
     *Boolean*. This option determines whether librepo verifies that
@@ -417,6 +425,7 @@ Version contants
 .. data:: LRI_FASTESTMIRRORMAXAGE
 .. data:: LRI_HMFCB
 .. data:: LRI_SSLVERIFYPEER
+.. data:: LRI_SSLVERIFYSTATUS
 .. data:: LRI_SSLVERIFYHOST
 .. data:: LRI_SSLCLIENTCERT
 .. data:: LRI_SSLCLIENTKEY
@@ -1357,6 +1366,10 @@ class Handle(_librepo.Handle):
     .. attribute:: sslverifypeer:
 
         See :data:`.LRO_SSLVERIFYPEER`
+
+    .. attribute:: sslverifySTATUS:
+
+        See :data:`.LRO_SSLVERIFYSTATUS`
 
     .. attribute:: sslverifyhost:
 

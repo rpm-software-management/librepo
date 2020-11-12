@@ -175,6 +175,10 @@ struct _LrHandle {
     long sslverifypeer; /*!<
         Determines whether verify the authenticity of the peer's certificate */
 
+    long sslverifystatus; /*!<
+        Determines whether verify the the status of the server cert using the
+        'Certificate Status Request' TLS extension (aka. OCSP stapling). */
+
     long sslverifyhost; /*!<
         Determines whether the server name should be checked against the name
         in the certificate */

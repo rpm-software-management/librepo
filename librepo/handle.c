@@ -63,6 +63,7 @@ lr_get_curl_handle()
     curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT);
     curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2);
     curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1);
+    curl_easy_setopt(h, CURLOPT_SSL_VERIFYSTATUS, 0);
     curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT);
     curl_easy_setopt(h, CURLOPT_FILETIME, 0);
 
@@ -102,6 +103,7 @@ lr_handle_init(void)
     handle->lowspeedlimit = LRO_LOWSPEEDLIMIT_DEFAULT;
     handle->sslverifypeer = 1;
     handle->sslverifyhost = 2;
+    handle->sslverifystatus = 0;
     handle->ipresolve = LRO_IPRESOLVE_DEFAULT;
     handle->allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
     handle->adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
@@ -637,6 +639,11 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_SSLVERIFYPEER:
         handle->sslverifypeer = va_arg(arg, long) ? 1 : 0;
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYPEER, handle->sslverifypeer);
+        break;
+
+    case LRO_SSLVERIFYSTATUS:
+        handle->sslverifystatus = va_arg(arg, long) ? 1 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_SSL_VERIFYSTATUS, handle->sslverifystatus);
         break;
 
     case LRO_SSLVERIFYHOST:
@@ -1483,6 +1490,12 @@ lr_handle_getinfo(LrHandle *handle,
         lnum = va_arg(arg, long *);
         *lnum = (long) handle->sslverifypeer;
         break;
+
+    case LRI_SSLVERIFYSTATUS:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->sslverifystatus;
+        break;
+
 
     case LRI_SSLVERIFYHOST:
         lnum = va_arg(arg, long *);
