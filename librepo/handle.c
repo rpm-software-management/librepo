@@ -649,6 +649,9 @@ lr_handle_setopt(LrHandle *handle,
             lr_free(handle->sslclientcert);
         handle->sslclientcert = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSLCERT, handle->sslclientcert);
+        if (c_rc == CURLE_OK && handle->sslclientcert && !strncasecmp(handle->sslclientcert, "pkcs11:", 7)) {
+            c_rc = curl_easy_setopt(c_h, CURLOPT_SSLCERTTYPE, "ENG");
+        }
         break;
 
     case LRO_SSLCLIENTKEY:
@@ -656,6 +659,9 @@ lr_handle_setopt(LrHandle *handle,
             lr_free(handle->sslclientkey);
         handle->sslclientkey = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSLKEY, handle->sslclientkey);
+        if (c_rc == CURLE_OK && handle->sslclientkey && !strncasecmp(handle->sslclientkey, "pkcs11:", 7)) {
+            c_rc = curl_easy_setopt(c_h, CURLOPT_SSLKEYTYPE, "ENG");
+        }
         break;
 
     case LRO_SSLCACERT:
