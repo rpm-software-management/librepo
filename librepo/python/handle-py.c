@@ -384,8 +384,7 @@ py_setopt(_HandleObject *self, PyObject *args)
 
         // Default values for None attribute
         if (obj == Py_None && (option == LRO_SSLVERIFYPEER ||
-                               option == LRO_SSLVERIFYHOST ||
-                               option == LRO_SSLVERIFYSTATUS))
+                               option == LRO_SSLVERIFYHOST))
         {
             d = 1;
         } else if (obj == Py_None && option == LRO_ADAPTIVEMIRRORSORTING) {
