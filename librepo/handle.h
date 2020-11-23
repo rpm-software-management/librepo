@@ -453,7 +453,6 @@ typedef enum {
     LRI_FASTESTMIRRORMAXAGE,    /*!< (long *) */
     LRI_HMFCB,                  /*!< (LrHandleMirrorFailureCb) */
     LRI_SSLVERIFYPEER,          /*!< (long *) */
-    LRI_SSLVERIFYSTATUS,        /*!< (long *) */
     LRI_SSLVERIFYHOST,          /*!< (long *) */
     LRI_IPRESOLVE,              /*!< (LrIpResolveType *) */
     LRI_ALLOWEDMIRRORFAILURES,  /*!< (long *) */
@@ -474,6 +473,7 @@ typedef enum {
     LRI_FTPUSEEPSV,             /*!< (long) */
     LRI_YUMSLIST,               /*!< (LrUrlVars **) */
     LRI_CACHEDIR,               /*!< (char *) */
+    LRI_SSLVERIFYSTATUS,        /*!< (long *) */
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 
