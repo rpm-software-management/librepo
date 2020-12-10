@@ -25,6 +25,7 @@
 #include <glib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <time.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -51,7 +52,6 @@
 #include "url_substitution.h"
 #include "yum_internal.h"
 
-#include <unistd.h>
 
 volatile sig_atomic_t lr_interrupt = 0;
 
@@ -2565,6 +2565,7 @@ lr_perform(LrDownload *dd, GError **err)
     assert(dd);
     assert(!err || *err == NULL);
 
+    int extra_sleep_trig = 0;
     while (1) {
 
         int still_running = 0;
@@ -2608,15 +2609,42 @@ lr_perform(LrDownload *dd, GError **err)
         if (curl_timeout <= 0) // No wait
             continue;
 
-        if (curl_timeout > 1000) // Wait no more than 1s
-            curl_timeout = 1000;
+        if (curl_timeout > 500) // Wait no more than 500ms
+            curl_timeout = 500;
 
-        cm_rc = curl_multi_wait(dd->multi_handle, NULL, 0, curl_timeout, NULL);
+        int numfds;
+        cm_rc = curl_multi_wait(dd->multi_handle, NULL, 0, curl_timeout, &numfds);
         if (cm_rc != CURLM_OK) {
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CURLM,
                         "curl_multi_wait() error: %s",
                         curl_multi_strerror(cm_rc));
             return FALSE;
+        }
+        // 'numfds' being zero means either a timeout or no file descriptors to wait for.
+        // If libcurl considers the bandwidth to be exceeded,
+        // curl_multi_wait() is not interested in these file descriptors (for the moment),
+        // so there are no file descriptors to wait for and curl_multi_wait() will return immediately.
+        // Libcurl solved the problem by introducing a new function curl_multi_poll() in version 7.66.0.
+        // Because librepo must work with older libcurl, new function cannot be used.
+        // Alternative solution:
+        // Try timeout on first occurrence, then assume no file descriptors to wait for. In this case,
+        // sleep to avoid busy-looping.
+        if (numfds == 0) {
+            if (extra_sleep_trig == 0) {
+                extra_sleep_trig = 1; // first occurrence
+            } else {
+                long sleep_ms;
+                // Sleep, to avoid busy-looping
+                if (curl_multi_timeout(dd->multi_handle, &sleep_ms) == CURLM_OK && sleep_ms > 0) {
+                    if (sleep_ms > curl_timeout)
+                        sleep_ms = curl_timeout;
+                    // ts.tv_nsec must be in the range 0 to 999999999. No problem because curl_timeout <=500.
+                    struct timespec ts = {0, sleep_ms * 1000000L};
+                    nanosleep(&ts, NULL);
+                }
+            }
+        } else {
+            extra_sleep_trig = 0;
         }
     }
 
