@@ -20,7 +20,6 @@ SET_TARGET_PROPERTIES(_librepo PROPERTIES PREFIX "")
 SET_TARGET_PROPERTIES(_librepo PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
 TARGET_LINK_LIBRARIES(_librepo librepo)
 TARGET_LINK_LIBRARIES(_librepo
-                        ${EXPAT_LIBRARIES}
                         ${CURL_LIBRARY}
                         ${PYTHON_LIBRARY}
                      )
