@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 librepo - download a package
@@ -26,11 +26,11 @@ def callback(data, total_to_download, downloaded):
         return
 
     completed = int(downloaded / (total_to_download / PROGRESSBAR_LEN))
-    print "%30s: [%s%s] %8s/%8s\r" % (data, '#'*completed, '-'*(PROGRESSBAR_LEN-completed), int(downloaded), int(total_to_download)),
+    print("%30s: [%s%s] %8s/%8s\r" % (data, '#'*completed, '-'*(PROGRESSBAR_LEN-completed), int(downloaded), int(total_to_download)), )
     sys.stdout.flush()
 
     if total_to_download == downloaded and not finished:
-        print
+        print()
         finished = True
         return
 

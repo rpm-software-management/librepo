@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 librepo - example of usage
@@ -19,7 +19,9 @@ def callback(data, total_to_download, downloaded):
     if total_to_download <= 0:
         return
     completed = int(downloaded / (total_to_download / PROGRESSBAR_LEN))
-    print "[%s%s] %8s/%8s (%s)\r" % ('#'*completed, '-'*(PROGRESSBAR_LEN-completed), int(downloaded), int(total_to_download), data),
+    print(
+        "[%s%s] %8s/%8s (%s)\r" % ('#'*completed, '-'*(PROGRESSBAR_LEN-completed), int(downloaded), int(total_to_download), data),
+    )
     sys.stdout.flush()
 
 if __name__ == "__main__":

@@ -52,14 +52,9 @@ PyAnyStr_AsString(PyObject *str, PyObject **tmp_py_str)
     if (PyUnicode_Check(str)) {
         *tmp_py_str = PyUnicode_AsUTF8String(str);
         res = PyBytes_AsString(*tmp_py_str);
-    }
-#if PY_MAJOR_VERSION < 3
-    else if (PyString_Check(str))
-        res = PyString_AsString(str);
-#else
-    else if (PyBytes_Check(str))
+    } else if (PyBytes_Check(str)) {
         res = PyBytes_AsString(str);
-#endif
+    }
 
     return res;
 }

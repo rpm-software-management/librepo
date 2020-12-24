@@ -793,7 +793,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         # You can use it to check adaptive mirror sorting behavior
         #
         # E.g. from librepo checkout dir:
-        # LIBREPO_DEBUG_ADAPTIVEMIRRORSORTING="1" LIBREPO_DEBUG="1" PYTHONPATH=`readlink -f ./build/librepo/python/python2/` nosetests -s -v tests/python/tests/test_yum_package_downloading.py:TestCaseYumPackagesDownloading.test_download_packages_mirror_penalization_01
+        # LIBREPO_DEBUG_ADAPTIVEMIRRORSORTING="1" LIBREPO_DEBUG="1" PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/test_yum_package_downloading.py:TestCaseYumPackagesDownloading.test_download_packages_mirror_penalization_01
 
         h = librepo.Handle()
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 librepo - download a file
@@ -16,7 +16,7 @@ DEST_FN_2 = "downloaded_mirrorlist_2.txt"
 
 def download_1():
     """Example of the simplest usage"""
-    fd = os.open(DEST_FN_1, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0666)
+    fd = os.open(DEST_FN_1, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o0666)
     librepo.download_url(URL, fd)
 
 def download_2():
@@ -28,7 +28,7 @@ def download_2():
     h = librepo.Handle()
     #h.setopt(librepo.LRO_PROXY, "http://foo.proxy.bar:8080")
 
-    fd = os.open(DEST_FN_2, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0666)
+    fd = os.open(DEST_FN_2, os.O_RDWR|os.O_CREAT|os.O_TRUNC, 0o0666)
     librepo.download_url(URL, fd, handle=h)
 
 if __name__ == "__main__":

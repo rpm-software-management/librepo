@@ -14,5 +14,33 @@ SET (librepomodule_SRCS
      ${pylibrepo_SRCDIR}/typeconversion.c
      ${pylibrepo_SRCDIR}/yum-py.c)
 
-MESSAGE("Building for python${PYTHON_VERSION_MAJOR}")
-ADD_SUBDIRECTORY(python${PYTHON_VERSION_MAJOR})
+MESSAGE("Building python bindings")
+
+EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "
+from sys import stdout
+from distutils import sysconfig
+path=sysconfig.get_python_lib(True, prefix='${CMAKE_INSTALL_PREFIX}')
+stdout.write(path)"
+OUTPUT_VARIABLE PYTHON_INSTALL_DIR)
+INCLUDE_DIRECTORIES (${PYTHON_INCLUDE_PATH})
+
+MESSAGE(STATUS "Python3 install dir is ${PYTHON_INSTALL_DIR}")
+
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-strict-aliasing")
+set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-strict-aliasing")
+
+SET (librepo_COPIES ${pylibrepo_SRCDIR}/__init__.py)
+FILE(COPY ${librepo_COPIES} DESTINATION ./librepo/)
+
+ADD_LIBRARY(_librepo SHARED ${librepomodule_SRCS})
+SET_TARGET_PROPERTIES(_librepo PROPERTIES PREFIX "")
+SET_TARGET_PROPERTIES(_librepo PROPERTIES LIBRARY_OUTPUT_DIRECTORY "./librepo")
+TARGET_LINK_LIBRARIES(_librepo librepo)
+TARGET_LINK_LIBRARIES(_librepo
+                        ${CURL_LIBRARY}
+                        ${PYTHON_LIBRARY}
+                     )
+
+INSTALL(FILES ${pylibrepo_SRCDIR}/__init__.py DESTINATION ${PYTHON_INSTALL_DIR}/librepo)
+INSTALL(TARGETS _librepo LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/librepo)

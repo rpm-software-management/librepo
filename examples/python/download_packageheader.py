@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 librepo - download packages
@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     # Setup logging
     def debug_function(msg, _):
-        print msg
+        print(msg)
     librepo.set_debug_log_handler(debug_function)
 
     # Prepare handle
@@ -31,14 +31,14 @@ if __name__ == "__main__":
     librepo.download_packages(packages)
 
     for target in packages:
-        print "### %s: %s" % (target.local_path, target.err or "OK")
-        print "Relative URL:      ", target.relative_url
-        print "Destination:       ", target.dest
-        print "Base URL:          ", target.base_url
-        print "Checksum type:     ", target.checksum_type
-        print "Expected checksum: ", target.checksum
-        print "Resume:            ", bool(target.resume)
-        print "Local path:        ", target.local_path
-        print "Error:             ", target.err
-        print
+        print("### %s: %s" % (target.local_path, target.err or "OK"))
+        print("Relative URL:      ", target.relative_url)
+        print("Destination:       ", target.dest)
+        print("Base URL:          ", target.base_url)
+        print("Checksum type:     ", target.checksum_type)
+        print("Expected checksum: ", target.checksum)
+        print("Resume:            ", bool(target.resume))
+        print("Local path:        ", target.local_path)
+        print("Error:             ", target.err)
+        print()
 
