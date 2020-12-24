@@ -11,7 +11,6 @@ Fedora/Ubuntu name
 
 * check (http://check.sourceforge.net/) - check-devel/check
 * cmake (http://www.cmake.org/) - cmake/cmake
-* expat (http://expat.sourceforge.net/) - expat-devel/libexpat1-dev
 * gcc (http://gcc.gnu.org/) - gcc/gcc
 * glib2 (http://developer.gnome.org/glib/) - glib2-devel/libglib2.0-dev
 * gpgme (http://www.gnupg.org/) - gpgme-devel/libgpgme11-dev
@@ -122,7 +121,7 @@ Here's the most direct way to get your work merged into the project.
 1. Clone down your fork
 1. Implement your feature or bug fix and commit changes
 1. If the change fixes a bug at [Red Hat bugzilla](https://bugzilla.redhat.com/), or if it is important to the end user, add the following block to the commit message:
-    
+
        = changelog =
        msg:           message to be included in the changelog
        type:          one of: bugfix/enhancement/security (this field is required when message is present)
