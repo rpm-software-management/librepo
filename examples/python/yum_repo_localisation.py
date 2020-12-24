@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 Example: Localize metadata files of a local repository
@@ -29,14 +29,14 @@ if __name__ == "__main__":
         h.perform(r)
     except librepo.LibrepoException as e:
         rc, msg, general_msg = e
-        print "Error: %s" % msg
+        print("Error: {}".format(msg))
         sys.exit(1)
 
-    print "Repomd content:"
+    print("Repomd content:")
     pprint.pprint(r.getinfo(librepo.LRR_YUM_REPOMD))
 
-    print "\nPaths to metadata files:"
+    print("\nPaths to metadata files:")
     for data_type, path in r.getinfo(librepo.LRR_YUM_REPO).iteritems():
-        print "%15s: %s" % (data_type, path)
+        print("%15s: %s" % (data_type, path))
 
     sys.exit(0)

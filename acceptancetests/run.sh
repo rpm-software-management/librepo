@@ -1,5 +1,5 @@
 #!/bin/bash
 
 pushd `dirname $0`
-PYTHONPATH="../build/librepo/python/python2/" lettuce
+PYTHONPATH="../build/librepo/python/" lettuce
 popd

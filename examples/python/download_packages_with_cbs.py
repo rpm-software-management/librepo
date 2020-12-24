@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 librepo - Example of download_packages() function with use of end,
@@ -21,18 +21,19 @@ if __name__ == "__main__":
 
     # Callbacks
     def endcb(data, status, msg):
-        print "EndCb: Download of %s finished with status:" % data,
+        print("EndCb: Download of {} finished with status:".format(data))
         if status == librepo.TRANSFER_SUCCESSFUL:
-            print "Successfully"
+            print("Sucessfully")
         elif status == librepo.TRANSFER_ALREADYEXISTS:
-            print "Already exists"
+            print("Already exists")
         else:
-            print "Error: %s" % msg
+            print("Error: {}".format(msg)
 
 
     def mirrorfailurecb(data, msg, url):
-        print "MirrorFailureCb: Download of %s from %s failed with: %s" % \
-              (data, url, msg)
+        print("MirrorFailureCb: Download of {} from {} failed with: {}".format(
+            data, url, msg
+        ))
 
     # Prepare list of targets
     packages = []
@@ -83,14 +84,13 @@ if __name__ == "__main__":
     librepo.download_packages(packages, failfast=False)
 
     for target in packages:
-        print "### %s: %s" % (target.local_path, target.err or "OK")
-        print "Relative URL:      ", target.relative_url
-        print "Destination:       ", target.dest
-        print "Base URL:          ", target.base_url
-        print "Checksum type:     ", target.checksum_type
-        print "Expected checksum: ", target.checksum
-        print "Resume:            ", bool(target.resume)
-        print "Local path:        ", target.local_path
-        print "Error:             ", target.err
-        print
-
+        print("### {}: {}".format(target.local_path, target.err or "OK"))
+        print("Relative URL:      ", target.relative_url)
+        print("Destination:       ", target.dest)
+        print("Base URL:          ", target.base_url)
+        print("Checksum type:     ", target.checksum_type)
+        print("Expected checksum: ", target.checksum)
+        print("Resume:            ", bool(target.resume))
+        print("Local path:        ", target.local_path)
+        print("Error:             ", target.err)
+        print()

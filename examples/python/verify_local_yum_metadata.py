@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 Example: Verify checksum of local metadata
@@ -35,9 +35,9 @@ if __name__ == "__main__":
     except librepo.LibrepoException as e:
         rc, msg, general_msg = e
         if rc == librepo.LRE_BADCHECKSUM:
-            print "Corrupted metadata! (%s)" % msg
+            print("Corrupted metadata! ({})".format(msg))
         else:
-            print "Other error: %s" % msg
+            print("Other error: {}".format(msg))
         sys.exit(1)
 
-    print "Metadata are fine!"
+    print("Metadata are fine!")

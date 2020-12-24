@@ -1675,7 +1675,7 @@ def set_debug_log_handler(log_function, user_data=None):
     Example::
 
         def debug_function(msg, _):
-            print msg
+            print(msg)
         librepo.set_debug_log_handler(debug_function)
 
     """

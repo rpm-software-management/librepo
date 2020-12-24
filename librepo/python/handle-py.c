@@ -108,10 +108,6 @@ progress_callback(void *data, double total_to_download, double now_downloaded)
         if (result == Py_None) {
             // Assume that None means that everything is ok
             ret = LR_CB_OK;
-#if PY_MAJOR_VERSION < 3
-        } else if (PyInt_Check(result)) {
-            ret = PyInt_AS_LONG(result);
-#endif
         } else if (PyLong_Check(result)) {
             ret = (int) PyLong_AsLong(result);
         } else {
@@ -209,10 +205,6 @@ hmf_callback(void *data, const char *msg, const char *url, const char *metadata)
         if (result == Py_None) {
             // Assume that None means that everything is ok
             ret = LR_CB_OK;
-#if PY_MAJOR_VERSION < 3
-        } else if (PyInt_Check(result)) {
-            ret = PyInt_AS_LONG(result);
-#endif
         } else if (PyLong_Check(result)) {
             ret = (int) PyLong_AsLong(result);
         } else {
@@ -424,10 +416,6 @@ py_setopt(_HandleObject *self, PyObject *args)
 
         if (PyLong_Check(obj))
             d = PyLong_AsLong(obj);
-#if PY_MAJOR_VERSION < 3
-        else if (PyInt_Check(obj))
-            d = PyInt_AS_LONG(obj);
-#endif
         else if (obj == Py_None) {
             // None stands for default value
             switch (option) {
@@ -482,10 +470,6 @@ py_setopt(_HandleObject *self, PyObject *args)
 
         if (PyLong_Check(obj))
             d = PyLong_AsLong(obj);
-#if PY_MAJOR_VERSION < 3
-        else if (PyInt_Check(obj))
-            d = PyInt_AS_LONG(obj);
-#endif
         else if (obj == Py_None) {
             /* Default options */
             if (option == LRO_PROXYPORT)
@@ -525,10 +509,6 @@ py_setopt(_HandleObject *self, PyObject *args)
 
         if (PyLong_Check(obj))
             d = (gint64) PyLong_AsLongLong(obj);
-#if PY_MAJOR_VERSION < 3
-        else if (PyInt_Check(obj))
-            d = (gint64) PyInt_AS_LONG(obj);
-#endif
         else if (obj == Py_None) {
             /* Default options */
             if (option == LRO_MAXSPEED)

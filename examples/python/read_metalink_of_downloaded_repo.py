@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 librepo - example of usage
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     elif os.path.isfile(os.path.join(DESTDIR, "metalink.xml")):
         h.mirrorlist = os.path.join(DESTDIR, "metalink.xml")
     else:
-        print "No mirrorlist of downloaded repodata available"
+        print("No mirrorlist of downloaded repodata available")
         sys.exit(0)
 
     # Download only the mirrorlist during perform() call.
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     h.perform(r)
 
-    print "Urls in mirrorlist:"
-    print h.mirrors
-    print "Metalink file content:"
+    print("Urls in mirrorlist:")
+    print(h.mirrors)
+    print("Metalink file content:")
     pprint.pprint(h.metalink)

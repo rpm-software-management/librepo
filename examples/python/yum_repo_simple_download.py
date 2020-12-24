@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 Example: Simple download whole repository
@@ -38,4 +38,4 @@ if __name__ == "__main__":
         # msg - Detailed error message (string)
         # general_msg - Error message based on rc (string)
         rc, msg, general_msg  = e
-        print "Error: %s" % msg
+        print("Error: {}".format(msg))

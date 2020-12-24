@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 librepo - download packages
@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     # Setup logging
     def debug_function(msg, _):
-        print msg
+        print(msg)
     #librepo.set_debug_log_handler(debug_function)
 
     # Remove packages if already exists
@@ -51,11 +51,10 @@ if __name__ == "__main__":
 
     t = time.time()
     librepo.download_packages(packages)
-    print "Download duration: {0}s\n".format((time.time() - t))
+    print("Download duration: {0}s\n".format((time.time() - t)))
 
     for target in packages:
-        print "### %s: %s" % (target.local_path, target.err or "OK")
-        print "Local path:        ", target.local_path
-        print "Error:             ", target.err
-        print
-
+        print("### %s: %s" % (target.local_path, target.err or "OK"))
+        print("Local path:        ", target.local_path)
+        print("Error:             ", target.err)
+        print()

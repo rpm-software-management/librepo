@@ -140,14 +140,7 @@ struct module_state {
     PyObject *error;
 };
 
-#if PY_MAJOR_VERSION >= 3
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#else
-#define GETSTATE(m) (&_state)
-static struct module_state _state;
-#endif
-
-#if PY_MAJOR_VERSION >= 3
 
 static int librepo_traverse(PyObject *m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
@@ -178,18 +171,8 @@ static struct PyModuleDef moduledef = {
 PyObject *
 PyInit__librepo(void)
 
-#else
-#define INITERROR return
-
-void
-init_librepo(void)
-#endif
 {
-#if PY_MAJOR_VERSION >= 3
     PyObject *m = PyModule_Create(&moduledef);
-#else
-    PyObject *m = Py_InitModule("_librepo", librepo_methods);
-#endif
 
     if (!m)
         INITERROR;
@@ -473,7 +456,5 @@ init_librepo(void)
     // Init librepo library
     lr_global_init();
 
-#if PY_MAJOR_VERSION >= 3
     return m;
-#endif
 }

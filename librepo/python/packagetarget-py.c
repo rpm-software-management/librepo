@@ -97,10 +97,6 @@ packagetarget_progress_callback(void *data, double total_to_download, double now
         if (result == Py_None) {
             // Assume that None means that everything is ok
             ret = LR_CB_OK;
-#if PY_MAJOR_VERSION < 3
-        } else if (PyInt_Check(result)) {
-            ret = PyInt_AS_LONG(result);
-#endif
         } else if (PyLong_Check(result)) {
             ret = (int) PyLong_AsLong(result);
         } else {
@@ -149,10 +145,6 @@ packagetarget_end_callback(void *data,
         if (result == Py_None) {
             // Assume that None means that everything is ok
             ret = LR_CB_OK;
-#if PY_MAJOR_VERSION < 3
-        } else if (PyInt_Check(result)) {
-            ret = PyInt_AS_LONG(result);
-#endif
         } else if (PyLong_Check(result)) {
             ret = (int) PyLong_AsLong(result);
         } else {
@@ -205,10 +197,6 @@ packagetarget_mirrorfailure_callback(void *data,
         if (result == Py_None) {
             // Assume that None means that everything is ok
             ret = LR_CB_OK;
-#if PY_MAJOR_VERSION < 3
-        } else if (PyInt_Check(result)) {
-            ret = PyInt_AS_LONG(result);
-#endif
         } else if (PyLong_Check(result)) {
             ret = (int) PyLong_AsLong(result);
         } else {

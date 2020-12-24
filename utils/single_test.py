@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Convert a single line from test output to run single test command.
 
@@ -13,8 +13,8 @@ import os
 import sys
 import argparse
 
-LIBPATH = "./build/librepo/python/python{pythonversion:d}/"
-COMMAND = "PYTHONPATH=`readlink -f {libpath}` nosetests{nosever} -s -v {testpath}"
+LIBPATH = "./build/librepo/python/"
+COMMAND = "PYTHONPATH=`readlink -f {libpath}` nosetests -s -v {testpath}"
 TEST_PATH_PREFIX = "tests/python"
 
 if __name__ == "__main__":
@@ -59,18 +59,9 @@ if __name__ == "__main__":
 
     full_path = os.path.join(TEST_PATH_PREFIX, test_path)
 
-    nosever = ""
-    pythonversion = 2
-
-    if (args.python3):
-        nosever = "-3.3"
-        pythonversion = 3
-
     testpath = "{0}:{1}.{2}".format(full_path, test_case, test_name)
-    libpath = LIBPATH.format(pythonversion=pythonversion)
 
-
-    command = COMMAND.format(libpath=libpath, nosever=nosever, testpath=testpath)
+    command = COMMAND.format(libpath=LIBPATH, testpath=testpath)
 
     print(command)
 
