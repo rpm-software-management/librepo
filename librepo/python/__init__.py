@@ -63,7 +63,7 @@ Version contants
 .. data:: LRO_MIRRORLIST
 
     *String or None*. **DEPRECATED** Set mirrorlist url (url could point
-    to a metalink mirrorlist or to a simple mirrorlist where each line wihtout
+    to a metalink mirrorlist or to a simple mirrorlist where each line without
     ``'#'`` is considered as mirror url).
 
 .. data:: LRO_MIRRORLISTURL
@@ -77,7 +77,7 @@ Version contants
 .. data:: LRO_LOCAL
 
     *Boolean*. If set to True, no local copy of repository is created
-    and repository is just localised in its current location.
+    and repository is just localized in its current location.
     When True, url of repository MUST be a local address
     (e.g. '/home/user/repo' or 'file:///home/user/repo').
 
@@ -99,7 +99,7 @@ Version contants
 
 .. data:: LRO_PROXYPORT
 
-    *Integer or None*. Set proxy port number to connect unsless
+    *Integer or None*. Set proxy port number to connect unless
     it is specified in the proxy address string. None sets default
     value 1080.
 
@@ -152,7 +152,7 @@ Version contants
 
 .. data:: LRO_IGNOREMISSING
 
-    *Boolean*. If you want to localise (LRO_LOCAL is True) a incomplete local
+    *Boolean*. If you want to localize (LRO_LOCAL is True) a incomplete local
     repository (eg. only primary and filelists are present but repomd.xml
     contains more files), you could use LRO_YUMDLIST and specify only file
     that are present, or use LRO_YUMBLIST and specify files that are not
