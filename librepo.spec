@@ -1,16 +1,6 @@
 %global libcurl_version 7.28.0
 
-%define __cmake_in_source_build 1
-
-%if 0%{?rhel} && 0%{?rhel} <= 7
-# Do not build bindings for python3 for RHEL <= 7
-%bcond_with python3
-# python-flask is not in RHEL7
-%bcond_with pythontests
-%else
-%bcond_without python3
-%bcond_without pythontests
-%endif
+%undefine __cmake_in_source_build
 
 %if 0%{?rhel}
 %bcond_with zchunk
@@ -56,7 +46,6 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description devel
 Development files for librepo.
 
-%if %{with python3}
 %package -n python3-%{name}
 Summary:        Python 3 bindings for the librepo library
 %{?python_provide:%python_provide python3-%{name}}
@@ -76,35 +65,19 @@ Conflicts:      python3-dnf < %{dnf_conflict}
 
 %description -n python3-%{name}
 Python 3 bindings for the librepo library.
-%endif
 
 %prep
 %autosetup -p1
 
-mkdir build-py3
-
 %build
-%if %{with python3}
-pushd build-py3
-  %cmake %{!?with_zchunk:-DWITH_ZCHUNK=OFF} ..
-  %make_build
-popd
-%endif
+%cmake %{!?with_zchunk:-DWITH_ZCHUNK=OFF}
+%cmake_build
 
 %check
-%if %{with python3}
-pushd build-py3
-  #ctest -VV
-  make ARGS="-V" test
-popd
-%endif
+%ctest
 
 %install
-%if %{with python3}
-pushd build-py3
-  %make_install
-popd
-%endif
+%cmake_install
 
 %if 0%{?rhel} && 0%{?rhel} <= 7
 %post -p /sbin/ldconfig
@@ -123,9 +96,7 @@ popd
 %{_libdir}/pkgconfig/%{name}.pc
 %{_includedir}/%{name}/
 
-%if %{with python3}
 %files -n python3-%{name}
 %{python3_sitearch}/%{name}/
-%endif
 
 %changelog
