@@ -86,7 +86,7 @@ mkdir build-py3
 %build
 %if %{with python3}
 pushd build-py3
-  %cmake %{!?with_zchunk:-DWITH_ZCHUNK=OFF} -DENABLE_PYTHON_TESTS=%{?with_pythontests:ON}%{!?with_pythontests:OFF} ..
+  %cmake %{!?with_zchunk:-DWITH_ZCHUNK=OFF} ..
   %make_build
 popd
 %endif
