@@ -50,13 +50,11 @@ Development files for librepo.
 Summary:        Python 3 bindings for the librepo library
 %{?python_provide:%python_provide python3-%{name}}
 BuildRequires:  python3-devel
-%if %{with pythontests}
 BuildRequires:  python3-gpg
 BuildRequires:  python3-flask
 BuildRequires:  python3-nose
 BuildRequires:  python3-pyxattr
 BuildRequires:  python3-requests
-%endif
 BuildRequires:  python3-sphinx
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 # Obsoletes Fedora 27 package
