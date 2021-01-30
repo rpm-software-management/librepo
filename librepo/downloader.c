@@ -1535,8 +1535,12 @@ maybe_transcode(LrTarget *target, GError **err)
 }
 
 void
-cleanup_transcode(LrTarget *target, GError **err)
+cleanup_transcode(LrTarget *target, GError **transfer_err)
 {
+    /** transfer_err can be NULL if we're using this to clean up a failed
+     * transfer. In that circumstance g_set_error does nothing which is fine,
+     * we don't need to pile on a second failure reason.
+     */
     int wstatus, trc;
     if (!target->writef) {
         return;
@@ -1546,21 +1550,21 @@ cleanup_transcode(LrTarget *target, GError **err)
     }
     fclose(target->writef);
     if(waitpid(target->pid, &wstatus, 0) == -1) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+        g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
                     "transcode waitpid failed: %s", g_strerror(errno));
     } else if (WIFEXITED(wstatus)) {
         trc = WEXITSTATUS(wstatus);
         if (trc != 0) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+            g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
                         "transcode process non-zero exit code %d", trc);
         }
     } else if (WIFSIGNALED(wstatus)) {
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+        g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
                     "transcode process was terminated with a signal: %d",
                     WTERMSIG(wstatus));
     } else {
         /* don't think this can happen, but covering all bases */
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
+        g_set_error(transfer_err, LR_DOWNLOADER_ERROR, LRE_TRANSCODE,
                     "transcode unhandled circumstance in waitpid");
     }
     target->writef = NULL;
@@ -1827,7 +1831,7 @@ fail:
         curl_easy_cleanup(target->curl_handle);
         target->curl_handle = NULL;
     }
-    cleanup_transcode(target, err);
+    cleanup_transcode(target, NULL);
     if (target->f != NULL) {
         fclose(target->f);
         target->f = NULL;
@@ -2395,10 +2399,10 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         if (!ret)  // Error
             return FALSE;
 
+        cleanup_transcode(target, &transfer_err);
+
         if (transfer_err)  // Transfer was unsuccessful
             goto transfer_error;
-
-        cleanup_transcode(target, err);
 
         //
         // Checksum checking
@@ -2494,7 +2498,7 @@ transfer_error:
         target->curl_handle = NULL;
         g_free(target->headercb_interrupt_reason);
         target->headercb_interrupt_reason = NULL;
-        cleanup_transcode(target, err);
+        cleanup_transcode(target, NULL);
         fclose(target->f);
         target->f = NULL;
         if (target->curl_rqheaders) {
@@ -2898,7 +2902,7 @@ lr_download_cleanup:
             curl_multi_remove_handle(dd.multi_handle, target->curl_handle);
             curl_easy_cleanup(target->curl_handle);
             target->curl_handle = NULL;
-            cleanup_transcode(target, err);
+            cleanup_transcode(target, NULL);
             fclose(target->f);
             target->f = NULL;
             g_free(target->headercb_interrupt_reason);
