@@ -192,6 +192,22 @@ struct _LrHandle {
     char *sslcacert; /*!<
         CA certificate path. */
 
+    long proxy_sslverifypeer; /*!<
+        Determines whether verify the authenticity of the proxy certificate */
+
+    long proxy_sslverifyhost; /*!<
+        Determines whether the proxy name should be checked against the name
+        in the certificate */
+
+    char *proxy_sslclientcert; /*!<
+        Client certificate filename. Used when talking to the proxy. */
+
+    char *proxy_sslclientkey; /*!<
+        Client certificate key. Used for proxy. */
+
+    char *proxy_sslcacert; /*!<
+        CA certificate path. Used for proxy. */
+
     LrIpResolveType ipresolve; /*!<
         What kind of IP addresses to use when resolving host names. */
 

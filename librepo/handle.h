@@ -405,6 +405,29 @@ typedef enum {
         Note that if this option is enabled but the server does not support
         the TLS extension, the verification will fail. */
 
+    LRO_PROXY_SSLVERIFYPEER, /*!< (long 1 or 0)
+        This option determines whether librepo verifies the authenticity
+        of the proxy certificate.
+        This trust is based on a chain of digital signatures,
+        rooted in certification authority (CA) certificates. */
+
+    LRO_PROXY_SSLVERIFYHOST, /*!< (long 1 or 0)
+        This option determines whether librepo verifies
+        the name of the proxy certificate against the host. */
+
+    LRO_PROXY_SSLCLIENTCERT, /*!< (char *)
+        Path to the PEM format SSL client certificate librepo should use
+        when talking to the proxy. */
+
+    LRO_PROXY_SSLCLIENTKEY, /*!< (char *)
+        Path to the PEM format SSL client key librepo should use when
+        talking to the proxy, if not included in the client certificate
+        file. */
+
+    LRO_PROXY_SSLCACERT, /*!< (char *)
+        Path to a file containing the list of PEM format trusted CA
+        certificates. Used for proxy. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -474,6 +497,13 @@ typedef enum {
     LRI_YUMSLIST,               /*!< (LrUrlVars **) */
     LRI_CACHEDIR,               /*!< (char *) */
     LRI_SSLVERIFYSTATUS,        /*!< (long *) */
+
+    LRI_PROXY_SSLVERIFYPEER,    /*!< (long *) */
+    LRI_PROXY_SSLVERIFYHOST,    /*!< (long *) */
+    LRI_PROXY_SSLCLIENTCERT,    /*!< (char **) */
+    LRI_PROXY_SSLCLIENTKEY,     /*!< (char **) */
+    LRI_PROXY_SSLCACERT,        /*!< (char **) */
+
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
 

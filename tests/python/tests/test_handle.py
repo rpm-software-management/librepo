@@ -194,6 +194,42 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_SSLCACERT, None)
         self.assertEqual(h.getinfo(librepo.LRI_SSLCACERT), None)
 
+        self.assertTrue(h.getinfo(librepo.LRI_PROXY_SSLVERIFYPEER))
+        h.setopt(librepo.LRO_PROXY_SSLVERIFYPEER, 0)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLVERIFYPEER), False)
+        h.setopt(librepo.LRO_PROXY_SSLVERIFYPEER, None)
+        self.assertTrue(h.getinfo(librepo.LRI_PROXY_SSLVERIFYPEER))
+
+        self.assertTrue(h.getinfo(librepo.LRI_PROXY_SSLVERIFYHOST))
+        h.setopt(librepo.LRO_PROXY_SSLVERIFYHOST, 0)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLVERIFYHOST), False)
+        h.setopt(librepo.LRO_PROXY_SSLVERIFYHOST, None)
+        self.assertTrue(h.getinfo(librepo.LRI_PROXY_SSLVERIFYHOST))
+
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTCERT), None)
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTCERT, "/etc/proxy_cert.pem")
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTCERT), "/etc/proxy_cert.pem")
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTCERT, "")
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTCERT), "")
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTCERT, None)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTCERT), None)
+
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTKEY), None)
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTKEY, "/etc/proxy_cert.key")
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTKEY), "/etc/proxy_cert.key")
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTKEY, "")
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTKEY), "")
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTKEY, None)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCLIENTKEY), None)
+
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCACERT), None)
+        h.setopt(librepo.LRO_PROXY_SSLCACERT, "/etc/proxy_ca.pem")
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCACERT), "/etc/proxy_ca.pem")
+        h.setopt(librepo.LRO_PROXY_SSLCACERT, "")
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCACERT), "")
+        h.setopt(librepo.LRO_PROXY_SSLCACERT, None)
+        self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCACERT), None)
+
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_WHATEVER)
         h.setopt(librepo.LRO_IPRESOLVE, librepo.IPRESOLVE_V6)
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_V6)
@@ -375,11 +411,29 @@ class TestCaseHandle(unittest.TestCase):
         h.sslverifypeer = None
         self.assertTrue(h.sslverifypeer)
 
+        self.assertFalse(h.sslverifystatus)
+        h.sslverifystatus = False
+        self.assertEqual(h.sslverifystatus, False)
+        h.sslverifystatus = None
+        self.assertFalse(h.sslverifystatus)
+
         self.assertTrue(h.sslverifyhost)
         h.sslverifyhost = False
         self.assertEqual(h.sslverifyhost, False)
         h.sslverifyhost = None
         self.assertTrue(h.sslverifyhost)
+
+        self.assertTrue(h.proxy_sslverifypeer)
+        h.proxy_sslverifypeer = False
+        self.assertEqual(h.proxy_sslverifypeer, False)
+        h.proxy_sslverifypeer = None
+        self.assertTrue(h.proxy_sslverifypeer)
+
+        self.assertTrue(h.proxy_sslverifyhost)
+        h.proxy_sslverifyhost = False
+        self.assertEqual(h.proxy_sslverifyhost, False)
+        h.proxy_sslverifyhost = None
+        self.assertTrue(h.proxy_sslverifyhost)
 
         self.assertEqual(h.ipresolve, librepo.IPRESOLVE_WHATEVER)
         h.ipresolve = librepo.IPRESOLVE_V4
@@ -537,6 +591,17 @@ class TestCaseHandle(unittest.TestCase):
         h.sslclientkey = None
         h.setopt(librepo.LRO_SSLCACERT, None)
         h.sslcacert = None
+
+        h.setopt(librepo.LRO_PROXY_SSLVERIFYPEER, None)
+        h.proxy_sslverifypeer = None
+        h.setopt(librepo.LRO_PROXY_SSLVERIFYHOST, None)
+        h.proxy_sslverifyhost = None
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTCERT, None)
+        h.proxy_sslclientcert = None
+        h.setopt(librepo.LRO_PROXY_SSLCLIENTKEY, None)
+        h.proxy_sslclientkey = None
+        h.setopt(librepo.LRO_PROXY_SSLCACERT, None)
+        h.proxy_sslcacert = None
 
         h.setopt(librepo.LRO_IPRESOLVE, None)
         h.ipresolve = None
