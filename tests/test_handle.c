@@ -53,6 +53,9 @@ START_TEST(test_handle)
     fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCLIENTCERT, "/etc/cert.pem"));
     fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCLIENTKEY, "/etc/cert.key"));
     fail_if(!lr_handle_setopt(h, NULL, LRO_SSLCACERT, "/etc/ca.pem"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_PROXY_SSLCLIENTCERT, "/etc/proxy_cert.pem"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_PROXY_SSLCLIENTKEY, "/etc/proxy_cert.key"));
+    fail_if(!lr_handle_setopt(h, NULL, LRO_PROXY_SSLCACERT, "/etc/proxy_ca.pem"));
     fail_if(!lr_handle_setopt(h, NULL, LRO_HTTPAUTHMETHODS, LR_AUTH_NTLM));
     fail_if(!lr_handle_setopt(h, NULL, LRO_PROXYAUTHMETHODS, LR_AUTH_DIGEST));
     lr_handle_free(h);
@@ -133,6 +136,18 @@ START_TEST(test_handle_getinfo)
 
     str = NULL;
     fail_if(!lr_handle_getinfo(h, NULL, LRI_SSLCACERT, &str));
+    fail_if(str != NULL);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_PROXY_SSLCLIENTCERT, &str));
+    fail_if(str != NULL);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_PROXY_SSLCLIENTKEY, &str));
+    fail_if(str != NULL);
+
+    str = NULL;
+    fail_if(!lr_handle_getinfo(h, NULL, LRI_PROXY_SSLCACERT, &str));
     fail_if(str != NULL);
 
     LrAuth auth = LR_AUTH_NONE;

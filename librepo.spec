@@ -1,4 +1,4 @@
-%global libcurl_version 7.28.0
+%global libcurl_version 7.52.0
 
 %undefine __cmake_in_source_build
 
@@ -11,7 +11,7 @@
 %global dnf_conflict 2.8.8
 
 Name:           librepo
-Version:        1.12.2
+Version:        1.13.0
 Release:        1%{?dist}
 Summary:        Repodata downloading library
 

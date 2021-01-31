@@ -104,6 +104,8 @@ lr_handle_init(void)
     handle->sslverifypeer = 1;
     handle->sslverifyhost = 2;
     handle->sslverifystatus = 0;
+    handle->proxy_sslverifypeer = 1;
+    handle->proxy_sslverifyhost = 2;
     handle->ipresolve = LRO_IPRESOLVE_DEFAULT;
     handle->allowed_mirror_failures = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
     handle->adaptivemirrorsorting = LRO_ADAPTIVEMIRRORSORTING_DEFAULT;
@@ -142,6 +144,9 @@ lr_handle_free(LrHandle *handle)
     lr_free(handle->sslclientcert);
     lr_free(handle->sslclientkey);
     lr_free(handle->sslcacert);
+    lr_free(handle->proxy_sslclientcert);
+    lr_free(handle->proxy_sslclientkey);
+    lr_free(handle->proxy_sslcacert);
     lr_lrmirrorlist_free(handle->internal_mirrorlist);
     lr_lrmirrorlist_free(handle->urls_mirrors);
     lr_lrmirrorlist_free(handle->mirrorlist_mirrors);
@@ -676,6 +681,43 @@ lr_handle_setopt(LrHandle *handle,
             lr_free(handle->sslcacert);
         handle->sslcacert = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_CAINFO, handle->sslcacert);
+        break;
+
+    case LRO_PROXY_SSLVERIFYPEER:
+        handle->proxy_sslverifypeer = va_arg(arg, long) ? 1 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSL_VERIFYPEER, handle->proxy_sslverifypeer);
+        break;
+
+    case LRO_PROXY_SSLVERIFYHOST:
+        handle->proxy_sslverifyhost = va_arg(arg, long) ? 2 : 0;
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSL_VERIFYHOST, handle->proxy_sslverifyhost);
+        break;
+
+    case LRO_PROXY_SSLCLIENTCERT:
+        if (handle->proxy_sslclientcert)
+            lr_free(handle->proxy_sslclientcert);
+        handle->proxy_sslclientcert = g_strdup(va_arg(arg, char *));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLCERT, handle->proxy_sslclientcert);
+        if (c_rc == CURLE_OK && handle->proxy_sslclientcert && !strncasecmp(handle->proxy_sslclientcert, "pkcs11:", 7)) {
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLCERTTYPE, "ENG");
+        }
+        break;
+
+    case LRO_PROXY_SSLCLIENTKEY:
+        if (handle->proxy_sslclientkey)
+            lr_free(handle->proxy_sslclientkey);
+        handle->proxy_sslclientkey = g_strdup(va_arg(arg, char *));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLKEY, handle->proxy_sslclientkey);
+        if (c_rc == CURLE_OK && handle->proxy_sslclientkey && !strncasecmp(handle->proxy_sslclientkey, "pkcs11:", 7)) {
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLKEYTYPE, "ENG");
+        }
+        break;
+
+    case LRO_PROXY_SSLCACERT:
+        if (handle->proxy_sslcacert)
+            lr_free(handle->proxy_sslcacert);
+        handle->proxy_sslcacert = g_strdup(va_arg(arg, char *));
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_CAINFO, handle->proxy_sslcacert);
         break;
 
     case LRO_IPRESOLVE: {
@@ -1521,6 +1563,31 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_SSLCACERT:
         str = va_arg(arg, char **);
         *str = handle->sslcacert;
+        break;
+
+    case LRI_PROXY_SSLVERIFYPEER:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) handle->proxy_sslverifypeer;
+        break;
+
+    case LRI_PROXY_SSLVERIFYHOST:
+        lnum = va_arg(arg, long *);
+        *lnum = (long) (handle->proxy_sslverifyhost ? 1 : 0);
+        break;
+
+    case LRI_PROXY_SSLCLIENTCERT:
+        str = va_arg(arg, char **);
+        *str = handle->proxy_sslclientcert;
+        break;
+
+    case LRI_PROXY_SSLCLIENTKEY:
+        str = va_arg(arg, char **);
+        *str = handle->proxy_sslclientkey;
+        break;
+
+    case LRI_PROXY_SSLCACERT:
+        str = va_arg(arg, char **);
+        *str = handle->proxy_sslcacert;
         break;
 
     case LRI_IPRESOLVE: {

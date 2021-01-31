@@ -302,6 +302,9 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_SSLCLIENTCERT:
     case LRO_SSLCLIENTKEY:
     case LRO_SSLCACERT:
+    case LRO_PROXY_SSLCLIENTCERT:
+    case LRO_PROXY_SSLCLIENTKEY:
+    case LRO_PROXY_SSLCACERT:
     case LRO_CACHEDIR:
     {
         char *str = NULL, *alloced = NULL;
@@ -367,6 +370,8 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_SSLVERIFYPEER:
     case LRO_SSLVERIFYSTATUS:
     case LRO_SSLVERIFYHOST:
+    case LRO_PROXY_SSLVERIFYPEER:
+    case LRO_PROXY_SSLVERIFYHOST:
     case LRO_ADAPTIVEMIRRORSORTING:
     case LRO_FTPUSEEPSV:
     case LRO_PRESERVETIME:
@@ -375,8 +380,8 @@ py_setopt(_HandleObject *self, PyObject *args)
         long d;
 
         // Default values for None attribute
-        if (obj == Py_None && (option == LRO_SSLVERIFYPEER ||
-                               option == LRO_SSLVERIFYHOST))
+        if (obj == Py_None && (option == LRO_SSLVERIFYPEER || option == LRO_PROXY_SSLVERIFYPEER ||
+                               option == LRO_SSLVERIFYHOST || option == LRO_PROXY_SSLVERIFYHOST))
         {
             d = 1;
         } else if (obj == Py_None && option == LRO_ADAPTIVEMIRRORSORTING) {
@@ -859,6 +864,9 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_SSLCLIENTCERT:
     case LRI_SSLCLIENTKEY:
     case LRI_SSLCACERT:
+    case LRI_PROXY_SSLCLIENTCERT:
+    case LRI_PROXY_SSLCLIENTKEY:
+    case LRI_PROXY_SSLCACERT:
     case LRI_CACHEDIR:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
@@ -889,6 +897,8 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_SSLVERIFYPEER:
     case LRI_SSLVERIFYSTATUS:
     case LRI_SSLVERIFYHOST:
+    case LRI_PROXY_SSLVERIFYPEER:
+    case LRI_PROXY_SSLVERIFYHOST:
     case LRI_ALLOWEDMIRRORFAILURES:
     case LRI_ADAPTIVEMIRRORSORTING:
     case LRI_OFFLINE:

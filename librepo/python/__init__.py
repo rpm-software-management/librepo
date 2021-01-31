@@ -319,6 +319,33 @@ Version contants
     *String or None*. Path to a file containing the list of PEM format
     trusted CA certificates.
 
+.. data:: LRO_PROXY_SSLVERIFYPEER
+
+    *Boolean*. This option determines whether librepo verifies the
+    authenticity of the proxy certificate. This trust is based on a chain
+    of digital signatures, rooted in certification authority
+    (CA) certificates.
+
+.. data:: LRO_PROXY_SSLVERIFYHOST
+
+    *Boolean*. This option determines whether librepo verifies
+    the name of the proxy certificate against the host.
+
+.. data:: LRO_PROXY_SSLCLIENTCERT
+
+    *String or None*. Path to the PEM format SSL client certificate to use
+    when talking to the proxy.
+
+.. data:: LRO_PROXY_SSLCLIENTKEY
+
+    *String or None*. Path to the PEM format SSL client key to use when
+    talking to the proxy.
+
+.. data:: LRO_PROXY_SSLCACERT
+
+    *String or None*. Path to a file containing the list of PEM format
+    trusted CA certificates. Used for proxy.
+
 .. data:: LRO_IPRESOLVE
 
     *Integer or None* Sets kind of IP addresses to use when resolving host
@@ -430,6 +457,11 @@ Version contants
 .. data:: LRI_SSLCLIENTCERT
 .. data:: LRI_SSLCLIENTKEY
 .. data:: LRI_SSLCACERT
+.. data:: LRI_PROXY_SSLVERIFYPEER
+.. data:: LRI_PROXY_SSLVERIFYHOST
+.. data:: LRI_PROXY_SSLCLIENTCERT
+.. data:: LRI_PROXY_SSLCLIENTKEY
+.. data:: LRI_PROXY_SSLCACERT
 .. data:: LRI_IPRESOLVE
 .. data:: LRI_ALLOWEDMIRRORFAILURES
 .. data:: LRI_ADAPTIVEMIRRORSORTING
@@ -1367,7 +1399,7 @@ class Handle(_librepo.Handle):
 
         See :data:`.LRO_SSLVERIFYPEER`
 
-    .. attribute:: sslverifySTATUS:
+    .. attribute:: sslverifystatus:
 
         See :data:`.LRO_SSLVERIFYSTATUS`
 
@@ -1386,6 +1418,26 @@ class Handle(_librepo.Handle):
     .. attribute:: sslcacert:
 
         See :data:`.LRO_SSLCACERT`
+
+    .. attribute:: proxy_sslverifypeer:
+
+        See :data:`.LRO_PROXY_SSLVERIFYPEER`
+
+    .. attribute:: proxy_sslverifyhost:
+
+        See :data:`.LRO_PROXY_SSLVERIFYHOST`
+
+    .. attribute:: proxy_sslclientcert:
+
+        See :data:`.LRO_PROXY_SSLCLIENTCERT`
+
+    .. attribute:: proxy_sslclientkey:
+
+        See :data:`.LRO_PROXY_SSLCLIENTKEY`
+
+    .. attribute:: proxy_sslcacert:
+
+        See :data:`.LRO_PROXY_SSLCACERT`
 
     .. attribute:: ipresolve:
 
