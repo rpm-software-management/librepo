@@ -679,7 +679,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         # the mirror list should be 1, 3, 4. The metalink file
         # defines preference order. This is the order in which
         # the URLs are listed in the file
-        self.assertEquals(h.mirrors, [url1, url2, url3])
+        self.assertEqual(h.mirrors, [url1, url2, url3])
 
         # YUM 01 contains P_01
         # YUM 03 contains P_03
@@ -697,10 +697,10 @@ class TestCaseYumPackagesDownloading(TestCaseWithFlask):
         # - P_04 from YUM_04 - FAIL
         # - P_04 from YUM_03 - FAIL
         # - P_04 from YUM_04 - PASS
-        self.assertEquals(len(cbdata["failed_urls"]), 3)
-        self.assertEquals(cbdata["failed_urls"][0], url1+config.PACKAGE_03_01)
-        self.assertEquals(cbdata["failed_urls"][1], url1+config.PACKAGE_04_01)
-        self.assertEquals(cbdata["failed_urls"][2], url2+config.PACKAGE_04_01)
+        self.assertEqual(len(cbdata["failed_urls"]), 3)
+        self.assertEqual(cbdata["failed_urls"][0], url1+config.PACKAGE_03_01)
+        self.assertEqual(cbdata["failed_urls"][1], url1+config.PACKAGE_04_01)
+        self.assertEqual(cbdata["failed_urls"][2], url2+config.PACKAGE_04_01)
 
         # assert that all packages have been downloaded
         for pkg in pkgs:
