@@ -20,7 +20,6 @@ Fedora/Ubuntu name
 * python (http://python.org/) - python3-devel/libpython3-dev
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - python3-pygpgme/python3-gpgme
 * **Test requires:** python3-flask (http://flask.pocoo.org/) - python-flask/python-flask
-* **Test requires:** python3-nose (https://nose.readthedocs.org/) - python3-nose/python3-nose
 * **Test requires:** python3-pyxattr (https://github.com/xattr/xattr) - python3-pyxattr/python3-pyxattr
 
 ### Build from your checkout dir:
@@ -86,7 +85,7 @@ Note: .valgrindrc file is present in checkoutdir, this file contains the setting
 
 ### Run (from your checkout dir) - Python 3 unittests:
 
-    PYTHONPATH=`readlink -f ./build/librepo/python/` nosetests -s -v tests/python/tests/
+    PYTHONPATH=`readlink -f ./build/librepo/python/` python3 -m unittest discover -b -s tests/python
 
 ## Contribution
 
