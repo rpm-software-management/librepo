@@ -1,0 +1,1 @@
+LD_LIBRARY_PATH="${CMAKE_BINARY_DIR}/librepo/:" PYTHONPATH="${CMAKE_BINARY_DIR}/librepo/python/" ${PYTHON_EXECUTABLE} -m unittest discover -s "${CMAKE_CURRENT_SOURCE_DIR}/../"
