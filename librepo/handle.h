@@ -277,7 +277,7 @@ typedef enum {
     LRO_RPMMDDLIST = LRO_YUMDLIST,
 
     LRO_YUMBLIST,  /*!< (char ** NULL-terminated)
-        Do not download this specified records from repomd (blacklist).
+        Do not download this specified records from repomd (skiplist).
         Note: Last element of the list must be NULL! */
 
     LRO_RPMMDBLIST = LRO_YUMBLIST,
