@@ -268,7 +268,7 @@ Version contants
 
 .. data:: LRO_YUMBLIST
 
-    *List of strings*. Set blacklist of yum metadata files.
+    *List of strings*. Set skiplist of yum metadata files.
     This files will not be downloaded.
 
 .. data:: LRO_RPMMDBLIST

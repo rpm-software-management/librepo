@@ -226,7 +226,7 @@ lr_yum_switch_to_zchunk(LrHandle *handle, LrYumRepoMd *repomd)
 static gboolean
 lr_yum_repomd_record_enabled(LrHandle *handle, const char *type, GSList* records)
 {
-    // Blacklist check
+    // Check for records that shouldn't be downloaded
     if (handle->yumblist) {
         int x = 0;
         while (handle->yumblist[x]) {
@@ -236,7 +236,7 @@ lr_yum_repomd_record_enabled(LrHandle *handle, const char *type, GSList* records
         }
     }
 
-    // Whitelist check
+    // Check for records that should be downloaded
     if (handle->yumdlist) {
         int x = 0;
         while (handle->yumdlist[x]) {

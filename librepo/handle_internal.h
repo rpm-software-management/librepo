@@ -138,8 +138,8 @@ struct _LrHandle {
         yumdlist[0] = NULL - Only repomd.xml */
 
     char **yumblist; /*!<
-        Repomd data typenames to skip (blacklist). NULL as argument will
-        disable blacklist. */
+        Repomd data typenames to skip (skiplist). NULL as argument will
+        disable skiplist. */
 
     int fetchmirrors;   /*!<
         Only fetch and parse mirrorlist. */
