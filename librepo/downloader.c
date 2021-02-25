@@ -51,6 +51,7 @@
 #include "cleanup.h"
 #include "url_substitution.h"
 #include "yum_internal.h"
+#include "xattr_internal.h"
 
 
 volatile sig_atomic_t lr_interrupt = 0;
@@ -981,11 +982,7 @@ add_librepo_xattr(int fd, const gchar *fn)
     else
         dst = g_strdup(fn);
 
-#if __APPLE__
-    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "1", 1, 0, 0);
-#else
-    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "1", 1, 0);
-#endif
+    int attr_ret = FSETXATTR(fd, XATTR_LIBREPO, "1", 1, 0);
     if (attr_ret == -1) {
         g_debug("%s: Cannot set xattr %s (%s): %s",
                 __func__, XATTR_LIBREPO, dst, g_strerror(errno));
@@ -998,11 +995,7 @@ add_librepo_xattr(int fd, const gchar *fn)
 static gboolean
 has_librepo_xattr(int fd)
 {
-#if __APPLE__
-    ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0, 0, 0);
-#else
-    ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0);
-#endif
+    ssize_t attr_ret = FGETXATTR(fd, XATTR_LIBREPO, NULL, 0);
     if (attr_ret == -1) {
         //g_debug("%s: Cannot get xattr %s: %s",
         //        __func__, XATTR_LIBREPO, g_strerror(errno));
@@ -1019,11 +1012,7 @@ remove_librepo_xattr(LrDownloadTarget * target)
 {
     int fd = target->fd;
     if (fd != -1) {
-#if __APPLE__
-        fremovexattr(fd, XATTR_LIBREPO, 0);
-#else
-        fremovexattr(fd, XATTR_LIBREPO);
-#endif
+        FREMOVEXATTR(fd, XATTR_LIBREPO);
         return;
     }
     // If file descriptor wasn't set, file name was, and we need to open it
@@ -1031,11 +1020,7 @@ remove_librepo_xattr(LrDownloadTarget * target)
     if (fd == -1) {
         return;
     }
-#if __APPLE__
-    fremovexattr(fd, XATTR_LIBREPO, 0);
-#else
-    fremovexattr(fd, XATTR_LIBREPO);
-#endif
+    FREMOVEXATTR(fd, XATTR_LIBREPO);
     close(fd);
 }
 
