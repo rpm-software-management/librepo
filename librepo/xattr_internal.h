@@ -21,6 +21,8 @@
 #ifndef __LR_XATTR_INTERNAL_H__
 #define __LR_XATTR_INTERNAL_H__
 
+#define XATTR_CHKSUM_PREFIX     "user.Librepo.checksum."
+
 #if __APPLE__
 
 #define FGETXATTR(FD, NAME, VALUE, SIZE)   \

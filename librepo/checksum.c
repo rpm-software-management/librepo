@@ -226,23 +226,34 @@ lr_checksum_fd_compare(LrChecksumType type,
         }
     }
 
+    _cleanup_free_ gchar *timestamp_str = g_strdup_printf("%lli", (long long)timestamp);
+    const char *type_str = lr_checksum_type_to_str(type);
+    _cleanup_free_ gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
+    _cleanup_free_ gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, type_str, NULL);
+
     if (caching && timestamp != -1) {
         // Load cached checksum if enabled and used
-        _cleanup_free_ gchar *key = NULL;
         char buf[256];
-
-        key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
-                              (unsigned long long) timestamp);
-        ssize_t attr_size = FGETXATTR(fd, key, &buf, sizeof(buf));
+        ssize_t attr_size;
+        attr_size = FGETXATTR(fd, timestamp_key, &buf, sizeof(buf)-1);
         if (attr_size != -1) {
-            // Cached checksum found
-            g_debug("%s: Using checksum cached in xattr: [%s] %s",
-                    __func__, key, buf);
-            size_t expected_len = strlen(expected);
-            // xattr may contain null terminator (+1 byte)
-            *matches = (attr_size == expected_len || attr_size == expected_len + 1) &&
-                       memcmp(expected, buf, attr_size) == 0;
-            return TRUE;
+            buf[attr_size] = 0;
+            // check that mtime stored in xattr is the same as timestamp
+            if (strcmp(timestamp_str, buf) == 0) {
+                g_debug("%s: Using mtime cached in xattr: [%s] %s", __func__, timestamp_key, buf);
+                attr_size = FGETXATTR(fd, checksum_key, &buf, sizeof(buf)-1);
+                if (attr_size != -1) {
+                    buf[attr_size] = 0;
+                    // Cached checksum found
+                    g_debug("%s: Using checksum cached in xattr: [%s] %s",
+                            __func__, checksum_key, buf);
+                    *matches = (strcmp(expected, buf) == 0);
+                    return TRUE;
+                }
+            } else {
+                // timestamp stored in xattr is different => checksums are no longer valid
+                lr_checksum_clear_cache(fd);
+            }
         }
     }
 
@@ -259,11 +270,9 @@ lr_checksum_fd_compare(LrChecksumType type,
     }
 
     if (caching && *matches && timestamp != -1) {
-        // Store checksum as extended file attribute if caching is enabled
-        _cleanup_free_ gchar *key = NULL;
-        key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
-                              (unsigned long long) timestamp);
-        FSETXATTR(fd, key, checksum, strlen(checksum)+1, 0);
+        // Store timestamp and checksum as extended file attribute if caching is enabled
+        FSETXATTR(fd, timestamp_key, timestamp_str, strlen(timestamp_str), 0);
+        FSETXATTR(fd, checksum_key, checksum, strlen(checksum), 0);
     }
 
     if (calculated)
@@ -280,8 +289,7 @@ lr_checksum_clear_cache(int fd)
     ssize_t xattrs_len;
     ssize_t bytes_read;
     const char *attr;
-    const char *prefix = "user.Zif.MdChecksum[";
-    ssize_t prefix_len = strlen(prefix);
+    ssize_t prefix_len = strlen(XATTR_CHKSUM_PREFIX);
 
     xattrs_len = FLISTXATTR(fd, NULL, 0);
     if (xattrs_len <= 0) {
@@ -294,7 +302,7 @@ lr_checksum_clear_cache(int fd)
     }
     attr = xattrs;
     while (attr < xattrs + xattrs_len) {
-        if (strncmp(prefix, attr, prefix_len) == 0) {
+        if (strncmp(XATTR_CHKSUM_PREFIX, attr, prefix_len) == 0) {
             FREMOVEXATTR(fd, attr);
         }
         attr += strlen(attr) + 1;
