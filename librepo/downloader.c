@@ -2259,6 +2259,23 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         fflush(target->f);
         fd = fileno(target->f);
+
+        // Preserve timestamp of downloaded file if requested
+        if (target->target->handle && target->target->handle->preservetime) {
+            CURLcode c_rc;
+            long remote_filetime = -1;
+            c_rc = curl_easy_getinfo(target->curl_handle, CURLINFO_FILETIME, &remote_filetime);
+            if (c_rc == CURLE_OK && remote_filetime >= 0) {
+                const struct timeval tv[] = {{remote_filetime, 0}, {remote_filetime, 0}};
+                if (futimes(fd, tv) == -1)
+                    g_debug("%s: Failed to change timestamps of downloaded file \"%s\"",
+                            __func__, target->target->path);
+            } else {
+                g_debug("%s: Unable to get remote time of retrieved document \"%s\"",
+                        __func__, target->target->path);
+            }
+        }
+
         #ifdef WITH_ZCHUNK
         if (target->target->is_zchunk) {
             zckCtx *zck = NULL;
@@ -2297,6 +2314,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             }
         } else {
         #endif /* WITH_ZCHUNK */
+            // New file was downloaded - clear checksums cached in extended attributes
+            lr_checksum_clear_cache(fd);
+
             ret = check_finished_transfer_checksum(fd,
                                                   target->target->checksums,
                                                   &matches,
@@ -2317,21 +2337,6 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         // Any other checks should go here
         //
-
-        // Preserve timestamp of downloaded file if requested
-        if (target->target->handle && target->target->handle->preservetime) {
-            long remote_filetime = -1;
-            curl_easy_getinfo(target->curl_handle, CURLINFO_FILETIME, &remote_filetime);
-            if (remote_filetime >= 0) {
-                const struct timeval tv[] = {{remote_filetime, 0}, {remote_filetime, 0}};
-                if (futimes(fileno(target->f), tv) == -1)
-                    g_debug("%s: Failed to change timestamps of downloaded file.", __func__);
-            } else {
-                g_debug("%s: Unable to get remote time of retrieved document \"%s\"",
-                        __func__, target->target->path);
-            }
-        }
-
 
 transfer_error:
 
