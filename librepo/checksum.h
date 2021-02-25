@@ -107,6 +107,12 @@ lr_checksum_fd_compare(LrChecksumType type,
                        gchar **calculated,
                        GError **err);
 
+/** Clear all checksums cached in extended file attributes
+ * @param fd            File descriptor
+ */
+void
+lr_checksum_clear_cache(int fd);
+
 /** @} */
 
 G_END_DECLS
