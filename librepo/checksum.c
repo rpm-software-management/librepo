@@ -269,3 +269,34 @@ lr_checksum_fd_compare(LrChecksumType type,
 
     return TRUE;
 }
+
+
+void
+lr_checksum_clear_cache(int fd)
+{
+    char *xattrs = NULL;
+    ssize_t xattrs_len;
+    ssize_t bytes_read;
+    const char *attr;
+    const char *prefix = "user.Zif.MdChecksum[";
+    ssize_t prefix_len = strlen(prefix);
+
+    xattrs_len = FLISTXATTR(fd, NULL, 0);
+    if (xattrs_len <= 0) {
+        return;
+    }
+    xattrs = lr_malloc(xattrs_len);
+    bytes_read = FLISTXATTR(fd, xattrs, xattrs_len);
+    if (bytes_read < 0) {
+        goto cleanup;
+    }
+    attr = xattrs;
+    while (attr < xattrs + xattrs_len) {
+        if (strncmp(prefix, attr, prefix_len) == 0) {
+            FREMOVEXATTR(fd, attr);
+        }
+        attr += strlen(attr) + 1;
+    }
+cleanup:
+    lr_free(xattrs);
+}
