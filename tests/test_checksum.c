@@ -11,6 +11,7 @@
 
 #include "librepo/util.h"
 #include "librepo/checksum.h"
+#include "librepo/xattr_internal.h"
 
 #include "fixtures.h"
 #include "testsys.h"
@@ -98,9 +99,11 @@ START_TEST(test_cached_checksum)
     char *filename;
     static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
     struct stat st;
-    char *key;
     char buf[256];
     GError *tmp_err = NULL;
+    gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
+    gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
+    gchar *mtime_str = NULL;
 
     filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum", NULL);
     f = fopen(filename, "w");
@@ -109,16 +112,9 @@ START_TEST(test_cached_checksum)
     fclose(f);
 
     // Assert no cached checksum exists
-    ret = stat(filename, &st);
-    fail_if(ret != 0);
-    key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
-                          (unsigned long long) st.st_mtime);
-#if __APPLE__
-    attr_ret = getxattr(filename, key, &buf, sizeof(buf), 0, 0);
-#else
-    attr_ret = getxattr(filename, key, &buf, sizeof(buf));
-#endif
-    lr_free(key);
+    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    fail_if(attr_ret != -1);  // Cached timestamp should not exists
+    attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
     fail_if(attr_ret != -1);  // Cached checksum should not exists
 
     // Calculate checksum
@@ -136,17 +132,7 @@ START_TEST(test_cached_checksum)
     close(fd);
 
     // Assert cached checksum exists
-    ret = stat(filename, &st);
-    fail_if(ret != 0);
-    key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
-                          (unsigned long long) st.st_mtime);
-#if __APPLE__
-    attr_ret = getxattr(filename, key, &buf, sizeof(buf), 0, 0);
-#else
-    attr_ret = getxattr(filename, key, &buf, sizeof(buf));
-#endif
-
-    lr_free(key);
+    attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
 
     if (attr_ret == -1) {
         // Error encountered
@@ -157,8 +143,18 @@ START_TEST(test_cached_checksum)
         // Any other errno means fail
         fail_if(attr_ret == -1);
     } else {
+        buf[attr_ret] = 0;
         fail_if(strcmp(buf, expected));
     }
+
+    // stored timestamp matches the file mtime
+    ret = stat(filename, &st);
+    fail_if(ret != 0);
+    mtime_str = g_strdup_printf("%lli", (long long) st.st_mtime);
+    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    fail_if(attr_ret == -1);
+    buf[attr_ret] = 0;
+    fail_if(strcmp(buf, mtime_str));
 
     // Calculate checksum again (cached shoud be used this time)
     fd = open(filename, O_RDONLY);
@@ -176,16 +172,78 @@ START_TEST(test_cached_checksum)
 
 exit_label:
     lr_free(filename);
+    lr_free(timestamp_key);
+    lr_free(checksum_key);
+    lr_free(mtime_str);
+}
+END_TEST
+
+START_TEST(test_cached_checksum_clear)
+{
+    FILE *f;
+    int fd;
+    ssize_t attr_ret;
+    char *filename;
+    char buf[256];
+    gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
+    gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
+    const char *other_key = "user.Other.Attribute";
+    const char *value = "some value";
+
+    filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum_clear", NULL);
+    f = fopen(filename, "w");
+    fail_if(f == NULL);
+    fclose(f);
+
+    // set extended attributes
+    fd = open(filename, O_RDONLY);
+    fail_if(fd < 0);
+    attr_ret = FSETXATTR(fd, timestamp_key, value, strlen(value), 0);
+    if (attr_ret == -1) {
+        if (errno == ENOTSUP) {
+            goto cleanup;
+        }
+        fail_if(attr_ret == -1);
+    }
+    attr_ret = FSETXATTR(fd, checksum_key, value, strlen(value), 0);
+    fail_if(attr_ret == -1);
+    attr_ret = FSETXATTR(fd, other_key, value, strlen(value), 0);
+    fail_if(attr_ret == -1);
+
+    // verify that xattrs are set
+    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf));
+    fail_if(attr_ret == -1);
+    attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf));
+    fail_if(attr_ret == -1);
+    attr_ret = GETXATTR(filename, other_key, &buf, sizeof(buf));
+    fail_if(attr_ret == -1);
+
+    lr_checksum_clear_cache(fd);
+
+    // verify that checksum xattrs are removed
+    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf));
+    fail_if(attr_ret != -1);
+    attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf));
+    fail_if(attr_ret != -1);
+    // other then checksum related attributes are not removed
+    attr_ret = GETXATTR(filename, other_key, &buf, sizeof(buf));
+    fail_if(attr_ret == -1);
+cleanup:
+    close(fd);
+    lr_free(filename);
+    lr_free(timestamp_key);
+    lr_free(checksum_key);
 }
 END_TEST
 
 Suite *
 checksum_suite(void)
 {
-    Suite *s = suite_create("cheksum");
+    Suite *s = suite_create("checksum");
     TCase *tc = tcase_create("Main");
     tcase_add_test(tc, test_checksum_fd);
     tcase_add_test(tc, test_cached_checksum);
+    tcase_add_test(tc, test_cached_checksum_clear);
     suite_add_tcase(s, tc);
     return s;
 }

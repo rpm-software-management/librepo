@@ -34,6 +34,7 @@
 #include "checksum.h"
 #include "rcodes.h"
 #include "util.h"
+#include "xattr_internal.h"
 
 #define BUFFER_SIZE             2048
 #define MAX_CHECKSUM_NAME_LEN   7
@@ -181,7 +182,6 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
     return checksum;
 }
 
-
 gboolean
 lr_checksum_fd_cmp(LrChecksumType type,
                    int fd,
@@ -217,29 +217,42 @@ lr_checksum_fd_compare(LrChecksumType type,
         return FALSE;
     }
 
+    time_t timestamp = -1;
+
     if (caching) {
-        // Load cached checksum if enabled and used
         struct stat st;
         if (fstat(fd, &st) == 0) {
-            _cleanup_free_ gchar *key = NULL;
-            char buf[256];
+            timestamp = st.st_mtime;
+        }
+    }
 
-            key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
-                                  (unsigned long long) st.st_mtime);
-#if __APPLE__
-            ssize_t attr_size = fgetxattr(fd, key, &buf, sizeof(buf), 0, 0);
-#else
-            ssize_t attr_size = fgetxattr(fd, key, &buf, sizeof(buf));
-#endif
-            if (attr_size != -1) {
-                // Cached checksum found
-                g_debug("%s: Using checksum cached in xattr: [%s] %s",
-                        __func__, key, buf);
-                size_t expected_len = strlen(expected);
-                // xattr may contain null terminator (+1 byte)
-                *matches = (attr_size == expected_len || attr_size == expected_len + 1) &&
-                           memcmp(expected, buf, attr_size) == 0;
-                return TRUE;
+    _cleanup_free_ gchar *timestamp_str = g_strdup_printf("%lli", (long long)timestamp);
+    const char *type_str = lr_checksum_type_to_str(type);
+    _cleanup_free_ gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
+    _cleanup_free_ gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, type_str, NULL);
+
+    if (caching && timestamp != -1) {
+        // Load cached checksum if enabled and used
+        char buf[256];
+        ssize_t attr_size;
+        attr_size = FGETXATTR(fd, timestamp_key, &buf, sizeof(buf)-1);
+        if (attr_size != -1) {
+            buf[attr_size] = 0;
+            // check that mtime stored in xattr is the same as timestamp
+            if (strcmp(timestamp_str, buf) == 0) {
+                g_debug("%s: Using mtime cached in xattr: [%s] %s", __func__, timestamp_key, buf);
+                attr_size = FGETXATTR(fd, checksum_key, &buf, sizeof(buf)-1);
+                if (attr_size != -1) {
+                    buf[attr_size] = 0;
+                    // Cached checksum found
+                    g_debug("%s: Using checksum cached in xattr: [%s] %s",
+                            __func__, checksum_key, buf);
+                    *matches = (strcmp(expected, buf) == 0);
+                    return TRUE;
+                }
+            } else {
+                // timestamp stored in xattr is different => checksums are no longer valid
+                lr_checksum_clear_cache(fd);
             }
         }
     }
@@ -256,23 +269,44 @@ lr_checksum_fd_compare(LrChecksumType type,
         return FALSE;
     }
 
-    if (caching && *matches) {
-        // Store checksum as extended file attribute if caching is enabled
-        struct stat st;
-        if (fstat(fd, &st) == 0) {
-            _cleanup_free_ gchar *key = NULL;
-            key = g_strdup_printf("user.Zif.MdChecksum[%llu]",
-                                  (unsigned long long) st.st_mtime);
-#if __APPLE__
-            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0, 0);
-#else
-            fsetxattr(fd, key, checksum, strlen(checksum)+1, 0);
-#endif
-        }
+    if (caching && *matches && timestamp != -1) {
+        // Store timestamp and checksum as extended file attribute if caching is enabled
+        FSETXATTR(fd, timestamp_key, timestamp_str, strlen(timestamp_str), 0);
+        FSETXATTR(fd, checksum_key, checksum, strlen(checksum), 0);
     }
 
     if (calculated)
         *calculated = g_strdup(checksum);
 
     return TRUE;
+}
+
+
+void
+lr_checksum_clear_cache(int fd)
+{
+    char *xattrs = NULL;
+    ssize_t xattrs_len;
+    ssize_t bytes_read;
+    const char *attr;
+    ssize_t prefix_len = strlen(XATTR_CHKSUM_PREFIX);
+
+    xattrs_len = FLISTXATTR(fd, NULL, 0);
+    if (xattrs_len <= 0) {
+        return;
+    }
+    xattrs = lr_malloc(xattrs_len);
+    bytes_read = FLISTXATTR(fd, xattrs, xattrs_len);
+    if (bytes_read < 0) {
+        goto cleanup;
+    }
+    attr = xattrs;
+    while (attr < xattrs + xattrs_len) {
+        if (strncmp(XATTR_CHKSUM_PREFIX, attr, prefix_len) == 0) {
+            FREMOVEXATTR(fd, attr);
+        }
+        attr += strlen(attr) + 1;
+    }
+cleanup:
+    lr_free(xattrs);
 }

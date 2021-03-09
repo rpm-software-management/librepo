@@ -51,6 +51,7 @@
 #include "cleanup.h"
 #include "url_substitution.h"
 #include "yum_internal.h"
+#include "xattr_internal.h"
 
 
 volatile sig_atomic_t lr_interrupt = 0;
@@ -981,11 +982,7 @@ add_librepo_xattr(int fd, const gchar *fn)
     else
         dst = g_strdup(fn);
 
-#if __APPLE__
-    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "1", 1, 0, 0);
-#else
-    int attr_ret = fsetxattr(fd, XATTR_LIBREPO, "1", 1, 0);
-#endif
+    int attr_ret = FSETXATTR(fd, XATTR_LIBREPO, "1", 1, 0);
     if (attr_ret == -1) {
         g_debug("%s: Cannot set xattr %s (%s): %s",
                 __func__, XATTR_LIBREPO, dst, g_strerror(errno));
@@ -998,11 +995,7 @@ add_librepo_xattr(int fd, const gchar *fn)
 static gboolean
 has_librepo_xattr(int fd)
 {
-#if __APPLE__
-    ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0, 0, 0);
-#else
-    ssize_t attr_ret = fgetxattr(fd, XATTR_LIBREPO, NULL, 0);
-#endif
+    ssize_t attr_ret = FGETXATTR(fd, XATTR_LIBREPO, NULL, 0);
     if (attr_ret == -1) {
         //g_debug("%s: Cannot get xattr %s: %s",
         //        __func__, XATTR_LIBREPO, g_strerror(errno));
@@ -1019,11 +1012,7 @@ remove_librepo_xattr(LrDownloadTarget * target)
 {
     int fd = target->fd;
     if (fd != -1) {
-#if __APPLE__
-        fremovexattr(fd, XATTR_LIBREPO, 0);
-#else
-        fremovexattr(fd, XATTR_LIBREPO);
-#endif
+        FREMOVEXATTR(fd, XATTR_LIBREPO);
         return;
     }
     // If file descriptor wasn't set, file name was, and we need to open it
@@ -1031,11 +1020,7 @@ remove_librepo_xattr(LrDownloadTarget * target)
     if (fd == -1) {
         return;
     }
-#if __APPLE__
-    fremovexattr(fd, XATTR_LIBREPO, 0);
-#else
-    fremovexattr(fd, XATTR_LIBREPO);
-#endif
+    FREMOVEXATTR(fd, XATTR_LIBREPO);
     close(fd);
 }
 
@@ -2274,6 +2259,23 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         fflush(target->f);
         fd = fileno(target->f);
+
+        // Preserve timestamp of downloaded file if requested
+        if (target->target->handle && target->target->handle->preservetime) {
+            CURLcode c_rc;
+            long remote_filetime = -1;
+            c_rc = curl_easy_getinfo(target->curl_handle, CURLINFO_FILETIME, &remote_filetime);
+            if (c_rc == CURLE_OK && remote_filetime >= 0) {
+                const struct timeval tv[] = {{remote_filetime, 0}, {remote_filetime, 0}};
+                if (futimes(fd, tv) == -1)
+                    g_debug("%s: Failed to change timestamps of downloaded file \"%s\"",
+                            __func__, target->target->path);
+            } else {
+                g_debug("%s: Unable to get remote time of retrieved document \"%s\"",
+                        __func__, target->target->path);
+            }
+        }
+
         #ifdef WITH_ZCHUNK
         if (target->target->is_zchunk) {
             zckCtx *zck = NULL;
@@ -2312,6 +2314,9 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             }
         } else {
         #endif /* WITH_ZCHUNK */
+            // New file was downloaded - clear checksums cached in extended attributes
+            lr_checksum_clear_cache(fd);
+
             ret = check_finished_transfer_checksum(fd,
                                                   target->target->checksums,
                                                   &matches,
@@ -2332,21 +2337,6 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         // Any other checks should go here
         //
-
-        // Preserve timestamp of downloaded file if requested
-        if (target->target->handle && target->target->handle->preservetime) {
-            long remote_filetime = -1;
-            curl_easy_getinfo(target->curl_handle, CURLINFO_FILETIME, &remote_filetime);
-            if (remote_filetime >= 0) {
-                const struct timeval tv[] = {{remote_filetime, 0}, {remote_filetime, 0}};
-                if (futimes(fileno(target->f), tv) == -1)
-                    g_debug("%s: Failed to change timestamps of downloaded file.", __func__);
-            } else {
-                g_debug("%s: Unable to get remote time of retrieved document \"%s\"",
-                        __func__, target->target->path);
-            }
-        }
-
 
 transfer_error:
 
