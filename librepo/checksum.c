@@ -248,6 +248,8 @@ lr_checksum_fd_compare(LrChecksumType type,
                     g_debug("%s: Using checksum cached in xattr: [%s] %s",
                             __func__, checksum_key, buf);
                     *matches = (strcmp(expected, buf) == 0);
+                    if (calculated)
+                      *calculated = g_strdup(buf);
                     return TRUE;
                 }
             } else {
