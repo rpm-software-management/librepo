@@ -90,7 +90,7 @@ START_TEST(test_checksum_fd)
 }
 END_TEST
 
-START_TEST(test_cached_checksum)
+START_TEST(test_cached_checksum_matches)
 {
     FILE *f;
     int fd, ret;
@@ -105,7 +105,7 @@ START_TEST(test_cached_checksum)
     gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
     gchar *mtime_str = NULL;
 
-    filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum", NULL);
+    filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum_matches", NULL);
     f = fopen(filename, "w");
     fail_if(f == NULL);
     fwrite("foo\nbar\n", 1, 8, f);
@@ -178,6 +178,67 @@ exit_label:
 }
 END_TEST
 
+START_TEST(test_cached_checksum_value)
+{
+    FILE *f;
+    int fd, ret;
+    gboolean checksum_ret, matches;
+    ssize_t attr_ret;
+    char *filename;
+    static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
+    struct stat st;
+    char buf[256];
+    GError *tmp_err = NULL;
+    gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
+    gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
+    gchar *mtime_str = NULL;
+    gchar *calculated = NULL;
+
+    filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum_value", NULL);
+    f = fopen(filename, "w");
+    fail_if(f == NULL);
+    fwrite("foo\nbar\n", 1, 8, f);
+    fclose(f);
+
+    // Assert no cached checksum exists
+    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    fail_if(attr_ret != -1);  // Cached timestamp should not exists
+    attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
+    fail_if(attr_ret != -1);  // Cached checksum should not exists
+
+    // Calculate checksum
+    fd = open(filename, O_RDONLY);
+    fail_if(fd < 0);
+    checksum_ret = lr_checksum_fd_compare(LR_CHECKSUM_SHA256,
+                                      fd,
+                                      "",
+                                      1,
+                                      &matches,
+                                      &calculated,
+                                      &tmp_err);
+    fail_if(tmp_err);
+    fail_if(!checksum_ret);
+    // We pass in an empty string for expected, so we must not match.
+    fail_if(matches);
+    close(fd);
+    fail_if(strcmp(calculated, expected));
+
+    // Assert no cached checksum exists
+    // This assumes issue #235 is unresolved. Once it is, this code
+    // should fail and the test will need updated.
+    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    fail_if(attr_ret != -1);  // Cached timestamp should not exists
+    attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
+    fail_if(attr_ret != -1);  // Cached checksum should not exists
+
+    lr_free(calculated);
+    lr_free(filename);
+    lr_free(timestamp_key);
+    lr_free(checksum_key);
+    lr_free(mtime_str);
+}
+END_TEST
+
 START_TEST(test_cached_checksum_clear)
 {
     FILE *f;
@@ -242,7 +303,8 @@ checksum_suite(void)
     Suite *s = suite_create("checksum");
     TCase *tc = tcase_create("Main");
     tcase_add_test(tc, test_checksum_fd);
-    tcase_add_test(tc, test_cached_checksum);
+    tcase_add_test(tc, test_cached_checksum_matches);
+    tcase_add_test(tc, test_cached_checksum_value);
     tcase_add_test(tc, test_cached_checksum_clear);
     suite_add_tcase(s, tc);
     return s;
