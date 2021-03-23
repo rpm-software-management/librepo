@@ -307,6 +307,7 @@ create_repomd_xml_download_targets(GSList *targets,
 
         (*fd_list) = appendFdValue((*fd_list), fd);
         (*paths) = appendPath((*paths), path);
+        lr_free(path);
     }
 }
 
