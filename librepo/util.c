@@ -255,12 +255,12 @@ lr_pathconcat(const char *first, ...)
 
         /* Prepend separator - except first element */
         if (is_first == 0) {
-            strncpy(res + offset, separator, separator_len);
+            memcpy(res + offset, separator, separator_len);
             offset += separator_len;
         } else
             is_first = 0;
 
-        strncpy(res + offset, start, end - start);
+        memcpy(res + offset, start, end - start);
         offset += end - start;
     }
     va_end(args);
@@ -279,7 +279,7 @@ lr_pathconcat(const char *first, ...)
 
     /* If last element was emtpy string, append separator to the end */
     if (previous_was_empty && is_first == 0) {
-        strncpy(res + offset, separator, separator_len);
+        memcpy(res + offset, separator, separator_len);
         offset += separator_len;
     }
 
