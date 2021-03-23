@@ -875,12 +875,14 @@ error_handling(GSList *targets, GError **dest_error, GError *src_error)
                                                 target->err,
                                                 NULL);
                 } else {
+                    char *tmp = error_summary;
                     error_summary = g_strconcat(error_summary,
                                                 "; ",
                                                 target->path,
                                                 " - ",
                                                 target->err,
                                                 NULL);
+                    g_free(tmp);
                 }
             }
 
