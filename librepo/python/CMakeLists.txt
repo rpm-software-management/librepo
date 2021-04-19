@@ -18,8 +18,8 @@ MESSAGE("Building python bindings")
 
 EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "
 from sys import stdout
-from distutils import sysconfig
-path=sysconfig.get_python_lib(True, prefix='${CMAKE_INSTALL_PREFIX}')
+from sysconfig import get_path
+path=get_path(name='platlib', vars={'platbase':'${CMAKE_INSTALL_PREFIX}'})
 stdout.write(path)"
 OUTPUT_VARIABLE PYTHON_INSTALL_DIR)
 INCLUDE_DIRECTORIES (${PYTHON_INCLUDE_PATH})
