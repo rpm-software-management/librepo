@@ -1,21 +1,19 @@
-from flask import Flask
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from optparse import OptionParser
 try:
-    from yum_mock.yum_mock import yum_mock
+    from yum_mock.yum_mock import yum_mock_handler
 except (ValueError, ImportError):
-    from .yum_mock.yum_mock import yum_mock
+    from .yum_mock.yum_mock import yum_mock_handler
 
-app = Flask(__name__)
-#app.register_blueprint(working_repo)
-app.register_blueprint(yum_mock, url_prefix='/yum')
 
+def start_server(port, host="127.0.0.1", handler=None):
+    if handler is None:
+        handler = yum_mock_handler(port)
+    with HTTPServer((host, port), handler) as server:
+        server.serve_forever()
 
 if __name__ == '__main__':
     parser = OptionParser("%prog [options]")
-    parser.add_option(
-        "-d", "--debug",
-        action="store_true",
-    )
     parser.add_option(
         "-p", "--port",
         default=5000,
@@ -25,18 +23,7 @@ if __name__ == '__main__':
         "-n", "--host",
         default="127.0.0.1",
     )
-    parser.add_option(
-        "--passthrough_errors",
-        action="store_true",
-    )
     options, args = parser.parse_args()
 
-    kwargs = {
-        "threaded": True,
-        "debug": options.debug,
-        "port": options.port,
-        "host": options.host,
-        "passthrough_errors": options.passthrough_errors,
-    }
+    start_server(options.port, options.host)
 
-    app.run(**kwargs)

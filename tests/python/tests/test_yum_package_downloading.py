@@ -9,11 +9,10 @@ import xattr
 
 import tests.servermock.yum_mock.config as config
 
-from tests.base import TestCaseWithFlask
-from tests.servermock.server import app
+from tests.base import TestCaseWithServer
 
 
-class TestCaseYumPackageDownloading(TestCaseWithFlask):
+class TestCaseYumPackageDownloading(TestCaseWithServer):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-", dir="./")
@@ -163,9 +162,7 @@ class TestCaseYumPackageDownloading(TestCaseWithFlask):
         pkg = os.path.join(self.tmpdir, config.PACKAGE_01_01)
         self.assertTrue(os.path.isfile(pkg))
 
-class TestCaseYumPackagesDownloading(TestCaseWithFlask):
-    application = app
-
+class TestCaseYumPackagesDownloading(TestCaseWithServer):
 #    @classmethod
 #    def setUpClass(cls):
 #        super(TestCaseYumPackageDownloading, cls).setUpClass()

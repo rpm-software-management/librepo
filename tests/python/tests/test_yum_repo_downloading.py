@@ -7,13 +7,12 @@ import unittest
 
 import librepo
 
-from tests.base import Context, TestCaseWithFlask, TEST_DATA
-from tests.servermock.server import app
+from tests.base import Context, TestCaseWithServer, TEST_DATA
 import tests.servermock.yum_mock.config as config
 
 PUB_KEY = TEST_DATA+"/key.pub"
 
-class TestCaseYumRepoDownloading(TestCaseWithFlask):
+class TestCaseYumRepoDownloading(TestCaseWithServer):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp(prefix="librepotest-")

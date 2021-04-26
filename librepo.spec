@@ -51,7 +51,6 @@ Summary:        Python 3 bindings for the librepo library
 %{?python_provide:%python_provide python3-%{name}}
 BuildRequires:  python3-devel
 BuildRequires:  python3-gpg
-BuildRequires:  python3-flask
 BuildRequires:  python3-pyxattr
 BuildRequires:  python3-requests
 BuildRequires:  python3-sphinx
