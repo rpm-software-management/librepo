@@ -19,7 +19,6 @@ Fedora/Ubuntu name
 * openssl (http://www.openssl.org/) - openssl-devel/libssl-dev
 * python (http://python.org/) - python3-devel/libpython3-dev
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - python3-pygpgme/python3-gpgme
-* **Test requires:** python3-flask (http://flask.pocoo.org/) - python-flask/python-flask
 * **Test requires:** python3-pyxattr (https://github.com/xattr/xattr) - python3-pyxattr/python3-pyxattr
 
 ### Build from your checkout dir:

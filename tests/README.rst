@@ -33,15 +33,13 @@ Files of C tests
  * Test suites
 
 
-Python tests with Flask
-=======================
+Python tests http.server
+========================
 
-Some python tests use **Flask** python framework (http://flask.pocoo.org/)
+Some python tests use **http.server** python standard library
 to simulate web server. The server is started automatically during that tests.
 
-*TestCases with Flask inherit from TestCaseWithApp class.*
-
-The Flask is then set as the app to the test case by 'application' class attribute.
+*TestCases with http.server inherit from TestCaseWithServer class.*
 
 If you want to start server manually::
 
@@ -57,27 +55,13 @@ http://127.0.0.1:5000/yum/badgpg/static/01/repodata/repomd.xml.asc
 
 etc..
 
-Modularity of tests with Flask
-------------------------------
+Repos for test with http.server
+-------------------------------
 
-Flask tests are intended to be modular.
+All data (repositories, packages, ..) are in servermock/yum_mock/static/
 
-Modularity is provided by use of http://flask.pocoo.org/docs/blueprints/
-Currently there is only one module (blueprint) for yum repo mocking
-in servermock/yum_mock.
+Configuration and globals for tests with http.server
+----------------------------------------------------
 
-Repos for test with Flask
--------------------------
+Configuration and globals used by these tests are in servermock/yum_mock/config.py
 
-Currently each module (blueprint) uses its own data (repositories,
-packages, ..).
-
-E.g. for yum mocking module: servermock/yum_mock/static/
-
-Configuration and globals for tests with Flask
-----------------------------------------------
-
-Each module (blueprint) has its own configuration and globals which uses
-and provides to tests which use the module.
-
-E.g. for yum mocking module: servermock/yum_mock/config.py
