@@ -352,6 +352,7 @@ lr_fastestmirror_prepare(LrHandle *handle,
             g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_CURL,
                         "curl_easy_setopt(_, CURLOPT_URL, %s) failed: %s",
                         url, curl_easy_strerror(curlcode));
+            curl_easy_cleanup(curlh);
             ret = FALSE;
             break;
         }
@@ -361,6 +362,7 @@ lr_fastestmirror_prepare(LrHandle *handle,
             g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_CURL,
                     "curl_easy_setopt(_, CURLOPT_CONNECT_ONLY, 1) failed: %s",
                     curl_easy_strerror(curlcode));
+            curl_easy_cleanup(curlh);
             ret = FALSE;
             break;
         }
