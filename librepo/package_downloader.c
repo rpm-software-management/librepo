@@ -547,8 +547,7 @@ lr_check_packages(GSList *targets,
         if (packagetarget->dest) {
             if (g_file_test(packagetarget->dest, G_FILE_TEST_IS_DIR)) {
                 // Dir specified
-                _cleanup_free_ gchar *file_basename;
-                file_basename = g_path_get_basename(packagetarget->relative_url);
+                _cleanup_free_ gchar *file_basename = g_path_get_basename(packagetarget->relative_url);
 
                 local_path = g_build_filename(packagetarget->dest,
                                               file_basename,
