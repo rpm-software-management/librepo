@@ -56,6 +56,9 @@ lr_get_curl_handle()
     lr_global_init();
 
     h = curl_easy_init();
+    if (!h)
+        return NULL;
+
     curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6);
     curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, LRO_CONNECTTIMEOUT_DEFAULT);
