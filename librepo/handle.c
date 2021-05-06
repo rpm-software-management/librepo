@@ -59,18 +59,32 @@ lr_get_curl_handle()
     if (!h)
         return NULL;
 
-    curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6);
-    curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, LRO_CONNECTTIMEOUT_DEFAULT);
-    curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, LRO_LOWSPEEDTIME_DEFAULT);
-    curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT);
-    curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2);
-    curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1);
-    curl_easy_setopt(h, CURLOPT_SSL_VERIFYSTATUS, 0);
-    curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT);
-    curl_easy_setopt(h, CURLOPT_FILETIME, 0);
+    if (curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, LRO_CONNECTTIMEOUT_DEFAULT) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, LRO_LOWSPEEDTIME_DEFAULT) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYSTATUS, 0) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_FILETIME, 0) != CURLE_OK)
+        goto err;
 
     return h;
+
+err:
+    curl_easy_cleanup(h);
+    return NULL;
 }
 
 void
