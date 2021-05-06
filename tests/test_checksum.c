@@ -181,12 +181,11 @@ END_TEST
 START_TEST(test_cached_checksum_value)
 {
     FILE *f;
-    int fd, ret;
+    int fd;
     gboolean checksum_ret, matches;
     ssize_t attr_ret;
     char *filename;
     static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
-    struct stat st;
     char buf[256];
     GError *tmp_err = NULL;
     gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
