@@ -1042,7 +1042,7 @@ lr_yum_check_checksum_of_md_record(LrYumRepoMdRecord *rec,
         zckCtx *zck = lr_zck_init_read_base(expected_checksum, checksum_type,
                                             rec->size_header, fd, &tmp_err);
         if (!tmp_err) {
-            if(zck_validate_checksums(zck) < 1) {
+            if(zck_validate_data_checksum(zck) < 1) {
                 g_set_error(&tmp_err, LR_YUM_ERROR, LRE_ZCK,
                             "Unable to validate zchunk checksums");
             } else {
