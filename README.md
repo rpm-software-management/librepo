@@ -47,7 +47,7 @@ Fedora/Ubuntu name
 
 ### Online python bindings documentation:
 
-https://rpm-software-management.github.com/librepo/
+https://rpm-software-management.github.io/librepo/
 
 ## Testing
 
