@@ -266,9 +266,13 @@ lr_checksum_fd_compare(LrChecksumType type,
     *matches = (strcmp(expected, checksum)) ? FALSE : TRUE;
 
     if (fsync(fd) != 0) {
-        g_set_error(err, LR_CHECKSUM_ERROR, LRE_FILE,
-                    "fsync failed: %s", strerror(errno));
-        return FALSE;
+        if (errno == EROFS || errno == EINVAL) {
+            g_debug("fsync failed: %s", strerror(errno));
+        } else {
+            g_set_error(err, LR_CHECKSUM_ERROR, LRE_FILE,
+                        "fsync failed: %s", strerror(errno));
+            return FALSE;
+        }
     }
 
     if (caching && *matches && timestamp != -1) {
