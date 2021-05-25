@@ -134,6 +134,7 @@ lr_handle_init(void)
     handle->ftpuseepsv = LRO_FTPUSEEPSV_DEFAULT;
     handle->cachedir = NULL;
     handle->preservetime = 0;
+    handle->currentrepomdpath = NULL;
 
     return handle;
 }
@@ -805,6 +806,11 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_CACHEDIR:
         if (handle->cachedir) lr_free(handle->cachedir);
         handle->cachedir = g_strdup(va_arg(arg, char *));
+        break;
+
+    case LRO_CURRENTREPOMDPATH:
+        if (handle->currentrepomdpath) lr_free(handle->currentrepomdpath);
+        handle->currentrepomdpath = g_strdup(va_arg(arg, char *));
         break;
 
     case LRO_PRESERVETIME:
@@ -1666,6 +1672,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_CACHEDIR:
         str = va_arg(arg, char **);
         *str = handle->cachedir;
+        break;
+
+    case LRI_CURRENTREPOMDPATH:
+        str = va_arg(arg, char **);
+        *str = handle->currentrepomdpath;
         break;
 
     default:

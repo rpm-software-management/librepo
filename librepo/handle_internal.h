@@ -249,6 +249,10 @@ struct _LrHandle {
         Preserve timestamps of downloaded files */
 
     LrUrlVars *yumslist;
+
+    char *currentrepomdpath; /*!<
+         If specified allows if-modified-since optimization, the file is not redownloaded
+         if it hasn't beed updated on the server since its current mtime */
 };
 
 /** Return new CURL easy handle with some default options setted.

@@ -428,6 +428,11 @@ typedef enum {
         Path to a file containing the list of PEM format trusted CA
         certificates. Used for proxy. */
 
+    LRO_CURRENTREPOMDPATH,  /*!< (char *)
+        Path to a current repomd.xml file, librepo uses its mtime to set
+        If-Modifies-Since header. If the repo wasn't updated since librepo
+        uses this current repomd.xml instead of downloading it again. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -503,6 +508,8 @@ typedef enum {
     LRI_PROXY_SSLCLIENTCERT,    /*!< (char **) */
     LRI_PROXY_SSLCLIENTKEY,     /*!< (char **) */
     LRI_PROXY_SSLCACERT,        /*!< (char **) */
+
+    LRI_CURRENTREPOMDPATH,      /*!< (char **) */
 
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */

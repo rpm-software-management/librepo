@@ -306,6 +306,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_PROXY_SSLCLIENTKEY:
     case LRO_PROXY_SSLCACERT:
     case LRO_CACHEDIR:
+    case LRO_CURRENTREPOMDPATH:
     {
         char *str = NULL, *alloced = NULL;
 
@@ -868,6 +869,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_PROXY_SSLCLIENTKEY:
     case LRI_PROXY_SSLCACERT:
     case LRI_CACHEDIR:
+    case LRI_CURRENTREPOMDPATH:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

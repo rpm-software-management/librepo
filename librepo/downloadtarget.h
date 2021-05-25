@@ -137,7 +137,16 @@ typedef struct {
     char *err; /*!<
         NULL or error message */
 
+    long ifmodifiedsince; /*!<
+        If the target file on server wasn't modified since the specified
+        ifmodifiedsince epoch time (and the server supports this) noting it
+        downloaded and notmodifiedsince is set to TRUE */
+
     // Other items
+
+    gboolean notmodifiedsince; /*!<
+        Whether server target was download or not because the file wasn't
+        modified since ifmodifiedsince */
 
     void *userdata; /*!<
         User data - This data are not used by lr_downloader or touched

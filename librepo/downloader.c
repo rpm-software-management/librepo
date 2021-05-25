@@ -1676,6 +1676,12 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // Add the transfer to the list of running transfers
     dd->running_transfers = g_slist_append(dd->running_transfers, target);
 
+    // set ifmodifiedsince if specified for this target
+    if (target->target->ifmodifiedsince) {
+        c_rc = curl_easy_setopt(h, CURLOPT_TIMEVALUE, target->target->ifmodifiedsince);
+        c_rc = curl_easy_setopt(h, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+    }
+
     return TRUE;
 
 fail:
@@ -1925,7 +1931,14 @@ check_finished_transfer_status(CURLMsg *msg,
         // Check status codes for some protocols
         if (effective_url && g_str_has_prefix(effective_url, "http")) {
             // Check HTTP(S) code
-            if (code/100 != 2) {
+            if (code == 304) {
+                long ifmodsinceunmet;
+                curl_easy_getinfo(msg->easy_handle, CURLINFO_CONDITION_UNMET, &ifmodsinceunmet);
+                if (ifmodsinceunmet) {
+                    target->target->notmodifiedsince = TRUE;
+                }
+
+            } else if (code/100 != 2) {
                 g_set_error(transfer_err,
                             LR_DOWNLOADER_ERROR,
                             LRE_BADSTATUS,

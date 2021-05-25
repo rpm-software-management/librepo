@@ -633,6 +633,12 @@ lr_yum_download_repomd(LrHandle *handle,
                                                      TRUE,
                                                      FALSE);
 
+    if (handle->currentrepomdpath) {
+        struct stat st;
+        stat(handle->currentrepomdpath, &st);
+        target->ifmodifiedsince = st.st_mtime;
+    }
+
     ret = lr_download_target(target, &tmp_err);
     assert((ret && !tmp_err) || (!ret && tmp_err));
 
@@ -642,11 +648,13 @@ lr_yum_download_repomd(LrHandle *handle,
     if (tmp_err) {
         g_propagate_prefixed_error(err, tmp_err,
                                    "Cannot download repomd.xml: ");
+        goto cleanup;
     } else if (target->err) {
         assert(0); // This should not happen since failfast should be TRUE
         ret = FALSE;
         g_set_error(err, LR_DOWNLOADER_ERROR, target->rcode,
                     "Cannot download repomd.xml: %s",target->err);
+        goto cleanup;
     } else {
         // Set mirror used for download a repomd.xml to the handle
         // TODO: Get rid of use_mirror attr
@@ -654,6 +662,27 @@ lr_yum_download_repomd(LrHandle *handle,
         handle->used_mirror = g_strdup(target->usedmirror);
     }
 
+    if (target->notmodifiedsince) {
+        g_debug("%s: repomd.xml on the server was not modified since %li, using: %s",
+                __func__,target->ifmodifiedsince, handle->currentrepomdpath);
+        int source_repomd = open(handle->currentrepomdpath, O_RDONLY);
+        if (fd < 0) {
+            g_debug("%s: Cannot open: %s", __func__, handle->currentrepomdpath);
+            g_set_error(err, LR_YUM_ERROR, LRE_IO,
+                        "Cannot read %s: %s", handle->currentrepomdpath, g_strerror(errno));
+            goto cleanup;
+        }
+        if (lr_copy_content(source_repomd, fd) != 0) {
+            g_debug("%s: Cannot copy content of repomd file", __func__);
+            g_set_error(err, LR_YUM_ERROR, LRE_IO,
+                        "Cannot copy content of repomd file %s: %s",
+                        handle->currentrepomdpath, g_strerror(errno));
+        }
+        close(source_repomd);
+    }
+
+
+cleanup:
     lr_downloadtarget_free(target);
 
     if (!ret) {
