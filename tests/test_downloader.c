@@ -46,7 +46,7 @@ START_TEST(test_downloader_single_file)
     fail_if(handle == NULL);
 
     char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+    fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
     lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
     fail_if(tmp_err);
 
@@ -55,8 +55,7 @@ START_TEST(test_downloader_single_file)
 
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
 
-    mktemp(tmpfn1);
-    fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd1 = mkstemp(tmpfn1);
     lr_free(tmpfn1);
     fail_if(fd1 < 0);
 
@@ -86,6 +85,7 @@ START_TEST(test_downloader_single_file)
     }
 
     g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+    close(fd1);
 }
 END_TEST
 
@@ -102,8 +102,7 @@ START_TEST(test_downloader_single_file_2)
 
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_2_XXXXXX", NULL);
 
-    mktemp(tmpfn1);
-    fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd1 = mkstemp(tmpfn1);
     lr_free(tmpfn1);
     fail_if(fd1 < 0);
 
@@ -131,6 +130,7 @@ START_TEST(test_downloader_single_file_2)
     }
 
     g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+    close(fd1);
 }
 END_TEST
 
@@ -151,7 +151,7 @@ START_TEST(test_downloader_two_files)
     fail_if(handle == NULL);
 
     char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+    fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
     lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
     fail_if(tmp_err);
 
@@ -160,10 +160,8 @@ START_TEST(test_downloader_two_files)
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_1_XXXXXX", NULL);
     tmpfn2 = lr_pathconcat(test_globals.tmpdir, "single_file_2_XXXXXX", NULL);
 
-    mktemp(tmpfn1);
-    mktemp(tmpfn2);
-    fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
-    fd2 = open(tmpfn2, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd1 = mkstemp(tmpfn1);
+    fd2 = mkstemp(tmpfn2);
     lr_free(tmpfn1);
     lr_free(tmpfn2);
     fail_if(fd1 < 0);
@@ -200,6 +198,8 @@ START_TEST(test_downloader_two_files)
     }
 
     g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+    close(fd1);
+    close(fd2);
 }
 END_TEST
 
@@ -220,7 +220,7 @@ START_TEST(test_downloader_three_files_with_error)
     fail_if(handle == NULL);
 
     char *urls[] = {"http://www.google.com", NULL};
-    lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+    fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
     lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
     fail_if(tmp_err);
 
@@ -230,12 +230,9 @@ START_TEST(test_downloader_three_files_with_error)
     tmpfn2 = lr_pathconcat(test_globals.tmpdir, "single_file_2_XXXXXX", NULL);
     tmpfn3 = lr_pathconcat(test_globals.tmpdir, "single_file_3_XXXXXX", NULL);
 
-    mktemp(tmpfn1);
-    mktemp(tmpfn2);
-    mktemp(tmpfn3);
-    fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
-    fd2 = open(tmpfn2, O_RDWR|O_CREAT|O_TRUNC, 0666);
-    fd3 = open(tmpfn3, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd1 = mkstemp(tmpfn1);
+    fd2 = mkstemp(tmpfn2);
+    fd3 = mkstemp(tmpfn3);
     lr_free(tmpfn1);
     lr_free(tmpfn2);
     lr_free(tmpfn3);
@@ -290,6 +287,9 @@ START_TEST(test_downloader_three_files_with_error)
     }
 
     g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+    close(fd1);
+    close(fd2);
+    close(fd3);
 }
 END_TEST
 
@@ -331,7 +331,7 @@ START_TEST(test_downloader_checksum)
         fail_if(handle == NULL);
 
         char *urls[] = {"file:///", NULL};
-        lr_handle_setopt(handle, NULL, LRO_URLS, urls);
+        fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
         lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
         fail_if(tmp_err);
 
@@ -340,8 +340,7 @@ START_TEST(test_downloader_checksum)
 
         tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
 
-        mktemp(tmpfn1);
-        fd1 = open(tmpfn1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+        fd1 = mkstemp(tmpfn1);
         lr_free(tmpfn1);
         fail_if(fd1 < 0);
 
@@ -382,6 +381,7 @@ START_TEST(test_downloader_checksum)
         }
 
         g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+        close(fd1);
     }
 }
 END_TEST
