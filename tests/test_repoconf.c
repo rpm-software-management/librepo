@@ -34,22 +34,6 @@ repoconf_assert_true(LrYumRepoConf *repoconf,
             repoconf_assert_true(conf, (option))
 
 static void
-repoconf_assert_false(LrYumRepoConf *repoconf,
-                      LrYumRepoConfOption option)
-{
-    ck_assert(1);
-    long val = 1L;
-    _cleanup_error_free_ GError *tmp_err = NULL;
-    gboolean ret = lr_yum_repoconf_getinfo(repoconf, &tmp_err, option, &val);
-    ck_assert(!tmp_err);
-    ck_assert(ret);
-    ck_assert_msg(!val, "Not a 0 (False) value (Option %d)", option);
-}
-
-#define conf_assert_false(option) \
-            repoconf_assert_false(conf, (option))
-
-static void
 repoconf_assert_na(LrYumRepoConf *repoconf,
                    LrYumRepoConfOption option)
 {
@@ -509,7 +493,7 @@ END_TEST
 
 START_TEST(test_write_repoconf)
 {
-    _cleanup_fd_close_ int rc = -1;
+    _cleanup_fd_close_ int fd = -1;
     gboolean ret;
     LrYumRepoConfs *confs;
     LrYumRepoConf * conf;
@@ -519,8 +503,8 @@ START_TEST(test_write_repoconf)
     _cleanup_error_free_ GError *tmp_err = NULL;
 
     // Create a temporary file
-    rc = mkstemp(tmpfn);
-    fail_if(rc == -1);
+    fd = mkstemp(tmpfn);
+    fail_if(fd == -1);
 
     // Create reconfs with one repoconf with one id (one section)
     confs = lr_yum_repoconfs_init();

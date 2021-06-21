@@ -628,7 +628,7 @@ lr_handle_setopt(LrHandle *handle,
                         "Value of LRO_LOWSPEEDTIME is too low.");
             ret = FALSE;
         } else {
-            curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_TIME, val_long);
+            c_rc = curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_TIME, val_long);
             handle->lowspeedtime = val_long;
         }
 
@@ -648,7 +648,7 @@ lr_handle_setopt(LrHandle *handle,
                         val_long, handle->maxspeed);
             ret = FALSE;
         } else {
-            curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_LIMIT, val_long);
+            c_rc = curl_easy_setopt(c_h, CURLOPT_LOW_SPEED_LIMIT, val_long);
             handle->lowspeedlimit = val_long;
         }
 
@@ -885,7 +885,13 @@ lr_yum_download_url_retry(int attempts, LrHandle *lr_handle, const char *url,
 
         g_debug("%s: Attempt #%d to download %s failed: %s",
                 __func__, i, url, (*err)->message);
-        ftruncate(fd, 0);
+
+        if (ftruncate(fd, 0) < 0) {
+            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                        "ftruncate() failed: %s", g_strerror(errno));
+            return FALSE;
+        }
+
         g_clear_error (err);
     }
 }
