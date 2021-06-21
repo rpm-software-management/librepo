@@ -494,7 +494,10 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
         return lr_zckheadercb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
-    char *header = g_strstrip(g_strndup(ptr, size*nmemb));
+    char *header = g_strndup(ptr, size*nmemb);
+    // strips in place
+    g_strstrip(header);
+
     gint64 expected = lrtarget->target->expectedsize;
 
     if (state == LR_HCS_DEFAULT) {
