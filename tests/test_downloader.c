@@ -20,18 +20,14 @@
 
 START_TEST(test_downloader_no_list)
 {
-    int ret;
     GError *err = NULL;
-
-    ret = lr_download(NULL, FALSE, &err);
-    fail_if(!ret);
-    fail_if(err);
+    ck_assert(lr_download(NULL, FALSE, &err));
+    ck_assert_ptr_null(err);
 }
 END_TEST
 
 START_TEST(test_downloader_single_file)
 {
-    int ret;
     LrHandle *handle;
     GSList *list = NULL;
     GError *err = NULL;
@@ -43,12 +39,12 @@ START_TEST(test_downloader_single_file)
     // Prepare handle
 
     handle = lr_handle_init();
-    fail_if(handle == NULL);
+    ck_assert_ptr_nonnull(handle);
 
     char *urls[] = {"http://www.google.com", NULL};
-    fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
+    ck_assert(lr_handle_setopt(handle, NULL, LRO_URLS, urls));
     lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
-    fail_if(tmp_err);
+    ck_assert_ptr_null(tmp_err);
 
 
     // Prepare list of download targets
@@ -57,20 +53,19 @@ START_TEST(test_downloader_single_file)
 
     fd1 = mkstemp(tmpfn1);
     lr_free(tmpfn1);
-    fail_if(fd1 < 0);
+    ck_assert_int_ge(fd1, 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, NULL, NULL,
                                0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL,
                                FALSE, FALSE);
-    fail_if(!t1);
+    ck_assert_ptr_nonnull(t1);
 
     list = g_slist_append(list, t1);
 
     // Download
 
-    ret = lr_download(list, FALSE, &err);
-    fail_if(!ret);
-    fail_if(err);
+    ck_assert(lr_download(list, FALSE, &err));
+    ck_assert_ptr_null(err);
 
     lr_handle_free(handle);
 
@@ -91,7 +86,6 @@ END_TEST
 
 START_TEST(test_downloader_single_file_2)
 {
-    int ret;
     GSList *list = NULL;
     GError *err = NULL;
     int fd1;
@@ -104,20 +98,19 @@ START_TEST(test_downloader_single_file_2)
 
     fd1 = mkstemp(tmpfn1);
     lr_free(tmpfn1);
-    fail_if(fd1 < 0);
+    ck_assert_int_ge(fd1, 0);
 
     t1 = lr_downloadtarget_new(NULL, "http://seznam.cz/index.html", NULL,
                                fd1, NULL, NULL, 0, 0, NULL, NULL, NULL,
                                NULL, NULL, 0, 0, NULL, FALSE, FALSE);
-    fail_if(!t1);
+    ck_assert_ptr_nonnull(t1);
 
     list = g_slist_append(list, t1);
 
     // Download
 
-    ret = lr_download(list, FALSE, &err);
-    fail_if(!ret);
-    fail_if(err);
+    ck_assert(lr_download(list, FALSE, &err));
+    ck_assert_ptr_null(err);
 
     // Check results
 
@@ -136,7 +129,6 @@ END_TEST
 
 START_TEST(test_downloader_two_files)
 {
-    int ret;
     LrHandle *handle;
     GSList *list = NULL;
     GError *err = NULL;
@@ -148,12 +140,12 @@ START_TEST(test_downloader_two_files)
     // Prepare handle
 
     handle = lr_handle_init();
-    fail_if(handle == NULL);
+    ck_assert_ptr_nonnull(handle);
 
     char *urls[] = {"http://www.google.com", NULL};
-    fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
+    ck_assert(lr_handle_setopt(handle, NULL, LRO_URLS, urls));
     lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
-    fail_if(tmp_err);
+    ck_assert_ptr_null(tmp_err);
 
     // Prepare list of download targets
 
@@ -164,26 +156,25 @@ START_TEST(test_downloader_two_files)
     fd2 = mkstemp(tmpfn2);
     lr_free(tmpfn1);
     lr_free(tmpfn2);
-    fail_if(fd1 < 0);
-    fail_if(fd2 < 0);
+    ck_assert_int_ge(fd1, 0);
+    ck_assert_int_ge(fd2, 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, NULL,
                                NULL, 0, 0, NULL, NULL, NULL,
                                NULL, NULL, 0, 0, NULL, FALSE, FALSE);
-    fail_if(!t1);
+    ck_assert_ptr_nonnull(t1);
     t2 = lr_downloadtarget_new(handle, "index.html", "http://seznam.cz", fd2,
                                NULL, NULL, 0, 0, NULL, NULL, NULL,
                                NULL, NULL, 0, 0, NULL, FALSE, FALSE);
-    fail_if(!t2);
+    ck_assert_ptr_nonnull(t2);
 
     list = g_slist_append(list, t1);
     list = g_slist_append(list, t2);
 
     // Download
 
-    ret = lr_download(list, FALSE, &err);
-    fail_if(!ret);
-    fail_if(err);
+    ck_assert(lr_download(list, FALSE, &err));
+    ck_assert_ptr_null(err);
 
     lr_handle_free(handle);
 
@@ -205,7 +196,6 @@ END_TEST
 
 START_TEST(test_downloader_three_files_with_error)
 {
-    int ret;
     LrHandle *handle;
     GSList *list = NULL;
     GError *err = NULL;
@@ -217,12 +207,12 @@ START_TEST(test_downloader_three_files_with_error)
     // Prepare handle
 
     handle = lr_handle_init();
-    fail_if(handle == NULL);
+    ck_assert_ptr_nonnull(handle);
 
     char *urls[] = {"http://www.google.com", NULL};
-    fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
+    ck_assert(lr_handle_setopt(handle, NULL, LRO_URLS, urls));
     lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
-    fail_if(tmp_err);
+    ck_assert_ptr_null(tmp_err);
 
     // Prepare list of download targets
 
@@ -236,25 +226,25 @@ START_TEST(test_downloader_three_files_with_error)
     lr_free(tmpfn1);
     lr_free(tmpfn2);
     lr_free(tmpfn3);
-    fail_if(fd1 < 0);
-    fail_if(fd2 < 0);
-    fail_if(fd3 < 0);
+    ck_assert_int_ge(fd1, 0);
+    ck_assert_int_ge(fd2, 0);
+    ck_assert_int_ge(fd3, 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, NULL, NULL,
                                0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL,
                                FALSE, FALSE);
-    fail_if(!t1);
+    ck_assert_ptr_nonnull(t1);
 
     t2 = lr_downloadtarget_new(handle, "index.html", "http://seznam.cz", fd2,
                                NULL, NULL, 0, 0, NULL, NULL, NULL, NULL,
                                NULL, 0, 0, NULL, FALSE, FALSE);
-    fail_if(!t2);
+    ck_assert_ptr_nonnull(t2);
 
     t3 = lr_downloadtarget_new(handle, "i_hope_this_page_doesnt_exists.html",
                                "http://google.com", fd3, NULL, NULL,
                                0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL,
                                FALSE, FALSE);
-    fail_if(!t3);
+    ck_assert_ptr_nonnull(t3);
 
     list = g_slist_append(list, t1);
     list = g_slist_append(list, t2);
@@ -262,9 +252,8 @@ START_TEST(test_downloader_three_files_with_error)
 
     // Download
 
-    ret = lr_download(list, FALSE, &err);
-    fail_if(!ret);
-    fail_if(err);
+    ck_assert(lr_download(list, FALSE, &err));
+    ck_assert_ptr_null(err);
 
     lr_handle_free(handle);
 
@@ -314,7 +303,6 @@ START_TEST(test_downloader_checksum)
     int i;
 
     for (i = 0; tests[i].sha512; i++) {
-        int ret;
         LrHandle *handle;
         GSList *list = NULL;
         GError *err = NULL;
@@ -328,12 +316,12 @@ START_TEST(test_downloader_checksum)
         // Prepare handle
 
         handle = lr_handle_init();
-        fail_if(handle == NULL);
+        ck_assert_ptr_nonnull(handle);
 
         char *urls[] = {"file:///", NULL};
-        fail_if(!lr_handle_setopt(handle, NULL, LRO_URLS, urls));
+        ck_assert(lr_handle_setopt(handle, NULL, LRO_URLS, urls));
         lr_handle_prepare_internal_mirrorlist(handle, FALSE, &tmp_err);
-        fail_if(tmp_err);
+        ck_assert_ptr_null(tmp_err);
 
 
         // Prepare list of download targets
@@ -342,7 +330,7 @@ START_TEST(test_downloader_checksum)
 
         fd1 = mkstemp(tmpfn1);
         lr_free(tmpfn1);
-        fail_if(fd1 < 0);
+        ck_assert_int_ge(fd1, 0);
 
         checksum = lr_downloadtargetchecksum_new(LR_CHECKSUM_SHA512,
                                                  tests[i].sha512);
@@ -351,15 +339,14 @@ START_TEST(test_downloader_checksum)
         t1 = lr_downloadtarget_new(handle, "dev/null", NULL, fd1, NULL, checksums,
                                    0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL,
                                    FALSE, FALSE);
-        fail_if(!t1);
+        ck_assert_ptr_nonnull(t1);
 
         list = g_slist_append(list, t1);
 
         // Download
 
-        ret = lr_download(list, FALSE, &err);
-        fail_if(!ret);
-        fail_if(err);
+        ck_assert(lr_download(list, FALSE, &err));
+        ck_assert_ptr_null(err);
 
         lr_handle_free(handle);
 

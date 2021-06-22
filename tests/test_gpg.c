@@ -39,24 +39,24 @@ START_TEST(test_gpg_check_signature)
                              "repo_yum_01/repodata/repomd.xml_bad.asc", NULL);
 
     ret = lr_gpg_import_key(key_path, tmp_home_path, &tmp_err);
-    fail_if(!ret);
-    fail_if(tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
 
     // Valid key and data
     ret = lr_gpg_check_signature(signature_path,
                                  data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    fail_if(!ret);
-    fail_if(tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
 
     // Bad signature signed with unknown key
     ret = lr_gpg_check_signature(_signature_path,
                                  data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    fail_if(ret);
-    fail_if(!tmp_err);
+    ck_assert(!ret);
+    ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 
@@ -65,31 +65,31 @@ START_TEST(test_gpg_check_signature)
                                  _data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    fail_if(ret);
-    fail_if(!tmp_err);
+    ck_assert(!ret);
+    ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 
     // Import the 2nd key
     ret = lr_gpg_import_key(_key_path, tmp_home_path, &tmp_err);
-    fail_if(!ret);
-    fail_if(tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
 
     // Valid key and data
     ret = lr_gpg_check_signature(_signature_path,
                                  _data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    fail_if(!ret);
-    fail_if(tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
 
     // Bad signature signed with known key
     ret = lr_gpg_check_signature(_signature_path,
                                  data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    fail_if(ret);
-    fail_if(!tmp_err);
+    ck_assert(!ret);
+    ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 
@@ -98,8 +98,8 @@ START_TEST(test_gpg_check_signature)
                                  data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    fail_if(ret);
-    fail_if(!tmp_err);
+    ck_assert(!ret);
+    ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
     tmp_err = NULL;
 

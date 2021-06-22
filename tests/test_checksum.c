@@ -38,8 +38,8 @@ build_test_file(const char *filename, const char *content)
 {
     FILE *fp = fopen(filename, "w");
     size_t len = strlen(content);
-    fail_if(fp == NULL);
-    fail_unless(fwrite(content, 1, len, fp) == len);
+    ck_assert_ptr_nonnull(fp);
+    ck_assert(fwrite(content, 1, len, fp) == len);
     fclose(fp);
 }
 
@@ -51,11 +51,11 @@ test_checksum(const char *filename, LrChecksumType ch_type, char *expected)
     GError *tmp_err = NULL;
 
     fd = open(filename, O_RDONLY);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     checksum = lr_checksum_fd(ch_type, fd, &tmp_err);
-    fail_if(checksum == NULL);
-    fail_if(tmp_err);
-    fail_if(strcmp(checksum, expected),
+    ck_assert_ptr_nonnull(checksum);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert_msg(!strcmp(checksum, expected),
         "Checksum is %s instead of %s", checksum, expected);
     lr_free(checksum);
     close(fd);
@@ -85,7 +85,7 @@ START_TEST(test_checksum_fd)
     test_checksum(file, LR_CHECKSUM_SHA384, CHKS_VAL_01_SHA384);
     test_checksum(file, LR_CHECKSUM_SHA512, CHKS_VAL_01_SHA512);
 
-    fail_if(remove(file) != 0, "Cannot delete temporary test file");
+    ck_assert_msg(remove(file) == 0, "Cannot delete temporary test file");
     lr_free(file);
 }
 END_TEST
@@ -107,28 +107,28 @@ START_TEST(test_cached_checksum_matches)
 
     filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum_matches", NULL);
     f = fopen(filename, "w");
-    fail_if(f == NULL);
+    ck_assert_ptr_nonnull(f);
     fwrite("foo\nbar\n", 1, 8, f);
     fclose(f);
 
     // Assert no cached checksum exists
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret != -1);  // Cached timestamp should not exists
+    ck_assert(attr_ret == -1);  // Cached timestamp should not exists
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret != -1);  // Cached checksum should not exists
+    ck_assert(attr_ret == -1);  // Cached checksum should not exists
 
     // Calculate checksum
     fd = open(filename, O_RDONLY);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     checksum_ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256,
                                       fd,
                                       expected,
                                       1,
                                       &matches,
                                       &tmp_err);
-    fail_if(tmp_err);
-    fail_if(!checksum_ret);
-    fail_if(!matches);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(checksum_ret);
+    ck_assert(matches);
     close(fd);
 
     // Assert cached checksum exists
@@ -141,33 +141,33 @@ START_TEST(test_cached_checksum_matches)
             goto exit_label;
         }
         // Any other errno means fail
-        fail_if(attr_ret == -1);
+        ck_assert(attr_ret != -1);
     } else {
         buf[attr_ret] = 0;
-        fail_if(strcmp(buf, expected));
+        ck_assert_str_eq(buf, expected);
     }
 
     // stored timestamp matches the file mtime
     ret = stat(filename, &st);
-    fail_if(ret != 0);
+    ck_assert_int_eq(ret, 0);
     mtime_str = g_strdup_printf("%lli", (long long) st.st_mtime);
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
     buf[attr_ret] = 0;
-    fail_if(strcmp(buf, mtime_str));
+    ck_assert_str_eq(buf, mtime_str);
 
     // Calculate checksum again (cached shoud be used this time)
     fd = open(filename, O_RDONLY);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     checksum_ret = lr_checksum_fd_cmp(LR_CHECKSUM_SHA256,
                                       fd,
                                       expected,
                                       1,
                                       &matches,
                                       &tmp_err);
-    fail_if(tmp_err);
-    fail_if(!checksum_ret);
-    fail_if(!matches);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(checksum_ret);
+    ck_assert(matches);
     close(fd);
 
 exit_label:
@@ -195,19 +195,19 @@ START_TEST(test_cached_checksum_value)
 
     filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum_value", NULL);
     f = fopen(filename, "w");
-    fail_if(f == NULL);
+    ck_assert_ptr_nonnull(f);
     fwrite("foo\nbar\n", 1, 8, f);
     fclose(f);
 
     // Assert no cached checksum exists
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret != -1);  // Cached timestamp should not exists
+    ck_assert(attr_ret == -1);  // Cached timestamp should not exists
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret != -1);  // Cached checksum should not exists
+    ck_assert(attr_ret == -1);  // Cached checksum should not exists
 
     // Calculate checksum
     fd = open(filename, O_RDONLY);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     checksum_ret = lr_checksum_fd_compare(LR_CHECKSUM_SHA256,
                                       fd,
                                       "",
@@ -215,20 +215,20 @@ START_TEST(test_cached_checksum_value)
                                       &matches,
                                       &calculated,
                                       &tmp_err);
-    fail_if(tmp_err);
-    fail_if(!checksum_ret);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(checksum_ret);
     // We pass in an empty string for expected, so we must not match.
-    fail_if(matches);
+    ck_assert(!matches);
     close(fd);
-    fail_if(strcmp(calculated, expected));
+    ck_assert_str_eq(calculated, expected);
 
     // Assert no cached checksum exists
     // This assumes issue #235 is unresolved. Once it is, this code
     // should fail and the test will need updated.
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret != -1);  // Cached timestamp should not exists
+    ck_assert(attr_ret == -1);  // Cached timestamp should not exists
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
-    fail_if(attr_ret != -1);  // Cached checksum should not exists
+    ck_assert(attr_ret == -1);  // Cached checksum should not exists
 
     lr_free(calculated);
     lr_free(filename);
@@ -252,42 +252,42 @@ START_TEST(test_cached_checksum_clear)
 
     filename = lr_pathconcat(test_globals.tmpdir, "/test_checksum_clear", NULL);
     f = fopen(filename, "w");
-    fail_if(f == NULL);
+    ck_assert_ptr_nonnull(f);
     fclose(f);
 
     // set extended attributes
     fd = open(filename, O_RDONLY);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     attr_ret = FSETXATTR(fd, timestamp_key, value, strlen(value), 0);
     if (attr_ret == -1) {
         if (errno == ENOTSUP) {
             goto cleanup;
         }
-        fail_if(attr_ret == -1);
+        ck_assert(attr_ret != -1);
     }
     attr_ret = FSETXATTR(fd, checksum_key, value, strlen(value), 0);
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
     attr_ret = FSETXATTR(fd, other_key, value, strlen(value), 0);
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
 
     // verify that xattrs are set
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf));
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf));
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
     attr_ret = GETXATTR(filename, other_key, &buf, sizeof(buf));
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
 
     lr_checksum_clear_cache(fd);
 
     // verify that checksum xattrs are removed
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf));
-    fail_if(attr_ret != -1);
+    ck_assert(attr_ret == -1);
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf));
-    fail_if(attr_ret != -1);
+    ck_assert(attr_ret == -1);
     // other then checksum related attributes are not removed
     attr_ret = GETXATTR(filename, other_key, &buf, sizeof(buf));
-    fail_if(attr_ret == -1);
+    ck_assert(attr_ret != -1);
 cleanup:
     close(fd);
     lr_free(filename);
