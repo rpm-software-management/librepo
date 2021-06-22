@@ -18,7 +18,7 @@ START_TEST(test_mirrorlist_init)
     LrMirrorlist *ml = NULL;
 
     ml = lr_mirrorlist_init();
-    fail_if(ml == NULL);
+    ck_assert_ptr_nonnull(ml);
     lr_mirrorlist_free(ml);
 }
 END_TEST
@@ -36,23 +36,23 @@ START_TEST(test_mirrorlist_01)
                          "mirrorlist_01", NULL);
     fd = open(path, O_RDONLY);
     lr_free(path);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     ml = lr_mirrorlist_init();
-    fail_if(ml == NULL);
+    ck_assert_ptr_nonnull(ml);
     ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
-    fail_if(!ret);
-    fail_if(tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
 
-    fail_if(g_slist_length(ml->urls) != 2);
+    ck_assert(g_slist_length(ml->urls) == 2);
 
     elem = g_slist_nth(ml->urls, 0);
-    fail_if(!elem);
-    fail_if(g_strcmp0(elem->data, "http://foo.bar/fedora/linux/"));
+    ck_assert_ptr_nonnull(elem);
+    ck_assert_str_eq(elem->data, "http://foo.bar/fedora/linux/");
 
     elem = g_slist_nth(ml->urls, 1);
-    fail_if(!elem);
-    fail_if(g_strcmp0(elem->data, "ftp://ftp.bar.foo/Fedora/17/"));
+    ck_assert_ptr_nonnull(elem);
+    ck_assert_str_eq(elem->data, "ftp://ftp.bar.foo/Fedora/17/");
     lr_mirrorlist_free(ml);
 }
 END_TEST
@@ -69,14 +69,14 @@ START_TEST(test_mirrorlist_02)
                          "mirrorlist_02", NULL);
     fd = open(path, O_RDONLY);
     lr_free(path);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     ml = lr_mirrorlist_init();
-    fail_if(ml == NULL);
+    ck_assert_ptr_nonnull(ml);
     ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
-    fail_if(!ret);
-    fail_if(tmp_err);
-    fail_if(g_slist_length(ml->urls) != 0);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(g_slist_length(ml->urls) == 0);
     lr_mirrorlist_free(ml);
 }
 END_TEST
@@ -93,14 +93,14 @@ START_TEST(test_mirrorlist_03)
                          "mirrorlist_03", NULL);
     fd = open(path, O_RDONLY);
     lr_free(path);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
     ml = lr_mirrorlist_init();
-    fail_if(ml == NULL);
+    ck_assert_ptr_nonnull(ml);
     ret = lr_mirrorlist_parse_file(ml, fd, &tmp_err);
     close(fd);
-    fail_if(!ret);
-    fail_if(tmp_err);
-    fail_if(g_slist_length(ml->urls) != 0);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(g_slist_length(ml->urls) == 0);
     lr_mirrorlist_free(ml);
 }
 END_TEST

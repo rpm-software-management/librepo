@@ -25,19 +25,19 @@ START_TEST(test_package_downloader_new_and_free)
 
     target = lr_packagetarget_new(NULL, "url", NULL, 0, NULL, 0, NULL, FALSE,
                                   NULL, NULL, &err);
-    fail_if(!target);
-    fail_if(err);
+    ck_assert_ptr_nonnull(target);
+    ck_assert_ptr_null(err);
 
-    fail_if(strcmp(target->relative_url, "url"));
-    fail_if(target->dest);
-    fail_if(target->base_url);
-    fail_if(target->checksum_type != 0);
-    fail_if(target->checksum);
-    fail_if(target->resume != FALSE);
-    fail_if(target->progresscb);
-    fail_if(target->cbdata);
-    fail_if(target->local_path);
-    fail_if(target->err);
+    ck_assert_str_eq(target->relative_url, "url");
+    ck_assert_ptr_null(target->dest);
+    ck_assert_ptr_null(target->base_url);
+    ck_assert(target->checksum_type == 0);
+    ck_assert_ptr_null(target->checksum);
+    ck_assert(target->resume == FALSE);
+    ck_assert(!target->progresscb);
+    ck_assert_ptr_null(target->cbdata);
+    ck_assert_ptr_null(target->local_path);
+    ck_assert_ptr_null(target->err);
 
     lr_packagetarget_free(target);
     target = NULL;
@@ -47,19 +47,19 @@ START_TEST(test_package_downloader_new_and_free)
     target = lr_packagetarget_new(NULL, "url", "dest", LR_CHECKSUM_SHA384,
                                   "xxx", 0, "baseurl", TRUE, (LrProgressCb) 22,
                                   (void *) 33, &err);
-    fail_if(!target);
-    fail_if(err);
+    ck_assert_ptr_nonnull(target);
+    ck_assert_ptr_null(err);
 
-    fail_if(strcmp(target->relative_url, "url"));
-    fail_if(strcmp(target->dest, "dest"));
-    fail_if(strcmp(target->base_url, "baseurl"));
-    fail_if(target->checksum_type != LR_CHECKSUM_SHA384);
-    fail_if(strcmp(target->checksum, "xxx"));
-    fail_if(target->resume != TRUE);
-    fail_if(target->progresscb != (LrProgressCb) 22);
-    fail_if(target->cbdata != (void *) 33);
-    fail_if(target->local_path);
-    fail_if(target->err);
+    ck_assert_str_eq(target->relative_url, "url");
+    ck_assert_str_eq(target->dest, "dest");
+    ck_assert_str_eq(target->base_url, "baseurl");
+    ck_assert(target->checksum_type == LR_CHECKSUM_SHA384);
+    ck_assert_str_eq(target->checksum, "xxx");
+    ck_assert(target->resume == TRUE);
+    ck_assert(target->progresscb == (LrProgressCb) 22);
+    ck_assert_ptr_eq(target->cbdata, (void *) 33);
+    ck_assert_ptr_null(target->local_path);
+    ck_assert_ptr_null(target->err);
 
     lr_packagetarget_free(target);
     target = NULL;

@@ -23,31 +23,31 @@ START_TEST(test_repomd_parsing)
                                 "repo_yum_02/repodata/repomd.xml",
                                 NULL);
     repomd = lr_yum_repomd_init();
-    fail_if(!repomd);
+    ck_assert_ptr_nonnull(repomd);
     fd = open(repomd_path, O_RDONLY);
-    fail_if(fd < 0);
+    ck_assert_int_ge(fd, 0);
 
     ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, &tmp_err);
     close(fd);
 
-    fail_if(!ret);
-    fail_if(tmp_err);
-    fail_if(g_slist_length(repomd->records) != 12);
-    fail_if(!lr_yum_repomd_get_record(repomd, "primary"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "filelists"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "other"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "primary_db"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "filelists_db"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "other_db"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "group"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "group_gz"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "updateinfo"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "origin"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "prestodelta"));
-    fail_if(!lr_yum_repomd_get_record(repomd, "deltainfo"));
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(g_slist_length(repomd->records) == 12);
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "primary"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "filelists"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "other"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "primary_db"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "filelists_db"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "other_db"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "group"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "group_gz"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "updateinfo"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "origin"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "prestodelta"));
+    ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "deltainfo"));
 
-    fail_if(lr_yum_repomd_get_record(repomd, "foo"));
-    fail_if(lr_yum_repomd_get_record(repomd, "bar"));
+    ck_assert_ptr_null(lr_yum_repomd_get_record(repomd, "foo"));
+    ck_assert_ptr_null(lr_yum_repomd_get_record(repomd, "bar"));
 
     lr_yum_repomd_free(repomd);
     lr_free(repomd_path);

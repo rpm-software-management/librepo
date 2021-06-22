@@ -20,22 +20,22 @@ START_TEST(test_urlvars_set)
     LrUrlVars *urlvars = NULL;
 
     urlvars = lr_urlvars_set(urlvars, "foo", "bar");
-    fail_if(urlvars == NULL);
-    fail_if(strcmp(((LrVar *)urlvars->data)->var, "foo") != 0);
+    ck_assert_ptr_nonnull(urlvars);
+    ck_assert_str_eq(((LrVar *)urlvars->data)->var, "foo");
 
     urlvars = lr_urlvars_set(urlvars, "foo1", "bar1");
-    fail_if(urlvars == NULL);
+    ck_assert_ptr_nonnull(urlvars);
 
     urlvars = lr_urlvars_set(urlvars, "foo", NULL);
-    fail_if(urlvars == NULL);
-    fail_if(strcmp(((LrVar *)urlvars->data)->var, "foo1") != 0);
+    ck_assert_ptr_nonnull(urlvars);
+    ck_assert_str_eq(((LrVar *)urlvars->data)->var, "foo1");
 
     urlvars = lr_urlvars_set(urlvars, "foo1", NULL);
-    fail_if(urlvars != NULL);
+    ck_assert_ptr_null(urlvars);
 
     urlvars = lr_urlvars_set(urlvars, "bar", "foo");
-    fail_if(urlvars == NULL);
-    fail_if(strcmp(((LrVar *)urlvars->data)->var, "bar") != 0);
+    ck_assert_ptr_nonnull(urlvars);
+    ck_assert_str_eq(((LrVar *)urlvars->data)->var, "bar");
 
     lr_urlvars_free(urlvars);
 }
@@ -49,19 +49,19 @@ START_TEST(test_url_substitute_without_urlvars)
     urlvars = lr_urlvars_set(urlvars, "foo", "bar");
 
     url = lr_url_substitute("", urlvars);
-    fail_if(strcmp(url, ""));
+    ck_assert_str_eq(url, "");
     lr_free(url);
 
     url = lr_url_substitute("http://foo", urlvars);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
     lr_free(url);
 
     url = lr_url_substitute("http://foo?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://foo?id=$bar"));
+    ck_assert_str_eq(url, "http://foo?id=$bar");
     lr_free(url);
 
     url = lr_url_substitute("http://foo?id=$foox", urlvars);
-    fail_if(strcmp(url, "http://foo?id=$foox"));
+    ck_assert_str_eq(url, "http://foo?id=$foox");
     lr_free(url);
 
     lr_urlvars_free(urlvars);
@@ -78,31 +78,31 @@ START_TEST(test_url_substitute)
     urlvars = lr_urlvars_set(urlvars, "bar", "repo");
 
     url = lr_url_substitute("", urlvars);
-    fail_if(strcmp(url, ""));
+    ck_assert_str_eq(url, "");
     lr_free(url);
 
     url = lr_url_substitute("http://foo", urlvars);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
     lr_free(url);
 
     url = lr_url_substitute("http://foo?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://foo?id=repo"));
+    ck_assert_str_eq(url, "http://foo?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://$foo?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://version?id=repo"));
+    ck_assert_str_eq(url, "http://version?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://$fo?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://ver?id=repo"));
+    ck_assert_str_eq(url, "http://ver?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://$foo$bar", urlvars);
-    fail_if(strcmp(url, "http://versionrepo"));
+    ck_assert_str_eq(url, "http://versionrepo");
     lr_free(url);
 
     url = lr_url_substitute("http://$foo$bar/", urlvars);
-    fail_if(strcmp(url, "http://versionrepo/"));
+    ck_assert_str_eq(url, "http://versionrepo/");
     lr_free(url);
 
     lr_urlvars_free(urlvars);
@@ -119,27 +119,27 @@ START_TEST(test_url_substitute_braces)
     urlvars = lr_urlvars_set(urlvars, "bar", "repo");
 
     url = lr_url_substitute("http://foo?id=${bar}", urlvars);
-    fail_if(strcmp(url, "http://foo?id=repo"));
+    ck_assert_str_eq(url, "http://foo?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://${foo}?id=${bar}", urlvars);
-    fail_if(strcmp(url, "http://version?id=repo"));
+    ck_assert_str_eq(url, "http://version?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://${fo}?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://ver?id=repo"));
+    ck_assert_str_eq(url, "http://ver?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://${fo?id=$bar", urlvars);
-    fail_if(strcmp(url, "http://${fo?id=repo"));
+    ck_assert_str_eq(url, "http://${fo?id=repo");
     lr_free(url);
 
     url = lr_url_substitute("http://${foo${bar}", urlvars);
-    fail_if(strcmp(url, "http://${foorepo"));
+    ck_assert_str_eq(url, "http://${foorepo");
     lr_free(url);
 
     url = lr_url_substitute("http://${foo}${bar}/", urlvars);
-    fail_if(strcmp(url, "http://versionrepo/"));
+    ck_assert_str_eq(url, "http://versionrepo/");
     lr_free(url);
 
     lr_urlvars_free(urlvars);

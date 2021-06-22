@@ -10,23 +10,23 @@
 
 START_TEST(test_version_check_macro)
 {
-    fail_if(!(LR_VERSION_CHECK(LR_VERSION_MAJOR,
+    ck_assert(LR_VERSION_CHECK(LR_VERSION_MAJOR,
                                LR_VERSION_MINOR,
-                               LR_VERSION_PATCH)));
+                               LR_VERSION_PATCH));
 
-    fail_if(!(LR_VERSION_CHECK(0, 0, 0)));
+    ck_assert(LR_VERSION_CHECK(0, 0, 0));
 
-    fail_if(LR_VERSION_CHECK(LR_VERSION_MAJOR,
-                             LR_VERSION_MINOR,
-                             LR_VERSION_PATCH+1));
+    ck_assert(!(LR_VERSION_CHECK(LR_VERSION_MAJOR,
+                                 LR_VERSION_MINOR,
+                                 LR_VERSION_PATCH+1)));
 
-    fail_if(LR_VERSION_CHECK(LR_VERSION_MAJOR,
-                             LR_VERSION_MINOR+1,
-                             LR_VERSION_PATCH));
+    ck_assert(!(LR_VERSION_CHECK(LR_VERSION_MAJOR,
+                                 LR_VERSION_MINOR+1,
+                                 LR_VERSION_PATCH)));
 
-    fail_if(LR_VERSION_CHECK(LR_VERSION_MAJOR+1,
-                             LR_VERSION_MINOR,
-                             LR_VERSION_PATCH));
+    ck_assert(!(LR_VERSION_CHECK(LR_VERSION_MAJOR+1,
+                                 LR_VERSION_MINOR,
+                                 LR_VERSION_PATCH)));
 }
 END_TEST
 

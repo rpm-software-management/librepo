@@ -304,19 +304,19 @@ START_TEST(test_parse_repoconf_minimal)
     path = lr_pathconcat(test_globals.testdata_dir, "repo-minimal.repo", NULL);
 
     confs = lr_yum_repoconfs_init();
-    fail_if(!confs);
+    ck_assert_ptr_nonnull(confs);
 
     ret = lr_yum_repoconfs_parse(confs, path, &tmp_err);
-    fail_if(!ret);
+    ck_assert(ret);
 
     list = lr_yum_repoconfs_get_list(confs, &tmp_err);
-    fail_if(!list);
-    fail_if(g_slist_length(list) != 2);
+    ck_assert_ptr_nonnull(list);
+    ck_assert(g_slist_length(list) == 2);
 
     // Test content of first repo config
 
     conf = g_slist_nth_data(list, 0);
-    fail_if(!conf);
+    ck_assert_ptr_nonnull(conf);
 
     conf_assert_str_eq(LR_YRC_ID, "minimal-repo-1");
     conf_assert_str_eq(LR_YRC_NAME, "Minimal repo 1 - $basearch");
@@ -363,7 +363,7 @@ START_TEST(test_parse_repoconf_minimal)
     // Test content of second repo config
 
     conf = g_slist_nth_data(list, 1);
-    fail_if(!conf);
+    ck_assert_ptr_nonnull(conf);
 
     conf_assert_str_eq(LR_YRC_ID, "minimal-repo-2");
     conf_assert_str_eq(LR_YRC_NAME, "Minimal repo 2 - $basearch");
@@ -423,17 +423,17 @@ START_TEST(test_parse_repoconf_big)
     path = lr_pathconcat(test_globals.testdata_dir, "repo-big.repo", NULL);
 
     confs = lr_yum_repoconfs_init();
-    fail_if(!confs);
+    ck_assert_ptr_nonnull(confs);
 
     ret = lr_yum_repoconfs_parse(confs, path, &tmp_err);
-    fail_if(!ret);
+    ck_assert(ret);
 
     list = lr_yum_repoconfs_get_list(confs, &tmp_err);
-    fail_if(!list);
-    fail_if(g_slist_length(list) != 1);
+    ck_assert_ptr_nonnull(list);
+    ck_assert(g_slist_length(list) == 1);
 
     conf = g_slist_nth_data(list, 0);
-    fail_if(!conf);
+    ck_assert_ptr_nonnull(conf);
 
     conf_assert_str_eq(LR_YRC_ID, "big-repo");
     conf_assert_str_eq(LR_YRC_NAME, "Maxi repo - $basearch");
@@ -504,7 +504,7 @@ START_TEST(test_write_repoconf)
 
     // Create a temporary file
     fd = mkstemp(tmpfn);
-    fail_if(fd == -1);
+    ck_assert_int_ne(fd, -1);
 
     // Create reconfs with one repoconf with one id (one section)
     confs = lr_yum_repoconfs_init();

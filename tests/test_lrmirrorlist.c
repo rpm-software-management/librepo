@@ -29,16 +29,16 @@ START_TEST(test_lrmirrorlist_append_url)
     lr_urlvars_free(vars);
 
     mirror = lr_lrmirrorlist_nth(iml, 0);
-    fail_if(!mirror);
-    fail_if(strcmp(mirror->url, "ftp://bar"));
+    ck_assert_ptr_nonnull(mirror);
+    ck_assert_str_eq(mirror->url, "ftp://bar");
 
     mirror = lr_lrmirrorlist_nth(iml, 1);
-    fail_if(!mirror);
-    fail_if(strcmp(mirror->url, "http://foo"));
+    ck_assert_ptr_nonnull(mirror);
+    ck_assert_str_eq(mirror->url, "http://foo");
 
     mirror = lr_lrmirrorlist_nth(iml, 2);
-    fail_if(!mirror);
-    fail_if(strcmp(mirror->url, "http://xyz/i386/"));
+    ck_assert_ptr_nonnull(mirror);
+    ck_assert_str_eq(mirror->url, "http://xyz/i386/");
 
     lr_lrmirrorlist_free(iml);
 }
@@ -56,30 +56,30 @@ START_TEST(test_lrmirrorlist_append_mirrorlist)
     ml.urls = g_slist_prepend(ml.urls, "ftp://bar");
     ml.urls = g_slist_prepend(ml.urls, "http://foo");
 
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
     iml = lr_lrmirrorlist_append_mirrorlist(iml, NULL, NULL);
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
 
     iml = lr_lrmirrorlist_append_mirrorlist(iml, &ml, NULL);
-    fail_if(g_slist_length(iml) != 2);
+    ck_assert(g_slist_length(iml) == 2);
     mirror = lr_lrmirrorlist_nth(iml, 0);
-    fail_if(!mirror);
-    fail_if(strcmp(mirror->url, "http://foo"));
-    fail_if(mirror->preference != 100);
-    fail_if(mirror->protocol != LR_PROTOCOL_HTTP);
+    ck_assert_ptr_nonnull(mirror);
+    ck_assert_str_eq(mirror->url, "http://foo");
+    ck_assert(mirror->preference == 100);
+    ck_assert(mirror->protocol == LR_PROTOCOL_HTTP);
     mirror = lr_lrmirrorlist_nth(iml, 1);
-    fail_if(!mirror);
-    fail_if(strcmp(mirror->url, "ftp://bar"));
-    fail_if(mirror->preference != 100);
-    fail_if(mirror->protocol != LR_PROTOCOL_FTP);
+    ck_assert_ptr_nonnull(mirror);
+    ck_assert_str_eq(mirror->url, "ftp://bar");
+    ck_assert(mirror->preference == 100);
+    ck_assert(mirror->protocol == LR_PROTOCOL_FTP);
 
-    fail_if(g_slist_length(iml) != 2);
+    ck_assert(g_slist_length(iml) == 2);
 
     url = lr_lrmirrorlist_nth_url(iml, 0);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
 
     url = lr_lrmirrorlist_nth_url(iml, 1);
-    fail_if(strcmp(url, "ftp://bar"));
+    ck_assert_str_eq(url, "ftp://bar");
 
     lr_lrmirrorlist_free(iml);
     g_slist_free(ml.urls);
@@ -132,46 +132,46 @@ START_TEST(test_lrmirrorlist_append_metalink)
     ml.urls = g_slist_prepend(ml.urls, &url2);
     ml.urls = g_slist_prepend(ml.urls, &url1);
 
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
     iml = lr_lrmirrorlist_append_metalink(iml, NULL, NULL, NULL);
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
 
     iml = lr_lrmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml", NULL);
-    fail_if(g_slist_length(iml) != 2);  // 2 because element with empty url shoud be skipped
+    ck_assert(g_slist_length(iml) == 2);  // 2 because element with empty url shoud be skipped
 
     mirror = lr_lrmirrorlist_nth(iml, 0);
-    fail_if(strcmp(mirror->url, "http://foo"));
-    fail_if(mirror->preference != 100);
-    fail_if(mirror->protocol != LR_PROTOCOL_HTTP);
+    ck_assert_str_eq(mirror->url, "http://foo");
+    ck_assert(mirror->preference == 100);
+    ck_assert(mirror->protocol == LR_PROTOCOL_HTTP);
 
     mirror = lr_lrmirrorlist_nth(iml, 1);
-    fail_if(strcmp(mirror->url, "ftp://bar"));
-    fail_if(mirror->preference != 95);
-    fail_if(mirror->protocol != LR_PROTOCOL_FTP);
+    ck_assert_str_eq(mirror->url, "ftp://bar");
+    ck_assert(mirror->preference == 95);
+    ck_assert(mirror->protocol == LR_PROTOCOL_FTP);
 
-    fail_if(g_slist_length(iml) != 2);
+    ck_assert(g_slist_length(iml) == 2);
 
     url = lr_lrmirrorlist_nth_url(iml, 0);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
 
     url = lr_lrmirrorlist_nth_url(iml, 1);
-    fail_if(strcmp(url, "ftp://bar"));
+    ck_assert_str_eq(url, "ftp://bar");
 
     lr_lrmirrorlist_free(iml);
 
     // Try append on list with existing element
     iml = NULL;
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
     iml = lr_lrmirrorlist_append_url(iml, "http://abc", NULL);
-    fail_if(g_slist_length(iml) != 1);
+    ck_assert(g_slist_length(iml) == 1);
     iml = lr_lrmirrorlist_append_metalink(iml, &ml, "/repodata/repomd.xml", NULL);
-    fail_if(g_slist_length(iml) != 3);
+    ck_assert(g_slist_length(iml) == 3);
     url = lr_lrmirrorlist_nth_url(iml, 0);
-    fail_if(strcmp(url, "http://abc"));
+    ck_assert_str_eq(url, "http://abc");
     url = lr_lrmirrorlist_nth_url(iml, 1);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
     url = lr_lrmirrorlist_nth_url(iml, 2);
-    fail_if(strcmp(url, "ftp://bar"));
+    ck_assert_str_eq(url, "ftp://bar");
 
     lr_lrmirrorlist_free(iml);
     g_slist_free(ml.urls);
@@ -189,48 +189,48 @@ START_TEST(test_lrmirrorlist_append_lrmirrorlist)
     iml_2 = lr_lrmirrorlist_append_url(iml_2, NULL, NULL);
     iml_2 = lr_lrmirrorlist_append_url(iml_2, "ftp://bar", NULL);
 
-    fail_if(g_slist_length(iml_2) != 2);
+    ck_assert(g_slist_length(iml_2) == 2);
 
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
     iml = lr_lrmirrorlist_append_lrmirrorlist(iml, NULL);
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
 
     iml = lr_lrmirrorlist_append_lrmirrorlist(iml, iml_2);
-    fail_if(g_slist_length(iml) != 2);  // 2 because element with empty url shoud be skipped
+    ck_assert(g_slist_length(iml) == 2);  // 2 because element with empty url shoud be skipped
 
     mirror = lr_lrmirrorlist_nth(iml, 0);
-    fail_if(strcmp(mirror->url, "http://foo"));
-    fail_if(mirror->preference != 100);
-    fail_if(mirror->protocol != LR_PROTOCOL_HTTP);
+    ck_assert_str_eq(mirror->url, "http://foo");
+    ck_assert(mirror->preference == 100);
+    ck_assert(mirror->protocol == LR_PROTOCOL_HTTP);
 
     mirror = lr_lrmirrorlist_nth(iml, 1);
-    fail_if(strcmp(mirror->url, "ftp://bar"));
-    fail_if(mirror->preference != 100);
-    fail_if(mirror->protocol != LR_PROTOCOL_FTP);
+    ck_assert_str_eq(mirror->url, "ftp://bar");
+    ck_assert(mirror->preference == 100);
+    ck_assert(mirror->protocol == LR_PROTOCOL_FTP);
 
-    fail_if(g_slist_length(iml) != 2);
+    ck_assert(g_slist_length(iml) == 2);
 
     url = lr_lrmirrorlist_nth_url(iml, 0);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
 
     url = lr_lrmirrorlist_nth_url(iml, 1);
-    fail_if(strcmp(url, "ftp://bar"));
+    ck_assert_str_eq(url, "ftp://bar");
 
     lr_lrmirrorlist_free(iml);
 
     // Try append on list with existing element
     iml = NULL;
-    fail_if(g_slist_length(iml) != 0);
+    ck_assert(g_slist_length(iml) == 0);
     iml = lr_lrmirrorlist_append_url(iml, "http://abc", NULL);
-    fail_if(g_slist_length(iml) != 1);
+    ck_assert(g_slist_length(iml) == 1);
     iml = lr_lrmirrorlist_append_lrmirrorlist(iml, iml_2);
-    fail_if(g_slist_length(iml) != 3);
+    ck_assert(g_slist_length(iml) == 3);
     url = lr_lrmirrorlist_nth_url(iml, 0);
-    fail_if(strcmp(url, "http://abc"));
+    ck_assert_str_eq(url, "http://abc");
     url = lr_lrmirrorlist_nth_url(iml, 1);
-    fail_if(strcmp(url, "http://foo"));
+    ck_assert_str_eq(url, "http://foo");
     url = lr_lrmirrorlist_nth_url(iml, 2);
-    fail_if(strcmp(url, "ftp://bar"));
+    ck_assert_str_eq(url, "ftp://bar");
     lr_lrmirrorlist_free(iml);
     lr_lrmirrorlist_free(iml_2);
 }
