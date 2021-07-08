@@ -798,7 +798,7 @@ lr_fastestmirror_sort_internalmirrorlists(GSList *handles,
             gchar *host = elem->data;
             for (GSList *ime = mirrors; ime; ime = g_slist_next(ime)) {
                 LrInternalMirror *im = ime->data;
-                gchar *im_host = lr_url_without_path(im->url);
+                _cleanup_free_ gchar *im_host = lr_url_without_path(im->url);
                 if (!g_strcmp0(im_host, host)) {
                     new_list = g_slist_prepend(new_list, im);
                     // XXX: Maybe convert GSList to GList to make
