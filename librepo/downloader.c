@@ -534,8 +534,9 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
                             __func__, content_length, expected);
                     lrtarget->headercb_state = LR_HCS_INTERRUPTED;
                     lrtarget->headercb_interrupt_reason = g_strdup_printf(
-                        "FTP server reports size: %"G_GINT64_FORMAT" "
-                        "via 213 code, but expected size is: %"G_GINT64_FORMAT,
+                        "Inconsistent FTP server data, file Content-Length: %"G_GINT64_FORMAT " reported"
+                        " via 213 code, repository metadata states file length: %"G_GINT64_FORMAT
+                        " (please report to repository maintainer)",
                         content_length, expected);
                     ret++;  // Return error value
                 } else {
@@ -565,8 +566,9 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
                         __func__, content_length, expected);
                 lrtarget->headercb_state = LR_HCS_INTERRUPTED;
                 lrtarget->headercb_interrupt_reason = g_strdup_printf(
-                    "Server reports Content-Length: %"G_GINT64_FORMAT" but "
-                    "expected size is: %"G_GINT64_FORMAT,
+                    "Inconsistent server data, reported file Content-Length: %"G_GINT64_FORMAT
+                    ", repository metadata states file length: %"G_GINT64_FORMAT
+                    " (please report to repository maintainer)",
                     content_length, expected);
                 ret++;  // Return error value
             } else {
