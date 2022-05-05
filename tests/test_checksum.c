@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
 #include <errno.h>
 #include <stdlib.h>
@@ -150,7 +151,10 @@ START_TEST(test_cached_checksum_matches)
     // stored timestamp matches the file mtime
     ret = stat(filename, &st);
     ck_assert_int_eq(ret, 0);
-    mtime_str = g_strdup_printf("%lli", (long long) st.st_mtime);
+    long long timestamp = st.st_mtime;
+    timestamp *= 1000000000; //convert sec timestamp to nanosec timestamp
+    timestamp += st.st_mtim.tv_nsec;
+    mtime_str = g_strdup_printf("%lli", timestamp);
     attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
     ck_assert(attr_ret != -1);
     buf[attr_ret] = 0;

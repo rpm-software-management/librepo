@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#define _POSIX_C_SOURCE 200809L
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <assert.h>
@@ -217,16 +218,18 @@ lr_checksum_fd_compare(LrChecksumType type,
         return FALSE;
     }
 
-    time_t timestamp = -1;
+    long long timestamp = -1;
 
     if (caching) {
         struct stat st;
         if (fstat(fd, &st) == 0) {
             timestamp = st.st_mtime;
+            timestamp *= 1000000000; //convert sec timestamp to nanosec timestamp
+            timestamp += st.st_mtim.tv_nsec;
         }
     }
 
-    _cleanup_free_ gchar *timestamp_str = g_strdup_printf("%lli", (long long)timestamp);
+    _cleanup_free_ gchar *timestamp_str = g_strdup_printf("%lli", timestamp);
     const char *type_str = lr_checksum_type_to_str(type);
     _cleanup_free_ gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
     _cleanup_free_ gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, type_str, NULL);
