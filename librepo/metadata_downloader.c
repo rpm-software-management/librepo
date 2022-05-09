@@ -25,7 +25,6 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <zconf.h>
 
 #include "librepo/librepo.h"
 
