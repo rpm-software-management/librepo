@@ -146,7 +146,7 @@ lr_yum_repoconfs_free(LrYumRepoConfs *repos)
         return;
     g_slist_free_full(repos->repos, (GDestroyNotify) lr_yum_repoconf_free);
     g_slist_free_full(repos->files, (GDestroyNotify) lr_yum_repofile_free);
-    g_free(repos);
+    lr_free(repos);
 }
 
 GSList *

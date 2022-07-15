@@ -205,8 +205,6 @@ lr_checksum_fd_compare(LrChecksumType type,
                        gchar **calculated,
                        GError **err)
 {
-    _cleanup_free_ gchar *checksum = NULL;
-
     assert(fd >= 0);
     assert(!err || *err == NULL);
 
@@ -262,7 +260,7 @@ lr_checksum_fd_compare(LrChecksumType type,
         }
     }
 
-    checksum = lr_checksum_fd(type, fd, err);
+    char *checksum = lr_checksum_fd(type, fd, err);
     if (!checksum)
         return FALSE;
 
@@ -274,6 +272,7 @@ lr_checksum_fd_compare(LrChecksumType type,
         } else {
             g_set_error(err, LR_CHECKSUM_ERROR, LRE_FILE,
                         "fsync failed: %s", strerror(errno));
+            lr_free(checksum);
             return FALSE;
         }
     }
@@ -287,6 +286,7 @@ lr_checksum_fd_compare(LrChecksumType type,
     if (calculated)
         *calculated = g_strdup(checksum);
 
+    lr_free(checksum);
     return TRUE;
 }
 

@@ -156,7 +156,7 @@ lr_lrmirrorlist_append_metalink(LrInternalMirrorlist *list,
         LrInternalMirror *mirror = lr_lrmirror_new(url_copy, urlvars);
         mirror->preference = metalinkurl->preference;
         mirror->protocol = lr_detect_protocol(mirror->url);
-        lr_free(url_copy);
+        g_free(url_copy);
         list = g_slist_append(list, mirror);
 
         //g_debug("%s: Appending URL: %s", __func__, mirror->url);

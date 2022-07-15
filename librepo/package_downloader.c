@@ -173,7 +173,7 @@ lr_packagetarget_free(LrPackageTarget *target)
     if (!target)
         return;
     g_string_chunk_free(target->chunk);
-    g_free(target);
+    lr_free(target);
 }
 
 gboolean

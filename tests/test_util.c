@@ -54,7 +54,7 @@ START_TEST(test_gettmpdir)
     char *tmp_dir = lr_gettmpdir();
     ck_assert_ptr_nonnull(tmp_dir);
     ck_assert_int_eq(rmdir(tmp_dir), 0);
-    lr_free(tmp_dir);
+    g_free(tmp_dir);
 }
 END_TEST
 
@@ -126,7 +126,7 @@ START_TEST(test_remove_dir)
     ck_assert_int_eq(rc, 0);
     ck_assert_int_ne(unlink(tmp_file), 0);
     ck_assert_int_ne(rmdir(tmp_dir), 0);
-    lr_free(tmp_dir);
+    g_free(tmp_dir);
     lr_free(tmp_file);
 }
 END_TEST
@@ -141,61 +141,61 @@ START_TEST(test_url_without_path)
     new_url = lr_url_without_path("");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("hostname");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "hostname");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("hostname/foo/bar/");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "hostname");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("hostname:80");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "hostname:80");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("hostname:80/foo/bar");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "hostname:80");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("http://hostname:80/");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "http://hostname:80");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("http://hostname:80/foo/bar");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "http://hostname:80");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("ftp://foo.hostname:80/foo/bar");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "ftp://foo.hostname:80");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("file:///home/foobar");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "file://");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 
     new_url = lr_url_without_path("file:/home/foobar");
     ck_assert_ptr_nonnull(new_url);
     ck_assert_str_eq(new_url, "file://");
-    lr_free(new_url);
+    g_free(new_url);
     new_url = NULL;
 }
 END_TEST
