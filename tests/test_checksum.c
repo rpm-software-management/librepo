@@ -295,8 +295,8 @@ START_TEST(test_cached_checksum_clear)
 cleanup:
     close(fd);
     lr_free(filename);
-    lr_free(timestamp_key);
-    lr_free(checksum_key);
+    g_free(timestamp_key);
+    g_free(checksum_key);
 }
 END_TEST
 

@@ -110,7 +110,7 @@ START_TEST(test_gpg_check_signature)
     lr_free(_data_path);
     lr_free(signature_path);
     lr_free(_signature_path);
-    lr_free(tmp_home_path);
+    g_free(tmp_home_path);
 }
 END_TEST
 

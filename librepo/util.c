@@ -170,7 +170,7 @@ lr_gettmpdir(void)
 {
     char *template = g_build_filename(g_get_tmp_dir(), "librepo-tmpdir-XXXXXX", NULL);
     if (!mkdtemp(template)) {
-        lr_free(template);
+        g_free(template);
         return NULL;
     }
     return template;
@@ -206,7 +206,7 @@ lr_pathconcat(const char *first, ...)
 
     qmark_section = strchr(first, '?');
 
-    res = lr_malloc(total_len + separator_len + 1);
+    res = g_malloc(total_len + separator_len + 1);
 
     next = first;
     va_start(args, first);
@@ -273,7 +273,7 @@ lr_pathconcat(const char *first, ...)
     assert(offset <= total_len);
 
     if (offset == 0) {
-        lr_free(res);
+        g_free(res);
         return g_strdup(first);
     }
 
