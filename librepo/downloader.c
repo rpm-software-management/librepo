@@ -1976,7 +1976,7 @@ list_of_checksums_to_str(GSList *checksums)
         tmp = g_strconcat(expected, chksum->value, "(",
                           chtype_str ? chtype_str : "UNKNOWN",
                           ") ", NULL);
-        free(expected);
+        g_free(expected);
         expected = tmp;
     }
 

@@ -39,7 +39,7 @@ init_test_globals(struct TestGlobals_s *tg, const char *testdata_dir)
 static void
 free_test_globals(struct TestGlobals_s *tg)
 {
-    lr_free(tg->tmpdir);
+    g_free(tg->tmpdir);
     lr_free(tg->testdata_dir);
 }
 

@@ -105,11 +105,11 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
     if (fd < 0) {
         g_set_error(err, LR_REPOUTIL_YUM_ERROR, LRE_IO,
                     "open(%s, O_RDONLY) error: %s", path, g_strerror(errno));
-        lr_free(path);
+        g_free(path);
         return FALSE;
     }
 
-    lr_free(path);
+    g_free(path);
 
     ret = lr_yum_repomd_parse_file(repomd, fd, NULL, NULL, err);
     close(fd);
