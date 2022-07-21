@@ -87,7 +87,7 @@ START_TEST(test_checksum_fd)
     test_checksum(file, LR_CHECKSUM_SHA512, CHKS_VAL_01_SHA512);
 
     ck_assert_msg(remove(file) == 0, "Cannot delete temporary test file");
-    lr_free(file);
+    g_free(file);
 }
 END_TEST
 
@@ -235,9 +235,9 @@ START_TEST(test_cached_checksum_value)
     ck_assert(attr_ret == -1);  // Cached checksum should not exists
 
     lr_free(calculated);
-    lr_free(filename);
-    lr_free(timestamp_key);
-    lr_free(checksum_key);
+    g_free(filename);
+    g_free(timestamp_key);
+    g_free(checksum_key);
     lr_free(mtime_str);
 }
 END_TEST
@@ -294,7 +294,7 @@ START_TEST(test_cached_checksum_clear)
     ck_assert(attr_ret != -1);
 cleanup:
     close(fd);
-    lr_free(filename);
+    g_free(filename);
     g_free(timestamp_key);
     g_free(checksum_key);
 }

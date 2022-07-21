@@ -191,7 +191,7 @@ handle_failure(LrMetadataTarget *target,
                GSList **paths,
                GError *err)
 {
-    lr_metadatatarget_append_error(target, err->message, NULL);
+    lr_metadatatarget_append_error(target, err->message);
     fillInvalidationValues(fd_list, paths);
     g_error_free(err);
 }
@@ -220,13 +220,13 @@ create_repomd_xml_download_targets(GSList *targets,
         handle = target->handle;
 
         if (!handle->urls && !handle->mirrorlisturl && !handle->metalinkurl) {
-            lr_metadatatarget_append_error(target, "No LRO_URLS, LRO_MIRRORLISTURL nor LRO_METALINKURL specified", NULL);
+            lr_metadatatarget_append_error(target, "No LRO_URLS, LRO_MIRRORLISTURL nor LRO_METALINKURL specified");
             fillInvalidationValues(fd_list, paths);
             continue;
         }
 
         if (handle->repotype != LR_YUMREPO) {
-            lr_metadatatarget_append_error(target, "Bad LRO_REPOTYPE specified", NULL);
+            lr_metadatatarget_append_error(target, "Bad LRO_REPOTYPE specified");
             fillInvalidationValues(fd_list, paths);
             continue;
         }
@@ -241,14 +241,14 @@ create_repomd_xml_download_targets(GSList *targets,
         if (!lr_handle_prepare_internal_mirrorlist(handle,
                                                    handle->fastestmirror,
                                                    &err)) {
-            lr_metadatatarget_append_error(target, "Cannot prepare internal mirrorlist: %s", err->message, NULL);
+            lr_metadatatarget_append_error(target, "Cannot prepare internal mirrorlist: %s", err->message);
             fillInvalidationValues(fd_list, paths);
             g_error_free(err);
             continue;
         }
 
         if (mkdir(handle->destdir, S_IRWXU) == -1 && errno != EEXIST) {
-            lr_metadatatarget_append_error(target, "Cannot create tmpdir: %s %s", handle->destdir, g_strerror(errno), NULL);
+            lr_metadatatarget_append_error(target, "Cannot create tmpdir: %s %s", handle->destdir, g_strerror(errno));
             fillInvalidationValues(fd_list, paths);
             g_error_free(err);
             continue;
@@ -334,12 +334,12 @@ process_repomd_xml(GSList *targets,
         handle->gnupghomedir = g_strdup(target->gnupghomedir);
 
         if (target->download_target->rcode != LRE_OK) {
-            lr_metadatatarget_append_error(target, (char *) lr_strerror(target->download_target->rcode), NULL);
+            lr_metadatatarget_append_error(target, (char *) lr_strerror(target->download_target->rcode));
             goto fail;
         }
 
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &error)) {
-            lr_metadatatarget_append_error(target, error->message, NULL);
+            lr_metadatatarget_append_error(target, error->message);
             g_error_free(error);
             goto fail;
         }
@@ -348,7 +348,7 @@ process_repomd_xml(GSList *targets,
         ret = lr_yum_repomd_parse_file(target->repomd, fd_value, lr_xml_parser_warning_logger,
                                        "Repomd xml parser", &error);
         if (!ret) {
-            lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message, NULL);
+            lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message);
             g_error_free(error);
             goto fail;
         }
@@ -376,7 +376,7 @@ lr_metadata_download_cleanup(GSList *download_targets)
         LrDownloadTarget *download_target = elem->data;
         LrMetadataTarget *target = download_target->userdata;
         if (download_target->err)
-            lr_metadatatarget_append_error(target, download_target->err, NULL);
+            lr_metadatatarget_append_error(target, download_target->err);
 
         if (target->err != NULL) {
             ret = FALSE;
