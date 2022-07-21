@@ -52,7 +52,7 @@ START_TEST(test_downloader_single_file)
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
 
     fd1 = mkstemp(tmpfn1);
-    lr_free(tmpfn1);
+    g_free(tmpfn1);
     ck_assert_int_ge(fd1, 0);
 
     t1 = lr_downloadtarget_new(handle, "index.html", NULL, fd1, NULL, NULL,
@@ -97,7 +97,7 @@ START_TEST(test_downloader_single_file_2)
     tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_2_XXXXXX", NULL);
 
     fd1 = mkstemp(tmpfn1);
-    lr_free(tmpfn1);
+    g_free(tmpfn1);
     ck_assert_int_ge(fd1, 0);
 
     t1 = lr_downloadtarget_new(NULL, "http://seznam.cz/index.html", NULL,
@@ -154,8 +154,8 @@ START_TEST(test_downloader_two_files)
 
     fd1 = mkstemp(tmpfn1);
     fd2 = mkstemp(tmpfn2);
-    lr_free(tmpfn1);
-    lr_free(tmpfn2);
+    g_free(tmpfn1);
+    g_free(tmpfn2);
     ck_assert_int_ge(fd1, 0);
     ck_assert_int_ge(fd2, 0);
 
@@ -223,9 +223,9 @@ START_TEST(test_downloader_three_files_with_error)
     fd1 = mkstemp(tmpfn1);
     fd2 = mkstemp(tmpfn2);
     fd3 = mkstemp(tmpfn3);
-    lr_free(tmpfn1);
-    lr_free(tmpfn2);
-    lr_free(tmpfn3);
+    g_free(tmpfn1);
+    g_free(tmpfn2);
+    g_free(tmpfn3);
     ck_assert_int_ge(fd1, 0);
     ck_assert_int_ge(fd2, 0);
     ck_assert_int_ge(fd3, 0);
@@ -329,7 +329,7 @@ START_TEST(test_downloader_checksum)
         tmpfn1 = lr_pathconcat(test_globals.tmpdir, "single_file_XXXXXX", NULL);
 
         fd1 = mkstemp(tmpfn1);
-        lr_free(tmpfn1);
+        g_free(tmpfn1);
         ck_assert_int_ge(fd1, 0);
 
         checksum = lr_downloadtargetchecksum_new(LR_CHECKSUM_SHA512,

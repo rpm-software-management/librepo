@@ -570,7 +570,7 @@ lr_yum_repomd_parse_file(LrYumRepoMd *repomd,
 
     // Parsing
 
-    ret = lr_xml_parser_generic(parser, pd, fd, &tmp_err);
+    ret = lr_xml_parser_generic(&parser, pd, fd, &tmp_err);
     if (tmp_err)
         g_propagate_error(err, tmp_err);
 
