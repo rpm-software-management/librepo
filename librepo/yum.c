@@ -335,7 +335,7 @@ lr_prepare_repodata_dir(LrHandle *handle,
             return FALSE;
         }
     }
-    lr_free(path_to_repodata);
+    g_free(path_to_repodata);
 
     return TRUE;
 }
@@ -356,7 +356,7 @@ lr_store_mirrorlist_files(LrHandle *handle,
             g_debug("%s: Cannot create: %s", __func__, ml_file_path);
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot create %s: %s", ml_file_path, g_strerror(errno));
-            lr_free(ml_file_path);
+            g_free(ml_file_path);
             return FALSE;
         }
         rc = lr_copy_content(handle->mirrorlist_fd, fd);
@@ -366,7 +366,7 @@ lr_store_mirrorlist_files(LrHandle *handle,
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot copy content of mirrorlist file %s: %s",
                         ml_file_path, g_strerror(errno));
-            lr_free(ml_file_path);
+            g_free(ml_file_path);
             return FALSE;
         }
         repo->mirrorlist = ml_file_path;
@@ -391,7 +391,7 @@ lr_copy_metalink_content(LrHandle *handle,
             g_debug("%s: Cannot create: %s", __func__, ml_file_path);
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot create %s: %s", ml_file_path, g_strerror(errno));
-            lr_free(ml_file_path);
+            g_free(ml_file_path);
             return FALSE;
         }
         rc = lr_copy_content(handle->metalink_fd, fd);
@@ -401,7 +401,7 @@ lr_copy_metalink_content(LrHandle *handle,
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot copy content of metalink file %s: %s",
                         ml_file_path, g_strerror(errno));
-            lr_free(ml_file_path);
+            g_free(ml_file_path);
             return FALSE;
         }
         repo->metalink = ml_file_path;
@@ -422,7 +422,7 @@ lr_prepare_repomd_xml_file(LrHandle *handle,
     if (fd == -1) {
         g_set_error(err, LR_YUM_ERROR, LRE_IO,
                     "Cannot open %s: %s", *path, g_strerror(errno));
-        lr_free(*path);
+        g_free(*path);
         return -1;
     }
 
@@ -458,13 +458,13 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
             g_debug("%s: Cannot open: %s", __func__, signature);
             g_set_error(err, LR_YUM_ERROR, LRE_IO,
                         "Cannot open %s: %s", signature, g_strerror(errno));
-            lr_free(signature);
+            g_free(signature);
             return FALSE;
         }
 
         url = lr_pathconcat(handle->used_mirror, "repodata/repomd.xml.asc", NULL);
         ret = lr_download_url(handle, url, fd_sig, &tmp_err);
-        lr_free(url);
+        g_free(url);
         close(fd_sig);
         if (!ret) {
             // Error downloading signature
@@ -474,7 +474,7 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
                         "repository does not support GPG verification: %s", tmp_err->message);
             g_clear_error(&tmp_err);
             unlink(signature);
-            lr_free(signature);
+            g_free(signature);
             return FALSE;
         } else {
             // Signature downloaded
@@ -483,7 +483,7 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
                                          path,
                                          handle->gnupghomedir,
                                          &tmp_err);
-            lr_free(signature);
+            g_free(signature);
             if (!ret) {
                 g_debug("%s: GPG signature verification failed: %s",
                         __func__, tmp_err->message);
@@ -680,7 +680,7 @@ prepare_repo_download_std_target(LrHandle *handle,
                 __func__, *path, g_strerror(errno));
         g_set_error(err, LR_YUM_ERROR, LRE_IO,
                     "Cannot create/open %s: %s", *path, g_strerror(errno));
-        lr_free(*path);
+        g_free(*path);
         g_slist_free_full(*targets, (GDestroyNotify) lr_downloadtarget_free);
         return FALSE;
     }
@@ -713,7 +713,7 @@ prepare_repo_download_zck_target(LrHandle *handle,
                 __func__, *path, g_strerror(errno));
         g_set_error(err, LR_YUM_ERROR, LRE_IO,
                     "Cannot create/open %s: %s", *path, g_strerror(errno));
-        lr_free(*path);
+        g_free(*path);
         g_slist_free_full(*targets, (GDestroyNotify) lr_downloadtarget_free);
         return FALSE;
     }
@@ -778,7 +778,7 @@ prepare_repo_download_targets(LrHandle *handle,
         char *dest_dir = realpath(handle->destdir, NULL);
         path = lr_pathconcat(handle->destdir, record->location_href, NULL);
         char *requested_dir = realpath(dirname(path), NULL);
-        lr_free(path);
+        g_free(path);
         if (!g_str_has_prefix(requested_dir, dest_dir)) {
             g_debug("%s: Invalid path: %s", __func__, location_href);
             g_set_error(err, LR_YUM_ERROR, LRE_IO, "Invalid path: %s", location_href);
@@ -850,7 +850,7 @@ prepare_repo_download_targets(LrHandle *handle,
 
         /* Because path may already exists in repo (while update) */
         lr_yum_repo_update(repo, record->type, path);
-        lr_free(path);
+        g_free(path);
     }
 
     return TRUE;
@@ -1130,7 +1130,7 @@ lr_yum_use_local_load_base(LrHandle *handle,
             repo->mirrorlist = mrl_fn;
         } else {
             repo->mirrorlist = NULL;
-            lr_free(mrl_fn);
+            g_free(mrl_fn);
         }
     }
 
@@ -1142,7 +1142,7 @@ lr_yum_use_local_load_base(LrHandle *handle,
             repo->metalink = mtl_fn;
         } else {
             repo->metalink = NULL;
-            lr_free(mtl_fn);
+            g_free(mtl_fn);
         }
     }
 

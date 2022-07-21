@@ -143,7 +143,7 @@ lr_xml_parser_strtoll(LrParserData *pd,
 }
 
 gboolean
-lr_xml_parser_generic(XmlParser parser,
+lr_xml_parser_generic(XmlParser *parser,
                       LrParserData *pd,
                       int fd,
                       GError **err)
@@ -151,7 +151,7 @@ lr_xml_parser_generic(XmlParser parser,
     /* Note: This function uses .err members of LrParserData! */
 
     gboolean ret = TRUE;
-    xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(&parser, pd, NULL, 0, NULL);
+    xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(parser, pd, NULL, 0, NULL);
     ctxt->linenumbers = 1;
 
     assert(ctxt);

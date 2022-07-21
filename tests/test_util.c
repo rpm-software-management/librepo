@@ -68,43 +68,43 @@ START_TEST(test_pathconcat)
     path = lr_pathconcat("", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 
     path = lr_pathconcat("/tmp", "foo///", "bar", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "/tmp/foo/bar");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 
     path = lr_pathconcat("foo", "bar/", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "foo/bar");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 
     path = lr_pathconcat("foo", "/bar/", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "foo/bar");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 
     path = lr_pathconcat("foo", "bar", "", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "foo/bar/");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 
     path = lr_pathconcat("http://host.net", "path/to/somewhere", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "http://host.net/path/to/somewhere");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 
     path = lr_pathconcat("http://host.net?hello=1", "path/to/", "somewhere", NULL);
     ck_assert_ptr_nonnull(path);
     ck_assert_str_eq(path, "http://host.net/path/to/somewhere?hello=1");
-    lr_free(path);
+    g_free(path);
     path = NULL;
 }
 END_TEST
@@ -127,7 +127,7 @@ START_TEST(test_remove_dir)
     ck_assert_int_ne(unlink(tmp_file), 0);
     ck_assert_int_ne(rmdir(tmp_dir), 0);
     g_free(tmp_dir);
-    lr_free(tmp_file);
+    g_free(tmp_file);
 }
 END_TEST
 

@@ -159,7 +159,7 @@ lr_xml_parser_strtoll(LrParserData *pd,
 /** Generic parser.
  */
 gboolean
-lr_xml_parser_generic(XmlParser parser,
+lr_xml_parser_generic(XmlParser *parser,
                       LrParserData *pd,
                       int fd,
                       GError **err);

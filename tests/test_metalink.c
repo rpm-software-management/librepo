@@ -48,7 +48,7 @@ START_TEST(test_metalink_good_01)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_good_01", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -160,7 +160,7 @@ START_TEST(test_metalink_good_02)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_good_02", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -206,7 +206,7 @@ START_TEST(test_metalink_good_03)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_good_03", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -250,7 +250,7 @@ START_TEST(test_metalink_bad_01)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_bad_01", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -371,7 +371,7 @@ START_TEST(test_metalink_bad_02)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_bad_02", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -395,7 +395,7 @@ START_TEST(test_metalink_really_bad_01)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_really_bad_01", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -419,7 +419,7 @@ START_TEST(test_metalink_really_bad_02)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_really_bad_02", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -443,7 +443,7 @@ START_TEST(test_metalink_really_bad_03)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_really_bad_03", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
@@ -470,7 +470,7 @@ START_TEST(test_metalink_with_alternates)
     path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
                          "metalink_with_alternates", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);

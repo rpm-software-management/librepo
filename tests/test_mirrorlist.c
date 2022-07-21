@@ -35,7 +35,7 @@ START_TEST(test_mirrorlist_01)
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
                          "mirrorlist_01", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_mirrorlist_init();
     ck_assert_ptr_nonnull(ml);
@@ -68,7 +68,7 @@ START_TEST(test_mirrorlist_02)
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
                          "mirrorlist_02", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_mirrorlist_init();
     ck_assert_ptr_nonnull(ml);
@@ -92,7 +92,7 @@ START_TEST(test_mirrorlist_03)
     path = lr_pathconcat(test_globals.testdata_dir, MIRRORLIST_DIR,
                          "mirrorlist_03", NULL);
     fd = open(path, O_RDONLY);
-    lr_free(path);
+    g_free(path);
     ck_assert_int_ge(fd, 0);
     ml = lr_mirrorlist_init();
     ck_assert_ptr_nonnull(ml);
