@@ -97,26 +97,11 @@ void
 lr_metadatatarget_append_error(LrMetadataTarget *target, char *format, ...)
 {
     va_list valist;
-    size_t length = strlen(format);
-    char *error_message = NULL;
-
     va_start(valist, format);
-    while (1) {
-        char *arg = va_arg(valist, char*);
-        if (arg == NULL)
-            break;
-
-        length += strlen(arg);
-    }
-    length += RESERVE;
+    gchar *error_message = g_strdup_vprintf(format, valist);
     va_end(valist);
 
-    va_start(valist, format);
-    error_message = malloc(length * sizeof(char));
-    vsnprintf(error_message, length, format, valist);
-    va_end(valist);
-
-    target->err = g_list_append(target->err, (gpointer) error_message);
+    target->err = g_list_append(target->err, error_message);
 }
 
 static gboolean
