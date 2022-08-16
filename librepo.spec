@@ -23,7 +23,7 @@ BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  check-devel
 BuildRequires:  doxygen
-BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(glib-2.0) >= 2.28
 BuildRequires:  gpgme-devel
 BuildRequires:  libattr-devel
 BuildRequires:  libcurl-devel >= %{libcurl_version}
