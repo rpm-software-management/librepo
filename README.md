@@ -14,7 +14,7 @@ Fedora/Ubuntu name
 * gcc (http://gcc.gnu.org/) - gcc/gcc
 * glib2 (http://developer.gnome.org/glib/) - glib2-devel/libglib2.0-dev
 * gpgme (http://www.gnupg.org/) - gpgme-devel/libgpgme11-dev
-* libattr (http://www.bestbits.at/acl/) - libattr-devel/libattr1-dev
+* libattr (https://savannah.nongnu.org/projects/attr) - libattr-devel/libattr1-dev
 * libcurl (http://curl.haxx.se/libcurl/) - libcurl-devel/libcurl4-openssl-dev
 * openssl (http://www.openssl.org/) - openssl-devel/libssl-dev
 * python (http://python.org/) - python3-devel/libpython3-dev
