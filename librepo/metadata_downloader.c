@@ -88,8 +88,7 @@ lr_metadatatarget_free(LrMetadataTarget *target)
     if (!target)
         return;
     g_string_chunk_free(target->chunk);
-    if (target->err != NULL)
-        g_list_free(target->err);
+    g_list_free_full(target->err, g_free);
     g_free(target);
 }
 
