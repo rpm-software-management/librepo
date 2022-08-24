@@ -32,6 +32,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
+#include <gio/gio.h>
 
 
 #include "handle_internal.h"
@@ -262,6 +264,51 @@ lr_handle_remote_sources_changed(LrHandle *handle, LrChangedRemoteSource type)
         lr_metalink_free(handle->metalink);
         handle->metalink = NULL;
     }
+}
+
+struct callback_data {
+    GMainLoop *loop; 
+    guint64 deadline_millis;
+    guint timeout_id; 
+    GNetworkMonitor *monitor;
+    GSocketConnectable *connectable; 
+    GCancellable *cancellable;
+};
+
+gboolean 
+timeout_callback(gpointer data)
+{ 
+    struct callback_data *dt = (struct callback_data*)data;
+
+    //if past deadline, exit
+    if (g_get_monotonic_time() >= dt->deadline_millis) {
+        g_main_loop_quit(dt->loop);
+        return G_SOURCE_REMOVE;
+    }
+
+    //if no internet, remove source
+    if (!g_network_monitor_get_network_available(dt->monitor)) {
+        return G_SOURCE_REMOVE;
+    }
+  
+    //if url reached, quit loop and remove source
+    if (g_network_monitor_can_reach (dt->monitor, dt->connectable, dt->cancellable, NULL)) {
+        g_main_loop_quit(dt->loop);
+        return G_SOURCE_REMOVE;
+    }
+
+    //Still waiting on the URL to be availbale, keep polling
+    return G_SOURCE_CONTINUE;
+}
+
+void 
+on_network_available(GObject *object, GParamSpec *pspec, gpointer data)
+{
+    struct callback_data *dt = (struct callback_data*)data;
+    if (dt->timeout_id == 0 && g_network_monitor_get_network_available(dt->monitor)) {
+        dt->timeout_id = g_timeout_add(200, timeout_callback, dt);
+    }
+    g_main_loop_run(dt->loop);
 }
 
 gboolean
@@ -839,6 +886,60 @@ lr_handle_setopt(LrHandle *handle,
 
     va_end(arg);
     return ret;
+}
+
+gboolean
+lr_handle_network_wait(LrHandle *handle, GError **err, guint seconds, GCancellable *cancellable)
+{
+    assert(!err || *err == NULL);
+
+    if (!handle) {
+        g_set_error(err, LR_HANDLE_ERROR, LRE_BADFUNCARG,
+                    "No handle specified");
+        return FALSE;
+    }
+
+    GNetworkMonitor *monitor = g_network_monitor_get_default();
+
+    struct callback_data data_struct;
+    data_struct.cancellable = cancellable;
+    data_struct.monitor = monitor;
+
+    const gchar *baseurl;
+    if (handle->metalinkurl)
+        baseurl = handle->metalinkurl;
+    else if (handle->mirrorlisturl)
+        baseurl = handle->mirrorlisturl;
+    else if (handle->urls)
+        baseurl = handle->urls[0];
+    assert(baseurl);
+
+    g_autoptr(GUri) uri = g_uri_parse(baseurl, G_URI_FLAGS_NONE, NULL);
+    if (uri == NULL) {
+        return FALSE;
+    }
+    const gchar* scheme = g_uri_get_scheme(uri);
+    if (!g_strcmp0(scheme, "file")) {
+        return TRUE; 
+    }
+    const gchar* host = g_uri_get_host(uri);
+    guint16 port = g_uri_get_port(uri);
+    GSocketConnectable *connectable =  g_network_address_new(host, port);
+    data_struct.connectable = connectable;
+    data_struct.deadline_millis = g_get_monotonic_time() + seconds * G_USEC_PER_SEC;
+    g_autoptr(GMainLoop) loop;
+    loop = g_main_loop_new(NULL, FALSE);
+    data_struct.loop = loop;
+    data_struct.timeout_id = 0; 
+
+    if (g_network_monitor_get_network_available(data_struct.monitor)) {
+        data_struct.timeout_id = g_timeout_add(200, timeout_callback, &data_struct);
+        g_main_loop_run(data_struct.loop);
+    }
+    else{
+        g_signal_connect(monitor, "notify::network-available", G_CALLBACK(on_network_available), &data_struct);    
+    }
+    return TRUE;
 }
 
 static gboolean
