@@ -22,6 +22,7 @@
 #define __LR_HANDLE_H__
 
 #include <glib.h>
+#include <gio/gio.h>
 
 #include "result.h"
 
@@ -559,6 +560,16 @@ lr_handle_getinfo(LrHandle *handle,
  */
 gboolean
 lr_handle_perform(LrHandle *handle, LrResult *result, GError **err);
+
+/** Handle waiting on network for LRO_URLS.
+ * @param handle        Librepo handle.
+ * @param seconds       Network timeout seconds 
+ * @param err           GError **
+ * @param cancellable   GCancellable *
+ * @return              TRUE if everything is ok, FALSE if err is set.
+ */
+gboolean
+lr_handle_network_wait(LrHandle *handle, GError **err, guint seconds, GCancellable *cancellable);
 
 /** @} */
 
