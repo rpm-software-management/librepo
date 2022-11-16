@@ -1,5 +1,6 @@
 /* librepo - A library providing (libcURL like) API to downloading repository
  * Copyright (C) 2012  Tomas Mlcoch
+ * Copyright (C) 2022  Jaroslav Rohel <jrohel@redhat.com>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -250,24 +251,51 @@ lr_gpg_check_signature(const char *signature_fn,
 }
 
 gboolean
-lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
+lr_gpg_import_key_from_memory(const char *key, size_t key_len, const char *home_dir, GError **err)
 {
     gpgme_ctx_t context = lr_gpg_context_init(home_dir, err);
     if (!context) {
         return FALSE;
     }
 
-    int key_fd = open(key_fn, O_RDONLY);
-    if (key_fd == -1) {
-        g_debug("%s: Opening key: %s", __func__, g_strerror(errno));
-        g_set_error(err, LR_GPG_ERROR, LRE_IO,
-                    "Error while opening key %s: %s",
-                    key_fn, g_strerror(errno));
+    gpgme_error_t gpgerr;
+    gpgme_data_t key_data;
+
+    gpgerr = gpgme_data_new_from_mem(&key_data, key, key_len, 0);
+    if (gpgerr != GPG_ERR_NO_ERROR) {
+        g_debug("%s: gpgme_data_new_from_mem: %s",
+                 __func__, gpgme_strerror(gpgerr));
+        g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
+                    "gpgme_data_new_from_mem(_, _, %ld, 0) error: %s",
+                    (unsigned long)key_len, gpgme_strerror(gpgerr));
         gpgme_release(context);
         return FALSE;
     }
 
-    // Key import
+    gpgerr = gpgme_op_import(context, key_data);
+    if (gpgerr != GPG_ERR_NO_ERROR) {
+        g_debug("%s: gpgme_op_import: %s", __func__, gpgme_strerror(gpgerr));
+        g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
+                    "gpgme_op_import() error: %s", gpgme_strerror(gpgerr));
+        gpgme_data_release(key_data);
+        gpgme_release(context);
+        return FALSE;
+    }
+
+    gpgme_data_release(key_data);
+    gpgme_release(context);
+
+    return TRUE;
+}
+
+gboolean
+lr_gpg_import_key_from_fd(int key_fd, const char *home_dir, GError **err)
+{
+    gpgme_ctx_t context = lr_gpg_context_init(home_dir, err);
+    if (!context) {
+        return FALSE;
+    }
+
     gpgme_error_t gpgerr;
     gpgme_data_t key_data;
 
@@ -279,25 +307,42 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
                     "gpgme_data_new_from_fd(_, %d) error: %s",
                     key_fd, gpgme_strerror(gpgerr));
         gpgme_release(context);
-        close(key_fd);
         return FALSE;
     }
 
     gpgerr = gpgme_op_import(context, key_data);
-
-    gpgme_data_release(key_data);
     if (gpgerr != GPG_ERR_NO_ERROR) {
         g_debug("%s: gpgme_op_import: %s", __func__, gpgme_strerror(gpgerr));
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_op_import() error: %s", gpgme_strerror(gpgerr));
+        gpgme_data_release(key_data);
         gpgme_release(context);
-        close(key_fd);
         return FALSE;
     }
 
-    close(key_fd);
-
+    gpgme_data_release(key_data);
     gpgme_release(context);
 
     return TRUE;
+}
+
+gboolean
+lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    int key_fd = open(key_fn, O_RDONLY);
+    if (key_fd == -1) {
+        g_debug("%s: Opening key: %s", __func__, g_strerror(errno));
+        g_set_error(err, LR_GPG_ERROR, LRE_IO,
+                    "Error while opening key %s: %s",
+                    key_fn, g_strerror(errno));
+        return FALSE;
+    }
+
+    gboolean ret = lr_gpg_import_key_from_fd(key_fd, home_dir, err);
+
+    close(key_fd);
+
+    return ret;
 }
