@@ -1,5 +1,6 @@
 /* librepo - A library providing (libcURL like) API to downloading repository
  * Copyright (C) 2012  Tomas Mlcoch
+ * Copyright (C) 2022  Jaroslav Rohel <jrohel@redhat.com>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -59,6 +60,35 @@ lr_gpg_check_signature(const char *signature_fn,
                        const char *data_fn,
                        const char *home_dir,
                        GError **err);
+
+
+/** Import key into the keyring.
+ * @param key           Pointer to memory buffer with key.
+ * @param key_len       Length of the key.
+ * @param home_dir      Configuration directory of OpenPGP engine
+ *                      (e.g. "/home/user/.gnupg/"), if NULL default
+ *                      config directory is used.
+ * @param err           GError **
+ * @return              returns TRUE if error is not set and FALSE if it is.
+ */
+gboolean
+lr_gpg_import_key_from_memory(const char *key,
+                              size_t key_len,
+                              const char *home_dir,
+                              GError **err);
+
+/** Import key into the keyring.
+ * @param key_fd        Filedescriptor of key file.
+ * @param home_dir      Configuration directory of OpenPGP engine
+ *                      (e.g. "/home/user/.gnupg/"), if NULL default
+ *                      config directory is used.
+ * @param err           GError **
+ * @return              returns TRUE if error is not set and FALSE if it is.
+ */
+gboolean
+lr_gpg_import_key_from_fd(int key_fd,
+                          const char *home_dir,
+                          GError **err);
 
 /** Import key into the keyring.
  * @param key_fn        Filename (path) of key file.
