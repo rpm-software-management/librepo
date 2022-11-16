@@ -52,7 +52,9 @@
  * [2] https://bugzilla.redhat.com/show_bug.cgi?id=1769831
  * [3] https://github.com/rpm-software-management/microdnf/issues/50
  */
-void ensure_socket_dir_exists() {
+static void
+lr_gpg_ensure_socket_dir_exists()
+{
     char dirname[32];
     snprintf(dirname, sizeof(dirname), "/run/user/%u", getuid());
     int res = mkdir(dirname, 0700);
@@ -75,6 +77,8 @@ lr_gpg_check_signature_fd(int signature_fd,
     gpgme_signature_t sig;
 
     assert(!err || *err == NULL);
+
+    lr_gpg_ensure_socket_dir_exists();
 
     // Initialization
     gpgme_check_version(NULL);
@@ -244,7 +248,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
 
     assert(!err || *err == NULL);
 
-    ensure_socket_dir_exists();
+    lr_gpg_ensure_socket_dir_exists();
 
     // Initialization
     gpgme_check_version(NULL);
