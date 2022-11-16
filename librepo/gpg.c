@@ -63,24 +63,16 @@ lr_gpg_ensure_socket_dir_exists()
     }
 }
 
-gboolean
-lr_gpg_check_signature_fd(int signature_fd,
-                          int data_fd,
-                          const char *home_dir,
-                          GError **err)
+static gpgme_ctx_t
+lr_gpg_context_init(const char *home_dir, GError **err)
 {
-    gpgme_error_t gpgerr;
-    gpgme_ctx_t context;
-    gpgme_data_t signature_data;
-    gpgme_data_t data_data;
-    gpgme_verify_result_t result;
-    gpgme_signature_t sig;
-
     assert(!err || *err == NULL);
 
     lr_gpg_ensure_socket_dir_exists();
 
-    // Initialization
+    gpgme_ctx_t context;
+    gpgme_error_t gpgerr;
+
     gpgme_check_version(NULL);
     gpgerr = gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP);
     if (gpgerr != GPG_ERR_NO_ERROR) {
@@ -89,7 +81,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_set_error(err, LR_GPG_ERROR, LRE_GPGNOTSUPPORTED,
                     "gpgme_engine_check_version() error: %s",
                     gpgme_strerror(gpgerr));
-        return FALSE;
+        return NULL;
     }
 
     gpgerr = gpgme_new(&context);
@@ -97,7 +89,7 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_debug("%s: gpgme_new: %s", __func__, gpgme_strerror(gpgerr));
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_new() error: %s", gpgme_strerror(gpgerr));
-        return FALSE;
+        return NULL;
     }
 
     gpgerr = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
@@ -106,24 +98,43 @@ lr_gpg_check_signature_fd(int signature_fd,
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                     "gpgme_set_protocol() error: %s", gpgme_strerror(gpgerr));
         gpgme_release(context);
-        return FALSE;
+        return NULL;
     }
 
     if (home_dir) {
         gpgerr = gpgme_ctx_set_engine_info(context, GPGME_PROTOCOL_OpenPGP,
                                         NULL, home_dir);
         if (gpgerr != GPG_ERR_NO_ERROR) {
-            g_debug("%s: gpgme_ctx_set_engine_info: %s", __func__,
-                    gpgme_strerror(gpgerr));
+            g_debug("%s: gpgme_ctx_set_engine_info: %s", __func__, gpgme_strerror(gpgerr));
             g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
                         "gpgme_ctx_set_engine_info() error: %s",
                         gpgme_strerror(gpgerr));
             gpgme_release(context);
-            return FALSE;
+            return NULL;
         }
     }
 
     gpgme_set_armor(context, 1);
+
+    return context;
+}
+
+gboolean
+lr_gpg_check_signature_fd(int signature_fd,
+                          int data_fd,
+                          const char *home_dir,
+                          GError **err)
+{
+    gpgme_error_t gpgerr;
+    gpgme_data_t signature_data;
+    gpgme_data_t data_data;
+    gpgme_verify_result_t result;
+    gpgme_signature_t sig;
+
+    gpgme_ctx_t context = lr_gpg_context_init(home_dir, err);
+    if (!context) {
+        return FALSE;
+    }
 
     gpgerr = gpgme_data_new_from_fd(&signature_data, signature_fd);
     if (gpgerr != GPG_ERR_NO_ERROR) {
@@ -241,62 +252,12 @@ lr_gpg_check_signature(const char *signature_fn,
 gboolean
 lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
 {
-    gpgme_error_t gpgerr;
-    int key_fd;
-    gpgme_ctx_t context;
-    gpgme_data_t key_data;
-
-    assert(!err || *err == NULL);
-
-    lr_gpg_ensure_socket_dir_exists();
-
-    // Initialization
-    gpgme_check_version(NULL);
-    gpgerr = gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP);
-    if (gpgerr != GPG_ERR_NO_ERROR) {
-        g_debug("%s: gpgme_engine_check_version: %s",
-                 __func__, gpgme_strerror(gpgerr));
-        g_set_error(err, LR_GPG_ERROR, LRE_GPGNOTSUPPORTED,
-                    "gpgme_engine_check_version() error: %s",
-                    gpgme_strerror(gpgerr));
+    gpgme_ctx_t context = lr_gpg_context_init(home_dir, err);
+    if (!context) {
         return FALSE;
     }
 
-    gpgerr = gpgme_new(&context);
-    if (gpgerr != GPG_ERR_NO_ERROR) {
-        g_debug("%s: gpgme_new: %s", __func__, gpgme_strerror(gpgerr));
-        g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
-                    "gpgme_new() error: %s", gpgme_strerror(gpgerr));
-        return FALSE;
-    }
-
-    gpgerr = gpgme_set_protocol(context, GPGME_PROTOCOL_OpenPGP);
-    if (gpgerr != GPG_ERR_NO_ERROR) {
-        g_debug("%s: gpgme_set_protocol: %s", __func__, gpgme_strerror(gpgerr));
-        g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
-                    "gpgme_set_protocol() error: %s", gpgme_strerror(gpgerr));
-        gpgme_release(context);
-        return FALSE;
-    }
-
-    if (home_dir) {
-        gpgerr = gpgme_ctx_set_engine_info(context, GPGME_PROTOCOL_OpenPGP,
-                                        NULL, home_dir);
-        if (gpgerr != GPG_ERR_NO_ERROR) {
-            g_debug("%s: gpgme_ctx_set_engine_info: %s", __func__, gpgme_strerror(gpgerr));
-            g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
-                        "gpgme_ctx_set_engine_info() error: %s",
-                        gpgme_strerror(gpgerr));
-            gpgme_release(context);
-            return FALSE;
-        }
-    }
-
-    gpgme_set_armor(context, 1);
-
-    // Key import
-
-    key_fd = open(key_fn, O_RDONLY);
+    int key_fd = open(key_fn, O_RDONLY);
     if (key_fd == -1) {
         g_debug("%s: Opening key: %s", __func__, g_strerror(errno));
         g_set_error(err, LR_GPG_ERROR, LRE_IO,
@@ -305,6 +266,10 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
         gpgme_release(context);
         return FALSE;
     }
+
+    // Key import
+    gpgme_error_t gpgerr;
+    gpgme_data_t key_data;
 
     gpgerr = gpgme_data_new_from_fd(&key_data, key_fd);
     if (gpgerr != GPG_ERR_NO_ERROR) {
@@ -319,6 +284,7 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
     }
 
     gpgerr = gpgme_op_import(context, key_data);
+
     gpgme_data_release(key_data);
     if (gpgerr != GPG_ERR_NO_ERROR) {
         g_debug("%s: gpgme_op_import: %s", __func__, gpgme_strerror(gpgerr));
