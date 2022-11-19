@@ -11,7 +11,7 @@
 %global dnf_conflict 2.8.8
 
 Name:           librepo
-Version:        1.14.5
+Version:        1.15.0
 Release:        1%{?dist}
 Summary:        Repodata downloading library
 
