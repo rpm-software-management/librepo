@@ -15,7 +15,7 @@ Version:        1.14.0
 Release:        1%{?dist}
 Summary:        Repodata downloading library
 
-License:        LGPLv2+
+License:        LGPL-2.1-or-later
 URL:            https://github.com/rpm-software-management/librepo
 Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 
