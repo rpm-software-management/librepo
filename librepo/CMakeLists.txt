@@ -44,7 +44,18 @@ SET(librepo_HEADERS
     downloader.h
     downloadtarget.h)
 
-ADD_LIBRARY(librepo SHARED ${librepo_SRCS})
+SET(librepo_internal_HEADERS
+    downloader_internal.h
+    downloadtarget_internal.h
+    fastestmirror_internal.h
+    handle_internal.h
+    repoconf_internal.h
+    result_internal.h
+    xattr_internal.h
+    xmlparser_internal.h
+    yum_internal.h)
+
+ADD_LIBRARY(librepo SHARED ${librepo_SRCS} ${librepo_HEADERS} ${librepo_internal_HEADERS})
 TARGET_LINK_LIBRARIES(librepo
                         ${LIBXML2_LIBRARIES}
                         ${CURL_LIBRARY}
