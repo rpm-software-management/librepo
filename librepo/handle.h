@@ -24,7 +24,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include "result.h"
+#include <librepo/result.h>
 
 G_BEGIN_DECLS
 

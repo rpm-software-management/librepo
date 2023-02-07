@@ -23,9 +23,9 @@
 
 #include <glib.h>
 
-#include "rcodes.h"
-#include "handle.h"
-#include "checksum.h"
+#include <librepo/rcodes.h>
+#include <librepo/handle.h>
+#include <librepo/checksum.h>
 
 G_BEGIN_DECLS
 

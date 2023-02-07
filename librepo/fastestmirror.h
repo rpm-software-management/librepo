@@ -24,10 +24,10 @@
 #include <glib.h>
 #include <curl/curl.h>
 
-#include "url_substitution.h"
-#include "mirrorlist.h"
-#include "metalink.h"
-#include "handle.h"
+#include <librepo/url_substitution.h>
+#include <librepo/mirrorlist.h>
+#include <librepo/metalink.h>
+#include <librepo/handle.h>
 
 G_BEGIN_DECLS
 

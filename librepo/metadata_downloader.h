@@ -23,10 +23,12 @@
 
 #include <glib.h>
 
-#include "yum.h"
-#include "handle.h"
-#include "repomd.h"
-#include "downloadtarget.h"
+#include <librepo/yum.h>
+#include <librepo/handle.h>
+#include <librepo/repomd.h>
+#include <librepo/downloadtarget.h>
+
+G_BEGIN_DECLS
 
 /** LrMetadataTarget structure */
 typedef struct {
@@ -117,5 +119,7 @@ lr_metadatatarget_free(LrMetadataTarget *target);
  */
 gboolean
 lr_download_metadata(GSList *targets, GError **err);
+
+G_END_DECLS
 
 #endif //LIBREPO_METADATA_DOWNLOADER_H

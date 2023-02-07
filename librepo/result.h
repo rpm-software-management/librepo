@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-#include "types.h"
+#include <librepo/types.h>
 
 G_BEGIN_DECLS
 

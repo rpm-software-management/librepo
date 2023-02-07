@@ -23,8 +23,8 @@
 
 #include <glib.h>
 
-#include "handle.h"
-#include "downloadtarget.h"
+#include <librepo/handle.h>
+#include <librepo/downloadtarget.h>
 
 G_BEGIN_DECLS
 

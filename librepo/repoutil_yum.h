@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-#include "repomd.h"
+#include <librepo/repomd.h>
 
 G_BEGIN_DECLS
 
