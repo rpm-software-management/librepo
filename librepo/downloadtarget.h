@@ -27,11 +27,11 @@
 #include <zck.h>
 #endif /* WITH_ZCHUNK */
 
-#include "handle.h"
-#include "rcodes.h"
-#include "checksum.h"
-#include "types.h"
-#include "yum.h"
+#include <librepo/handle.h>
+#include <librepo/rcodes.h>
+#include <librepo/checksum.h>
+#include <librepo/types.h>
+#include <librepo/yum.h>
 
 G_BEGIN_DECLS
 

@@ -30,9 +30,9 @@
 #include <zck.h>
 #endif /* WITH_ZCHUNK */
 
-#include "checksum.h"
-#include "xmlparser.h"
-#include "downloadtarget.h"
+#include <librepo/checksum.h>
+#include <librepo/xmlparser.h>
+#include <librepo/downloadtarget.h>
 
 G_BEGIN_DECLS
 

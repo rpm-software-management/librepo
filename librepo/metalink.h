@@ -22,7 +22,7 @@
 #define __LR_METALINK_H__
 
 #include <glib.h>
-#include "xmlparser.h"
+#include <librepo/xmlparser.h>
 
 G_BEGIN_DECLS
 
