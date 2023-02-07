@@ -21,7 +21,9 @@
 #ifndef LIBREPO_DOWNLOADER_INTERNAL_H
 #define LIBREPO_DOWNLOADER_INTERNAL_H
 
-#include "handle.h"
+#include <librepo/handle.h>
+
+G_BEGIN_DECLS
 
 typedef struct {
     LrProgressCb cb; /*!<
@@ -41,5 +43,7 @@ typedef struct {
     void *userdata;     /*!< User data related to the target */
     LrSharedCallbackData *sharedcbdata; /*!< Shared cb data */
 } LrCallbackData;
+
+G_END_DECLS
 
 #endif //LIBREPO_DOWNLOADER_INTERNAL_H

@@ -23,8 +23,8 @@
 
 #include <glib.h>
 
-#include "xmlparser.h"
-#include "types.h"
+#include <librepo/xmlparser.h>
+#include <librepo/types.h>
 
 G_BEGIN_DECLS
 

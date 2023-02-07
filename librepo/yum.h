@@ -23,11 +23,11 @@
 
 #include <glib.h>
 
-#include "handle.h"
-#include "metalink.h"
-#include "rcodes.h"
-#include "repomd.h"
-#include "result.h"
+#include <librepo/handle.h>
+#include <librepo/metalink.h>
+#include <librepo/rcodes.h>
+#include <librepo/repomd.h>
+#include <librepo/result.h>
 
 G_BEGIN_DECLS
 
