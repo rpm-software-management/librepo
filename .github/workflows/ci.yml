@@ -36,8 +36,8 @@ jobs:
         with:
           copr-user: ${{steps.setup-ci.outputs.copr-user}}
 
-  integration-tests:
-    name: DNF Integration Tests
+  integration-tests-dnf4:
+    name: DNF4 Integration Tests
     needs: copr-build
     runs-on: ubuntu-latest
     container:
@@ -48,11 +48,34 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: rpm-software-management/ci-dnf-stack
+          ref: dnf-4-stack
 
       - name: Run Integration Tests
         uses: ./.github/actions/integration-tests
         with:
           package-urls: ${{needs.copr-build.outputs.package-urls}}
+
+  integration-tests-dnf5:
+    name: DNF5 Integration Tests
+    needs: copr-build
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/rpm-software-management/dnf-ci-host
+      options: --privileged
+    strategy:
+      matrix:
+        extra-run-args: [--tags dnf5 --command dnf5, --tags dnf5daemon --command dnf5daemon-client]
+    steps:
+      - name: Check out ci-dnf-stack
+        uses: actions/checkout@v2
+        with:
+          repository: rpm-software-management/ci-dnf-stack
+
+      - name: Run Integration Tests
+        uses: ./.github/actions/integration-tests
+        with:
+          package-urls: ${{needs.copr-build.outputs.package-urls}}
+          extra-run-args: ${{matrix.extra-run-args}}
 
   ansible-tests:
     name: Ansible Tests
