@@ -147,7 +147,7 @@ START_TEST(test_gpg_check_key_export)
     // Test key user ids
     char * const *uids = lr_gpg_key_get_userids(keys);
     ck_assert_ptr_nonnull(uids);
-    ck_assert(g_strcmp0(uids[0], "Tomas Mlcoch (test key) <tmlcoch@redhat.com>") == 0);
+    ck_assert(g_strcmp0(uids[0], "repository signing key (test key) <noone@example.org>") == 0);
     ck_assert_ptr_null(uids[1]);
 
     // Get subkeys
@@ -156,11 +156,11 @@ START_TEST(test_gpg_check_key_export)
 
     // Test first subkey
     const char *id = lr_gpg_subkey_get_id(subkeys);
-    ck_assert(g_strcmp0(id, "46AF958A22F2C4E9") == 0);
+    ck_assert(g_strcmp0(id, "97BDB7906441EDF5") == 0);
     const char *fingerprint = lr_gpg_subkey_get_fingerprint(subkeys);
-    ck_assert(g_strcmp0(fingerprint, "55B80C4944D8938E94980B6D46AF958A22F2C4E9") == 0);
+    ck_assert(g_strcmp0(fingerprint, "F4FC5B6AC58696023B9DBFB197BDB7906441EDF5") == 0);
     long timestamp = lr_gpg_subkey_get_timestamp(subkeys);
-    ck_assert(timestamp == 1347882156);
+    ck_assert(timestamp == 1677863811);
     gboolean can_sign = lr_gpg_subkey_get_can_sign(subkeys);
     ck_assert(can_sign);
 
@@ -170,11 +170,11 @@ START_TEST(test_gpg_check_key_export)
 
     // Test second subkey
     id = lr_gpg_subkey_get_id(subkeys);
-    ck_assert(g_strcmp0(id, "7AE6F6EF026AF38A") == 0);
+    ck_assert(g_strcmp0(id, "C4101E247506302F") == 0);
     fingerprint = lr_gpg_subkey_get_fingerprint(subkeys);
-    ck_assert(g_strcmp0(fingerprint, "D855DBAA43DB343EC4F214EB7AE6F6EF026AF38A") == 0);
+    ck_assert(g_strcmp0(fingerprint, "FBF903F3B01FFA462C6DBF96C4101E247506302F") == 0);
     timestamp = lr_gpg_subkey_get_timestamp(subkeys);
-    ck_assert(timestamp == 1347882156);
+    ck_assert(timestamp == 1677863811);
     can_sign = lr_gpg_subkey_get_can_sign(subkeys);
     ck_assert(!can_sign);
 
@@ -186,32 +186,37 @@ START_TEST(test_gpg_check_key_export)
     const char *raw_key = lr_gpg_key_get_raw_key(keys);
     ck_assert_ptr_nonnull(raw_key);
     ck_assert(strstr(raw_key,
-                     "mQENBFBXDKwBCADA5jpCwpb/JKOG8mcFyIanNojDwpHwKoyjGNpZNPNUDJguvkRa\n"
-                     "IO3NdoyXYd5QVTOsnyKBaRaiLLJWI/VJxTOT3fwOPprrzUlkHwoWl+sYuSdXHASu\n"
-                     "m4lkBiXHsa5oiXPdrY6hoh5vsF8ASwCHXOwpR9yyvGEaUUMBl2GpJAX/cGVcL4Dy\n"
-                     "Z0pyJMLO4qrIPoX+wd1ZSFSc8JcAC4UtA82HCGTmesgialpwKdoQyt+em94oIM1f\n"
-                     "D6v7zzcRX/zLKKEzpFnU458WBA+JACkde3ohX//0fDCeaLqMzs++FCgwm/HMCszw\n"
-                     "RnINr+K8ENfMYBoeM7a7tnhiae+rkxWmvWz/ABEBAAG0LFRvbWFzIE1sY29jaCAo\n"
-                     "dGVzdCBrZXkpIDx0bWxjb2NoQHJlZGhhdC5jb20+iQE4BBMBAgAiBQJQVwysAhsD\n"
-                     "BgsJCAcDAgYVCAIJCgsEFgIDAQIeAQIXgAAKCRBGr5WKIvLE6fdyB/9OzDczaqGy\n"
-                     "1rzk7Wp2C9S5QatFUFNWt6FIFPITbixT4jrDo/LyUJVWLw4ng7ldg79vmrzhpP8h\n"
-                     "yFVvuvGvSEMn5sgnZ83SEd4vRJ2O8K5RuVs5Kcj7ayLlxPpqbYOYmrmTaLwYTwdv\n"
-                     "0wDnNU9IkkMSK752RQes4J+4XGikd8CNm5lw8cRQ7bcQd8s2rnCoiyGt7PIdl13z\n"
-                     "8hO9KA52iUP06AbbIusbQ1jzsViEny+xQH7SZ53Ga4eRr0mW2iA20Mkp4Ieb+dNo\n"
-                     "47Q8aHUqI9O4HTF/3Fzt7KmNxXCpCOhxTWx0IkqPGoZ0W63Aut/CVh0LXsBF2TUD\n"
-                     "Ym9P/IjRgJLhuQENBFBXDKwBCACvhlMcgjLJ4PtMTtauF1OXVTfODQSHo+qwKt4S\n"
-                     "GyDlTGayQ76pOqYkkzIRqmNYl1ThmcfzpmJ3O+hFQQ7OdguYcfkbfgIMjEJEbKG3\n"
-                     "wsR5pm9zjwStzYHedwkct1nyROgBz70o16FfdiWOguw58jQZOSO/I2S3JpLsLgI8\n"
-                     "KqdIk/0WuoOfzt+KcvL52lX94O2hBpRI0v6lDgSm7KkPGQrVFnSIUR5r73ceageL\n"
-                     "5LmGm1TlEjWHwA9iYIvBcjnE26/l8u58IYQ/sUmn0u4jBcBNc7iqdWvlSLZLlMmi\n"
-                     "qnzDNhUup9neKGxgr4hGAblxiSxXlmOoFv0jEW81b4VximSJABEBAAGJAR8EGAEC\n"
-                     "AAkFAlBXDKwCGwwACgkQRq+ViiLyxOnf6Qf+PIG//12qp3hXZsvB7JQuQ4nUNwp6\n"
-                     "Ufm6W9pFm3DOqnI9H9ZNzGbkoS5WwRp0B1NLfNKipQVORnDs6qve298ReRrmLKnk\n"
-                     "BPZqxFpPqLQ6X83Or2bqKiJS1axonIgqkImFLfxxqKoukvhn328Z2FVlrvkKSMU8\n"
-                     "eHi/iDF/TCHoPE9WtnVSzsNU9i+9j8j//GO+bMC5AGNOxcBKlChFpLYpE/pfITL/\n"
-                     "icS7wB9MrMLNvjlN1EKszQFxJrFVBGTt8hUqRH3CCUFRwbpE1QJ1WAzJ0Vzk5nWR\n"
-                     "rVZQiiLe03B8hC7/qRiB4bya5nbWcwe9ltPFja4/tTe92ivScFfCLyALVQ==\n"
-                     "=G300") != NULL);
+                     "-----BEGIN PGP PUBLIC KEY BLOCK-----\n"
+                     "\n"
+                     "mQENBGQCK4MBCACmfps+HeGv3BnrFmOO5PGPFDgQ0KtmSkfkrw8Sf3dcsfiMS9II\n"
+                     "2AOJNLd8NOgOkGGlyymrrf/FKPWnQHQDKxLgOuZ0FvAIfb+VNTjnuj8TfO94y7n1\n"
+                     "VpCu7oRKOQLfmRd3OQDe0CofNjYeYKn2l/an/x80o3ikoFMEdHcOkdhPkm/Kf5oc\n"
+                     "bJYVvxb81vvtsEOV5/+ybCpJIxXhk1y3DBBhaZGfEYOy9oF5/w2ZmL+mbLQ6KVlK\n"
+                     "euTDlADLv3KAtGALy1E/ZHANChPc372JI7osKT6MhRr1fItY6NCFSgXapDtea0x0\n"
+                     "sZj6LvOuWISZ5n+YoTM+loMgxjFHXEd7nV93ABEBAAG0NXJlcG9zaXRvcnkgc2ln\n"
+                     "bmluZyBrZXkgKHRlc3Qga2V5KSA8bm9vbmVAZXhhbXBsZS5vcmc+iQFOBBMBCgA4\n"
+                     "FiEE9PxbasWGlgI7nb+xl723kGRB7fUFAmQCK4MCGwMFCwkIBwIGFQoJCAsCBBYC\n"
+                     "AwECHgECF4AACgkQl723kGRB7fUC7Af/YSwbvM2xsjK947FOmVfX63qf5v2fRI7Q\n"
+                     "CEil6X8uZw5UXEvqsGDZCqmhYKSKlNnuky392D0/Kp0h3KCJ7KHA9/SCHrnl2PN4\n"
+                     "nenX5xunwJd3mhGOtLR2WSYXLBlG5Dh6bkDsWEaR8OPC8rSNNM9OfuuXMWf0OF91\n"
+                     "WYwleixUrfMbX9gVKozFzGv/yAospsJ0F48Z3RW+XROYLwbk72G6jXR0hkB1zEpN\n"
+                     "gwbpldxQFEagBDNwpvCF8jlwCOLjOQWM3oTx4YUdG4gAEGDKLsJcv4cMTaEUCr0r\n"
+                     "FEIHRcFCox7P4f9UFlIUNLj6zWNP9Nr3Yuqfh4bdYJfWE9kK271NErkBDQRkAiuD\n"
+                     "AQgAxjdpqh4z8wcURkon/bdxLKeI1weKYEdprNrEEHLlk5hV+qQ5dHtUCHBcf2sH\n"
+                     "kAwG4S3s4WAVoNyFP2l1gC5eM6/J/t1K5UgKEsDdCcVQMO1hA+T6breCLGTyS3Ut\n"
+                     "Qes/EZloe+zUjH8covZQwQJFuZp5xVaTVK/7IjYzL/zUK6ySjbXGU4W/iYGV07Je\n"
+                     "1W401uCwc3nosjptXgmc6Nhawn6U+I5tgPgX4L8hI3tla+fsiUpDD+Xlz3m90f8w\n"
+                     "4baHRSajB4b6Llu963JSTUE5tKfmxVVfHbKTe2Y5Nf6coJXfFxy3UuFDTUfK5S/C\n"
+                     "rIwB+ZoahvjfhC6eg7gh4LNnawARAQABiQE2BBgBCgAgFiEE9PxbasWGlgI7nb+x\n"
+                     "l723kGRB7fUFAmQCK4MCGwwACgkQl723kGRB7fV9Dgf9GvTNb36IxIOhyqWFFXZp\n"
+                     "C3NqyyIbRZ6KEXUzLaC88fx2hK1BQkeDASUS0HxccCCdjR1zesk0QfZtGJxVQFw+\n"
+                     "AyLWzMGRLDfMvXYRLzjYowYJ++beVadt/EfPzRHckunW75PLHrDd89Hur92r4ikK\n"
+                     "42GA3ZDPr9yggpnYvsAXt25lDx37HN3SeVds2Gb6wA01Vo6jXVKQGhRgk9K5T8dB\n"
+                     "szn12XdPGxhzo1HXPUFWwSi8SODpG+MkC+IGOrFzPHW5R5kOO7+nbALjzLWSrcfw\n"
+                     "zLiMgTqA0Z2O8QcTGSQ7jYQhSaWguWzhT1LsZ0/9xNGSHyWfYkYtXPAogB50qlvM\n"
+                     "LQ==\n"
+                     "=RI7R\n"
+                     "-----END PGP PUBLIC KEY BLOCK-----\n") != NULL);
 
     // Only one key is in keyring
     ck_assert_ptr_null(lr_gpg_key_get_next(keys));
