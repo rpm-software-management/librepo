@@ -23,7 +23,7 @@ if __name__ == "__main__":
     def endcb(data, status, msg):
         print("EndCb: Download of {} finished with status:".format(data))
         if status == librepo.TRANSFER_SUCCESSFUL:
-            print("Sucessfully")
+            print("Successfully")
         elif status == librepo.TRANSFER_ALREADYEXISTS:
             print("Already exists")
         else:
