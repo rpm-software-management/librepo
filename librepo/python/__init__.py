@@ -400,12 +400,12 @@ Version contants
 
 .. data:: LRO_HTTPAUTHMETHODS
 
-    *Long (bitmask)* Bitmask which tell Librepo which auth metods to use.
+    *Long (bitmask)* Bitmask which tell Librepo which auth methods to use.
     See: :ref:`auth-methods-label`
 
 .. data:: LRO_PROXYAUTHMETHODS
 
-    *Long (bitmask)* Bitmask which tell Librepo which auth metods to use
+    *Long (bitmask)* Bitmask which tell Librepo which auth methods to use
     for proxy authentication.
     See: :ref:`auth-methods-label`
 
