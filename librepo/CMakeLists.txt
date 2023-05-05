@@ -1,4 +1,4 @@
-SET (librepo_SRCS
+LIST(APPEND librepo_SRCS
      checksum.c
      downloader.c
      downloadtarget.c
@@ -20,7 +20,13 @@ SET (librepo_SRCS
      xmlparser.c
      yum.c)
 
-SET(librepo_HEADERS
+IF(USE_GPGME)
+    LIST(APPEND librepo_SRCS gpg_gpgme.c)
+ELSE(USE_GPGME)
+    LIST(APPEND librepo_SRCS gpg_rpm.c)
+ENDIF(USE_GPGME)
+
+LIST(APPEND librepo_HEADERS
     checksum.h
     fastestmirror.h
     gpg.h
@@ -44,10 +50,11 @@ SET(librepo_HEADERS
     downloader.h
     downloadtarget.h)
 
-SET(librepo_internal_HEADERS
+LIST(APPEND librepo_internal_HEADERS
     downloader_internal.h
     downloadtarget_internal.h
     fastestmirror_internal.h
+    gpg_internal.h
     handle_internal.h
     repoconf_internal.h
     result_internal.h
@@ -60,9 +67,14 @@ TARGET_LINK_LIBRARIES(librepo
                         ${LIBXML2_LIBRARIES}
                         ${CURL_LIBRARY}
                         ${LIBCRYPTO_LIBRARIES}
-                        ${GPGME_VANILLA_LIBRARIES}
                         ${GLIB2_LIBRARIES}
                      )
+IF (USE_GPGME)
+    TARGET_LINK_LIBRARIES(librepo ${GPGME_VANILLA_LIBRARIES})
+ELSE(USE_GPGME)
+    TARGET_LINK_LIBRARIES(librepo ${RPM_LIBRARIES})
+ENDIF (USE_GPGME)
+
 IF (WITH_ZCHUNK)
     TARGET_LINK_LIBRARIES(librepo ${ZCHUNKLIB_LIBRARIES})
 ENDIF (WITH_ZCHUNK)
