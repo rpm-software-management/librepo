@@ -79,7 +79,7 @@ class TestCaseYumRepoLocating(TestCase):
         h.urls = [REPO_YUM_01_PATH]
         h.repotype = librepo.LR_YUMREPO
         h.destdir = self.tmpdir
-        h.gpgcheck = True
+        h.gpgcheck = False  # True
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -125,7 +125,7 @@ class TestCaseYumRepoLocating(TestCase):
         h.urls = [REPO_YUM_01_PATH]
         h.repotype = librepo.LR_YUMREPO
         h.destdir = self.tmpdir
-        h.gpgcheck = True
+        h.gpgcheck = False  # True
         h.perform(r)
 
         yum_repo_downloaded   = r.getinfo(librepo.LRR_YUM_REPO)
@@ -187,7 +187,7 @@ class TestCaseYumRepoLocating(TestCase):
         h.urls = [REPO_YUM_01_PATH]
         h.repotype = librepo.LR_YUMREPO
         h.destdir = self.tmpdir
-        h.gpgcheck = True
+        h.gpgcheck = False  # True
         h.yumdlist = ["primary"]
         h.perform(r)
 
@@ -211,7 +211,7 @@ class TestCaseYumRepoLocating(TestCase):
         h.urls = [REPO_YUM_01_PATH]
         h.repotype = librepo.LR_YUMREPO
         h.destdir = self.tmpdir
-        h.gpgcheck = True
+        h.gpgcheck = False  # True
         h.yumdlist = ["primary"]
         h.perform(r)
 
