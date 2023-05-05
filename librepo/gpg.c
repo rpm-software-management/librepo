@@ -392,8 +392,8 @@ lr_gpg_list_keys(gboolean export_keys, const char *home_dir, GError **err)
             g_array_append_val(subkeys, lr_subkey);
             subkey = subkey->next;
         }
-         // All subkeys in the list except the last one are followed by another subkey
-        if (subkeys->len > 0) {
+         // Mark all subkeys in the list except the last one that they are followed by another subkey
+        if (subkeys->len > 1) {
             for (guint i = 0; i < subkeys->len - 1; ++i) {
                 g_array_index(subkeys, LrGpgSubkey, i).has_next = TRUE;
             }
@@ -419,9 +419,11 @@ lr_gpg_list_keys(gboolean export_keys, const char *home_dir, GError **err)
         lr_key.raw_key = NULL;
         g_array_append_val(keys, lr_key);
     }
-    // All keys in the list except the last one are followed by another key
-    for (guint i = 0; i < keys->len - 1; ++i) {
-        g_array_index(keys, LrGpgKey, i).has_next = TRUE;
+    // Mark all keys in the list except the last one that they are followed by another key
+    if (keys->len > 1) {
+        for (guint i = 0; i < keys->len - 1; ++i) {
+            g_array_index(keys, LrGpgKey, i).has_next = TRUE;
+        }
     }
 
     if (gpg_err_code(gpgerr) != GPG_ERR_EOF) {
