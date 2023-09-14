@@ -156,13 +156,43 @@ write_memory_to_file(const char * path, const guint8 * buf, size_t len, GError *
     return ret;
 }
 
+/* Invoke librpmio pgpPrtParams2(), log error and set GError with forwarded
+ * librpmio error, and return pgpPrtParams2() return code. */
+static int
+lr_pgpPrtParams2_with_gerror(const uint8_t *pkts, size_t pktlen, unsigned int pkttype,
+        pgpDigParams *ret, GError **err) {
+    int retval;
+    char *message = NULL;
+
+    retval =
+#ifdef HAVE_PGPPRTPARAMS2
+        pgpPrtParams2(pkts, pktlen, pkttype, ret, &message);
+#else
+        pgpPrtParams(pkts, pktlen, pkttype, ret);
+#endif
+    if (retval == -1) {
+        if (message == NULL) {
+            g_debug("%s: Error during parsing OpenPGP packets", __func__);
+            g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
+                    "Error during parsing OpenPGP packets");
+        } else {
+            g_debug("%s: Error during parsing OpenPGP packets: %s", __func__, message);
+            g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR,
+                    "Error during parsing OpenPGP packets: %s", message);
+        }
+    }
+    /* The message can be set on success. */
+    if (message != NULL)
+        free(message);
+
+    return retval;
+}
+
 // Searches for a key with `keyid` in the OpenPGP packet.
 static gboolean
 search_key_id(const guint8 * keyid, gchar * buf, size_t len, pgpDigParams * dig_params, GError **err) {
     pgpDigParams main_dig_params = NULL;
-    if (pgpPrtParams((const uint8_t *)buf, len, PGPTAG_PUBLIC_KEY, &main_dig_params) == -1) {
-        g_debug("%s: Error: Parsing a OpenPGP packet(s) failed", __func__);
-        g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR, "Parsing a OpenPGP packet(s) failed");
+    if (lr_pgpPrtParams2_with_gerror((const uint8_t *)buf, len, PGPTAG_PUBLIC_KEY, &main_dig_params, err) == -1) {
         return FALSE;
     }
     if (main_dig_params == NULL) {
@@ -268,9 +298,7 @@ import_raw_key_from_memory(const guint8 *key, size_t key_len, const char *home_d
     }
     do {
         pgpDigParams main_dig_params = NULL;
-        if (pgpPrtParams(key, cert_len, PGPTAG_PUBLIC_KEY, &main_dig_params) == -1) {
-            g_debug("%s: Error: Parsing a OpenPGP packet(s) failed", __func__);
-            g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR, "Parsing a OpenPGP packet(s) failed");
+        if (lr_pgpPrtParams2_with_gerror(key, cert_len, PGPTAG_PUBLIC_KEY, &main_dig_params, err) == -1) {
             return FALSE;
         }
         const guint8 * keyid = pgpDigParamsSignID(main_dig_params);
@@ -396,8 +424,7 @@ lr_gpg_list_keys(gboolean export_keys, const char *home_dir, GError **err)
         }
 
         pgpDigParams main_dig_params = NULL;
-        if (pgpPrtParams((const uint8_t *)buf, len, PGPTAG_PUBLIC_KEY, &main_dig_params) == -1) {
-            g_debug("%s: Error: Parsing a OpenPGP packet(s) failed", __func__);
+        if (lr_pgpPrtParams2_with_gerror((const uint8_t *)buf, len, PGPTAG_PUBLIC_KEY, &main_dig_params, NULL) == -1) {
             continue;
         }
 
@@ -518,9 +545,7 @@ check_signature(const gchar * sig_buf, ssize_t sig_buf_len, const gchar * data, 
     }
 
     pgpDigParams signature_dig_params = NULL;
-    if (pgpPrtParams(pkts, pkts_len, PGPTAG_SIGNATURE, &signature_dig_params) == -1) {
-        g_debug("%s: Error during parsing OpenPGP packet(s)", __func__);
-        g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR, "%s: Error during parsing OpenPGP packet(s)", __func__);
+    if (lr_pgpPrtParams2_with_gerror(pkts, pkts_len, PGPTAG_SIGNATURE, &signature_dig_params, err) == -1) {
         free(pkts);
         return FALSE;
     }
@@ -549,16 +574,29 @@ check_signature(const gchar * sig_buf, ssize_t sig_buf_len, const gchar * data, 
 
         const unsigned int hash_algo = pgpDigParamsAlgo(signature_dig_params, PGPVAL_HASHALGO);
         DIGEST_CTX hashctx = rpmDigestInit(hash_algo, RPMDIGEST_NONE);
+        char *message = NULL;
         rpmDigestUpdate(hashctx, data, data_len);
-        rpmRC ret_verify = pgpVerifySignature(signing_key_dig_params, signature_dig_params, hashctx);
+        rpmRC ret_verify =
+#ifdef HAVE_PGPVERIFYSIGNATURE2
+            pgpVerifySignature2(signing_key_dig_params, signature_dig_params, hashctx, &message);
+#else
+            pgpVerifySignature(signing_key_dig_params, signature_dig_params, hashctx);
+#endif
         rpmDigestFinal(hashctx, NULL, NULL, 0);
         pgpDigParamsFree(signing_key_dig_params);
 
         ret = ret_verify == RPMRC_OK || ret_verify == RPMRC_NOTTRUSTED;
         if (!ret) {
-            g_debug("%s: Bad GPG signature", __func__);
-            g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad GPG signature");
+            if (message == NULL) {
+                g_debug("%s: Bad PGP signature", __func__);
+                g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad PGP signature");
+            } else {
+                g_debug("%s: Bad PGP signature: %s", __func__, message);
+                g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad PGP signature: %s", message);
+            }
         }
+        if (message != NULL)
+            free(message);
     } else {
         g_debug("%s: Signing key not found", __func__);
         g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Signing key not found");

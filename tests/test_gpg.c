@@ -48,8 +48,10 @@ START_TEST(test_gpg_check_signature)
                                  data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    ck_assert(ret);
-    ck_assert_ptr_null(tmp_err);
+    ck_assert_msg(ret, "Checking valid key and data from file failed with \"%s\"",
+            (tmp_err && tmp_err->message) ? tmp_err->message : "");
+    ck_assert_msg(NULL == tmp_err, "Checking valid key and data from file passed but set error \"%s\"",
+            (tmp_err && tmp_err->message) ? tmp_err->message : "");
 
     // Bad signature signed with unknown key
     ret = lr_gpg_check_signature(_signature_path,
@@ -86,8 +88,10 @@ START_TEST(test_gpg_check_signature)
                                  _data_path,
                                  tmp_home_path,
                                  &tmp_err);
-    ck_assert(ret);
-    ck_assert_ptr_null(tmp_err);
+    ck_assert_msg(ret, "Checking valid key and data from memory failed with \"%s\"",
+            (tmp_err && tmp_err->message) ? tmp_err->message : "");
+    ck_assert_msg(NULL == tmp_err, "Checking valid key and data from memory passed but set error \"%s\"",
+            (tmp_err && tmp_err->message) ? tmp_err->message : "");
 
     // Bad signature signed with known key
     ret = lr_gpg_check_signature(_signature_path,
