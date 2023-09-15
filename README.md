@@ -13,11 +13,18 @@ Fedora/Ubuntu name
 * cmake (http://www.cmake.org/) - cmake/cmake
 * gcc (http://gcc.gnu.org/) - gcc/gcc
 * glib2 (http://developer.gnome.org/glib/) - glib2-devel/libglib2.0-dev
-* gpgme (http://www.gnupg.org/) - gpgme-devel/libgpgme11-dev
 * libattr (https://savannah.nongnu.org/projects/attr) - libattr-devel/libattr1-dev
 * libcurl (http://curl.haxx.se/libcurl/) - libcurl-devel/libcurl4-openssl-dev
 * openssl (http://www.openssl.org/) - openssl-devel/libssl-dev
 * python (http://python.org/) - python3-devel/libpython3-dev
+* One of the libraries:
+    * gpgme (http://www.gnupg.org/) - gpgme-devel/libgpgme11-dev - default
+      option
+    * rpm (https://rpm.org/) - rpm-devel/librpm-dev - choose with
+      -DUSE\_GPGME=OFF
+        * Built with Sequoia
+        * Built with an internal OpenPGP parser - buggy
+          (https://github.com/rpm-software-management/rpm/issues/2512)
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - python3-pygpgme/python3-gpgme
 * **Test requires:** python3-pyxattr (https://github.com/xattr/xattr) - python3-pyxattr/python3-pyxattr
 
