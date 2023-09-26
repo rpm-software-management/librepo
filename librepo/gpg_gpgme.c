@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <gpgme.h>
+#include <stdint.h>
 #include <unistd.h>
 
 #include "gpg.h"
@@ -33,9 +34,9 @@
 #include "util.h"
 
 /*
- * Creates the '/run/user/$UID' directory if it doesn't exist. If this
+ * Creates the '/run/gnupg/user/$UID' directory if it doesn't exist. If this
  * directory exists, gpgagent will create its sockets under
- * '/run/user/$UID/gnupg'.
+ * '/run/gnupg/user/$UID/gnupg'.
  *
  * If this directory doesn't exist, gpgagent will create its sockets in gpg
  * home directory, which is under '/var/cache/yum/metadata/' and this was
@@ -44,6 +45,11 @@
  * Previous solution was to send the agent a "KILLAGENT" message, but that
  * would cause a race condition with calling gpgme_release(), see [2], [3].
  *
+ * Another previous solution used /run/user/$UID which showed problematic when
+ * this library was used out of an systemd-logind session. Then /run/user/$UID,
+ * normally maintained by systemd, was assigned a SELinux label unexpected by
+ * systemd causing errors on a user logout [4].
+ *
  * Since the agent doesn't clean up its sockets properly, by creating this
  * directory we make sure they are in a place that is not causing trouble with
  * container images.
@@ -51,15 +57,33 @@
  * [1] https://bugzilla.redhat.com/show_bug.cgi?id=1650266
  * [2] https://bugzilla.redhat.com/show_bug.cgi?id=1769831
  * [3] https://github.com/rpm-software-management/microdnf/issues/50
+ * [4] https://issues.redhat.com/browse/RHEL-6421
  */
 static void
 lr_gpg_ensure_socket_dir_exists()
 {
+#ifdef DUSE_RUN_GNUPG_USER_SOCKET
+    const char *templates[] = { "/run/gnupg", "/run/gnupg/user", "/run/gnupg/user/%ju", NULL };
+    const mode_t modes[] = { 0755, 0755, 0700, 0 };
+#else
+    const char *templates[] = { "/run/user/%ju", NULL };
+    const mode_t modes[] = { 0700, 0 };
+#endif
+    const uid_t uid = getuid();
     char dirname[32];
-    snprintf(dirname, sizeof(dirname), "/run/user/%u", getuid());
-    int res = mkdir(dirname, 0700);
-    if (res != 0 && errno != EEXIST) {
-        g_debug("Failed to create \"%s\": %d - %s\n", dirname, errno, strerror(errno));
+    int res;
+
+    for (int i = 0; templates[i] != NULL; i++) {
+        res = snprintf(dirname, sizeof(dirname), templates[i], (uintmax_t)uid);
+        if (res >= sizeof(dirname)) {
+            g_debug("Failed to format a GnuPG agent socket path because of a small buffer");
+            return;
+        }
+        res = mkdir(dirname, modes[i]);
+        if (res != 0 && errno != EEXIST) {
+            g_debug("Failed to create \"%s\": %d - %s\n", dirname, errno, strerror(errno));
+            return;
+        }
     }
 }
 
