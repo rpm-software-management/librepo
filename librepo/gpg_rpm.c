@@ -335,7 +335,13 @@ import_raw_key_from_memory(const guint8 *key, size_t key_len, const char *home_d
 gboolean
 lr_gpg_import_key_from_memory(const char *key, size_t key_len, const char *home_dir, GError **err)
 {
-    const char *block_begin = search_line_starts_with(key, key_len, BEGIN_OPENPGP_PUBKEY_BLOCK);
+    const char *block_begin = search_line_starts_with(key, key_len, BEGIN_OPENPGP_BLOCK);
+    if (!block_begin) {
+        // ASCII Armored OpenPGP block not found. Is binary? Try it.
+        return import_raw_key_from_memory((const guint8 *)key, key_len, home_dir, err);
+    }
+
+    block_begin = search_line_starts_with(key, key_len, BEGIN_OPENPGP_PUBKEY_BLOCK);
     if (block_begin == NULL) {
         g_debug("%s: Error: Public key not found", __func__);
         g_set_error(err, LR_GPG_ERROR, LRE_GPGERROR, "Public key not found");
@@ -538,7 +544,7 @@ check_signature(const gchar * sig_buf, ssize_t sig_buf_len, const gchar * data, 
             return FALSE;
         }
     } else {
-        // Armored OpenPGP block not found. Is unarmored? Try it.
+        // ASCII Armored OpenPGP block not found. Is binary? Try it.
         pkts_len = sig_buf_len;
         pkts = malloc(sig_buf_len);
         memcpy(pkts, sig_buf, sig_buf_len);
