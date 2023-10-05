@@ -16,10 +16,12 @@ SUBKEY_KEYID=`gpg -k --with-colons | grep sub | cut -d: -f5`
 SUBKEY_FP=`gpg -k --with-colons | grep fpr | tail -n1 | cut -d: -f10`
 SUBKEY_CREATION=`gpg -k --with-colons | grep sub | cut -d: -f6`
 
-gpg --batch --passphrase '' --armor --export-secret-key "$USERID" > repomd.xml.key.secret
-gpg --batch --armor --export "$USERID" > repomd.xml.key
+gpg --batch --passphrase '' --armor --export-secret-key "$USERID" >repomd.xml.private-key.asc
+gpg --batch --armor --export "$USERID" >repomd.xml.key.asc
+gpg --batch --dearmor <repomd.xml.key.asc >repomd.xml.key
 mv repomd.xml.asc repomd.xml.asc~
 gpg --batch --armor --sign --detach -o repomd.xml.asc repomd.xml
+gpg --batch --dearmor <repomd.xml.asc >repomd.xml.sig 
 
 echo "Adjust test_gpg.c with these values:"
 echo
