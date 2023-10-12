@@ -8,6 +8,8 @@
 %bcond_without zchunk
 %endif
 
+%bcond_without selinux
+
 %global dnf_conflict 2.8.8
 
 Name:           librepo
@@ -29,6 +31,9 @@ BuildRequires:  libattr-devel
 BuildRequires:  libcurl-devel >= %{libcurl_version}
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libcrypto)
+%if %{with selinux}
+BuildRequires:  pkgconfig(libselinux)
+%endif
 BuildRequires:  pkgconfig(openssl)
 %if %{with zchunk}
 BuildRequires:  pkgconfig(zck) >= 0.9.11
@@ -66,7 +71,9 @@ Python 3 bindings for the librepo library.
 %autosetup -p1
 
 %build
-%cmake %{!?with_zchunk:-DWITH_ZCHUNK=OFF}
+%cmake \
+    %{!?with_zchunk:-DWITH_ZCHUNK=OFF} \
+    -DENABLE_SELINUX=%{?with_selinux:ON}%{!?with_selinux:OFF}
 %cmake_build
 
 %check
