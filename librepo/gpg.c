@@ -28,6 +28,11 @@
 #include <gpgme.h>
 #include <unistd.h>
 
+#if ENABLE_SELINUX
+#include <selinux/selinux.h>
+#include <selinux/label.h>
+#endif
+
 #include "rcodes.h"
 #include "util.h"
 #include "gpg.h"
@@ -44,6 +49,14 @@
  * Previous solution was to send the agent a "KILLAGENT" message, but that
  * would cause a race condition with calling gpgme_release(), see [2], [3].
  *
+ * Current solution with precreating /run/user/$UID showed problematic when
+ * this library was used out of an systemd-logind session. Then
+ * /run/user/$UID, normally maintained by systemd, was assigned a SELinux
+ * label unexpected by systemd causing errors on a user logout [4].
+ *
+ * We remedy it by choosing the label according to a default file context
+ * policy (ENABLE_SELINUX macro).
+ *
  * Since the agent doesn't clean up its sockets properly, by creating this
  * directory we make sure they are in a place that is not causing trouble with
  * container images.
@@ -51,14 +64,65 @@
  * [1] https://bugzilla.redhat.com/show_bug.cgi?id=1650266
  * [2] https://bugzilla.redhat.com/show_bug.cgi?id=1769831
  * [3] https://github.com/rpm-software-management/microdnf/issues/50
+ * [4] https://issues.redhat.com/browse/RHEL-10720
  */
 void ensure_socket_dir_exists() {
     char dirname[32];
+#if ENABLE_SELINUX
+    char *old_default_context = NULL;
+    int old_default_context_was_retrieved = 0;
+    struct selabel_handle *labeling_handle = NULL;
+
+    /* A purpose of this piece of code is to deal with applications whose
+     * security policy overrides a file context for temporary files but don't
+     * know that librepo executes GnuPG which expects a default file context. */
+    if (0 == getfscreatecon(&old_default_context)) {
+        old_default_context_was_retrieved = 1;
+    } else {
+        g_debug("Failed to retrieve a default SELinux context");
+    }
+    labeling_handle = selabel_open(SELABEL_CTX_FILE, NULL, 0);
+    if (labeling_handle == NULL) {
+        g_debug("Failed to open a SELinux labeling handle: %s", strerror(errno));
+    }
+#endif
+
     snprintf(dirname, sizeof(dirname), "/run/user/%u", getuid());
+
+#if ENABLE_SELINUX
+    if (labeling_handle != NULL) {
+        char *new_default_context = NULL;
+        if (selabel_lookup(labeling_handle, &new_default_context, dirname, 0700)) {
+            /* Here we could hard-code "system_u:object_r:user_tmp_t:s0", but
+             * that value should be really defined in default file context
+             * SELinux policy. Only log that the policy is incomplete. */
+            g_debug("Failed to look up a default SELinux label for \"%s\"", dirname);
+        } else {
+            if (setfscreatecon(new_default_context)) {
+                g_debug("Failed to set default SELinux context to \"%s\"",
+                        new_default_context);
+            }
+            freecon(new_default_context);
+        }
+    }
+#endif
+
     int res = mkdir(dirname, 0700);
     if (res != 0 && errno != EEXIST) {
         g_debug("Failed to create \"%s\": %d - %s\n", dirname, errno, strerror(errno));
     }
+
+#if ENABLE_SELINUX
+    if (labeling_handle != NULL) {
+        selabel_close(labeling_handle);
+    }
+    if (old_default_context_was_retrieved) {
+        if (setfscreatecon(old_default_context)) {
+            g_debug("Failed to restore a default SELinux context");
+         }
+     }
+    freecon(old_default_context);
+#endif
 }
 
 gboolean
