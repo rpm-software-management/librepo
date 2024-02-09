@@ -148,8 +148,8 @@ typedef struct {
         Current protocol */
     CURL *curl_handle; /*!<
         Used curl handle or NULL */
-    FILE *f; /*!<
-        fdopened file descriptor from LrDownloadTarget and used
+    int fd; /*!<
+        opened file descriptor from LrDownloadTarget and used
         in curl_handle. */
     char errorbuffer[CURL_ERROR_SIZE]; /*!<
         Error buffer used in curl handle */
@@ -280,7 +280,7 @@ typedef struct {
  *       | LrDownloadTarget *target  -----------/   | int fd                   |
  *       | LrMirror *mirror          --------/      | LrChecksumType checks..  |
  *       | CURL *curl_handle          |-+           | char *checksum           |
- *       | FILE *f                    |             | int resume               |
+ *       | int fd                     |             | int resume               |
  *       | GSList *tried_mirrors      |             | LrProgressCb progresscb  |
  *       | gint64 original_offset     |             | void *cbdata             |
  *       | GSlist *lrmirrors         ---\           | GStringChunk *chunk      |
@@ -619,7 +619,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if (range_start <= 0 && range_end <= 0) {
         // Write everything curl give to you
         target->writecb_recieved += all;
-        return fwrite(ptr, size, nmemb, target->f);
+        return write(target->fd, ptr, all);
     }
 
     /* Deal with situation when user wants only specific byte range of the
@@ -684,7 +684,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     }
 
     assert(nmemb > 0);
-    cur_written = fwrite(ptr, size, nmemb, target->f);
+    cur_written = write(target->fd, ptr, size * nmemb);
     if (cur_written != nmemb) {
         g_warning("Error while writing file: %s", g_strerror(errno));
         return 0; // There was an error
@@ -1033,9 +1033,9 @@ remove_librepo_xattr(LrDownloadTarget * target)
 gboolean
 lr_zck_clear_header(LrTarget *target, GError **err)
 {
-    assert(target && target->f && target->target && target->target->path);
+    assert(target && target->fd && target->target && target->target->path);
 
-    int fd = fileno(target->f);
+    int fd = target->fd;
     lseek(fd, 0, SEEK_END);
     if(ftruncate(fd, 0) < 0) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
@@ -1051,7 +1051,7 @@ find_local_zck_header(LrTarget *target, GError **err)
 {
     zckCtx *zck = NULL;
     gboolean found = FALSE;
-    int fd = fileno(target->f);
+    int fd = target->fd;
 
     if(target->target->handle->cachedir) {
         g_debug("%s: Cache directory: %s\n", __func__,
@@ -1129,7 +1129,7 @@ static gboolean
 prep_zck_header(LrTarget *target, GError **err)
 {
     zckCtx *zck = NULL;
-    int fd = fileno(target->f);
+    int fd = target->fd;
     GError *tmp_err = NULL;
 
     if(lr_zck_valid_header(target->target, target->target->path, fd,
@@ -1187,7 +1187,7 @@ find_local_zck_chunks(LrTarget *target, GError **err)
     assert(target && target->target && target->target->zck_dl);
 
     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
-    int fd = fileno(target->f);
+    int fd = target->fd;
     if(zck && fd != zck_get_fd(zck) && !zck_set_fd(zck, fd)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to set zchunk file descriptor for %s: %s",
@@ -1255,7 +1255,7 @@ static gboolean
 prep_zck_body(LrTarget *target, GError **err)
 {
     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
-    int fd = fileno(target->f);
+    int fd = target->fd;
     if(zck && fd != zck_get_fd(zck) && !zck_set_fd(zck, fd)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to set zchunk file descriptor for %s: %s",
@@ -1295,7 +1295,7 @@ static gboolean
 check_zck(LrTarget *target, GError **err)
 {
     assert(!err || *err == NULL);
-    assert(target && target->f && target->target);
+    assert(target && target->fd && target->target);
 
     if(target->mirror->max_ranges == 0 || target->mirror->mirror->protocol != LR_PROTOCOL_HTTP) {
         target->zck_state = LR_ZCK_DL_BODY;
@@ -1391,11 +1391,10 @@ check_zck(LrTarget *target, GError **err)
 
 /** Open the file to write to
  */
-static FILE*
+static int
 open_target_file(LrTarget *target, GError **err)
 {
     int fd;
-    FILE *f;
 
     if (target->target->fd != -1) {
         // Use supplied filedescriptor
@@ -1404,7 +1403,7 @@ open_target_file(LrTarget *target, GError **err)
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "dup(%d) failed: %s",
                         target->target->fd, g_strerror(errno));
-           return NULL;
+           return -1;
         }
     } else {
         // Use supplied filename
@@ -1417,20 +1416,11 @@ open_target_file(LrTarget *target, GError **err)
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "Cannot open %s: %s",
                         target->target->fn, g_strerror(errno));
-            return NULL;
+            return -1;
         }
     }
 
-    f = fdopen(fd, "w+b");
-    if (!f) {
-        close(fd);
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                    "fdopen(%d) failed: %s",
-                    fd, g_strerror(errno));
-        return NULL;
-    }
-
-    return f;
+    return fd;
 }
 
 /** Prepare next transfer
@@ -1511,8 +1501,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     }
 
     // Prepare FILE
-    target->f = open_target_file(target, err);
-    if (!target->f)
+    target->fd = open_target_file(target, err);
+    if (target->fd < 0)
         goto fail;
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
@@ -1538,15 +1528,15 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
             target->curl_handle = NULL;
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
-            fclose(target->f);
-            target->f = NULL;
+            close(target->fd);
+            target->fd = 0;
             lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
             return prepare_next_transfer(dd, candidatefound, err);
         }
     }
     # endif /* WITH_ZCHUNK */
 
-    int fd = fileno(target->f);
+    int fd = target->fd;
 
     // Allow resume only for files that were originally being
     // downloaded by librepo
@@ -1573,8 +1563,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
         if (target->original_offset == -1) {
             // Determine offset
-            fseek(target->f, 0L, SEEK_END);
-            gint64 determined_offset = ftell(target->f);
+            gint64 determined_offset = lseek(target->fd, 0L, SEEK_END);
             if (determined_offset == -1) {
                 // An error while determining offset =>
                 // Download the whole file again
@@ -1689,9 +1678,9 @@ fail:
         curl_easy_cleanup(target->curl_handle);
         target->curl_handle = NULL;
     }
-    if (target->f != NULL) {
-        fclose(target->f);
-        target->f = NULL;
+    if (target->fd != 0) {
+        close(target->fd);
+        target->fd = 0;
     }
 
     return FALSE;
@@ -2262,8 +2251,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         // Checksum checking
         //
-        fflush(target->f);
-        fd = fileno(target->f);
+        fd = target->fd;
 
         // Preserve timestamp of downloaded file if requested
         if (target->target->handle && target->target->handle->preservetime) {
@@ -2353,8 +2341,8 @@ transfer_error:
         target->curl_handle = NULL;
         g_free(target->headercb_interrupt_reason);
         target->headercb_interrupt_reason = NULL;
-        fclose(target->f);
-        target->f = NULL;
+        close(target->fd);
+        target->fd = 0;
         if (target->curl_rqheaders) {
             curl_slist_free_all(target->curl_rqheaders);
             target->curl_rqheaders = NULL;
@@ -2756,8 +2744,8 @@ lr_download_cleanup:
             curl_multi_remove_handle(dd.multi_handle, target->curl_handle);
             curl_easy_cleanup(target->curl_handle);
             target->curl_handle = NULL;
-            fclose(target->f);
-            target->f = NULL;
+            close(target->fd);
+            target->fd = 0;
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
 
@@ -2803,7 +2791,7 @@ lr_download_cleanup:
     for (GSList *elem = dd.targets; elem; elem = g_slist_next(elem)) {
         LrTarget *target = elem->data;
         assert(target->curl_handle == NULL);
-        assert(target->f == NULL);
+        assert(target->fd == 0);
 
         // Remove file created for the target if download was
         // unsuccessful and the file doesn't exists before or
