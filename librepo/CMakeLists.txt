@@ -30,7 +30,7 @@ LIST(APPEND librepo_HEADERS
     checksum.h
     fastestmirror.h
     gpg.h
-    handle.h
+    ${CMAKE_CURRENT_BINARY_DIR}/handle.h
     librepo.h
     metadata_downloader.h
     metalink.h
@@ -43,12 +43,12 @@ LIST(APPEND librepo_HEADERS
     result.h
     types.h
     url_substitution.h
-    util.h
+    ${CMAKE_CURRENT_BINARY_DIR}/util.h
     version.h
     xmlparser.h
     yum.h
     downloader.h
-    downloadtarget.h)
+    ${CMAKE_CURRENT_BINARY_DIR}/downloadtarget.h)
 
 LIST(APPEND librepo_internal_HEADERS
     downloader_internal.h

@@ -23,9 +23,9 @@
 
 #include <glib.h>
 
-#ifdef WITH_ZCHUNK
+#if @LIBREPO_ZCHUNK_ENABLED@
 #include <zck.h>
-#endif /* WITH_ZCHUNK */
+#endif /* @LIBREPO_ZCHUNK_ENABLED@ */
 
 #include <librepo/handle.h>
 #include <librepo/rcodes.h>
@@ -150,7 +150,7 @@ typedef struct {
     char *range; /*!<
         Range string to download, overrides byterangestart and end */
 
-    #ifdef WITH_ZCHUNK
+    #if @LIBREPO_ZCHUNK_ENABLED@
     zckDL *zck_dl; /*!<
         Zchunk download context */
 
@@ -162,7 +162,7 @@ typedef struct {
 
     double downloaded; /*!<
         Amount already downloaded in zchunk file */
-    #endif /* WITH_ZCHUNK */
+    #endif /* @LIBREPO_ZCHUNK_ENABLED@ */
 
 } LrDownloadTarget;
 
