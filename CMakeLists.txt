@@ -70,9 +70,10 @@ IF (USE_RUN_GNUPG_USER_SOCKET)
 ENDIF (USE_RUN_GNUPG_USER_SOCKET)
 
 IF (WITH_ZCHUNK)
-PKG_CHECK_MODULES(ZCHUNKLIB zck>=0.9.11 REQUIRED)
-SET (CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -DWITH_ZCHUNK")
-SET (CMAKE_C_FLAGS_DEBUG    "${CMAKE_C_FLAGS_DEBUG} -DWITH_ZCHUNK")
+    PKG_CHECK_MODULES(ZCHUNKLIB zck>=0.9.11 REQUIRED)
+    SET (LIBREPO_ZCHUNK_ENABLED "1")
+ELSE (WITH_ZCHUNK)
+    SET (LIBREPO_ZCHUNK_ENABLED "0")
 ENDIF (WITH_ZCHUNK)
 
 INCLUDE_DIRECTORIES(${GLIB2_INCLUDE_DIRS})
@@ -91,6 +92,12 @@ IF (NOT CURL_FOUND)
     MESSAGE(FATAL_ERROR "No CURL library installed")
 ENDIF (NOT CURL_FOUND)
 
+# Generate header files with the configured ABI (e.g. with/without zchunk).
+
+configure_file("librepo/downloadtarget.h.in" "librepo/downloadtarget.h" @ONLY)
+configure_file("librepo/handle.h.in" "librepo/handle.h" @ONLY)
+configure_file("librepo/util.h.in" "librepo/util.h" @ONLY)
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/librepo")
 
 # Add include dirs
 
