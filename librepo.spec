@@ -66,6 +66,9 @@ metadata.
 %package devel
 Summary:        Repodata downloading library
 Requires:       %{name}%{?_isa} = %{version}-%{release}
+%if %{with zchunk}
+Requires:       zchunk-devel%{?_isa}
+%endif
 
 %description devel
 Development files for librepo.

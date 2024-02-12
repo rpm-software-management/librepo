@@ -38,11 +38,11 @@ G_BEGIN_DECLS
  */
 typedef struct _LrHandle LrHandle;
 
-#ifdef WITH_ZCHUNK
+#if @LIBREPO_ZCHUNK_ENABLED@
 /** Define LRO_SUPPORTS_CACHEDIR so clients can check for this feature at build
  * time */
 #define LRO_SUPPORTS_CACHEDIR
-#endif /* WITH_ZCHUNK */
+#endif /* @LIBREPO_ZCHUNK_ENABLED@ */
 
 /** LRO_FASTESTMIRRORMAXAGE default value */
 #define LRO_FASTESTMIRRORMAXAGE_DEFAULT     2592000L // 30 days
