@@ -174,7 +174,7 @@ lr_xml_parser_generic(XmlParser *parser,
         }
 
         if (xmlParseChunk(ctxt, buf, len, len == 0)) {
-            xmlErrorPtr error = xmlCtxtGetLastError(ctxt);
+            const xmlError *error = xmlCtxtGetLastError(ctxt);
             ret = FALSE;
 
             g_debug("%s: Parse error at line: %d (%s)",
