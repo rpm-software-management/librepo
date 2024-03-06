@@ -74,7 +74,7 @@ typedef enum {
     LR_AUTH_NTLM        = (1<<3),  /*!< HTTP NTLM authentication */
     LR_AUTH_DIGEST_IE   = (1<<4),  /*!< HTTP Digest authentication with an IE flavor */
     LR_AUTH_NTLM_WB     = (1<<5),  /*!< NTLM delegating to winbind helper */
-    LR_AUTH_ONLY        = (1<<31), /*!< This is a meta symbol. OR this value
+    LR_AUTH_ONLY        = ((int)(1u<<31)), /*!< This is a meta symbol. OR this value
                                         together with a single specific auth
                                         value to force libcurl to probe for
                                         un-restricted auth and if not, only
