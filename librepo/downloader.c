@@ -379,7 +379,7 @@ lr_prepare_lrmirrors(GSList *list, LrTarget *target)
     GSList *lrmirrors = NULL;
 
     if (handle && handle->internal_mirrorlist) {
-        g_debug("%s: Preparing internal mirror list for handle id: %p", __func__, handle);
+        g_debug("%s: Preparing internal mirror list for handle id: %p", __func__, (void*)handle);
         for (GSList *elem = handle->internal_mirrorlist;
              elem;
              elem = g_slist_next(elem))
@@ -2189,7 +2189,7 @@ sort_mirrors(GSList *mirrors, LrMirror *mirror, gboolean success, gboolean serio
 exit:
     if (g_getenv("LIBREPO_DEBUG_ADAPTIVEMIRRORSORTING")) {
         // Debug
-        g_debug("%s: Updated order of mirrors (for %p):", __func__, mirrors);
+        g_debug("%s: Updated order of mirrors (for %p):", __func__, (void*)mirrors);
         for (GSList *elem = mirrors; elem; elem = g_slist_next(elem)) {
             LrMirror *m = elem->data;
             g_debug(" %s (s: %d f: %d)", m->mirror->url,
