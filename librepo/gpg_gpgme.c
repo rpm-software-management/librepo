@@ -144,6 +144,7 @@ exit:
     }
     freecon(old_default_context);
 #endif
+    return;
 }
 
 static gpgme_ctx_t
