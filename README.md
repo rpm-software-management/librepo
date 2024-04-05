@@ -25,6 +25,11 @@ Fedora/Ubuntu name
         * Built with Sequoia
         * Built with an internal OpenPGP parser - buggy
           (https://github.com/rpm-software-management/rpm/issues/2512)
+* Optional dependencies:
+    * zchunk (https://github.com/zchunk/zchunk) - zchunk-devel/libzck-dev - disable
+      with -DWITH\_ZCHUNK=OFF
+        * If you build librepo with zchunk support, your application might
+          transitively include zchunk headers.
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - python3-pygpgme/python3-gpgme
 * **Test requires:** python3-pyxattr (https://github.com/xattr/xattr) - python3-pyxattr/python3-pyxattr
 
