@@ -102,7 +102,6 @@ START_TEST(test_cached_checksum_matches)
     struct stat st;
     char buf[256];
     GError *tmp_err = NULL;
-    gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
     gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
     gchar *mtime_str = NULL;
 
@@ -113,7 +112,7 @@ START_TEST(test_cached_checksum_matches)
     fclose(f);
 
     // Assert no cached checksum exists
-    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf)-1);
     ck_assert(attr_ret == -1);  // Cached timestamp should not exists
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
     ck_assert(attr_ret == -1);  // Cached checksum should not exists
@@ -155,7 +154,7 @@ START_TEST(test_cached_checksum_matches)
     timestamp *= 1000000000; //convert sec timestamp to nanosec timestamp
     timestamp += st.st_mtim.tv_nsec;
     mtime_str = g_strdup_printf("%lli", timestamp);
-    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf)-1);
     ck_assert(attr_ret != -1);
     buf[attr_ret] = 0;
     ck_assert_str_eq(buf, mtime_str);
@@ -176,7 +175,6 @@ START_TEST(test_cached_checksum_matches)
 
 exit_label:
     lr_free(filename);
-    lr_free(timestamp_key);
     lr_free(checksum_key);
     lr_free(mtime_str);
 }
@@ -192,7 +190,6 @@ START_TEST(test_cached_checksum_value)
     static char *expected = "d78931fcf2660108eec0d6674ecb4e02401b5256a6b5ee82527766ef6d198c67";
     char buf[256];
     GError *tmp_err = NULL;
-    gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
     gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
     gchar *mtime_str = NULL;
     gchar *calculated = NULL;
@@ -204,7 +201,7 @@ START_TEST(test_cached_checksum_value)
     fclose(f);
 
     // Assert no cached checksum exists
-    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf)-1);
     ck_assert(attr_ret == -1);  // Cached timestamp should not exists
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
     ck_assert(attr_ret == -1);  // Cached checksum should not exists
@@ -229,14 +226,13 @@ START_TEST(test_cached_checksum_value)
     // Assert no cached checksum exists
     // This assumes issue #235 is unresolved. Once it is, this code
     // should fail and the test will need updated.
-    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf)-1);
+    attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf)-1);
     ck_assert(attr_ret == -1);  // Cached timestamp should not exists
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf)-1);
     ck_assert(attr_ret == -1);  // Cached checksum should not exists
 
     lr_free(calculated);
     g_free(filename);
-    g_free(timestamp_key);
     g_free(checksum_key);
     lr_free(mtime_str);
 }
@@ -249,7 +245,6 @@ START_TEST(test_cached_checksum_clear)
     ssize_t attr_ret;
     char *filename;
     char buf[256];
-    gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
     gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, "sha256", NULL);
     const char *other_key = "user.Other.Attribute";
     const char *value = "some value";
@@ -262,7 +257,7 @@ START_TEST(test_cached_checksum_clear)
     // set extended attributes
     fd = open(filename, O_RDONLY);
     ck_assert_int_ge(fd, 0);
-    attr_ret = FSETXATTR(fd, timestamp_key, value, strlen(value), 0);
+    attr_ret = FSETXATTR(fd, XATTR_CHKSUM_MTIME, value, strlen(value), 0);
     if (attr_ret == -1) {
         if (errno == ENOTSUP) {
             goto cleanup;
@@ -275,7 +270,7 @@ START_TEST(test_cached_checksum_clear)
     ck_assert(attr_ret != -1);
 
     // verify that xattrs are set
-    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf));
+    attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf));
     ck_assert(attr_ret != -1);
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf));
     ck_assert(attr_ret != -1);
@@ -285,7 +280,7 @@ START_TEST(test_cached_checksum_clear)
     lr_checksum_clear_cache(fd);
 
     // verify that checksum xattrs are removed
-    attr_ret = GETXATTR(filename, timestamp_key, &buf, sizeof(buf));
+    attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf));
     ck_assert(attr_ret == -1);
     attr_ret = GETXATTR(filename, checksum_key, &buf, sizeof(buf));
     ck_assert(attr_ret == -1);
@@ -295,7 +290,6 @@ START_TEST(test_cached_checksum_clear)
 cleanup:
     close(fd);
     g_free(filename);
-    g_free(timestamp_key);
     g_free(checksum_key);
 }
 END_TEST

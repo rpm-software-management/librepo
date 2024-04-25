@@ -229,19 +229,18 @@ lr_checksum_fd_compare(LrChecksumType type,
 
     _cleanup_free_ gchar *timestamp_str = g_strdup_printf("%lli", timestamp);
     const char *type_str = lr_checksum_type_to_str(type);
-    _cleanup_free_ gchar *timestamp_key = g_strconcat(XATTR_CHKSUM_PREFIX, "mtime", NULL);
     _cleanup_free_ gchar *checksum_key = g_strconcat(XATTR_CHKSUM_PREFIX, type_str, NULL);
 
     if (caching && timestamp != -1) {
         // Load cached checksum if enabled and used
         char buf[256];
         ssize_t attr_size;
-        attr_size = FGETXATTR(fd, timestamp_key, &buf, sizeof(buf)-1);
+        attr_size = FGETXATTR(fd, XATTR_CHKSUM_MTIME, &buf, sizeof(buf)-1);
         if (attr_size != -1) {
             buf[attr_size] = 0;
             // check that mtime stored in xattr is the same as timestamp
             if (strcmp(timestamp_str, buf) == 0) {
-                g_debug("%s: Using mtime cached in xattr: [%s] %s", __func__, timestamp_key, buf);
+                g_debug("%s: Using mtime cached in xattr: [%s] %s", __func__, XATTR_CHKSUM_MTIME, buf);
                 attr_size = FGETXATTR(fd, checksum_key, &buf, sizeof(buf)-1);
                 if (attr_size != -1) {
                     buf[attr_size] = 0;
@@ -279,7 +278,7 @@ lr_checksum_fd_compare(LrChecksumType type,
 
     if (caching && *matches && timestamp != -1) {
         // Store timestamp and checksum as extended file attribute if caching is enabled
-        FSETXATTR(fd, timestamp_key, timestamp_str, strlen(timestamp_str), 0);
+        FSETXATTR(fd, XATTR_CHKSUM_MTIME, timestamp_str, strlen(timestamp_str), 0);
         FSETXATTR(fd, checksum_key, checksum, strlen(checksum), 0);
     }
 
