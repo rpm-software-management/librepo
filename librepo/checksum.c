@@ -256,6 +256,10 @@ lr_checksum_fd_compare(LrChecksumType type,
                 // timestamp stored in xattr is different => checksums are no longer valid
                 lr_checksum_clear_cache(fd);
             }
+        } else if (errno == ENOTSUP) {
+            // Extended attributes are not supported by the filesystem, or are disabled.
+            // Disable the use of extended attributes for cache.
+            caching = FALSE;
         }
     }
 
@@ -293,22 +297,28 @@ lr_checksum_fd_compare(LrChecksumType type,
 void
 lr_checksum_clear_cache(int fd)
 {
-    char *xattrs = NULL;
-    ssize_t xattrs_len;
-    ssize_t bytes_read;
-    const char *attr;
-    ssize_t prefix_len = strlen(XATTR_CHKSUM_PREFIX);
+    // Remove the extended attribute containing mtime.
+    if (FREMOVEXATTR(fd, XATTR_CHKSUM_MTIME) == -1) {
+        if (errno == ENOTSUP) {
+            // Extended attributes are not supported by the filesystem, or are disabled.
+            return;
+        }
+    }
 
-    xattrs_len = FLISTXATTR(fd, NULL, 0);
+    // Remove the other extended attributes used by librepo to store the file checksum.
+    // Librepo does not need this to work properly. Deleting the mtime attribute is sufficient.
+    // We're just cleaning up.
+    ssize_t xattrs_len = FLISTXATTR(fd, NULL, 0);
     if (xattrs_len <= 0) {
         return;
     }
-    xattrs = lr_malloc(xattrs_len);
-    bytes_read = FLISTXATTR(fd, xattrs, xattrs_len);
+    char *xattrs = lr_malloc(xattrs_len);
+    ssize_t bytes_read = FLISTXATTR(fd, xattrs, xattrs_len);
     if (bytes_read < 0) {
         goto cleanup;
     }
-    attr = xattrs;
+    ssize_t prefix_len = strlen(XATTR_CHKSUM_PREFIX);
+    const char *attr = xattrs;
     while (attr < xattrs + xattrs_len) {
         if (strncmp(XATTR_CHKSUM_PREFIX, attr, prefix_len) == 0) {
             FREMOVEXATTR(fd, attr);
