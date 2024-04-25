@@ -22,6 +22,7 @@
 #define __LR_XATTR_INTERNAL_H__
 
 #define XATTR_CHKSUM_PREFIX     "user.Librepo.checksum."
+#define XATTR_CHKSUM_MTIME      XATTR_CHKSUM_PREFIX "mtime"
 
 #if __APPLE__
 
