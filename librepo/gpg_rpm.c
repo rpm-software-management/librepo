@@ -390,6 +390,9 @@ lr_gpg_import_key_from_fd(int key_fd, const char *home_dir, GError **err)
 {
     g_autofree gchar * buf = NULL;
     const ssize_t size = read_file_fd_to_memory(key_fd, &buf, err);
+    if (size == -1 ) {
+        return FALSE;
+    }
     return lr_gpg_import_key_from_memory((const char *)buf, size, home_dir, err);
 }
 
@@ -398,6 +401,9 @@ lr_gpg_import_key(const char *key_fn, const char *home_dir, GError **err)
 {
     g_autofree gchar * buf = NULL;
     const ssize_t size = read_file_to_memory(key_fn, &buf, err);
+    if (size == -1 ) {
+        return FALSE;
+    }
     return lr_gpg_import_key_from_memory((const char *)buf, size, home_dir, err);
 }
 
