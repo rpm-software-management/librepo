@@ -906,7 +906,7 @@ lr_handle_network_wait(LrHandle *handle, GError **err, guint seconds, GCancellab
     data_struct.cancellable = cancellable;
     data_struct.monitor = monitor;
 
-    const gchar *baseurl;
+    const gchar *baseurl = NULL;
     if (handle->metalinkurl)
         baseurl = handle->metalinkurl;
     else if (handle->mirrorlisturl)
