@@ -538,9 +538,8 @@ check_signature(const gchar * sig_buf, ssize_t sig_buf_len, const gchar * data, 
             memcpy(sig_buf_with_null_byte, sig_buf, sig_buf_len);
             sig_buf_with_null_byte[sig_buf_len] = '\0';
 
-            // set block_begin and key to null byte terminated local copy
+            // set block_begin to null byte terminated local copy
             block_begin = sig_buf_with_null_byte + (block_begin - sig_buf);
-            sig_buf = sig_buf_with_null_byte;
         }
 
         pgpArmor ret_pgparmor = pgpParsePkts((const char *)block_begin, &pkts, &pkts_len);
