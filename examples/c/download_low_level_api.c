@@ -23,14 +23,11 @@ main(void)
     GError *tmp_err = NULL;
 
     // Setup logging (optional step)
-
-/*
     g_log_set_handler("librepo", G_LOG_LEVEL_ERROR |
                                  G_LOG_LEVEL_CRITICAL |
                                  G_LOG_LEVEL_DEBUG |
                                  G_LOG_LEVEL_WARNING,
                       log_handler_cb, NULL);
-*/
 
     // Download something
     GSList *possible_checksums = NULL;
