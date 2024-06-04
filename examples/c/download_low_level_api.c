@@ -57,7 +57,10 @@ main(void)
                 NULL,   // Mirror failure callback
                 NULL,   // User's data for the end and mirror failure callbacks
                 0,      // Start of byterange
-                3788       // End of byterange
+                3788,   // End of byterange
+                NULL,   // Range string to download; Overrides Start and End of byterange
+                FALSE,  // TRUE = Tell proxy server that we don't want to use cache for this request
+                FALSE   // TRUE = This target is a zchunk file; FALSE = is not zchuk file
             );
 
     ret = lr_download_target(target, &tmp_err);
