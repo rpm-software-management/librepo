@@ -404,8 +404,13 @@ lr_download_packages(GSList *targets,
                                                FALSE,
                                                FALSE);
 
-        downloadtargets = g_slist_append(downloadtargets, downloadtarget);
+        downloadtargets = g_slist_prepend(downloadtargets, downloadtarget);
     }
+    /*
+     * Since g_slist_append() has to traverse the list to the end, we use
+     * g_slist_prepend() above, and reverse the lists now.
+     */
+    downloadtargets = g_slist_reverse(downloadtargets);
 
     // Do Fastest Mirror resolving for all handles in one shot
     if (fmr_handles) {
