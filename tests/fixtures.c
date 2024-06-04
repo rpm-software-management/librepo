@@ -20,7 +20,7 @@ test_log_handler_cb(G_GNUC_UNUSED const gchar *log_domain,
 {
     time_t rawtime;
     char buffer[255];
-    gchar *level = "";
+    gchar *level;
 
     switch(log_level) {
         case G_LOG_LEVEL_ERROR:     level = "ERROR"; break;
