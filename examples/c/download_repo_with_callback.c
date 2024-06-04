@@ -6,6 +6,7 @@
 #define FEDORA_VERSION  "19"
 #define FEDORA_BASEARCH "x86_64"
 
+/* Logging handler. Uncomment if want to use it.
 static void
 log_handler_cb(const gchar *log_domain G_GNUC_UNUSED,
                GLogLevelFlags log_level G_GNUC_UNUSED,
@@ -14,6 +15,7 @@ log_handler_cb(const gchar *log_domain G_GNUC_UNUSED,
 {
     g_print ("%s\n", message);
 }
+*/
 
 static int
 progress_callback(G_GNUC_UNUSED void *data,
