@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <librepo/librepo.h>
 
+/* Logging handler. Uncomment if want to use it.
 static void
 log_handler_cb(const gchar *log_domain G_GNUC_UNUSED,
                GLogLevelFlags log_level G_GNUC_UNUSED,
@@ -11,6 +12,7 @@ log_handler_cb(const gchar *log_domain G_GNUC_UNUSED,
 {
     g_print ("%s\n", message);
 }
+*/
 
 static void
 cb(G_GNUC_UNUSED void *clientp, LrFastestMirrorStages stage, void *ptr)
