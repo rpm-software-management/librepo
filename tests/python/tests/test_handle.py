@@ -509,6 +509,10 @@ class TestCaseHandle(unittest.TestCase):
         h.httpauth = None
         h.setopt(librepo.LRO_USERPWD, None)
         h.userpwd = None
+        h.setopt(librepo.LRO_USERNAME, None)
+        h.username = None
+        h.setopt(librepo.LRO_PASSWORD, None)
+        h.password = None
         h.setopt(librepo.LRO_PROXY, None)
         h.proxy = None
         h.setopt(librepo.LRO_PROXYPORT, None)       # None sets default value

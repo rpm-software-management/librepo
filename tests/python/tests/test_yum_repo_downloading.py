@@ -1435,7 +1435,8 @@ class TestCaseYumRepoDownloading(TestCaseWithServer):
         h.checksum = True
         self.assertRaises(librepo.LibrepoException, h.perform, (r))
 
-    def test_download_repo_01_from_base_auth_secured_web_02(self):
+    def test_download_repo_01_from_base_auth_secured_web_02_use_userpwd(self):
+        """ The test uses the deprecated `h.userpwd="username:password"`. """
         h = librepo.Handle()
         r = librepo.Result()
 
@@ -1446,6 +1447,27 @@ class TestCaseYumRepoDownloading(TestCaseWithServer):
         h.checksum = True
         h.httpauth = True
         h.userpwd = "%s:%s" % (config.AUTH_USER, config.AUTH_PASS)
+        h.perform(r)
+
+        yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
+        yum_repomd = r.getinfo(librepo.LRR_YUM_REPOMD)
+
+        self.assertTrue(yum_repo)
+        self.assertTrue(yum_repomd)
+
+    def test_download_repo_01_from_base_auth_secured_web_02(self):
+        """ The test uses `h.username="username" and `h.password="password"`. """
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s%s" % (self.MOCKURL, config.AUTHBASIC, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.checksum = True
+        h.httpauth = True
+        h.username = config.AUTH_USER
+        h.password = config.AUTH_PASS
         h.perform(r)
 
         yum_repo   = r.getinfo(librepo.LRR_YUM_REPO)
