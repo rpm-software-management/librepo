@@ -293,6 +293,8 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_MIRRORLISTURL:
     case LRO_METALINKURL:
     case LRO_USERPWD:
+    case LRO_USERNAME:
+    case LRO_PASSWORD:
     case LRO_PROXY:
     case LRO_PROXYUSERPWD:
     case LRO_DESTDIR:

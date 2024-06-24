@@ -90,6 +90,17 @@ Version contants
 
     *String or None*. Set username and password for HTTP authentication.
     Param must be in format 'username:password'.
+    The user and password strings are not URL decoded, so there is no way to send in
+    a username containing a colon using this option. The option is DEPRECATED!
+    Use LRO_USERNAME and LRO_PASSWORD.
+
+.. data:: LRO_USERNAME
+
+    *String or None*. Set username for HTTP authentication.
+
+.. data:: LRO_PASSWORD
+
+    *String or None*. Set password for HTTP authentication.
 
 .. data:: LRO_PROXY
 
@@ -116,6 +127,8 @@ Version contants
 
     *String or None*. Set username and password for proxy
     authentication in format 'username:password'.
+    Both the username and the password are URL decoded before use, so if the username
+    contains, for example, a colon, it should be encoded as %3A.
 
 .. data:: LRO_PROGRESSCB
 
@@ -1258,6 +1271,14 @@ class Handle(_librepo.Handle):
     .. attribute:: userpwd:
 
         See: :data:`.LRO_USERPWD`
+
+    .. attribute:: username:
+
+        See: :data:`.LRO_USERNAME`
+
+    .. attribute:: password:
+
+        See: :data:`.LRO_PASSWORD`
 
     .. attribute:: proxy:
 
