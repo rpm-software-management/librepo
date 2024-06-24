@@ -38,6 +38,8 @@ START_TEST(test_handle)
     ck_assert(lr_handle_setopt(h, &tmp_err, LRO_MIRRORLIST, "bar"));
     ck_assert_ptr_null(tmp_err);
     ck_assert(lr_handle_setopt(h, NULL, LRO_USERPWD, "user:pwd"));
+    ck_assert(lr_handle_setopt(h, NULL, LRO_USERNAME, "user"));
+    ck_assert(lr_handle_setopt(h, NULL, LRO_PASSWORD, "pwd"));
     ck_assert(lr_handle_setopt(h, NULL, LRO_PROXY, "proxy"));
     ck_assert(lr_handle_setopt(h, NULL, LRO_PROXYUSERPWD, "proxyuser:pwd"));
     ck_assert(lr_handle_setopt(h, NULL, LRO_DESTDIR, "foodir"));
