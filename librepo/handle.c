@@ -407,6 +407,14 @@ lr_handle_setopt(LrHandle *handle,
         c_rc = curl_easy_setopt(c_h, CURLOPT_USERPWD, va_arg(arg, char *));
         break;
 
+    case LRO_USERNAME:
+        c_rc = curl_easy_setopt(c_h, CURLOPT_USERNAME, va_arg(arg, char *));
+        break;
+
+    case LRO_PASSWORD:
+        c_rc = curl_easy_setopt(c_h, CURLOPT_PASSWORD, va_arg(arg, char *));
+        break;
+
     case LRO_PROXY:
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY, va_arg(arg, char *));
         break;

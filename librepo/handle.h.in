@@ -153,7 +153,10 @@ typedef enum {
         Use LRO_HTTPAUTHMETHODS */
 
     LRO_USERPWD,  /*!< (char *)
-        User and password for http authetification in format user:password */
+        User and password for http authetification in format user:password.
+        The user and password strings are not URL decoded, so there is no way to send in
+        a username containing a colon using this option. The option is DEPRECATED!
+        Use LRO_USERNAME and LRO_PASSWORD */
 
     LRO_PROXY,  /*!< (char *)
         Address of proxy server eg. "proxy-host.com:8080" */
@@ -170,7 +173,9 @@ typedef enum {
         Use LRO_PROXYAUTHMETHODS */
 
     LRO_PROXYUSERPWD,  /*!< (char *)
-        User and password for proxy in format user:password */
+        User and password for proxy in format user:password
+        Both the username and the password are URL decoded before use, so if the username
+        contains, for example, a colon, it should be encoded as %3A.*/
 
     LRO_PROGRESSCB,  /*!< (LrProgressCb)
         Progress callback */
@@ -428,6 +433,12 @@ typedef enum {
     LRO_PROXY_SSLCACERT, /*!< (char *)
         Path to a file containing the list of PEM format trusted CA
         certificates. Used for proxy. */
+
+    LRO_USERNAME,  /*!< (char *)
+        User for http authetification */
+
+    LRO_PASSWORD,  /*!< (char *)
+        Password for http authetification */
 
     LRO_SENTINEL,    /*!< Sentinel */
 
