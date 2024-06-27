@@ -148,12 +148,12 @@ typedef enum {
         Do not duplicate local metadata, just locate the old one */
 
     LRO_HTTPAUTH,  /*!< (long 1 or 0)
-        Enable all supported method of HTTP authentification.
+        Enable all supported method of HTTP authentication.
         This option is DEPRECATED!
         Use LRO_HTTPAUTHMETHODS */
 
     LRO_USERPWD,  /*!< (char *)
-        User and password for http authetification in format user:password.
+        User and password for HTTP authentication in format user:password.
         The user and password strings are not URL decoded, so there is no way to send in
         a username containing a colon using this option. The option is DEPRECATED!
         Use LRO_USERNAME and LRO_PASSWORD */
@@ -168,7 +168,7 @@ typedef enum {
         Type of the proxy used. */
 
     LRO_PROXYAUTH,  /*!< (long 1 or 0)
-        Enable all supported method for proxy authentification.
+        Enable all supported method for proxy authentication.
         This option is DEPRECATED!
         Use LRO_PROXYAUTHMETHODS */
 
@@ -435,10 +435,10 @@ typedef enum {
         certificates. Used for proxy. */
 
     LRO_USERNAME,  /*!< (char *)
-        User for http authetification */
+        User for HTTP authentication */
 
     LRO_PASSWORD,  /*!< (char *)
-        Password for http authetification */
+        Password for HTTP authentication */
 
     LRO_SENTINEL,    /*!< Sentinel */
 
