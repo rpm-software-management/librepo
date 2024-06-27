@@ -48,7 +48,7 @@ $ python python/tests/servermock/server.py
 Url examples
 ------------
 http://127.0.0.1:5000/yum/auth_basic/static/01/repodata/repomd.xml
- * This url provides basic authentification
+ * This url provides basic authentication
 
 http://127.0.0.1:5000/yum/badgpg/static/01/repodata/repomd.xml.asc
  * This url in fact returns .../repodata/repomd.xml.asc.bad file
