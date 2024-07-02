@@ -86,17 +86,19 @@ lr_gpg_ensure_socket_dir_exists()
     int old_default_context_was_retrieved = 0;
     struct selabel_handle *labeling_handle = NULL;
 
-    /* A purpose of this piece of code is to deal with applications whose
-     * security policy overrides a file context for temporary files but don't
-     * know that librepo executes GnuPG which expects a default file context. */
-    if (0 == getfscreatecon(&old_default_context)) {
-        old_default_context_was_retrieved = 1;
-    } else {
-        g_debug("Failed to retrieve a default SELinux context");
-    }
-    labeling_handle = selabel_open(SELABEL_CTX_FILE, NULL, 0);
-    if (labeling_handle == NULL) {
-        g_debug("Failed to open a SELinux labeling handle: %s", strerror(errno));
+    if (is_selinux_enabled()) {
+       /* A purpose of this piece of code is to deal with applications whose
+        * security policy overrides a file context for temporary files but don't
+        * know that librepo executes GnuPG which expects a default file context. */
+       if (0 == getfscreatecon(&old_default_context)) {
+           old_default_context_was_retrieved = 1;
+       } else {
+           g_debug("Failed to retrieve a default SELinux context");
+       }
+       labeling_handle = selabel_open(SELABEL_CTX_FILE, NULL, 0);
+       if (labeling_handle == NULL) {
+           g_debug("Failed to open a SELinux labeling handle: %s", strerror(errno));
+       }
     }
 #endif
 
