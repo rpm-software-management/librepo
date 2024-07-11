@@ -943,6 +943,7 @@ select_next_target(LrDownload *dd,
                             "from end callback", __func__);
                     g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
                             "Interrupted by LR_CB_ERROR from end callback");
+                    g_free(full_url);
                     return FALSE;
                 }
             }
@@ -953,6 +954,7 @@ select_next_target(LrDownload *dd,
                             "Cannot download %s: Offline mode is specified "
                             "and no local URL is available",
                             target->target->path);
+                g_free(full_url);
                 return FALSE;
             }
         }
