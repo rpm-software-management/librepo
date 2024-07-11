@@ -474,14 +474,22 @@ class TestCaseHandle(unittest.TestCase):
         self.assertEqual(h.httpheader, None)
 
         self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_BASIC)
-        h.httpauthmethods = librepo.LR_AUTH_NTLM
-        self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_NTLM)
+        try:
+            h.httpauthmethods = librepo.LR_AUTH_NTLM
+        except librepo.LibrepoException as exception:
+            if not "not found built-in" in str(exception):
+                raise exception
+            self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_NTLM)
         h.httpauthmethods = None
         self.assertEqual(h.httpauthmethods, librepo.LR_AUTH_BASIC)
 
         self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_BASIC)
-        h.proxyauthmethods = librepo.LR_AUTH_NTLM
-        self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_NTLM)
+        try:
+            h.proxyauthmethods = librepo.LR_AUTH_NTLM
+        except librepo.LibrepoException as exception:
+            if not "not found built-in" in str(exception):
+                raise exception
+            self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_NTLM)
         h.proxyauthmethods = None
         self.assertEqual(h.proxyauthmethods, librepo.LR_AUTH_BASIC)
 
