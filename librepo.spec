@@ -97,7 +97,11 @@ Python 3 bindings for the librepo library.
     -DWITH_ZCHUNK=%{?with_zchunk:ON}%{!?with_zchunk:OFF} \
     -DUSE_GPGME=%{?with_use_gpgme:ON}%{!?with_use_gpgme:OFF} \
     -DUSE_RUN_GNUPG_USER_SOCKET=%{?with_run_gnupg_user_socket:ON}%{!?with_run_gnupg_user_socket:OFF} \
-    -DENABLE_SELINUX=%{?need_selinux:ON}%{!?need_selinux:OFF}
+%if %{need_selinux}
+    -DENABLE_SELINUX=ON
+%else
+    -DENABLE_SELINUX=OFF
+%endif
 %cmake_build
 
 %check
