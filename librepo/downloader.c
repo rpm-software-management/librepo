@@ -1357,8 +1357,6 @@ check_zck(LrTarget *target, GError **err)
 
         if(cks_good == 1) {  // All checksums good
             g_debug("%s: File is complete", __func__);
-            if(target->target->zck_dl)
-                zck_dl_free(&(target->target->zck_dl));
             target->zck_state = LR_ZCK_DL_FINISHED;
             return TRUE;
         }
@@ -1378,8 +1376,6 @@ check_zck(LrTarget *target, GError **err)
         }
 
         if(cks_good == 1) {  // All checksums good
-            if(target->target->zck_dl)
-                zck_dl_free(&(target->target->zck_dl));
             target->zck_state = LR_ZCK_DL_FINISHED;
             return TRUE;
         }
