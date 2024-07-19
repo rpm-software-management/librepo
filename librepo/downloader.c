@@ -1139,6 +1139,8 @@ prep_zck_header(LrTarget *target, GError **err)
         zck = lr_zck_init_read(target->target, target->target->path,
                                fd, &tmp_err);
         if(zck) {
+            zckCtx *old_zck = zck_dl_get_zck(target->target->zck_dl);
+            zck_free(&old_zck);
             if(!zck_dl_set_zck(target->target->zck_dl, zck)) {
                 g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                             "Unable to setup zchunk download context");
