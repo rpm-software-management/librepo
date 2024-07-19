@@ -134,6 +134,26 @@ lr_downloadtarget_free(LrDownloadTarget *target)
     if (!target)
         return;
 
+    #ifdef WITH_ZCHUNK
+    if (target->zck_dl) {
+        zckCtx *zck = zck_dl_get_zck(target->zck_dl);
+        if (zck) {
+            zck_free(&zck);
+        }
+
+        zckRange *range = zck_dl_get_range(target->zck_dl);
+        if(range) {
+            zck_range_free(&range);
+        }
+
+        zck_dl_free(&target->zck_dl);
+    }
+    #endif /* WITH_ZCHUNK */
+
+    if(target->range) {
+        free(target->range);
+    }
+
     g_slist_free_full(target->checksums,
                       (GDestroyNotify) lr_downloadtargetchecksum_free);
     g_string_chunk_free(target->chunk);
