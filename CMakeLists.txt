@@ -9,6 +9,7 @@ OPTION (ENABLE_PYTHON "Build Python bindings" ON)
 OPTION (USE_GPGME "Use GpgMe (instead of rpm library) for OpenPGP key support" ON)
 OPTION (USE_RUN_GNUPG_USER_SOCKET "Create a directory for gpg-agent socket in /run/gnugp/user (instead of /run/user)" OFF)
 OPTION (ENABLE_SELINUX "Restore SELinux labels on GnuPG directories" ON)
+OPTION (WITH_SANITIZERS "Build with address, leak and undefined sanitizers (DEBUG ONLY)" OFF)
 
 INCLUDE (${CMAKE_SOURCE_DIR}/VERSION.cmake)
 SET (VERSION "${LIBREPO_MAJOR}.${LIBREPO_MINOR}.${LIBREPO_PATCH}")
@@ -94,6 +95,12 @@ ENDIF (NOT LIBXML2_FOUND)
 IF (NOT CURL_FOUND)
     MESSAGE(FATAL_ERROR "No CURL library installed")
 ENDIF (NOT CURL_FOUND)
+
+IF (WITH_SANITIZERS)
+    MESSAGE(WARNING "Building with sanitizers enabled!")
+    ADD_COMPILE_OPTIONS(-fsanitize=address -fsanitize=undefined -fsanitize=leak)
+    LINK_LIBRARIES(asan ubsan)
+ENDIF()
 
 # Generate header files with the configured ABI (e.g. with/without zchunk).
 
