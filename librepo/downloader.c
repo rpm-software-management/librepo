@@ -1228,6 +1228,7 @@ find_local_zck_chunks(LrTarget *target, GError **err)
 
             zckCtx *zck_src = zck_create();
             if(!zck_init_read(zck_src, chk_fd)) {
+                zck_free(&zck_src);
                 close(chk_fd);
                 continue;
             }
