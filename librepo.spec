@@ -19,6 +19,8 @@
 # Needs to match how gnupg2 is compiled
 %bcond_with run_gnupg_user_socket
 
+%bcond_with sanitizers
+
 %if %{with use_gpgme} && %{with use_selinux}
 %global need_selinux 1
 %else
@@ -59,6 +61,12 @@ BuildRequires:  pkgconfig(zck) >= 0.9.11
 %endif
 Requires:       libcurl%{?_isa} >= %{libcurl_version}
 
+%if %{with sanitizers}
+BuildRequires:  libasan
+BuildRequires:  liblsan
+BuildRequires:  libubsan
+%endif
+
 %description
 A library providing C and Python (libcURL like) API to downloading repository
 metadata.
@@ -97,6 +105,7 @@ Python 3 bindings for the librepo library.
     -DWITH_ZCHUNK=%{?with_zchunk:ON}%{!?with_zchunk:OFF} \
     -DUSE_GPGME=%{?with_use_gpgme:ON}%{!?with_use_gpgme:OFF} \
     -DUSE_RUN_GNUPG_USER_SOCKET=%{?with_run_gnupg_user_socket:ON}%{!?with_run_gnupg_user_socket:OFF} \
+    -DWITH_SANITIZERS=%{?with_sanitizers:ON}%{!?with_sanitizers:OFF} \
 %if %{need_selinux}
     -DENABLE_SELINUX=ON
 %else
