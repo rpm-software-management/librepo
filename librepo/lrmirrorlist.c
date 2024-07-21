@@ -42,6 +42,9 @@ lr_detect_protocol(const char *url)
     if (g_str_has_prefix(url, "rsync://"))
         return LR_PROTOCOL_RSYNC;
 
+    if (g_str_has_prefix(url, "oci://"))
+        return LR_PROTOCOL_OCI;
+
     return LR_PROTOCOL_OTHER;
 }
 

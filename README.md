@@ -15,6 +15,7 @@ Fedora/Ubuntu name
 * glib2 (http://developer.gnome.org/glib/) - glib2-devel/libglib2.0-dev
 * libattr (https://savannah.nongnu.org/projects/attr) - libattr-devel/libattr1-dev
 * libcurl (http://curl.haxx.se/libcurl/) - libcurl-devel/libcurl4-openssl-dev
+* json-glib (https://wiki.gnome.org/Projects/JsonGlib) - json-glib/json-glib-devel
 * openssl (http://www.openssl.org/) - openssl-devel/libssl-dev
 * python (http://python.org/) - python3-devel/libpython3-dev
 * One of the libraries:
