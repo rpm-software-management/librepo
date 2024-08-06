@@ -35,6 +35,7 @@
 #include <sys/xattr.h>
 #include <fcntl.h>
 #include <curl/curl.h>
+#include <json-glib/json-glib.h>
 
 #ifdef WITH_ZCHUNK
 #include <zck.h>
@@ -84,6 +85,16 @@ typedef enum {
     LR_HCS_DONE, /*!<
         All headers which we were looking for are already found*/
 } LrHeaderCbState;
+
+/** Enum with OCI file status */
+typedef enum {
+    LR_OCI_DL_WAITING, /*!<
+        The OCI file is waiting to be processed. */
+    LR_OCI_DL_MANIFEST, /*!<
+        The OCI manifest file is being downloaded. */
+    LR_OCI_DL_LAYER, /*!<
+        The OCI layer is being downloaded. */
+} LrOciState;
 
 /** Enum with zchunk file status */
 typedef enum {
@@ -185,6 +196,8 @@ typedef struct {
         Last cb return code. */
     struct curl_slist *curl_rqheaders; /*!<
         Extra headers for request. */
+    LrOciState oci_state; /*!<
+        OCI download state. */
 
     #ifdef WITH_ZCHUNK
     LrZckState zck_state; /*!<
@@ -1398,7 +1411,19 @@ open_target_file(LrTarget *target, GError **err)
     int fd;
     FILE *f;
 
-    if (target->target->fd != -1) {
+    if (target->oci_state == LR_OCI_DL_MANIFEST) {
+        if (target->target->fn == NULL) {
+            // Create a temporary file for the OCI manifest
+            const char *tmpdir = getenv("TMPDIR");
+            if (tmpdir == NULL)
+                tmpdir = "/tmp";
+            char *tmpname = g_strdup_printf("%s/librepo-oci-XXXXXX", tmpdir);
+            close (mkstemp(tmpname));
+            target->target->fn = tmpname;
+        }
+    }
+
+    if (target->oci_state != LR_OCI_DL_MANIFEST && target->target->fd != -1) {
         // Use supplied filedescriptor
         fd = dup(target->target->fd);
         if (fd == -1) {
@@ -1432,6 +1457,80 @@ open_target_file(LrTarget *target, GError **err)
     }
 
     return f;
+}
+
+/** Get the OCI manifest URL
+ */
+static char *
+get_oci_manifest_url(char *oci_url, GError **err)
+{
+    assert(!err || *err == NULL);
+
+    // Remove the 'oci://' prefix
+    char *hostname = strdup(oci_url + 6);
+
+    char *first_slash = strchr(hostname, '/');
+    if (first_slash == NULL || first_slash[1] == 0) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                    "invalid OCI URL format: %s",
+                    oci_url);
+        return NULL;
+    }
+    *first_slash = 0;
+
+    char *result = g_strdup_printf ("https://%s/v2/%s/manifests/latest",
+                                    hostname,
+                                    first_slash + 1);
+    free (hostname);
+    return result;
+}
+
+static char *
+get_oci_layer_url(char *oci_url, char *fn, GError **err) {
+    assert(!err || *err == NULL);
+
+    // Load the JSON manifest file
+    JsonParser *parser = json_parser_new();
+
+    // Load the JSON manifest file
+    if (!json_parser_load_from_file(parser, fn, err)) {
+        g_object_unref(parser);
+        return NULL;
+    }
+
+    // Delete the manifest file
+    unlink(fn);
+
+    // Get the root object
+    JsonNode *root = json_parser_get_root(parser);
+    JsonObject *root_obj = json_node_get_object(root);
+
+    // Navigate to the layers array
+    JsonArray *layers = json_object_get_array_member(root_obj, "layers");
+    JsonObject *first_layer = json_array_get_object_element(layers, 0);
+
+    // Extract the digest for the first layer
+    const char *digest = json_object_get_string_member(first_layer, "digest");
+
+    // Remove the 'oci://' prefix
+    char *hostname = strdup(oci_url + 6);
+
+    char *first_slash = strchr(hostname, '/');
+    if (first_slash == NULL || first_slash[1] == 0) {
+        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                    "invalid OCI URL format: %s",
+                    oci_url);
+        return NULL;
+    }
+    *first_slash = 0;
+
+    char *result = g_strdup_printf ("https://%s/v2/%s/blobs/%s",
+                                    hostname,
+                                    first_slash + 1,
+                                    digest);
+    free (hostname);
+    g_object_unref(parser);
+    return result;
 }
 
 /** Prepare next transfer
@@ -1476,6 +1575,17 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     g_info("Downloading: %s", full_url);
 
     protocol = lr_detect_protocol(full_url);
+
+    if (protocol == LR_PROTOCOL_OCI) {
+        if (target->oci_state == LR_OCI_DL_WAITING) {
+            target->oci_state = LR_OCI_DL_MANIFEST;
+            full_url = get_oci_manifest_url(full_url, err);
+        } else if (target->oci_state == LR_OCI_DL_LAYER) {
+            full_url = get_oci_layer_url(full_url, target->target->fn, err);
+        }
+        if (!full_url)
+            goto fail;
+    }
 
     // Prepare CURL easy handle
     CURLcode c_rc;
@@ -1652,6 +1762,18 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         // Add headers that tell proxy to serve us fresh data
         headers = curl_slist_append(headers, "Cache-Control: no-cache");
         headers = curl_slist_append(headers, "Pragma: no-cache");
+        if (!headers)
+            lr_out_of_memory();
+    }
+    if (target->oci_state == LR_OCI_DL_MANIFEST) {
+        headers = curl_slist_append(headers, "Authorization: Bearer QQ==");
+        if (!headers)
+            lr_out_of_memory();
+        headers = curl_slist_append(headers, "Accept: application/vnd.oci.image.manifest.v1+json");
+        if (!headers)
+            lr_out_of_memory();
+    } else if (target->oci_state == LR_OCI_DL_LAYER) {
+        headers = curl_slist_append(headers, "Authorization: Bearer QQ==");
         if (!headers)
             lr_out_of_memory();
     }
@@ -2323,15 +2445,17 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             // New file was downloaded - clear checksums cached in extended attributes
             lr_checksum_clear_cache(fd);
 
-            ret = check_finished_transfer_checksum(fd,
-                                                  target->target->checksums,
-                                                  &matches,
-                                                  &transfer_err,
-                                                  &tmp_err);
+            ret = target->oci_state != LR_OCI_DL_MANIFEST
+                ? check_finished_transfer_checksum(fd,
+                                                   target->target->checksums,
+                                                   &matches,
+                                                   &transfer_err,
+                                                   &tmp_err)
+                : 1;
             if (!ret) { // Error
                 g_propagate_prefixed_error(err, tmp_err, "Downloading from %s"
-                        "was successful but error encountered while "
-                        "checksumming: ", effective_url);
+                                           "was successful but error encountered while "
+                                           "checksumming: ", effective_url);
                 return FALSE;
             }
         #ifdef WITH_ZCHUNK
@@ -2505,31 +2629,38 @@ transfer_error:
                 target->tried_mirrors = g_slist_remove(target->tried_mirrors, target->mirror);
             } else {
             #endif /* WITH_ZCHUNK */
-                target->state = LR_DS_FINISHED;
+              if (target->oci_state == LR_OCI_DL_MANIFEST) {
+                  // Now that we have the manifest, let's download the
+                  // layer blob.
+                  target->oci_state = LR_OCI_DL_LAYER;
+                  target->state = LR_DS_WAITING;
+              } else {
+                  target->state = LR_DS_FINISHED;
 
-                // Remove xattr that states that the file is being downloaded
-                // by librepo, because the file is now completely downloaded
-                // and the xattr is not needed (is is useful only for resuming)
-                remove_librepo_xattr(target->target);
+                  // Remove xattr that states that the file is being downloaded
+                  // by librepo, because the file is now completely downloaded
+                  // and the xattr is not needed (is is useful only for resuming)
+                  remove_librepo_xattr(target->target);
 
-                // Call end callback
-                LrEndCb end_cb = target->target->endcb;
-                if (end_cb) {
-                    int rc = end_cb(target->target->cbdata,
-                                    LR_TRANSFER_SUCCESSFUL,
-                                    NULL);
-                    if (rc == LR_CB_ERROR) {
-                        target->cb_return_code = LR_CB_ERROR;
-                        g_debug("%s: Downloading was aborted by LR_CB_ERROR "
-                                "from end callback", __func__);
-                        g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
-                                    LRE_CBINTERRUPTED,
-                                    "Interrupted by LR_CB_ERROR from end callback");
-                    }
-                }
-                if (target->mirror)
-                    lr_downloadtarget_set_usedmirror(target->target,
-                                                     target->mirror->mirror->url);
+                  // Call end callback
+                  LrEndCb end_cb = target->target->endcb;
+                  if (end_cb) {
+                      int rc = end_cb(target->target->cbdata,
+                                      LR_TRANSFER_SUCCESSFUL,
+                                      NULL);
+                      if (rc == LR_CB_ERROR) {
+                          target->cb_return_code = LR_CB_ERROR;
+                          g_debug("%s: Downloading was aborted by LR_CB_ERROR "
+                                  "from end callback", __func__);
+                          g_set_error(&fail_fast_error, LR_DOWNLOADER_ERROR,
+                                      LRE_CBINTERRUPTED,
+                                      "Interrupted by LR_CB_ERROR from end callback");
+                      }
+                  }
+                  if (target->mirror)
+                      lr_downloadtarget_set_usedmirror(target->target,
+                                                       target->mirror->mirror->url);
+              }
             #ifdef WITH_ZCHUNK
             }
             #endif /* WITH_ZCHUNK */
