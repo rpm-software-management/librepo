@@ -694,10 +694,24 @@ lr_fastestmirror(LrHandle *handle,
     }
 
     // Sort the mirrors by the connection time
+    //
+    // Note that always picking the single best mirror has undesirable properties like
+    // forcing the user to always pick the single lowest latency mirror regardless of its
+    // actual bandwidth performance, and high density install bases all using fastestmirror
+    // tend to dogpile the single mirror nearest to all of them
+    //
+    // Instead of using a strict sorted list, shuffle all mirrors with lower latency than 2x
+    // the best mirror, to introduce enough entropy to spread the load across nearby mirrors.
+    double bestMirrorLatency = ((LrFastestMirror *)lrfastestmirrors->data)->plain_connect_time;
+
     for (GSList *elem = lrfastestmirrors; elem; elem = g_slist_next(elem)) {
         LrFastestMirror *mirror = elem->data;
         g_debug("%s: %3.6f : %s", __func__, mirror->plain_connect_time, mirror->url);
-        new_list = g_slist_append(new_list, mirror->url);
+        if (mirror->plain_connect_time < (2.0 * bestMirrorLatency) ) { // Shuffle nearby mirrors
+            new_list = g_slist_insert(new_list, mirror->url, g_random_int_range(0, g_slist_length(new_list)+1));
+        } else { // Far away mirrors appended as backup options
+            new_list = g_slist_append(new_list, mirror->url);
+        }
     }
 
     g_slist_free_full(lrfastestmirrors, (GDestroyNotify)lr_lrfastestmirror_free);
