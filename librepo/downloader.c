@@ -1551,7 +1551,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Allow resume only for files that were originally being
     // downloaded by librepo
-    if (target->resume && !has_librepo_xattr(fd)) {
+    if (!(target->resume && has_librepo_xattr(fd))) {
         target->resume = FALSE;
         g_debug("%s: Resume ignored, existing file was not originally "
                 "being downloaded by Librepo", __func__);
