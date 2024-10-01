@@ -702,12 +702,16 @@ lr_fastestmirror(LrHandle *handle,
     //
     // Instead of using a strict sorted list, shuffle all mirrors with lower latency than 2x
     // the best mirror, to introduce enough entropy to spread the load across nearby mirrors.
-    double bestMirrorLatency = ((LrFastestMirror *)lrfastestmirrors->data)->plain_connect_time;
+    double bestMirrorLatency = 0;
+    if (lrfastestmirrors != NULL) {
+        bestMirrorLatency = ((LrFastestMirror *)lrfastestmirrors->data)->plain_connect_time;
+    }
 
     for (GSList *elem = lrfastestmirrors; elem; elem = g_slist_next(elem)) {
         LrFastestMirror *mirror = elem->data;
         g_debug("%s: %3.6f : %s", __func__, mirror->plain_connect_time, mirror->url);
-        if (mirror->plain_connect_time < (2.0 * bestMirrorLatency) ) { // Shuffle nearby mirrors
+        if (mirror->plain_connect_time >= 0 &&
+            mirror->plain_connect_time < (2.0 * bestMirrorLatency)) { // Shuffle nearby mirrors
             new_list = g_slist_insert(new_list, mirror->url, g_random_int_range(0, g_slist_length(new_list)+1));
         } else { // Far away mirrors appended as backup options
             new_list = g_slist_append(new_list, mirror->url);
