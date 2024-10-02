@@ -350,7 +350,7 @@ lr_gpg_import_key_from_memory(const char *key, size_t key_len, const char *home_
 
     // `pgpParsePkts` needs null-terminated input, if null byte not found, make a local null-terminated copy
     g_autofree gchar * key_with_null_byte = NULL;
-    if (memchr(block_begin, '\0', key_len) == NULL) {
+    if (memchr(block_begin, '\0', key_len - (block_begin - key)) == NULL) {
         key_with_null_byte = g_new(gchar, key_len + 1);
         memcpy(key_with_null_byte, key, key_len);
         key_with_null_byte[key_len] = '\0';
@@ -533,7 +533,7 @@ check_signature(const gchar * sig_buf, ssize_t sig_buf_len, const gchar * data, 
 
         // `pgpParsePkts` needs null-terminated input, if null byte not found, make a local null-terminated copy
         g_autofree gchar * sig_buf_with_null_byte = NULL;
-        if (memchr(block_begin, '\0', sig_buf_len) == NULL) {
+        if (memchr(block_begin, '\0', sig_buf_len - (block_begin - sig_buf)) == NULL) {
             sig_buf_with_null_byte = g_new(gchar, sig_buf_len + 1);
             memcpy(sig_buf_with_null_byte, sig_buf, sig_buf_len);
             sig_buf_with_null_byte[sig_buf_len] = '\0';
