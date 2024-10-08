@@ -974,7 +974,7 @@ select_next_target(LrDownload *dd,
 }
 
 
-#define XATTR_LIBREPO   "user.Librepo.DownloadInProgress"
+#define XATTR_LIBREPO   "user.librepo.downloadinprogress"
 
 /** Add an extended attribute that indicates that
  * the file is being/was downloaded by Librepo

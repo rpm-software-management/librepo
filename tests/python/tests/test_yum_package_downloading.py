@@ -755,7 +755,7 @@ class TestCaseYumPackagesDownloading(TestCaseWithServer):
         # Otherwise librepo refuse to resume
         try:
             xattr.setxattr(fn,
-                           "user.Librepo.DownloadInProgress".encode("utf-8"),
+                           "user.librepo.downloadinprogress".encode("utf-8"),
                            "".encode("utf-8"))
         except IOError as err:
             if err.errno == 95:
