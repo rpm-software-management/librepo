@@ -35,6 +35,7 @@ typedef enum {
     LR_PROTOCOL_HTTP,
     LR_PROTOCOL_FTP,
     LR_PROTOCOL_RSYNC,
+    LR_PROTOCOL_OCI,
 } LrProtocol;
 
 /** A internal representation of a mirror */
