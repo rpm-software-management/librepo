@@ -78,7 +78,9 @@ lr_metadatatarget_new2(LrHandle *handle,
     target->progresscb = progresscb;
     target->mirrorfailurecb = mirrorfailure_cb;
     target->endcb = endcb;
-    target->gnupghomedir = g_string_chunk_insert(target->chunk, gnupghomedir);
+    if (gnupghomedir) {
+        target->gnupghomedir = g_string_chunk_insert(target->chunk, gnupghomedir);
+    }
 
     return target;
 }

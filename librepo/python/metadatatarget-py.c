@@ -262,7 +262,7 @@ metadatatarget_init(_MetadataTargetObject *self,
     LrMirrorFailureCb mirrorfailurecb = NULL;
     GError *tmp_err = NULL;
 
-    if (!PyArg_ParseTuple(args, "OOOOOs:metadatatarget_init",
+    if (!PyArg_ParseTuple(args, "OOOOOz:metadatatarget_init",
                           &pyhandle, &py_cbdata, &py_progresscb,
                           &py_mirrorfailurecb, &py_endcb, &gnupghomedir))
         return -1;
