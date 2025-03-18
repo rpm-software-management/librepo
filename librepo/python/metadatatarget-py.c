@@ -80,12 +80,9 @@ static int
 metadatatarget_progress_callback(void *data, double total_to_download, double now_downloaded)
 {
     int ret = LR_CB_OK;
-    _MetadataTargetObject *self;
+    _MetadataTargetObject *self = (_MetadataTargetObject *)data;
     PyObject *user_data, *result;
-    LrCallbackData *callback_data = (LrCallbackData *) data;
-    CbData *cbdata = (CbData *) callback_data->userdata;
 
-    self = (_MetadataTargetObject *)cbdata->cbdata;
     if (!self || !self->progress_cb)
         return ret;
 
@@ -124,13 +121,10 @@ metadatatarget_mirrorfailure_callback(void *data,
                                       const char *url)
 {
     int ret = LR_CB_OK; // Assume everything will be ok
-    _MetadataTargetObject *self;
+    _MetadataTargetObject *self = (_MetadataTargetObject *)data;
     PyObject *user_data, *result, *py_msg, *py_url;
-    LrCallbackData *callback_data = (LrCallbackData *) data;
-    CbData *cbdata = (CbData *) callback_data->userdata;
 
-    self = (_MetadataTargetObject *)cbdata->cbdata;
-    if (!self->mirrorfailure_cb)
+    if (!self || !self->mirrorfailure_cb)
         return ret;
 
     if (self->cb_data)
@@ -178,19 +172,10 @@ metadatatarget_end_callback(void *data,
                            const char *msg)
 {
     int ret = LR_CB_OK; // Assume everything will be ok
-    _MetadataTargetObject *self;
+    _MetadataTargetObject *self = (_MetadataTargetObject *)data;
     PyObject *user_data, *result, *py_msg;
-    LrCallbackData *callback_data = (LrCallbackData *) data;
-    CbData *cbdata = (CbData *) callback_data->userdata;
 
-    self = (_MetadataTargetObject *)cbdata->cbdata;
-
-    LrMetadataTarget *target = self->target;
-    target->repomd_records_downloaded++;
-
-    if (target->repomd_records_to_download != target->repomd_records_downloaded)
-        return ret;
-    else if (!self->end_cb)
+    if (!self || !self->end_cb)
         return ret;
 
     if (self->cb_data)
