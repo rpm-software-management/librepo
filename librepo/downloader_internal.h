@@ -21,6 +21,7 @@
 #ifndef LIBREPO_DOWNLOADER_INTERNAL_H
 #define LIBREPO_DOWNLOADER_INTERNAL_H
 
+#include "librepo/metadata_downloader.h"
 #include <librepo/handle.h>
 
 G_BEGIN_DECLS
@@ -32,9 +33,16 @@ typedef struct {
     LrMirrorFailureCb mfcb; /*!<
         Mirror failure callback */
 
+    LrEndCb endcb; /*!<
+        End callback */
+
     GSList *singlecbdata; /*!<
         List of LrCallbackData */
 
+    LrMetadataTarget * target; /*!<
+        Metadata target for which are these callback data shared.
+        It is currently only used in lr_multi_end_func to determine
+        if endcb should be called. */
 } LrSharedCallbackData;
 
 typedef struct {
@@ -43,6 +51,17 @@ typedef struct {
     void *userdata;     /*!< User data related to the target */
     LrSharedCallbackData *sharedcbdata; /*!< Shared cb data */
 } LrCallbackData;
+
+int
+lr_multi_progress_func(void* ptr,
+                       double total_to_download,
+                       double now_downloaded);
+
+int
+lr_multi_mf_func(void *ptr, const char *msg, const char *url);
+
+int
+lr_metadata_target_end_func(void *ptr, LrTransferStatus status, const char *msg);
 
 G_END_DECLS
 

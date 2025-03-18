@@ -43,6 +43,7 @@
 #include "handle_internal.h"
 #include "result_internal.h"
 #include "yum_internal.h"
+#include "downloader_internal.h"
 #include "gpg.h"
 #include "cleanup.h"
 #include "librepo.h"
@@ -911,37 +912,72 @@ lr_yum_download_repos(GSList *targets,
     gboolean ret;
     GSList *download_targets = NULL;
     GSList *cbdata_list = NULL;
+    GSList *shared_cbdata_list = NULL;
     GError *download_error = NULL;
 
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
-        LrMetadataTarget *target = elem->data;
+        LrMetadataTarget *repo_target = elem->data;
+        GSList *repo_download_targets = NULL;
 
-        if (!target->handle) {
+        if (!repo_target->handle) {
             continue;
         }
 
-        prepare_repo_download_targets(target->handle,
-                                      target->repo,
-                                      target->repomd,
-                                      target,
-                                      &download_targets,
+        prepare_repo_download_targets(repo_target->handle,
+                                      repo_target->repo,
+                                      repo_target->repomd,
+                                      repo_target,
+                                      &repo_download_targets,
                                       &cbdata_list,
                                       &download_error);
+
+
+        // Shared data for all targets from a single repository
+        LrSharedCallbackData *shared_cbdata = lr_malloc0(sizeof(*shared_cbdata));
+        shared_cbdata->cb           = repo_target->progresscb;
+        shared_cbdata->mfcb         = repo_target->mirrorfailurecb;
+        shared_cbdata->endcb        = repo_target->endcb;
+        shared_cbdata->singlecbdata = NULL;
+        shared_cbdata->target       = repo_target;
+        shared_cbdata_list = g_slist_append(shared_cbdata_list, shared_cbdata);
+
+        for (GSList *elem = repo_download_targets; elem; elem = g_slist_next(elem)) {
+            LrDownloadTarget *download_target = elem->data;
+            LrCallbackData *lrcbdata = lr_malloc0(sizeof(*lrcbdata));
+            lrcbdata->downloaded     = 0.0;
+            lrcbdata->total          = 0.0;
+            lrcbdata->userdata       = repo_target->cbdata;
+            lrcbdata->sharedcbdata   = shared_cbdata;
+
+            download_target->progresscb      = (repo_target->progresscb) ? lr_multi_progress_func : NULL;
+            download_target->mirrorfailurecb = (repo_target->mirrorfailurecb) ? lr_multi_mf_func : NULL;
+            download_target->endcb           = (repo_target->endcb) ? lr_metadata_target_end_func : NULL;
+            download_target->cbdata          = lrcbdata;
+
+            shared_cbdata->singlecbdata = g_slist_append(shared_cbdata->singlecbdata,
+                                                        lrcbdata);
+        }
+        download_targets = g_slist_concat(download_targets, repo_download_targets);
     }
 
     if (!download_targets) {
-        g_propagate_error(err, download_error);
+        if (download_error) {
+            g_propagate_error(err, download_error);
+        }
         return TRUE;
     }
 
-    ret = lr_download_single_cb(download_targets,
-                                FALSE,
-                                (cbdata_list) ? progresscb : NULL,
-                                (cbdata_list) ? hmfcb : NULL,
-                                &download_error);
+    ret = lr_download(download_targets,
+                      FALSE,
+                      &download_error);
 
     error_handling(download_targets, err, download_error);
 
+    for (GSList *elem = shared_cbdata_list; elem; elem = g_slist_next(elem)) {
+        LrSharedCallbackData *shared_cbdata = elem->data;
+        g_slist_free_full(shared_cbdata->singlecbdata, (GDestroyNotify)lr_free);
+    }
+    g_slist_free_full(shared_cbdata_list, (GDestroyNotify)lr_free);
     g_slist_free_full(cbdata_list, (GDestroyNotify)cbdata_free);
     g_slist_free_full(download_targets, (GDestroyNotify)lr_downloadtarget_free);
 

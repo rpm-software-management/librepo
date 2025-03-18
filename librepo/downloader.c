@@ -2910,6 +2910,26 @@ lr_multi_mf_func(void *ptr, const char *msg, const char *url)
     return shared_cbdata->mfcb(cbdata->userdata, msg, url);
 }
 
+int
+lr_metadata_target_end_func(void *ptr, LrTransferStatus status, const char *msg)
+{
+    int ret = LR_CB_OK; // Assume everything will be ok
+    LrCallbackData *cbdata = ptr;
+    LrSharedCallbackData *shared_cbdata = cbdata->sharedcbdata;
+
+    LrMetadataTarget *target = shared_cbdata->target;
+    target->repomd_records_downloaded++;
+
+    // We want to call the endcb only once per repo but this callback is called
+    // whenever a target (file) from the repo is downloaded. Call endcb only once
+    // all files have been downloaded.
+    if (target->repomd_records_to_download != target->repomd_records_downloaded) {
+        return ret;
+    }
+
+    return shared_cbdata->endcb(cbdata->userdata, status, msg);
+}
+
 gboolean
 lr_download_single_cb(GSList *targets,
                       gboolean failfast,
