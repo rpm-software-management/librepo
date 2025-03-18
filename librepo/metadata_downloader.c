@@ -373,6 +373,7 @@ lr_metadata_download_cleanup(GSList *download_targets)
 
         lr_downloadtarget_free(download_target);
     }
+    g_slist_free(download_targets);
 
     return ret;
 }
