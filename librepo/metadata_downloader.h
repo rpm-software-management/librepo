@@ -75,8 +75,8 @@ typedef struct {
 /**
  * Create new LrMetadataTarget object.
  * @param handle Handle related to this download or NULL.
- * @param repo Related repo.
- * @param repomd Related repomd.
+ * @param repo Related repo (transfers ownership to the LrMetadataTarget).
+ * @param repomd Related repomd (transfers ownership to the LrMetadataTarget).
  * @param cbdata User data for the callback
  * @param err GError **
  * @return Newly allocated LrMetadataTarget or NULL on error
