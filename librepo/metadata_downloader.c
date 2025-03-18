@@ -92,6 +92,8 @@ lr_metadatatarget_free(LrMetadataTarget *target)
         return;
     g_string_chunk_free(target->chunk);
     g_list_free_full(target->err, g_free);
+    lr_yum_repo_free(target->repo);
+    lr_yum_repomd_free(target->repomd);
     g_free(target);
 }
 
