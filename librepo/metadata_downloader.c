@@ -269,8 +269,6 @@ create_repomd_xml_download_targets(GSList *targets,
             lr_get_best_checksum(handle->metalink, &checksums);
         }
 
-        CbData *cbdata = lr_get_metadata_failure_callback(handle);
-
         download_target = lr_downloadtarget_new(target->handle,
                                                 "repodata/repomd.xml",
                                                 NULL,
@@ -279,10 +277,10 @@ create_repomd_xml_download_targets(GSList *targets,
                                                 checksums,
                                                 0,
                                                 0,
+                                                target->progresscb,
+                                                target->cbdata,
                                                 NULL,
-                                                cbdata,
-                                                NULL,
-                                                (cbdata) ? hmfcb : NULL,
+                                                target->mirrorfailurecb,
                                                 target,
                                                 0,
                                                 0,
