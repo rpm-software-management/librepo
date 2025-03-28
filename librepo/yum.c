@@ -971,7 +971,20 @@ lr_yum_download_repos(GSList *targets,
                       FALSE,
                       &download_error);
 
-    error_handling(download_targets, err, download_error);
+    if (!ret && download_error) {
+        g_propagate_error(err, download_error);
+    }
+
+    // Propagate download target error to its metadata target
+    for (GSList *elem = download_targets; elem; elem = g_slist_next(elem)) {
+        LrDownloadTarget *target = elem->data;
+        if (target->err) {
+            LrCallbackData *lrcbdata = target->cbdata;
+            LrSharedCallbackData *shared_cbdata = lrcbdata->sharedcbdata;
+            LrMetadataTarget *metadata_target = shared_cbdata->target;
+            metadata_target->err = g_list_append(metadata_target->err, g_strdup(target->err));
+        }
+    }
 
     for (GSList *elem = shared_cbdata_list; elem; elem = g_slist_next(elem)) {
         LrSharedCallbackData *shared_cbdata = elem->data;
