@@ -332,7 +332,7 @@ process_repomd_xml(GSList *targets,
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &error)) {
             lr_metadatatarget_append_error(target, error->message);
             err_msg = g_list_last(target->err)->data;
-            g_error_free(error);
+            g_clear_error(&error);
             goto fail;
         }
 
@@ -342,7 +342,7 @@ process_repomd_xml(GSList *targets,
         if (!ret) {
             lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message);
             err_msg = g_list_last(target->err)->data;
-            g_error_free(error);
+            g_clear_error(&error);
             goto fail;
         }
 
