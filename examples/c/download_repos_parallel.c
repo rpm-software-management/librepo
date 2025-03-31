@@ -34,12 +34,6 @@ static int hmf_callback(void *data, const char *msg, const char *url) {
   return 0;
 }
 
-static int hmf_callback_handle(void *data, const char *msg, const char *url,
-                               const char *metadata) {
-  printf("%s: %s: %s (%s)\n", metadata, msg, url, (const char *)data);
-  return 0;
-}
-
 LrHandle *create_handle(const char *repo) {
   // Handle represents a download configuration
   LrHandle *h = lr_handle_init();
@@ -68,13 +62,6 @@ LrHandle *create_handle(const char *repo) {
   char *download_list[] = {"primary", "filelists", "group", "updateinfo", NULL};
   lr_handle_setopt(h, NULL, LRO_YUMDLIST, download_list);
 
-  // Callback to display progress of downloading
-  lr_handle_setopt(h, NULL, LRO_PROGRESSCB, progress_callback);
-  // Callback to call handle mirror failure
-  lr_handle_setopt(h, NULL, LRO_HMFCB, hmf_callback_handle);
-  // Set user data for the callback
-  lr_handle_setopt(h, NULL, LRO_PROGRESSDATA, "Callback data set in handle");
-
   return h;
 }
 
@@ -88,14 +75,15 @@ int main(void) {
   }
   mkdir(DESTDIR, 0777);
 
-  const char *cbdata = "Callback data set in target";
+  const char *cbdata1 = "Callback data from target 1";
   LrHandle *h1 = create_handle("fedora-41");
   LrMetadataTarget *m1 =
-      lr_metadatatarget_new2(h1, (void *)cbdata, progress_callback,
+      lr_metadatatarget_new2(h1, (void *)cbdata1, progress_callback,
                              hmf_callback, end_callback, NULL, &tmp_err);
+  const char *cbdata2 = "Callback data from target 2";
   LrHandle *h2 = create_handle("updates-released-f41");
   LrMetadataTarget *m2 =
-      lr_metadatatarget_new2(h2, (void *)cbdata, progress_callback,
+      lr_metadatatarget_new2(h2, (void *)cbdata2, progress_callback,
                              hmf_callback, end_callback, NULL, &tmp_err);
 
   GSList *metadata_targets = NULL;

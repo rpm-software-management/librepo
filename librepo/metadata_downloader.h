@@ -89,9 +89,9 @@ lr_metadatatarget_new(LrHandle *handle, LrYumRepo *repo, LrYumRepoMd *repomd, vo
  * Almost same as lr_metadatatarget_new() except this function
  * could set more callbacks.
  * @param handle Handle related to this download or NULL.
- * @param cbdata User data for the callback
- * @param progresscb Progress callback for this transfer.
- * @param mirror_failure_cb Called when download from a mirror failed.
+ * @param cbdata User data for the callback (overrides handle user_data).
+ * @param progresscb Progress callback for this transfer (overrides handle user_cb).
+ * @param mirror_failure_cb Called when download from a mirror failed (overrides handle hmfcb).
  * @param endcb Callback called when target transfer is done.
  * @param err GError **
  * @return Newly allocated LrMetadataTarget or NULL on error
