@@ -413,6 +413,58 @@ gboolean cleanup(GSList *download_targets, GError **err)
     return *err == NULL;
 }
 
+// metadata is unused here because the LrHandle hmfcb callback is different to the LrMetadataTarget callback
+static int
+hmfcb_metadata_target_wrapper(void * clientp, const char *msg, const char *url, G_GNUC_UNUSED const char *metadata) {
+    LrMetadataTarget *target = clientp;
+    if (target->mirrorfailurecb) {
+        return target->mirrorfailurecb(target->cbdata, msg, url);
+    }
+
+    return LR_CB_OK;
+}
+
+static int
+usercb_metadata_target_wrapper(void * clientp, double total_to_download, double now_downloaded) {
+    LrMetadataTarget *target = clientp;
+    if (target->progresscb) {
+        return target->progresscb(target->cbdata, total_to_download, now_downloaded);
+    }
+
+    return LR_CB_OK;
+}
+
+typedef struct {
+    LrProgressCb user_cb;
+    void *user_data;
+    LrHandleMirrorFailureCb hmfcb;
+} HandleCallbacksBackup;
+
+static void
+restore_handle_callbacks(GSList *targets, GSList *handle_callbacks_backups)
+{
+    assert(g_slist_length(targets) == g_slist_length(handle_callbacks_backups));
+
+    GSList *elem = targets;
+    GSList *backup_handle_elem = handle_callbacks_backups;
+
+    for (; elem; elem = g_slist_next(elem), backup_handle_elem = g_slist_next(backup_handle_elem)) {
+        LrMetadataTarget *metadata_target = elem->data;
+
+        // Restore original handle callbacks
+        HandleCallbacksBackup *backup = backup_handle_elem->data;
+        LrHandle *handle = metadata_target->handle;
+        if (handle) {
+            handle->user_cb = backup->user_cb;
+            handle->user_data = backup->user_data;
+            handle->hmfcb = backup->hmfcb;
+        }
+        lr_free(backup);
+
+    }
+    g_slist_free(handle_callbacks_backups);
+}
+
 gboolean
 lr_download_metadata(GSList *targets,
                      GError **err)
@@ -431,13 +483,41 @@ lr_download_metadata(GSList *targets,
         return FALSE;
     }
 
+    // Override handle callbacks with callbacks set from LrMetadataTargets.
+    // We want to consistently use LrMetadataTarget callbacks for everything.
+    // Store them so we can put them back once finished.
+    GSList *handle_callbacks_backups = NULL;
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        LrMetadataTarget *target = elem->data;
+        LrHandle *handle = target->handle;
+        if (handle) {
+            HandleCallbacksBackup * backup = lr_malloc0(sizeof(HandleCallbacksBackup));
+            backup->user_cb = handle->user_cb;
+            backup->user_data = handle->user_data;
+            backup->hmfcb = handle->hmfcb;
+
+            // Use indirect callback wrappers because handle->hmfcb and target->mirrorfailurecb have different types
+            handle->user_data = target;
+            handle->user_cb = usercb_metadata_target_wrapper;
+            handle->hmfcb = hmfcb_metadata_target_wrapper;
+
+            handle_callbacks_backups = g_slist_append(handle_callbacks_backups, backup);
+        } else {
+            // In case there is no handle add NULL to ensure both targets and handle_callbacks_backups have
+            // the same number of elements.
+            handle_callbacks_backups = g_slist_append(handle_callbacks_backups, NULL);
+        }
+    }
+
     create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths);
 
     if (!lr_download(download_targets, FALSE, err)) {
+        restore_handle_callbacks(targets, handle_callbacks_backups);
         return cleanup(download_targets, err);
     }
 
     if (!process_repomd_xml(targets, fd_list, paths, err)) {
+        restore_handle_callbacks(targets, handle_callbacks_backups);
         return cleanup(download_targets, err);
     }
 
@@ -446,6 +526,7 @@ lr_download_metadata(GSList *targets,
 
     lr_yum_download_repos(targets, err);
 
+    restore_handle_callbacks(targets, handle_callbacks_backups);
     return cleanup(download_targets, err);
 }
 
