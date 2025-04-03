@@ -1535,6 +1535,17 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         if(target->zck_state == LR_ZCK_DL_FINISHED) {
             g_debug("%s: Target already fully downloaded: %s", __func__, target->target->path);
             target->state = LR_DS_FINISHED;
+            LrEndCb end_cb =  target->target->endcb;
+            if (end_cb) {
+                int rc = end_cb(target->target->cbdata,
+                                LR_TRANSFER_SUCCESSFUL,
+                                "Already downloaded");
+                if (rc == LR_CB_ERROR) {
+                    g_set_error(err, LR_DOWNLOADER_ERROR, LRE_CBINTERRUPTED,
+                                "Interrupted by LR_CB_ERROR from end callback");
+                    goto fail;
+                }
+            }
             curl_easy_cleanup(target->curl_handle);
             target->curl_handle = NULL;
             g_free(target->headercb_interrupt_reason);
