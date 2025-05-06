@@ -87,7 +87,7 @@ jobs:
       - name: Run Integration Tests
         uses: ./.github/actions/integration-tests
         with:
-          package-urls: ${{needs.copr-build.outputs.package-urls}}
+          package-urls: ${{needs.copr-build-dnf4.outputs.package-urls}}
 
   integration-tests-dnf5:
     name: DNF5 Integration Tests
@@ -108,7 +108,7 @@ jobs:
       - name: Run Integration Tests
         uses: ./.github/actions/integration-tests
         with:
-          package-urls: ${{needs.copr-build.outputs.package-urls}}
+          package-urls: ${{needs.copr-build-dnf5.outputs.package-urls}}
           extra-run-args: ${{matrix.extra-run-args}}
 
   ansible-tests:
