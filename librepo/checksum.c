@@ -269,17 +269,6 @@ lr_checksum_fd_compare(LrChecksumType type,
 
     *matches = (strcmp(expected, checksum)) ? FALSE : TRUE;
 
-    if (fsync(fd) != 0) {
-        if (errno == EROFS || errno == EINVAL) {
-            g_debug("fsync failed: %s", strerror(errno));
-        } else {
-            g_set_error(err, LR_CHECKSUM_ERROR, LRE_FILE,
-                        "fsync failed: %s", strerror(errno));
-            lr_free(checksum);
-            return FALSE;
-        }
-    }
-
     if (caching && *matches && timestamp != -1) {
         // Store timestamp and checksum as extended file attribute if caching is enabled
         FSETXATTR(fd, XATTR_CHKSUM_MTIME, timestamp_str, strlen(timestamp_str), 0);
