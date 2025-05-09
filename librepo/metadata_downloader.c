@@ -78,7 +78,9 @@ lr_metadatatarget_new2(LrHandle *handle,
     target->progresscb = progresscb;
     target->mirrorfailurecb = mirrorfailure_cb;
     target->endcb = endcb;
-    target->gnupghomedir = g_string_chunk_insert(target->chunk, gnupghomedir);
+    if (gnupghomedir) {
+        target->gnupghomedir = g_string_chunk_insert(target->chunk, gnupghomedir);
+    }
 
     return target;
 }
@@ -90,6 +92,8 @@ lr_metadatatarget_free(LrMetadataTarget *target)
         return;
     g_string_chunk_free(target->chunk);
     g_list_free_full(target->err, g_free);
+    lr_yum_repo_free(target->repo);
+    lr_yum_repomd_free(target->repomd);
     g_free(target);
 }
 
@@ -265,8 +269,6 @@ create_repomd_xml_download_targets(GSList *targets,
             lr_get_best_checksum(handle->metalink, &checksums);
         }
 
-        CbData *cbdata = lr_get_metadata_failure_callback(handle);
-
         download_target = lr_downloadtarget_new(target->handle,
                                                 "repodata/repomd.xml",
                                                 NULL,
@@ -275,10 +277,10 @@ create_repomd_xml_download_targets(GSList *targets,
                                                 checksums,
                                                 0,
                                                 0,
+                                                target->progresscb,
+                                                target->cbdata,
                                                 NULL,
-                                                cbdata,
-                                                NULL,
-                                                (cbdata) ? hmfcb : NULL,
+                                                target->mirrorfailurecb,
                                                 target,
                                                 0,
                                                 0,
@@ -295,10 +297,12 @@ create_repomd_xml_download_targets(GSList *targets,
     }
 }
 
-void
+// If it returns FALSE then err is set
+gboolean
 process_repomd_xml(GSList *targets,
                    GSList *fd_list,
-                   GSList *paths)
+                   GSList *paths,
+                   GError **err)
 {
     GError *error = NULL;
 
@@ -309,6 +313,7 @@ process_repomd_xml(GSList *targets,
         LrHandle *handle;
         gboolean ret;
         int fd_value = *((int *) fd->data);
+        const char * err_msg = NULL;
 
         if (!target->handle || fd_value == -1) {
             goto fail;
@@ -320,12 +325,14 @@ process_repomd_xml(GSList *targets,
 
         if (target->download_target->rcode != LRE_OK) {
             lr_metadatatarget_append_error(target, (char *) lr_strerror(target->download_target->rcode));
+            err_msg = g_list_last(target->err)->data;
             goto fail;
         }
 
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &error)) {
             lr_metadatatarget_append_error(target, error->message);
-            g_error_free(error);
+            err_msg = g_list_last(target->err)->data;
+            g_clear_error(&error);
             goto fail;
         }
 
@@ -334,7 +341,8 @@ process_repomd_xml(GSList *targets,
                                        "Repomd xml parser", &error);
         if (!ret) {
             lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message);
-            g_error_free(error);
+            err_msg = g_list_last(target->err)->data;
+            g_clear_error(&error);
             goto fail;
         }
 
@@ -349,7 +357,23 @@ process_repomd_xml(GSList *targets,
         }
         lr_free(path->data);
         lr_free(fd->data);
+
+        // If we failed to download/verify/parse repomd of this LrMetadataTarget call its endcb
+        // because we cannot continue and the target is finished.
+        if (target->endcb) {
+            int ret = target->endcb(target->cbdata, LR_TRANSFER_ERROR,
+                                    err_msg ? err_msg : "Unknown error processing repomd.");
+            if (ret == LR_CB_ERROR) {
+                g_debug("%s: Downloading was aborted by LR_CB_ERROR from end callback", __func__);
+                g_set_error(err, LR_DOWNLOADER_ERROR,
+                            LRE_CBINTERRUPTED,
+                            "Interrupted by LR_CB_ERROR from end callback");
+                return FALSE;
+            }
+        }
     }
+
+    return TRUE;
 }
 
 static gboolean
@@ -369,6 +393,7 @@ lr_metadata_download_cleanup(GSList *download_targets)
 
         lr_downloadtarget_free(download_target);
     }
+    g_slist_free(download_targets);
 
     return ret;
 }
@@ -386,6 +411,58 @@ gboolean cleanup(GSList *download_targets, GError **err)
     }
 
     return *err == NULL;
+}
+
+// metadata is unused here because the LrHandle hmfcb callback is different to the LrMetadataTarget callback
+static int
+hmfcb_metadata_target_wrapper(void * clientp, const char *msg, const char *url, G_GNUC_UNUSED const char *metadata) {
+    LrMetadataTarget *target = clientp;
+    if (target->mirrorfailurecb) {
+        return target->mirrorfailurecb(target->cbdata, msg, url);
+    }
+
+    return LR_CB_OK;
+}
+
+static int
+usercb_metadata_target_wrapper(void * clientp, double total_to_download, double now_downloaded) {
+    LrMetadataTarget *target = clientp;
+    if (target->progresscb) {
+        return target->progresscb(target->cbdata, total_to_download, now_downloaded);
+    }
+
+    return LR_CB_OK;
+}
+
+typedef struct {
+    LrProgressCb user_cb;
+    void *user_data;
+    LrHandleMirrorFailureCb hmfcb;
+} HandleCallbacksBackup;
+
+static void
+restore_handle_callbacks(GSList *targets, GSList *handle_callbacks_backups)
+{
+    assert(g_slist_length(targets) == g_slist_length(handle_callbacks_backups));
+
+    GSList *elem = targets;
+    GSList *backup_handle_elem = handle_callbacks_backups;
+
+    for (; elem; elem = g_slist_next(elem), backup_handle_elem = g_slist_next(backup_handle_elem)) {
+        LrMetadataTarget *metadata_target = elem->data;
+
+        // Restore original handle callbacks
+        HandleCallbacksBackup *backup = backup_handle_elem->data;
+        LrHandle *handle = metadata_target->handle;
+        if (handle) {
+            handle->user_cb = backup->user_cb;
+            handle->user_data = backup->user_data;
+            handle->hmfcb = backup->hmfcb;
+        }
+        lr_free(backup);
+
+    }
+    g_slist_free(handle_callbacks_backups);
 }
 
 gboolean
@@ -406,19 +483,50 @@ lr_download_metadata(GSList *targets,
         return FALSE;
     }
 
+    // Override handle callbacks with callbacks set from LrMetadataTargets.
+    // We want to consistently use LrMetadataTarget callbacks for everything.
+    // Store them so we can put them back once finished.
+    GSList *handle_callbacks_backups = NULL;
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        LrMetadataTarget *target = elem->data;
+        LrHandle *handle = target->handle;
+        if (handle) {
+            HandleCallbacksBackup * backup = lr_malloc0(sizeof(HandleCallbacksBackup));
+            backup->user_cb = handle->user_cb;
+            backup->user_data = handle->user_data;
+            backup->hmfcb = handle->hmfcb;
+
+            // Use indirect callback wrappers because handle->hmfcb and target->mirrorfailurecb have different types
+            handle->user_data = target;
+            handle->user_cb = usercb_metadata_target_wrapper;
+            handle->hmfcb = hmfcb_metadata_target_wrapper;
+
+            handle_callbacks_backups = g_slist_append(handle_callbacks_backups, backup);
+        } else {
+            // In case there is no handle add NULL to ensure both targets and handle_callbacks_backups have
+            // the same number of elements.
+            handle_callbacks_backups = g_slist_append(handle_callbacks_backups, NULL);
+        }
+    }
+
     create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths);
 
     if (!lr_download(download_targets, FALSE, err)) {
+        restore_handle_callbacks(targets, handle_callbacks_backups);
         return cleanup(download_targets, err);
     }
 
-    process_repomd_xml(targets, fd_list, paths);
+    if (!process_repomd_xml(targets, fd_list, paths, err)) {
+        restore_handle_callbacks(targets, handle_callbacks_backups);
+        return cleanup(download_targets, err);
+    }
 
     g_slist_free(fd_list);
     g_slist_free(paths);
 
     lr_yum_download_repos(targets, err);
 
+    restore_handle_callbacks(targets, handle_callbacks_backups);
     return cleanup(download_targets, err);
 }
 
