@@ -905,6 +905,20 @@ error_handling(GSList *targets, GError **dest_error, GError *src_error)
     return TRUE;
 }
 
+gchar* join_glist_strings(GList *list, const gchar *separator) {
+    GString *result = g_string_new(NULL);
+
+    for (GList *l = list; l != NULL; l = l->next) {
+        gchar *str = (gchar *)l->data;
+        g_string_append(result, str);
+        if (l->next != NULL) {
+            g_string_append(result, separator);
+        }
+    }
+
+    return g_string_free(result, FALSE); // FALSE = return the string, not free it
+}
+
 gboolean
 lr_yum_download_repos(GSList *targets,
                       GError **err)
@@ -957,7 +971,34 @@ lr_yum_download_repos(GSList *targets,
             shared_cbdata->singlecbdata = g_slist_append(shared_cbdata->singlecbdata,
                                                         lrcbdata);
         }
-        download_targets = g_slist_concat(download_targets, repo_download_targets);
+
+        if ((g_slist_length(repo_download_targets) == 0) && (repo_target->endcb)) {
+            LrTransferStatus status;
+            const char *msg;
+            if (g_list_length(repo_target->err) == 0) {
+                // If there is nothing to download for this repo_target and
+                // there were no erors it is finished.
+                // This can happen when downloading just metalink/repomd.xml
+                status = LR_TRANSFER_SUCCESSFUL;
+                msg = "Successfully downloaded";
+            } else {
+                // If there were errors (we failed to download/verify/parse repomd)
+                // for this repo_target it cannot continue and is finished.
+                status = LR_TRANSFER_ERROR;
+                const char * err_msg = join_glist_strings(repo_target->err, ",");
+                msg = err_msg ? err_msg : "Unknown error.";
+            }
+            int ret = repo_target->endcb(repo_target->cbdata, status, msg);
+            if (ret == LR_CB_ERROR) {
+                g_debug("%s: Downloading was aborted by LR_CB_ERROR from end callback", __func__);
+                g_set_error(err, LR_DOWNLOADER_ERROR,
+                            LRE_CBINTERRUPTED,
+                            "Interrupted by LR_CB_ERROR from end callback");
+                return FALSE;
+            }
+        } else {
+            download_targets = g_slist_concat(download_targets, repo_download_targets);
+        }
     }
 
     if (!download_targets) {
