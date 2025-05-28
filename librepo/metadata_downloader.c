@@ -298,11 +298,10 @@ create_repomd_xml_download_targets(GSList *targets,
 }
 
 // If it returns FALSE then err is set
-gboolean
+void
 process_repomd_xml(GSList *targets,
                    GSList *fd_list,
-                   GSList *paths,
-                   GError **err)
+                   GSList *paths)
 {
     GError *error = NULL;
 
@@ -313,25 +312,21 @@ process_repomd_xml(GSList *targets,
         LrHandle *handle;
         gboolean ret;
         int fd_value = *((int *) fd->data);
-        const char * err_msg = NULL;
 
         if (!target->handle || fd_value == -1) {
             goto fail;
         }
 
-        handle = target->handle;
         handle->used_mirror =  g_strdup(target->download_target->usedmirror);
         handle->gnupghomedir = g_strdup(target->gnupghomedir);
 
         if (target->download_target->rcode != LRE_OK) {
             lr_metadatatarget_append_error(target, (char *) lr_strerror(target->download_target->rcode));
-            err_msg = g_list_last(target->err)->data;
             goto fail;
         }
 
         if (!lr_check_repomd_xml_asc_availability(handle, target->repo, fd_value, path->data, &error)) {
             lr_metadatatarget_append_error(target, error->message);
-            err_msg = g_list_last(target->err)->data;
             g_clear_error(&error);
             goto fail;
         }
@@ -341,7 +336,6 @@ process_repomd_xml(GSList *targets,
                                        "Repomd xml parser", &error);
         if (!ret) {
             lr_metadatatarget_append_error(target, "Parsing unsuccessful: %s", error->message);
-            err_msg = g_list_last(target->err)->data;
             g_clear_error(&error);
             goto fail;
         }
@@ -357,23 +351,7 @@ process_repomd_xml(GSList *targets,
         }
         lr_free(path->data);
         lr_free(fd->data);
-
-        // If we failed to download/verify/parse repomd of this LrMetadataTarget call its endcb
-        // because we cannot continue and the target is finished.
-        if (target->endcb) {
-            int ret = target->endcb(target->cbdata, LR_TRANSFER_ERROR,
-                                    err_msg ? err_msg : "Unknown error processing repomd.");
-            if (ret == LR_CB_ERROR) {
-                g_debug("%s: Downloading was aborted by LR_CB_ERROR from end callback", __func__);
-                g_set_error(err, LR_DOWNLOADER_ERROR,
-                            LRE_CBINTERRUPTED,
-                            "Interrupted by LR_CB_ERROR from end callback");
-                return FALSE;
-            }
-        }
     }
-
-    return TRUE;
 }
 
 static gboolean
@@ -516,10 +494,7 @@ lr_download_metadata(GSList *targets,
         return cleanup(download_targets, err);
     }
 
-    if (!process_repomd_xml(targets, fd_list, paths, err)) {
-        restore_handle_callbacks(targets, handle_callbacks_backups);
-        return cleanup(download_targets, err);
-    }
+    process_repomd_xml(targets, fd_list, paths);
 
     g_slist_free(fd_list);
     g_slist_free(paths);
