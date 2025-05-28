@@ -236,6 +236,11 @@ create_repomd_xml_download_targets(GSList *targets,
             continue;
         }
 
+        if (handle->fetchmirrors) {
+            fillInvalidationValues(fd_list, paths);
+            continue;
+        }
+
         if (mkdir(handle->destdir, S_IRWXU) == -1 && errno != EEXIST) {
             lr_metadatatarget_append_error(target, "Cannot create tmpdir: %s %s", handle->destdir, g_strerror(errno));
             fillInvalidationValues(fd_list, paths);
@@ -263,36 +268,38 @@ create_repomd_xml_download_targets(GSList *targets,
                 handle_failure(target, fd_list, paths, err);
                 continue;
             }
+
+            if (handle->metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
+                lr_get_best_checksum(handle->metalink, &checksums);
+            }
+
+            download_target = lr_downloadtarget_new(target->handle,
+                                                    "repodata/repomd.xml",
+                                                    NULL,
+                                                    fd,
+                                                    NULL,
+                                                    checksums,
+                                                    0,
+                                                    0,
+                                                    target->progresscb,
+                                                    target->cbdata,
+                                                    NULL,
+                                                    target->mirrorfailurecb,
+                                                    target,
+                                                    0,
+                                                    0,
+                                                    NULL,
+                                                    TRUE,
+                                                    FALSE);
+
+            target->download_target = download_target;
+            (*download_targets) = g_slist_append((*download_targets), download_target);
+            (*fd_list) = appendFdValue((*fd_list), fd);
+            (*paths) = appendPath((*paths), path);
+        } else {
+            fillInvalidationValues(fd_list, paths);
         }
 
-        if (handle->metalink && (handle->checks & LR_CHECK_CHECKSUM)) {
-            lr_get_best_checksum(handle->metalink, &checksums);
-        }
-
-        download_target = lr_downloadtarget_new(target->handle,
-                                                "repodata/repomd.xml",
-                                                NULL,
-                                                fd,
-                                                NULL,
-                                                checksums,
-                                                0,
-                                                0,
-                                                target->progresscb,
-                                                target->cbdata,
-                                                NULL,
-                                                target->mirrorfailurecb,
-                                                target,
-                                                0,
-                                                0,
-                                                NULL,
-                                                TRUE,
-                                                FALSE);
-
-        target->download_target = download_target;
-        (*download_targets) = g_slist_append((*download_targets), download_target);
-
-        (*fd_list) = appendFdValue((*fd_list), fd);
-        (*paths) = appendPath((*paths), path);
         lr_free(path);
     }
 }
@@ -309,7 +316,18 @@ process_repomd_xml(GSList *targets,
          elem = g_slist_next(elem), fd = g_slist_next(fd), path = g_slist_next(path)) {
 
         LrMetadataTarget *target = elem->data;
-        LrHandle *handle;
+        LrHandle *handle = target->handle;
+
+        // No repomd should be present
+        if (handle->fetchmirrors) {
+            continue;
+        }
+
+        // For an update we use repomd from the previous (first) run
+        if (handle->update) {
+            continue;
+        }
+
         gboolean ret;
         int fd_value = *((int *) fd->data);
 
