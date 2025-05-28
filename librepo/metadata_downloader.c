@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "cleanup.h"
 
 #include "librepo/librepo.h"
 
@@ -461,6 +462,95 @@ restore_handle_callbacks(GSList *targets, GSList *handle_callbacks_backups)
     g_slist_free(handle_callbacks_backups);
 }
 
+static void
+append_url_target(const char *url, LrMetadataTarget *target, GSList *download_targets) {
+    int fd = lr_gettmpfile();
+    if (fd < 0) {
+        lr_metadatatarget_append_error(target, "Cannot create a temporary file for: %s", url);
+        return;
+    }
+    target->handle->onetimeflag_apply = TRUE;
+    LrDownloadTarget *download_target = lr_downloadtarget_new(target->handle,
+                                            url,
+                                            NULL,
+                                            fd,
+                                            NULL,
+                                            NULL,
+                                            0,
+                                            0,
+                                            target->progresscb,
+                                            target->cbdata,
+                                            NULL,
+                                            target->mirrorfailurecb,
+                                            target,
+                                            0,
+                                            0,
+                                            NULL,
+                                            TRUE,
+                                            FALSE);
+
+    download_targets = g_slist_append(download_targets, download_target);
+}
+
+static void
+create_metalink_and_mirrorlist_download_targets(GSList *targets, GSList *download_targets)
+{
+    for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
+        LrMetadataTarget *target = elem->data;
+        LrHandle *handle;
+        // handle is required
+        assert(target->handle);
+        handle = target->handle;
+
+        if (handle->offline || handle->local) {
+            // Handle is configured not to download
+            continue;
+        }
+
+        // If metalink is configured but mirrors are not populated yet
+        // we need to download it.
+        if (handle->metalinkurl && !handle->metalink_mirrors) {
+            _cleanup_free_ gchar *url = lr_prepend_url_protocol(handle->metalinkurl);
+            append_url_target(url, target, download_targets);
+        }
+        // If mirrorlist is configured but mirrors are not populated yet
+        // we need to download it.
+        if (handle->mirrorlisturl && !handle->mirrorlist_mirrors) {
+            _cleanup_free_ gchar *url = lr_prepend_url_protocol(handle->mirrorlisturl);
+            append_url_target(url, target, download_targets);
+        }
+    }
+}
+
+static gboolean
+propagate_metalink_or_mirrorlist_download_targets(GSList *download_targets, GError **err)
+{
+    for (GSList *elem = download_targets; elem; elem = g_slist_next(elem)) {
+        LrDownloadTarget *download_target = elem->data;
+        LrMetadataTarget *target = download_target->userdata;
+
+        if (target->handle->metalinkurl) {
+            target->handle->metalink_fd = download_target->fd;
+        } else if (target->handle->mirrorlisturl) {
+            target->handle->mirrorlist_fd = download_target->fd;
+        } else {
+            // The targets should download only metalinks or mirrorlists
+            assert(false);
+        }
+
+        if (lseek(download_target->fd, 0, SEEK_SET) != 0) {
+            g_debug("%s: Seek error: %s", __func__, g_strerror(errno));
+            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                        "lseek(%d, 0, SEEK_SET) error: %s",
+                        download_target->fd, g_strerror(errno));
+            close(download_target->fd);
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 gboolean
 lr_download_metadata(GSList *targets,
                      GError **err)
@@ -504,6 +594,30 @@ lr_download_metadata(GSList *targets,
             handle_callbacks_backups = g_slist_append(handle_callbacks_backups, NULL);
         }
     }
+
+    create_metalink_and_mirrorlist_download_targets(targets, download_targets);
+
+    // To match commit 12d0b4 (retry the metalink/mirrorlist download 3x times)
+    // multiply allowed_mirror_failures by 3. Since each metalink/mirrorlist has
+    // exactly one url (mirror) it has the same effect.
+    // Modify the first handle becasue that is where lr_download takes the config from.
+    LrHandle *first_lr_handle = ((LrDownloadTarget *) targets->data)->handle;
+    first_lr_handle->allowed_mirror_failures *= 3;
+
+    if (!lr_download(download_targets, FALSE, err)) {
+        first_lr_handle->allowed_mirror_failures /= 3;
+        restore_handle_callbacks(targets, handle_callbacks_backups);
+        return cleanup(download_targets, err);
+    }
+    // Restore previous value.
+    first_lr_handle->allowed_mirror_failures /= 3;
+
+    if (!propagate_metalink_or_mirrorlist_download_targets(download_targets, err)) {
+        restore_handle_callbacks(targets, handle_callbacks_backups);
+        return cleanup(download_targets, err);
+    }
+    lr_metadata_download_cleanup(download_targets);
+    download_targets = NULL;
 
     create_repomd_xml_download_targets(targets, &download_targets, &fd_list, &paths);
 
