@@ -1009,7 +1009,6 @@ lr_yum_download_url_retry(int attempts, LrHandle *lr_handle, const char *url,
 static gboolean
 lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
 {
-    assert(handle->mirrorlist_fd == -1);
     assert(!handle->mirrorlist_mirrors);
 
     int fd = -1;
@@ -1019,6 +1018,9 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
     if (!localpath && !handle->mirrorlisturl) {
         // Nothing to do
         return TRUE;
+    } else if (handle->mirrorlist_fd >= 0) {
+        // The mirrorlist is already provided
+        fd = handle->mirrorlist_fd;
     } else if (localpath && !handle->mirrorlisturl) {
         // Just try to use mirrorlist of the local repository
         _cleanup_free_ gchar *path = lr_pathconcat(localpath, "mirrorlist", NULL);
@@ -1123,7 +1125,6 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
 static gboolean
 lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
 {
-    assert(handle->metalink_fd == -1);
     assert(!handle->metalink_mirrors);
     assert(!handle->metalink);
 
@@ -1134,6 +1135,9 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
     if (!localpath && !handle->metalinkurl) {
         // Nothing to do
         return TRUE;
+    } else if (handle->metalink_fd >= 0) {
+        // The metalink is already provided
+        fd = handle->metalink_fd;
     } else if (localpath && !handle->metalinkurl) {
         // Just try to use metalink of the local repository
         _cleanup_free_ gchar *path = lr_pathconcat(localpath, "metalink.xml", NULL);
