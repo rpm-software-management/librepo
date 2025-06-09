@@ -1051,7 +1051,12 @@ lr_yum_download_repo(LrHandle *handle,
 
     assert(!err || *err == NULL);
 
-    prepare_repo_download_targets(handle, repo, repomd, NULL, &targets, &cbdata_list, err);
+    ret = prepare_repo_download_targets(handle, repo, repomd, NULL, &targets, &cbdata_list, err);
+    if (!ret) {
+        assert(!err || *err != NULL);
+        return ret;
+    }
+    assert(!err || *err == NULL);
 
     if (!targets)
         return TRUE;
