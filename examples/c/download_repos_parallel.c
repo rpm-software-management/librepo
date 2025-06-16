@@ -49,13 +49,13 @@ LrHandle *create_handle(const char *repo) {
 
   // --- Optional arguments --------------------------------------------
   // Make download interruptible
-  lr_handle_setopt(h, NULL, LRO_INTERRUPTIBLE, true);
+  lr_handle_setopt(h, NULL, LRO_INTERRUPTIBLE, 1);
   // Destination directory for metadata
   gchar *repo_destdir = g_strconcat(DESTDIR, "/", repo, NULL);
   lr_handle_setopt(h, NULL, LRO_DESTDIR, repo_destdir);
   g_free(repo_destdir);
   // Check checksum of all files (if checksum is available in repomd.xml)
-  lr_handle_setopt(h, NULL, LRO_CHECKSUM, true);
+  lr_handle_setopt(h, NULL, LRO_CHECKSUM, 1);
   // Download only primary.xml, comps.xml and updateinfo
   // Note: repomd.xml is downloaded implicitly!
   // Note: If LRO_YUMDLIST is None -> all files are downloaded
