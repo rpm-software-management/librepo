@@ -535,7 +535,7 @@ propagate_metalink_or_mirrorlist_download_targets(GSList *download_targets, GErr
             target->handle->mirrorlist_fd = download_target->fd;
         } else {
             // The targets should download only metalinks or mirrorlists
-            assert(false);
+            assert(0);
         }
 
         if (lseek(download_target->fd, 0, SEEK_SET) != 0) {
