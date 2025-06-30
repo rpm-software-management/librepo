@@ -246,6 +246,51 @@ START_TEST(test_gpg_check_binary_key_import_test_export)
 END_TEST
 
 
+START_TEST(test_gpg_check_import_padded)
+{
+    // Verify that lr_gpg_import_key_from_memory properly respects the key_len
+    // argument and does not read any garbage beyond the key in memory.
+
+    gboolean ret;
+    char *key_path;
+    char *tmp_home_path;
+    GError *tmp_err = NULL;
+
+    tmp_home_path = lr_gettmpdir();
+    key_path = lr_pathconcat(test_globals.testdata_dir,
+                             "repo_yum_01/repodata/repomd.xml_bad.key.asc", NULL);
+    char *random_prefix_text = "The file with the key can have any text\n";
+    int prefix_len = strlen(random_prefix_text);
+    // The suffix represents arbitrary memory that is located after the key
+    char suffix_with_garbage_and_null_byte[] = {'\xf4', '\xc2', '\x7f', '\0',};
+    int suffix_len = sizeof(suffix_with_garbage_and_null_byte);
+
+    // Load the key into memory
+    gchar *contents;
+    gsize length;
+    ret = g_file_get_contents(key_path, &contents, &length, &tmp_err);
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(ret);
+
+    // Wrap the loaded key with random text prefix and garbage suffix
+    gchar *padded_contents = g_malloc0(prefix_len + length + suffix_len);
+    memcpy(padded_contents, random_prefix_text, prefix_len);
+    memcpy(padded_contents + prefix_len, contents, length);
+    memcpy(padded_contents + prefix_len + length, suffix_with_garbage_and_null_byte, suffix_len);
+
+    ret = lr_gpg_import_key_from_memory(padded_contents, prefix_len + length, tmp_home_path, &tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+    g_free(contents);
+    g_free(padded_contents);
+
+    lr_remove_dir(tmp_home_path);
+    lr_free(key_path);
+    g_free(tmp_home_path);
+}
+END_TEST
+
+
 Suite *
 gpg_suite(void)
 {
@@ -254,6 +299,7 @@ gpg_suite(void)
     tcase_add_test(tc, test_gpg_check_signature);
     tcase_add_test(tc, test_gpg_check_armored_key_import_test_export);
     tcase_add_test(tc, test_gpg_check_binary_key_import_test_export);
+    tcase_add_test(tc, test_gpg_check_import_padded);
     suite_add_tcase(s, tc);
     return s;
 }
