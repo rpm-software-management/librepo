@@ -37,7 +37,7 @@
 #include "util.h"
 #include "xattr_internal.h"
 
-#define BUFFER_SIZE             2048
+#define BUFFER_SIZE             128*1024
 #define MAX_CHECKSUM_NAME_LEN   7
 
 LrChecksumType
