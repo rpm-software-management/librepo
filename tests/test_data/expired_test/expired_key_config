@@ -1,0 +1,9 @@
+%echo Generating expired test key
+Key-Type: RSA
+Key-Length: 2048
+Name-Real: expired test key
+Name-Email: expired@example.org
+Expire-Date: 2020-01-01
+%no-protection
+%commit
+%echo done

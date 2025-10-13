@@ -279,19 +279,52 @@ lr_gpg_check_signature_fd(int signature_fd,
 
     // Example of signature usage could be found in gpgme git repository
     // in the gpgme/tests/run-verify.c
+    //
+    // For key rotation support: If the data is signed with multiple keys and at least
+    // one valid, non-expired signature exists, we should succeed. We only fail if ALL
+    // signatures are either invalid or expired.
+    gboolean found_valid_signature = FALSE;
+    gboolean found_expired_key = FALSE;
+    gboolean found_expired_sig = FALSE;
     for (; sig; sig = sig->next) {
-        if ((sig->summary & GPGME_SIGSUM_VALID) ||  // Valid
-            (sig->summary & GPGME_SIGSUM_GREEN) ||  // Valid
-            (sig->summary == 0 && sig->status == GPG_ERR_NO_ERROR)) // Valid but key is not certified with a trusted signature
+        // Check if this signature is from an expired key or is itself expired
+        if (sig->summary & GPGME_SIGSUM_KEY_EXPIRED) {
+            g_debug("%s: Skipping signature with expired key", __func__);
+            found_expired_key = TRUE;
+            continue;
+        }
+        if (sig->summary & GPGME_SIGSUM_SIG_EXPIRED) {
+            g_debug("%s: Skipping expired signature", __func__);
+            found_expired_sig = TRUE;
+            continue;
+        }
+        if ((sig->summary & GPGME_SIGSUM_VALID) || // Valid
+            (sig->summary & GPGME_SIGSUM_GREEN) || // Valid
+            (sig->summary == 0 && sig->status == GPG_ERR_NO_ERROR))
+        // Valid but key is not certified with a trusted signature
         {
-            gpgme_release(context);
-            return TRUE;
+            found_valid_signature = TRUE;
+            break;
         }
     }
 
     gpgme_release(context);
-    g_debug("%s: Bad GPG signature", __func__);
-    g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad GPG signature");
+
+    if (found_valid_signature) {
+        return TRUE;
+    }
+
+    // No valid signature found - report appropriate error
+    if (found_expired_key) {
+        g_debug("%s: GPG signature verification failed - key has expired", __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "GPG signature verification failed - key has expired");
+    } else if (found_expired_sig) {
+        g_debug("%s: GPG signature verification failed - signature has expired", __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "GPG signature verification failed - signature has expired");
+    } else {
+        g_debug("%s: Bad GPG signature", __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad GPG signature");
+    }
     return FALSE;
 }
 
