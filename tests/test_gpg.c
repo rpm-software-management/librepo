@@ -291,6 +291,85 @@ START_TEST(test_gpg_check_import_padded)
 END_TEST
 
 
+START_TEST(test_gpgme_expired_signature)
+{
+    // This test verifies that expired GPG signatures are properly rejected
+    // using the gpgme backend.
+
+#ifndef USE_GPGME
+    // Skip this test when not using gpgme backend
+    return;
+#endif
+
+    gboolean ret;
+    char *valid_key_path, *valid_data_path, *valid_signature_path;
+    char *tmp_home_path;
+    GError *tmp_err = NULL;
+
+    tmp_home_path = lr_gettmpdir();
+
+    // First test with valid key/signature (sanity check)
+    valid_key_path = lr_pathconcat(test_globals.testdata_dir,
+                                   "repo_yum_01/repodata/repomd.xml.key.asc", NULL);
+    valid_data_path = lr_pathconcat(test_globals.testdata_dir,
+                                    "repo_yum_01/repodata/repomd.xml", NULL);
+    valid_signature_path = lr_pathconcat(test_globals.testdata_dir,
+                                         "repo_yum_01/repodata/repomd.xml.asc", NULL);
+
+    // Import the valid key first
+    ret = lr_gpg_import_key(valid_key_path, tmp_home_path, &tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+
+    // This should pass with a valid signature (sanity check)
+    ret = lr_gpg_check_signature(valid_signature_path,
+                                 valid_data_path,
+                                 tmp_home_path,
+                                 &tmp_err);
+    ck_assert_msg(ret, "Valid signature should pass: %s",
+            (tmp_err && tmp_err->message) ? tmp_err->message : "");
+    ck_assert_ptr_null(tmp_err);
+
+    // Clean up for expired key test
+    lr_remove_dir(tmp_home_path);
+    tmp_home_path = lr_gettmpdir();
+
+    // Now test with expired key
+    char *expired_key_path = lr_pathconcat(test_globals.testdata_dir, "expired_test/expired_key.asc", NULL);
+    char *expired_data_path = lr_pathconcat(test_globals.testdata_dir, "expired_test/test_data.txt", NULL);
+    char *expired_signature_path = lr_pathconcat(test_globals.testdata_dir, "expired_test/test_data.txt.asc", NULL);
+
+    // Import the expired key
+    ret = lr_gpg_import_key(expired_key_path, tmp_home_path, &tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+
+    // This should FAIL with expired signature - gpgme will reject it
+    ret = lr_gpg_check_signature(expired_signature_path,
+                                 expired_data_path,
+                                 tmp_home_path,
+                                 &tmp_err);
+    ck_assert_msg(!ret, "Expired signature should be rejected");
+    ck_assert_ptr_nonnull(tmp_err);
+
+    // Just verify that we get an appropriate error message (no specific text required)
+    ck_assert_msg(tmp_err->message != NULL, "Error message should not be NULL");
+    g_debug("GPG verification failed as expected: %s", tmp_err->message);
+
+    // Cleanup
+    lr_remove_dir(tmp_home_path);
+    lr_free(valid_key_path);
+    lr_free(valid_data_path);
+    lr_free(valid_signature_path);
+    lr_free(expired_key_path);
+    lr_free(expired_data_path);
+    lr_free(expired_signature_path);
+    g_free(tmp_home_path);
+    if (tmp_err) g_error_free(tmp_err);
+}
+END_TEST
+
+
 Suite *
 gpg_suite(void)
 {
@@ -300,6 +379,7 @@ gpg_suite(void)
     tcase_add_test(tc, test_gpg_check_armored_key_import_test_export);
     tcase_add_test(tc, test_gpg_check_binary_key_import_test_export);
     tcase_add_test(tc, test_gpg_check_import_padded);
+    tcase_add_test(tc, test_gpgme_expired_signature);
     suite_add_tcase(s, tc);
     return s;
 }
