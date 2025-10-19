@@ -294,6 +294,8 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_USERPWD:
     case LRO_USERNAME:
     case LRO_PASSWORD:
+    case LRO_METALINK_EXCLUDE_DOMAIN:
+    case LRO_METALINK_EXCLUDE_LOCATION:
     case LRO_PROXY:
     case LRO_PROXYUSERPWD:
     case LRO_DESTDIR:

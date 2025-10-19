@@ -28,6 +28,7 @@
 #include "rcodes.h"
 #include "util.h"
 #include "metalink.h"
+#include "metalink_internal.h"
 #include "xmlparser_internal.h"
 
 /** TODO:
@@ -93,6 +94,30 @@ lr_free_metalinkurl(LrMetalinkUrl *metalinkurl)
     lr_free(metalinkurl->location);
     lr_free(metalinkurl->url);
     lr_free(metalinkurl);
+}
+
+void
+lr_metalink_filter(LrMetalink *metalink, GRegex *domain, GRegex *location)
+{
+    GSList **link = &metalink->urls;
+    while (*link) {
+        GSList *item = *link;
+        LrMetalinkUrl *url = item->data;
+        gboolean excluded = location && url->location &&
+                            g_regex_match(location, url->location, 0, NULL);
+        if (!excluded && domain && url->url) {
+            g_autoptr(GUri) uri = g_uri_parse(url->url, G_URI_FLAGS_NONE, NULL);
+            const char *host = uri ? g_uri_get_host(uri) : NULL;
+            excluded = host && *host && g_regex_match(domain, host, 0, NULL);
+        }
+        if (excluded) {
+            *link = item->next;
+            lr_free_metalinkurl(url);
+            g_slist_free_1(item);
+        } else {
+            link = &item->next;
+        }
+    }
 }
 
 static void

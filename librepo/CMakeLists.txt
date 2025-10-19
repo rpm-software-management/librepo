@@ -56,6 +56,7 @@ LIST(APPEND librepo_internal_HEADERS
     fastestmirror_internal.h
     gpg_internal.h
     handle_internal.h
+    metalink_internal.h
     repoconf_internal.h
     result_internal.h
     xattr_internal.h

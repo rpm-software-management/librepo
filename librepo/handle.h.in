@@ -439,6 +439,20 @@ typedef enum {
     LRO_PASSWORD,  /*!< (char *)
         Password for HTTP authentication */
 
+    LRO_METALINK_EXCLUDE_DOMAIN, /*!< (const char *)
+        GLib regular expression matched against the hostname of metalink URLs.
+        Matching is case-sensitive and unanchored; use ^ and $ for a full match,
+        | for alternatives, or (?i) for case-insensitive matching.
+        NULL or an empty string disables exclusion. Invalid expressions are
+        rejected without changing the previous value. Since 1.22.0. */
+
+    LRO_METALINK_EXCLUDE_LOCATION, /*!< (const char *)
+        GLib regular expression matched against the metalink location attribute.
+        The same rules as LRO_METALINK_EXCLUDE_DOMAIN apply. A URL is excluded
+        if either expression matches. Missing attributes do not match.
+        Only metalink URLs are filtered, not explicit base URLs or mirrorlists.
+        Since 1.22.0. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */

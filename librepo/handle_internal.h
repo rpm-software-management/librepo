@@ -247,6 +247,9 @@ struct _LrHandle {
     long preservetime; /*!<
         Preserve timestamps of downloaded files */
 
+    GRegex *metalink_exclude_domain;
+    GRegex *metalink_exclude_location;
+
     LrUrlVars *yumslist;
 };
 
