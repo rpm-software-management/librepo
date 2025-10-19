@@ -10,6 +10,7 @@
 #include "librepo/librepo.h"
 #include "librepo/rcodes.h"
 #include "librepo/handle.h"
+#include "librepo/handle_internal.h"
 #include "librepo/url_substitution.h"
 
 #include "fixtures.h"
@@ -195,6 +196,36 @@ START_TEST(test_handle_maxmirrortries)
 }
 END_TEST
 
+START_TEST(test_handle_metalink_exclusion_options)
+{
+    LrHandle *h = lr_handle_init();
+    const LrHandleOption options[] = {
+        LRO_METALINK_EXCLUDE_DOMAIN, LRO_METALINK_EXCLUDE_LOCATION
+    };
+    for (unsigned int i = 0; i < G_N_ELEMENTS(options); i++) {
+        GError *err = NULL;
+        ck_assert(lr_handle_setopt(h, &err, options[i], "^(one|two)$"));
+        ck_assert_ptr_null(err);
+        GRegex *before = i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location;
+        ck_assert_ptr_nonnull(before);
+        ck_assert(!lr_handle_setopt(h, &err, options[i], "["));
+        ck_assert_ptr_nonnull(err);
+        ck_assert_int_eq(err->domain, LR_HANDLE_ERROR);
+        ck_assert_int_eq(err->code, LRE_BADOPTARG);
+        g_clear_error(&err);
+        GRegex *after = i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location;
+        ck_assert_ptr_eq(before, after);
+        ck_assert(!lr_handle_setopt(h, NULL, options[i], "["));
+        ck_assert(lr_handle_setopt(h, &err, options[i], ""));
+        ck_assert_ptr_null(i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location);
+        ck_assert(lr_handle_setopt(h, &err, options[i], "(?i)example"));
+        ck_assert(lr_handle_setopt(h, &err, options[i], (const char *) NULL));
+        ck_assert_ptr_null(i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location);
+    }
+    lr_handle_free(h);
+}
+END_TEST
+
 Suite *
 handle_suite(void)
 {
@@ -203,6 +234,7 @@ handle_suite(void)
     tcase_add_test(tc, test_handle);
     tcase_add_test(tc, test_handle_getinfo);
     tcase_add_test(tc, test_handle_maxmirrortries);
+    tcase_add_test(tc, test_handle_metalink_exclusion_options);
     suite_add_tcase(s, tc);
     return s;
 }

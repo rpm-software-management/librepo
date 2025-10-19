@@ -1,5 +1,7 @@
 import unittest
 import librepo
+import tempfile
+from pathlib import Path
 
 def foo_cb(data, total_to_download, downloaded):
     pass
@@ -633,3 +635,64 @@ class TestCaseHandle(unittest.TestCase):
 
         h.httpauthmethods = None
         h.proxyauthmethods = None
+
+    def test_metalink_exclusion(self):
+        urls = [
+            ('http://drop.example/repodata/repomd.xml', 'XX'),
+            ('http://drop.example@keep.example:8080/drop.example/repodata/repomd.xml?drop.example', 'YY'),
+            ('http://middle.example/repodata/repomd.xml', 'ZZ'),
+            ('http://last.example/repodata/repomd.xml', 'XX'),
+            ('file:///tmp/repodata/repomd.xml', None),
+            ('http://[broken/repodata/repomd.xml', None),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'metalink.xml'
+            path.write_text('<metalink xmlns="http://www.metalinker.org/" version="3.0">'
+                            '<files><file name="repomd.xml"><size>42</size>'
+                            '<verification><hash type="sha256">abc</hash></verification>'
+                            '<resources>' + ''.join(
+                '<url protocol="http" preference="{}"{}>{}</url>'.format(
+                    100 - i, ' location="{}"'.format(loc) if loc else '', url)
+                for i, (url, loc) in enumerate(urls)) +
+                            '</resources></file></files></metalink>')
+            h = librepo.Handle()
+            h.setopt(librepo.LRO_METALINKURL, path.as_uri())
+            h.repotype = librepo.LR_YUMREPO
+            h.fetchmirrors = True
+            cases = [
+                (None, None, [0, 1, 2, 3, 4, 5]),
+                (r'^drop\.example$', None, [1, 2, 3, 4, 5]),
+                (r'^middle\.example$', None, [0, 1, 3, 4, 5]),
+                (r'^last\.example$', None, [0, 1, 2, 4, 5]),
+                (None, '^XX$', [1, 2, 4, 5]),
+                (r'^(drop|last)\.example$', '^ZZ$', [1, 4, 5]),
+                ('(?i)^DROP\\.EXAMPLE$', None, [1, 2, 3, 4, 5]),
+                ('.*', '.*', [4, 5]),
+                ('', '', [0, 1, 2, 3, 4, 5]),
+            ]
+            for domain, location, expected in cases:
+                with self.subTest(domain=domain, location=location):
+                    h.setopt(librepo.LRO_METALINK_EXCLUDE_DOMAIN, domain)
+                    h.setopt(librepo.LRO_METALINK_EXCLUDE_LOCATION, location)
+                    h.perform(librepo.Result())
+                    ml = h.metalink
+                    self.assertEqual([u['url'] for u in ml['urls']], [urls[i][0] for i in expected])
+                    self.assertEqual([u['preference'] for u in ml['urls']], [100 - i for i in expected])
+                    self.assertEqual(ml['size'], 42)
+                    self.assertEqual(ml['hashes'], [('sha256', 'abc')])
+            h.setopt(librepo.LRO_METALINK_EXCLUDE_DOMAIN, r'^drop\.example$')
+            self.assertRaises(ValueError, h.setopt,
+                              librepo.LRO_METALINK_EXCLUDE_DOMAIN, '[')
+            h.perform(librepo.Result())
+            self.assertEqual(len(h.metalink['urls']), 5)
+            self.assertRaises(TypeError, h.setopt, librepo.LRO_METALINK_EXCLUDE_DOMAIN, ['x'])
+            # A fresh, ordinary metalink whose every URL can be excluded.
+            path.write_text('<metalink xmlns="http://www.metalinker.org/" version="3.0">'
+                            '<files><file name="repomd.xml"><resources>'
+                            '<url>http://drop.example/repodata/repomd.xml</url>'
+                            '</resources></file></files></metalink>')
+            h.setopt(librepo.LRO_METALINK_EXCLUDE_DOMAIN, '.*')
+            self.assertRaises(librepo.LibrepoException, h.perform, librepo.Result())
+            h.setopt(librepo.LRO_METALINK_EXCLUDE_DOMAIN, None)
+            h.perform(librepo.Result())
+            self.assertEqual(len(h.metalink['urls']), 1)

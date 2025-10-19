@@ -93,6 +93,28 @@ Version contants
     a username containing a colon using this option. The option is DEPRECATED!
     Use LRO_USERNAME and LRO_PASSWORD.
 
+.. data:: LRO_METALINK_EXCLUDE_DOMAIN
+
+    *String or None*. GLib regular expression matched against the hostname
+    of metalink URLs (not user information, port, path, or query).
+    Matching is case-sensitive and unanchored. Use ``^`` and ``$`` for a full
+    match, ``|`` for alternatives, or ``(?i)`` for case-insensitive matching.
+    See https://docs.gtk.org/glib/struct.Regex.html for the syntax.
+    ``None`` or an empty string disables exclusion. Invalid expressions raise
+    ``ValueError`` immediately and preserve the previous setting.
+
+    .. versionadded:: 1.22.0
+
+.. data:: LRO_METALINK_EXCLUDE_LOCATION
+
+    *String or None*. GLib regular expression matched against the metalink
+    ``location`` attribute. The same matching rules as
+    :data:`LRO_METALINK_EXCLUDE_DOMAIN` apply. Missing attributes do not match.
+    A URL is excluded if either expression matches. Only metalink URLs are
+    filtered; explicit base URLs and ordinary mirrorlists are unaffected.
+
+    .. versionadded:: 1.22.0
+
 .. data:: LRO_USERNAME
 
     *String or None*. Set username for HTTP authentication.

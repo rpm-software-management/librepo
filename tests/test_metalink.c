@@ -10,6 +10,8 @@
 #include "librepo/types.h"
 #include "librepo/metalink.h"
 #include "librepo/util.h"
+#include "librepo/handle.h"
+#include "librepo/result.h"
 
 #define REPOMD              "repomd.xml"
 #define METALINK_DIR        "metalinks"
@@ -511,6 +513,91 @@ START_TEST(test_metalink_with_alternates)
 }
 END_TEST
 
+static LrHandle *
+metalink_handle_with_exclusion(LrHandleOption option, const char *pattern)
+{
+    GError *err = NULL;
+    char *path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR,
+                              "metalink_good_01", NULL);
+    char *absolute_path = g_canonicalize_filename(path, NULL);
+    char *url = g_filename_to_uri(absolute_path, NULL, &err);
+    g_free(absolute_path);
+    g_free(path);
+    ck_assert_ptr_null(err);
+    ck_assert_ptr_nonnull(url);
+
+    LrHandle *h = lr_handle_init();
+    ck_assert_ptr_nonnull(h);
+    ck_assert(lr_handle_setopt(h, &err, LRO_METALINKURL, url));
+    ck_assert(lr_handle_setopt(h, &err, LRO_REPOTYPE, LR_YUMREPO));
+    ck_assert(lr_handle_setopt(h, &err, LRO_FETCHMIRRORS, 1L));
+    ck_assert(lr_handle_setopt(h, &err, option, pattern));
+    g_free(url);
+    ck_assert_ptr_null(err);
+
+    /* Read the local metalink without contacting any of its mirrors. */
+    LrResult *result = lr_result_init();
+    ck_assert_ptr_nonnull(result);
+    ck_assert(lr_handle_perform(h, result, &err));
+    ck_assert_ptr_null(err);
+    lr_result_free(result);
+    return h;
+}
+
+START_TEST(test_metalink_exclude_location)
+{
+    LrHandle *h = metalink_handle_with_exclusion(LRO_METALINK_EXCLUDE_LOCATION,
+                                                "^(US|CA)$");
+    LrMetalink *ml = NULL;
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_METALINK, &ml));
+    ck_assert_ptr_nonnull(ml);
+    /* Of 106 URLs, only the Costa Rican mirror should remain. */
+    ck_assert_int_eq(g_slist_length(ml->urls), 1);
+    ck_assert_int_eq(g_slist_length(ml->hashes), 4);
+
+    for (GSList *elem = ml->urls; elem != NULL; elem = elem->next) {
+        LrMetalinkUrl *mlurl = elem->data;
+        ck_assert_ptr_nonnull(mlurl);
+        ck_assert_ptr_nonnull(mlurl->location);
+        ck_assert_str_ne(mlurl->location, "US");
+        ck_assert_str_ne(mlurl->location, "CA");
+        ck_assert_str_eq(mlurl->location, "CR");
+    }
+
+    lr_handle_free(h);
+}
+END_TEST
+
+START_TEST(test_metalink_exclude_domain)
+{
+    const char *pattern =
+        "^(mirror\\.pnl\\.gov|mirrors\\.syringanetworks\\.net)$";
+    LrHandle *h = metalink_handle_with_exclusion(LRO_METALINK_EXCLUDE_DOMAIN,
+                                                pattern);
+    LrMetalink *ml = NULL;
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_METALINK, &ml));
+    ck_assert_ptr_nonnull(ml);
+    /* Exclude one pnl.gov URL and three syringanetworks.net URLs. */
+    ck_assert_int_eq(g_slist_length(ml->urls), 102);
+    ck_assert_int_eq(g_slist_length(ml->hashes), 4);
+
+    for (GSList *elem = ml->urls; elem != NULL; elem = elem->next) {
+        LrMetalinkUrl *mlurl = elem->data;
+        ck_assert_ptr_nonnull(mlurl);
+        ck_assert_ptr_nonnull(mlurl->url);
+        GUri *uri = g_uri_parse(mlurl->url, G_URI_FLAGS_NONE, NULL);
+        ck_assert_ptr_nonnull(uri);
+        const char *host = g_uri_get_host(uri);
+        ck_assert_ptr_nonnull(host);
+        ck_assert_str_ne(host, "mirror.pnl.gov");
+        ck_assert_str_ne(host, "mirrors.syringanetworks.net");
+        g_uri_unref(uri);
+    }
+
+    lr_handle_free(h);
+}
+END_TEST
+
 Suite *
 metalink_suite(void)
 {
@@ -526,6 +613,8 @@ metalink_suite(void)
     tcase_add_test(tc, test_metalink_really_bad_02);
     tcase_add_test(tc, test_metalink_really_bad_03);
     tcase_add_test(tc, test_metalink_with_alternates);
+    tcase_add_test(tc, test_metalink_exclude_location);
+    tcase_add_test(tc, test_metalink_exclude_domain);
     suite_add_tcase(s, tc);
     return s;
 }

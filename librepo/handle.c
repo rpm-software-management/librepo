@@ -37,6 +37,7 @@
 #include <openssl/opensslv.h>
 
 #include "handle_internal.h"
+#include "metalink_internal.h"
 #include "handle.h"
 #include "result_internal.h"
 #include "repomd.h"
@@ -179,6 +180,8 @@ lr_handle_free(LrHandle *handle)
     lr_lrmirrorlist_free(handle->metalink_mirrors);
     lr_lrmirrorlist_free(handle->mirrors);
     lr_metalink_free(handle->metalink);
+    g_clear_pointer(&handle->metalink_exclude_domain, g_regex_unref);
+    g_clear_pointer(&handle->metalink_exclude_location, g_regex_unref);
     lr_handle_free_list(&handle->yumdlist);
     lr_urlvars_free(handle->yumslist);
     lr_handle_free_list(&handle->yumblist);
@@ -346,6 +349,33 @@ lr_handle_setopt(LrHandle *handle,
     va_start(arg, option);
 
     switch (option) {
+    case LRO_METALINK_EXCLUDE_DOMAIN:
+    case LRO_METALINK_EXCLUDE_LOCATION: {
+        const char *pattern = va_arg(arg, const char *);
+        GRegex *compiled = NULL;
+        if (pattern && *pattern) {
+            g_autoptr(GError) compile_error = NULL;
+            compiled = g_regex_new(pattern, G_REGEX_OPTIMIZE, 0, &compile_error);
+            if (!compiled) {
+                g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                            "Invalid regular expression for %s: %s",
+                            option == LRO_METALINK_EXCLUDE_DOMAIN ?
+                            "LRO_METALINK_EXCLUDE_DOMAIN" :
+                            "LRO_METALINK_EXCLUDE_LOCATION",
+                            compile_error->message);
+                ret = FALSE;
+                break;
+            }
+        }
+        GRegex **target = option == LRO_METALINK_EXCLUDE_DOMAIN ?
+                         &handle->metalink_exclude_domain :
+                         &handle->metalink_exclude_location;
+        g_clear_pointer(target, g_regex_unref);
+        *target = compiled;
+        lr_handle_remote_sources_changed(handle, LR_REMOTESOURCE_METALINK);
+        break;
+    }
+
     case LRO_UPDATE:
         handle->update = va_arg(arg, long) ? 1 : 0;
         break;
@@ -1229,6 +1259,9 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         lr_metalink_free(ml);
         return FALSE;
     }
+
+    lr_metalink_filter(ml, handle->metalink_exclude_domain,
+                      handle->metalink_exclude_location);
 
     if (!ml->urls) {
         g_debug("%s: No URLs in metalink", __func__);
