@@ -5,6 +5,7 @@ linux repository metadata and packages
 
 ## Building
 
+
 ### Build requires:
 
 Fedora/Ubuntu name
@@ -32,6 +33,10 @@ Fedora/Ubuntu name
           transitively include zchunk headers.
 * **Test requires:** pygpgme (https://pypi.python.org/pypi/pygpgme/0.1) - python3-pygpgme/python3-gpgme
 * **Test requires:** python3-pyxattr (https://github.com/xattr/xattr) - python3-pyxattr/python3-pyxattr
+
+or on a DNF-based distribution run:
+
+    dnf builddep librepo.spec #[--define '_without_<option> 1 ...]
 
 ### Build from your checkout dir:
 
