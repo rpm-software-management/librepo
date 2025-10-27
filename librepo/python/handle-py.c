@@ -540,6 +540,8 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_URLS:
     case LRO_YUMDLIST:
     case LRO_YUMBLIST:
+    case LRO_METALINK_EXCLUDE_DOMAIN:
+    case LRO_METALINK_EXCLUDE_LOCATION:
     case LRO_HTTPHEADER:
     {
         Py_ssize_t len = 0;

@@ -94,6 +94,12 @@ struct _LrHandle {
     LrMetalink *metalink; /*!<
         Parsed metalink for repomd.xml */
 
+    char **metalink_exclude_domain; /*!<
+        List of domains to exclude from metalink */
+
+    char **metalink_exclude_location; /*!<
+        List of locations to exclude from metalink */
+
     LrInternalMirrorlist *mirrors;  /*!<
         Mirrors from metalink or mirrorlist */
 
