@@ -15,10 +15,6 @@ jobs:
     targets:
       - epel-9
       - epel-10
-
-  - job: copr_build
-    trigger: pull_request
-    targets:
       - fedora-all
 
   - job: tests
