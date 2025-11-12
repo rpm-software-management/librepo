@@ -326,7 +326,7 @@ lr_prepare_repodata_dir(LrHandle *handle,
     if (create_repodata_dir) {
         /* Prepare repodata/ subdir */
         rc = mkdir(path_to_repodata, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
-        if (rc == -1) {
+        if (rc == -1 && errno != EEXIST) {
             g_debug("%s: Cannot create dir: %s (%s)",
                     __func__, path_to_repodata, g_strerror(errno));
             g_set_error(err, LR_YUM_ERROR, LRE_CANNOTCREATEDIR,
