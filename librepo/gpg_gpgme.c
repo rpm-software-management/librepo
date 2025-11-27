@@ -57,7 +57,7 @@
  *
  * We remedy it by choosing the label according to a default file context
  * policy (ENABLE_SELINUX macro) or by using a different path supported by
- * some GnuPG configurations (DUSE_RUN_GNUPG_USER_SOCKET macro).
+ * some GnuPG configurations (USE_RUN_GNUPG_USER_SOCKET macro).
  *
  * Since the agent doesn't clean up its sockets properly, by creating this
  * directory we make sure they are in a place that is not causing trouble with
@@ -71,7 +71,7 @@
 static void
 lr_gpg_ensure_socket_dir_exists()
 {
-#ifdef DUSE_RUN_GNUPG_USER_SOCKET
+#ifdef USE_RUN_GNUPG_USER_SOCKET
     const char *templates[] = { "/run/gnupg", "/run/gnupg/user", "/run/gnupg/user/%ju", NULL };
     const mode_t modes[] = { 0755, 0755, 0700, 0 };
 #else
