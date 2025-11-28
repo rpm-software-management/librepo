@@ -994,6 +994,13 @@ lr_yum_download_repos(GSList *targets,
                 g_set_error(err, LR_DOWNLOADER_ERROR,
                             LRE_CBINTERRUPTED,
                             "Interrupted by LR_CB_ERROR from end callback");
+                for (GSList *elem = shared_cbdata_list; elem; elem = g_slist_next(elem)) {
+                    LrSharedCallbackData *shared_cbdata = elem->data;
+                    g_slist_free_full(shared_cbdata->singlecbdata, (GDestroyNotify)lr_free);
+                }
+                g_slist_free_full(shared_cbdata_list, (GDestroyNotify)lr_free);
+                g_slist_free_full(cbdata_list, (GDestroyNotify)cbdata_free);
+                g_slist_free_full(download_targets, (GDestroyNotify)lr_downloadtarget_free);
                 return FALSE;
             }
         } else {
@@ -1005,6 +1012,12 @@ lr_yum_download_repos(GSList *targets,
         if (download_error) {
             g_propagate_error(err, download_error);
         }
+        for (GSList *elem = shared_cbdata_list; elem; elem = g_slist_next(elem)) {
+            LrSharedCallbackData *shared_cbdata = elem->data;
+            g_slist_free_full(shared_cbdata->singlecbdata, (GDestroyNotify)lr_free);
+        }
+        g_slist_free_full(shared_cbdata_list, (GDestroyNotify)lr_free);
+        g_slist_free_full(cbdata_list, (GDestroyNotify)cbdata_free);
         return TRUE;
     }
 
