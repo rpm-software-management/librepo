@@ -463,7 +463,7 @@ restore_handle_callbacks(GSList *targets, GSList *handle_callbacks_backups)
 }
 
 static void
-append_url_target(const char *url, LrMetadataTarget *target, GSList *download_targets) {
+append_url_target(const char *url, LrMetadataTarget *target, GSList **download_targets) {
     int fd = lr_gettmpfile();
     if (fd < 0) {
         lr_metadatatarget_append_error(target, "Cannot create a temporary file for: %s", url);
@@ -489,11 +489,11 @@ append_url_target(const char *url, LrMetadataTarget *target, GSList *download_ta
                                             TRUE,
                                             FALSE);
 
-    download_targets = g_slist_append(download_targets, download_target);
+    *download_targets = g_slist_append(*download_targets, download_target);
 }
 
 static void
-create_metalink_and_mirrorlist_download_targets(GSList *targets, GSList *download_targets)
+create_metalink_and_mirrorlist_download_targets(GSList *targets, GSList **download_targets)
 {
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrMetadataTarget *target = elem->data;
@@ -595,7 +595,7 @@ lr_download_metadata(GSList *targets,
         }
     }
 
-    create_metalink_and_mirrorlist_download_targets(targets, download_targets);
+    create_metalink_and_mirrorlist_download_targets(targets, &download_targets);
 
     // To match commit 12d0b4 (retry the metalink/mirrorlist download 3x times)
     // multiply allowed_mirror_failures by 3. Since each metalink/mirrorlist has
