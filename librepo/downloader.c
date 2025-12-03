@@ -417,10 +417,10 @@ lr_prepare_lrmirrors(GSList *list, LrTarget *target)
  */
 static int
 lr_progresscb(void *ptr,
-              double total_to_download,
-              double now_downloaded,
-              G_GNUC_UNUSED double total_to_upload,
-              G_GNUC_UNUSED double now_uploaded)
+              curl_off_t total_to_download,
+              curl_off_t now_downloaded,
+              G_GNUC_UNUSED curl_off_t total_to_upload,
+              G_GNUC_UNUSED curl_off_t now_uploaded)
 {
     int ret = LR_CB_OK;
     LrTarget *target = ptr;
@@ -1631,9 +1631,9 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     // Prepare progress callback
     target->cb_return_code = LR_CB_OK;
     if (target->target->progresscb) {
-        c_rc = curl_easy_setopt(h, CURLOPT_PROGRESSFUNCTION, lr_progresscb) ||
+        c_rc = curl_easy_setopt(h, CURLOPT_XFERINFOFUNCTION, lr_progresscb) ||
                curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0) ||
-               curl_easy_setopt(h, CURLOPT_PROGRESSDATA, target);
+               curl_easy_setopt(h, CURLOPT_XFERINFODATA, target);
         assert(c_rc == CURLE_OK);
     }
 
