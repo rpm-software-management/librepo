@@ -120,6 +120,57 @@ def yum_mock_handler(port):
                 path += ".bad"
             self.serve_file(path)
 
+        def serve_partial(self):
+            """Serve only the first half of a file then close connection,
+            simulating a connection drop mid-download.
+            URL format: /yum/partial/<path>"""
+            path = self.parse_path('/yum/partial/')
+            if "static/" not in path:
+                return self.return_bad_request()
+            path = path[path.find("static/"):]
+            try:
+                with open(file_path(path), 'rb') as f:
+                    data = f.read()
+            except IOError:
+                return self.return_not_found()
+            half = len(data) // 2
+            # Send full Content-Length but only write first half
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/octet-stream')
+            self.send_header('Content-Length', str(len(data)))
+            self.end_headers()
+            self.wfile.write(data[:half])
+            self.wfile.flush()
+
+        def serve_range_only(self):
+            """Serve file only if a Range header is present (206),
+            otherwise return 404. This proves the client is resuming.
+            URL format: /yum/range_only/<path>"""
+            path = self.parse_path('/yum/range_only/')
+            if "static/" not in path:
+                return self.return_bad_request()
+            path = path[path.find("static/"):]
+            try:
+                with open(file_path(path), 'rb') as f:
+                    data = f.read()
+            except IOError:
+                return self.return_not_found()
+            range_header = self.headers.get('Range')
+            if not range_header or not range_header.startswith('bytes='):
+                return self.return_not_found()
+            range_spec = range_header[6:]
+            start_str = range_spec.split('-')[0]
+            start = int(start_str) if start_str else 0
+            remaining = data[start:]
+            self.send_response(206)
+            self.send_header('Content-Type', 'application/octet-stream')
+            end_byte = len(data) - 1
+            self.send_header('Content-Range',
+                             'bytes %d-%d/%d' % (start, end_byte, len(data)))
+            self.send_header('Content-Length', str(len(remaining)))
+            self.end_headers()
+            self.wfile.write(remaining)
+
         def serve_auth_basic(self):
             """Page secured with basic HTTP auth; User: admin Password: secret"""
             if not self.check_auth():
@@ -144,6 +195,10 @@ def yum_mock_handler(port):
                 return self.serve_badurl()
             if self.path.startswith('/yum/badgpg/'):
                 return self.serve_badgpg()
+            if self.path.startswith('/yum/partial/'):
+                return self.serve_partial()
+            if self.path.startswith('/yum/range_only/'):
+                return self.serve_range_only()
             if self.path.startswith('/yum/auth_basic/'):
                 return self.serve_auth_basic()
             return self.serve_static()

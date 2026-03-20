@@ -782,6 +782,38 @@ class TestCaseYumPackagesDownloading(TestCaseWithServer):
         self.assertTrue(os.path.isfile(pkg.local_path))
         self.assertEqual(open(pkg.local_path, "rb").read(), CONTENT.encode('utf-8'))
 
+    def test_download_packages_resume_on_mirror_switch(self):
+        h = librepo.Handle()
+
+        # First mirror serves only half of the file then drops connection.
+        # Second mirror only serves Range requests (returns 404 otherwise)
+        # If the second mirror succeeds it proves librepo did not ask for
+        # fresh new download but resume worked.
+        url_partial = "%s%sstatic/01/" % (self.MOCKURL, config.PARTIAL)
+        url_range_only = "%s%sstatic/01/" % (self.MOCKURL, config.RANGE_ONLY)
+        h.urls = [url_partial, url_range_only]
+        h.repotype = librepo.LR_YUMREPO
+        h.maxparalleldownloads = 1
+
+        pkgs = []
+        pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                          handle=h,
+                                          dest=self.tmpdir,
+                                          resume=True,
+                                          checksum_type=librepo.SHA256,
+                                          checksum=config.PACKAGE_01_01_SHA256))
+
+        librepo.download_packages(pkgs, failfast=True)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        self.assertTrue(os.path.isfile(pkg.local_path))
+
+        with open(pkg.local_path, 'rb') as f:
+            data = f.read()
+        sha256 = hashlib.sha256(data).hexdigest()
+        self.assertEqual(sha256, config.PACKAGE_01_01_SHA256)
+
     def test_download_packages_mirror_penalization_01(self):
 
         # This test is useful for mirror penalization testing
