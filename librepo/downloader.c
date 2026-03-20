@@ -193,6 +193,9 @@ typedef struct {
 
     gboolean range_fail; /*!<
         Whether range request failed. */
+
+    CURLcode curl_code; /*!<
+        Result code from the last curl transfer */
 } LrTarget;
 
 typedef struct {
@@ -559,11 +562,18 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
                     "(converted %"G_GINT64_FORMAT"/%"G_GINT64_FORMAT" expected)",
                     __func__, content_length_str, content_length, expected);
 
-            // Compare expected size and size reported by a HTTP server
-            if (content_length > 0 && content_length != expected) {
+            // Compare expected size and size reported by a HTTP server.
+            // For resumed downloads, Content-Length
+            // is the remaining bytes, not the full file size.
+            gint64 remaining_bytes = expected;
+            if (lrtarget->resume && lrtarget->original_offset > 0) {
+                remaining_bytes = expected - lrtarget->original_offset;
+            }
+
+            if (content_length > 0 && content_length != remaining_bytes) {
                 g_debug("%s: Size doesn't match (%"G_GINT64_FORMAT
                         " != %"G_GINT64_FORMAT")",
-                        __func__, content_length, expected);
+                        __func__, content_length, remaining_bytes);
                 lrtarget->headercb_state = LR_HCS_INTERRUPTED;
                 lrtarget->headercb_interrupt_reason = g_strdup_printf(
                     "Inconsistent server data, reported file Content-Length: %"G_GINT64_FORMAT
@@ -1560,19 +1570,6 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     int fd = fileno(target->f);
 
-    // Allow resume only for files that were originally being
-    // downloaded by librepo
-    if (target->resume && !has_librepo_xattr(fd)) {
-        target->resume = FALSE;
-        g_debug("%s: Resume ignored, existing file was not originally "
-                "being downloaded by Librepo", __func__);
-        if (ftruncate(fd, 0) == -1) {
-            g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                        "ftruncate() failed: %s", g_strerror(errno));
-            goto fail;
-        }
-    }
-
     if (target->resume && target->resume_count >= LR_DOWNLOADER_MAXIMAL_RESUME_COUNT) {
         target->resume = FALSE;
         g_debug("%s: Download resume ignored, maximal number of attempts (%d)"
@@ -1581,8 +1578,6 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
 
     // Resume - set offset to resume incomplete download
     if (target->resume) {
-        target->resume_count++;
-
         if (target->original_offset == -1) {
             // Determine offset
             fseek(target->f, 0L, SEEK_END);
@@ -1593,15 +1588,41 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                 determined_offset = 0;
             }
             target->original_offset = determined_offset;
+        } else if (target->original_offset > 0) {
+            // Seek the file to the resume offset so that received
+            // data is written at the correct position.
+            fseek(target->f, target->original_offset, SEEK_SET);
         }
 
-        gint64 used_offset = target->original_offset;
-        g_debug("%s: Used offset for download resume: %"G_GINT64_FORMAT,
-                __func__, used_offset);
+        // Starting from offset 0 is a fresh download, not a resume.
+        if (target->original_offset > 0) {
+            target->resume_count++;
+        }
 
-        c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
-                                (curl_off_t) used_offset);
-        assert(c_rc == CURLE_OK);
+        // Allow resume only for files that were originally being
+        // downloaded by librepo. Check after offset determination so
+        // that new/empty files (offset 0) are not affected — there is
+        // nothing to validate and the xattr has not been set yet.
+        if (target->original_offset > 0 && !has_librepo_xattr(fd)) {
+            target->resume = FALSE;
+            g_debug("%s: Resume ignored, existing file was not originally "
+                    "being downloaded by Librepo", __func__);
+            if (ftruncate(fd, 0) == -1) {
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                            "ftruncate() failed: %s", g_strerror(errno));
+                goto fail;
+            }
+            target->original_offset = 0;
+        } else {
+            gint64 used_offset = target->original_offset;
+
+            g_debug("%s: Used offset for download resume: %"G_GINT64_FORMAT,
+                    __func__, used_offset);
+
+            c_rc = curl_easy_setopt(h, CURLOPT_RESUME_FROM_LARGE,
+                                    (curl_off_t) used_offset);
+            assert(c_rc == CURLE_OK);
+        }
     }
 
     // Add librepo extended attribute to the file
@@ -1824,6 +1845,8 @@ check_finished_transfer_status(CURLMsg *msg,
     assert(!err || *err == NULL);
 
     *fatal_error = FALSE;
+
+    target->curl_code = msg->data.result;
 
     curl_easy_getinfo(msg->easy_handle,
                       CURLINFO_EFFECTIVE_URL,
@@ -2449,17 +2472,34 @@ transfer_error:
                   }
                   target->state = LR_DS_WAITING;
                   retry = TRUE;
-                  g_error_free(transfer_err);  // Ignore the error
 
-                  // Truncate file - remove downloaded garbage (error html page etc.)
                   #ifdef WITH_ZCHUNK
                   if (!target->target->is_zchunk || target->zck_state == LR_ZCK_DL_HEADER) {
                   #endif
-                    if (!truncate_transfer_file(target, err))
-                        return FALSE;
+                    if (target->target->resume
+                        && transfer_err->code == LRE_CURL
+                        && target->headercb_state != LR_HCS_INTERRUPTED
+                        && target->curl_code != CURLE_RANGE_ERROR)
+                    {
+                        // Connection error (timeout, recv error, etc.) with
+                        // potentially valid partial data. Keep the data and
+                        // let prepare_next_transfer() detect the offset from
+                        // the current file size.
+                        target->original_offset = -1;
+                    } else {
+                        // Server error (bad HTTP status), checksum mismatch,
+                        // header callback interrupt, or range error — data is
+                        // garbage. Truncate the file back to original_offset.
+                        if (!truncate_transfer_file(target, err)) {
+                            g_error_free(transfer_err);
+                            return FALSE;
+                        }
+                    }
                   #ifdef WITH_ZCHUNK
                   }
                   #endif
+
+                  g_error_free(transfer_err);  // Ignore the error
                 }
             }
 

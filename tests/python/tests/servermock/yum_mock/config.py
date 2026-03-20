@@ -5,6 +5,7 @@ BADURL = "yum/badurl/"
 BADGPG = "yum/badgpg/"
 AUTHBASIC = "yum/auth_basic/"
 PARTIAL = "yum/partial/"
+RANGE_ONLY = "yum/range_only/"
 
 AUTH_USER = "admin"
 AUTH_PASS = "secret"
