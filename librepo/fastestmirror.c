@@ -347,6 +347,9 @@ lr_fastestmirror_prepare(LrHandle *handle,
             break;
         }
 
+        if (handle && handle->curl_share)
+            curl_easy_setopt(curlh, CURLOPT_SHARE, handle->curl_share);
+
         curlcode = curl_easy_setopt(curlh, CURLOPT_URL, url);
         if (curlcode != CURLE_OK) {
             g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_CURL,

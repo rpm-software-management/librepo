@@ -51,6 +51,24 @@
 #include "fastestmirror_internal.h"
 #include "cleanup.h"
 
+static void
+lr_share_lock_cb(CURL *handle, curl_lock_data data,
+                 curl_lock_access access, void *userptr)
+{
+    (void)handle;
+    (void)access;
+    GMutex *mutexes = userptr;
+    g_mutex_lock(&mutexes[data]);
+}
+
+static void
+lr_share_unlock_cb(CURL *handle, curl_lock_data data, void *userptr)
+{
+    (void)handle;
+    GMutex *mutexes = userptr;
+    g_mutex_unlock(&mutexes[data]);
+}
+
 CURL *
 lr_get_curl_handle()
 {
@@ -81,6 +99,8 @@ lr_get_curl_handle()
     if (curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT) != CURLE_OK)
         goto err;
     if (curl_easy_setopt(h, CURLOPT_FILETIME, 0) != CURLE_OK)
+        goto err;
+    if (curl_easy_setopt(h, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS) != CURLE_OK)
         goto err;
 
     return h;
@@ -138,6 +158,23 @@ lr_handle_init(void)
     handle->cachedir = NULL;
     handle->preservetime = 0;
 
+    for (int i = 0; i < CURL_LOCK_DATA_LAST; i++)
+        g_mutex_init(&handle->share_mutexes[i]);
+    handle->curl_share = curl_share_init();
+    if (handle->curl_share) {
+        curl_share_setopt(handle->curl_share,
+                          CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+        curl_share_setopt(handle->curl_share,
+                          CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+        curl_share_setopt(handle->curl_share,
+                          CURLSHOPT_LOCKFUNC, lr_share_lock_cb);
+        curl_share_setopt(handle->curl_share,
+                          CURLSHOPT_UNLOCKFUNC, lr_share_unlock_cb);
+        curl_share_setopt(handle->curl_share,
+                          CURLSHOPT_USERDATA, handle->share_mutexes);
+        curl_easy_setopt(curl, CURLOPT_SHARE, handle->curl_share);
+    }
+
     return handle;
 }
 
@@ -148,6 +185,11 @@ lr_handle_free(LrHandle *handle)
         return;
     if (handle->curl_handle)
         curl_easy_cleanup(handle->curl_handle);
+    if (handle->curl_share) {
+        curl_share_cleanup(handle->curl_share);
+        for (int i = 0; i < CURL_LOCK_DATA_LAST; i++)
+            g_mutex_clear(&handle->share_mutexes[i]);
+    }
     if (handle->mirrorlist_fd != -1)
         close(handle->mirrorlist_fd);
     if (handle->metalink_fd != -1)
@@ -867,6 +909,27 @@ lr_handle_setopt(LrHandle *handle,
         handle->preservetime = va_arg(arg, long) ? 1 : 0;
         c_rc = curl_easy_setopt(c_h, CURLOPT_FILETIME, handle->preservetime);
         break;
+
+    case LRO_HTTPVERSION: {
+        long curl_ver = -1;
+        long lr_ver = va_arg(arg, long);
+        switch (lr_ver) {
+            case LR_HTTPVERSION_DEFAULT: curl_ver = CURL_HTTP_VERSION_NONE;  break;
+            case LR_HTTPVERSION_1_1:     curl_ver = CURL_HTTP_VERSION_1_1;   break;
+            case LR_HTTPVERSION_2TLS:    curl_ver = CURL_HTTP_VERSION_2TLS;  break;
+            case LR_HTTPVERSION_2:       curl_ver = CURL_HTTP_VERSION_2;     break;
+            default: break;
+        }
+        if (curl_ver == -1) {
+            g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
+                    "Bad LRO_HTTPVERSION value");
+            ret = FALSE;
+        } else {
+            handle->httpversion = lr_ver;
+            c_rc = curl_easy_setopt(c_h, CURLOPT_HTTP_VERSION, curl_ver);
+        }
+        break;
+    }
 
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
@@ -1787,6 +1850,12 @@ lr_handle_getinfo(LrHandle *handle,
         str = va_arg(arg, char **);
         *str = handle->cachedir;
         break;
+
+    case LRI_HTTPVERSION: {
+        LrHttpVersionType *type = va_arg(arg, LrHttpVersionType *);
+        *type = handle->httpversion;
+        break;
+    }
 
     default:
         rc = FALSE;

@@ -65,6 +65,14 @@ typedef enum {
     LR_IPRESOLVE_V6,        /*!< Resolve to IPv6 addresses */
 } LrIpResolveType;
 
+/** HTTP version preference */
+typedef enum {
+    LR_HTTPVERSION_DEFAULT,  /*!< Let libcurl decide */
+    LR_HTTPVERSION_1_1,      /*!< Force HTTP/1.1 */
+    LR_HTTPVERSION_2TLS,     /*!< HTTP/2 over TLS, fallback to 1.1 (default) */
+    LR_HTTPVERSION_2,        /*!< HTTP/2 (with or without TLS) */
+} LrHttpVersionType;
+
 /** LrAuth methods */
 typedef enum {
     LR_AUTH_NONE        = 0,       /*!< None auth method */

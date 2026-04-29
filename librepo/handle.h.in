@@ -69,7 +69,7 @@ typedef struct _LrHandle LrHandle;
 #define LRO_MAXMIRRORTRIES_MIN              0L
 
 /** LRO_MAXPARALLELDOWNLOADS default value */
-#define LRO_MAXPARALLELDOWNLOADS_DEFAULT    3L
+#define LRO_MAXPARALLELDOWNLOADS_DEFAULT    5L
 
 /** LRO_MAXPARALLELDOWNLOADS minimal allowed value */
 #define LRO_MAXPARALLELDOWNLOADS_MIN        1L
@@ -97,6 +97,9 @@ typedef struct _LrHandle LrHandle;
 
 /** LRO_IPRESOLVE default value */
 #define LRO_IPRESOLVE_DEFAULT               LR_IPRESOLVE_WHATEVER
+
+/** LRO_HTTPVERSION default value - HTTP/2 over TLS with fallback */
+#define LRO_HTTPVERSION_DEFAULT             LR_HTTPVERSION_2TLS
 
 /** LRO_ALLOWEDMIRRORFAILURES default value */
 #define LRO_ALLOWEDMIRRORFAILURES_DEFAULT   4L
@@ -440,6 +443,10 @@ typedef enum {
     LRO_PASSWORD,  /*!< (char *)
         Password for HTTP authentication */
 
+    LRO_HTTPVERSION,  /*!< (long)
+        HTTP version to use. Default CURL_HTTP_VERSION_2TLS (attempt
+        HTTP/2 over TLS, transparent fallback to HTTP/1.1). */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -515,6 +522,8 @@ typedef enum {
     LRI_PROXY_SSLCLIENTCERT,    /*!< (char **) */
     LRI_PROXY_SSLCLIENTKEY,     /*!< (char **) */
     LRI_PROXY_SSLCACERT,        /*!< (char **) */
+
+    LRI_HTTPVERSION,            /*!< (LrHttpVersionType *) */
 
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */
