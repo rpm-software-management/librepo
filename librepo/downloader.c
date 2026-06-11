@@ -1103,7 +1103,8 @@ find_local_zck_header(LrTarget *target, GError **err)
                    ftruncate(fd, lseek(chk_fd, 0, SEEK_END)) >= 0 &&
                    lseek(fd, 0, SEEK_SET) == 0 &&
                    (zck = lr_zck_init_read(target->target, (char *)file->data,
-                                           chk_fd, &tmp_err))) {
+                                           fd, &tmp_err))) {
+                    close(chk_fd);
                     found = TRUE;
                     break;
                 } else {
