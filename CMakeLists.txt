@@ -10,6 +10,7 @@ OPTION (USE_GPGME "Use GpgMe (instead of rpm library) for OpenPGP key support" O
 OPTION (USE_RUN_GNUPG_USER_SOCKET "Create a directory for gpg-agent socket in /run/gnugp/user (instead of /run/user)" OFF)
 OPTION (ENABLE_SELINUX "Restore SELinux labels on GnuPG directories" ON)
 OPTION (WITH_SANITIZERS "Build with address, leak and undefined sanitizers (DEBUG ONLY)" OFF)
+OPTION (ENABLE_STATIC "Also build librepo as a static library" OFF)
 
 INCLUDE (${CMAKE_SOURCE_DIR}/VERSION.cmake)
 SET (VERSION "${LIBREPO_MAJOR}.${LIBREPO_MINOR}.${LIBREPO_PATCH}")
