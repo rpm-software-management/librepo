@@ -770,7 +770,7 @@ class TestCaseYumRepoDownloading(TestCaseWithServer):
 
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
-        self.assertTrue(os.path.getsize(yum_repo["primary"]) == 0)
+        self.assertFalse(os.path.exists(yum_repo["primary"]))
 
     def test_download_repo_01_with_missing_unwanted_file(self):
         h = librepo.Handle()
