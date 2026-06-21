@@ -417,6 +417,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_LOWSPEEDLIMIT:
     case LRO_IPRESOLVE:
     case LRO_ALLOWEDMIRRORFAILURES:
+    case LRO_HTTPVERSION:
     {
         int badarg = 0;
         long d;
@@ -443,6 +444,9 @@ py_setopt(_HandleObject *self, PyObject *args)
                 break;
             case LRO_ALLOWEDMIRRORFAILURES:
                 d = LRO_ALLOWEDMIRRORFAILURES_DEFAULT;
+                break;
+            case LRO_HTTPVERSION:
+                d = LRO_HTTPVERSION_DEFAULT;
                 break;
             default:
                 badarg = 1;
@@ -931,6 +935,18 @@ py_getinfo(_HandleObject *self, PyObject *args)
     /* LrIpResolveType* option  */
     case LRI_IPRESOLVE: {
         LrIpResolveType type;
+        res = lr_handle_getinfo(self->handle,
+                                &tmp_err,
+                                (LrHandleInfoOption)option,
+                                &type);
+        if (!res)
+            RETURN_ERROR(&tmp_err, -1, NULL);
+        return PyLong_FromLong((long) type);
+    }
+
+    /* LrHttpVersionType* option */
+    case LRI_HTTPVERSION: {
+        LrHttpVersionType type;
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,
                                 (LrHandleInfoOption)option,

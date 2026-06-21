@@ -38,6 +38,16 @@ struct _LrHandle {
     CURL *curl_handle; /*!<
         CURL handle */
 
+    CURLSH *curl_share; /*!<
+        Shared DNS and connection pool for curl handles spawned
+        from this LrHandle, enabling connection reuse across
+        sequential lr_download() calls. */
+
+    GMutex share_mutexes[CURL_LOCK_DATA_LAST]; /*!<
+        Per-data-type locks for curl_share. Curl may hold locks on
+        multiple data types simultaneously (e.g. CONNECT + DNS),
+        so a single mutex would deadlock. */
+
     int update; /*!<
         Just update existing repo */
 
@@ -210,6 +220,9 @@ struct _LrHandle {
 
     LrIpResolveType ipresolve; /*!<
         What kind of IP addresses to use when resolving host names. */
+
+    LrHttpVersionType httpversion; /*!<
+        HTTP version preference (default: LR_HTTPVERSION_2TLS). */
 
     long allowed_mirror_failures; /*!<
         Number of allowed failed transfers, when there are no

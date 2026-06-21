@@ -60,6 +60,7 @@ START_TEST(test_handle)
     ck_assert(lr_handle_setopt(h, NULL, LRO_PROXY_SSLCACERT, "/etc/proxy_ca.pem"));
     (void)lr_handle_setopt(h, NULL, LRO_HTTPAUTHMETHODS, LR_AUTH_NTLM);
     ck_assert(lr_handle_setopt(h, NULL, LRO_PROXYAUTHMETHODS, LR_AUTH_DIGEST));
+    ck_assert(lr_handle_setopt(h, NULL, LRO_HTTPVERSION, LR_HTTPVERSION_2TLS));
     lr_handle_free(h);
 }
 END_TEST
@@ -159,6 +160,31 @@ START_TEST(test_handle_getinfo)
     auth = LR_AUTH_NONE;
     ck_assert(lr_handle_getinfo(h, NULL, LRI_PROXYAUTHMETHODS, &auth));
     ck_assert(auth == LR_AUTH_BASIC);
+
+    LrHttpVersionType httpver = -1;
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_HTTPVERSION, &httpver));
+    ck_assert_int_eq(httpver, 0);
+
+    ck_assert(lr_handle_setopt(h, NULL, LRO_HTTPVERSION, LR_HTTPVERSION_1_1));
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_HTTPVERSION, &httpver));
+    ck_assert_int_eq(httpver, LR_HTTPVERSION_1_1);
+
+    ck_assert(lr_handle_setopt(h, NULL, LRO_HTTPVERSION, LR_HTTPVERSION_2TLS));
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_HTTPVERSION, &httpver));
+    ck_assert_int_eq(httpver, LR_HTTPVERSION_2TLS);
+
+    ck_assert(lr_handle_setopt(h, NULL, LRO_HTTPVERSION, LR_HTTPVERSION_2));
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_HTTPVERSION, &httpver));
+    ck_assert_int_eq(httpver, LR_HTTPVERSION_2);
+
+    ck_assert(lr_handle_setopt(h, NULL, LRO_HTTPVERSION, LR_HTTPVERSION_DEFAULT));
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_HTTPVERSION, &httpver));
+    ck_assert_int_eq(httpver, LR_HTTPVERSION_DEFAULT);
+
+    GError *httpver_err = NULL;
+    ck_assert(!lr_handle_setopt(h, &httpver_err, LRO_HTTPVERSION, (long)999));
+    ck_assert_ptr_nonnull(httpver_err);
+    g_error_free(httpver_err);
 
     lr_handle_free(h);
 }
