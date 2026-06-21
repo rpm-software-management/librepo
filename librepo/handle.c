@@ -173,6 +173,8 @@ lr_handle_free(LrHandle *handle)
     lr_lrmirrorlist_free(handle->metalink_mirrors);
     lr_lrmirrorlist_free(handle->mirrors);
     lr_metalink_free(handle->metalink);
+    lr_handle_free_list(&handle->metalink_exclude_domain);
+    lr_handle_free_list(&handle->metalink_exclude_location);
     lr_handle_free_list(&handle->yumdlist);
     lr_urlvars_free(handle->yumslist);
     lr_handle_free_list(&handle->yumblist);
@@ -536,6 +538,8 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_URLS:
     case LRO_YUMDLIST:
     case LRO_YUMBLIST:
+    case LRO_METALINK_EXCLUDE_DOMAIN:
+    case LRO_METALINK_EXCLUDE_LOCATION:
     {
         int size = 0;
         char **list = va_arg(arg, char **);
@@ -548,6 +552,10 @@ lr_handle_setopt(LrHandle *handle,
             handle_list = &handle->yumdlist;
         } else if (option == LRO_YUMBLIST) {
             handle_list = &handle->yumblist;
+        } else if (option == LRO_METALINK_EXCLUDE_DOMAIN) {
+            handle_list = &handle->metalink_exclude_domain;
+        } else if (option == LRO_METALINK_EXCLUDE_LOCATION) {
+            handle_list = &handle->metalink_exclude_location;
         }
 
         lr_handle_free_list(handle_list);
@@ -1212,6 +1220,7 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
 
     LrMetalink *ml = lr_metalink_init();
     gboolean ret = lr_metalink_parse_file(ml,
+                                          handle,
                                           fd,
                                           metalink_file,
                                           lr_xml_parser_warning_logger,

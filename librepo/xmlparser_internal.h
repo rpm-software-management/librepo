@@ -29,6 +29,8 @@
 
 G_BEGIN_DECLS
 
+struct _LrHandle;
+
 /** \defgroup xmlparser_internal Common stuff for XML parsers in Librepo (datatypes, etc.)
  *  \addtogroup xmlparser_internal
  *  @{
@@ -91,6 +93,8 @@ typedef struct {
         ignore all subelements of the current file element */
     int found; /*!<
         wanted file was already parsed */
+    int skip_url; /*!<
+        skip currently parsed url element */
 
     LrMetalink *metalink; /*!<
         metalink object */
@@ -100,6 +104,7 @@ typedef struct {
         Hash in progress or NULL */
     LrMetalinkAlternate *metalinkalternate; /*!<
         Alternate in progress or NULL */
+    struct _LrHandle *handle;
 
 } LrParserData;
 
