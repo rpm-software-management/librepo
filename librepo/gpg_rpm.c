@@ -599,18 +599,18 @@ check_signature(const gchar * sig_buf, ssize_t sig_buf_len, const gchar * data, 
         ret = ret_verify == RPMRC_OK || ret_verify == RPMRC_NOTTRUSTED;
         if (!ret) {
             if (message == NULL) {
-                g_debug("%s: Bad PGP signature", __func__);
-                g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad PGP signature");
+                g_debug("%s: " LR_GPG_ERR_BAD_SIGNATURE, __func__);
+                g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_BAD_SIGNATURE);
             } else {
-                g_debug("%s: Bad PGP signature: %s", __func__, message);
-                g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad PGP signature: %s", message);
+                g_debug("%s: " LR_GPG_ERR_BAD_SIGNATURE ": %s", __func__, message);
+                g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_BAD_SIGNATURE ": %s", message);
             }
         }
         if (message != NULL)
             free(message);
     } else {
-        g_debug("%s: Signing key not found", __func__);
-        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Signing key not found");
+        g_debug("%s: " LR_GPG_ERR_SIGNING_KEY_NOT_FOUND, __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_SIGNING_KEY_NOT_FOUND);
     }
 
     pgpDigParamsFree(signature_dig_params);

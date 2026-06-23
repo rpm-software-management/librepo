@@ -23,6 +23,9 @@
 
 #include <glib.h>
 
+#define LR_GPG_ERR_SIGNING_KEY_NOT_FOUND  "Signing key not found"
+#define LR_GPG_ERR_BAD_SIGNATURE          "Bad PGP signature"
+
 struct tLrGpgSubkey {
     gboolean has_next;   // FALSE if this is the last subkey in the list
     char *id;            // subkey id
