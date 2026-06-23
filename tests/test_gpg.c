@@ -291,6 +291,42 @@ START_TEST(test_gpg_check_import_padded)
 END_TEST
 
 
+START_TEST(test_gpg_missing_key_error_message)
+{
+    // When verifying a signature without the signing key in the keyring,
+    // both backends must report "Signing key not found" so that dnf5's
+    // retry logic can trigger GPG key import.
+    gboolean ret;
+    char *data_path, *signature_path;
+    char *tmp_home_path;
+    GError *tmp_err = NULL;
+
+    tmp_home_path = lr_gettmpdir();
+    data_path = lr_pathconcat(test_globals.testdata_dir,
+                             "repo_yum_01/repodata/repomd.xml", NULL);
+    signature_path = lr_pathconcat(test_globals.testdata_dir,
+                             "repo_yum_01/repodata/repomd.xml.asc", NULL);
+
+    // Do NOT import any key — the keyring is empty.
+    ret = lr_gpg_check_signature(signature_path,
+                                 data_path,
+                                 tmp_home_path,
+                                 &tmp_err);
+    ck_assert(!ret);
+    ck_assert_ptr_nonnull(tmp_err);
+    ck_assert_msg(g_str_has_suffix(tmp_err->message, "Signing key not found"),
+                  "Expected error ending with 'Signing key not found', got: %s",
+                  tmp_err->message);
+    g_clear_error(&tmp_err);
+
+    lr_remove_dir(tmp_home_path);
+    lr_free(data_path);
+    lr_free(signature_path);
+    g_free(tmp_home_path);
+}
+END_TEST
+
+
 START_TEST(test_gpgme_expired_signature)
 {
     // This test verifies that expired GPG signatures are properly rejected
@@ -379,6 +415,7 @@ gpg_suite(void)
     tcase_add_test(tc, test_gpg_check_armored_key_import_test_export);
     tcase_add_test(tc, test_gpg_check_binary_key_import_test_export);
     tcase_add_test(tc, test_gpg_check_import_padded);
+    tcase_add_test(tc, test_gpg_missing_key_error_message);
     tcase_add_test(tc, test_gpgme_expired_signature);
     suite_add_tcase(s, tc);
     return s;
