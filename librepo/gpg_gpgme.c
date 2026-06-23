@@ -286,8 +286,13 @@ lr_gpg_check_signature_fd(int signature_fd,
     gboolean found_valid_signature = FALSE;
     gboolean found_expired_key = FALSE;
     gboolean found_expired_sig = FALSE;
+    gboolean found_missing_key = FALSE;
     for (; sig; sig = sig->next) {
-        // Check if this signature is from an expired key or is itself expired
+        if (sig->summary & GPGME_SIGSUM_KEY_MISSING ||
+            gpg_err_code(sig->status) == GPG_ERR_NO_PUBKEY) {
+            found_missing_key = TRUE;
+            continue;
+        }
         if (sig->summary & GPGME_SIGSUM_KEY_EXPIRED) {
             g_debug("%s: Skipping signature with expired key", __func__);
             found_expired_key = TRUE;
@@ -315,15 +320,18 @@ lr_gpg_check_signature_fd(int signature_fd,
     }
 
     // No valid signature found - report appropriate error
-    if (found_expired_key) {
-        g_debug("%s: GPG signature verification failed - key has expired", __func__);
-        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "GPG signature verification failed - key has expired");
+    if (found_missing_key) {
+        g_debug("%s: " LR_GPG_ERR_SIGNING_KEY_NOT_FOUND, __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_SIGNING_KEY_NOT_FOUND);
+    } else if (found_expired_key) {
+        g_debug("%s: " LR_GPG_ERR_BAD_SIGNATURE ": key has expired", __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_BAD_SIGNATURE ": key has expired");
     } else if (found_expired_sig) {
-        g_debug("%s: GPG signature verification failed - signature has expired", __func__);
-        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "GPG signature verification failed - signature has expired");
+        g_debug("%s: " LR_GPG_ERR_BAD_SIGNATURE ": signature has expired", __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_BAD_SIGNATURE ": signature has expired");
     } else {
-        g_debug("%s: Bad GPG signature", __func__);
-        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, "Bad GPG signature");
+        g_debug("%s: " LR_GPG_ERR_BAD_SIGNATURE, __func__);
+        g_set_error(err, LR_GPG_ERROR, LRE_BADGPG, LR_GPG_ERR_BAD_SIGNATURE);
     }
     return FALSE;
 }
