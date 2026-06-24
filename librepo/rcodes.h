@@ -125,6 +125,8 @@ typedef enum {
         key/group not found, ...) */
     LRE_ZCK, /*!<
         (41) Zchunk error (error reading zchunk file, ...) */
+    LRE_TRANSCODE, /*!<
+        (42) Transcode error (env empty, ...) */
     LRE_UNKNOWNERROR, /*!<
         (xx) unknown error - sentinel of error codes enum */
 } LrRc; /*!< Return codes */
