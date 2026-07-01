@@ -35,7 +35,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <gio/gio.h>
-
+#include <openssl/opensslv.h>
 
 #include "handle_internal.h"
 #include "handle.h"
@@ -50,6 +50,13 @@
 #include "downloader.h"
 #include "fastestmirror_internal.h"
 #include "cleanup.h"
+
+/* OpenSSL 4.0+ uses providers, older versions use engines for PKCS#11 */
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+  #define LR_PKCS11_TYPE "PROV"
+#else
+  #define LR_PKCS11_TYPE "ENG"
+#endif
 
 CURL *
 lr_get_curl_handle()
@@ -735,7 +742,7 @@ lr_handle_setopt(LrHandle *handle,
         handle->sslclientcert = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSLCERT, handle->sslclientcert);
         if (c_rc == CURLE_OK && handle->sslclientcert && !strncasecmp(handle->sslclientcert, "pkcs11:", 7)) {
-            c_rc = curl_easy_setopt(c_h, CURLOPT_SSLCERTTYPE, "ENG");
+            c_rc = curl_easy_setopt(c_h, CURLOPT_SSLCERTTYPE, LR_PKCS11_TYPE);
         }
         break;
 
@@ -745,7 +752,7 @@ lr_handle_setopt(LrHandle *handle,
         handle->sslclientkey = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_SSLKEY, handle->sslclientkey);
         if (c_rc == CURLE_OK && handle->sslclientkey && !strncasecmp(handle->sslclientkey, "pkcs11:", 7)) {
-            c_rc = curl_easy_setopt(c_h, CURLOPT_SSLKEYTYPE, "ENG");
+            c_rc = curl_easy_setopt(c_h, CURLOPT_SSLKEYTYPE, LR_PKCS11_TYPE);
         }
         break;
 
@@ -772,7 +779,7 @@ lr_handle_setopt(LrHandle *handle,
         handle->proxy_sslclientcert = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLCERT, handle->proxy_sslclientcert);
         if (c_rc == CURLE_OK && handle->proxy_sslclientcert && !strncasecmp(handle->proxy_sslclientcert, "pkcs11:", 7)) {
-            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLCERTTYPE, "ENG");
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLCERTTYPE, LR_PKCS11_TYPE);
         }
         break;
 
@@ -782,7 +789,7 @@ lr_handle_setopt(LrHandle *handle,
         handle->proxy_sslclientkey = g_strdup(va_arg(arg, char *));
         c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLKEY, handle->proxy_sslclientkey);
         if (c_rc == CURLE_OK && handle->proxy_sslclientkey && !strncasecmp(handle->proxy_sslclientkey, "pkcs11:", 7)) {
-            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLKEYTYPE, "ENG");
+            c_rc = curl_easy_setopt(c_h, CURLOPT_PROXY_SSLKEYTYPE, LR_PKCS11_TYPE);
         }
         break;
 
