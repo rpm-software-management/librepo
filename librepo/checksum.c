@@ -19,6 +19,7 @@
  */
 
 #define _POSIX_C_SOURCE 200809L
+#define _GNU_SOURCE
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <assert.h>
@@ -28,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/xattr.h>
+#include <sys/mman.h>
 #include <unistd.h>
 #include <openssl/evp.h>
 
@@ -108,7 +110,8 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
 {
     unsigned int len;
     ssize_t readed;
-    char buf[BUFFER_SIZE];
+    char *buf;
+    struct stat sb;
     unsigned char raw_checksum[EVP_MAX_MD_SIZE];
     char *checksum;
     EVP_MD_CTX *ctx;
@@ -154,12 +157,37 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
         return NULL;
     }
 
-    while ((readed = read(fd, buf, BUFFER_SIZE)) > 0)
+    // First, try mmap()
+    readed = -1;
+    if (fstat(fd, &sb) == 0 && sb.st_size < 10 * BUFFER_SIZE) {
+      buf = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED|MAP_POPULATE, fd, 0);
+      if (buf != MAP_FAILED) {
+	  madvise(buf, sb.st_size, MADV_SEQUENTIAL);
+	  if (!EVP_DigestUpdate(ctx, buf, sb.st_size)) {
+              g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
+                          "EVP_DigestUpdate() failed");
+            munmap(buf, sb.st_size);
+            return NULL;
+        }
+	munmap(buf, sb.st_size);
+      }
+      buf = NULL;
+      readed = 0;
+    }
+    if (readed == -1) {
+      // fall back to reading..
+      buf = malloc(BUFFER_SIZE);
+      while ((readed = read(fd, buf, BUFFER_SIZE)) > 0)
         if (!EVP_DigestUpdate(ctx, buf, readed)) {
             g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
                         "EVP_DigestUpdate() failed");
+	    free(buf);
             return NULL;
         }
+    }
+
+    if (buf)
+        free(buf);
 
     if (readed == -1) {
         EVP_MD_CTX_destroy(ctx);
