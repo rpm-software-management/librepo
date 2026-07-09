@@ -23,6 +23,7 @@
 
 #include <glib.h>
 #include <librepo/xmlparser.h>
+#include <librepo/handle.h>
 
 G_BEGIN_DECLS
 
@@ -71,6 +72,8 @@ lr_metalink_init(void);
 
 /** Parse metalink file.
  * @param metalink          Metalink object.
+ * @param handle            LrHandle or NULL. If LrHandle is provided, it's used
+ *                          for filtering metalink data (e.g. by location or domain).
  * @param fd                File descriptor.
  * @param filename          File to look for in metalink file.
  * @param warningcb         ::LrXmlParserWarningCb function or NULL
@@ -80,6 +83,7 @@ lr_metalink_init(void);
  */
 gboolean
 lr_metalink_parse_file(LrMetalink *metalink,
+                       LrHandle *handle,
                        int fd,
                        const char *filename,
                        LrXmlParserWarningCb warningcb,

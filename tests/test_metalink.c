@@ -10,6 +10,7 @@
 #include "librepo/types.h"
 #include "librepo/metalink.h"
 #include "librepo/util.h"
+#include "librepo/handle.h"
 
 #define REPOMD              "repomd.xml"
 #define METALINK_DIR        "metalinks"
@@ -52,7 +53,7 @@ START_TEST(test_metalink_good_01)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
     close(fd);
@@ -164,7 +165,7 @@ START_TEST(test_metalink_good_02)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
     close(fd);
@@ -210,7 +211,7 @@ START_TEST(test_metalink_good_03)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
     close(fd);
@@ -255,7 +256,7 @@ START_TEST(test_metalink_bad_01)
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
     int call_counter = 0;
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, warning_cb, &call_counter, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, warning_cb, &call_counter, &tmp_err);
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
     ck_assert_int_gt(call_counter, 0);
@@ -375,7 +376,7 @@ START_TEST(test_metalink_bad_02)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
     close(fd);
@@ -399,7 +400,7 @@ START_TEST(test_metalink_really_bad_01)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(!ret);
     ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
@@ -423,7 +424,7 @@ START_TEST(test_metalink_really_bad_02)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(!ret);
     ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
@@ -447,7 +448,7 @@ START_TEST(test_metalink_really_bad_03)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(!ret);
     ck_assert_ptr_nonnull(tmp_err);
     g_error_free(tmp_err);
@@ -474,7 +475,7 @@ START_TEST(test_metalink_with_alternates)
     ck_assert_int_ge(fd, 0);
     ml = lr_metalink_init();
     ck_assert_ptr_nonnull(ml);
-    ret = lr_metalink_parse_file(ml, fd, REPOMD, NULL, NULL, &tmp_err);
+    ret = lr_metalink_parse_file(ml, NULL, fd, REPOMD, NULL, NULL, &tmp_err);
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
     close(fd);
@@ -511,6 +512,99 @@ START_TEST(test_metalink_with_alternates)
 }
 END_TEST
 
+START_TEST(test_metalink_exclude_location)
+{
+    LrHandle *h = lr_handle_init();
+    ck_assert_ptr_nonnull(h);
+
+    // Test with regex patterns - exclude US and CA locations
+    char *exclude_locations[] = {"^(US|CA)$", NULL};
+    gboolean ret_setopt = lr_handle_setopt(h, NULL, LRO_METALINK_EXCLUDE_LOCATION, exclude_locations);
+    ck_assert(ret_setopt);
+
+    int fd;
+    gboolean ret;
+    char *path;
+    LrMetalink *ml = NULL;
+    GError *tmp_err = NULL;
+
+    path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR, "metalink_good_01", NULL);
+    fd = open(path, O_RDONLY);
+    g_free(path);
+    ck_assert_int_ge(fd, 0);
+
+    ml = lr_metalink_init();
+    ck_assert_ptr_nonnull(ml);
+
+    ret = lr_metalink_parse_file(ml, h, fd, REPOMD, NULL, NULL, &tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+    close(fd);
+
+    for (GSList *elem = ml->urls; elem != NULL; elem = elem->next) {
+        LrMetalinkUrl *mlurl = elem->data;
+        ck_assert_ptr_nonnull(mlurl);
+        if (mlurl->location) {
+            ck_assert_str_ne(mlurl->location, "US");
+            ck_assert_str_ne(mlurl->location, "CA");
+        }
+    }
+
+    lr_metalink_free(ml);
+    lr_handle_free(h);
+}
+END_TEST
+
+START_TEST(test_metalink_exclude_domain)
+{
+    LrHandle *h = lr_handle_init();
+    ck_assert_ptr_nonnull(h);
+
+    // Test with regex patterns - exclude specific domains
+    char *exclude_domains[] = {"^(mirror\\.pnl\\.gov|mirrors\\.syringanetworks\\.net)$", NULL};
+    gboolean ret_setopt = lr_handle_setopt(h, NULL, LRO_METALINK_EXCLUDE_DOMAIN, exclude_domains);
+    ck_assert(ret_setopt);
+
+    int fd;
+    gboolean ret;
+    char *path;
+    LrMetalink *ml = NULL;
+    GError *tmp_err = NULL;
+
+    path = lr_pathconcat(test_globals.testdata_dir, METALINK_DIR, "metalink_good_01", NULL);
+    fd = open(path, O_RDONLY);
+    g_free(path);
+    ck_assert_int_ge(fd, 0);
+
+    ml = lr_metalink_init();
+    ck_assert_ptr_nonnull(ml);
+
+    ret = lr_metalink_parse_file(ml, h, fd, REPOMD, NULL, NULL, &tmp_err);
+    ck_assert(ret);
+    ck_assert_ptr_null(tmp_err);
+    close(fd);
+
+    for (GSList *elem = ml->urls; elem != NULL; elem = elem->next) {
+        LrMetalinkUrl *mlurl = elem->data;
+        ck_assert_ptr_nonnull(mlurl);
+        if (mlurl->url) {
+            GUri *uri = g_uri_parse(mlurl->url, G_URI_FLAGS_NONE, NULL);
+            if (uri) {
+                const char *host = g_uri_get_host(uri);
+                if (host) {
+                    ck_assert_str_ne(host, "mirror.pnl.gov");
+                    ck_assert_str_ne(host, "mirrors.syringanetworks.net");
+                }
+                g_uri_unref(uri);
+            }
+        }
+    }
+
+    lr_metalink_free(ml);
+    lr_handle_free(h);
+}
+END_TEST
+
 Suite *
 metalink_suite(void)
 {
@@ -526,6 +620,8 @@ metalink_suite(void)
     tcase_add_test(tc, test_metalink_really_bad_02);
     tcase_add_test(tc, test_metalink_really_bad_03);
     tcase_add_test(tc, test_metalink_with_alternates);
+    tcase_add_test(tc, test_metalink_exclude_location);
+    tcase_add_test(tc, test_metalink_exclude_domain);
     suite_add_tcase(s, tc);
     return s;
 }

@@ -102,6 +102,20 @@ Version contants
 
     *String or None*. Set password for HTTP authentication.
 
+.. data:: LRO_METALINK_EXCLUDE_DOMAIN
+
+    *List of strings*. List of regex patterns to exclude domains from metalink.
+    Each pattern is matched against the domain name in metalink URLs. If the pattern
+    is not a valid regex, it will be treated as a literal string match.
+    Example: ``["^mirror\\.example\\.com$"]``
+
+.. data:: LRO_METALINK_EXCLUDE_LOCATION
+
+    *List of strings*. List of regex patterns to exclude locations from metalink.
+    Each pattern is matched against the location attribute in metalink URLs. If the
+    pattern is not a valid regex, it will be treated as a literal string match.
+    Example: ``["^US$", "^(CA|MX)$"]``
+
 .. data:: LRO_PROXY
 
     *String or None*. Set proxy server address. Port could be
@@ -1279,6 +1293,14 @@ class Handle(_librepo.Handle):
     .. attribute:: password:
 
         See: :data:`.LRO_PASSWORD`
+
+    .. attribute:: metalink_exclude_domain:
+
+        See: :data:`.LRO_METALINK_EXCLUDE_DOMAIN`
+
+    .. attribute:: metalink_exclude_location:
+
+        See: :data:`.LRO_METALINK_EXCLUDE_LOCATION`
 
     .. attribute:: proxy:
 
