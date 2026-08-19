@@ -58,6 +58,18 @@
   #define LR_PKCS11_TYPE "ENG"
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+#include <openssl/provider.h>
+
+static CURLcode
+lr_ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *userptr)
+{
+    (void)curl; (void)userptr;
+    OSSL_PROVIDER_load(ssl_ctx, "pkcs11");
+    return CURLE_OK;
+}
+#endif
+
 CURL *
 lr_get_curl_handle()
 {
