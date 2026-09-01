@@ -39,7 +39,7 @@ jobs:
     identifier: "dnf5-tests"
     targets:
       - fedora-all
-    fmf_url: https://github.com/rpm-software-management/ci-dnf-stack.git
+    fmf_url: https://github.com/rpm-software-management/dnf5.git
     fmf_ref: &CI_DNF_STACK_REF main
     tmt_plan: "^/plans/integration/behave-dnf5$"
     tf_extra_params:
