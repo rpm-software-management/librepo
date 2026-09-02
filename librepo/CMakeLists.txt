@@ -67,6 +67,7 @@ TARGET_LINK_LIBRARIES(librepo
                         ${LIBXML2_LIBRARIES}
                         ${CURL_LIBRARY}
                         ${LIBCRYPTO_LIBRARIES}
+                        ${JSONGLIB_LIBRARIES}
                         ${GLIB2_LIBRARIES}
                      )
 IF (USE_GPGME)
