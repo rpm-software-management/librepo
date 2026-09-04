@@ -1613,6 +1613,12 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                             "ftruncate() failed: %s", g_strerror(errno));
                 goto fail;
             }
+            // The stream position was moved to the end of the file while
+            // determining the offset above. After truncating the file back
+            // to zero, rewind the stream so the freshly downloaded data is
+            // written from the beginning instead of leaving a zero-filled
+            // hole (which would corrupt and double the size of the file).
+            fseek(target->f, 0L, SEEK_SET);
             target->original_offset = 0;
         } else {
             gint64 used_offset = target->original_offset;
