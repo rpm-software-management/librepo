@@ -9,6 +9,7 @@ import xattr
 import errno
 
 import tests.servermock.yum_mock.config as config
+import tests.servermock.yum_mock.yum_mock as yum_mock
 
 from tests.base import TestCaseWithServer
 
@@ -438,6 +439,71 @@ class TestCaseYumPackagesDownloading(TestCaseWithServer):
         pkg = pkgs[0]
         self.assertTrue(pkg.err is None)
         self.assertTrue(os.path.isfile(pkg.local_path))
+
+    def _package_01_01_content(self):
+        """Raw bytes of the package as the mock server serves it."""
+        path = yum_mock.file_path("static/01/" + config.PACKAGE_01_01)
+        with open(path, "rb") as f:
+            return f.read()
+
+    def test_download_packages_with_byterangeend(self):
+        # Only the beginning of the file is wanted. The server has no idea
+        # about that, it sends the whole file and librepo has to discard
+        # everything past byterangeend while still telling curl that all the
+        # received data was accepted.
+        h = librepo.Handle()
+
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+
+        # Deliberately not a multiple of curl's write buffer size, so that
+        # the range ends in the middle of a chunk passed to the write callback.
+        range_end = 1000
+        dest = os.path.join(self.tmpdir, "byterangeend.rpm")
+
+        pkgs = [librepo.PackageTarget(config.PACKAGE_01_01,
+                                      handle=h,
+                                      dest=dest,
+                                      byterangeend=range_end)]
+
+        librepo.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        with open(dest, "rb") as f:
+            content = f.read()
+        self.assertEqual(content,
+                         self._package_01_01_content()[:range_end + 1])
+
+    def test_download_packages_with_byterange_start_and_end(self):
+        # A range in the middle of the file. byterangestart is turned into
+        # a Range request, so the mock server starts the response at that
+        # offset and librepo clips the tail itself.
+        h = librepo.Handle()
+
+        url = "%s%s" % (self.MOCKURL, config.RANGE_ONLY + config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+
+        range_start = 4000
+        range_end = 5500
+        dest = os.path.join(self.tmpdir, "byterange.rpm")
+
+        pkgs = [librepo.PackageTarget(config.PACKAGE_01_01,
+                                      handle=h,
+                                      dest=dest,
+                                      byterangestart=range_start,
+                                      byterangeend=range_end)]
+
+        librepo.download_packages(pkgs)
+
+        pkg = pkgs[0]
+        self.assertTrue(pkg.err is None)
+        with open(dest, "rb") as f:
+            content = f.read()
+        self.assertEqual(content,
+                         self._package_01_01_content()[range_start:range_end + 1])
 
     def test_download_packages_with_resume(self):
         h = librepo.Handle()

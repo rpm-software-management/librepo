@@ -148,8 +148,8 @@ typedef struct {
         Current protocol */
     CURL *curl_handle; /*!<
         Used curl handle or NULL */
-    FILE *f; /*!<
-        fdopened file descriptor from LrDownloadTarget and used
+    int fd; /*!<
+        opened file descriptor from LrDownloadTarget and used
         in curl_handle. */
     char errorbuffer[CURL_ERROR_SIZE]; /*!<
         Error buffer used in curl handle */
@@ -283,7 +283,7 @@ typedef struct {
  *       | LrDownloadTarget *target  -----------/   | int fd                   |
  *       | LrMirror *mirror          --------/      | LrChecksumType checks..  |
  *       | CURL *curl_handle          |-+           | char *checksum           |
- *       | FILE *f                    |             | int resume               |
+ *       | int fd                     |             | int resume               |
  *       | GSList *tried_mirrors      |             | LrProgressCb progresscb  |
  *       | gint64 original_offset     |             | void *cbdata             |
  *       | GSlist *lrmirrors         ---\           | GStringChunk *chunk      |
@@ -607,6 +607,33 @@ lr_zck_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 }
 #endif /* WITH_ZCHUNK */
 
+/*
+ * We write up to 32MB at a time, mainly to ensure that the below loop never
+ * bitrots, and it's regularly tested with real world RPMs.
+ */
+#define WRITECB_CHUNK_MAX (32*1024*1024)
+
+/** Write the whole buffer to a file descriptor.
+ * Short writes are resumed and EINTR is retried.
+ * @return TRUE on success, FALSE on error with errno set.
+ */
+static gboolean
+write_all(int fd, const char *buf, size_t len)
+{
+    while (len > 0) {
+        size_t chunk = (len > WRITECB_CHUNK_MAX) ? WRITECB_CHUNK_MAX : len;
+        ssize_t written = write(fd, buf, chunk);
+        if (written < 0) {
+            if (errno == EINTR)
+                continue;
+            return FALSE;
+        }
+        buf += written;
+        len -= written;
+    }
+    return TRUE;
+}
+
 /** Write callback for CURL handles.
  * This callback handles situation when an user wants only specified
  * byte range of the target file.
@@ -614,22 +641,43 @@ lr_zck_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 size_t
 lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-    size_t cur_written_expected = nmemb;
-    size_t cur_written;
     LrTarget *target = (LrTarget *) userdata;
     #ifdef WITH_ZCHUNK
     if(target->target->is_zchunk && !target->range_fail && target->mirror->mirror->protocol == LR_PROTOCOL_HTTP)
         return lr_zck_writecb(ptr, size, nmemb, userdata);
     #endif /* WITH_ZCHUNK */
 
-    gint64 all = size * nmemb;  // Total number of bytes from curl
     gint64 range_start = target->target->byterangestart;
     gint64 range_end = target->target->byterangeend;
 
+    /*
+     * The libcurl docs point to size always being 1, and the max value for
+     * nmemb being CURL_MAX_WRITE_SIZE (default 16kb, compile time setting),
+     * and if CURLOPT_HEADER is set, then it's CURL_MAX_HTTP_HEADER, usually
+     * meaning 100k. libcurl docs tell us size is always 1, but don't bet on it.
+     */
+    size_t all = size * nmemb;  // Total number of bytes from curl
+    if (size != 0 && all / size != nmemb) {
+        // The length libcurl handed us does not fit in a size_t. There is no
+        // way to write all of it, and returning a short count would only be
+        // reported as a write error, so fail explicitly.
+        g_warning("Invalid write callback length from libcurl");
+        return 0;
+    }
+
+    // Number of bytes curl expects us to return on success. Any other value
+    // is treated by curl as a write failure, even when only a subset of the
+    // buffer is wanted (byte ranges below).
+    const size_t cur_written_expected = all;
+
     if (range_start <= 0 && range_end <= 0) {
         // Write everything curl give to you
+        if (!write_all(target->fd, ptr, all)) {
+            g_warning("Error while writing file: %s", g_strerror(errno));
+            return 0;
+        }
         target->writecb_recieved += all;
-        return fwrite(ptr, size, nmemb, target->f);
+        return cur_written_expected;
     }
 
     /* Deal with situation when user wants only specific byte range of the
@@ -653,7 +701,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
     if (cur_range_end < range_start)
         // The wanted byte range doesn't start yet
-        return nmemb;
+        return cur_written_expected;
 
     if (range_end != 0 && cur_range_start > range_end) {
         // The wanted byte range is over
@@ -694,8 +742,7 @@ lr_writecb(char *ptr, size_t size, size_t nmemb, void *userdata)
     }
 
     assert(nmemb > 0);
-    cur_written = fwrite(ptr, size, nmemb, target->f);
-    if (cur_written != nmemb) {
+    if (!write_all(target->fd, ptr, size * nmemb)) {
         g_warning("Error while writing file: %s", g_strerror(errno));
         return 0; // There was an error
     }
@@ -1045,9 +1092,9 @@ remove_librepo_xattr(LrDownloadTarget * target)
 gboolean
 lr_zck_clear_header(LrTarget *target, GError **err)
 {
-    assert(target && target->f && target->target && target->target->path);
+    assert(target && target->fd >= 0 && target->target && target->target->path);
 
-    int fd = fileno(target->f);
+    int fd = target->fd;
     lseek(fd, 0, SEEK_END);
     if(ftruncate(fd, 0) < 0) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
@@ -1063,7 +1110,7 @@ find_local_zck_header(LrTarget *target, GError **err)
 {
     zckCtx *zck = NULL;
     gboolean found = FALSE;
-    int fd = fileno(target->f);
+    int fd = target->fd;
 
     if(target->target->handle->cachedir) {
         g_debug("%s: Cache directory: %s\n", __func__,
@@ -1142,7 +1189,7 @@ static gboolean
 prep_zck_header(LrTarget *target, GError **err)
 {
     zckCtx *zck = NULL;
-    int fd = fileno(target->f);
+    int fd = target->fd;
     GError *tmp_err = NULL;
 
     if(lr_zck_valid_header(target->target, target->target->path, fd,
@@ -1202,7 +1249,7 @@ find_local_zck_chunks(LrTarget *target, GError **err)
     assert(target && target->target && target->target->zck_dl);
 
     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
-    int fd = fileno(target->f);
+    int fd = target->fd;
     if(zck && fd != zck_get_fd(zck) && !zck_set_fd(zck, fd)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to set zchunk file descriptor for %s: %s",
@@ -1271,7 +1318,7 @@ static gboolean
 prep_zck_body(LrTarget *target, GError **err)
 {
     zckCtx *zck = zck_dl_get_zck(target->target->zck_dl);
-    int fd = fileno(target->f);
+    int fd = target->fd;
     if(zck && fd != zck_get_fd(zck) && !zck_set_fd(zck, fd)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to set zchunk file descriptor for %s: %s",
@@ -1311,7 +1358,7 @@ static gboolean
 check_zck(LrTarget *target, GError **err)
 {
     assert(!err || *err == NULL);
-    assert(target && target->f && target->target);
+    assert(target && target->fd >= 0 && target->target);
 
     if(target->mirror->max_ranges == 0 || target->mirror->mirror->protocol != LR_PROTOCOL_HTTP) {
         target->zck_state = LR_ZCK_DL_BODY;
@@ -1403,11 +1450,10 @@ check_zck(LrTarget *target, GError **err)
 
 /** Open the file to write to
  */
-static FILE*
+static int
 open_target_file(LrTarget *target, GError **err)
 {
     int fd;
-    FILE *f;
 
     if (target->target->fd != -1) {
         // Use supplied filedescriptor
@@ -1416,7 +1462,7 @@ open_target_file(LrTarget *target, GError **err)
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "dup(%d) failed: %s",
                         target->target->fd, g_strerror(errno));
-           return NULL;
+           return -1;
         }
     } else {
         // Use supplied filename
@@ -1429,20 +1475,11 @@ open_target_file(LrTarget *target, GError **err)
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
                         "Cannot open %s: %s",
                         target->target->fn, g_strerror(errno));
-            return NULL;
+            return -1;
         }
     }
 
-    f = fdopen(fd, "w+b");
-    if (!f) {
-        close(fd);
-        g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
-                    "fdopen(%d) failed: %s",
-                    fd, g_strerror(errno));
-        return NULL;
-    }
-
-    return f;
+    return fd;
 }
 
 /** Prepare next transfer
@@ -1523,8 +1560,8 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     }
 
     // Prepare FILE
-    target->f = open_target_file(target, err);
-    if (!target->f)
+    target->fd = open_target_file(target, err);
+    if (target->fd < 0)
         goto fail;
     target->writecb_recieved = 0;
     target->writecb_required_range_written = FALSE;
@@ -1561,15 +1598,15 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
             target->curl_handle = NULL;
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
-            fclose(target->f);
-            target->f = NULL;
+            close(target->fd);
+            target->fd = -1;
             lr_downloadtarget_set_error(target->target, LRE_OK, NULL);
             return prepare_next_transfer(dd, candidatefound, err);
         }
     }
     # endif /* WITH_ZCHUNK */
 
-    int fd = fileno(target->f);
+    int fd = target->fd;
 
     if (target->resume && target->resume_count >= LR_DOWNLOADER_MAXIMAL_RESUME_COUNT) {
         target->resume = FALSE;
@@ -1581,8 +1618,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     if (target->resume) {
         if (target->original_offset == -1) {
             // Determine offset
-            fseek(target->f, 0L, SEEK_END);
-            gint64 determined_offset = ftell(target->f);
+            off_t determined_offset = lseek(target->fd, 0L, SEEK_END);
             if (determined_offset == -1) {
                 // An error while determining offset =>
                 // Download the whole file again
@@ -1592,7 +1628,11 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
         } else if (target->original_offset > 0) {
             // Seek the file to the resume offset so that received
             // data is written at the correct position.
-            fseek(target->f, target->original_offset, SEEK_SET);
+            if (lseek(fd, target->original_offset, SEEK_SET) == -1) {
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                            "lseek() failed: %s", g_strerror(errno));
+                goto fail;
+            }
         }
 
         // Starting from offset 0 is a fresh download, not a resume.
@@ -1613,12 +1653,16 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
                             "ftruncate() failed: %s", g_strerror(errno));
                 goto fail;
             }
-            // The stream position was moved to the end of the file while
-            // determining the offset above. After truncating the file back
-            // to zero, rewind the stream so the freshly downloaded data is
-            // written from the beginning instead of leaving a zero-filled
-            // hole (which would corrupt and double the size of the file).
-            fseek(target->f, 0L, SEEK_SET);
+            // The file offset was moved to the end of the file while
+            // determining the offset above. Truncating does not move it back,
+            // so rewind explicitly to have the freshly downloaded data written
+            // from the beginning instead of leaving a zero-filled hole (which
+            // would corrupt and double the size of the file).
+            if (lseek(fd, 0, SEEK_SET) == -1) {
+                g_set_error(err, LR_DOWNLOADER_ERROR, LRE_IO,
+                            "lseek() failed: %s", g_strerror(errno));
+                goto fail;
+            }
             target->original_offset = 0;
         } else {
             gint64 used_offset = target->original_offset;
@@ -1729,9 +1773,9 @@ fail:
         curl_easy_cleanup(target->curl_handle);
         target->curl_handle = NULL;
     }
-    if (target->f != NULL) {
-        fclose(target->f);
-        target->f = NULL;
+    if (target->fd != -1) {
+        close(target->fd);
+        target->fd = -1;
     }
 
     return FALSE;
@@ -2304,8 +2348,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
         //
         // Checksum checking
         //
-        fflush(target->f);
-        fd = fileno(target->f);
+        fd = target->fd;
 
         // Preserve timestamp of downloaded file if requested
         if (target->target->handle && target->target->handle->preservetime) {
@@ -2395,8 +2438,8 @@ transfer_error:
         target->curl_handle = NULL;
         g_free(target->headercb_interrupt_reason);
         target->headercb_interrupt_reason = NULL;
-        fclose(target->f);
-        target->f = NULL;
+        close(target->fd);
+        target->fd = -1;
         if (target->curl_rqheaders) {
             curl_slist_free_all(target->curl_rqheaders);
             target->curl_rqheaders = NULL;
@@ -2784,6 +2827,7 @@ lr_download(GSList *targets,
         target->target->rcode   = LRE_UNFINISHED;
         target->target->err     = "Not finished";
         target->handle          = dtarget->handle;
+        target->fd              = -1;
         dd.targets = g_slist_append(dd.targets, target);
         // Add list of handle internal mirrors to dd.handle_mirrors
         // if doesn't exists yet and set the list reference
@@ -2815,8 +2859,8 @@ lr_download_cleanup:
             curl_multi_remove_handle(dd.multi_handle, target->curl_handle);
             curl_easy_cleanup(target->curl_handle);
             target->curl_handle = NULL;
-            fclose(target->f);
-            target->f = NULL;
+            close(target->fd);
+            target->fd = -1;
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
 
@@ -2862,7 +2906,7 @@ lr_download_cleanup:
     for (GSList *elem = dd.targets; elem; elem = g_slist_next(elem)) {
         LrTarget *target = elem->data;
         assert(target->curl_handle == NULL);
-        assert(target->f == NULL);
+        assert(target->fd == -1);
 
         // Remove file created for the target if download was
         // unsuccessful and the file doesn't exists before or
