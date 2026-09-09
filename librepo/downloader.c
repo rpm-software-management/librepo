@@ -348,6 +348,28 @@ is_parallel_connections_limited_and_reached(const LrMirror *mirror)
            mirror->running_transfers >= mirror->allowed_parallel_connections;
 }
 
+/** Check if every mirror in a list has reached its limit of parallel
+ * connections. Which mirrors a particular target may use depends on that
+ * target, but if none of them can take another connection at all then no
+ * target sharing the list can be started, so all of them can be skipped
+ * without being examined one by one.
+ */
+static gboolean
+all_mirrors_at_connection_limit(LrDownload *dd, GSList *lrmirrors)
+{
+    for (GSList *elem = lrmirrors; elem; elem = g_slist_next(elem)) {
+        LrMirror *mirror = elem->data;
+        // An untouched mirror has allowed_parallel_connections set to 0, which
+        // would look like a reached limit, so initialize it first - exactly as
+        // select_suitable_mirror() does before the same test.
+        init_once_allowed_parallel_connections(mirror, dd->max_connection_per_host);
+        if (!is_parallel_connections_limited_and_reached(mirror))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
 static void
 mirror_update_statistics(LrMirror *mirror, gboolean transfer_success)
 {
@@ -865,6 +887,15 @@ select_next_target(LrDownload *dd,
     *selected_target = NULL;
     *selected_full_url = NULL;
 
+    // Verdict of all_mirrors_at_connection_limit() for the mirror list of the
+    // previously examined target. Targets that share a handle share one mirror
+    // list, so remembering the last answer answers it for the whole run of
+    // them, and a scan that cannot start anything - which is every scan once
+    // all the mirrors are busy - stays cheap no matter how many targets are
+    // waiting.
+    GSList *checked_lrmirrors = NULL;
+    gboolean checked_lrmirrors_are_full = FALSE;
+
     for (GSList *elem = dd->targets; elem; elem = g_slist_next(elem)) {
         LrTarget *target = elem->data;
         LrMirror *mirror = NULL;
@@ -890,6 +921,21 @@ select_next_target(LrDownload *dd,
             g_set_error(err, LR_DOWNLOADER_ERROR, LRE_NOURL,
                         "Empty mirrorlist and no basepath specified!");
             return FALSE;
+        }
+
+        // Skip the target if it has to go through a mirror and none of its
+        // mirrors can take another connection. Only targets that use mirrors
+        // qualify - a complete URL in the path or a base URL bypasses them.
+        if (!complete_url_in_path && !target->target->baseurl
+            && target->lrmirrors)
+        {
+            if (target->lrmirrors != checked_lrmirrors) {
+                checked_lrmirrors = target->lrmirrors;
+                checked_lrmirrors_are_full =
+                    all_mirrors_at_connection_limit(dd, target->lrmirrors);
+            }
+            if (checked_lrmirrors_are_full)
+                continue;
         }
 
         g_debug("Selecting mirror for: %s", target->target->path);
@@ -2251,6 +2297,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
     int msgs_in_queue;
     CURLMsg *msg;
+    gboolean transfer_finished = FALSE;
 
     while ((msg = curl_multi_info_read(dd->multi_handle, &msgs_in_queue))) {
         LrTarget *target = NULL;
@@ -2268,6 +2315,8 @@ check_transfer_statuses(LrDownload *dd, GError **err)
             // We are only interested in messages about finished transfers
             continue;
         }
+
+        transfer_finished = TRUE;
 
         // Find the target with this curl easy handle
         for (GSList *elem = dd->running_transfers; elem; elem = g_slist_next(elem)) {
@@ -2603,6 +2652,15 @@ transfer_error:
             g_propagate_error(err, fail_fast_error);
             return FALSE;
         }
+    }
+
+    if (!transfer_finished) {
+        // Nothing finished, so no transfer slot and no mirror connection was
+        // freed and no target changed state. Nothing can be started that
+        // could not have been started by the previous call, and this function
+        // runs after every curl_multi_perform(), so asking again would only
+        // repeat a fruitless walk over every waiting target.
+        return TRUE;
     }
 
     // At this point, after handles of finished transfers were removed
