@@ -276,6 +276,33 @@ class TestCaseYumPackagesDownloading(TestCaseWithServer):
 
         self.assertTrue(os.path.isfile(dest))
 
+    def test_download_packages_more_parallel_than_per_mirror(self):
+        """Every target has to be downloaded even when more parallel downloads
+        are allowed than connections to a single mirror. The downloader then
+        always has a free transfer slot it cannot fill, so it has to keep
+        deferring the waiting targets until a running transfer finishes
+        instead of giving up on them."""
+        h = librepo.Handle()
+
+        url = "%s%s" % (self.MOCKURL, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.setopt(librepo.LRO_MAXPARALLELDOWNLOADS, 5)
+        h.setopt(librepo.LRO_MAXDOWNLOADSPERMIRROR, 1)
+
+        pkgs = []
+        for x in range(10):
+            dest = os.path.join(self.tmpdir, "pkg-%d.rpm" % x)
+            pkgs.append(librepo.PackageTarget(config.PACKAGE_01_01,
+                                              handle=h,
+                                              dest=dest))
+
+        librepo.download_packages(pkgs)
+
+        for pkg in pkgs:
+            self.assertTrue(pkg.err is None)
+            self.assertTrue(os.path.isfile(pkg.local_path))
+
     def test_download_packages_02_with_failfast(self):
         h = librepo.Handle()
 
