@@ -50,6 +50,7 @@ BuildRequires:  pkgconfig(rpm) >= 4.18.0
 %endif
 BuildRequires:  libattr-devel
 BuildRequires:  libcurl-devel >= %{libcurl_version}
+BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libcrypto)
 %if %{need_selinux}
