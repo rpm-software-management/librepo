@@ -440,6 +440,12 @@ typedef enum {
     LRO_PASSWORD,  /*!< (char *)
         Password for HTTP authentication */
 
+    LRO_METALINK_EXCLUDE_DOMAIN, /*!< (char ** NULL-terminated)
+        List of domains to exclude from metalink */
+
+    LRO_METALINK_EXCLUDE_LOCATION, /*!< (char ** NULL-terminated)
+        List of locations to exclude from metalink */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
