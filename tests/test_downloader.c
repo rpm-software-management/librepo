@@ -7,6 +7,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "librepo/librepo.h"
 #include "librepo/rcodes.h"
@@ -373,6 +378,85 @@ START_TEST(test_downloader_checksum)
 }
 END_TEST
 
+/* Answer every connection with the response until killed */
+static void
+http_server(int sock, const char *response)
+{
+    for (;;) {
+        char buf[4096];
+        int conn = accept(sock, NULL, NULL);
+        if (conn < 0)
+            continue;
+        ssize_t r = read(conn, buf, sizeof(buf));  // The request is ignored
+        r = write(conn, response, strlen(response));
+        (void) r;
+        close(conn);
+    }
+}
+
+/* Header names are case-insensitive (HTTP/2 servers send them in lower
+ * case) and there doesn't have to be a space after the colon. Such
+ * Content-Length must be compared with the expected size too. */
+START_TEST(test_downloader_content_length_header)
+{
+    const char *response = "HTTP/1.1 200 OK\r\n"
+                           "content-length:11\r\n"
+                           "Connection: close\r\n"
+                           "\r\n"
+                           "hello world";
+    const gint64 expected_sizes[] = {1000, 11};  // A wrong and the right size
+    struct sockaddr_in addr = {0};
+    socklen_t addr_len = sizeof(addr);
+
+    // Listen on a free port of the loopback interface
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    ck_assert_int_eq(bind(sock, (struct sockaddr *) &addr, sizeof(addr)), 0);
+    ck_assert_int_eq(listen(sock, 8), 0);
+    ck_assert_int_eq(getsockname(sock, (struct sockaddr *) &addr, &addr_len), 0);
+
+    pid_t server = fork();
+    ck_assert_int_ge(server, 0);
+    if (server == 0)
+        http_server(sock, response);
+    close(sock);
+
+    // No proxy for the local transfer
+    LrHandle *handle = lr_handle_init();
+    ck_assert_ptr_nonnull(handle);
+    ck_assert(lr_handle_setopt(handle, NULL, LRO_PROXY, ""));
+
+    gchar *url = g_strdup_printf("http://127.0.0.1:%d/file", ntohs(addr.sin_port));
+    char *fn = lr_pathconcat(test_globals.tmpdir, "content_length_header", NULL);
+    for (int i = 0; i < 2; i++) {
+        GError *err = NULL;
+        LrDownloadTarget *t = lr_downloadtarget_new(handle, url, NULL, -1, fn, NULL,
+                                                    expected_sizes[i], FALSE,
+                                                    NULL, NULL, NULL, NULL, NULL,
+                                                    0, 0, NULL, FALSE, FALSE);
+        GSList *list = g_slist_append(NULL, t);
+        ck_assert(lr_download(list, FALSE, &err));
+        ck_assert_ptr_null(err);
+        if (expected_sizes[i] != 11)
+            ck_assert_msg(t->err && strstr(t->err, "Inconsistent server data"),
+                          "Size mismatch not detected: %s",
+                          t->err ? t->err : "(no error)");
+        else
+            ck_assert_msg(t->err == NULL, "Unexpected error: %s", t->err);
+        g_slist_free_full(list, (GDestroyNotify) lr_downloadtarget_free);
+    }
+
+    // SIGKILL: the server inherited check's SIGTERM handler, which would
+    // forward the signal to the whole process group
+    kill(server, SIGKILL);
+    waitpid(server, NULL, 0);
+    lr_handle_free(handle);
+    lr_free(fn);
+    g_free(url);
+}
+END_TEST
+
 Suite *
 downloader_suite(void)
 {
@@ -384,6 +468,17 @@ downloader_suite(void)
     tcase_add_test(tc, test_downloader_two_files);
     tcase_add_test(tc, test_downloader_three_files_with_error);
     tcase_add_test(tc, test_downloader_checksum);
+    suite_add_tcase(s, tc);
+    return s;
+}
+
+/* Tests that don't need an internet connection */
+Suite *
+downloader_local_suite(void)
+{
+    Suite *s = suite_create("downloader_local");
+    TCase *tc = tcase_create("Main");
+    tcase_add_test(tc, test_downloader_content_length_header);
     suite_add_tcase(s, tc);
     return s;
 }
