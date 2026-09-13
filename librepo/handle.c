@@ -591,9 +591,9 @@ lr_handle_setopt(LrHandle *handle,
     case LRO_MAXMIRRORTRIES:
         val_long = va_arg(arg, long);
 
-        if (handle->maxmirrortries < LRO_MAXMIRRORTRIES_MIN) {
+        if (val_long < LRO_MAXMIRRORTRIES_MIN) {
             g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
-                    "Value of LRO_MAXMIRRORTRIES is too low (use value > %ld)",
+                    "Value of LRO_MAXMIRRORTRIES is too low (use value >= %ld)",
                     LRO_MAXMIRRORTRIES_MIN);
             ret = FALSE;
         } else {

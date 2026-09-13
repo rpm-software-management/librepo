@@ -164,6 +164,37 @@ START_TEST(test_handle_getinfo)
 }
 END_TEST
 
+START_TEST(test_handle_maxmirrortries)
+{
+    long num = -1;
+    GError *tmp_err = NULL;
+    LrHandle *h = lr_handle_init();
+    ck_assert_ptr_nonnull(h);
+
+    // A negative value must be rejected and must not change the option
+    ck_assert(!lr_handle_setopt(h, &tmp_err, LRO_MAXMIRRORTRIES, -1L));
+    ck_assert_ptr_nonnull(tmp_err);
+    ck_assert_int_eq(tmp_err->code, LRE_BADOPTARG);
+    g_clear_error(&tmp_err);
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_MAXMIRRORTRIES, &num));
+    ck_assert_int_eq(num, LRO_MAXMIRRORTRIES_DEFAULT);
+
+    ck_assert(lr_handle_setopt(h, &tmp_err, LRO_MAXMIRRORTRIES, 5L));
+    ck_assert_ptr_null(tmp_err);
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_MAXMIRRORTRIES, &num));
+    ck_assert_int_eq(num, 5);
+
+    // Once a valid value is set, an invalid one must still be rejected
+    ck_assert(!lr_handle_setopt(h, &tmp_err, LRO_MAXMIRRORTRIES, -3L));
+    ck_assert_ptr_nonnull(tmp_err);
+    g_clear_error(&tmp_err);
+    ck_assert(lr_handle_getinfo(h, NULL, LRI_MAXMIRRORTRIES, &num));
+    ck_assert_int_eq(num, 5);
+
+    lr_handle_free(h);
+}
+END_TEST
+
 Suite *
 handle_suite(void)
 {
@@ -171,6 +202,7 @@ handle_suite(void)
     TCase *tc = tcase_create("Main");
     tcase_add_test(tc, test_handle);
     tcase_add_test(tc, test_handle_getinfo);
+    tcase_add_test(tc, test_handle_maxmirrortries);
     suite_add_tcase(s, tc);
     return s;
 }
