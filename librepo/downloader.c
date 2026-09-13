@@ -2900,7 +2900,7 @@ lr_download(GSList *targets,
         // Assertions
         assert(dtarget);
         assert(dtarget->path);
-        assert((dtarget->fd > 0 && !dtarget->fn) || (dtarget->fd < 0 && dtarget->fn));
+        assert((dtarget->fd >= 0 && !dtarget->fn) || (dtarget->fd < 0 && dtarget->fn));
         g_debug("%s: Target: %s (%s)", __func__,
                 dtarget->path,
                 (dtarget->baseurl) ? dtarget->baseurl : "-");
