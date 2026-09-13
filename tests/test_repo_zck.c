@@ -32,7 +32,7 @@ START_TEST(test_repo_zck_parsing)
 
     ck_assert(ret);
     ck_assert_ptr_null(tmp_err);
-    ck_assert(g_slist_length(repomd->records) == 12);
+    ck_assert(g_slist_length(repomd->records) == 6);
     ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "primary"));
     ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "filelists"));
     ck_assert_ptr_nonnull(lr_yum_repomd_get_record(repomd, "other"));
