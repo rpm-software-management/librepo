@@ -1173,6 +1173,7 @@ prep_zck_header(LrTarget *target, GError **err)
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to initialize zchunk file %s for reading",
                     target->target->path);
+        zck_free(&zck);
         return FALSE;
     }
 

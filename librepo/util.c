@@ -520,7 +520,8 @@ init_zck_read(const char *checksum, LrChecksumType checksum_type,
     if(!zck_init_adv_read(zck, fd)) {
         g_set_error(err, LR_DOWNLOADER_ERROR, LRE_ZCK,
                     "Unable to initialize zchunk file for reading");
-        return FALSE;
+        zck_free(&zck);
+        return NULL;
     }
 
     zck_hash ct = lr_zck_hash_from_lr_checksum(checksum_type);
@@ -528,19 +529,19 @@ init_zck_read(const char *checksum, LrChecksumType checksum_type,
         g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
                     "Zchunk doesn't support checksum type %i",
                     checksum_type);
-        free(zck);
+        zck_free(&zck);
         return NULL;
     }
     if(!zck_set_ioption(zck, ZCK_VAL_HEADER_HASH_TYPE, ct)) {
         g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
                     "Error setting validation checksum type");
-        free(zck);
+        zck_free(&zck);
         return NULL;
     }
     if(!zck_set_ioption(zck, ZCK_VAL_HEADER_LENGTH, zck_header_size)) {
         g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
                     "Error setting header size");
-        free(zck);
+        zck_free(&zck);
         return NULL;
     }
     if(!zck_set_soption(zck, ZCK_VAL_HEADER_DIGEST, checksum,
@@ -548,7 +549,7 @@ init_zck_read(const char *checksum, LrChecksumType checksum_type,
         g_set_error(err, LR_YUM_ERROR, LRE_ZCK,
                     "Unable to set validation checksum: %s",
                     checksum);
-        free(zck);
+        zck_free(&zck);
         return NULL;
     }
     return zck;
