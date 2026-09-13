@@ -151,18 +151,26 @@ lr_free(void *m)
 }
 
 int
-lr_gettmpfile(void)
+lr_gettmpfile_with_gerror(GError **err)
 {
     int fd;
     _cleanup_free_ char *template = NULL;
     template = g_build_filename(g_get_tmp_dir(), "librepo-tmp-XXXXXX", NULL);
     fd = mkstemp(template);
     if (fd < 0) {
-        fprintf(stderr, "Cannot create temporary file - mkstemp '%s': %s\n", template, strerror(errno));
-        exit(1);
+        g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
+                    "Cannot create temporary file - mkstemp '%s': %s",
+                    template, g_strerror(errno));
+        return -1;
     }
     unlink(template);
     return fd;
+}
+
+int
+lr_gettmpfile(void)
+{
+    return lr_gettmpfile_with_gerror(NULL);
 }
 
 char *
