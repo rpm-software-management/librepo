@@ -124,7 +124,8 @@ lr_url_substitute(const char *url, LrUrlVars *list)
                 bracket = FALSE;
             }
             const char *varname = cur;
-            for (; isalnum(*cur) || (*cur == '_' && isalnum(*(cur + 1))); ++cur);
+            for (; isalnum((unsigned char) *cur) ||
+                   (*cur == '_' && isalnum((unsigned char) *(cur + 1))); ++cur);
             if (cur != varname && (!bracket || *cur == '}')) {
                 for (LrUrlVars *elem = list; elem; elem = g_slist_next(elem)) {
                     LrVar *var_val = elem->data;

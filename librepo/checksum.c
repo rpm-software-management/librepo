@@ -54,7 +54,7 @@ lr_checksum_type(const char *type)
         return LR_CHECKSUM_UNKNOWN;
 
     for (size_t x = 0; x <= len; x++)
-        type_lower[x] = tolower(type[x]);
+        type_lower[x] = tolower((unsigned char) type[x]);
 
     if (!strncmp(type_lower, "md", 2)) {
         // MD* family
