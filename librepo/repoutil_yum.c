@@ -96,7 +96,7 @@ lr_repoutil_yum_parse_repomd(const char *in_path,
         return FALSE;
     }
 
-    if (st.st_mode & S_IFDIR)
+    if (S_ISDIR(st.st_mode))
         path = lr_pathconcat(in_path, "repodata/repomd.xml", NULL);
     else
         path = g_strdup(in_path);
