@@ -151,6 +151,7 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
         g_set_error(err, LR_CHECKSUM_ERROR, LRE_IO,
                     "Cannot seek to the begin of the file. "
                     "lseek(%d, 0, SEEK_SET) error: %s", fd, g_strerror(errno));
+        EVP_MD_CTX_destroy(ctx);
         return NULL;
     }
 
@@ -158,6 +159,7 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
         if (!EVP_DigestUpdate(ctx, buf, readed)) {
             g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
                         "EVP_DigestUpdate() failed");
+            EVP_MD_CTX_destroy(ctx);
             return NULL;
         }
 
@@ -171,6 +173,7 @@ lr_checksum_fd(LrChecksumType type, int fd, GError **err)
     if (!EVP_DigestFinal_ex(ctx, raw_checksum, &len)) {
         g_set_error(err, LR_CHECKSUM_ERROR, LRE_OPENSSL,
                     "EVP_DigestFinal_ex() failed");
+        EVP_MD_CTX_destroy(ctx);
         return NULL;
     }
 
@@ -319,7 +322,9 @@ lr_checksum_clear_cache(int fd)
     }
     ssize_t prefix_len = strlen(XATTR_CHKSUM_PREFIX);
     const char *attr = xattrs;
-    while (attr < xattrs + xattrs_len) {
+    // The list could have shrunk since its size was queried, only walk
+    // through the part that was actually filled in.
+    while (attr < xattrs + bytes_read) {
         if (strncmp(XATTR_CHKSUM_PREFIX, attr, prefix_len) == 0) {
             FREMOVEXATTR(fd, attr);
         }
