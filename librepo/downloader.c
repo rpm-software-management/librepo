@@ -2819,6 +2819,10 @@ lr_download_cleanup:
             target->f = NULL;
             g_free(target->headercb_interrupt_reason);
             target->headercb_interrupt_reason = NULL;
+            if (target->curl_rqheaders) {
+                curl_slist_free_all(target->curl_rqheaders);
+                target->curl_rqheaders = NULL;
+            }
 
             // Call end callback
             LrEndCb end_cb =  target->target->endcb;
