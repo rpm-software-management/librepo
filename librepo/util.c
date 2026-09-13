@@ -318,9 +318,18 @@ lr_copy_content(int source, int dest)
     lseek(source, 0, SEEK_SET);
     lseek(dest, 0, SEEK_SET);
 
-    while ((size = read(source, buf, bufsize)) > 0)
-        if (write(dest, buf, size) == -1)
-            return -1;
+    while ((size = read(source, buf, bufsize)) > 0) {
+        // write() may write less than requested, write the rest as well
+        for (ssize_t written = 0; written < size; ) {
+            ssize_t ret = write(dest, buf + written, size - written);
+            if (ret == -1) {
+                if (errno == EINTR)
+                    continue;
+                return -1;
+            }
+            written += ret;
+        }
+    }
 
     return (size < 0) ? -1 : 0;
 }
