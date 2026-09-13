@@ -48,6 +48,7 @@ lr_xml_parser_data_free(LrParserData *pd)
     g_free(pd->content);
     g_free(pd->swtab);
     g_free(pd->sbtab);
+    g_free(pd->cpeid);
     g_free(pd);
 }
 
