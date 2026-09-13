@@ -107,6 +107,7 @@ main(int argc, char **argv)
     if (downloading) {
         srunner_add_suite(sr, downloader_suite());
     }
+    srunner_add_suite(sr, downloader_local_suite());
     srunner_add_suite(sr, gpg_suite());
     srunner_add_suite(sr, handle_suite());
     srunner_add_suite(sr, lrmirrorlist_suite());
