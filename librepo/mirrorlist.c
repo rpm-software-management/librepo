@@ -72,6 +72,7 @@ lr_mirrorlist_parse_file(LrMirrorlist *mirrorlist, int fd, GError **err)
         g_debug("%s: Cannot fdopen(mirrorlist_fd): %s", __func__, g_strerror(errno));
         g_set_error(err, LR_MIRRORLIST_ERROR, LRE_IO,
                     "fdopen(%d, \"r\") error: %s", fd_dup, g_strerror(errno));
+        close(fd_dup);
         return FALSE;
     }
 
