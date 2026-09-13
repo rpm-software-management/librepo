@@ -287,7 +287,8 @@ lr_download_packages(GSList *targets,
                 g_set_error(err, LR_PACKAGE_DOWNLOADER_ERROR, LRE_IO,
                         "Cannot stat %s: %s", packagetarget->local_path,
                         g_strerror(errno));
-                return FALSE;
+                ret = FALSE;
+                goto cleanup;
             }
 
             realsize = buf.st_size;
@@ -417,16 +418,18 @@ lr_download_packages(GSList *targets,
         fmr_handles = g_slist_reverse(fmr_handles);
         ret = lr_fastestmirror_sort_internalmirrorlists(fmr_handles, err);
         g_slist_free(fmr_handles);
+        fmr_handles = NULL;
 
-        if (!ret) {
-            return FALSE;
-        }
+        if (!ret)
+            goto cleanup;
     }
 
     // Start downloading
     ret = lr_download(downloadtargets, failfast, err);
 
 cleanup:
+
+    g_slist_free(fmr_handles);
 
     // Copy download statuses from downloadtargets to targets
     for (GSList *elem = downloadtargets; elem; elem = g_slist_next(elem)) {
@@ -516,7 +519,7 @@ lr_check_packages(GSList *targets,
     for (GSList *elem = targets; elem; elem = g_slist_next(elem)) {
         LrPackageTarget *packagetarget = elem->data;
 
-        if (packagetarget->handle->interruptible)
+        if (packagetarget->handle && packagetarget->handle->interruptible)
             interruptible = TRUE;
 
         if (!packagetarget->checksum
@@ -534,6 +537,8 @@ lr_check_packages(GSList *targets,
     if (interruptible) {
         g_debug("%s: Using own SIGINT handler", __func__);
         struct sigaction sigact;
+        memset(&sigact, 0, sizeof(sigact));
+        sigemptyset(&sigact.sa_mask);
         sigact.sa_handler = lr_sigint_handler;
         sigaddset(&sigact.sa_mask, SIGINT);
         sigact.sa_flags = SA_RESTART;
