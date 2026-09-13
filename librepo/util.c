@@ -158,8 +158,12 @@ lr_gettmpfile(void)
     template = g_build_filename(g_get_tmp_dir(), "librepo-tmp-XXXXXX", NULL);
     fd = mkstemp(template);
     if (fd < 0) {
-        fprintf(stderr, "Cannot create temporary file - mkstemp '%s': %s\n", template, strerror(errno));
-        exit(1);
+        // handle the error.
+        int saved_errno = errno;
+        g_warning("Cannot create temporary file - mkstemp '%s': %s",
+                  template, g_strerror(saved_errno));
+        errno = saved_errno;
+        return -1;
     }
     unlink(template);
     return fd;
