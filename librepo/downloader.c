@@ -228,6 +228,12 @@ typedef struct {
     gboolean failfast; /*!<
         Fail fast */
 
+    gboolean persist_checksum_cache; /*!<
+        Whether to persist verified checksums to xattrs
+        (and fsync() beforehand to make that write crash-safe). FALSE for
+        transient downloads (see LR_PACKAGEDOWNLOAD_TRANSIENT) that will
+        never be re-verified from disk. */
+
     int max_parallel_connections; /*!<
         Maximal number of parallel downloads. */
 
@@ -2157,6 +2163,7 @@ list_of_checksums_to_str(GSList *checksums)
 static gboolean
 check_finished_transfer_checksum(int fd,
                                  GSList *checksums,
+                                 gboolean persist_checksum_cache,
                                  gboolean *checksum_matches,
                                  GError **transfer_err,
                                  GError **err)
@@ -2177,7 +2184,7 @@ check_finished_transfer_checksum(int fd,
         ret = lr_checksum_fd_compare(chksum->type,
                                      fd,
                                      chksum->value,
-                                     1,
+                                     persist_checksum_cache,
                                      &matches,
                                      &calculated,
                                      err);
@@ -2497,6 +2504,7 @@ check_transfer_statuses(LrDownload *dd, GError **err)
 
             ret = check_finished_transfer_checksum(fd,
                                                   target->target->checksums,
+                                                  dd->persist_checksum_cache,
                                                   &matches,
                                                   &transfer_err,
                                                   &tmp_err);
@@ -2841,9 +2849,10 @@ lr_perform(LrDownload *dd, GError **err)
 }
 
 gboolean
-lr_download(GSList *targets,
-            gboolean failfast,
-            GError **err)
+lr_download_internal(GSList *targets,
+                     gboolean failfast,
+                     gboolean persist_checksum_cache,
+                     GError **err)
 {
     gboolean ret = FALSE;
     LrDownload dd;             // dd stands for Download Data
@@ -2868,6 +2877,7 @@ lr_download(GSList *targets,
 
     // Prepare download data
     dd.failfast = failfast;
+    dd.persist_checksum_cache = persist_checksum_cache;
 
     if (lr_handle) {
         dd.max_parallel_connections = lr_handle->maxparalleldownloads;
@@ -3016,6 +3026,14 @@ lr_download_cleanup:
     g_slist_free(dd.targets);
 
     return ret;
+}
+
+gboolean
+lr_download(GSList *targets,
+            gboolean failfast,
+            GError **err)
+{
+    return lr_download_internal(targets, failfast, TRUE, err);
 }
 
 gboolean
