@@ -63,6 +63,24 @@ lr_multi_mf_func(void *ptr, const char *msg, const char *url);
 int
 lr_metadata_target_end_func(void *ptr, LrTransferStatus status, const char *msg);
 
+/** Same as lr_download(), but additionally lets the caller opt out of
+ * persisting verified checksums to xattrs (and the
+ * fsync() that protects that write) for downloads that will never be
+ * re-verified from disk - e.g. packages downloaded with keepcache=0.
+ * lr_download() itself is a thin wrapper that always passes TRUE.
+ * @param targets                  See ::lr_download
+ * @param failfast                 See ::lr_download
+ * @param persist_checksum_cache   FALSE to skip persisting the checksum
+ *                                 cache (checksums are still verified).
+ * @param err                      See ::lr_download
+ * @return                         See ::lr_download
+ */
+gboolean
+lr_download_internal(GSList *targets,
+                     gboolean failfast,
+                     gboolean persist_checksum_cache,
+                     GError **err);
+
 G_END_DECLS
 
 #endif //LIBREPO_DOWNLOADER_INTERNAL_H
