@@ -4,5 +4,6 @@
 #include <check.h>
 
 Suite *downloader_suite(void);
+Suite *downloader_local_suite(void);
 
 #endif

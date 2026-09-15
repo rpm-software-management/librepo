@@ -612,9 +612,11 @@ lr_headercb(void *ptr, size_t size, size_t nmemb, void *userdata)
     }
 
     if (state == LR_HCS_HTTP_STATE_OK) {
-        if (g_str_has_prefix(header, "Content-Length: ")) {
+        // Header field names are case-insensitive (RFC 9110), e.g. HTTP/2
+        // servers always send them in lower case.
+        if (!g_ascii_strncasecmp(header, "Content-Length:", STRLEN("Content-Length:"))) {
             // Content-Length header found
-            char *content_length_str = header + STRLEN("Content-Length: ");
+            char *content_length_str = g_strchug(header + STRLEN("Content-Length:"));
             gint64 content_length = g_ascii_strtoll(content_length_str,
                                                     NULL, 0);
             g_debug("%s: Server returned Content-Length: \"%s\" "
