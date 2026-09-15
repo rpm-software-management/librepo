@@ -350,7 +350,7 @@ process_repomd_xml(GSList *targets,
             goto fail;
         }
 
-        lseek(fd_value, SEEK_SET, 0);
+        lseek(fd_value, 0, SEEK_SET);
         ret = lr_yum_repomd_parse_file(target->repomd, fd_value, lr_xml_parser_warning_logger,
                                        "Repomd xml parser", &error);
         if (!ret) {

@@ -1438,7 +1438,7 @@ lr_yum_download_remote(LrHandle *handle, LrResult *result, GError **err)
         else
             repo->url = g_strdup(handle->urls[0]);
 
-        g_debug("%s: Repomd revision: %s", repomd->revision, __func__);
+        g_debug("%s: Repomd revision: %s", __func__, repomd->revision);
     }
 
     /* Download rest of metadata files */
