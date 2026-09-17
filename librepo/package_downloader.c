@@ -35,6 +35,7 @@
 #include "package_downloader.h"
 #include "handle_internal.h"
 #include "downloader.h"
+#include "downloader_internal.h"
 #include "fastestmirror_internal.h"
 
 /* Do NOT use resume on successfully downloaded files - download will fail */
@@ -183,6 +184,7 @@ lr_download_packages(GSList *targets,
 {
     gboolean ret;
     gboolean failfast = flags & LR_PACKAGEDOWNLOAD_FAILFAST;
+    gboolean persist_checksum_cache = !(flags & LR_PACKAGEDOWNLOAD_TRANSIENT);
     struct sigaction old_sigact;
     GSList *downloadtargets = NULL;
     gboolean interruptible = FALSE;
@@ -425,7 +427,7 @@ lr_download_packages(GSList *targets,
     }
 
     // Start downloading
-    ret = lr_download(downloadtargets, failfast, err);
+    ret = lr_download_internal(downloadtargets, failfast, persist_checksum_cache, err);
 
 cleanup:
 
