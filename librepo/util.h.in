@@ -96,10 +96,17 @@ void *lr_realloc(void *ptr, size_t len);
  */
 void lr_free(void *mem);
 
-/** Create temporary librepo file in /tmp directory.
- * @return              File descriptor.
+/** Create temporary librepo file in the temporary directory
+ * (see g_get_tmp_dir()).
+ * @return              File descriptor or -1 on error (errno is set).
  */
 int lr_gettmpfile(void);
+
+/** Same as lr_gettmpfile(), but set err on error.
+ * @param err           GError **
+ * @return              File descriptor or -1 on error.
+ */
+int lr_gettmpfile_with_gerror(GError **err);
 
 /** Create temporary directory in /tmp directory.
  * @return              Path to directory.

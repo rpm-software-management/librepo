@@ -1062,11 +1062,9 @@ lr_handle_prepare_mirrorlist(LrHandle *handle, gchar *localpath, GError **err)
         // Download remote mirrorlist
         _cleanup_free_ gchar *url = NULL;
 
-        fd = lr_gettmpfile();
+        fd = lr_gettmpfile_with_gerror(err);
         if (fd < 0) {
             g_debug("%s: Cannot create a temporary file", __func__);
-            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
-                        "Cannot create a temporary file");
             return FALSE;
         }
 
@@ -1179,11 +1177,9 @@ lr_handle_prepare_metalink(LrHandle *handle, gchar *localpath, GError **err)
         // Download remote metalink
         _cleanup_free_ gchar *url = NULL;
 
-        fd = lr_gettmpfile();
+        fd = lr_gettmpfile_with_gerror(err);
         if (fd < 0) {
             g_debug("%s: Cannot create a temporary file", __func__);
-            g_set_error(err, LR_HANDLE_ERROR, LRE_IO,
-                        "Cannot create a temporary file");
             return FALSE;
         }
 
