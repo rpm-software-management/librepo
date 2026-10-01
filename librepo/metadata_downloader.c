@@ -464,9 +464,12 @@ restore_handle_callbacks(GSList *targets, GSList *handle_callbacks_backups)
 
 static void
 append_url_target(const char *url, LrMetadataTarget *target, GSList **download_targets) {
-    int fd = lr_gettmpfile();
+    GError *tmp_err = NULL;
+    int fd = lr_gettmpfile_with_gerror(&tmp_err);
     if (fd < 0) {
-        lr_metadatatarget_append_error(target, "Cannot create a temporary file for: %s", url);
+        lr_metadatatarget_append_error(target, "Cannot create a temporary file for %s: %s",
+                                       url, tmp_err->message);
+        g_error_free(tmp_err);
         return;
     }
     target->handle->onetimeflag_apply = TRUE;
