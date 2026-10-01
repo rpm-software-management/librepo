@@ -948,6 +948,7 @@ lr_yum_download_repos(GSList *targets,
         if ((g_slist_length(repo_download_targets) == 0) && (repo_target->endcb)) {
             LrTransferStatus status;
             const char *msg;
+            _cleanup_free_ gchar *err_msg = NULL;
             if (g_list_length(repo_target->err) == 0) {
                 // If there is nothing to download for this repo_target and
                 // there were no erors it is finished.
@@ -958,7 +959,7 @@ lr_yum_download_repos(GSList *targets,
                 // If there were errors (we failed to download/verify/parse repomd)
                 // for this repo_target it cannot continue and is finished.
                 status = LR_TRANSFER_ERROR;
-                const char * err_msg = join_glist_strings(repo_target->err, ",");
+                err_msg = join_glist_strings(repo_target->err, ",");
                 msg = err_msg ? err_msg : "Unknown error.";
             }
             int ret = repo_target->endcb(repo_target->cbdata, status, msg);
@@ -1040,6 +1041,7 @@ lr_yum_download_repo(LrHandle *handle,
     ret = prepare_repo_download_targets(handle, repo, repomd, NULL, &targets, &cbdata_list, err);
     if (!ret) {
         assert(!err || *err != NULL);
+        g_slist_free_full(cbdata_list, (GDestroyNotify)cbdata_free);
         return ret;
     }
     assert(!err || *err == NULL);
