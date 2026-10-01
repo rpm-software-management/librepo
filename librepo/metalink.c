@@ -30,6 +30,7 @@
 #include "util.h"
 #include "metalink.h"
 #include "xmlparser_internal.h"
+#include "handle_internal.h"
 
 /** TODO:
  * - (?) Use GStringChunk
@@ -311,8 +312,44 @@ lr_metalink_start_handler(void *pdata, const xmlChar *xmlElement, const xmlChar 
         assert(!pd->metalinkurl);
         assert(!pd->metalinkhash);
 
+        pd->skip_url = 0;
+
         const char *val;
         assert(!pd->metalinkurl);
+
+        if ((val = lr_find_attr("location", attr))) {
+            if (pd->handle && pd->handle->metalink_exclude_location) {
+                for (int i = 0; pd->handle->metalink_exclude_location[i]; i++) {
+                    const char *pattern = pd->handle->metalink_exclude_location[i];
+                    GError *regex_err = NULL;
+                    GRegex *regex = g_regex_new(pattern,
+                                                G_REGEX_OPTIMIZE,
+                                                0,
+                                                &regex_err);
+                    if (regex) {
+                        gboolean matches = g_regex_match(regex, val, 0, NULL);
+                        g_regex_unref(regex);
+                        if (matches) {
+                            pd->skip_url = 1;
+                            return;
+                        }
+                    } else {
+                        // Invalid regex, treat as literal string
+                        g_warning("%s: Invalid regex for metalink location exclusion \"%s\": %s",
+                                  __func__, pattern,
+                                  regex_err ? regex_err->message : "unknown error");
+                        if (regex_err)
+                            g_error_free(regex_err);
+
+                        if (g_strcmp0(val, pattern) == 0) {
+                            pd->skip_url = 1;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         LrMetalinkUrl *url = lr_new_metalinkurl(pd->metalink);
         if ((val = lr_find_attr("protocol", attr)))
             url->protocol = g_strdup(val);
@@ -447,11 +484,75 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
         break;
 
     case STATE_URL:
+        if (pd->skip_url) {
+            pd->skip_url = 0;
+            break;
+        }
+
         assert(pd->metalink);
         assert(pd->metalinkurl);
         assert(!pd->metalinkhash);
 
-        pd->metalinkurl->url = g_strdup(pd->content);
+        // Check domain filtering before setting URL
+        if (pd->handle && pd->handle->metalink_exclude_domain && pd->content) {
+            GError *uri_err = NULL;
+            GUri *uri = g_uri_parse(pd->content, G_URI_FLAGS_NONE, &uri_err);
+            if (uri) {
+                const char *host = g_uri_get_host(uri);
+                gboolean excluded = FALSE;
+                if (host) {
+                    for (int i = 0; pd->handle->metalink_exclude_domain[i]; i++) {
+                        const char *pattern = pd->handle->metalink_exclude_domain[i];
+                        GError *regex_err = NULL;
+                        GRegex *regex = g_regex_new(pattern,
+                                                    G_REGEX_OPTIMIZE,
+                                                    0,
+                                                    &regex_err);
+                        if (regex) {
+                            gboolean matches = g_regex_match(regex, host, 0, NULL);
+                            g_regex_unref(regex);
+                            if (matches) {
+                                excluded = TRUE;
+                                break;
+                            }
+                        } else {
+                            // Invalid regex, treat as literal string
+                            g_warning("%s: Invalid regex for metalink domain exclusion \"%s\": %s",
+                                      __func__, pattern,
+                                      regex_err ? regex_err->message : "unknown error");
+                            if (regex_err)
+                                g_error_free(regex_err);
+
+                            if (g_strcmp0(host, pattern) == 0) {
+                                excluded = TRUE;
+                                break;
+                            }
+                        }
+                    }
+                }
+                g_uri_unref(uri);
+
+                if (excluded) {
+                    // remove last url
+                    GSList *last = g_slist_last(pd->metalink->urls);
+                    lr_free_metalinkurl(last->data);
+                    pd->metalink->urls = g_slist_delete_link(pd->metalink->urls, last);
+                    pd->metalinkurl = NULL;
+                }
+            } else {
+                g_debug("%s: Unable to parse URL \"%s\" for domain exclusion: %s",
+                        __func__, pd->content,
+                        uri_err ? uri_err->message : "unknown error");
+                if (uri_err)
+                    g_error_free(uri_err);
+            }
+        }
+
+        // If URL was excluded above, metalinkurl will be NULL
+        if (pd->metalinkurl) {
+            pd->metalinkurl->url = g_strdup(pd->content);
+        }
+
         pd->metalinkurl = NULL;
         break;
 
@@ -464,6 +565,7 @@ lr_metalink_end_handler(void *pdata, G_GNUC_UNUSED const xmlChar *element)
 
 gboolean
 lr_metalink_parse_file(LrMetalink *metalink,
+                       LrHandle *handle,
                        int fd,
                        const char *filename,
                        LrXmlParserWarningCb warningcb,
@@ -491,6 +593,7 @@ lr_metalink_parse_file(LrMetalink *metalink,
     pd->parser = &parser;
     pd->state = STATE_START;
     pd->metalink = metalink;
+    pd->handle = handle;
     pd->filename = (char *) filename;
     pd->ignore = 1;
     pd->found = 0;
