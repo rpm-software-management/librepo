@@ -441,8 +441,8 @@ typedef enum {
 
     LRO_METALINK_EXCLUDE_DOMAIN, /*!< (const char *)
         GLib regular expression matched against the hostname of metalink URLs.
-        Matching is case-sensitive and unanchored; use ^ and $ for a full match,
-        | for alternatives, or (?i) for case-insensitive matching.
+        Matching is case-insensitive and unanchored; use ^ and $ for a full match
+        or | for alternatives.
         NULL or an empty string disables exclusion. Invalid expressions are
         rejected without changing the previous value. Since 1.22.0. */
 
