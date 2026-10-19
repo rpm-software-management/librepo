@@ -355,7 +355,8 @@ lr_handle_setopt(LrHandle *handle,
         GRegex *compiled = NULL;
         if (pattern && *pattern) {
             g_autoptr(GError) compile_error = NULL;
-            compiled = g_regex_new(pattern, G_REGEX_OPTIMIZE, 0, &compile_error);
+            compiled = g_regex_new(pattern, G_REGEX_OPTIMIZE | G_REGEX_CASELESS, 0,
+                                   &compile_error);
             if (!compiled) {
                 g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
                             "Invalid regular expression for %s: %s",

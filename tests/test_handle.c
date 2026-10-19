@@ -208,6 +208,8 @@ START_TEST(test_handle_metalink_exclusion_options)
         ck_assert_ptr_null(err);
         GRegex *before = i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location;
         ck_assert_ptr_nonnull(before);
+        ck_assert(g_regex_match(before, "ONE", 0, NULL));
+        ck_assert(g_regex_match(before, "TwO", 0, NULL));
         ck_assert(!lr_handle_setopt(h, &err, options[i], "["));
         ck_assert_ptr_nonnull(err);
         ck_assert_int_eq(err->domain, LR_HANDLE_ERROR);
@@ -218,7 +220,9 @@ START_TEST(test_handle_metalink_exclusion_options)
         ck_assert(!lr_handle_setopt(h, NULL, options[i], "["));
         ck_assert(lr_handle_setopt(h, &err, options[i], ""));
         ck_assert_ptr_null(i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location);
-        ck_assert(lr_handle_setopt(h, &err, options[i], "(?i)example"));
+        ck_assert(lr_handle_setopt(h, &err, options[i], "example"));
+        GRegex *replacement = i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location;
+        ck_assert(g_regex_match(replacement, "ExAmPlE", 0, NULL));
         ck_assert(lr_handle_setopt(h, &err, options[i], (const char *) NULL));
         ck_assert_ptr_null(i == 0 ? h->metalink_exclude_domain : h->metalink_exclude_location);
     }

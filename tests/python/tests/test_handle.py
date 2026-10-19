@@ -638,10 +638,10 @@ class TestCaseHandle(unittest.TestCase):
 
     def test_metalink_exclusion(self):
         urls = [
-            ('http://drop.example/repodata/repomd.xml', 'XX'),
+            ('http://DrOp.ExAmPlE/repodata/repomd.xml', 'XX'),
             ('http://drop.example@keep.example:8080/drop.example/repodata/repomd.xml?drop.example', 'YY'),
             ('http://middle.example/repodata/repomd.xml', 'ZZ'),
-            ('http://last.example/repodata/repomd.xml', 'XX'),
+            ('http://last.example/repodata/repomd.xml', 'xX'),
             ('file:///tmp/repodata/repomd.xml', None),
             ('http://[broken/repodata/repomd.xml', None),
         ]
@@ -666,7 +666,10 @@ class TestCaseHandle(unittest.TestCase):
                 (r'^last\.example$', None, [0, 1, 2, 4, 5]),
                 (None, '^XX$', [1, 2, 4, 5]),
                 (r'^(drop|last)\.example$', '^ZZ$', [1, 4, 5]),
-                ('(?i)^DROP\\.EXAMPLE$', None, [1, 2, 3, 4, 5]),
+                (r'^DROP\.EXAMPLE$', None, [1, 2, 3, 4, 5]),
+                (r'^DrOp\.eXaMpLe$', None, [1, 2, 3, 4, 5]),
+                (None, '^xx$', [1, 2, 4, 5]),
+                (None, '^Xx$', [1, 2, 4, 5]),
                 ('.*', '.*', [4, 5]),
                 ('', '', [0, 1, 2, 3, 4, 5]),
             ]

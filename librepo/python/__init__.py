@@ -97,8 +97,8 @@ Version contants
 
     *String or None*. GLib regular expression matched against the hostname
     of metalink URLs (not user information, port, path, or query).
-    Matching is case-sensitive and unanchored. Use ``^`` and ``$`` for a full
-    match, ``|`` for alternatives, or ``(?i)`` for case-insensitive matching.
+    Matching is case-insensitive and unanchored. Use ``^`` and ``$`` for a full
+    match or ``|`` for alternatives.
     See https://docs.gtk.org/glib/struct.Regex.html for the syntax.
     ``None`` or an empty string disables exclusion. Invalid expressions raise
     ``ValueError`` immediately and preserve the previous setting.
