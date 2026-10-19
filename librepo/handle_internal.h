@@ -93,6 +93,9 @@ struct _LrHandle {
     LrMetalink *metalink; /*!<
         Parsed metalink for repomd.xml */
 
+    GRegex *metalink_exclude_domain;
+    GRegex *metalink_exclude_location;
+
     LrInternalMirrorlist *mirrors;  /*!<
         Mirrors from metalink or mirrorlist */
 
@@ -246,9 +249,6 @@ struct _LrHandle {
 
     long preservetime; /*!<
         Preserve timestamps of downloaded files */
-
-    GRegex *metalink_exclude_domain;
-    GRegex *metalink_exclude_location;
 
     LrUrlVars *yumslist;
 };
