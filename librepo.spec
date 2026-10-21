@@ -88,7 +88,6 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-gpg
 BuildRequires:  python3-pyxattr
 BuildRequires:  python3-requests
-BuildRequires:  python3-sphinx
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 # Obsoletes Fedora 27 package
 Obsoletes:      platform-python-%{name} < %{version}-%{release}
