@@ -91,6 +91,23 @@ START_TEST(test_checksum_fd)
 }
 END_TEST
 
+/* Return TRUE if user extended attributes can be stored for the file.
+ * Some file systems don't support them at all or report an error other than
+ * ENOTSUP (e.g. tmpfs on older kernels or some FreeBSD setups), the checksum
+ * caching is silently disabled there and the tests have nothing to check. */
+static gboolean
+user_xattrs_supported(const char *filename)
+{
+    int fd = open(filename, O_RDWR);
+    if (fd < 0)
+        return FALSE;
+    gboolean supported = FSETXATTR(fd, "user.librepo.test", "1", 1, 0) == 0;
+    if (supported)
+        FREMOVEXATTR(fd, "user.librepo.test");
+    close(fd);
+    return supported;
+}
+
 START_TEST(test_cached_checksum_matches)
 {
     FILE *f;
@@ -110,6 +127,9 @@ START_TEST(test_cached_checksum_matches)
     ck_assert_ptr_nonnull(f);
     fwrite("foo\nbar\n", 1, 8, f);
     fclose(f);
+
+    if (!user_xattrs_supported(filename))
+        goto exit_label;
 
     // Assert no cached checksum exists
     attr_ret = GETXATTR(filename, XATTR_CHKSUM_MTIME, &buf, sizeof(buf)-1);
@@ -257,6 +277,8 @@ START_TEST(test_cached_checksum_clear)
     // set extended attributes
     fd = open(filename, O_RDONLY);
     ck_assert_int_ge(fd, 0);
+    if (!user_xattrs_supported(filename))
+        goto cleanup;
     attr_ret = FSETXATTR(fd, XATTR_CHKSUM_MTIME, value, strlen(value), 0);
     if (attr_ret == -1) {
         if (errno == ENOTSUP) {
