@@ -463,7 +463,7 @@ lr_check_repomd_xml_asc_availability(LrHandle *handle,
         }
 
         url = lr_pathconcat(handle->used_mirror, "repodata/repomd.xml.asc", NULL);
-        ret = lr_download_url(handle, url, fd_sig, &tmp_err);
+        ret = lr_yum_download_url(handle, url, fd_sig, TRUE, FALSE, &tmp_err);
         g_free(url);
         close(fd_sig);
         if (!ret) {
