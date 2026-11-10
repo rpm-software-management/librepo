@@ -5,6 +5,8 @@ import os.path
 import tempfile
 import unittest
 
+import requests
+
 import librepo
 
 from tests.base import Context, TestCaseWithServer, TEST_DATA
@@ -754,6 +756,48 @@ class TestCaseYumRepoDownloading(TestCaseWithServer):
         self.assertTrue(yum_repo)
         self.assertTrue(yum_repomd)
         self.assertTrue("signature" not in yum_repo or yum_repo["signature"])
+
+    def assert_repomd_requested_with_no_cache(self, keyword):
+        for path in (config.REPO_YUM_01_REPOMD, config.REPO_YUM_01_REPOMD + ".asc"):
+            url = "%s%s%s" % (self.MOCKURL, config.RECORDED_HEADERS % keyword, path)
+            response = requests.get(url)
+            self.assertEqual(response.status_code, 200, "%s was not requested" % path)
+            headers = response.json()
+            self.assertEqual(headers.get("cache-control"), "no-cache", path)
+            self.assertEqual(headers.get("pragma"), "no-cache", path)
+
+    def test_download_repo_with_gpg_check_no_cache_headers(self):
+        keyword = "perform"
+        h = librepo.Handle()
+        r = librepo.Result()
+
+        url = "%s%s%s" % (self.MOCKURL, config.RECORD_HEADERS % keyword, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
+        # Whether the signature verifies depends on the OpenPGP backend
+        # (see test_download_repo_with_gpg_check). Only the requests matter.
+        try:
+            h.perform(r)
+        except librepo.LibrepoException:
+            pass
+
+        self.assert_repomd_requested_with_no_cache(keyword)
+
+    def test_download_metadata_with_gpg_check_no_cache_headers(self):
+        keyword = "download_metadata"
+        h = librepo.Handle()
+
+        url = "%s%s%s" % (self.MOCKURL, config.RECORD_HEADERS % keyword, config.REPO_YUM_01_PATH)
+        h.urls = [url]
+        h.repotype = librepo.LR_YUMREPO
+        h.destdir = self.tmpdir
+        h.gpgcheck = True
+        target = librepo.MetadataTarget(h, gnupghomedir=os.environ['GNUPGHOME'])
+        librepo.download_metadata([target])
+
+        self.assert_repomd_requested_with_no_cache(keyword)
 
     def test_download_repo_01_with_missing_file(self):
         h = librepo.Handle()
