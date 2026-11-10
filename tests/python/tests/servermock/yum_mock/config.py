@@ -6,6 +6,8 @@ BADGPG = "yum/badgpg/"
 AUTHBASIC = "yum/auth_basic/"
 PARTIAL = "yum/partial/"
 RANGE_ONLY = "yum/range_only/"
+RECORD_HEADERS = "yum/record_headers/%s/"
+RECORDED_HEADERS = "yum/recorded_headers/%s/"
 
 AUTH_USER = "admin"
 AUTH_PASS = "secret"

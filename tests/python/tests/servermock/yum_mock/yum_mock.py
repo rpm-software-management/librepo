@@ -1,5 +1,6 @@
 import base64
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
 import os
 import sys
 
@@ -14,6 +15,7 @@ def yum_mock_handler(port):
 
     class YumMockHandler(BaseHTTPRequestHandler):
         _port = port
+        _recorded_headers = {}
 
         def return_bad_request(self):
             self.send_response(400)
@@ -178,6 +180,25 @@ def yum_mock_handler(port):
             path = self.parse_path('/yum/auth_basic/')
             self.serve_file(path)
 
+        def serve_record_headers(self):
+            """Serve a file from the static dir and record the request
+            headers under the keyword. The recorded headers can be read
+            back with /yum/recorded_headers/<keyword>/<path>"""
+            keyword, path = self.parse_path('/yum/record_headers/', keyword_expected=True)
+            self._recorded_headers[(keyword, path)] = {
+                name.lower(): value for name, value in self.headers.items()}
+            self.serve_file(path)
+
+        def serve_recorded_headers(self):
+            """Return the request headers recorded for <keyword>/<path> as
+            a JSON object with lower case header names, or 404 if no request
+            was recorded"""
+            keyword, path = self.parse_path('/yum/recorded_headers/', keyword_expected=True)
+            headers = self._recorded_headers.get((keyword, path))
+            if headers is None:
+                return self.return_not_found()
+            self.return_ok_with_message(json.dumps(headers))
+
         def serve_static(self):
             path = self.parse_path()
             self.serve_file(path)
@@ -201,6 +222,10 @@ def yum_mock_handler(port):
                 return self.serve_range_only()
             if self.path.startswith('/yum/auth_basic/'):
                 return self.serve_auth_basic()
+            if self.path.startswith('/yum/record_headers/'):
+                return self.serve_record_headers()
+            if self.path.startswith('/yum/recorded_headers/'):
+                return self.serve_recorded_headers()
             return self.serve_static()
 
     return YumMockHandler
