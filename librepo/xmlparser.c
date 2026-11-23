@@ -164,7 +164,9 @@ lr_xml_parser_generic(XmlParser *parser,
                     "Cannot create an XML parser context");
         return FALSE;
     }
+#if LIBXML_VERSION < 21400
     ctxt->linenumbers = 1;
+#endif
 
     while (1) {
         int len;
