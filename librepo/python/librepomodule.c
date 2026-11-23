@@ -31,7 +31,6 @@
 #include "result-py.h"
 #include "yum-py.h"
 #include "downloader-py.h"
-#include "globalstate-py.h" // GIL Hack
 #include "typeconversion.h"
 #include "logging.h"
 
