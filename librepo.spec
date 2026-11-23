@@ -32,7 +32,7 @@
 Name:           librepo
 Version:        1.22.0
 Release:        1%{?dist}
-Summary:        Repodata downloading library
+Summary:        Repository metadata downloading library
 
 License:        LGPL-2.1-or-later
 URL:            https://github.com/rpm-software-management/librepo
@@ -72,14 +72,14 @@ A library providing C and Python (libcURL like) API to downloading repository
 metadata.
 
 %package devel
-Summary:        Repodata downloading library
+Summary:        Developmental files for librepo library
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 %if %{with zchunk}
 Requires:       zchunk-devel%{?_isa}
 %endif
 
 %description devel
-Development files for librepo.
+Files supporting developing C applications against the librepo library.
 
 %package -n python3-%{name}
 Summary:        Python 3 bindings for the librepo library
