@@ -89,8 +89,6 @@ BuildRequires:  python3-gpg
 BuildRequires:  python3-pyxattr
 BuildRequires:  python3-requests
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-# Obsoletes Fedora 27 package
-Obsoletes:      platform-python-%{name} < %{version}-%{release}
 Conflicts:      python3-dnf < %{dnf_conflict}
 
 %description -n python3-%{name}
@@ -118,12 +116,7 @@ Python 3 bindings for the librepo library.
 %install
 %cmake_install
 
-%if 0%{?rhel} && 0%{?rhel} <= 7
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
-%else
 %ldconfig_scriptlets
-%endif
 
 %files
 %license COPYING
