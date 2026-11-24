@@ -1,0 +1,8 @@
+1.22.1      2026-11-24
+
+Fixes:
+- Make downloading a repository signature uncached, the same as we already
+  download the repository metadata file. This should decrease a probability
+  that the signature won't match the metadata file.
+- Fix compiler warnings with libxml2-2.14.0.
+
