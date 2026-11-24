@@ -30,7 +30,7 @@
 %global dnf_conflict 2.8.8
 
 Name:           librepo
-Version:        1.22.0
+Version:        1.22.1
 Release:        1%{?dist}
 Summary:        Repository metadata downloading library
 
@@ -120,7 +120,7 @@ Python 3 bindings for the librepo library.
 
 %files
 %license COPYING
-%doc README.md
+%doc NEWS README.md
 %{_libdir}/%{name}.so.*
 
 %files devel
