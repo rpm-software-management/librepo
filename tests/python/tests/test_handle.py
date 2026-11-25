@@ -232,6 +232,14 @@ class TestCaseHandle(unittest.TestCase):
         h.setopt(librepo.LRO_PROXY_SSLCACERT, None)
         self.assertEqual(h.getinfo(librepo.LRI_PROXY_SSLCACERT), None)
 
+        self.assertEqual(h.getinfo(librepo.LRI_AWS_SIGV4), None)
+        h.setopt(librepo.LRO_AWS_SIGV4, "aws:amz:us-west-2:s3")
+        self.assertEqual(h.getinfo(librepo.LRI_AWS_SIGV4), "aws:amz:us-west-2:s3")
+        h.setopt(librepo.LRO_HTTPAUTHMETHODS, librepo.LR_AUTH_BASIC)
+        self.assertEqual(h.getinfo(librepo.LRI_AWS_SIGV4), "aws:amz:us-west-2:s3")
+        h.setopt(librepo.LRO_AWS_SIGV4, None)
+        self.assertEqual(h.getinfo(librepo.LRI_AWS_SIGV4), None)
+
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_WHATEVER)
         h.setopt(librepo.LRO_IPRESOLVE, librepo.IPRESOLVE_V6)
         self.assertEqual(h.getinfo(librepo.LRI_IPRESOLVE), librepo.IPRESOLVE_V6)
@@ -616,6 +624,9 @@ class TestCaseHandle(unittest.TestCase):
         h.proxy_sslclientkey = None
         h.setopt(librepo.LRO_PROXY_SSLCACERT, None)
         h.proxy_sslcacert = None
+
+        h.setopt(librepo.LRO_AWS_SIGV4, None)
+        h.aws_sigv4 = None
 
         h.setopt(librepo.LRO_IPRESOLVE, None)
         h.ipresolve = None

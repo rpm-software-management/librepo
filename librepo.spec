@@ -30,7 +30,7 @@
 %global dnf_conflict 2.8.8
 
 Name:           librepo
-Version:        1.22.1
+Version:        1.23.0
 Release:        1%{?dist}
 Summary:        Repository metadata downloading library
 

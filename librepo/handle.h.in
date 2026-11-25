@@ -453,6 +453,11 @@ typedef enum {
         Only metalink URLs are filtered, not explicit base URLs or mirrorlists.
         Since 1.22.0. */
 
+    LRO_AWS_SIGV4, /*!< (char *)
+        AWS SigV4 provider string passed to CURLOPT_AWS_SIGV4.
+        NULL disables signing. Requires curl >= 8.1.0.
+        Since 1.23.0. */
+
     LRO_SENTINEL,    /*!< Sentinel */
 
 } LrHandleOption; /*!< Handle config options */
@@ -528,6 +533,7 @@ typedef enum {
     LRI_PROXY_SSLCLIENTCERT,    /*!< (char **) */
     LRI_PROXY_SSLCLIENTKEY,     /*!< (char **) */
     LRI_PROXY_SSLCACERT,        /*!< (char **) */
+    LRI_AWS_SIGV4,              /*!< (char **) */
 
     LRI_SENTINEL,
 } LrHandleInfoOption; /*!< Handle info options */

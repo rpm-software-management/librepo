@@ -380,6 +380,12 @@ Version contants
     *String or None*. Path to a file containing the list of PEM format
     trusted CA certificates. Used for proxy.
 
+.. data:: LRO_AWS_SIGV4
+
+    *String or None*. AWS SigV4 provider string passed to CURLOPT_AWS_SIGV4,
+    for example "aws:amz:us-west-2:s3". None disables signing.
+    Requires curl >= 8.1.0.
+
 .. data:: LRO_IPRESOLVE
 
     *Integer or None* Sets kind of IP addresses to use when resolving host
@@ -496,6 +502,7 @@ Version contants
 .. data:: LRI_PROXY_SSLCLIENTCERT
 .. data:: LRI_PROXY_SSLCLIENTKEY
 .. data:: LRI_PROXY_SSLCACERT
+.. data:: LRI_AWS_SIGV4
 .. data:: LRI_IPRESOLVE
 .. data:: LRI_ALLOWEDMIRRORFAILURES
 .. data:: LRI_ADAPTIVEMIRRORSORTING
@@ -1480,6 +1487,10 @@ class Handle(_librepo.Handle):
     .. attribute:: proxy_sslcacert:
 
         See :data:`.LRO_PROXY_SSLCACERT`
+
+    .. attribute:: aws_sigv4:
+
+        See :data:`.LRO_AWS_SIGV4`
 
     .. attribute:: ipresolve:
 

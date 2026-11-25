@@ -296,6 +296,7 @@ py_setopt(_HandleObject *self, PyObject *args)
     case LRO_PASSWORD:
     case LRO_METALINK_EXCLUDE_DOMAIN:
     case LRO_METALINK_EXCLUDE_LOCATION:
+    case LRO_AWS_SIGV4:
     case LRO_PROXY:
     case LRO_PROXYUSERPWD:
     case LRO_DESTDIR:
@@ -870,6 +871,7 @@ py_getinfo(_HandleObject *self, PyObject *args)
     case LRI_PROXY_SSLCLIENTCERT:
     case LRI_PROXY_SSLCLIENTKEY:
     case LRI_PROXY_SSLCACERT:
+    case LRI_AWS_SIGV4:
     case LRI_CACHEDIR:
         res = lr_handle_getinfo(self->handle,
                                 &tmp_err,

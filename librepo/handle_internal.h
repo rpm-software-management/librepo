@@ -250,6 +250,8 @@ struct _LrHandle {
     long preservetime; /*!<
         Preserve timestamps of downloaded files */
 
+    char *aws_sigv4; /*!< AWS Sigv4 provider string */
+
     LrUrlVars *yumslist;
 };
 
