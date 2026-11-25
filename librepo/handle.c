@@ -973,7 +973,7 @@ lr_handle_network_wait(LrHandle *handle, GError **err, guint seconds, GCancellab
     GSocketConnectable *connectable =  g_network_address_new(host, port);
     data_struct.connectable = connectable;
     data_struct.deadline_millis = g_get_monotonic_time() + seconds * G_USEC_PER_SEC;
-    g_autoptr(GMainLoop) loop;
+    g_autoptr(GMainLoop) loop = NULL;
     loop = g_main_loop_new(NULL, FALSE);
     data_struct.loop = loop;
     data_struct.timeout_id = 0; 
