@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #define DESTDIR "downloaded_metadata"
 #define PROGRESSBAR_LEN 50
@@ -67,13 +68,21 @@ LrHandle *create_handle(const char *repo) {
 
 int main(void) {
   int rc = EXIT_SUCCESS;
+  int rv;
   GError *tmp_err = NULL;
   // Prepare destination directory
   struct stat buffer;
   if (stat(DESTDIR, &buffer) == 0) {
-    system("rm -rf " DESTDIR);
+    rv = system("rm -rf " DESTDIR);
+    if (rv == -1 || !WIFEXITED(rv) || WEXITSTATUS(rv) != EXIT_SUCCESS) {
+      fprintf(stderr, "Removing " DESTDIR " directory failed\n");
+      exit(EXIT_FAILURE);
+    }
   }
-  mkdir(DESTDIR, 0777);
+  if (mkdir(DESTDIR, 0777)) {
+    fprintf(stderr, "Creating " DESTDIR " directory failed\n");
+    exit(EXIT_FAILURE);
+  }
 
   const char *cbdata1 = "Callback data from target 1";
   LrHandle *h1 = create_handle("fedora-41");
