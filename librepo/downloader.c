@@ -1798,7 +1798,7 @@ prepare_next_transfer(LrDownload *dd, gboolean *candidatefound, GError **err)
     target->cb_return_code = LR_CB_OK;
     if (target->target->progresscb) {
         c_rc = curl_easy_setopt(h, CURLOPT_XFERINFOFUNCTION, lr_progresscb) ||
-               curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0) ||
+               curl_easy_setopt(h, CURLOPT_NOPROGRESS, 0L) ||
                curl_easy_setopt(h, CURLOPT_XFERINFODATA, target);
         assert(c_rc == CURLE_OK);
     }

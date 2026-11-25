@@ -356,10 +356,10 @@ lr_fastestmirror_prepare(LrHandle *handle,
             break;
         }
 
-        curlcode = curl_easy_setopt(curlh, CURLOPT_CONNECT_ONLY, 1);
+        curlcode = curl_easy_setopt(curlh, CURLOPT_CONNECT_ONLY, 1L);
         if (curlcode != CURLE_OK) {
             g_set_error(err, LR_FASTESTMIRROR_ERROR, LRE_CURL,
-                    "curl_easy_setopt(_, CURLOPT_CONNECT_ONLY, 1) failed: %s",
+                    "curl_easy_setopt(_, CURLOPT_CONNECT_ONLY, 1L) failed: %s",
                     curl_easy_strerror(curlcode));
             curl_easy_cleanup(curlh);
             ret = FALSE;

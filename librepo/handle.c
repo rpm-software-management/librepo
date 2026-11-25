@@ -69,9 +69,9 @@ lr_get_curl_handle()
     if (!h)
         return NULL;
 
-    if (curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1) != CURLE_OK)
+    if (curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK)
         goto err;
-    if (curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6) != CURLE_OK)
+    if (curl_easy_setopt(h, CURLOPT_MAXREDIRS, 6L) != CURLE_OK)
         goto err;
     if (curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, LRO_CONNECTTIMEOUT_DEFAULT) != CURLE_OK)
         goto err;
@@ -79,15 +79,15 @@ lr_get_curl_handle()
         goto err;
     if (curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, LRO_LOWSPEEDLIMIT_DEFAULT) != CURLE_OK)
         goto err;
-    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2) != CURLE_OK)
+    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYHOST, 2L) != CURLE_OK)
         goto err;
-    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1) != CURLE_OK)
+    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYPEER, 1L) != CURLE_OK)
         goto err;
-    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYSTATUS, 0) != CURLE_OK)
+    if (curl_easy_setopt(h, CURLOPT_SSL_VERIFYSTATUS, 0L) != CURLE_OK)
         goto err;
     if (curl_easy_setopt(h, CURLOPT_FTP_USE_EPSV, LRO_FTPUSEEPSV_DEFAULT) != CURLE_OK)
         goto err;
-    if (curl_easy_setopt(h, CURLOPT_FILETIME, 0) != CURLE_OK)
+    if (curl_easy_setopt(h, CURLOPT_FILETIME, 0L) != CURLE_OK)
         goto err;
 
     return h;
