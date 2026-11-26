@@ -174,6 +174,7 @@ lr_handle_free(LrHandle *handle)
     lr_free(handle->proxy_sslclientcert);
     lr_free(handle->proxy_sslclientkey);
     lr_free(handle->proxy_sslcacert);
+    lr_free(handle->aws_sigv4);
     lr_lrmirrorlist_free(handle->internal_mirrorlist);
     lr_lrmirrorlist_free(handle->urls_mirrors);
     lr_lrmirrorlist_free(handle->mirrorlist_mirrors);
@@ -438,6 +439,11 @@ lr_handle_setopt(LrHandle *handle,
             c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
             handle->httpauthmethods = LR_AUTH_ANY;
         }
+
+#if LR_CURL_VERSION_CHECK(8, 1, 0)
+        if (c_rc == CURLE_OK && handle->aws_sigv4)
+            c_rc = curl_easy_setopt(c_h, CURLOPT_AWS_SIGV4, handle->aws_sigv4);
+#endif
         break;
 
     case LRO_USERPWD:
@@ -879,6 +885,10 @@ lr_handle_setopt(LrHandle *handle,
         long bitmask = curlauth_bitmask(in_bitmask);
         handle->httpauthmethods = in_bitmask;
         c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH, bitmask);
+#if LR_CURL_VERSION_CHECK(8, 1, 0)
+        if (c_rc == CURLE_OK && handle->aws_sigv4)
+            c_rc = curl_easy_setopt(c_h, CURLOPT_AWS_SIGV4, handle->aws_sigv4);
+#endif
         break;
     }
 
@@ -904,6 +914,23 @@ lr_handle_setopt(LrHandle *handle,
         handle->preservetime = va_arg(arg, long) ? 1 : 0;
         c_rc = curl_easy_setopt(c_h, CURLOPT_FILETIME, handle->preservetime);
         break;
+
+    case LRO_AWS_SIGV4: {
+#if LR_CURL_VERSION_CHECK(8, 1, 0)
+        const char *val_string = va_arg(arg, char *);
+        lr_free(handle->aws_sigv4);
+        handle->aws_sigv4 = g_strdup(val_string);
+        c_rc = curl_easy_setopt(c_h, CURLOPT_AWS_SIGV4, handle->aws_sigv4);
+        if (c_rc == CURLE_OK && !handle->aws_sigv4)
+            c_rc = curl_easy_setopt(c_h, CURLOPT_HTTPAUTH,
+                                    curlauth_bitmask(handle->httpauthmethods));
+#else
+        g_set_error(err, LR_HANDLE_ERROR, LRE_UNKNOWNOPT,
+                    "AWS SigV4 Signing requires curl >= 8.1.0");
+        ret = FALSE;
+#endif
+        break;
+    }
 
     default:
         g_set_error(err, LR_HANDLE_ERROR, LRE_BADOPTARG,
@@ -1763,6 +1790,11 @@ lr_handle_getinfo(LrHandle *handle,
     case LRI_PROXY_SSLCACERT:
         str = va_arg(arg, char **);
         *str = handle->proxy_sslcacert;
+        break;
+
+    case LRI_AWS_SIGV4:
+        str = va_arg(arg, char **);
+        *str = handle->aws_sigv4;
         break;
 
     case LRI_IPRESOLVE: {
